@@ -1,0 +1,8 @@
+{
+  "name": "Choosify",
+  "description": "Choose, Compare & Decide Wisely. Bangladesh’s independent curated product discovery, recommendation, comparison and seller growth ecosystem.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

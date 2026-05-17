@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-navy: #000435;
+  --color-green-accent: #07DD05;
+  --color-orange-primary: #FF5B00;
+  --color-orange-deep: #EB4501;
+  --color-blue-grey: #D6E1EC;
+  --color-ice-blue: #F0F8FF;
+  --color-alert-red: #FF000D;
+  --color-royal-blue: #2323FF;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+}
+
+@layer utilities {
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+}
+
+@layer base {
+  body {
+    @apply font-sans text-[#1A1A2E] bg-[#f4f7f9] antialiased selection:bg-orange-primary/30 selection:text-navy;
+  }
+}
+
+.hero-gradient {
+  background: linear-gradient(180deg, #482319 0%, #08081a 100%);
+}
+
+.button-gradient {
+  background: linear-gradient(90deg, #B4411C 0%, #D15E32 100%);
+}
+
+.dark-brand-gradient {
+  background: linear-gradient(180deg, #482319 0%, #08081a 100%);
+}
+
+.orange-brand-gradient {
+  background: linear-gradient(90deg, #B4411C 0%, #D15E32 100%);
+}
+
+.shadow-soft {
+  box-shadow: 0 2px 10px rgba(0, 4, 53, 0.04);
+}
+
+.shadow-high-density {
+  box-shadow: 0 4px 20px rgba(0, 4, 53, 0.08);
+}
+
+/* Scrollbar styling for high-density look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #000435;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
