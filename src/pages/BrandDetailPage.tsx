@@ -545,7 +545,7 @@ export function BrandDetailPage() {
                         <div className="text-xs font-black text-navy italic uppercase tracking-wider mb-1">Tech Review BD</div>
                         <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Live from Dhaka</div>
                      </div>
-                     <div className="w-14 h-14 rounded-full bg-navy flex items-center justify-center text-white text-[10px] font-black uppercase tracking-tight shadow-xl italic">Choosify</div>
+                     <div className="w-14 h-14 rounded-full bg-navy flex items-center justify-center text-white text-[10px] font-black uppercase tracking-tight shadow-xl italic">Choosify.bd</div>
                   </div>
                </div>
             </div>

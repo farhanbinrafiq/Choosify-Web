@@ -215,7 +215,7 @@ const SavedProductsSection = () => {
             <ShoppingBag size={40} />
           </div>
           <h3 className="text-xl font-black text-white italic uppercase tracking-widest mb-4">Vault is empty</h3>
-          <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">Start exploring Choosify and save products you love to your personal vault.</p>
+          <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">Start exploring Choosify.bd and save products you love to your personal vault.</p>
           <Link to="/products" className="px-12 py-4 bg-[#F96500] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-2xl shadow-[#F96500]/20 hover:scale-105 transition-all">Start Browsing</Link>
         </div>
       )}
@@ -616,7 +616,7 @@ export function DashboardPage() {
                   <div className="w-1.5 h-1.5 bg-[#F96500] rounded-full" />
                 </div>
               </div>
-              <span className="text-2xl font-black tracking-tight lowercase font-sans">choosify</span>
+              <span className="text-2xl font-black tracking-tight lowercase font-sans">choosify.bd</span>
               <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mt-1 italic">Dashboard v2.0</span>
             </Link>
 
@@ -657,7 +657,7 @@ export function DashboardPage() {
 
           <div className="p-10 mt-auto border-t border-white/5 space-y-4">
             <Link to="/" className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-navy rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-black/20">
-               <ShoppingBag size={16} /> Browse Choosify
+               <ShoppingBag size={16} /> Browse Choosify.bd
             </Link>
             <button className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:bg-white/10 transition-all">
                <LogOut size={16} className="text-[#F96500]" /> Curator Log Out
@@ -691,7 +691,7 @@ export function DashboardPage() {
                 <div className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center">
                   <div className="w-1 h-1 bg-white rounded-full" />
                 </div>
-                <span className="text-xl font-bold tracking-tight lowercase">choosify</span>
+                <span className="text-xl font-bold tracking-tight lowercase">choosify.bd</span>
               </div>
               <p className="text-[10px] font-bold uppercase tracking-[0.3em]">SECURE CURATOR TERMINAL • v2.6.0</p>
            </div>

@@ -223,7 +223,7 @@ export function BrandsPage() {
         <div className="mb-12">
           <div className="flex items-center gap-4 mb-8 overflow-hidden">
             <div className="flex items-center gap-3 bg-orange-primary px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/20 flex-shrink-0">
-               <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify Recommends</span>
+               <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
                <div className="flex gap-0.5">
                   <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
                     <div className="w-1.5 h-1.5 rounded-full bg-white" />
@@ -316,8 +316,8 @@ export function BrandsPage() {
           <div className="bg-navy rounded-[10px] p-8 text-center relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
             <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.2em] mb-4 block">Sponsored</span>
-            <h4 className="text-lg font-black text-white leading-tight mb-4 tracking-tight">List Your Brand On Choosify</h4>
-            <p className="text-[10px] text-white/60 mb-6 leading-relaxed">Reach 100 Million Shoppers<br />Email: ads@choosify.com</p>
+            <h4 className="text-lg font-black text-white leading-tight mb-4 tracking-tight">List Your Brand On Choosify.bd</h4>
+            <p className="text-[10px] text-white/60 mb-6 leading-relaxed">Reach 100 Million Shoppers<br />Email: ads@choosify.bd</p>
             <button className="w-full py-3 bg-orange-primary text-white text-[10px] font-black uppercase rounded-xl shadow-lg hover:translate-y-[-2px] transition-all">Partner With Us</button>
           </div>
 

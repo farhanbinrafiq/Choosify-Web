@@ -67,7 +67,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
                   <LogIn size={32} />
                 </div>
                 <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Welcome <span className="text-orange-primary">Back</span></h2>
-                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] italic">Unlock the full Choosify experience</p>
+                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] italic">Unlock the full Choosify.bd experience</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">

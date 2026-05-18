@@ -22,7 +22,7 @@ export function LoadingFallback({ variant = 'default' }: { variant?: 'default' |
       </div>
       <div className="flex flex-col items-center gap-2">
         <span className="text-[12px] font-black text-navy uppercase tracking-[0.4em] italic animate-pulse">Initializing Data Protocol</span>
-        <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest italic">Choosify discovery matrix loading...</span>
+        <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest italic">Choosify.bd discovery matrix loading...</span>
       </div>
     </div>
   );

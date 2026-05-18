@@ -21,7 +21,7 @@ export function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState('Overview');
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(0);
 
-  const tabs = ['Overview', 'Specifications', 'About Choosify', 'Influencer Reviews', 'Public Reviews', 'Comparison'];
+  const tabs = ['Overview', 'Specifications', 'About Choosify.bd', 'Influencer Reviews', 'Public Reviews', 'Comparison'];
 
   const heroImages = [
     "https://images.unsplash.com/photo-1511119253457-36e78921865c?w=1200&h=800&fit=crop",
@@ -397,7 +397,7 @@ export function ProductDetailPage() {
                         <h5 className="text-white font-black text-sm uppercase tracking-widest italic">Product Advice</h5>
                      </div>
                      <p className="text-white/40 text-[11px] font-medium leading-relaxed italic mb-8 border-l-2 border-orange-primary pl-4 uppercase tracking-wider">
-                        Tested by Choosify Experts. This product is recommended for its high-quality fabric and authentic design. Great for festive occasions.
+                        Tested by Choosify.bd Experts. This product is recommended for its high-quality fabric and authentic design. Great for festive occasions.
                      </p>
                      <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full border-2 border-orange-primary p-1">
@@ -480,7 +480,7 @@ export function ProductDetailPage() {
                         <div className="text-xs font-black text-navy italic uppercase tracking-wider mb-1">Tech Review BD</div>
                         <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Live from Dhaka</div>
                      </div>
-                     <div className="w-14 h-14 rounded-full bg-navy flex items-center justify-center text-white text-[10px] font-black uppercase tracking-tight shadow-xl italic">Choosify</div>
+                     <div className="w-14 h-14 rounded-full bg-navy flex items-center justify-center text-white text-[10px] font-black uppercase tracking-tight shadow-xl italic">Choosify.bd</div>
                   </div>
                </div>
             </div>
@@ -880,8 +880,8 @@ export function ProductDetailPage() {
              <ShieldCheck size={40} className="text-blue-600" />
            </div>
            <div className="space-y-2">
-             <h4 className="text-2xl font-black text-navy italic tracking-tighter uppercase leading-none">Choosify Trust Statement</h4>
-             <p className="text-[14px] font-bold text-gray-400 uppercase tracking-widest italic">“Only verified sellers and unbiased brands are listed on Choosify.”</p>
+             <h4 className="text-2xl font-black text-navy italic tracking-tighter uppercase leading-none">Choosify.bd Trust Statement</h4>
+             <p className="text-[14px] font-bold text-gray-400 uppercase tracking-widest italic">“Only verified sellers and unbiased brands are listed on Choosify.bd.”</p>
            </div>
         </div>
       </section>
