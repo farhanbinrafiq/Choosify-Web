@@ -119,60 +119,62 @@ export function DealsPage() {
           </div>
         </div>
 
-        {/* Featured Deals Section */}
-        <section className="py-12 border-b border-gray-100 px-8">
+        {/* Deals Marketplace Showcase Grid */}
+        <section className="py-12 px-8">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-8 border-l-4 border-orange-primary px-6">
-               <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-1">Featured <span className="text-orange-primary">Deals</span></h2>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic">Handpicked Top Offers • Selected for You</p>
+            <div className="mb-12 border-l-4 border-orange-primary px-6 flex flex-col md:flex-row md:items-end justify-between gap-6">
+               <div>
+                  <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-2">Marketplace <span className="text-orange-primary">Deals</span></h2>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic">Handpicked Top Offers • Limited Time Selection</p>
+               </div>
+               <div className="flex items-center gap-3 bg-[#F8FAFC] px-6 py-3 rounded-2xl border border-gray-100 shadow-sm">
+                  <ShoppingBag size={16} className="text-navy" />
+                  <span className="text-[11px] font-black text-navy uppercase tracking-widest italic">{PRODUCTS.length} ITEMS AVAILABLE</span>
+               </div>
             </div>
  
-            {/* Image 6 Style (Large Featured + 4 Stacked Grid + 2 Bottom Grid) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-               {/* Left: Large Featured Card + 2 Small Cards beneath it */}
-               <div className="lg:col-span-8 flex flex-col gap-6">
-                  <div className="h-fit">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 grid-flow-row-dense">
+              {PRODUCTS.map((product, index) => {
+                const isFeatured = index === 0;
+                return (
+                  <div 
+                    key={product.id}
+                    className={cn(
+                      "flex flex-col h-full",
+                      isFeatured && "md:col-span-2 lg:col-span-2 lg:row-span-2"
+                    )}
+                  >
                     <ProductCard 
                       product={{
-                        ...PRODUCTS[0],
-                        title: "Apex Running Pro Series X1 - Limited Edition",
-                        discount: "20%"
+                        ...product,
+                        tag: index % 3 === 0 ? "HOT" : index % 3 === 1 ? "SALE" : "NEW",
+                        tagColor: index % 3 === 0 ? "bg-[#E93B3B]" : index % 3 === 1 ? "bg-[#E98B8B]" : "bg-[#7CD93B]",
+                        originalPrice: index % 2 === 0 ? "3,500" : undefined
                       }} 
-                      variant="featured" 
+                      variant={isFeatured ? 'featured' : 'compact'}
+                      showCountdown={index < 4}
                     />
                   </div>
-                  
-                  {/* Two small cards underneath the big card */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                    {PRODUCTS.slice(1, 3).map((product, i) => (
-                      <ProductCard 
-                        key={i} 
-                        product={{
-                          ...product,
-                          tag: "HOT DEAL",
-                          tagColor: "bg-[#E93B3B]"
-                        }} 
-                        variant="grid" 
-                      />
-                    ))}
-                  </div>
-               </div>
-               
-               {/* Right: 4 Small Horizontal Cards Stacked - Matches the total height */}
-               <div className="lg:col-span-4 flex flex-col gap-6">
-                  {PRODUCTS.slice(3, 7).map((product, i) => (
-                    <div key={i} className="flex-1">
-                      <ProductCard 
-                        product={{
-                          ...product,
-                          tag: i === 0 ? "TOP" : "DEAL",
-                          tagColor: i === 0 ? "bg-[#1B5CFF]" : "bg-orange-primary"
-                        }} 
-                        variant="compact" 
-                      />
-                    </div>
+                );
+              })}
+            </div>
+
+            {/* Pagination / Load More Placeholder */}
+            <div className="mt-16 flex flex-col items-center gap-6">
+               <div className="flex gap-2">
+                  {[1, 2, 3, '...', 12].map((p, i) => (
+                    <button 
+                      key={i} 
+                      className={cn(
+                        "w-12 h-12 rounded-xl flex items-center justify-center font-black text-[11px] uppercase italic transition-all",
+                        p === 1 ? "bg-navy text-white shadow-xl" : "bg-white text-navy border border-gray-100 hover:bg-gray-50"
+                      )}
+                    >
+                      {p}
+                    </button>
                   ))}
                </div>
+               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] italic">Showing 12 of {PRODUCTS.length} deals available today</p>
             </div>
           </div>
         </section>
@@ -186,7 +188,7 @@ export function DealsPage() {
             </div>
             
             <div className="bg-white/60 backdrop-blur-sm rounded-[10px] p-12 md:p-16 border border-dashed border-[#FF5B00]/30 text-center relative overflow-hidden shadow-sm">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
                <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-primary/5 rounded-full translate-y-1/2 -translate-x-1/2" />
                
                <h3 className="text-2xl font-black text-[#FF5B00] mb-8 uppercase tracking-[0.2em] italic relative z-10">Boost Your Sales, Submit Your Offer</h3>
@@ -197,69 +199,6 @@ export function DealsPage() {
                   Post Offer <ExternalLink size={18} />
                </button>
                <p className="mt-8 text-[11px] font-bold text-gray-400 uppercase tracking-[0.3em] relative z-10">100,000+ Shoppers Log In Every Day</p>
-            </div>
-          </div>
-        </section>
-
-        {/* All Deals Section */}
-        <section className="py-16 px-8 bg-white/50">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-12 border-l-4 border-navy px-6">
-               <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-2">All <span className="text-[#1B5CFF]">Deals</span></h2>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic">Explore Our Complete Collection of Offers</p>
-            </div>
-
-            {/* 3x3 Grid of Products */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-              {PRODUCTS.slice(0, 9).map((product, i) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={{
-                    ...product,
-                    tag: i % 3 === 0 ? "HOT" : i % 3 === 1 ? "SALE" : "NEW",
-                    tagColor: i % 3 === 0 ? "bg-[#E93B3B]" : i % 3 === 1 ? "bg-[#E98B8B]" : "bg-[#7CD93B]",
-                    originalPrice: "3,500"
-                  }} 
-                  showCountdown={true}
-                />
-              ))}
-            </div>
-
-            {/* Ad Banner */}
-            <div className="bg-[#050626] rounded-[10px] p-10 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/5 relative overflow-hidden group mb-16 shadow-2xl">
-               <div className="absolute top-0 right-0 w-80 h-full bg-purple-500/15 blur-[100px] -translate-x-1/2 translate-y-1/2" />
-               <div className="flex items-center gap-12 relative z-10 w-full md:w-auto">
-                  <div className="w-24 h-24 rounded-[10px] bg-[#7C3AED] flex items-center justify-center text-white font-black text-3xl shadow-2xl flex-shrink-0 animate-pulse">
-                     ezbooking
-                  </div>
-                  <div className="flex flex-col">
-                     <h3 className="text-3xl font-black text-white mb-3 italic uppercase tracking-tighter">Ezbooking - Your Travel Solution</h3>
-                     <div className="flex items-center gap-5 text-gray-400 text-[12px] font-bold uppercase tracking-[0.2em]">
-                        <span>New Collection Available</span>
-                        <div className="w-1.5 h-1.5 bg-gray-600 rounded-full" />
-                        <span>Free Delivery Overall Dhaka City Purchase Above BDT 1000</span>
-                     </div>
-                  </div>
-               </div>
-               
-               <div className="flex items-center gap-8 relative z-10">
-                  <div className="flex items-center gap-2">
-                     <div className="w-2 h-2 bg-gray-600 rounded-full" />
-                     <div className="w-2 h-2 bg-gray-600 rounded-full" />
-                     <div className="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center text-gray-500">
-                        <span className="text-[11px] font-black">ad</span>
-                     </div>
-                  </div>
-                  <button className="px-16 py-5 bg-[#FF5B00] text-white text-[15px] font-black uppercase rounded-[10px] hover:bg-orange-600 transition-all shadow-2xl shadow-orange-primary/20 italic tracking-widest whitespace-nowrap">
-                     Visit Now
-                  </button>
-               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-               {PRODUCTS.map(product => (
-                 <ProductCard key={product.id} product={product} variant="grid" />
-               ))}
             </div>
           </div>
         </section>

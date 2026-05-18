@@ -1,15 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Youtube, Star, ChevronDown, CheckCircle2, Bookmark, ChevronLeft, ChevronRight, Zap, TrendingUp, HelpCircle, AlertCircle, Share2, MessageCircle, BarChart3, Users, Play, Smartphone, Gift, Shirt, Info, Package, DollarSign, ShieldCheck, ThumbsUp, Heart } from 'lucide-react';
 import { BRANDS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+
+import { useCarousel } from '../hooks/useCarousel';
 
 export function BrandDetailPage() {
+  const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const brand = BRANDS[2]; // Apex or Sailor based on ref
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(1);
-  const [activeSuggestedIndex, setActiveSuggestedIndex] = useState(0);
+  const [productLineIndex, setProductLineIndex] = useState(1);
+  const [suggestedIndex, setSuggestedIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
 
   const carouselItems = [
     { name: "Premium Comfort", category: "Classic Collection", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=800&fit=crop" },
@@ -17,6 +31,43 @@ export function BrandDetailPage() {
     { name: "Royal Edition", category: "Luxury Series", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=800&fit=crop" },
     { name: "Festive Spirit", category: "Seasonal Wear", img: "https://images.unsplash.com/photo-1511741454500-ddbf7ef33554?w=1200&h=800&fit=crop" }
   ];
+
+  const productLineCarousel = useCarousel(carouselItems.length, 3500);
+  const suggestedCarousel = useCarousel(3, 3000);
+
+  const handleProductLineNext = () => setProductLineIndex((prev) => (prev + 1) % carouselItems.length);
+  const handleProductLinePrev = () => setProductLineIndex((prev) => (prev - 1 + carouselItems.length) % carouselItems.length);
+
+  const handleSuggestedNext = () => setSuggestedIndex((prev) => (prev + 1) % 4);
+  const handleSuggestedPrev = () => setSuggestedIndex((prev) => (prev - 1 + 4) % 4);
+
+  const dragStart = useRef<number | null>(null);
+  
+  const handleSuggestedPointerDown = (e: React.PointerEvent) => {
+    dragStart.current = e.clientX;
+    suggestedCarousel.pause();
+  };
+  
+  const handleSuggestedPointerMove = (e: React.PointerEvent) => {
+    if (dragStart.current !== null) {
+      if (Math.abs(e.clientX - dragStart.current) > 5) {
+        isDraggingRef.current = true;
+        setIsDragging(true);
+      }
+    }
+  };
+
+  const handleSuggestedPointerUp = (e: React.PointerEvent) => {
+    if (dragStart.current !== null) {
+      const diff = e.clientX - dragStart.current;
+      if (diff > 50) suggestedCarousel.prev();
+      else if (diff < -50) suggestedCarousel.next();
+    }
+    dragStart.current = null;
+    isDraggingRef.current = false;
+    setIsDragging(false);
+    suggestedCarousel.resume();
+  };
 
   const brandValues = [
     { icon: <Users className="text-blue-500" />, title: "My Audience", items: ["Family Focused", "Mens Wear", "Teens & Kids", "Ethnic Style", "Teens"] },
@@ -173,76 +224,105 @@ export function BrandDetailPage() {
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         id="product-line" 
-        className="bg-white pt-12 pb-8"
+        className="bg-white pt-12 pb-16"
       >
-        <div className="max-w-7xl mx-auto px-8 text-center">
+        <div className="max-w-7xl mx-auto px-8 text-center mb-12">
            <h2 className="text-4xl font-black text-navy italic tracking-tighter mb-3 uppercase italic">Product Line</h2>
            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-8">Sailor's Trending Elements</p>
-           
-           <div className="flex gap-4 h-[560px]">
-              {carouselItems.map((item, i) => {
-                const isActive = activeAccordionIndex === i;
-                return (
-                  <motion.div 
-                    layout
-                    key={i} 
-                    onClick={() => setActiveAccordionIndex(i)}
-                    onMouseEnter={() => setActiveAccordionIndex(i)}
-                    initial={false}
-                    animate={{ flex: isActive ? 6 : 1 }}
-                    transition={{ type: "spring", stiffness: 150, damping: 25, mass: 0.5 }}
-                    className="rounded-[30px] overflow-hidden relative cursor-pointer shadow-[0_40px_80px_rgba(0,0,0,0.15)] h-full border border-gray-100 group"
-                  >
-                    <motion.img 
-                      layout
-                      src={item.img} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                      alt={item.name} 
-                    />
-                    <div className={cn(
-                      "absolute inset-0 bg-gradient-to-t transition-opacity duration-700",
-                      isActive ? "from-black/80 via-black/10 text-white" : "from-black/30 to-transparent opacity-80"
-                    )} />
-                    
-                    <AnimatePresence>
-                      {isActive && (
-                        <motion.div 
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ delay: 0.2 }}
-                          className="absolute inset-0 flex flex-col justify-end p-12 text-left"
-                        >
-                          <div className="flex items-center gap-3 mb-6">
-                             <div className="w-12 h-12 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-xl shadow-orange-primary/20">
-                                <Zap size={20} className="fill-current" />
-                             </div>
-                             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-primary">Featured Selection</span>
-                          </div>
-                          <h3 className="text-5xl font-black italic tracking-tighter mb-2">{item.name}</h3>
-                          <p className="text-xl font-bold text-white/50 tracking-wide uppercase italic tracking-widest">{item.category}</p>
-                          
-                          <div className="mt-10 flex gap-4">
-                             <button className="px-10 py-4 bg-white text-navy font-black rounded-full text-xs uppercase tracking-widest shadow-2xl hover:scale-105 hover:bg-orange-primary hover:text-white transition-all">Shop Item</button>
-                             <button className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white group-hover:text-navy transition-all">
-                                <Bookmark size={24} />
-                             </button>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+        </div>
 
-                    {!isActive && (
-                      <div className="absolute inset-x-0 bottom-12 flex justify-center">
-                        <span className="text-white text-xs font-black uppercase tracking-[0.5em] rotate-180 [writing-mode:vertical-lr] opacity-30 whitespace-nowrap">
-                          {item.name}
-                        </span>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
-           </div>
+        <div className="max-w-[1440px] mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-center gap-3 md:gap-5 h-[400px] md:h-[580px]">
+            {carouselItems.map((item, i) => {
+              const isActive = i === productLineIndex;
+              
+              return (
+                <motion.div
+                  key={i}
+                  onClick={() => setProductLineIndex(i)}
+                  initial={false}
+                  animate={{
+                    width: isActive ? (isMobile ? '100%' : '60%') : (isMobile ? '0%' : '13%'),
+                    flex: isActive ? 10 : 1,
+                    opacity: isActive ? 1 : 0.7,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 20
+                  }}
+                  className={cn(
+                    "relative h-full rounded-[24px] md:rounded-[32px] overflow-hidden cursor-pointer group",
+                    !isActive && "hidden md:block"
+                  )}
+                >
+                  <img 
+                    src={item.img} 
+                    className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" 
+                    alt={item.name} 
+                  />
+                  <div className={cn(
+                     "absolute inset-0 transition-opacity duration-700",
+                     isActive ? "bg-gradient-to-t from-black/80 via-black/20 to-transparent" : "bg-black/30"
+                  )} />
+
+                  {/* Vertical Text for Inactive */}
+                  {!isActive && (
+                    <div className="absolute inset-x-0 bottom-12 flex justify-center translate-y-10 group-hover:translate-y-0 transition-transform">
+                      <span className="text-white/80 text-[11px] font-black uppercase tracking-[0.5em] italic origin-center rotate-[-90deg] whitespace-nowrap">
+                        {item.name}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Active Content - Text Title Only as requested */}
+                  {isActive && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="absolute inset-0 p-12 flex flex-col justify-end items-start"
+                    >
+                      <h3 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter uppercase mb-2 leading-none">
+                        {item.name}
+                      </h3>
+                    </motion.div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Navigation Controls */}
+        <div className="mt-12 flex items-center justify-center gap-12">
+          <div className="flex gap-4">
+            {carouselItems.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setProductLineIndex(i)}
+                className={cn(
+                  "h-1.5 transition-all duration-500 rounded-full",
+                  productLineIndex === i ? "w-20 bg-orange-primary" : "w-3 bg-gray-200"
+                )}
+              />
+            ))}
+          </div>
+          
+          <div className="flex gap-6">
+            <button 
+              onClick={handleProductLinePrev} 
+              className="w-14 h-14 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-90 shadow-sm"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button 
+              onClick={handleProductLineNext} 
+              className="w-14 h-14 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-90 shadow-sm"
+            >
+              <ChevronRight size={24} />
+            </button>
+          </div>
         </div>
       </motion.section>
 
@@ -295,68 +375,98 @@ export function BrandDetailPage() {
                         <h3 className="text-3xl font-black text-navy italic tracking-tighter mb-2 uppercase">Top Suggested Products</h3>
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">Sailor Best Selling Items</p>
                      </div>
-                     <button className="text-[10px] font-black text-orange-primary uppercase tracking-[0.2em] hover:opacity-70 transition-opacity">View All Lineup</button>
+                     <Link to="/products" className="text-[10px] font-black text-orange-primary uppercase tracking-[0.2em] hover:opacity-70 transition-opacity">View All Lineup</Link>
                   </div>
                   
-                  <div className="flex gap-4 h-[440px]">
-                     {PRODUCTS.slice(0, 3).map((p, i) => {
-                        const isActive = activeSuggestedIndex === i;
-                        return (
-                          <motion.div 
-                            layout
-                            key={i} 
-                            onClick={() => setActiveSuggestedIndex(i)}
-                            onMouseEnter={() => setActiveSuggestedIndex(i)}
-                            initial={false}
-                            animate={{ flex: isActive ? 4 : 1 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="rounded-[30px] overflow-hidden relative cursor-pointer shadow-xl h-full border border-gray-100 group"
-                          >
-                            <motion.img 
-                              layout
-                              src={p.image} 
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                              alt={p.title} 
-                            />
-                            <div className={cn(
-                              "absolute inset-0 bg-gradient-to-t transition-opacity duration-700",
-                              isActive ? "from-black/80 via-black/20 to-transparent opacity-100" : "from-black/40 to-transparent opacity-80"
-                            )} />
-                            
-                            <AnimatePresence>
-                              {isActive && (
-                                <motion.div 
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  exit={{ opacity: 0, y: 20 }}
-                                  transition={{ delay: 0.2 }}
-                                  className="absolute inset-0 flex flex-col justify-end p-8 text-left"
-                                >
-                                  <div className="flex items-center gap-2 mb-4">
-                                     <div className="w-8 h-8 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-lg">
-                                        <Star size={14} className="fill-current" />
-                                     </div>
-                                     <span className="text-[9px] font-black uppercase tracking-[0.3em] text-orange-primary">Top Pick</span>
-                                  </div>
-                                  <h4 className="text-2xl font-black text-white italic tracking-tighter mb-2 truncate">{p.title}</h4>
-                                  <div className="flex items-center justify-between">
-                                     <span className="text-lg font-black text-white italic tracking-tight">৳ {p.price}</span>
-                                     <Link to={`/products/${p.id}`} className="px-6 py-2 bg-white text-navy font-black rounded-full text-[10px] uppercase tracking-widest shadow-xl hover:bg-orange-primary hover:text-white transition-all">Explore</Link>
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-        
-                            {!isActive && (
-                              <div className="absolute inset-x-0 bottom-8 flex justify-center">
-                                <span className="text-white text-[10px] font-black uppercase tracking-[0.4em] rotate-180 [writing-mode:vertical-lr] opacity-40 whitespace-nowrap">
-                                  {p.brand} {p.title}
-                                </span>
-                              </div>
-                            )}
-                          </motion.div>
-                        );
-                     })}
+                  <div className="relative w-full h-[400px] md:h-[480px]">
+                     <div className="flex items-center justify-center gap-3 h-full">
+                        {PRODUCTS.slice(0, 4).map((p, i) => {
+                           const isActive = i === suggestedIndex;
+                           
+                           return (
+                             <motion.div
+                               key={p.id}
+                               onClick={() => setSuggestedIndex(i)}
+                               initial={false}
+                               animate={{
+                                 width: isActive ? (isMobile ? '100%' : '60%') : (isMobile ? '0%' : '15%'),
+                                 flex: isActive ? 8 : 1,
+                                 opacity: isActive ? 1 : 0.6,
+                               }}
+                               transition={{
+                                 type: "spring",
+                                 stiffness: 100,
+                                 damping: 20
+                               }}
+                               className={cn(
+                                 "relative h-full rounded-[24px] md:rounded-[30px] overflow-hidden cursor-pointer group",
+                                 !isActive && "hidden md:block" // Hide side cards on mobile
+                               )}
+                             >
+                               <img 
+                                 src={p.image} 
+                                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" 
+                                 alt={p.title} 
+                               />
+                               <div className={cn(
+                                  "absolute inset-0 transition-opacity duration-700",
+                                  isActive ? "bg-gradient-to-t from-black/80 via-black/20 to-transparent" : "bg-black/40"
+                               )} />
+
+                               {!isActive && (
+                                 <div className="absolute inset-x-0 bottom-12 flex justify-center translate-y-10 group-hover:translate-y-0 transition-transform">
+                                   <span className="text-white/80 text-[9px] font-black uppercase tracking-[0.5em] italic origin-center rotate-[-90deg] whitespace-nowrap">
+                                     {p.title}
+                                   </span>
+                                 </div>
+                               )}
+
+                               {isActive && (
+                                 <motion.div 
+                                   initial={{ opacity: 0, y: 10 }}
+                                   animate={{ opacity: 1, y: 0 }}
+                                   transition={{ delay: 0.3 }}
+                                   className="absolute inset-0 p-8 flex flex-col justify-end items-start"
+                                 >
+                                    <div className="flex items-center gap-2 mb-4 bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                                       <div className="w-5 h-5 rounded-full bg-orange-primary flex items-center justify-center text-white">
+                                          <Star size={10} className="fill-current" />
+                                       </div>
+                                       <span className="text-[8px] font-black text-white uppercase tracking-[0.2em] italic">TOP PICK</span>
+                                    </div>
+                                    <h4 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none mb-2">
+                                       {p.title}
+                                    </h4>
+                                 </motion.div>
+                               )}
+                             </motion.div>
+                           );
+                        })}
+                     </div>
+                  </div>
+
+                  {/* Navigator for Compact Carousel */}
+                  <div className="mt-8 flex items-center justify-center md:justify-start gap-10">
+                     <div className="flex gap-3">
+                       {[0, 1, 2, 3].map((i) => (
+                         <button
+                           key={i}
+                           onClick={() => setSuggestedIndex(i)}
+                           className={cn(
+                             "h-1 transition-all duration-500 rounded-full",
+                             suggestedIndex === i ? "w-12 bg-orange-primary" : "w-2 bg-gray-300"
+                           )}
+                         />
+                       ))}
+                     </div>
+                     <div className="flex gap-4">
+                        <button onClick={handleSuggestedPrev} className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all">
+                           <ChevronLeft size={18} />
+                        </button>
+                        <button onClick={handleSuggestedNext} className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all">
+                           <ChevronRight size={18} />
+                        </button>
+                     </div>
                   </div>
                </div>
 

@@ -66,25 +66,25 @@ export function ProductCard({
          {/* Background accent */}
          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-700" />
          
-         <div className="relative z-20 flex-shrink-0 w-full md:w-[40%] aspect-square md:aspect-auto md:h-full bg-gray-50 rounded-[20px] flex items-center justify-center p-6 overflow-hidden">
-            <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
+         <div className="relative z-20 flex-shrink-0 w-full md:w-[65%] aspect-[16/10] md:h-full bg-[#f8fafc] rounded-[24px] flex items-center justify-center p-8 overflow-hidden">
+            <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
                 <button 
                   onClick={toggleSave}
                   className={cn(
-                    "w-8 h-8 rounded-full border flex items-center justify-center shadow-xl group-hover:scale-110 transition-all",
+                    "w-10 h-10 rounded-full border flex items-center justify-center shadow-xl group-hover:scale-110 transition-all",
                     isSaved ? "bg-[#F96500] border-[#F96500] text-white" : "border-[#F96500]/20 text-[#F96500] bg-white"
                   )}
                 >
-                   <Bookmark size={16} className={isSaved ? "fill-current" : ""} />
+                   <Bookmark size={20} className={isSaved ? "fill-current" : ""} />
                 </button>
                 <button 
                    onClick={handleCompare}
                    className={cn(
-                     "w-8 h-8 rounded-full border flex items-center justify-center transition-all bg-white shadow-xl group-hover:scale-110",
+                     "w-10 h-10 rounded-full border flex items-center justify-center transition-all bg-white shadow-xl group-hover:scale-110",
                      isInCompare ? "bg-[#07DD05] border-[#07DD05] text-white" : "border-[#1B5CFF]/20 text-[#1B5CFF]"
                    )}
                 >
-                   <Layers size={16} />
+                   <Layers size={20} />
                 </button>
              </div>
             
@@ -92,43 +92,43 @@ export function ProductCard({
               src={product.image} 
               loading="lazy"
               onError={handleImageError}
-              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-1000 relative z-10" 
+              className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-1000 relative z-10" 
               alt={product.title} 
             />
          </div>
   
-         <div className="relative z-10 flex-1 flex flex-col justify-center">
-            <div className="flex items-center justify-between mb-4">
+         <div className="relative z-10 flex-1 flex flex-col justify-center py-4 px-2">
+            <div className="flex items-center justify-between mb-5">
                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">{product.brand || 'APEX'}</span>
-                  <div className="bg-[#FF5B00] text-white text-[8px] font-black px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 italic uppercase tracking-[0.1em] shadow-orange-primary/20">
-                     <Star size={10} className="fill-current" /> FEATURED
+                  <span className="text-[11px] font-black text-gray-400 uppercase tracking-[0.4em] italic">{product.brand || 'APEX'}</span>
+                  <div className="bg-[#FF5B00] text-white text-[9px] font-black px-4 py-2 rounded-full shadow-lg flex items-center gap-2 italic uppercase tracking-[0.1em] shadow-orange-primary/20 leading-none">
+                     <Star size={12} className="fill-current" /> FEATURED
                   </div>
                </div>
                {product.discount && (
-                 <span className="bg-rose-500/10 text-rose-500 text-[9px] font-black px-4 py-1.5 rounded-full uppercase italic border border-rose-500/10">{product.discount} OFF</span>
+                 <span className="bg-rose-500/10 text-rose-500 text-[10px] font-black px-4 py-2 rounded-full uppercase italic border border-rose-500/10 leading-none">{product.discount} OFF</span>
                )}
             </div>
             
-            <h3 className="text-2xl md:text-3xl font-black text-navy uppercase italic tracking-tighter leading-none mb-6 group-hover:text-orange-primary transition-colors">
+            <h3 className="text-2xl md:text-4xl font-black text-navy uppercase italic tracking-tighter leading-[1.1] mb-6 group-hover:text-orange-primary transition-colors line-clamp-3">
               {product.title}
             </h3>
 
-            <div className="mb-6">
+            <div className="mb-8">
                <StockProgress sm />
             </div>
             
-            <div className="flex items-end justify-between gap-4">
-               <div className="flex flex-col gap-1.5">
-                  <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest italic text-left">ULTIMATE OFFER</span>
-                  <span className="text-3xl font-black text-[#FF5B00] italic leading-none tracking-tighter">BDT {product.price}</span>
+            <div className="flex items-end justify-between gap-6 pt-6 border-t border-gray-100">
+               <div className="flex flex-col gap-2">
+                  <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest italic text-left leading-none">ULTIMATE OFFER</span>
+                  <span className="text-4xl font-black text-[#FF5B00] italic leading-none tracking-tighter">BDT {product.price}</span>
                </div>
                
                <button className="flex flex-col items-center group/btn-featured-mini shrink-0">
-                  <div className="w-12 h-12 rounded-full border-2 border-[#1B5CFF] flex items-center justify-center text-[#1B5CFF] group-hover/btn-featured-mini:bg-[#1B5CFF] group-hover/btn-featured-mini:text-white transition-all shadow-lg active:scale-90">
-                     <ArrowRight size={20} className="-rotate-45" />
+                  <div className="w-14 h-14 rounded-full border-2 border-[#1B5CFF] flex items-center justify-center text-[#1B5CFF] group-hover/btn-featured-mini:bg-[#1B5CFF] group-hover/btn-featured-mini:text-white transition-all shadow-xl active:scale-90">
+                     <ArrowRight size={24} className="-rotate-45" />
                   </div>
-                  <span className="text-[9px] font-black text-[#1B5CFF] uppercase mt-1.5 tracking-[0.1em] italic">Go Buy</span>
+                  <span className="text-[10px] font-black text-[#1B5CFF] uppercase mt-2 tracking-widest italic">Go Buy</span>
                </button>
             </div>
          </div>
@@ -140,7 +140,7 @@ export function ProductCard({
     return (
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
-        className="bg-white rounded-[15px] p-4 flex flex-col gap-4 border border-gray-100 shadow-sm hover:shadow-xl transition-all cursor-pointer group relative"
+        className="bg-white rounded-[15px] p-4 flex flex-col gap-4 border border-gray-100 shadow-sm hover:shadow-xl transition-all cursor-pointer group relative h-full"
       >
         <div className="w-full aspect-square bg-gray-50 rounded-[12px] relative overflow-hidden flex items-center justify-center p-3">
             <div className="absolute top-2 left-2 z-10 flex flex-col gap-1.5">
@@ -171,7 +171,7 @@ export function ProductCard({
              alt={product.title} 
            />
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 flex-1">
           <div className="flex items-center justify-between">
             <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">{product.brand || 'APEX'}</span>
             <div className={cn("text-[8px] font-black text-white px-3 py-1 rounded-full uppercase tracking-tighter leading-none italic bg-orange-primary", product.tagColor)}>
@@ -184,7 +184,7 @@ export function ProductCard({
           
           <StockProgress sm />
           
-          <div className="flex items-center justify-between gap-4 mt-2">
+          <div className="flex items-center justify-between gap-4 mt-auto pt-2 border-t border-gray-50/50">
              <span className="text-[15px] font-black text-orange-primary italic leading-none shrink-0">BDT {product.price}</span>
              <button className="flex flex-col items-center group/btn-mini shrink-0">
                 <div className="w-9 h-9 rounded-full border border-[#1B5CFF] flex items-center justify-center text-[#1B5CFF] group-hover/btn-mini:bg-[#1B5CFF] group-hover/btn-mini:text-white transition-all shadow-md">

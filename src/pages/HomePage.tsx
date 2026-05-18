@@ -6,24 +6,55 @@ import { PRODUCTS, BLOGS, BRANDS, PLACEHOLDER_IMAGE } from '../constants';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
-export function HomePage() {
-  const [activeBrandIndex, setActiveBrandIndex] = useState(1);
-  const [guideIndex, setGuideIndex] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
+import { useCarousel } from '../hooks/useCarousel';
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === 'left' ? scrollLeft - clientWidth / 2 : scrollLeft + clientWidth / 2;
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-    }
+import { ModernCarousel } from '../components/ModernCarousel';
+
+export function HomePage() {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const navigate = useNavigate();
+  const [activeBrandIndex, setActiveBrandIndex] = useState(1);
+  const [activeSection, setActiveSection] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef<number | null>(null);
+  const isDraggingRef = useRef(false);
+  
+  const brandCarousel = useCarousel(4, 3500);
+  
+  // Resize listener for responsive carousel count
+  useEffect(() => {
+    const handleResize = () => {
+      // Small delay to debounce if needed
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (!element) return;
+    const navbarHeight = 80;
+    const top = element.getBoundingClientRect().top + window.scrollY - navbarHeight - 12;
+    window.scrollTo({ top, behavior: 'smooth' });
   };
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveBrandIndex((prev) => (prev + 1) % 4);
-    }, 5000);
-    return () => clearInterval(timer);
+    const sections = ['trending-brands', 'popular-products', 'business', 'guides', 'categories'];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
   }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,8 +76,6 @@ export function HomePage() {
     { name: "Perfume World", category: "Best Fragrance", img: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=600&fit=crop", id: 8 },
     { name: "Pickaboo", category: "Gadgets & Electronics", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&h=600&fit=crop", id: 9 }
   ];
-
-  const navigate = useNavigate();
 
   const categories = [
     { name: "Footwear & Shoes", count: "125 Brands", icon: <ShoppingBag className="text-blue-500" />, color: "from-blue-500/10 to-indigo-600/10", id: 'fashion' },
@@ -87,7 +116,7 @@ export function HomePage() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-6xl md:text-[88px] font-black text-white mb-6 tracking-tighter leading-[0.9] max-w-6xl uppercase italic"
           >
-            DISCOVER THE <span className="text-orange-primary">BEST</span> IN BANGLADESH
+            CHOOSE, VERIFY & <span className="text-orange-primary">BUY ORIGINAL</span>
           </motion.h1>
           
           <motion.p 
@@ -172,131 +201,31 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Trending Brands */}
-      <section className="py-20 px-8 bg-white overflow-hidden relative border-b border-gray-100">
-        {/* Subtle background flair */}
-        <div className="absolute top-0 left-0 w-1/3 h-full bg-orange-primary/5 blur-[150px] rounded-full -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-1/3 h-full bg-blue-500/5 blur-[150px] rounded-full translate-x-1/2 translate-y-1/2" />
-
-        <div className="max-w-7xl mx-auto relative z-10 w-full">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-            <div>
-              <h2 className="text-[48px] font-black text-navy uppercase tracking-tighter italic leading-none mb-4">Trending <span className="text-orange-primary">Brands</span></h2>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic mb-2 px-2 border-l-4 border-orange-primary">Curated Premium Selection 2024</p>
-            </div>
-            <Link to="/brands" className="w-fit px-10 py-4 bg-white border-2 border-navy text-navy font-black uppercase tracking-widest text-[10px] rounded-full hover:bg-navy hover:text-white transition-all transform hover:scale-105 active:scale-95 italic shadow-xl shadow-navy/5">View All Brands</Link>
-          </div>
-          <div className="flex gap-4 h-[520px]">
-            {trendingBrands.map((brand, i) => {
-              const isActive = activeBrandIndex === i;
-              return (
-                <motion.div 
-                  layout
-                  key={i} 
-                  onClick={() => {
-                    if (isActive) {
-                      navigate(`/brands/${brand.id}`);
-                    } else {
-                      setActiveBrandIndex(i);
-                    }
-                  }}
-                  onMouseEnter={() => setActiveBrandIndex(i)}
-                  initial={false}
-                  animate={{ 
-                    flex: isActive ? 5 : 1,
-                  }}
-                  transition={{ type: "spring", stiffness: 150, damping: 25, mass: 0.5 }}
-                  className="rounded-[15px] overflow-hidden relative cursor-pointer shadow-2xl h-full border border-gray-100"
-                >
-                  <motion.img 
-                    layout
-                    src={brand.img} 
-                    loading="lazy"
-                    onError={handleImageError}
-                    className={cn("w-full h-full object-cover transition-transform duration-700", isActive ? "scale-105" : "scale-100")} 
-                    alt={brand.name} 
-                  />
-                  <div className={cn(
-                    "absolute inset-0 bg-gradient-to-t transition-opacity duration-700",
-                    isActive ? "from-black/90 via-black/20 to-transparent opacity-100" : "from-black/50 to-transparent opacity-70"
-                  )} />
-                  
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 30 }}
-                        transition={{ delay: 0.15 }}
-                        className="absolute inset-0 flex flex-col justify-end p-12 text-left"
-                      >
-                         <div className="max-w-xl">
-                            <div className="flex items-center gap-3 mb-6">
-                               <div className="w-10 h-10 rounded-full orange-brand-gradient flex items-center justify-center text-white shadow-xl">
-                                  <Zap size={18} className="fill-current" />
-                               </div>
-                               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-primary">Top Verified</span>
-                            </div>
-                            <Link to={`/brands/${brand.id}`}>
-                              <h3 className="text-4xl md:text-5xl font-black text-white mb-2 hover:text-orange-primary transition-colors italic tracking-tighter truncate leading-tight">
-                                {brand.name}
-                              </h3>
-                            </Link>
-                            <div className="flex items-center gap-6">
-                               <p className="text-sm font-bold text-white/50 tracking-widest uppercase italic">{brand.category}</p>
-                               <Link to={`/brands/${brand.id}`} className="flex items-center gap-3 text-[10px] font-black text-white px-6 py-2 rounded-full border border-white/20 hover:bg-white hover:text-navy transition-all uppercase tracking-widest italic backdrop-blur-sm">
-                                  Explore Brand <ArrowRight size={14} className="-rotate-45" />
-                               </Link>
-                            </div>
-                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {!isActive && (
-                    <div className="absolute inset-x-0 bottom-12 flex justify-center">
-                      <span className="text-white text-xs font-black uppercase tracking-[0.6em] rotate-180 [writing-mode:vertical-lr] opacity-40 whitespace-nowrap">
-                        {brand.name}
-                      </span>
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
+      {/* Trending Brands Carousel Section */}
+      <section 
+        id="trending-brands" 
+        className="relative overflow-hidden"
+      >
+        <ModernCarousel />
       </section>
 
       {/* Popular Products */}
-      <section className="py-16 px-8 bg-white border-y border-gray-50">
+      <section 
+        id="popular-products" 
+        className="py-16 px-8 bg-white border-y border-gray-50 group/products"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-12">
-            <h2 className="text-3xl font-black text-navy uppercase tracking-tighter italic">Popular Products</h2>
-            <div className="flex items-center gap-4">
-              <Link to="/products" className="text-orange-primary font-black uppercase tracking-widest text-[10px] flex items-center gap-2 hover:gap-3 transition-all mr-4">Browse All <ArrowRight size={14}/></Link>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => scroll('left')}
-                  className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-navy hover:bg-gray-50 transition-all"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button 
-                  onClick={() => scroll('right')}
-                  className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-navy hover:bg-gray-50 transition-all"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
+            <div>
+              <h2 className="text-3xl font-black text-navy uppercase tracking-tighter italic">Popular Products</h2>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic mt-1">Trending now in Bangladesh</p>
             </div>
+            <Link to="/products" className="text-orange-primary font-black uppercase tracking-widest text-[10px] flex items-center gap-2 hover:gap-3 transition-all mr-4">Browse All <ArrowRight size={14}/></Link>
           </div>
           
-          <div 
-            ref={scrollRef}
-            className="flex gap-10 overflow-x-auto no-scrollbar scroll-smooth pb-12"
-          >
-            {PRODUCTS.map(product => (
-              <div key={product.id} className="flex-shrink-0 w-[340px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {PRODUCTS.slice(0, 8).map(product => (
+              <div key={product.id}>
                 <ProductCard product={product} variant="grid" />
               </div>
             ))}
@@ -305,7 +234,7 @@ export function HomePage() {
       </section>
 
       {/* Business & Product Grid Section - Image 3 Style */}
-      <section className="py-16 px-8 bg-[#F4F9FF] overflow-hidden relative border-t border-gray-100">
+      <section id="business" className="py-16 px-8 bg-[#F4F9FF] overflow-hidden relative border-t border-gray-100">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-left mb-12">
             <h2 className="text-4xl font-black text-[#0D0D1A] italic uppercase tracking-tighter">For Business & Sellers</h2>
@@ -329,7 +258,7 @@ export function HomePage() {
       </section>
 
       {/* Expert Guides & Recommendations Section */}
-      <section className="bg-white py-20 overflow-hidden relative">
+      <section id="guides" className="bg-white py-20 overflow-hidden relative">
          <div className="max-w-7xl mx-auto px-6">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                <div>
@@ -495,7 +424,7 @@ export function HomePage() {
       </section>
 
       {/* Popular Product Categories */}
-      <section className="py-16 bg-[#EEF2F6] px-8">
+      <section id="categories" className="py-16 bg-[#EEF2F6] px-8">
         <div className="max-w-7xl mx-auto">
            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
               <div>

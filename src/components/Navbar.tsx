@@ -19,14 +19,7 @@ export function Navbar() {
     <nav className="w-full bg-[#0A0A1F]/90 text-white h-20 flex items-center px-8 z-50 sticky top-0 border-b border-white/5 shadow-2xl backdrop-blur-md" id="main-navbar">
       <div className="flex items-center gap-3 mr-8 scale-110">
         <Link to="/" className="flex flex-col items-center group">
-          <div className="flex gap-1 mb-[-4px]">
-            <div className="w-4 h-4 rounded-full border-2 border-orange-primary flex items-center justify-center">
-              <div className="w-1.5 h-1.5 bg-orange-primary rounded-full" />
-            </div>
-            <div className="w-4 h-4 rounded-full border-2 border-orange-primary flex items-center justify-center">
-              <div className="w-1.5 h-1.5 bg-orange-primary rounded-full" />
-            </div>
-          </div>
+          <img src="/logo.png" className="h-6 w-auto mb-1" alt="Choosify.bd Logo" />
           <span className="text-xl font-black tracking-tight lowercase font-sans">choosify.bd</span>
         </Link>
       </div>
@@ -36,7 +29,7 @@ export function Navbar() {
         <Link to="/categories" className="hover:text-orange-primary transition-colors">Categories</Link>
         <Link to="/products" className="hover:text-orange-primary transition-colors">Products</Link>
         <Link to="/brands" className="hover:text-orange-primary transition-colors">Brands</Link>
-        <Link to="/guides" className="hover:text-orange-primary transition-colors">Recommendations</Link>
+        <Link to="/guides" className="text-orange-primary hover:text-orange-primary transition-colors">Recommendations</Link>
         <Link to="/compare" className="hover:text-orange-primary transition-colors">Compare</Link>
         <Link to="/deals" className="hover:text-orange-primary transition-colors">Deals</Link>
       </div>
