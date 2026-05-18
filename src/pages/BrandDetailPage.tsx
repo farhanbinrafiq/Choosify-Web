@@ -260,7 +260,7 @@ export function BrandDetailPage() {
                   <div key={i} className="group">
                      <div className="flex items-center gap-6 mb-8">
                         <div className="w-14 h-14 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center group-hover:bg-navy group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:shadow-navy/10 transform group-hover:rotate-6">
-                           {React.cloneElement(value.icon as React.ReactElement, { size: 24, className: cn((value.icon as React.ReactElement).props.className, "group-hover:text-white") })}
+                           {React.cloneElement(value.icon as React.ReactElement<any>, { size: 24, className: cn((value.icon as any).props.className, "group-hover:text-white") })}
                         </div>
                         <h4 className="text-xl font-black text-navy italic tracking-tight">{value.title}</h4>
                      </div>
@@ -859,7 +859,7 @@ export function BrandDetailPage() {
                      className="bg-gray-50 rounded-[30px] p-8 border border-gray-100 flex flex-col items-center text-center group hover:bg-white hover:shadow-2xl transition-all duration-500"
                   >
                      <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-navy mb-6 shadow-sm group-hover:scale-110 group-hover:rotate-6 transition-transform">
-                        {React.cloneElement(deal.icon as React.ReactElement, { size: 28 })}
+                        {React.cloneElement(deal.icon as React.ReactElement<any>, { size: 28 })}
                      </div>
                      <h4 className="text-xl font-black text-navy italic tracking-tight mb-2">{deal.title}</h4>
                      <div className="text-3xl font-black text-orange-primary italic tracking-tighter mb-6 underline decoration-navy/10 underline-offset-8">

@@ -2,11 +2,16 @@ import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Play, Heart, ArrowRight, Share2, Eye, Youtube, Instagram } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { PLACEHOLDER_IMAGE } from '../constants';
 
 export function RecommendationCard(props: any) {
   const { guide, index, variant } = props;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = PLACEHOLDER_IMAGE;
+  };
 
   const handleMouseEnter = () => {
     setIsHovering(true);
@@ -51,7 +56,13 @@ export function RecommendationCard(props: any) {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2.5s]"
             />
           ) : (
-            <img src={guide.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" alt="Featured" />
+            <img 
+              src={guide.image} 
+              loading="lazy"
+              onError={handleImageError}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" 
+              alt="Featured" 
+            />
           )}
 
           {/* Overlays */}
@@ -121,7 +132,13 @@ export function RecommendationCard(props: any) {
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s]"
             />
           ) : (
-            <img src={guide.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s]" alt="Shorts" />
+            <img 
+              src={guide.image} 
+              loading="lazy"
+              onError={handleImageError}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s]" 
+              alt="Shorts" 
+            />
           )}
           
           {/* Top Overlays */}
@@ -200,7 +217,13 @@ export function RecommendationCard(props: any) {
             )}
           </div>
         ) : (
-          <img src={guide.image || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" alt="Guide" />
+          <img 
+            src={guide.image || PLACEHOLDER_IMAGE} 
+            loading="lazy"
+            onError={handleImageError}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" 
+            alt="Guide" 
+          />
         )}
 
         {/* Badges */}

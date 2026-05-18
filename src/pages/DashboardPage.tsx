@@ -34,6 +34,7 @@ import { RecommendationCard } from '../components/RecommendationCard';
 import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { PLACEHOLDER_IMAGE } from '../constants';
 
 // Hex Colors as per instruction
 const COLORS = {
@@ -105,7 +106,12 @@ const OverviewSection = () => {
           <div className="flex -space-x-3">
             {[1, 2, 3].map(i => (
               <div key={i} className="w-8 h-8 rounded-full border-2 border-navy overflow-hidden bg-gray-800">
-                <img src={`https://i.pravatar.cc/150?u=${i + 10}`} className="w-full h-full object-cover" alt="" />
+                <img 
+                  src={`https://i.pravatar.cc/150?u=${i + 10}`} 
+                  onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${i}&background=random`; }}
+                  className="w-full h-full object-cover" 
+                  alt="" 
+                />
               </div>
             ))}
           </div>
@@ -147,6 +153,8 @@ const OverviewSection = () => {
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#F96500]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
               <img 
                 src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop" 
+                loading="lazy"
+                onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE; }}
                 className="w-full h-48 object-contain mb-8 group-hover:scale-110 transition-transform duration-700" 
                 alt="" 
               />
@@ -507,6 +515,10 @@ const SettingsSection = () => {
 export function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const navigate = useNavigate();
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = PLACEHOLDER_IMAGE;
+  };
   
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },

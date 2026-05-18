@@ -18,7 +18,7 @@ export function Footer() {
                   <div className="w-1.5 h-1.5 bg-orange-primary rounded-full" />
                 </div>
               </div>
-              <span className="text-xl font-black tracking-tight lowercase font-sans text-white">choosify</span>
+              <span className="text-xl font-black tracking-tight lowercase font-sans text-white">choosify.bd</span>
             </div>
           </div>
           <p className="text-gray-400 text-sm font-medium leading-relaxed mb-10 max-w-xs">
@@ -67,7 +67,7 @@ export function Footer() {
 
       <div className="max-w-7xl mx-auto pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-           <span className="text-[10px] font-black text-orange-primary uppercase tracking-widest">© 2026 Choosify</span>
+           <span className="text-[10px] font-black text-orange-primary uppercase tracking-widest">© 2026 Choosify.bd</span>
            <span className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">| Project development</span>
         </div>
         <div className="text-[10px] font-black text-white/20 uppercase tracking-widest italic group cursor-pointer hover:text-orange-primary transition-colors">

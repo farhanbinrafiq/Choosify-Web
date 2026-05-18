@@ -1,8 +1,9 @@
 import React from 'react';
-import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers } from 'lucide-react';
+import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers, ImageOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useDashboard } from '../context/DashboardContext';
+import { PLACEHOLDER_IMAGE } from '../constants';
 import toast from 'react-hot-toast';
 
 export function ProductCard({ 
@@ -20,6 +21,10 @@ export function ProductCard({
   
   const isSaved = savedProducts.some(p => p.id === product.id);
   const isInCompare = comparedProducts.some(p => p.id === product.id);
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = PLACEHOLDER_IMAGE;
+  };
 
   const toggleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -85,6 +90,8 @@ export function ProductCard({
             
             <img 
               src={product.image} 
+              loading="lazy"
+              onError={handleImageError}
               className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-1000 relative z-10" 
               alt={product.title} 
             />
@@ -156,7 +163,13 @@ export function ProductCard({
                   <Layers size={12} />
                </button>
             </div>
-           <img src={product.image} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" alt={product.title} />
+           <img 
+             src={product.image} 
+             loading="lazy"
+             onError={handleImageError}
+             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+             alt={product.title} 
+           />
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
@@ -189,7 +202,13 @@ export function ProductCard({
     return (
       <div className="bg-white rounded-[15px] shadow-sm flex gap-6 p-5 hover:shadow-2xl transition-all group border border-gray-100 cursor-pointer" onClick={() => navigate(`/products/${product.id}`)}>
         <div className="w-40 h-40 flex-shrink-0 bg-gray-50 rounded-[12px] relative overflow-hidden flex items-center justify-center p-4">
-          <img src={product.image} alt={product.title} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+          <img 
+            src={product.image} 
+            alt={product.title} 
+            loading="lazy"
+            onError={handleImageError}
+            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+          />
           <div className="absolute top-2 left-2 z-10 flex flex-col gap-1.5">
             <button 
               onClick={toggleSave}
@@ -256,6 +275,8 @@ export function ProductCard({
         <img 
           src={product.image} 
           alt={product.title} 
+          loading="lazy"
+          onError={handleImageError}
           className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" 
         />
         <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { Star, ArrowRight, Search, CheckCircle, Smartphone, Tag, ShoppingBag, Globe, Users, Trophy, ExternalLink, Bookmark, ShieldCheck, Zap, Award, ChevronRight, ChevronLeft, Laptop, Heart, Bike, Car, Camera, Watch, Home, Gift, Shirt, Glasses, Utensils, Baby, GraduationCap, Youtube, Play, Package, Gamepad2, Tv } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { PRODUCTS, BLOGS, BRANDS } from '../constants';
+import { PRODUCTS, BLOGS, BRANDS, PLACEHOLDER_IMAGE } from '../constants';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
@@ -26,6 +26,19 @@ export function HomePage() {
     return () => clearInterval(timer);
   }, []);
 
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = PLACEHOLDER_IMAGE;
+  };
+
   const trendingBrands = [
     { name: "Apex", category: "Footwear & Lifestyle", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=600&fit=crop", id: 3 },
     { name: "La Reve", category: "Clothing & Lifestyle", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=600&fit=crop", id: 7 },
@@ -36,24 +49,24 @@ export function HomePage() {
   const navigate = useNavigate();
 
   const categories = [
-    { name: "Footwear & Shoes", count: "125 Brands", icon: <ShoppingBag className="text-blue-500" />, color: "from-blue-500/10 to-indigo-600/10" },
-    { name: "Tools & Equipment", count: "89 Brands", icon: <Zap className="text-orange-500" />, color: "from-orange-500/10 to-amber-600/10" },
-    { name: "Books & Station", count: "210 Brands", icon: <Globe className="text-purple-500" />, color: "from-purple-500/10 to-violet-600/10" },
-    { name: "Food & Grocery", count: "340 Brands", icon: <Tag className="text-red-500" />, color: "from-red-500/10 to-rose-600/10" },
-    { name: "Smart Home Devices", count: "56 Brands", icon: <Home className="text-green-500" />, color: "from-green-500/10 to-emerald-600/10" },
-    { name: "Children & Toys", count: "112 Brands", icon: <Gift className="text-pink-500" />, color: "from-pink-500/10 to-rose-600/10" },
-    { name: "Travel & Backpack", count: "45 Brands", icon: <Bike className="text-indigo-500" />, color: "from-indigo-500/10 to-blue-600/10" },
-    { name: "Social Entertainment", count: "78 Brands", icon: <Award className="text-yellow-500" />, color: "from-yellow-500/10 to-orange-600/10" },
-    { name: "Beauty & Personal", count: "156 Brands", icon: <Heart className="text-rose-500" />, color: "from-rose-500/10 to-pink-600/10" },
-    { name: "Medical & Health", count: "92 Brands", icon: <ShieldCheck className="text-cyan-500" />, color: "from-cyan-500/10 to-teal-600/10" },
-    { name: "App & Appliances", count: "67 Brands", icon: <Smartphone className="text-slate-500" />, color: "from-slate-500/10 to-gray-600/10" },
-    { name: "Watch & Jewelry", count: "43 Brands", icon: <Watch className="text-amber-500" />, color: "from-amber-500/10 to-yellow-600/10" },
+    { name: "Footwear & Shoes", count: "125 Brands", icon: <ShoppingBag className="text-blue-500" />, color: "from-blue-500/10 to-indigo-600/10", id: 'fashion' },
+    { name: "Tools & Equipment", count: "89 Brands", icon: <Zap className="text-orange-500" />, color: "from-orange-500/10 to-amber-600/10", id: 'tech' },
+    { name: "Books & Station", count: "210 Brands", icon: <Globe className="text-purple-500" />, color: "from-purple-500/10 to-violet-600/10", id: 'home' },
+    { name: "Food & Grocery", count: "340 Brands", icon: <Tag className="text-red-500" />, color: "from-red-500/10 to-rose-600/10", id: 'food' },
+    { name: "Smart Home Devices", count: "56 Brands", icon: <Home className="text-green-500" />, color: "from-green-500/10 to-emerald-600/10", id: 'tech' },
+    { name: "Children & Toys", count: "112 Brands", icon: <Gift className="text-pink-500" />, color: "from-pink-500/10 to-rose-600/10", id: 'baby' },
+    { name: "Travel & Backpack", count: "45 Brands", icon: <Bike className="text-indigo-500" />, color: "from-indigo-500/10 to-blue-600/10", id: 'fashion' },
+    { name: "Social Entertainment", count: "78 Brands", icon: <Award className="text-yellow-500" />, color: "from-yellow-500/10 to-orange-600/10", id: 'gaming' },
+    { name: "Beauty & Personal", count: "156 Brands", icon: <Heart className="text-rose-500" />, color: "from-rose-500/10 to-pink-600/10", id: 'jewelry' },
+    { name: "Medical & Health", count: "92 Brands", icon: <ShieldCheck className="text-cyan-500" />, color: "from-cyan-500/10 to-teal-600/10", id: 'tech' },
+    { name: "App & Appliances", count: "67 Brands", icon: <Smartphone className="text-slate-500" />, color: "from-slate-500/10 to-gray-600/10", id: 'mobile' },
+    { name: "Watch & Jewelry", count: "43 Brands", icon: <Watch className="text-amber-500" />, color: "from-amber-500/10 to-yellow-600/10", id: 'jewelry' },
   ];
 
   return (
     <div className="flex flex-col bg-white">
       {/* Hero Section */}
-      <section className="relative w-full min-h-[80vh] flex flex-col justify-center pt-24 pb-32 overflow-hidden bg-[#0A0A1F]">
+      <section className="relative w-full min-h-[85vh] flex flex-col justify-center pt-24 pb-32 overflow-hidden bg-[#0A0A1F]">
         {/* Background Gradients matching other directory pages */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/10 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 opacity-50" />
@@ -65,50 +78,59 @@ export function HomePage() {
             className="mb-10"
           >
             <div className="bg-orange-primary text-white text-[10px] md:text-[11px] font-black px-8 py-2.5 rounded-full uppercase tracking-[0.25em] italic shadow-2xl shadow-orange-primary/30 inline-block">
-              Bangladesh's 1st ever Brand Discovery Platform
+              Bangladesh's #1 Brand Discovery Platform
             </div>
           </motion.div>
  
           <motion.h1 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-5xl md:text-[72px] font-black text-white mb-6 tracking-tighter leading-[0.95] max-w-5xl uppercase italic"
+            className="text-6xl md:text-[88px] font-black text-white mb-6 tracking-tighter leading-[0.9] max-w-6xl uppercase italic"
           >
-            Choose, verify & buy <span className="text-orange-primary">ORIGINAL</span>
+            DISCOVER THE <span className="text-orange-primary">BEST</span> IN BANGLADESH
           </motion.h1>
           
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-white/70 text-sm md:text-base max-w-2xl mb-12 font-bold uppercase tracking-[0.2em] italic opacity-80 leading-relaxed"
+            className="text-white/70 text-sm md:text-lg max-w-2xl mb-16 font-bold uppercase tracking-[0.2em] italic opacity-80 leading-relaxed"
           >
-            Cannot Trust A Brand? Choosify Protecting Your Online Shopping Experience With Verified Brands.
+            Verifying 500+ Local & Global Brands To Protect Your Shopping Experience.
           </motion.p>
           
           {/* Main Search Bar */}
-          <motion.div 
+          <motion.form 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="w-full max-w-3xl bg-white rounded-full p-2 flex items-center shadow-[0_40px_100px_rgba(0,0,0,0.4)] mb-8 transition-all hover:scale-[1.02] relative z-20"
+            onSubmit={handleSearch}
+            className="w-full max-w-4xl bg-white rounded-full p-2 flex items-center shadow-[0_40px_100px_rgba(0,0,0,0.5)] mb-12 transition-all hover:scale-[1.01] relative z-20 group"
           >
-            <input 
-              type="text" 
-              placeholder="Search Fashion, Gadgets & Lifestyle Brands."
-              className="flex-1 h-16 bg-transparent text-[#0A0A1F] font-bold px-8 focus:outline-none placeholder:text-gray-400 text-base italic"
-            />
-            <button className="h-16 px-10 orange-brand-gradient text-white font-black rounded-full shadow-xl hover:brightness-110 transition-all text-[12px] uppercase tracking-widest flex items-center gap-3 italic">
-              Search <Search size={18} />
+            <div className="flex-1 flex items-center px-6">
+              <Search className="text-gray-300 group-focus-within:text-orange-primary transition-colors" size={24} />
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search brands like Samsung, Apex, or La Reve..."
+                className="w-full h-16 bg-transparent text-[#0A0A1F] font-bold px-4 focus:outline-none placeholder:text-gray-400 text-lg italic"
+              />
+            </div>
+            <button 
+              type="submit"
+              className="h-16 px-12 orange-brand-gradient text-white font-black rounded-full shadow-xl hover:brightness-110 transition-all text-sm uppercase tracking-widest flex items-center gap-3 italic"
+            >
+              Search
             </button>
-          </motion.div>
+          </motion.form>
  
           {/* Category Pills */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="flex flex-wrap justify-center gap-3 max-w-4xl relative z-10 mb-20"
+            className="flex flex-wrap justify-center gap-3 max-w-5xl relative z-10 pt-4"
           >
             {[
               { label: "Fashion & Lifestyle", icon: <Shirt size={14} /> },
@@ -189,6 +211,8 @@ export function HomePage() {
                   <motion.img 
                     layout
                     src={brand.img} 
+                    loading="lazy"
+                    onError={handleImageError}
                     className={cn("w-full h-full object-cover transition-transform duration-700", isActive ? "scale-105" : "scale-100")} 
                     alt={brand.name} 
                   />
@@ -293,7 +317,10 @@ export function HomePage() {
              <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-primary/5 rounded-full translate-y-1/2 -translate-x-1/2" />
              
              <h3 className="text-[28px] font-black text-[#FF5B00] mb-10 uppercase tracking-[0.2em] italic relative z-10">Boost Your Sales, Submit Your Offer</h3>
-             <button className="px-16 py-5 bg-[#FF5B00] text-white font-black rounded-[10px] flex items-center gap-4 mx-auto shadow-2xl shadow-[#FF5B00]/40 hover:scale-105 active:scale-95 transition-all text-[14px] uppercase tracking-widest relative z-10 italic">
+             <button 
+               onClick={() => navigate('/post-offer')}
+               className="px-16 py-5 bg-[#FF5B00] text-white font-black rounded-[10px] flex items-center gap-4 mx-auto shadow-2xl shadow-[#FF5B00]/40 hover:scale-105 active:scale-95 transition-all text-[14px] uppercase tracking-widest relative z-10 italic"
+             >
                 Post Offer <ExternalLink size={20} />
              </button>
              <p className="mt-10 text-[12px] font-bold text-gray-400 uppercase tracking-[0.3em] relative z-10">100,000+ Shoppers Log In Every Day</p>
@@ -352,11 +379,12 @@ export function HomePage() {
 
             {/* Secondary Guides (3 Small Cards Underneath) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-               {/* Small Guide Card 1 */}
                <Link to="/guides/1" className="group block">
                   <div className="relative aspect-[16/10] rounded-[10px] overflow-hidden mb-10 border border-gray-100 shadow-xl bg-gray-50">
                      <img 
                        src="https://images.unsplash.com/photo-1512428559083-a40516a3ee85?w=800&h=500&fit=crop" 
+                       loading="lazy"
+                       onError={handleImageError}
                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" 
                        alt="Guide" 
                      />
@@ -381,6 +409,8 @@ export function HomePage() {
                   <div className="relative aspect-[16/10] rounded-[10px] overflow-hidden mb-10 border border-gray-100 shadow-xl bg-gray-50">
                      <img 
                        src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=500&fit=crop" 
+                       loading="lazy"
+                       onError={handleImageError}
                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" 
                        alt="Guide" 
                      />
@@ -405,6 +435,8 @@ export function HomePage() {
                   <div className="relative aspect-[16/10] rounded-[10px] overflow-hidden mb-10 border border-gray-100 shadow-xl bg-gray-50">
                      <img 
                        src="https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=800&h=500&fit=crop" 
+                       loading="lazy"
+                       onError={handleImageError}
                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" 
                        alt="Guide" 
                      />
@@ -488,7 +520,7 @@ export function HomePage() {
                     <div className={cn(
                       "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm group-hover:scale-110 group-hover:shadow-xl bg-white border border-gray-50",
                     )}>
-                       {React.cloneElement(cat.icon as React.ReactElement, { size: 24, className: (cat.icon as React.ReactElement).props.className })}
+                       {React.cloneElement(cat.icon as React.ReactElement<any>, { size: 24, className: (cat.icon as any).props.className })}
                     </div>
                     <div className="flex flex-col">
                        <h4 className="text-base font-black text-navy mb-1 group-hover:text-orange-primary transition-colors italic">{cat.name}</h4>

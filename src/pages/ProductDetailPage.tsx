@@ -7,7 +7,7 @@ import {
   Search, ShieldCheck, ChevronDown, Package, TrendingUp,
   Award, Globe, Save, ThumbsUp, ThumbsDown
 } from 'lucide-react';
-import { PRODUCTS, BRANDS } from '../constants';
+import { PRODUCTS, BRANDS, PLACEHOLDER_IMAGE } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 
@@ -29,6 +29,10 @@ export function ProductDetailPage() {
     "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&h=800&fit=crop",
     "https://images.unsplash.com/photo-1445205170230-053b830c6050?w=1200&h=800&fit=crop",
   ];
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = PLACEHOLDER_IMAGE;
+  };
 
   const productSpecs = [
     { label: "Material", value: "Premium Linen" },
@@ -290,7 +294,7 @@ export function ProductDetailPage() {
                         ].map((item, i) => (
                            <div key={i} className="flex items-start gap-4 group">
                               <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center group-hover:bg-navy transition-all duration-300">
-                                 {React.cloneElement(item.icon as React.ReactElement, { size: 22, className: "group-hover:text-white" })}
+                                 {React.cloneElement(item.icon as React.ReactElement<any>, { size: 22, className: "group-hover:text-white" })}
                               </div>
                               <div className="flex flex-col">
                                  <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest mb-1">{item.label}</span>
@@ -397,7 +401,12 @@ export function ProductDetailPage() {
                      </p>
                      <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full border-2 border-orange-primary p-1">
-                           <img src="https://i.pravatar.cc/100?img=32" className="w-full h-full rounded-full object-cover" alt="expert" />
+                           <img 
+                             src="https://i.pravatar.cc/100?img=32" 
+                             onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=Expert&background=random`; }}
+                             className="w-full h-full rounded-full object-cover" 
+                             alt="expert" 
+                           />
                         </div>
                         <div className="flex flex-col">
                            <span className="text-white font-black text-xs italic">Auntie Mirpur</span>

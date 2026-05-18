@@ -1,3 +1,5 @@
+export const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1560393464-5c69a73c5770?w=800&h=800&fit=crop';
+
 export const CATEGORIES = [
   { id: 'fashion', name: 'Fashion & Lifestyle', icon: 'Shirt' },
   { id: 'jewelry', name: 'Jewelry & Accessories', icon: 'Gem' },
@@ -20,7 +22,7 @@ export const PRODUCTS = [
     originalPrice: '155,000',
     rating: 4.8,
     reviews: 128,
-    image: 'https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=400&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
     tag: 'NEW',
     stores: [
       { name: 'Daraz', price: '145,000', delivery: '2-3 Days', rating: 4.5, link: 'https://daraz.com.bd' },
@@ -42,7 +44,7 @@ export const PRODUCTS = [
     originalPrice: '42,000',
     rating: 4.9,
     reviews: 86,
-    image: 'https://images.unsplash.com/photo-1618366712214-8c075189d0ad?w=400&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
     tag: 'HOT',
     stores: [
       { name: 'Pickaboo', price: '38,500', delivery: '1-2 Days', rating: 4.8, link: '#' },
@@ -57,7 +59,7 @@ export const PRODUCTS = [
     price: '128,000',
     rating: 4.7,
     reviews: 54,
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1496181133227-f83bb023945d?w=400&h=400&fit=crop',
     tag: 'NEW',
     stores: ['Daraz', 'Ryan PC'],
     category: 'Tech & Electronics'
@@ -107,7 +109,7 @@ export const PRODUCTS = [
     price: '34,500',
     rating: 4.4,
     reviews: 45,
-    image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1563897539633-7374c276c212?w=400&h=400&fit=crop',
     tag: 'BUDGET',
     stores: ['Pickaboo', 'Daraz'],
     category: 'Mobile & Phones'
@@ -119,7 +121,7 @@ export const PRODUCTS = [
     price: '31,999',
     rating: 4.6,
     reviews: 156,
-    image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=400&h=400&fit=crop',
     tag: 'VALUE',
     stores: ['Xiaomi Store', 'Daraz'],
     category: 'Mobile & Phones'
@@ -131,7 +133,7 @@ export const PRODUCTS = [
     price: '35,000',
     rating: 4.7,
     reviews: 89,
-    image: 'https://images.unsplash.com/photo-1511743314034-ac240a5d1a5a?w=400&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=400&h=400&fit=crop',
     tag: 'GAMING',
     stores: ['Daraz', 'Pickaboo'],
     category: 'Mobile & Phones'
@@ -170,7 +172,7 @@ export const BLOGS = [
     title: 'Top 10 Smartphones to Buy in 2026',
     author: 'Farhan Rafiq',
     date: 'May 12, 2026',
-    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=800&fit=crop',
+    image: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=1200&h=800&fit=crop',
     excerpt: 'Looking for a new phone? We\'ve compiled the best options available in the market right now, from titanium flagships to budget-friendly powerhouses.',
     type: 'article',
     readTime: '15 MIN READ',
