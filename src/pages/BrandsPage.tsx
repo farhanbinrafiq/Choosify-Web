@@ -114,7 +114,7 @@ export function BrandsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
       {/* Hero Section */}
-      <div className="w-full bg-[#0A0A1F] py-16 px-8 relative overflow-hidden">
+      <div className="w-full bg-[#0A0A1F] py-16 px-4 md:px-8 relative overflow-hidden">
         {/* Background Gradients */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -173,7 +173,7 @@ export function BrandsPage() {
 
       {/* Sticky Alphabet Filter Bar */}
       <div className="sticky top-[64px] z-30 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm py-4">
-        <div className="max-w-7xl mx-auto px-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between gap-6 overflow-x-auto no-scrollbar">
             <div className="flex items-center gap-1">
               <button 
@@ -218,7 +218,7 @@ export function BrandsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 w-full pt-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full pt-8">
         {/* Choosify Recommends Section */}
         <div className="mb-12">
           <div className="flex items-center gap-4 mb-8 overflow-hidden">
@@ -296,7 +296,7 @@ export function BrandsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 w-full pb-16 flex gap-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full pb-16 flex flex-col lg:flex-row gap-8">
         {/* Sidebar Filters */}
         <aside className="w-64 flex-shrink-0 hidden lg:flex flex-col gap-8">
           {/* Filter By Brand */}

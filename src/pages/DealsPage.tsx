@@ -121,10 +121,10 @@ export function DealsPage() {
 
         {/* Deals Marketplace Showcase Grid */}
         <section className="py-12 px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-12 border-l-4 border-orange-primary px-6 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="max-w-max mx-auto">
+            <div className="mb-12 border-l-4 border-orange-primary px-6 flex flex-col md:flex-row md:items-end justify-between gap-6 max-w-[1280px] mx-auto">
                <div>
-                  <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-2">Marketplace <span className="text-orange-primary">Deals</span></h2>
+                  <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-2">FEATURED <span className="text-orange-primary">DEALS</span></h2>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic">Handpicked Top Offers • Limited Time Selection</p>
                </div>
                <div className="flex items-center gap-3 bg-[#F8FAFC] px-6 py-3 rounded-2xl border border-gray-100 shadow-sm">
@@ -133,48 +133,37 @@ export function DealsPage() {
                </div>
             </div>
  
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 grid-flow-row-dense">
-              {PRODUCTS.map((product, index) => {
-                const isFeatured = index === 0;
-                return (
-                  <div 
-                    key={product.id}
-                    className={cn(
-                      "flex flex-col h-full",
-                      isFeatured && "md:col-span-2 lg:col-span-2 lg:row-span-2"
-                    )}
-                  >
-                    <ProductCard 
-                      product={{
-                        ...product,
-                        tag: index % 3 === 0 ? "HOT" : index % 3 === 1 ? "SALE" : "NEW",
-                        tagColor: index % 3 === 0 ? "bg-[#E93B3B]" : index % 3 === 1 ? "bg-[#E98B8B]" : "bg-[#7CD93B]",
-                        originalPrice: index % 2 === 0 ? "3,500" : undefined
-                      }} 
-                      variant={isFeatured ? 'featured' : 'compact'}
-                      showCountdown={index < 4}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Pagination / Load More Placeholder */}
-            <div className="mt-16 flex flex-col items-center gap-6">
-               <div className="flex gap-2">
-                  {[1, 2, 3, '...', 12].map((p, i) => (
-                    <button 
-                      key={i} 
-                      className={cn(
-                        "w-12 h-12 rounded-xl flex items-center justify-center font-black text-[11px] uppercase italic transition-all",
-                        p === 1 ? "bg-navy text-white shadow-xl" : "bg-white text-navy border border-gray-100 hover:bg-gray-50"
-                      )}
-                    >
-                      {p}
-                    </button>
+            <div className="flex flex-col gap-10 items-center">
+               {/* Banner Card */}
+               <div className="w-full lg:w-[1280px] lg:h-[395px] flex-shrink-0">
+                  <ProductCard 
+                    product={{
+                      ...PRODUCTS[0],
+                      tag: "HOT",
+                      tagColor: "bg-[#E93B3B]",
+                      originalPrice: "3,500"
+                    }} 
+                    variant="featured"
+                    showCountdown={true}
+                  />
+               </div>
+               
+               {/* Small Cards Row */}
+               <div className="flex flex-col md:flex-row gap-6 lg:gap-0 lg:w-[1280px] lg:justify-between items-center w-full">
+                  {PRODUCTS.slice(1, 5).map((product, index) => (
+                     <div key={product.id} className="w-full max-w-[300px] lg:w-[300px] lg:h-[572px] flex-shrink-0">
+                       <ProductCard 
+                         product={{
+                           ...product,
+                           tag: "SALE",
+                           tagColor: "bg-[#E98B8B]",
+                         }} 
+                         variant="compact"
+                         showCountdown={index < 3}
+                       />
+                     </div>
                   ))}
                </div>
-               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] italic">Showing 12 of {PRODUCTS.length} deals available today</p>
             </div>
           </div>
         </section>
@@ -203,6 +192,49 @@ export function DealsPage() {
           </div>
         </section>
 
+
+        {/* ALL DEALS Section */}
+        <section id="all-deals" className="py-20 bg-[#F3F9FF]/20 px-8 border-t border-gray-100">
+          <div className="max-w-max mx-auto">
+            <div className="mb-12 border-l-4 border-orange-primary px-6 max-w-[1280px] mx-auto">
+               <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-2">ALL <span className="text-orange-primary">DEALS</span></h2>
+               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic px-2 border-l-4 border-orange-primary">Browse All Handpicked Offers</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-10 lg:gap-x-[26px] lg:w-[1280px] mx-auto place-items-center">
+              {[...PRODUCTS, ...PRODUCTS.slice(0, 2)].slice(0, 12).map((product, idx) => (
+                <div key={`${product.id}-${idx}`} className="w-full max-w-[300px] lg:w-[300px] lg:h-[572px] flex-shrink-0">
+                  <ProductCard 
+                    product={{
+                      ...product,
+                      tag: idx % 3 === 0 ? "HOT" : idx % 3 === 1 ? "SALE" : "NEW",
+                      tagColor: idx % 3 === 0 ? "bg-[#E93B3B]" : idx % 3 === 1 ? "bg-[#E98B8B]" : "bg-[#7CD93B]",
+                    }} 
+                    variant="compact"
+                    showCountdown={idx < 4}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-16 flex flex-col items-center gap-6">
+               <div className="flex gap-2">
+                  {[1, 2, 3, '...', 12].map((p, i) => (
+                    <button 
+                      key={i} 
+                      className={cn(
+                        "w-12 h-12 rounded-xl flex items-center justify-center font-black text-[11px] uppercase italic transition-all",
+                        p === 1 ? "bg-navy text-white shadow-xl" : "bg-white text-navy border border-gray-100 hover:bg-gray-50"
+                      )}
+                    >
+                      {p}
+                    </button>
+                  ))}
+               </div>
+               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] italic">Showing 12 of {PRODUCTS.length} deals available today</p>
+            </div>
+          </div>
+        </section>
 
         {/* Featured Brand Deals Section */}
         <section className="py-20 bg-white px-8 relative overflow-hidden border-t border-gray-100">
@@ -246,7 +278,10 @@ export function DealsPage() {
              </div>
              
              <div className="mt-12 flex justify-center">
-                <button className="px-16 py-6 bg-navy text-white text-[13px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-orange-primary hover:scale-105 active:scale-95 transition-all shadow-2xl italic">
+                <button 
+                  onClick={() => navigate('/brand-deals')}
+                  className="px-16 py-6 bg-navy text-white text-[13px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-orange-primary hover:scale-105 active:scale-95 transition-all shadow-2xl italic"
+                >
                    View All Brand Deals
                 </button>
              </div>

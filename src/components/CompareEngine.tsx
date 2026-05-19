@@ -185,35 +185,37 @@ export function CompareEngine() {
          <div className="bg-white rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden">
             
             {/* Table Header Row (Products Meta) */}
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_2.5fr] gap-px bg-gray-100">
-               <div className="bg-[#FAF9F5]/80 p-10 flex flex-col justify-center">
-                  <h3 className="text-2xl font-black text-navy italic uppercase mb-2">Category Breakdown</h3>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest italic">In-depth feature analysis for 2026 standards</p>
-               </div>
-               <div className="bg-white grid grid-cols-3 divide-x divide-gray-100">
-                  {selectedProducts.map((p, idx) => (
-                     <div key={idx} className="p-8 flex flex-col items-center text-center">
-                        <div className="w-12 h-12 mb-4">
-                           <img src={p.image} className="w-full h-full object-contain" alt={p.name} />
-                        </div>
-                        <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest italic mb-1">Model</span>
-                        <h4 className="text-xs font-black text-navy italic uppercase leading-none mb-4">{p.name}</h4>
-                        <div className="flex items-center gap-1.5 mb-6">
-                           <div className="flex items-center gap-0.5">
-                              {[1, 2, 3, 4, 5].map(s => (
-                                 <Star key={s} size={10} className={s <= Math.floor(p.rating) ? "text-[#FFD700] fill-current" : "text-gray-200"} />
-                              ))}
+            <div className="overflow-x-auto no-scrollbar">
+               <div className="min-w-[800px] grid grid-cols-[1.5fr_2.5fr] gap-px bg-gray-100">
+                  <div className="bg-[#FAF9F5]/80 p-8 md:p-10 flex flex-col justify-center">
+                     <h3 className="text-xl md:text-2xl font-black text-navy italic uppercase mb-2">Category Breakdown</h3>
+                     <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest italic">In-depth feature analysis</p>
+                  </div>
+                  <div className="bg-white grid grid-cols-3 divide-x divide-gray-100">
+                     {selectedProducts.map((p, idx) => (
+                        <div key={idx} className="p-6 md:p-8 flex flex-col items-center text-center">
+                           <div className="w-10 h-10 md:w-12 md:h-12 mb-4">
+                              <img src={p.image} className="w-full h-full object-contain" alt={p.name} />
                            </div>
-                           <span className="text-[10px] font-black text-navy italic">{p.rating}</span>
+                           <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest italic mb-1">Model</span>
+                           <h4 className="text-xs font-black text-navy italic uppercase leading-none mb-4">{p.name}</h4>
+                           <div className="flex items-center gap-1.5 mb-6">
+                              <div className="flex items-center gap-0.5">
+                                 {[1, 2, 3, 4, 5].map(s => (
+                                    <Star key={s} size={10} className={s <= Math.floor(p.rating) ? "text-[#FFD700] fill-current" : "text-gray-200"} />
+                                 ))}
+                              </div>
+                              <span className="text-[10px] font-black text-navy italic">{p.rating}</span>
+                           </div>
+                           <button className={cn(
+                              "w-full py-2 md:py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest italic transition-all active:scale-95",
+                              p.isWinner ? "bg-[#059669] text-white shadow-lg shadow-[#059669]/20" : "bg-[#FF5C38] text-white shadow-lg shadow-[#FF5C38]/20"
+                           )}>
+                              Shop Now <ArrowRight size={12} className="inline ml-1" />
+                           </button>
                         </div>
-                        <button className={cn(
-                           "w-full py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest italic transition-all active:scale-95",
-                           p.isWinner ? "bg-[#059669] text-white shadow-lg shadow-[#059669]/20" : "bg-[#FF5C38] text-white shadow-lg shadow-[#FF5C38]/20"
-                        )}>
-                           Shop Now <ArrowRight size={12} className="inline ml-1" />
-                        </button>
-                     </div>
-                  ))}
+                     ))}
+                  </div>
                </div>
             </div>
 
@@ -245,11 +247,11 @@ export function CompareEngine() {
                              exit={{ height: 0, opacity: 0 }}
                              className="overflow-hidden bg-[#FAF9F5]/30"
                            >
-                              <div className="divide-y divide-gray-100">
+                              <div className="divide-y divide-gray-100 overflow-x-auto no-scrollbar">
                                  {section.metrics.map((metric, midx) => (
-                                    <div key={midx} className="grid grid-cols-1 md:grid-cols-[1fr_2.5fr] gap-px bg-gray-100">
-                                       <div className="bg-white p-10 flex flex-col justify-center">
-                                          <h5 className="text-[11px] font-black text-navy uppercase italic tracking-tighter">{metric.label}</h5>
+                                    <div key={midx} className="min-w-[800px] grid grid-cols-[1.5fr_2.5fr] gap-px bg-gray-100">
+                                       <div className="bg-white p-8 flex flex-col justify-center">
+                                          <h5 className="text-xs font-black text-navy uppercase italic tracking-tighter">{metric.label}</h5>
                                           {metric.subLabel && <p className="text-[9px] font-bold text-gray-400 italic mt-1">{metric.subLabel}</p>}
                                        </div>
                                        <div className="bg-white grid grid-cols-3 divide-x divide-gray-100">
@@ -332,20 +334,20 @@ export function CompareEngine() {
             </div>
 
             {/* Final Discovery Verdict (Based on Image bottom) */}
-            <div className="bg-[#0A0A1F] p-12 text-center md:text-left flex flex-col md:flex-row items-center gap-12 border-t border-white/5">
-                <div className="w-20 h-20 rounded-full bg-orange-primary/10 flex items-center justify-center text-orange-primary shrink-0 border border-orange-primary/20">
-                   <Trophy size={40} />
+            <div className="bg-[#0A0A1F] p-8 md:p-12 text-center md:text-left flex flex-col md:flex-row items-center gap-8 md:gap-12 border-t border-white/5">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-orange-primary/10 flex items-center justify-center text-orange-primary shrink-0 border border-orange-primary/20">
+                   <Trophy size={32} className="md:w-[40px] md:h-[40px]" />
                 </div>
                 <div className="flex-1">
-                   <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter leading-none mb-4">Discovery Verdict</h3>
-                   <p className="text-white/40 text-[13px] font-bold italic leading-relaxed max-w-2xl">
-                      For performance and long-term value, <span className="text-white">Sailor Ultra Cotton Pro</span> offers premium quality at a competitive rating, especially for durability and overall experience. However, if budget is your main priority, <span className="text-white">Infinity Modern Casual</span> remains the unbeatable choice for general use.
+                   <h3 className="text-xl md:text-2xl font-black text-white italic uppercase tracking-tighter leading-none mb-4">Discovery Verdict</h3>
+                   <p className="text-white/40 text-xs md:text-[13px] font-bold italic leading-relaxed max-w-2xl">
+                      For performance and long-term value, <span className="text-white">Sailor Ultra Cotton Pro</span> offers premium quality at a competitive rating.
                    </p>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col items-center">
+                <div className="w-full md:w-auto bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col items-center">
                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-2">Final Recommendation</span>
-                   <span className="text-3xl font-black text-[#FF7A00] italic leading-none mb-6">SAILOR PRO</span>
-                   <button className="bg-[#059669] text-white px-10 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest italic shadow-2xl shadow-[#059669]/30 hover:scale-105 active:scale-95 transition-all">
+                   <span className="text-2xl md:text-3xl font-black text-[#FF7A00] italic leading-none mb-6">SAILOR PRO</span>
+                   <button className="w-full md:w-auto bg-[#059669] text-white px-10 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest italic shadow-2xl shadow-[#059669]/30 hover:scale-105 active:scale-95 transition-all">
                       View Model Details
                    </button>
                 </div>

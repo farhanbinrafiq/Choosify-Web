@@ -14,6 +14,14 @@ import { cn } from '../lib/utils';
 export function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const product = PRODUCTS.find(p => p.id === Number(id)) || PRODUCTS[0];
   const brandObj = BRANDS.find(b => b.name === product.brand);
   const brandId = brandObj ? brandObj.id : 1;
@@ -66,7 +74,7 @@ export function ProductDetailPage() {
       {/* Hero Section */}
       <section className="bg-[#050514] pt-6 pb-24 overflow-hidden relative border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-center gap-3 md:gap-5 h-[400px] md:h-[580px] mb-12">
+          <div className="flex items-center justify-center gap-3 md:gap-5 h-[320px] md:h-[580px] mb-12">
             {heroImages.map((img, i) => {
               const isActive = i === carouselIndex;
               
@@ -76,7 +84,7 @@ export function ProductDetailPage() {
                   onClick={() => setCarouselIndex(i)}
                   initial={false}
                   animate={{
-                    width: isActive ? (window.innerWidth < 768 ? '100%' : '60%') : (window.innerWidth < 768 ? '0%' : '12%'),
+                    width: isActive ? (isMobile ? '100%' : '60%') : (isMobile ? '0%' : '12%'),
                     flex: isActive ? 10 : 1,
                     opacity: isActive ? 1 : 0.6,
                   }}
@@ -130,19 +138,19 @@ export function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col lg:flex-row items-end justify-between">
-             <div className="flex flex-col items-start gap-4">
+          <div className="mt-8 flex flex-col items-center lg:items-end lg:flex-row justify-between gap-8 lg:gap-0">
+             <div className="flex flex-col items-center lg:items-start gap-4 text-center lg:text-left">
                 <div className="flex items-center gap-3">
                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] italic mb-1">BRAND / {product.category?.toUpperCase()}</span>
                    <div className="h-px w-12 bg-white/20" />
                 </div>
-                <h1 className="text-5xl md:text-6xl font-black text-white italic tracking-tighter leading-none">{product.brand} {product.title}</h1>
+                <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter leading-tight lg:leading-none">{product.brand} {product.title}</h1>
                 
                 {/* Pricing Section Refined */}
-                <div className="flex items-center gap-8 mt-6">
-                   <div className="flex flex-col">
+                <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 mt-6">
+                   <div className="flex flex-col items-center sm:items-start">
                       <div className="flex items-center gap-4 mb-2">
-                        <span className="text-4xl font-black text-orange-primary italic tracking-tighter leading-none">৳ {product.price}</span>
+                        <span className="text-3xl md:text-4xl font-black text-orange-primary italic tracking-tighter leading-none">৳ {product.price}</span>
                         {product.originalPrice && (
                           <span className="text-xl font-bold text-white/30 line-through italic">৳{product.originalPrice}</span>
                         )}
@@ -163,15 +171,15 @@ export function ProductDetailPage() {
                    )}
                 </div>
 
-                <div className="flex gap-4 mt-8">
-                  <Link to={`/brands/${brandId}`} className="bg-orange-primary text-white text-[12px] font-black uppercase px-12 py-5 rounded-full tracking-[0.2em] shadow-2xl shadow-orange-primary/30 hover:scale-105 active:scale-95 transition-all italic border border-white/10">
-                    Visit Official Store
+                <div className="flex flex-wrap justify-center lg:justify-start gap-4 mt-8">
+                  <Link to={`/brands/${brandId}`} className="bg-orange-primary text-white text-[11px] md:text-[12px] font-black uppercase px-8 md:px-12 py-4 md:py-5 rounded-full tracking-[0.2em] shadow-2xl shadow-orange-primary/30 hover:scale-105 active:scale-95 transition-all italic border border-white/10">
+                    Visit Store
                   </Link>
-                  <button className="bg-white/10 text-white text-[12px] font-black uppercase px-8 py-5 rounded-full tracking-[0.2em] hover:bg-white/20 transition-all italic border border-white/10 flex items-center gap-2">
+                  <button className="bg-white/10 text-white text-[11px] md:text-[12px] font-black uppercase px-6 md:px-8 py-4 md:py-5 rounded-full tracking-[0.2em] hover:bg-white/20 transition-all italic border border-white/10 flex items-center gap-2">
                     <Zap size={16} className="text-orange-primary fill-current" /> Price Alert
                   </button>
-                  <button className="bg-navy text-white text-[12px] font-black uppercase px-8 py-5 rounded-full tracking-[0.2em] hover:bg-navy/80 transition-all italic border border-white/10 flex items-center gap-2">
-                    <Heart size={16} className="text-orange-primary" /> Follow Brand
+                  <button className="bg-navy text-white text-[11px] md:text-[12px] font-black uppercase px-6 md:px-8 py-4 md:py-5 rounded-full tracking-[0.2em] hover:bg-navy/80 transition-all italic border border-white/10 flex items-center gap-2">
+                    <Heart size={16} className="text-orange-primary" /> Follow
                   </button>
                 </div>
              </div>

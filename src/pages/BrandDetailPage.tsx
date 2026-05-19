@@ -91,60 +91,60 @@ export function BrandDetailPage() {
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
         </div>
         
-        <div className="max-w-7xl mx-auto px-8 relative z-10 w-full mb-8">
-            <div className="flex flex-col md:flex-row gap-12 items-start">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full mb-8">
+            <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-start">
               {/* Left: Brand Identity */}
               <div className="flex-1 w-full">
-                 <div className="flex items-center gap-6 mb-6 flex-wrap">
-                    <div className="w-28 h-28 rounded-2xl bg-white flex items-center justify-center text-5xl font-black text-navy shadow-2xl border-4 border-white relative">
+                 <div className="flex items-center gap-4 md:gap-6 mb-6 flex-wrap">
+                    <div className="w-20 h-20 md:w-28 md:h-28 rounded-2xl bg-white flex items-center justify-center text-3xl md:text-5xl font-black text-navy shadow-2xl border-4 border-white relative">
                        {brand.logo}
-                       <div className="absolute -top-3 -right-3 w-8 h-8 bg-orange-primary rounded-full flex items-center justify-center text-white border-4 border-[#050514] shadow-lg">
-                          <CheckCircle2 size={16} />
+                       <div className="absolute -top-2 -right-2 md:-top-3 md:-right-3 w-6 h-6 md:w-8 md:h-8 bg-orange-primary rounded-full flex items-center justify-center text-white border-[3px] md:border-4 border-[#050514] shadow-lg">
+                          <CheckCircle2 size={isMobile ? 12 : 16} />
                        </div>
                     </div>
                     <div>
                        <div className="flex items-center gap-3 mb-1 flex-wrap">
-                          <h1 className="text-5xl font-black text-white italic tracking-tighter">{brand.name}</h1>
-                          <div className="bg-green-accent px-3 py-1 rounded-full flex items-center gap-2 shadow-lg">
+                          <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter shrink-0">{brand.name}</h1>
+                          <div className="bg-green-accent px-2 md:px-3 py-1 rounded-full flex items-center gap-2 shadow-lg w-fit">
                              <ShieldCheck size={12} className="text-white" />
-                             <span className="text-[10px] font-black text-white uppercase tracking-widest italic">Verified Brand</span>
+                             <span className="text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">Verified Brand</span>
                           </div>
                        </div>
-                       <div className="flex items-center gap-6 flex-wrap mt-2">
+                       <div className="flex items-center gap-4 md:gap-6 flex-wrap mt-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Brand of {brand.category}</span>
+                            <span className="white/40 text-[9px] md:text-[10px] font-bold uppercase tracking-widest">Brand of {brand.category}</span>
                           </div>
-                          <div className="h-4 w-px bg-white/10" />
+                          <div className="h-3 w-px bg-white/10 hidden sm:block" />
                           <div className="flex items-center gap-2">
                              <Heart size={14} className="text-orange-primary fill-current" />
-                             <span className="text-white font-black text-[10px] uppercase tracking-widest italic">25k Loves</span>
+                             <span className="text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest italic">25k Loves</span>
                           </div>
-                          <div className="h-4 w-px bg-white/10" />
+                          <div className="h-3 w-px bg-white/10 hidden sm:block" />
                           <div className="flex items-center gap-2">
                              <TrendingUp size={14} className="text-green-accent" />
-                             <span className="text-white font-black text-[10px] uppercase tracking-widest italic">Score: 92/100</span>
+                             <span className="text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest italic">Score: 92/100</span>
                           </div>
                        </div>
                     </div>
                  </div>
 
                  {/* Top Socials/Quick Stats */}
-                 <div className="flex gap-4 mb-10 text-white flex-wrap">
-                    <button className="bg-orange-primary text-white text-[11px] font-black uppercase px-10 py-5 rounded-full tracking-[0.2em] shadow-2xl shadow-orange-primary/30 hover:scale-105 active:scale-95 transition-all italic border border-white/10 flex items-center gap-3">
-                       <Heart size={16} /> Love Brand
+                 <div className="flex gap-3 md:gap-4 mb-8 md:mb-10 text-white flex-wrap">
+                    <button className="bg-orange-primary text-white text-[10px] md:text-[11px] font-black uppercase px-6 md:px-10 py-4 md:py-5 rounded-full tracking-[0.2em] shadow-2xl shadow-orange-primary/30 hover:scale-105 active:scale-95 transition-all italic border border-white/10 flex items-center gap-2 md:gap-3">
+                       <Heart size={isMobile ? 14 : 16} /> Love Brand
                     </button>
-                    <button className="bg-white/10 text-white text-[11px] font-black uppercase px-10 py-5 rounded-full tracking-[0.2em] hover:bg-white/20 transition-all italic border border-white/10">
+                    <button className="bg-white/10 text-white text-[10px] md:text-[11px] font-black uppercase px-6 md:px-10 py-4 md:py-5 rounded-full tracking-[0.2em] hover:bg-white/20 transition-all italic border border-white/10">
                        Follow Brand
                     </button>
-                    <button className="bg-navy text-white text-[11px] font-black uppercase px-8 py-5 rounded-full tracking-[0.2em] hover:bg-navy/80 transition-all italic border border-white/20 flex items-center gap-3">
-                       <Share2 size={16} /> Share
+                    <button className="bg-navy text-white text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-4 md:py-5 rounded-full tracking-[0.2em] hover:bg-navy/80 transition-all italic border border-white/20 flex items-center gap-2 md:gap-3">
+                       <Share2 size={isMobile ? 14 : 16} /> Share
                     </button>
                  </div>
                  
-                 <div className="w-fit">
-                    <button className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-8 py-4 flex items-center gap-4 group hover:bg-white/20 transition-all">
+                 <div className="w-full md:w-fit">
+                    <button className="w-full md:w-fit bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-6 md:px-8 py-3 md:py-4 flex items-center justify-center gap-4 group hover:bg-white/20 transition-all">
                        <div className="w-2 h-2 rounded-full bg-green-accent animate-pulse" />
-                       <span className="text-white font-black text-xs uppercase tracking-widest italic">Go To Authentic Store</span>
+                       <span className="text-white font-black text-[10px] md:text-xs uppercase tracking-widest italic">Go To Authentic Store</span>
                        <ChevronRight size={16} className="text-white group-hover:translate-x-1 transition-transform" />
                     </button>
                  </div>
@@ -951,10 +951,9 @@ export function BrandDetailPage() {
          <div className="max-w-7xl mx-auto px-8 relative">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                <div>
-                  <h3 className="text-4xl font-black text-navy italic tracking-tighter mb-4 uppercase">Exclusive Brand Deals</h3>
+                  <h3 className="text-4xl font-black text-navy italic tracking-tighter mb-4 uppercase">Exclusive Brand Promot Codes</h3>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em] italic mb-2">Limited Time Offers & Vouchers</p>
                </div>
-               <Link to={`/brands/${brand.id}/products`} className="px-10 py-4 bg-navy text-white font-black uppercase tracking-widest text-[10px] rounded-full hover:bg-orange-primary transition-all transform hover:scale-105 active:scale-95 italic shadow-xl shadow-navy/10 flex items-center justify-center">Show all Deals</Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

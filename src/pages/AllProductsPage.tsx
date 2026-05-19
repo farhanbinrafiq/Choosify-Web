@@ -44,9 +44,9 @@ export function AllProductsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* Header / Hero */}
-      <div className="w-full bg-[#0A0B1E] pt-12 pb-16 px-8 relative overflow-hidden">
+      <div className="w-full bg-[#0A0B1E] pt-12 pb-16 px-4 md:px-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
-        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row justify-between items-end">
+        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row justify-between md:items-end">
           <div className="flex flex-col">
             <div className="flex items-center gap-2 text-gray-400 text-[10px] font-black uppercase tracking-widest mb-4">
               <Link to="/" className="hover:text-white transition-colors">Home</Link>
@@ -85,7 +85,7 @@ export function AllProductsPage() {
       </div>
 
 
-      <div className="max-w-7xl mx-auto px-8 w-full flex flex-col lg:flex-row gap-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-col lg:flex-row gap-8 py-8">
         {/* Sidebar Filters */}
         <aside className="w-full lg:w-60 flex-shrink-0">
           <div className="space-y-8">

@@ -32,9 +32,11 @@ import { useDashboard } from '../context/DashboardContext';
 import { ProductCard } from '../components/ProductCard';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { PRODUCTS, BRANDS, BLOGS } from '../constants';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 // Hex Colors as per instruction
 const COLORS = {
@@ -279,54 +281,58 @@ const CompareToolSection = () => {
         </div>
       </div>
 
-      <div className="bg-[#050514]/50 border border-white/10 rounded-[32px] overflow-hidden">
-        <div className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-white/5 border-b border-white/10">
-           <div className="p-8 flex flex-col justify-center bg-white/5">
-              <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest italic mb-2">Active Slots</span>
-              <h4 className="text-xl font-black text-white italic uppercase uppercase leading-none">{comparedProducts.length}/4 Models</h4>
-           </div>
-           {[...comparedProducts, ...Array(4 - comparedProducts.length).fill(null)].slice(0, 3).map((p, i) => (
-             <div key={i} className="p-8 group relative min-h-[200px] flex flex-col items-center justify-center">
-               {p ? (
-                 <>
-                   <button 
-                     onClick={() => removeFromCompare(p.id)}
-                     className="absolute top-4 right-4 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-                   >
-                     <X size={16} />
-                   </button>
-                   <img src={p.image} className="w-20 h-20 object-contain mb-6" alt="" />
-                   <h5 className="text-[11px] font-black text-white italic uppercase text-center line-clamp-1">{p.title}</h5>
-                   <span className="text-[10px] font-bold text-[#F96500] mt-1 italic">BDT {p.price}</span>
-                 </>
-               ) : (
-                 <button className="w-16 h-16 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center text-white/10 hover:border-white/20 hover:text-white/30 transition-all">
-                    <Plus size={24} />
-                 </button>
-               )}
-             </div>
-           ))}
-        </div>
-        
-        {/* Comparison Table (Simplified) */}
-        <div className="divide-y divide-white/5">
-            {[
-              { label: 'Rating', values: comparedProducts.map(p => p.rating + '/5.0') },
-              { label: 'Market Value', values: comparedProducts.map(() => 'Premium') },
-              { label: 'In Stock', values: comparedProducts.map(() => 'Yes (Dhaka)'), color: 'text-[#07DD05]' },
-              { label: 'Expert Score', values: comparedProducts.map(() => '92/100'), color: 'text-[#F96500]' }
-            ].map((row, i) => (
-              <div key={i} className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-white/5">
-                 <div className="p-6 bg-white/5 text-[10px] font-black text-gray-400 uppercase italic tracking-widest">{row.label}</div>
-                 {row.values.map((val, vidx) => (
-                   <div key={vidx} className={cn("p-6 text-center text-xs font-bold italic", row.color || "text-white")}>{val}</div>
-                 ))}
-                 {/* Empty slot fillers */}
-                 {Array(3 - row.values.length).fill(null).map((_, fidx) => (
-                   <div key={`f-${fidx}`} className="p-6 text-center text-white/5">-</div>
-                 ))}
-              </div>
-            ))}
+      <div className="bg-[#050514]/50 border border-white/10 rounded-[24px] md:rounded-[32px] overflow-hidden">
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="min-w-[800px]">
+            <div className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-white/5 border-b border-white/10">
+               <div className="p-8 flex flex-col justify-center bg-white/5">
+                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest italic mb-2">Active Slots</span>
+                  <h4 className="text-xl font-black text-white italic uppercase uppercase leading-none">{comparedProducts.length}/4 Models</h4>
+               </div>
+               {[...comparedProducts, ...Array(4 - comparedProducts.length).fill(null)].slice(0, 3).map((p, i) => (
+                 <div key={i} className="p-8 group relative min-h-[200px] flex flex-col items-center justify-center">
+                   {p ? (
+                     <>
+                       <button 
+                         onClick={() => removeFromCompare(p.id)}
+                         className="absolute top-4 right-4 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                       >
+                         <X size={16} />
+                       </button>
+                       <img src={p.image} className="w-20 h-20 object-contain mb-6" alt="" />
+                       <h5 className="text-[11px] font-black text-white italic uppercase text-center line-clamp-1">{p.title}</h5>
+                       <span className="text-[10px] font-bold text-[#F96500] mt-1 italic">BDT {p.price}</span>
+                     </>
+                   ) : (
+                     <button className="w-16 h-16 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center text-white/10 hover:border-white/20 hover:text-white/30 transition-all">
+                        <Plus size={24} />
+                     </button>
+                   )}
+                 </div>
+               ))}
+            </div>
+            
+            {/* Comparison Table (Simplified) */}
+            <div className="divide-y divide-white/5">
+                {[
+                  { label: 'Rating', values: comparedProducts.map(p => p.rating + '/5.0') },
+                  { label: 'Market Value', values: comparedProducts.map(() => 'Premium') },
+                  { label: 'In Stock', values: comparedProducts.map(() => 'Yes (Dhaka)'), color: 'text-[#07DD05]' },
+                  { label: 'Expert Score', values: comparedProducts.map(() => '92/100'), color: 'text-[#F96500]' }
+                ].map((row, i) => (
+                  <div key={i} className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-white/5">
+                     <div className="p-6 bg-white/5 text-[10px] font-black text-gray-400 uppercase italic tracking-widest">{row.label}</div>
+                     {row.values.map((val, vidx) => (
+                       <div key={vidx} className={cn("p-6 text-center text-xs font-bold italic", row.color || "text-white")}>{val}</div>
+                     ))}
+                     {/* Empty slot fillers */}
+                     {Array(3 - row.values.length).fill(null).map((_, fidx) => (
+                       <div key={`f-${fidx}`} className="p-6 text-center text-white/5">-</div>
+                     ))}
+                  </div>
+                ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -336,6 +342,7 @@ const CompareToolSection = () => {
 const MessagesSection = () => {
   const { messages, addMessage } = useDashboard();
   const [inputText, setInputText] = useState('');
+  const [activeChat, setActiveChat] = useState<number | null>(null);
 
   const handleSend = () => {
     if (!inputText.trim()) return;
@@ -344,11 +351,14 @@ const MessagesSection = () => {
   };
 
   return (
-    <div className="h-[700px] flex gap-px bg-white/5 border border-white/10 rounded-[32px] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-700">
+    <div className="h-[600px] md:h-[700px] flex flex-col md:flex-row gap-px bg-white/5 border border-white/10 rounded-[24px] md:rounded-[32px] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-700">
       {/* Inbox List */}
-      <div className="w-[350px] bg-[#050514] flex flex-col">
-         <div className="p-8 border-b border-white/5">
-            <h2 className="text-xl font-black text-white italic uppercase tracking-tighter mb-4">Inbox</h2>
+      <div className={cn(
+        "w-full md:w-[300px] lg:w-[350px] bg-[#050514] flex flex-col",
+        activeChat !== null && "hidden md:flex"
+      )}>
+         <div className="p-6 md:p-8 border-b border-white/5">
+            <h2 className="text-lg md:text-xl font-black text-white italic uppercase tracking-tighter mb-4">Inbox</h2>
             <div className="relative">
                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                <input className="w-full h-10 pl-10 pr-4 bg-white/5 rounded-xl text-[10px] font-bold text-white placeholder:text-gray-500 focus:outline-none" placeholder="Search chats..." />
@@ -356,7 +366,11 @@ const MessagesSection = () => {
          </div>
          <div className="flex-1 overflow-y-auto no-scrollbar">
             {[1, 2, 3].map(i => (
-              <button key={i} className={cn("w-full p-6 flex gap-4 text-left border-b border-white/5 transition-all hover:bg-white/5", i === 1 && "bg-white/5 border-r-2 border-[#F96500]")}>
+              <button 
+                key={i} 
+                onClick={() => setActiveChat(i)}
+                className={cn("w-full p-6 flex gap-4 text-left border-b border-white/5 transition-all hover:bg-white/5", i === 1 && "bg-white/5 border-r-2 border-[#F96500]")}
+              >
                  <div className="relative">
                     <img src={`https://i.pravatar.cc/150?u=${i + 20}`} className="w-12 h-12 rounded-full object-cover" alt="" />
                     {i === 1 && <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#07DD05] border-2 border-[#050514] rounded-full" />}
@@ -374,26 +388,32 @@ const MessagesSection = () => {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-[#0A0A1F]/50">
-         <div className="p-6 border-b border-white/5 flex items-center justify-between bg-[#050514]/40">
+      <div className={cn(
+        "flex-1 flex flex-col bg-[#0A0A1F]/50",
+        activeChat === null && "hidden md:flex"
+      )}>
+         <div className="p-4 md:p-6 border-b border-white/5 flex items-center justify-between bg-[#050514]/40">
             <div className="flex items-center gap-4">
-               <img src="https://i.pravatar.cc/150?u=admin" className="w-10 h-10 rounded-full object-cover" alt="" />
+               <button onClick={() => setActiveChat(null)} className="md:hidden w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white">
+                  <ArrowLeft size={16} />
+               </button>
+               <img src="https://i.pravatar.cc/150?u=admin" className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" alt="" />
                <div>
-                  <h4 className="text-sm font-black text-white italic uppercase tracking-widest leading-none">Farhan Rafiq</h4>
-                  <span className="text-[9px] font-bold text-[#07DD05] uppercase italic font-black">Support Active</span>
+                  <h4 className="text-xs md:text-sm font-black text-white italic uppercase tracking-widest leading-none">Farhan Rafiq</h4>
+                  <span className="text-[8px] md:text-[9px] font-bold text-[#07DD05] uppercase italic font-black">Support Active</span>
                </div>
             </div>
-            <div className="flex items-center gap-3">
-               <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors"><Bell size={16} /></button>
-               <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors"><MoreVertical size={16} /></button>
+            <div className="flex items-center gap-2 md:gap-3">
+               <button className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors"><Bell size={14} /></button>
+               <button className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors"><MoreVertical size={14} /></button>
             </div>
          </div>
 
-         <div className="flex-1 p-8 overflow-y-auto space-y-6 no-scrollbar">
+         <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6 no-scrollbar">
             {messages.map((m) => (
-              <div key={m.id} className={cn("flex flex-col max-w-[80%]", m.sender === 'user' ? "ml-auto items-end" : "mr-auto items-start")}>
+              <div key={m.id} className={cn("flex flex-col max-w-[90%] md:max-w-[80%]", m.sender === 'user' ? "ml-auto items-end" : "mr-auto items-start")}>
                  <div className={cn(
-                   "px-6 py-4 rounded-[20px] mb-2 text-xs font-bold leading-relaxed",
+                   "px-5 py-3 md:px-6 md:py-4 rounded-[16px] md:rounded-[20px] mb-2 text-[11px] md:text-xs font-bold leading-relaxed",
                    m.sender === 'user' ? "bg-[#F96500] text-white rounded-tr-none shadow-xl shadow-[#F96500]/10 italic" : "bg-white/5 text-gray-300 rounded-tl-none border border-white/10"
                  )}>
                     {m.text}
@@ -403,20 +423,20 @@ const MessagesSection = () => {
             ))}
          </div>
 
-         <div className="p-8 bg-[#050514]/60 border-t border-white/5">
+         <div className="p-6 md:p-8 bg-[#050514]/60 border-t border-white/5">
             <div className="relative">
                <input 
                  value={inputText}
                  onChange={(e) => setInputText(e.target.value)}
                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                 className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl pl-6 pr-16 text-xs font-bold text-white placeholder:text-gray-500 focus:outline-none focus:border-[#F96500]/50 transition-all" 
-                 placeholder="Type message to expert curator..." 
+                 className="w-full h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-white placeholder:text-gray-500 focus:outline-none focus:border-[#F96500]/50 transition-all" 
+                 placeholder="Type message..." 
                />
                <button 
                  onClick={handleSend}
-                 className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-[#F96500] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#F96500]/20"
+                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#F96500] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#F96500]/20"
                >
-                  <Send size={18} />
+                  <Send size={16} />
                </button>
             </div>
          </div>
@@ -425,7 +445,78 @@ const MessagesSection = () => {
   );
 };
 
+const NotificationsSection = () => {
+  const { notifications, setNotifications } = useDashboard();
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  return (
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Notification <span className="text-[#7C3AED]">Center</span></h2>
+          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Updates on your curated world</p>
+        </div>
+        <button 
+          onClick={markAllAsRead}
+          className="text-[10px] font-black text-[#F96500] uppercase tracking-widest italic hover:underline"
+        >
+          Mark all as read
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {notifications.length > 0 ? (
+          notifications.map((n) => (
+            <div 
+              key={n.id} 
+              className={cn(
+                "p-8 bg-white/5 border border-white/10 rounded-[24px] flex items-start gap-6 transition-all hover:bg-white/10 relative overflow-hidden group",
+                !n.read && "border-[#7C3AED]/30 bg-[#7C3AED]/5"
+              )}
+            >
+              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#7C3AED]" />}
+              <div className={cn(
+                "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg",
+                n.type === 'price' ? "bg-[#07DD05]/10 text-[#07DD05]" : 
+                n.type === 'reply' ? "bg-[#F96500]/10 text-[#F96500]" : 
+                "bg-[#7C3AED]/10 text-[#7C3AED]"
+              )}>
+                {n.type === 'price' ? <TrendingUp size={24} /> : n.type === 'reply' ? <MessageSquare size={24} /> : <Bell size={24} />}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-lg font-black text-white uppercase italic tracking-tighter">{n.title}</h4>
+                  <span className="text-[10px] font-black text-gray-500 uppercase">{n.time}</span>
+                </div>
+                <p className="text-gray-400 text-sm font-bold italic leading-relaxed">{n.message}</p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="py-32 flex flex-col items-center text-center opacity-40">
+            <Bell size={64} className="mb-8" />
+            <p className="text-[11px] font-black uppercase tracking-widest italic">No new notifications</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const SettingsSection = () => {
+  const [profile, setProfile] = useState({
+    name: 'Farhan Bin Rafiq',
+    email: 'farhan-88@gmail.com',
+    location: 'Dhaka, Bangladesh'
+  });
+
+  const handleSave = () => {
+    toast.success('Profile settings updated successfully');
+  };
+
   return (
     <div className="max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
        <div className="flex items-center justify-between">
@@ -433,7 +524,12 @@ const SettingsSection = () => {
             <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Profile <span className="text-[#F96500]">Master</span></h2>
             <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Configure your discovery experience</p>
           </div>
-          <button className="px-10 py-3 bg-[#F96500] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#F96500]/20 hover:scale-105 transition-all italic">Save Changes</button>
+          <button 
+            onClick={handleSave}
+            className="px-10 py-3 bg-[#F96500] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#F96500]/20 hover:scale-105 transition-all italic"
+          >
+            Save Changes
+          </button>
        </div>
 
        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -446,7 +542,7 @@ const SettingsSection = () => {
                       <Plus className="text-white" size={32} />
                    </div>
                 </div>
-                <h4 className="text-xl font-black text-white italic uppercase mb-1">Farhan Bin Rafiq</h4>
+                <h4 className="text-xl font-black text-white italic uppercase mb-1">{profile.name}</h4>
                 <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator • ID: 89BD-001</p>
              </div>
 
@@ -455,15 +551,27 @@ const SettingsSection = () => {
                 <div className="space-y-4">
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Full Display Name</label>
-                      <input className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-6 text-[11px] font-bold text-white focus:outline-none focus:border-[#F96500]/50" defaultValue="Farhan Bin Rafiq" />
+                      <input 
+                        className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-6 text-[11px] font-bold text-white focus:outline-none focus:border-[#F96500]/50" 
+                        value={profile.name}
+                        onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                      />
                    </div>
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Email Address</label>
-                      <input className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-6 text-[11px] font-bold text-white focus:outline-none focus:border-[#F96500]/50" defaultValue="farhan-88@gmail.com" />
+                      <input 
+                        className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-6 text-[11px] font-bold text-white focus:outline-none focus:border-[#F96500]/50" 
+                        value={profile.email}
+                        onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                      />
                    </div>
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Location (City)</label>
-                      <input className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-6 text-[11px] font-bold text-white focus:outline-none focus:border-[#F96500]/50" defaultValue="Dhaka, Bangladesh" />
+                      <input 
+                        className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-6 text-[11px] font-bold text-white focus:outline-none focus:border-[#F96500]/50" 
+                        value={profile.location}
+                        onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                      />
                    </div>
                 </div>
              </div>
@@ -513,8 +621,15 @@ const SettingsSection = () => {
 // --- MAIN PAGE ---
 
 export function DashboardPage() {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state && location.state.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
@@ -527,6 +642,7 @@ export function DashboardPage() {
     { id: 'saved-recommendations', label: 'Saved Guides', icon: Bookmark },
     { id: 'my-comparisons', label: 'My Comparisons', icon: Layers },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'my-reviews', label: 'My Reviews', icon: Star },
     { id: 'settings', label: 'Profile Settings', icon: Settings },
   ];
@@ -551,6 +667,7 @@ export function DashboardPage() {
       );
       case 'my-comparisons': return <CompareToolSection />;
       case 'messages': return <MessagesSection />;
+      case 'notifications': return <NotificationsSection />;
       case 'my-reviews': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
            <div>

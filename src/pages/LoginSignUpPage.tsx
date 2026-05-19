@@ -6,7 +6,7 @@ export function LoginSignUpPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <div className="flex-1 flex flex-col lg:flex-row">
-        <div className="lg:w-1/2 bg-orange-primary relative flex flex-col p-12 lg:p-24 orange-brand-gradient overflow-hidden">
+        <div className="lg:w-1/2 bg-orange-primary relative flex flex-col p-8 md:p-12 lg:p-24 orange-brand-gradient overflow-hidden">
            <div className="mt-auto relative z-10">
               <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight mb-8 tracking-tighter italic">
                 Bangladesh's Most Trusted <br/> <span className="text-orange-primary">Product Discovery</span> Platform
@@ -21,7 +21,7 @@ export function LoginSignUpPage() {
               </div>
            </div>
         </div>
-        <div className="lg:w-1/2 flex flex-col justify-center p-12 lg:p-24">
+        <div className="lg:w-1/2 flex flex-col justify-center p-8 md:p-12 lg:p-24">
            <div className="max-w-md w-full mx-auto">
               <div className="flex gap-12 border-b border-gray-100 mb-12">
                  <button className="pb-4 text-2xl font-black text-navy uppercase tracking-tighter border-b-4 border-orange-primary italic">Sign In</button>

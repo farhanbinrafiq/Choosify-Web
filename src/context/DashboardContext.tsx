@@ -13,6 +13,8 @@ interface DashboardContextType {
   setComparedProducts: React.Dispatch<React.SetStateAction<any[]>>;
   messages: any[];
   setMessages: React.Dispatch<React.SetStateAction<any[]>>;
+  notifications: any[];
+  setNotifications: React.Dispatch<React.SetStateAction<any[]>>;
   reviews: any[];
   setReviews: React.Dispatch<React.SetStateAction<any[]>>;
   removeSavedProduct: (id: number) => void;
@@ -36,6 +38,11 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     { id: 1, text: 'Hello! I am interested in the Samsung S24 Ultra you posted. Is it still available?', sender: 'other', senderName: 'Rahat Hossain', time: '10:30 AM', avatar: 'https://i.pravatar.cc/150?u=1' },
     { id: 2, text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', time: '10:35 AM' },
     { id: 3, text: 'I have a question about the delivery time to Chittagong.', sender: 'other', senderName: 'Admin Support', time: '11:00 AM', avatar: 'https://i.pravatar.cc/150?u=admin' }
+  ]);
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'Price Drop Alert', message: 'Samsung S24 Ultra is now 5% cheaper!', time: '2 hours ago', type: 'price', read: false },
+    { id: 2, title: 'New Review Reply', message: 'An expert replied to your review on Apex Runner Elite.', time: '5 hours ago', type: 'reply', read: true },
+    { id: 3, title: 'Guide Update', message: 'The "Best Smartwatches 2026" guide has new entries.', time: '1 day ago', type: 'system', read: false }
   ]);
   const [reviews, setReviews] = useState([
     { id: 1, product: PRODUCTS[0].title, rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
@@ -92,6 +99,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       savedGuides, setSavedGuides,
       comparedProducts, setComparedProducts,
       messages, setMessages,
+      notifications, setNotifications,
       reviews, setReviews,
       removeSavedProduct,
       removeSavedBrand,

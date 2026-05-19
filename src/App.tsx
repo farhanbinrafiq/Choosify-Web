@@ -26,6 +26,7 @@ const LoginSignUpPage = lazy(() => import('./pages/LoginSignUpPage').then(m => (
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
 const BrandProductPage = lazy(() => import('./pages/BrandProductPage').then(m => ({ default: m.BrandProductPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const BrandDealsPage = lazy(() => import('./pages/BrandDealsPage').then(m => ({ default: m.BrandDealsPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Shell for all 13 screens overview
@@ -43,6 +44,7 @@ function Overview() {
     { title: "10. Recommendations", id: "screen-10", content: <GuidesPage /> },
     { title: "12. Login / Sign Up", id: "screen-12", content: <LoginSignUpPage /> },
     { title: "13. Post Your Offer", id: "screen-13", content: <PostOfferPage /> },
+    { title: "14. Brand Wise Deals", id: "screen-14", content: <BrandDealsPage /> },
   ];
 
   return (
@@ -159,6 +161,7 @@ function AppContent() {
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
             <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
             <Route path="/post-offer" element={<PageWrapper><PostOfferPage /></PageWrapper>} />
+            <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
             <Route path="/dashboard" element={<PageWrapper><DashboardPage /></PageWrapper>} />
             <Route path="*" element={<PageWrapper><NotFoundPage /></PageWrapper>} />
           </Routes>

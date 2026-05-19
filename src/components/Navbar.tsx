@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Search, ShoppingBag, User, PlusCircle, ChevronRight, Bell, Bookmark, LogIn } from 'lucide-react';
+import { Search, ShoppingBag, User, PlusCircle, ChevronRight, Bell, Bookmark, LogIn, LayoutDashboard, Heart, MessageSquare, Settings } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SignInModal } from './SignInModal';
+import { motion, AnimatePresence } from 'motion/react';
 
 export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -15,9 +17,17 @@ export function Navbar() {
     }
   };
 
+  const dashboardMiniMenu = [
+    { label: 'My Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { label: 'Saved Products', path: '/dashboard', tab: 'saved-products', icon: Heart },
+    { label: 'Messages', path: '/dashboard', tab: 'messages', icon: MessageSquare },
+    { label: 'Notifications', path: '/dashboard', tab: 'notifications', icon: Bell },
+    { label: 'Settings', path: '/dashboard', tab: 'settings', icon: Settings },
+  ];
+
   return (
-    <nav className="w-full bg-[#0A0A1F]/90 text-white h-20 flex items-center px-8 z-50 sticky top-0 border-b border-white/5 shadow-2xl backdrop-blur-md" id="main-navbar">
-      <div className="flex items-center gap-3 mr-8 scale-110">
+    <nav className="w-full bg-[#0A0A1F]/90 text-white h-20 flex items-center px-4 md:px-8 z-50 sticky top-0 border-b border-white/5 shadow-2xl backdrop-blur-md" id="main-navbar">
+      <div className="flex items-center gap-3 mr-4 md:mr-8 scale-110">
         <Link to="/" className="flex flex-col items-center group">
           <img src="/logo.png" className="h-6 w-auto mb-1" alt="Choosify.bd Logo" />
           <span className="text-xl font-black tracking-tight lowercase font-sans">choosify.bd</span>
@@ -68,11 +78,66 @@ export function Navbar() {
           </button>
         </Link>
         
-        <div onClick={() => setIsSignInOpen(true)} className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-10 h-10 rounded-full border-2 border-orange-primary overflow-hidden group-hover:scale-105 transition-all">
-             <img src="https://i.pravatar.cc/150?u=me" className="w-full h-full object-cover" alt="Profile" />
+        <div className="relative">
+          <div 
+            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
+            className="flex items-center gap-3 group cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-full border-2 border-orange-primary overflow-hidden group-hover:scale-105 transition-all">
+              <img src="https://i.pravatar.cc/150?u=me" className="w-full h-full object-cover" alt="Profile" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block italic text-white/70 group-hover:text-white transition-colors">Hi, Farhan</span>
           </div>
-          <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block italic text-white/70">Hi, Farhan</span>
+
+          <AnimatePresence>
+            {isUserMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-[-1]" onClick={() => setIsUserMenuOpen(false)} />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                  className="absolute right-0 mt-4 w-64 bg-[#050514] border border-white/10 rounded-2xl shadow-2xl p-4 z-50 overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 blur-2xl rounded-full" />
+                  
+                  <div className="flex items-center gap-3 p-3 mb-4 bg-white/5 rounded-xl border border-white/5">
+                    <img src="https://i.pravatar.cc/150?u=me" className="w-10 h-10 rounded-full object-cover border border-orange-primary/30" alt="" />
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-black text-white italic uppercase truncate">Farhan Bin Rafiq</p>
+                      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest truncate">farhan-88@gmail.com</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    {dashboardMiniMenu.map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          if (item.tab) {
+                            navigate(item.path, { state: { activeTab: item.tab } });
+                          } else {
+                            navigate(item.path);
+                          }
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-white hover:bg-white/5 rounded-xl transition-all group"
+                      >
+                        <item.icon size={16} className="group-hover:text-orange-primary transition-colors" />
+                        <span className="italic">{item.label}</span>
+                      </button>
+                    ))}
+                    <div className="mt-2 pt-2 border-t border-white/5">
+                      <button className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-red-400 uppercase tracking-widest hover:bg-red-500/5 rounded-xl transition-all group">
+                        <LogIn size={16} className="rotate-180" />
+                        <span className="italic">Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </div>
       

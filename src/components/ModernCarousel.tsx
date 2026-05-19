@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { ChevronLeft, ChevronRight, ArrowUpRight, Zap } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface BrandItem {
   id: number;
@@ -13,25 +13,25 @@ interface BrandItem {
 
 const BRANDS_LIST: BrandItem[] = [
   {
-    id: 1,
+    id: 3, // Apex
     name: "Apex",
     category: "Fashion Sneaker",
     image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80"
   },
   {
-    id: 2,
+    id: 7, // La Reve
     name: "La Reve",
     category: "Clothing & Lifestyle",
     image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80"
   },
   {
-    id: 3,
+    id: 8, // Perfume World
     name: "Perfume World",
     category: "Fragrances & Cosmetics",
     image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=1200&q=80"
   },
   {
-    id: 4,
+    id: 9, // Pickaboo
     name: "Pickaboo",
     category: "Mobiles & Gadgets",
     image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80"
@@ -40,6 +40,7 @@ const BRANDS_LIST: BrandItem[] = [
 
 export const ModernCarousel: React.FC = () => {
   const [index, setIndex] = useState(1);
+  const navigate = useNavigate();
 
   const handleNext = () => setIndex((prev) => (prev + 1) % BRANDS_LIST.length);
   const handlePrev = () => setIndex((prev) => (prev - 1 + BRANDS_LIST.length) % BRANDS_LIST.length);
@@ -77,7 +78,13 @@ export const ModernCarousel: React.FC = () => {
             return (
               <motion.div
                 key={brand.id}
-                onClick={() => setIndex(i)}
+                onClick={() => {
+                  if (isActive) {
+                    navigate(`/brands/${brand.id}`);
+                  } else {
+                    setIndex(i);
+                  }
+                }}
                 initial={false}
                 animate={{
                   width: isActive ? (window.innerWidth < 768 ? '100%' : '55%') : (window.innerWidth < 768 ? '0%' : '15%'),
@@ -138,7 +145,13 @@ export const ModernCarousel: React.FC = () => {
                           {brand.category}
                        </p>
                        
-                       <button className="flex items-center gap-4 px-10 py-4 bg-white/5 backdrop-blur-sm border-2 border-white/20 hover:border-white transition-all rounded-full group/btn">
+                       <button 
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           navigate(`/brands/${brand.id}`);
+                         }}
+                         className="flex items-center gap-4 px-10 py-4 bg-white/5 backdrop-blur-sm border-2 border-white/20 hover:border-white transition-all rounded-full group/btn"
+                       >
                           <span className="text-[12px] font-black text-white uppercase tracking-[0.3em] italic">EXPLORE BRAND</span>
                           <ArrowUpRight size={20} className="text-white group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
                        </button>

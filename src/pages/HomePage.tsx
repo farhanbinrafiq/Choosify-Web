@@ -95,18 +95,18 @@ export function HomePage() {
   return (
     <div className="flex flex-col bg-white">
       {/* Hero Section */}
-      <section className="relative w-full min-h-[85vh] flex flex-col justify-center pt-24 pb-32 overflow-hidden bg-[#0A0A1F]">
+      <section className="relative w-full min-h-[85vh] flex flex-col justify-center pt-24 pb-48 md:pb-32 overflow-hidden bg-[#0A0A1F]">
         {/* Background Gradients matching other directory pages */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/10 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 opacity-50" />
         
-        <div className="max-w-7xl mx-auto px-8 relative z-10 flex flex-col items-center text-center">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center text-center">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-10"
           >
-            <div className="bg-orange-primary text-white text-[10px] md:text-[11px] font-black px-8 py-2.5 rounded-full uppercase tracking-[0.25em] italic shadow-2xl shadow-orange-primary/30 inline-block">
+            <div className="bg-orange-primary text-white text-[10px] md:text-[11px] font-black px-6 md:px-8 py-2.5 rounded-full uppercase tracking-[0.25em] italic shadow-2xl shadow-orange-primary/30 inline-block">
               Bangladesh's #1 Brand Discovery Platform
             </div>
           </motion.div>
@@ -114,7 +114,7 @@ export function HomePage() {
           <motion.h1 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-6xl md:text-[88px] font-black text-white mb-6 tracking-tighter leading-[0.9] max-w-6xl uppercase italic"
+            className="text-4xl sm:text-6xl md:text-[88px] font-black text-white mb-6 tracking-tighter leading-[0.9] max-w-6xl uppercase italic px-4"
           >
             CHOOSE, VERIFY & <span className="text-orange-primary">BUY ORIGINAL</span>
           </motion.h1>
@@ -134,21 +134,21 @@ export function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             onSubmit={handleSearch}
-            className="w-full max-w-4xl bg-white rounded-full p-2 flex items-center shadow-[0_40px_100px_rgba(0,0,0,0.5)] mb-12 transition-all hover:scale-[1.01] relative z-20 group"
+            className="w-full max-w-4xl bg-white rounded-3xl md:rounded-full p-2 flex flex-col md:flex-row items-center shadow-[0_40px_100px_rgba(0,0,0,0.5)] mb-12 transition-all hover:scale-[1.01] relative z-20 group"
           >
-            <div className="flex-1 flex items-center px-6">
-              <Search className="text-gray-300 group-focus-within:text-orange-primary transition-colors" size={24} />
+            <div className="w-full flex-1 flex items-center px-4 md:px-6">
+              <Search className="text-gray-300 group-focus-within:text-orange-primary transition-colors shrink-0" size={24} />
               <input 
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search brands like Samsung, Apex, or La Reve..."
-                className="w-full h-16 bg-transparent text-[#0A0A1F] font-bold px-4 focus:outline-none placeholder:text-gray-400 text-lg italic"
+                placeholder="Search brands like Samsung or Apex..."
+                className="w-full h-14 md:h-16 bg-transparent text-[#0A0A1F] font-bold px-4 focus:outline-none placeholder:text-gray-400 text-base md:text-lg italic"
               />
             </div>
             <button 
               type="submit"
-              className="h-16 px-12 orange-brand-gradient text-white font-black rounded-full shadow-xl hover:brightness-110 transition-all text-sm uppercase tracking-widest flex items-center gap-3 italic"
+              className="w-full md:w-auto h-14 md:h-16 px-12 orange-brand-gradient text-white font-black rounded-2xl md:rounded-full shadow-xl hover:brightness-110 transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-3 italic"
             >
               Search
             </button>
@@ -182,8 +182,8 @@ export function HomePage() {
         </div>
 
         {/* Stats Section on the bottom edge */}
-        <div className="absolute bottom-0 left-0 w-full py-10 bg-white/5 backdrop-blur-md border-t border-white/10">
-           <div className="max-w-7xl mx-auto px-8 grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-0">
+        <div className="absolute bottom-0 left-0 w-full py-6 md:py-10 bg-white/5 backdrop-blur-md border-t border-white/10">
+           <div className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-0">
               {[
                 { label: "Brand Listed", val: "500+", color: "text-white" },
                 { label: "Product Tracked", val: "12k+", color: "text-white" },
@@ -192,9 +192,9 @@ export function HomePage() {
               ].map((stat, i) => (
                 <div key={i} className="flex flex-col items-center lg:items-start lg:px-12 lg:border-r last:border-0 border-white/10">
                    <div className="flex items-end gap-1 mb-1">
-                      <span className={cn("text-4xl font-black italic tracking-tighter leading-none", stat.color)}>{stat.val}</span>
+                      <span className={cn("text-2xl sm:text-4xl font-black italic tracking-tighter leading-none", stat.color)}>{stat.val}</span>
                    </div>
-                   <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] italic">{stat.label}</span>
+                   <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.3em] italic">{stat.label}</span>
                 </div>
               ))}
            </div>
@@ -212,7 +212,7 @@ export function HomePage() {
       {/* Popular Products */}
       <section 
         id="popular-products" 
-        className="py-16 px-8 bg-white border-y border-gray-50 group/products"
+        className="py-16 px-4 md:px-8 bg-white border-y border-gray-50 group/products"
       >
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-12">
@@ -234,13 +234,13 @@ export function HomePage() {
       </section>
 
       {/* Business & Product Grid Section - Image 3 Style */}
-      <section id="business" className="py-16 px-8 bg-[#F4F9FF] overflow-hidden relative border-t border-gray-100">
+      <section id="business" className="py-16 px-4 md:px-8 bg-[#F4F9FF] overflow-hidden relative border-t border-gray-100">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-left mb-12">
             <h2 className="text-4xl font-black text-[#0D0D1A] italic uppercase tracking-tighter">For Business & Sellers</h2>
             <p className="text-[14px] font-bold text-gray-400 mt-2 uppercase tracking-wide">Approved Offers From Verified Merchants Setting Exclusive Items</p>
           </div>
-          
+
           <div className="bg-white/60 backdrop-blur-sm rounded-[10px] p-24 border border-dashed border-[#FF5B00]/30 text-center mb-16 relative overflow-hidden shadow-sm">
              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
              <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-primary/5 rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -257,48 +257,104 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Flash Deals Section - Image 8 Marketplace Style */}
+      <section 
+        id="flash-deals" 
+        className="py-20 px-4 md:px-8 bg-[#F8FAFC] border-t border-gray-100"
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div>
+              <h2 className="text-3xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-3">FLASH <span className="text-orange-primary">DEALS</span></h2>
+              <div className="flex items-center gap-3">
+                 <div className="flex items-center gap-2 bg-orange-primary/10 px-4 py-1.5 rounded-full border border-orange-primary/20">
+                    <Zap size={14} className="text-orange-primary fill-orange-primary" />
+                    <span className="text-[10px] font-black text-orange-primary uppercase tracking-widest italic">ENDS IN 10:10:10</span>
+                 </div>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic mb-1 px-2 border-l-4 border-orange-primary">Hottest Offers Today</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+               <Link to="/deals" className="px-8 py-3.5 bg-orange-primary text-white font-black uppercase tracking-widest text-[10px] rounded-full hover:brightness-110 transition-all transform hover:scale-105 active:scale-95 italic shadow-xl shadow-orange-primary/20">View All Deals</Link>
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-10 items-center">
+             {/* Banner Card */}
+             <div className="w-full lg:w-[1280px] lg:h-[395px] flex-shrink-0">
+                <ProductCard 
+                  product={{
+                    ...PRODUCTS[0],
+                    tag: "HOT",
+                    tagColor: "bg-[#E93B3B]",
+                  }} 
+                  variant="featured"
+                  showCountdown={true}
+                />
+             </div>
+             
+             {/* Small Cards Row */}
+             <div className="flex flex-col md:flex-row gap-6 lg:gap-0 lg:w-[1280px] lg:justify-between items-center w-full">
+                {PRODUCTS.slice(1, 5).map((product) => (
+                   <div key={product.id} className="w-full max-w-[300px] lg:w-[300px] lg:h-[572px] flex-shrink-0">
+                     <ProductCard 
+                       product={{
+                         ...product,
+                         tag: "SALE",
+                         tagColor: "bg-[#E98B8B]",
+                       }} 
+                       variant="compact"
+                       showCountdown={true}
+                     />
+                   </div>
+                ))}
+             </div>
+          </div>
+        </div>
+      </section>
+
       {/* Expert Guides & Recommendations Section */}
-      <section id="guides" className="bg-white py-20 overflow-hidden relative">
-         <div className="max-w-7xl mx-auto px-6">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+      <section id="guides" className="bg-white py-12 md:py-20 overflow-hidden relative">
+         <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-16 gap-6">
                <div>
-                  <h2 className="text-[48px] font-black text-navy uppercase tracking-tighter italic leading-none mb-4">Expert <span className="text-orange-primary">Recommendations</span></h2>
+                  <h2 className="text-3xl sm:text-4xl md:text-[48px] font-black text-navy uppercase tracking-tighter italic leading-none mb-4">Expert <span className="text-orange-primary">Recommendations</span></h2>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic mb-2 px-2 border-l-4 border-orange-primary">Curated Picks for you</p>
                </div>
-               <Link to="/guides" className="w-fit px-10 py-4 bg-white border-2 border-navy text-navy font-black uppercase tracking-widest text-[10px] rounded-full hover:bg-navy hover:text-white transition-all transform hover:scale-105 active:scale-95 italic shadow-xl shadow-navy/5">View All Guides</Link>
+               <Link to="/guides" className="w-fit px-8 md:px-10 py-3 md:py-4 bg-white border-2 border-navy text-navy font-black uppercase tracking-widest text-[10px] rounded-full hover:bg-navy hover:text-white transition-all transform hover:scale-105 active:scale-95 italic shadow-xl shadow-navy/5">View All Guides</Link>
             </div>
 
             {/* Main Featured Guide Card - Redesigned to match Overall Winner Style */}
-            <div className="relative w-full h-[600px] rounded-[10px] overflow-hidden mb-20 group shadow-[0_40px_120px_rgba(0,0,0,0.15)] border border-gray-100">
+            <div className="relative w-full min-h-[500px] md:h-[600px] rounded-[10px] overflow-hidden mb-12 md:mb-20 group shadow-[0_40px_120px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col">
                <img 
                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1600&h=900&fit=crop" 
-                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" 
+                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" 
                  alt="Featured Guide"
                />
-               <div className="absolute inset-0 bg-gradient-to-r from-[#0D0B33] via-[#0D0B33]/80 to-transparent" />
+               <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-[#0D0B33] via-[#0D0B33]/80 to-transparent" />
                
-               <div className="absolute inset-0 p-12 md:p-24 flex flex-col justify-center items-start">
-                  <div className="bg-[#FF5C38] text-white text-[10px] font-black px-8 py-3 rounded-xl mb-12 uppercase tracking-[0.3em] italic shadow-lg shadow-orange-primary/30">
+               <div className="relative z-10 p-8 md:p-24 flex flex-col justify-center items-start h-full mt-auto">
+                  <div className="bg-[#FF5C38] text-white text-[10px] font-black px-6 md:px-8 py-2 md:py-3 rounded-xl mb-8 md:mb-12 uppercase tracking-[0.3em] italic shadow-lg shadow-orange-primary/30">
                     FEATURED 2026 GUIDE
                   </div>
                   
-                  <h4 className="text-5xl md:text-8xl font-black text-white italic tracking-tighter leading-[0.9] mb-16 max-w-4xl uppercase group-hover:tracking-normal transition-all duration-700">
+                  <h4 className="text-4xl md:text-8xl font-black text-white italic tracking-tighter leading-[0.9] mb-10 md:mb-16 max-w-4xl uppercase group-hover:tracking-normal transition-all duration-700">
                     THE DEFINITIVE SMARTPHONE BUYING GUIDE 2026
                   </h4>
                   
-                  <div className="flex flex-col md:flex-row items-start md:items-center gap-12">
-                     <Link to="/guides/1" className="bg-white text-navy px-14 py-7 rounded-[20px] text-[13px] font-black uppercase tracking-widest italic flex items-center gap-4 hover:bg-orange-primary hover:text-white hover:scale-105 active:scale-95 transition-all shadow-2xl">
+                  <div className="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-12">
+                     <Link to="/guides/1" className="w-full md:w-auto bg-white text-navy px-10 md:px-14 py-5 md:py-7 rounded-[20px] text-[11px] md:text-[13px] font-black uppercase tracking-widest italic flex items-center justify-center gap-4 hover:bg-orange-primary hover:text-white hover:scale-105 active:scale-95 transition-all shadow-2xl">
                         READ FULL GUIDE <ArrowRight size={22} className="-rotate-45" />
                      </Link>
                      
-                     <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-full border-2 border-white/20 p-1 group/author cursor-pointer">
+                     <div className="flex items-center gap-4 md:gap-6">
+                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-white/20 p-1 group/author cursor-pointer">
                            <img src="https://i.pravatar.cc/100?img=11" className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform" alt="author" />
                         </div>
                         <div className="flex flex-col">
-                           <div className="flex items-center gap-3">
-                              <span className="w-8 h-8 rounded-full bg-orange-primary flex items-center justify-center text-white text-[10px] font-black">F</span>
-                              <span className="text-white/40 text-[10px] font-black uppercase tracking-widest italic">Research by Farhan Bin Rafiq • May 12, 2026</span>
+                           <div className="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-3">
+                              <span className="w-6 h-6 rounded-full bg-orange-primary flex items-center justify-center text-white text-[8px] font-black shrink-0">F</span>
+                              <span className="text-white/40 text-[8px] md:text-[10px] font-black uppercase tracking-widest italic">Research by Farhan Bin Rafiq • May 12, 2026</span>
                            </div>
                         </div>
                      </div>
@@ -404,7 +460,7 @@ export function HomePage() {
 
       {/* Partners / Banner Section */}
       <section className="py-12 bg-[#F8FAFC]">
-        <div className="max-w-7xl mx-auto px-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
            <div className="dark-brand-gradient rounded-[15px] p-8 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/5 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-64 h-full bg-purple-500/10 blur-[80px] -translate-x-1/2 translate-y-1/2" />
               <div className="flex items-center gap-8 relative z-10">
@@ -424,7 +480,7 @@ export function HomePage() {
       </section>
 
       {/* Popular Product Categories */}
-      <section id="categories" className="py-16 bg-[#EEF2F6] px-8">
+      <section id="categories" className="py-16 bg-[#EEF2F6] px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
               <div>
@@ -462,7 +518,7 @@ export function HomePage() {
       </section>
 
       {/* Value Proposition */}
-      <section className="py-20 bg-white px-8">
+      <section className="py-20 bg-white px-4 md:px-8">
          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-20">
             <div className="flex flex-col items-center text-center">
                <div className="w-20 h-20 rounded-[15px] bg-[#F8FAFC] border border-gray-100 shadow-sm flex items-center justify-center text-navy mb-8">

@@ -11,6 +11,16 @@ export function BrandProductPage() {
   const brandId = parseInt(id || '1');
   const brand = BRANDS.find(b => b.id === brandId) || BRANDS[2]; // Fallback to Sailor
 
+  const [activeFilter, setActiveFilter] = useState('Full Experience');
+
+  const brandProducts = PRODUCTS.filter(p => p.brand === brand.name);
+  // If no products match the brand name (since constants is limited), fallback to first few products for demo
+  const displayProducts = brandProducts.length > 0 ? brandProducts : PRODUCTS.slice(0, 6);
+  
+  const dealProducts = displayProducts.filter(p => p.tag === 'SALE' || p.tag === 'HOT' || p.tag === 'NEW').slice(0, 3);
+  // If no deals found, just take first 3
+  const finalDeals = dealProducts.length > 0 ? dealProducts : displayProducts.slice(0, 3);
+
   const categories = [
     { name: "Mobile", count: 230, checked: true },
     { name: "FIMS", count: 150 },
@@ -92,19 +102,23 @@ export function BrandProductPage() {
                <h3 className="text-[10px] font-black text-navy uppercase tracking-widest mb-6">Show Component</h3>
                <div className="space-y-2">
                   {[
-                    { label: "Full Experience", active: true },
+                    { label: "Full Experience", icon: <Star size={12} /> },
                     { label: "Exclusive Deals Only", icon: <Gift size={12} /> },
-                    { label: "Products Catalog Only", icon: <Package size={12} /> }
+                    { label: "Product Catalogs Only", icon: <Package size={12} /> }
                   ].map((item, i) => (
-                    <button key={i} className={cn(
-                      "w-full flex items-center justify-between px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                      item.active ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/20" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                    )}>
+                    <button 
+                      key={i} 
+                      onClick={() => setActiveFilter(item.label)}
+                      className={cn(
+                        "w-full flex items-center justify-between px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                        activeFilter === item.label ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/20" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                      )}
+                    >
                       <div className="flex items-center gap-3">
                          {item.icon}
                          {item.label}
                       </div>
-                      <div className={cn("w-1.5 h-1.5 rounded-full", item.active ? "bg-white" : "bg-transparent")} />
+                      <div className={cn("w-1.5 h-1.5 rounded-full", activeFilter === item.label ? "bg-white" : "bg-transparent")} />
                     </button>
                   ))}
                </div>
@@ -201,62 +215,83 @@ export function BrandProductPage() {
         <main className="flex-1">
           <div className="w-full h-[1px] bg-gray-100 mb-20" />
 
-          {/* Products Sub-section */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-black text-navy italic tracking-tighter uppercase mb-1">Product Catalog</h2>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">Explore All Items From {brand.name}</p>
+          {/* Exclusive Deals Section */}
+          {(activeFilter === 'Full Experience' || activeFilter === 'Exclusive Deals Only') && (
+            <div className="mb-20">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-2xl font-black text-navy italic tracking-tighter uppercase mb-1">Exclusive Deals</h2>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">Limited Time Offers From {brand.name}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {finalDeals.map((product, i) => (
+                  <ProductCard key={i} product={product} variant="grid" />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Top Bar / Sort Area */}
-          <div className="flex flex-col gap-6 mb-12">
-             <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
-                   Active Results: <span className="text-navy">100 Items Identified</span>
+          {/* Products Sub-section */}
+          {(activeFilter === 'Full Experience' || activeFilter === 'Product Catalogs Only') && (
+            <>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-2xl font-black text-navy italic tracking-tighter uppercase mb-1">Product Catalog</h2>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">Explore All Items From {brand.name}</p>
                 </div>
-                
-                <div className="flex items-center gap-4">
-                   <div className="flex items-center gap-2 text-navy text-[10px] font-black uppercase tracking-widest">
-                      Sort:
-                      <div className="relative group">
-                         <button className="flex items-center gap-2 px-6 py-2 bg-orange-primary text-white rounded-xl shadow-lg shadow-orange-primary/20">
-                            Most Popular <ChevronDown size={14} />
-                         </button>
+              </div>
+
+              {/* Top Bar / Sort Area */}
+              <div className="flex flex-col gap-6 mb-12">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
+                      Active Results: <span className="text-navy">100 Items Identified</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 text-navy text-[10px] font-black uppercase tracking-widest">
+                          Sort:
+                          <div className="relative group">
+                            <button className="flex items-center gap-2 px-6 py-2 bg-orange-primary text-white rounded-xl shadow-lg shadow-orange-primary/20">
+                                Most Popular <ChevronDown size={14} />
+                            </button>
+                          </div>
                       </div>
-                   </div>
+                    </div>
                 </div>
-             </div>
-          </div>
+              </div>
 
-          {/* Product Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-20">
-            {([...PRODUCTS, ...PRODUCTS, ...PRODUCTS.slice(0, 4)]).map((product, i) => (
-              <ProductCard key={i} product={product} variant="grid" />
-            ))}
-          </div>
+              {/* Product Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-20">
+                {([...displayProducts, ...displayProducts, ...displayProducts.slice(0, 4)]).map((product, i) => (
+                  <ProductCard key={i} product={product} variant="grid" />
+                ))}
+              </div>
 
-          {/* Pagination */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-t border-gray-100 pt-12">
-             <div className="flex items-center gap-4 bg-white px-8 py-3 rounded-full border border-gray-100 shadow-sm overflow-x-auto no-scrollbar max-w-full">
-                <button className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-navy transition-colors whitespace-nowrap">
-                   Previous
-                </button>
-                <div className="flex items-center gap-4">
-                   {[1, 2, 3, 4, 5, "...", 32].map((page, i) => (
-                      <button key={i} className={cn("w-9 h-9 rounded-full text-xs font-black transition-all flex-shrink-0 flex items-center justify-center", page === 3 ? "bg-orange-primary text-white shadow-xl shadow-orange-primary/20 scale-110" : "text-gray-400 hover:text-navy hover:bg-gray-50")}>
-                         {page}
-                      </button>
-                   ))}
+              {/* Pagination */}
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-t border-gray-100 pt-12">
+                <div className="flex items-center gap-4 bg-white px-8 py-3 rounded-full border border-gray-100 shadow-sm overflow-x-auto no-scrollbar max-w-full">
+                    <button className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-navy transition-colors whitespace-nowrap">
+                      Previous
+                    </button>
+                    <div className="flex items-center gap-4">
+                      {[1, 2, 3, 4, 5, "...", 32].map((page, i) => (
+                          <button key={i} className={cn("w-9 h-9 rounded-full text-xs font-black transition-all flex-shrink-0 flex items-center justify-center", page === 3 ? "bg-orange-primary text-white shadow-xl shadow-orange-primary/20 scale-110" : "text-gray-400 hover:text-navy hover:bg-gray-50")}>
+                            {page}
+                          </button>
+                      ))}
+                    </div>
+                    <button className="flex items-center gap-2 text-[10px] font-black text-navy uppercase tracking-widest hover:text-orange-primary transition-colors whitespace-nowrap">
+                      Next
+                    </button>
                 </div>
-                <button className="flex items-center gap-2 text-[10px] font-black text-navy uppercase tracking-widest hover:text-orange-primary transition-colors whitespace-nowrap">
-                   Next
-                </button>
-             </div>
-             <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic px-6 py-3 bg-white border border-gray-100 rounded-full">
-                Showing <span className="text-navy">100</span> Of <span className="text-navy">1,582 Results</span>
-             </div>
-          </div>
+                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic px-6 py-3 bg-white border border-gray-100 rounded-full">
+                    Showing <span className="text-navy">100</span> Of <span className="text-navy">1,582 Results</span>
+                </div>
+              </div>
+            </>
+          )}
         </main>
       </div>
     </div>

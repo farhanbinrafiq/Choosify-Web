@@ -218,22 +218,8 @@ export function GuidesPage() {
                </div>
                
                <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">Results 1-8 of 156 Stories</p>
-               
-               <button className="h-16 px-14 bg-navy text-white font-black rounded-2xl uppercase tracking-[0.1em] flex items-center gap-4 hover:bg-orange-primary transition-all italic group shadow-xl active:scale-95">
-                  Load More stories <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-               </button>
             </div>
 
-            {/* Load More Banner */}
-            <div className="mt-20 py-12 px-10 bg-gradient-to-br from-white to-ice-blue/50 rounded-[40px] border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-8 group shadow-xl shadow-gray-100/50">
-               <div className="flex flex-col text-center md:text-left">
-                  <h4 className="text-2xl font-black text-navy uppercase italic tracking-tighter mb-2">Want More Recommendations?</h4>
-                  <p className="text-navy/60 text-xs font-bold uppercase tracking-widest italic">Discover thousands of expert reviews and guides curated just for you.</p>
-               </div>
-               <button className="h-14 px-10 bg-navy text-white font-black rounded-full uppercase tracking-widest shadow-xl flex items-center gap-2 hover:bg-orange-primary transition-all active:scale-95 italic group-hover:scale-105">
-                  Browse All Guides <ArrowRight size={18} />
-               </button>
-            </div>
          </div>
 
          {/* Right Sidebar Widgets */}
