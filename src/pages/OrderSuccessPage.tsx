@@ -117,7 +117,7 @@ export function OrderSuccessPage() {
             </div>
 
             <button 
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/messages')}
               className="w-full h-12 bg-[#050514] hover:bg-[#F96500] text-white text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-between px-6 transition-all italic"
             >
               <span>Open Merchant Inbox</span>

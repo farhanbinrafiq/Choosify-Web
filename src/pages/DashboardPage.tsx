@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard } from '../context/DashboardContext';
+import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { PRODUCTS, BRANDS, BLOGS } from '../constants';
@@ -621,6 +622,7 @@ const SettingsSection = () => {
 // --- MAIN PAGE ---
 
 export function DashboardPage() {
+  const { setIsLoggedIn } = useGlobalState();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
   const navigate = useNavigate();
@@ -715,9 +717,6 @@ export function DashboardPage() {
         <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white">
           <ArrowLeft size={20} />
         </button>
-        <div className="w-10 h-10 rounded-full border-2 border-[#F96500] overflow-hidden">
-           <img src="https://i.pravatar.cc/150?u=me" className="w-full h-full object-cover" alt="" />
-        </div>
       </div>
 
       <div className="flex flex-1">
@@ -736,16 +735,6 @@ export function DashboardPage() {
               <span className="text-2xl font-black tracking-tight lowercase font-sans">choosify.bd</span>
               <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mt-1 italic">Dashboard v2.0</span>
             </Link>
-
-            <div className="flex items-center gap-5 p-4 bg-white/5 rounded-2xl border border-white/10 group cursor-pointer hover:border-white/20 transition-all">
-               <div className="w-14 h-14 rounded-full border-4 border-[#F96500]/30 overflow-hidden shrink-0 group-hover:border-[#F96500] transition-all">
-                  <img src="https://i.pravatar.cc/150?u=me" className="w-full h-full object-cover" alt="" />
-               </div>
-               <div className="min-w-0">
-                  <h4 className="text-sm font-black text-white italic uppercase truncate">Farhan Bin Rafiq</h4>
-                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest truncate">farhan-88@gmail.com</p>
-               </div>
-            </div>
           </div>
 
           <nav className="flex-1 py-8 overflow-y-auto no-scrollbar">
@@ -776,7 +765,14 @@ export function DashboardPage() {
             <Link to="/" className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-navy rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-black/20">
                <ShoppingBag size={16} /> Browse Choosify.bd
             </Link>
-            <button className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:bg-white/10 transition-all">
+            <button 
+              onClick={() => {
+                setIsLoggedIn(false);
+                navigate('/');
+                toast.success('Successfully logged out.');
+              }}
+              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:bg-white/10 transition-all"
+            >
                <LogOut size={16} className="text-[#F96500]" /> Curator Log Out
             </button>
           </div>

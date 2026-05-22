@@ -202,8 +202,11 @@ ORDER STATUS: PENDING_CONFIRMATION
     // Clear active cart
     clearCart();
 
-    toast.success('Order placed successfully! Message threads generated for seller coordination.');
-    navigate('/order-success', { state: { order: fullOrderObject } });
+    toast.success('Order placed successfully! Live support thread generated.');
+    
+    // Auto-open newly spawned buyer-seller conversation thread
+    const firstThreadId = sellerIds.length > 0 ? `thread-${sellerIds[0]}` : 'thread-general';
+    navigate(`/messages/${firstThreadId}`);
   };
 
   return (

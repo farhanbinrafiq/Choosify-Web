@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Mail, Lock, LogIn, Github, ArrowRight, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useGlobalState } from '../context/GlobalStateContext';
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { setIsLoggedIn } = useGlobalState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +27,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     setIsLoading(false);
+    setIsLoggedIn(true);
     toast.success('Successfully signed in!');
     onClose();
   };

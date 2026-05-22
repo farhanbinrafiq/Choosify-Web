@@ -43,15 +43,18 @@ export function MobileNav() {
             );
           })}
           
-          <button 
-            onClick={() => setIsSignInOpen(true)}
-            className="flex flex-col items-center gap-1 p-3 rounded-2xl text-white/40 hover:text-white transition-all"
+          <Link 
+            to="/dashboard"
+            className={cn(
+              "flex flex-col items-center gap-1 p-3 rounded-2xl transition-all",
+              isActive('/dashboard') ? "bg-orange-primary/10 text-orange-primary" : "text-white/40 hover:text-white"
+            )}
           >
-            <User size={20} />
-            <span className="text-[8px] font-black uppercase tracking-widest italic opacity-0">
+            <User size={20} className={cn(isActive('/dashboard') && "animate-pulse")} />
+            <span className={cn("text-[8px] font-black uppercase tracking-widest italic", isActive('/dashboard') ? "opacity-100" : "opacity-0")}>
               Profile
             </span>
-          </button>
+          </Link>
         </div>
       </div>
       

@@ -26,6 +26,8 @@ export interface GlobalStateContextType {
   addReport: (type: 'seller' | 'product' | 'brand', targetId: string, reason: string, description: string, evidence?: string) => void;
   currentUser: User;
   setCurrentUser: (user: User) => void;
+  isLoggedIn: boolean;
+  setIsLoggedIn: (loggedIn: boolean) => void;
   buyerReputations: BuyerReputation[];
   sellers: Seller[];
   allBrands: Brand[];
@@ -156,6 +158,16 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   });
 
   const [currentUser, setCurrentUser] = useState<User>(DEFAULT_USER);
+
+  const [isLoggedIn, setIsLoggedInState] = useState<boolean>(() => {
+    const saved = localStorage.getItem('choosify_is_logged_in');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  const setIsLoggedIn = (val: boolean) => {
+    setIsLoggedInState(val);
+    localStorage.setItem('choosify_is_logged_in', String(val));
+  };
 
   const setMode = (newMode: ProductModeType) => {
     setModeState(newMode);
@@ -457,6 +469,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       addReport,
       currentUser,
       setCurrentUser,
+      isLoggedIn,
+      setIsLoggedIn,
       buyerReputations: INITIAL_BUYER_REPUTATIONS,
       sellers: INITIAL_SELLERS,
       allBrands,

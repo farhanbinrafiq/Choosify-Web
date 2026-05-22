@@ -35,6 +35,8 @@ const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage').then(m =>
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(m => ({ default: m.OrderTrackingPage })));
 const SellerIncomingOrdersPage = lazy(() => import('./pages/SellerIncomingOrdersPage').then(m => ({ default: m.SellerIncomingOrdersPage })));
 const SellerOrderDetailsPage = lazy(() => import('./pages/SellerOrderDetailsPage').then(m => ({ default: m.SellerOrderDetailsPage })));
+const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })));
+const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Shell for all 13 screens overview
@@ -178,6 +180,9 @@ function AppContent() {
             <Route path="/seller/orders" element={<PageWrapper><SellerIncomingOrdersPage /></PageWrapper>} />
             <Route path="/seller/orders/:id" element={<PageWrapper><SellerOrderDetailsPage /></PageWrapper>} />
             <Route path="/dashboard" element={<PageWrapper><DashboardPage /></PageWrapper>} />
+            <Route path="/messages" element={<PageWrapper><MessagesPage /></PageWrapper>} />
+            <Route path="/messages/:threadId" element={<PageWrapper><MessagesPage /></PageWrapper>} />
+            <Route path="/profile/orders" element={<PageWrapper><CustomerOrdersPage /></PageWrapper>} />
             <Route path="*" element={<PageWrapper><NotFoundPage /></PageWrapper>} />
           </Routes>
         </Suspense>
