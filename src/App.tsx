@@ -4,6 +4,7 @@ import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
 import { DashboardProvider } from './context/DashboardContext';
+import { GlobalStateProvider } from './context/GlobalStateContext';
 import { Toaster } from 'react-hot-toast';
 import { MobileNav } from './components/MobileNav';
 import { AnimatePresence, motion } from 'motion/react';
@@ -27,6 +28,13 @@ const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ de
 const BrandProductPage = lazy(() => import('./pages/BrandProductPage').then(m => ({ default: m.BrandProductPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const BrandDealsPage = lazy(() => import('./pages/BrandDealsPage').then(m => ({ default: m.BrandDealsPage })));
+const RetailCartPage = lazy(() => import('./pages/RetailCartPage').then(m => ({ default: m.RetailCartPage })));
+const B2BCartPage = lazy(() => import('./pages/B2BCartPage').then(m => ({ default: m.B2BCartPage })));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
+const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage').then(m => ({ default: m.OrderSuccessPage })));
+const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(m => ({ default: m.OrderTrackingPage })));
+const SellerIncomingOrdersPage = lazy(() => import('./pages/SellerIncomingOrdersPage').then(m => ({ default: m.SellerIncomingOrdersPage })));
+const SellerOrderDetailsPage = lazy(() => import('./pages/SellerOrderDetailsPage').then(m => ({ default: m.SellerOrderDetailsPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Shell for all 13 screens overview
@@ -162,6 +170,13 @@ function AppContent() {
             <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
             <Route path="/post-offer" element={<PageWrapper><PostOfferPage /></PageWrapper>} />
             <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
+            <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
+            <Route path="/cart/b2b" element={<PageWrapper><B2BCartPage /></PageWrapper>} />
+            <Route path="/checkout" element={<PageWrapper><CheckoutPage /></PageWrapper>} />
+            <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
+            <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />
+            <Route path="/seller/orders" element={<PageWrapper><SellerIncomingOrdersPage /></PageWrapper>} />
+            <Route path="/seller/orders/:id" element={<PageWrapper><SellerOrderDetailsPage /></PageWrapper>} />
             <Route path="/dashboard" element={<PageWrapper><DashboardPage /></PageWrapper>} />
             <Route path="*" element={<PageWrapper><NotFoundPage /></PageWrapper>} />
           </Routes>
@@ -176,27 +191,29 @@ export default function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
-        <DashboardProvider>
-          <Toaster 
-            position="top-center" 
-            toastOptions={{
-              style: {
-                background: '#050514',
-                color: '#fff',
-                border: '1px solid rgba(255,255,255,0.1)',
-                fontSize: '11px',
-                fontWeight: '900',
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                fontStyle: 'italic',
-                borderRadius: '12px',
-              },
-            }} 
-          />
-          <ScrollToTop />
-          <AppContent />
-          <MobileNav />
-        </DashboardProvider>
+        <GlobalStateProvider>
+          <DashboardProvider>
+            <Toaster 
+              position="top-center" 
+              toastOptions={{
+                style: {
+                  background: '#050514',
+                  color: '#fff',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  fontSize: '11px',
+                  fontWeight: '900',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  fontStyle: 'italic',
+                  borderRadius: '12px',
+                },
+              }} 
+            />
+            <ScrollToTop />
+            <AppContent />
+            <MobileNav />
+          </DashboardProvider>
+        </GlobalStateProvider>
       </ErrorBoundary>
     </BrowserRouter>
   )

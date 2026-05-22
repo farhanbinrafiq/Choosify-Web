@@ -3,6 +3,7 @@ import { CATEGORIES } from '../constants';
 import * as LucideIcons from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { useGlobalState } from '../context/GlobalStateContext';
 
 interface Subcategory {
   name: string;
@@ -20,6 +21,7 @@ interface CategoryItem {
 }
 
 export function CategoriesPage() {
+  const { mode } = useGlobalState();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -112,13 +114,23 @@ export function CategoriesPage() {
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
       <div className="w-full bg-[#0A0A1F] py-16 px-8 relative overflow-hidden">
         {/* Background Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
+        {mode === 'wholesale' ? (
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
+        )}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="max-w-7xl mx-auto text-center relative z-10">
-          <h1 className="text-[54px] md:text-[64px] font-black italic uppercase tracking-tighter mb-4 leading-none">
-            <span className="text-white">EXPLORATION</span> <span className="text-orange-primary">HUB</span>
-          </h1>
+          {mode === 'wholesale' ? (
+            <h1 className="text-[54px] md:text-[64px] font-black italic uppercase tracking-tighter mb-4 leading-none">
+              <span className="text-white">B2B Product Category</span> <span className="text-[#FF5B00]">HUB</span>
+            </h1>
+          ) : (
+            <h1 className="text-[54px] md:text-[64px] font-black italic uppercase tracking-tighter mb-4 leading-none">
+              <span className="text-white">EXPLORATION</span> <span className="text-orange-primary">HUB</span>
+            </h1>
+          )}
 
           {/* Product Name Marquee */}
           <div className="w-full overflow-hidden mb-12 py-4 border-y border-white/5 relative">

@@ -2,6 +2,27 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { PRODUCTS, BRANDS } from '../constants';
 import toast from 'react-hot-toast';
 
+export interface MessageThread {
+  id: string;
+  title: string;
+  avatar: string;
+  lastMessage: string;
+  time: string;
+  type: 'retail' | 'wholesale' | 'general';
+  unread: boolean;
+  orderRef?: string;
+}
+
+export interface ThreadMessage {
+  id: number;
+  threadId: string;
+  text: string;
+  sender: 'user' | 'other' | 'admin' | 'seller' | 'creator';
+  time: string;
+  senderName: string;
+  avatar?: string;
+}
+
 interface DashboardContextType {
   savedProducts: any[];
   setSavedProducts: React.Dispatch<React.SetStateAction<any[]>>;
@@ -13,6 +34,10 @@ interface DashboardContextType {
   setComparedProducts: React.Dispatch<React.SetStateAction<any[]>>;
   messages: any[];
   setMessages: React.Dispatch<React.SetStateAction<any[]>>;
+  threads: MessageThread[];
+  setThreads: React.Dispatch<React.SetStateAction<MessageThread[]>>;
+  threadMessages: ThreadMessage[];
+  setThreadMessages: React.Dispatch<React.SetStateAction<ThreadMessage[]>>;
   notifications: any[];
   setNotifications: React.Dispatch<React.SetStateAction<any[]>>;
   reviews: any[];
@@ -22,6 +47,8 @@ interface DashboardContextType {
   addToCompare: (product: any) => void;
   removeFromCompare: (id: number) => void;
   addMessage: (text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator') => void;
+  addThreadMessage: (threadId: string, text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', senderName?: string) => void;
+  createNewThread: (id: string, title: string, avatar: string, type: 'retail' | 'wholesale' | 'general', lastMessage: string, orderRef?: string) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -34,6 +61,32 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     { id: 2, title: 'Top 5 Sustainable Fashion Brands', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=300&fit=crop', category: 'Fashion' }
   ]);
   const [comparedProducts, setComparedProducts] = useState([PRODUCTS[0], PRODUCTS[1]]);
+
+  // Threaded Messaging States with Localstorage persistence
+  const [threads, setThreads] = useState<MessageThread[]>(() => {
+    const saved = localStorage.getItem('choosify_threads');
+    if (saved) return JSON.parse(saved);
+    return [
+      { id: 'thread-general', title: 'Farhan Rafiq (Admin)', avatar: 'https://i.pravatar.cc/150?u=admin', lastMessage: 'Absolutely! We can ship the S24 Ultra...', time: '10:30 AM', type: 'general', unread: true },
+      { id: 'seller-samsung', title: 'Samsung Bangladesh Ltd.', avatar: 'https://i.pravatar.cc/150?u=samsung', lastMessage: 'Let us know your wholesale quantity requirements.', time: 'Yesterday', type: 'wholesale', unread: false },
+      { id: 'seller-apple', title: 'Apple Retail BD', avatar: 'https://i.pravatar.cc/150?u=apple', lastMessage: 'Welcome to Apple Retail! Feel free to ask queries.', time: '2 days ago', type: 'retail', unread: false }
+    ];
+  });
+
+  const [threadMessages, setThreadMessages] = useState<ThreadMessage[]>(() => {
+    const saved = localStorage.getItem('choosify_thread_messages');
+    if (saved) return JSON.parse(saved);
+    return [
+      { id: 1, threadId: 'thread-general', text: 'Hello! I am interested in the Samsung S24 Ultra you posted. Is it still available?', sender: 'other', senderName: 'Rahat Hossain', time: '10:30 AM', avatar: 'https://i.pravatar.cc/150?u=1' },
+      { id: 2, threadId: 'thread-general', text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', senderName: 'Me', time: '10:35 AM' },
+      { id: 3, threadId: 'thread-general', text: 'Absolutely! We can ship the S24 Ultra to Banani with standard COD coverage.', sender: 'other', senderName: 'Farhan Rafiq', time: '11:00 AM', avatar: 'https://i.pravatar.cc/150?u=admin' },
+      
+      { id: 4, threadId: 'seller-samsung', text: 'Hello! Do you offer wholesale volume pricing for bulk S24 units?', sender: 'user', senderName: 'Me', time: 'Yesterday' },
+      { id: 5, threadId: 'seller-samsung', text: 'Yes, we do! Let us know your wholesale quantity requirements.', sender: 'seller', senderName: 'Samsung Sales', time: 'Yesterday', avatar: 'https://i.pravatar.cc/150?u=samsung' }
+    ];
+  });
+
+  // Flat messages list (backwards compatibility)
   const [messages, setMessages] = useState([
     { id: 1, text: 'Hello! I am interested in the Samsung S24 Ultra you posted. Is it still available?', sender: 'other', senderName: 'Rahat Hossain', time: '10:30 AM', avatar: 'https://i.pravatar.cc/150?u=1' },
     { id: 2, text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', time: '10:35 AM' },
@@ -77,6 +130,15 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     toast.success('Product removed from comparison');
   };
 
+  // Persist threads and thread messages
+  React.useEffect(() => {
+    localStorage.setItem('choosify_threads', JSON.stringify(threads));
+  }, [threads]);
+
+  React.useEffect(() => {
+    localStorage.setItem('choosify_thread_messages', JSON.stringify(threadMessages));
+  }, [threadMessages]);
+
   const addMessage = (text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator' = 'user') => {
     const newMessage = {
       id: Date.now(),
@@ -89,7 +151,90 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     setMessages(prev => [...prev, newMessage]);
     if (sender === 'user') {
       toast.success('Message sent to curator');
+      // Sync into the active general thread too
+      addThreadMessage('thread-general', text, 'user', 'Me');
     }
+  };
+
+  const addThreadMessage = (
+    threadId: string, 
+    text: string, 
+    sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', 
+    senderName?: string
+  ) => {
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMsg: ThreadMessage = {
+      id: Date.now() + Math.floor(Math.random() * 100),
+      threadId,
+      text,
+      sender,
+      time: timeStr,
+      senderName: senderName || (sender === 'user' ? 'Me' : 'Partner Representative'),
+      avatar: sender === 'user' ? undefined : `https://i.pravatar.cc/150?u=${threadId}`
+    };
+
+    setThreadMessages(prev => [...prev, newMsg]);
+
+    // Update the thread metadata
+    setThreads(prev => prev.map(t => {
+      if (t.id === threadId) {
+        return {
+          ...t,
+          lastMessage: text,
+          time: timeStr,
+          unread: sender !== 'user'
+        };
+      }
+      return t;
+    }));
+  };
+
+  const createNewThread = (
+    id: string, 
+    title: string, 
+    avatar: string, 
+    type: 'retail' | 'wholesale' | 'general', 
+    lastMessage: string, 
+    orderRef?: string
+  ) => {
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    setThreads(prev => {
+      // Avoid duplicate thread registrations
+      if (prev.some(t => t.id === id)) {
+        return prev.map(t => t.id === id ? { ...t, lastMessage, time: timeStr, orderRef } : t);
+      }
+      return [
+        {
+          id,
+          title,
+          avatar,
+          lastMessage,
+          time: timeStr,
+          type,
+          unread: false,
+          orderRef
+        },
+        ...prev
+      ];
+    });
+
+    // Seed a starter system message in the thread
+    setThreadMessages(prev => {
+      if (prev.some(m => m.threadId === id && m.text === lastMessage)) return prev;
+      return [
+        ...prev,
+        {
+          id: Date.now() + 10,
+          threadId: id,
+          text: lastMessage,
+          sender: 'other',
+          senderName: title,
+          time: timeStr,
+          avatar
+        }
+      ];
+    });
   };
 
   return (
@@ -99,13 +244,17 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       savedGuides, setSavedGuides,
       comparedProducts, setComparedProducts,
       messages, setMessages,
+      threads, setThreads,
+      threadMessages, setThreadMessages,
       notifications, setNotifications,
       reviews, setReviews,
       removeSavedProduct,
       removeSavedBrand,
       addToCompare,
       removeFromCompare,
-      addMessage
+      addMessage,
+      addThreadMessage,
+      createNewThread
     }}>
       {children}
     </DashboardContext.Provider>

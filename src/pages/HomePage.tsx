@@ -3,6 +3,7 @@ import { ProductCard } from '../components/ProductCard';
 import { Star, ArrowRight, Search, CheckCircle, Smartphone, Tag, ShoppingBag, Globe, Users, Trophy, ExternalLink, Bookmark, ShieldCheck, Zap, Award, ChevronRight, ChevronLeft, Laptop, Heart, Bike, Car, Camera, Watch, Home, Gift, Shirt, Glasses, Utensils, Baby, GraduationCap, Youtube, Play, Package, Gamepad2, Tv } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PRODUCTS, BLOGS, BRANDS, PLACEHOLDER_IMAGE } from '../constants';
+import { useGlobalState } from '../context/GlobalStateContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
@@ -13,6 +14,7 @@ import { ModernCarousel } from '../components/ModernCarousel';
 export function HomePage() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const navigate = useNavigate();
+  const { allProducts, mode } = useGlobalState();
   const [activeBrandIndex, setActiveBrandIndex] = useState(1);
   const [activeSection, setActiveSection] = useState('');
   const [isDragging, setIsDragging] = useState(false);
@@ -97,7 +99,11 @@ export function HomePage() {
       {/* Hero Section */}
       <section className="relative w-full min-h-[85vh] flex flex-col justify-center pt-24 pb-48 md:pb-32 overflow-hidden bg-[#0A0A1F]">
         {/* Background Gradients matching other directory pages */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
+        {mode === 'wholesale' ? (
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
+        )}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/10 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 opacity-50" />
         
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 flex flex-col items-center text-center">
@@ -106,9 +112,15 @@ export function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-10"
           >
-            <div className="bg-orange-primary text-white text-[10px] md:text-[11px] font-black px-6 md:px-8 py-2.5 rounded-full uppercase tracking-[0.25em] italic shadow-2xl shadow-orange-primary/30 inline-block">
-              Bangladesh's #1 Brand Discovery Platform
-            </div>
+            {mode === 'wholesale' ? (
+              <div className="bg-gradient-to-r from-orange-primary to-orange-deep text-white text-[10px] md:text-[11px] font-black px-6 md:px-8 py-2.5 rounded-full uppercase tracking-[0.25em] italic shadow-2xl inline-block animate-pulse">
+                B2B WHOLESALE MARKETPLACE
+              </div>
+            ) : (
+              <div className="bg-orange-primary text-white text-[10px] md:text-[11px] font-black px-6 md:px-8 py-2.5 rounded-full uppercase tracking-[0.25em] italic shadow-2xl shadow-orange-primary/30 inline-block">
+                Bangladesh's #1 Brand Discovery Platform
+              </div>
+            )}
           </motion.div>
  
           <motion.h1 
@@ -125,7 +137,9 @@ export function HomePage() {
             transition={{ delay: 0.2 }}
             className="text-white/70 text-sm md:text-lg max-w-2xl mb-16 font-bold uppercase tracking-[0.2em] italic opacity-80 leading-relaxed"
           >
-            Verifying 500+ Local & Global Brands To Protect Your Shopping Experience.
+            {mode === 'wholesale' 
+              ? "Choose, B2B & Wholesale" 
+              : "Verifying 500+ Local & Global Brands To Protect Your Shopping Experience."}
           </motion.p>
           
           {/* Main Search Bar */}
@@ -224,7 +238,7 @@ export function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {PRODUCTS.slice(0, 8).map(product => (
+            {allProducts.slice(0, 8).map(product => (
               <div key={product.id}>
                 <ProductCard product={product} variant="grid" />
               </div>
@@ -281,21 +295,23 @@ export function HomePage() {
           
           <div className="flex flex-col gap-10 items-center">
              {/* Banner Card */}
-             <div className="w-full lg:w-[1280px] lg:h-[395px] flex-shrink-0">
-                <ProductCard 
-                  product={{
-                    ...PRODUCTS[0],
-                    tag: "HOT",
-                    tagColor: "bg-[#E93B3B]",
-                  }} 
-                  variant="featured"
-                  showCountdown={true}
-                />
-             </div>
+             {allProducts.length > 0 && (
+               <div className="w-full lg:w-[1280px] lg:h-[395px] flex-shrink-0">
+                  <ProductCard 
+                    product={{
+                      ...allProducts[0],
+                      tag: "HOT",
+                      tagColor: "bg-[#E93B3B]",
+                    }} 
+                    variant="featured"
+                    showCountdown={true}
+                  />
+               </div>
+             )}
              
              {/* Small Cards Row */}
              <div className="flex flex-col md:flex-row gap-6 lg:gap-0 lg:w-[1280px] lg:justify-between items-center w-full">
-                {PRODUCTS.slice(1, 5).map((product) => (
+                {allProducts.slice(1, 5).map((product) => (
                    <div key={product.id} className="w-full max-w-[300px] lg:w-[300px] lg:h-[572px] flex-shrink-0">
                      <ProductCard 
                        product={{
@@ -325,7 +341,7 @@ export function HomePage() {
             </div>
 
             {/* Main Featured Guide Card - Redesigned to match Overall Winner Style */}
-            <div className="relative w-full min-h-[500px] md:h-[600px] rounded-[10px] overflow-hidden mb-12 md:mb-20 group shadow-[0_40px_120px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col">
+            <div className="relative w-full min-h-[350px] md:h-[350px] rounded-[10px] overflow-hidden mb-12 md:mb-20 group shadow-[0_40px_120px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col">
                <img 
                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1600&h=900&fit=crop" 
                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" 
@@ -333,22 +349,22 @@ export function HomePage() {
                />
                <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-[#0D0B33] via-[#0D0B33]/80 to-transparent" />
                
-               <div className="relative z-10 p-8 md:p-24 flex flex-col justify-center items-start h-full mt-auto">
-                  <div className="bg-[#FF5C38] text-white text-[10px] font-black px-6 md:px-8 py-2 md:py-3 rounded-xl mb-8 md:mb-12 uppercase tracking-[0.3em] italic shadow-lg shadow-orange-primary/30">
+               <div className="relative z-10 p-8 md:p-12 flex flex-col justify-center items-start h-full mt-auto">
+                  <div className="bg-[#FF5C38] text-white text-[10px] font-black px-6 md:px-8 py-2 md:py-3 rounded-xl mb-4 md:mb-6 uppercase tracking-[0.3em] italic shadow-lg shadow-orange-primary/30">
                     FEATURED 2026 GUIDE
                   </div>
                   
-                  <h4 className="text-4xl md:text-8xl font-black text-white italic tracking-tighter leading-[0.9] mb-10 md:mb-16 max-w-4xl uppercase group-hover:tracking-normal transition-all duration-700">
+                  <h4 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-[0.9] mb-4 md:mb-6 max-w-4xl uppercase group-hover:tracking-normal transition-all duration-700">
                     THE DEFINITIVE SMARTPHONE BUYING GUIDE 2026
                   </h4>
                   
-                  <div className="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-12">
-                     <Link to="/guides/1" className="w-full md:w-auto bg-white text-navy px-10 md:px-14 py-5 md:py-7 rounded-[20px] text-[11px] md:text-[13px] font-black uppercase tracking-widest italic flex items-center justify-center gap-4 hover:bg-orange-primary hover:text-white hover:scale-105 active:scale-95 transition-all shadow-2xl">
-                        READ FULL GUIDE <ArrowRight size={22} className="-rotate-45" />
+                  <div className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10">
+                     <Link to="/guides/1" className="w-full md:w-auto bg-white text-navy px-8 py-4 rounded-[16px] text-[10px] md:text-[11px] font-black uppercase tracking-widest italic flex items-center justify-center gap-3 hover:bg-orange-primary hover:text-white hover:scale-105 active:scale-95 transition-all shadow-2xl">
+                        READ FULL GUIDE <ArrowRight size={18} className="-rotate-45" />
                      </Link>
                      
                      <div className="flex items-center gap-4 md:gap-6">
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-white/20 p-1 group/author cursor-pointer">
+                        <div className="w-10 h-10 md:w-12 h-12 rounded-full border-2 border-white/20 p-1 group/author cursor-pointer">
                            <img src="https://i.pravatar.cc/100?img=11" className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform" alt="author" />
                         </div>
                         <div className="flex flex-col">

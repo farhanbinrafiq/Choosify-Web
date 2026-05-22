@@ -3,6 +3,7 @@ import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRig
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { useGlobalState } from '../context/GlobalStateContext';
 
 interface Brand {
   id: string;
@@ -20,6 +21,7 @@ interface Brand {
 }
 
 export function BrandsPage() {
+  const { mode } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -116,13 +118,23 @@ export function BrandsPage() {
       {/* Hero Section */}
       <div className="w-full bg-[#0A0A1F] py-16 px-4 md:px-8 relative overflow-hidden">
         {/* Background Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
+        {mode === 'wholesale' ? (
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
+        )}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="max-w-7xl mx-auto text-center relative z-10">
-          <h1 className="text-[54px] md:text-[64px] font-black italic uppercase tracking-tighter mb-4 leading-none">
-            <span className="text-orange-primary">BRAND</span> <span className="text-white">DIRECTORY</span>
-          </h1>
+          {mode === 'wholesale' ? (
+            <h1 className="text-[54px] md:text-[64px] font-black italic uppercase tracking-tighter mb-4 leading-none">
+              <span className="text-[#FF5B00]">B2B BRAND</span> <span className="text-white">DIRECTORY</span>
+            </h1>
+          ) : (
+            <h1 className="text-[54px] md:text-[64px] font-black italic uppercase tracking-tighter mb-4 leading-none">
+              <span className="text-orange-primary">BRAND</span> <span className="text-white">DIRECTORY</span>
+            </h1>
+          )}
           
           {/* Text-only Carousel (PRD Requirement) */}
           <div className="w-full overflow-hidden mb-12 py-4 border-y border-white/5 relative">
@@ -239,7 +251,7 @@ export function BrandsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[brands[0], brands[1], brands[2]].map((brand, i) => (
-              <div key={i} className="bg-white rounded-[32px] p-8 shadow-high-density border border-gray-100 flex flex-col min-h-[440px] hover:shadow-2xl transition-all relative group overflow-hidden">
+              <div key={i} className="bg-white rounded-[32px] p-5 shadow-high-density border border-gray-100 flex flex-col h-[395px] hover:shadow-2xl transition-all relative group overflow-y-auto no-scrollbar">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/5 blur-3xl rounded-full" />
                 
                 {/* Compact Header */}
@@ -349,7 +361,7 @@ export function BrandsPage() {
                   <motion.div 
                     layout
                     key={brand.id} 
-                    className="bg-white rounded-[24px] p-8 shadow-high-density hover:shadow-3xl transition-all border border-transparent hover:border-orange-primary/10 relative group flex flex-col min-h-[440px] overflow-hidden"
+                    className="bg-white rounded-[24px] p-5 shadow-high-density hover:shadow-3xl transition-all border border-transparent hover:border-orange-primary/10 relative group flex flex-col h-[395px] overflow-y-auto no-scrollbar"
                   >
                     {brand.isHot && (
                       <div className="absolute top-6 right-6 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">HOT</div>

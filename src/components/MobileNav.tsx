@@ -3,8 +3,10 @@ import { Home, Search, Heart, User, Layers, LogIn } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { SignInModal } from './SignInModal';
+import { useGlobalState } from '../context/GlobalStateContext';
 
 export function MobileNav() {
+  const { mode } = useGlobalState();
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
@@ -12,8 +14,10 @@ export function MobileNav() {
   const navItems = [
     { icon: Home, label: 'Home', path: '/' },
     { icon: Search, label: 'Search', path: '/categories' },
-    { icon: Layers, label: 'Compare', path: '/compare' },
-    { icon: Heart, label: 'Vault', path: '/deals' },
+    ...(mode !== 'wholesale' ? [
+      { icon: Layers, label: 'Compare', path: '/compare' },
+      { icon: Heart, label: 'Vault', path: '/deals' },
+    ] : [])
   ];
 
   return (

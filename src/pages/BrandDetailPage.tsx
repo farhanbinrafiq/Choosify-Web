@@ -4,13 +4,17 @@ import { BRANDS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
-import { useNavigate, Link } from 'react-router-dom';
-
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { useCarousel } from '../hooks/useCarousel';
+import { ReportModal } from '../components/ReportModal';
+import { useGlobalState } from '../context/GlobalStateContext';
 
 export function BrandDetailPage() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const { allBrands, allProducts, mode } = useGlobalState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -18,7 +22,12 @@ export function BrandDetailPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const brand = BRANDS[2]; // Apex or Sailor based on ref
+  // Dynamically resolve brand or fallback to Apex (allBrands[2])
+  const brand = allBrands.find(b => String(b.id) === id) || allBrands[2];
+  
+  const brandProducts = allProducts.filter((p: any) => p.brandId === brand.id);
+  const displaySuggestedProducts = brandProducts.length > 0 ? brandProducts.slice(0, 4) : allProducts.slice(0, 4);
+
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(1);
   const [productLineIndex, setProductLineIndex] = useState(1);
   const [suggestedIndex, setSuggestedIndex] = useState(0);
@@ -27,7 +36,7 @@ export function BrandDetailPage() {
 
   const carouselItems = [
     { name: "Premium Comfort", category: "Classic Collection", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=800&fit=crop" },
-    { name: "Sailor Eid Collection", category: "Modern Fit", img: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=1200&h=800&fit=crop" },
+    { name: `${brand.name} Eid Collection`, category: "Modern Fit", img: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=1200&h=800&fit=crop" },
     { name: "Royal Edition", category: "Luxury Series", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=800&fit=crop" },
     { name: "Festive Spirit", category: "Seasonal Wear", img: "https://images.unsplash.com/photo-1511741454500-ddbf7ef33554?w=1200&h=800&fit=crop" }
   ];
@@ -80,7 +89,8 @@ export function BrandDetailPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
-      {/* Brand Hero Section */}
+      
+      {/* 1. Hero Section (Unchanged, with added neutral Report Store button top-right) */}
       <motion.section 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -89,6 +99,17 @@ export function BrandDetailPage() {
       >
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
+        </div>
+
+        {/* Report Store button - Small, clean neutral style, absolute top-right of hero section */}
+        <div className="absolute top-6 right-6 z-30">
+          <button 
+            onClick={() => setIsReportOpen(true)}
+            className="bg-white/10 backdrop-blur-md text-white border border-white/20 hover:bg-white/20 rounded-full px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] flex items-center gap-2 transition-all cursor-pointer shadow-lg"
+          >
+            <AlertCircle size={13} className="text-orange-primary" />
+            Report Store
+          </button>
         </div>
         
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full mb-8">
@@ -112,12 +133,12 @@ export function BrandDetailPage() {
                        </div>
                        <div className="flex items-center gap-4 md:gap-6 flex-wrap mt-2">
                           <div className="flex items-center gap-2">
-                            <span className="white/40 text-[9px] md:text-[10px] font-bold uppercase tracking-widest">Brand of {brand.category}</span>
+                             <span className="white/40 text-[9px] md:text-[10px] font-bold uppercase tracking-widest border-b border-white/20 pb-0.5">Brand of {brand.category || 'Lifestyle'}</span>
                           </div>
                           <div className="h-3 w-px bg-white/10 hidden sm:block" />
                           <div className="flex items-center gap-2">
                              <Heart size={14} className="text-orange-primary fill-current" />
-                             <span className="text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest italic">25k Loves</span>
+                             <span className="text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest italic">{brand.followers || '25k'} Loves</span>
                           </div>
                           <div className="h-3 w-px bg-white/10 hidden sm:block" />
                           <div className="flex items-center gap-2">
@@ -202,7 +223,7 @@ export function BrandDetailPage() {
                     </div>
                  </div>
               </div>
-           </div>
+            </div>
         </div>
 
         {/* Global Breadcrumbs in Hero Area */}
@@ -212,12 +233,12 @@ export function BrandDetailPage() {
             <ChevronRight size={10} />
             <Link to="/brands" className="hover:text-white transition-colors">Brands</Link>
             <ChevronRight size={10} />
-            <span className="text-white">Sailor</span>
+            <span className="text-white">{brand.name}</span>
           </div>
         </div>
       </motion.section>
 
-      {/* Product Line Title */}
+      {/* 2. Product Line Section (With prominent Browse All button below) */}
       <motion.section 
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -228,7 +249,7 @@ export function BrandDetailPage() {
       >
         <div className="max-w-7xl mx-auto px-8 text-center mb-12">
            <h2 className="text-4xl font-black text-navy italic tracking-tighter mb-3 uppercase italic">Product Line</h2>
-           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-8">Sailor's Trending Elements</p>
+           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-8">{brand.name}'s Trending Elements</p>
         </div>
 
         <div className="max-w-[1440px] mx-auto px-4 md:px-8">
@@ -324,9 +345,21 @@ export function BrandDetailPage() {
             </button>
           </div>
         </div>
+
+        {/* ADDITION: Prominent "Browse All From This Brand" button below the carousel / banner */}
+        <div className="mt-12 flex justify-center w-full px-4">
+          <Link 
+            to={`/brands/${brand.id}/products`}
+            className="bg-orange-primary hover:bg-orange-600 text-white font-black text-xs md:text-sm uppercase tracking-[0.2em] px-10 py-5 rounded-full shadow-2xl transition-all transform hover:scale-105 active:scale-95 italic inline-flex items-center gap-3 cursor-pointer border border-white/10"
+          >
+            <Shirt size={16} />
+            Browse All From This Brand
+          </Link>
+        </div>
+
       </motion.section>
 
-      {/* Brand Attributes Grid */}
+      {/* 3. My Audience / My Messaging / My Appeal / My Brand / Brand Materials / The Occasion (Brand Attributes Grid) */}
       <motion.section 
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -358,7 +391,7 @@ export function BrandDetailPage() {
          </div>
       </motion.section>
 
-      {/* Recommendations & Price Check */}
+      {/* 4. Top Suggested Products & Review Analysis */}
       <motion.section 
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -373,14 +406,14 @@ export function BrandDetailPage() {
                   <div className="flex items-center justify-between mb-12">
                      <div>
                         <h3 className="text-3xl font-black text-navy italic tracking-tighter mb-2 uppercase">Top Suggested Products</h3>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">Sailor Best Selling Items</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">{brand.name} Best Selling Items</p>
                      </div>
                      <Link to="/products" className="text-[10px] font-black text-orange-primary uppercase tracking-[0.2em] hover:opacity-70 transition-opacity">View All Lineup</Link>
                   </div>
                   
                   <div className="relative w-full h-[400px] md:h-[480px]">
                      <div className="flex items-center justify-center gap-3 h-full">
-                        {PRODUCTS.slice(0, 4).map((p, i) => {
+                        {displaySuggestedProducts.map((p, i) => {
                            const isActive = i === suggestedIndex;
                            
                            return (
@@ -400,7 +433,7 @@ export function BrandDetailPage() {
                                }}
                                className={cn(
                                  "relative h-full rounded-[24px] md:rounded-[30px] overflow-hidden cursor-pointer group",
-                                 !isActive && "hidden md:block" // Hide side cards on mobile
+                                 !isActive && "hidden md:block"
                                )}
                              >
                                <img 
@@ -448,16 +481,16 @@ export function BrandDetailPage() {
                   {/* Navigator for Compact Carousel */}
                   <div className="mt-8 flex items-center justify-center md:justify-start gap-10">
                      <div className="flex gap-3">
-                       {[0, 1, 2, 3].map((i) => (
-                         <button
-                           key={i}
-                           onClick={() => setSuggestedIndex(i)}
-                           className={cn(
-                             "h-1 transition-all duration-500 rounded-full",
-                             suggestedIndex === i ? "w-12 bg-orange-primary" : "w-2 bg-gray-300"
-                           )}
-                         />
-                       ))}
+                        {[0, 1, 2, 3].map((i) => (
+                          <button
+                            key={i}
+                            onClick={() => setSuggestedIndex(i)}
+                            className={cn(
+                              "h-1 transition-all duration-500 rounded-full",
+                              suggestedIndex === i ? "w-12 bg-orange-primary" : "w-2 bg-gray-300"
+                            )}
+                          />
+                        ))}
                      </div>
                      <div className="flex gap-4">
                         <button onClick={handleSuggestedPrev} className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all">
@@ -518,7 +551,7 @@ export function BrandDetailPage() {
                            <div>
                               <div className="text-xs font-black text-navy uppercase tracking-widest mb-2 italic">Expert Rating</div>
                               <p className="text-[11px] font-bold text-gray-400 leading-relaxed italic">
-                                Sailor has consistently maintained high scores across style and ethnic quality, making it a top choice for festive fashion in 2024.
+                                {brand.name} has consistently maintained high scores across style and ethnic quality, making it a top choice for festive fashion in 2024.
                               </p>
                            </div>
                         </div>
@@ -529,66 +562,7 @@ export function BrandDetailPage() {
          </div>
       </motion.section>
 
-      {/* Comparison Section Header */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="bg-white py-16"
-      >
-         <div className="max-w-7xl mx-auto px-8">
-            <h3 className="text-3xl font-black text-navy italic tracking-tighter mb-12 text-center uppercase italic underline decoration-orange-primary underline-offset-8">Similar Brands Comparison</h3>
-            
-            <div className="overflow-x-auto no-scrollbar rounded-[30px] border border-gray-100 shadow-soft bg-white">
-               <table className="w-full text-left border-collapse">
-                  <thead>
-                     <tr className="bg-gray-50 border-b border-gray-100">
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic">Brand Identity</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Quality</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Service</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Price Range</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Materials</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Rating</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-navy uppercase tracking-widest text-right italic">Action</th>
-                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                     {[
-                        { name: "Apex Brand", id: 3, logo: "A", quality: "Premium", service: "Excellent", price: "High (৳৳৳)", mat: "P. Cotton", score: "4.8" },
-                        { name: "Aarong Brand", id: 10, logo: "A", quality: "Elite", service: "Good", price: "Mid (৳৳)", mat: "Pure Silk", score: "4.7" },
-                        { name: "Lotto Wear", id: 6, logo: "L", quality: "Basic", service: "Fast", price: "Economy (৳)", mat: "Synthetic", score: "4.2" },
-                        { name: "Yellow Shop", id: 11, logo: "Y", quality: "Fashion", service: "Med", price: "Premium (৳৳৳)", mat: "Cotton Blend", score: "4.5" }
-                     ].map((item, i) => (
-                        <tr key={i} className="hover:bg-gray-50/50 transition-colors group">
-                           <td className="py-6 px-8">
-                              <div className="flex items-center gap-4">
-                                 <div className="w-10 h-10 rounded-xl bg-navy text-white font-black flex items-center justify-center text-sm">{item.logo}</div>
-                                 <span className="font-black text-navy italic text-sm">{item.name}</span>
-                              </div>
-                           </td>
-                           <td className="py-6 px-8 text-center"><span className="px-3 py-1 bg-green-accent text-white text-[9px] font-black uppercase rounded-full tracking-widest italic">{item.quality}</span></td>
-                           <td className="py-6 px-8 text-center text-xs font-bold text-gray-400 italic uppercase tracking-wider">{item.service}</td>
-                           <td className="py-6 px-8 text-center text-xs font-bold text-navy italic">{item.price}</td>
-                           <td className="py-6 px-8 text-center text-xs font-bold text-gray-400 italic">{item.mat}</td>
-                           <td className="py-6 px-8 text-center">
-                              <div className="flex items-center justify-center gap-1.5">
-                                 <Star size={12} className="fill-orange-primary text-orange-primary" />
-                                 <span className="font-black text-navy text-xs italic">{item.score}</span>
-                              </div>
-                           </td>
-                           <td className="py-6 px-8 text-right">
-                              <Link to={`/brands/${item.id}`} className="px-6 py-2 border-2 border-navy text-navy font-black text-[10px] uppercase tracking-widest rounded-full hover:bg-navy hover:text-white transition-all transform hover:scale-105 italic inline-block">Visit Page</Link>
-                           </td>
-                        </tr>
-                     ))}
-                  </tbody>
-               </table>
-            </div>
-         </div>
-      </motion.section>
-
-      {/* Influencer & Youtuber Reviews */}
+      {/* 5. Influencer & YouTuber Reviews */}
       <motion.section 
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -638,14 +612,14 @@ export function BrandDetailPage() {
                         <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2 italic">Creator Spotlight</p>
                         <h4 className="text-4xl md:text-6xl font-black italic tracking-tighter leading-none mb-1">{brand.name} Special Edition</h4>
                         <div className="w-20 h-1.5 bg-orange-primary rounded-full mt-2" />
-                     </div>
+                      </div>
                   </div>
                </div>
                <div className="lg:w-2/5 p-12 flex flex-col justify-center bg-white relative">
                   <span className="text-[10px] font-black text-orange-primary uppercase tracking-[0.4em] mb-6 block italic px-3 py-1 border-l-2 border-orange-primary w-fit">IN-DEPTH REVIEW</span>
                   <h4 className="text-3xl md:text-4xl font-black text-navy italic tracking-tighter leading-tight mb-6">Why {brand.name} remains a Top Choice in 2024!</h4>
                   <p className="text-sm text-gray-500 font-medium leading-relaxed mb-10">
-                    Watch as we dive deep into the performance and build quality of {brand.name}'s latest collection. From real-world testing to expert analysis.
+                     Watch as we dive deep into the performance and build quality of {brand.name}'s latest collection. From real-world testing to expert analysis.
                   </p>
                   
                   <div className="w-full h-[1px] bg-gray-100 mb-8" />
@@ -790,7 +764,7 @@ export function BrandDetailPage() {
                               Exploring original luxury quality and how to verify authenticity.
                            </p>
                            
-                           <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
+                           <div className="mt-auto pt-6 border-t border-gray-200 flex items-center justify-between">
                                <div className="flex items-center gap-3">
                                   <div className="w-10 h-10 rounded-full bg-orange-primary text-white flex items-center justify-center text-white font-black text-[10px] shadow-lg italic">AM</div>
                                   <div>
@@ -808,7 +782,7 @@ export function BrandDetailPage() {
          </div>
       </motion.section>
 
-      {/* Public Review Section */}
+      {/* 6. Public Reviews (Immediately after Influencer section) */}
       <motion.section 
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -828,7 +802,7 @@ export function BrandDetailPage() {
                      name: "Tanvir Hasan",
                      date: "2 weeks ago",
                      purchaseDate: "April 2024",
-                     comment: "The fabric quality of the new Sailor Eid collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect for large build individuals as well.",
+                     comment: `The material quality of the new ${brand.name} collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect for large build individuals as well.`,
                      rating: 5,
                      verified: true,
                      productImages: [
@@ -924,7 +898,7 @@ export function BrandDetailPage() {
                               <ThumbsUp size={14} className="group-hover/btn:-translate-y-0.5 transition-transform" />
                               <span className="text-[10px] font-black uppercase tracking-widest italic">Helpful ({review.helpful})</span>
                            </button>
-                           <button className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all">
+                           <button className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 text-gray-300 hover:text-red-500 hover:bg-red-55 transition-all">
                               <ThumbsUp size={14} className="rotate-180" />
                            </button>
                         </div>
@@ -939,7 +913,7 @@ export function BrandDetailPage() {
          </div>
       </motion.section>
 
-      {/* Brand Deals Section */}
+      {/* 7. Exclusive Brand Promo Codes */}
       <motion.section 
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -951,16 +925,16 @@ export function BrandDetailPage() {
          <div className="max-w-7xl mx-auto px-8 relative">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                <div>
-                  <h3 className="text-4xl font-black text-navy italic tracking-tighter mb-4 uppercase">Exclusive Brand Promot Codes</h3>
+                  <h3 className="text-4xl font-black text-navy italic tracking-tighter mb-4 uppercase">Exclusive Brand Promo Codes</h3>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em] italic mb-2">Limited Time Offers & Vouchers</p>
                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                {[
-                  { title: "Eid Special Voucher", discount: "20% OFF", code: "EID2024", expiry: "Valid till June 30", icon: <Gift /> },
-                  { title: "First Purchase Offer", discount: "৳ 500 FLAT", code: "WELCOME500", expiry: "New Users Only", icon: <DollarSign /> },
-                  { title: "Free Shipping", discount: "MIN ৳ 2000", code: "FREESHIP", expiry: "Selected Areas", icon: <Package /> }
+                  { title: "Eid Special Voucher", discount: "20% OFF", code: `${brand.name.toUpperCase()}EID`, expiry: "Valid till June 30", icon: <Gift /> },
+                  { title: "First Purchase Offer", discount: "৳ 500 FLAT", code: `${brand.name.toUpperCase()}500`, expiry: "New Users Only", icon: <DollarSign /> },
+                  { title: "Free Shipping", discount: "MIN ৳ 2000", code: `${brand.name.toUpperCase()}SHIP`, expiry: "Selected Areas", icon: <Package /> }
                ].map((deal, i) => (
                   <motion.div 
                      key={i}
@@ -987,6 +961,75 @@ export function BrandDetailPage() {
             </div>
          </div>
       </motion.section>
+
+      {/* 8. Similar Brands Comparison (Moved to the very bottom, just above the footer) */}
+      <motion.section 
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="bg-white py-16 border-t border-gray-100"
+      >
+         <div className="max-w-7xl mx-auto px-8">
+            <h3 className="text-3xl font-black text-navy italic tracking-tighter mb-12 text-center uppercase italic underline decoration-orange-primary underline-offset-8">Similar Brands Comparison</h3>
+            
+            <div className="overflow-x-auto no-scrollbar rounded-[30px] border border-gray-100 shadow-soft bg-white">
+               <table className="w-full text-left border-collapse">
+                  <thead>
+                     <tr className="bg-gray-50 border-b border-gray-100">
+                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic">Brand Identity</th>
+                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Quality</th>
+                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Service</th>
+                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Price Range</th>
+                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Materials</th>
+                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Rating</th>
+                        <th className="py-6 px-8 text-[11px] font-black text-navy uppercase tracking-widest text-right italic">Action</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                     {[
+                        { name: "Apex Shoes", id: 3, logo: "Ap", quality: "Premium", service: "Excellent", price: "High (৳৳৳)", mat: "P. Cotton", score: "4.8" },
+                        { name: "Aarong Brand", id: 10, logo: "Aa", quality: "Elite", service: "Good", price: "Mid (৳৳)", mat: "Pure Silk", score: "4.7" },
+                        { name: "Lotto Wear", id: 6, logo: "L", quality: "Basic", service: "Fast", price: "Economy (৳)", mat: "Synthetic", score: "4.2" },
+                        { name: "Yellow Shop", id: 11, logo: "Y", quality: "Fashion", service: "Med", price: "Premium (৳৳৳)", mat: "Cotton Blend", score: "4.5" }
+                     ].map((item, i) => (
+                        <tr key={i} className="hover:bg-gray-50/50 transition-colors group">
+                           <td className="py-6 px-8">
+                              <div className="flex items-center gap-4">
+                                 <div className="w-10 h-10 rounded-xl bg-navy text-white font-black flex items-center justify-center text-sm">{item.logo}</div>
+                                 <span className="font-black text-navy italic text-sm">{item.name}</span>
+                              </div>
+                           </td>
+                           <td className="py-6 px-8 text-center"><span className="px-3 py-1 bg-green-accent text-white text-[9px] font-black uppercase rounded-full tracking-widest italic">{item.quality}</span></td>
+                           <td className="py-6 px-8 text-center text-xs font-bold text-gray-400 italic uppercase tracking-wider">{item.service}</td>
+                           <td className="py-6 px-8 text-center text-xs font-bold text-navy italic">{item.price}</td>
+                           <td className="py-6 px-8 text-center text-xs font-bold text-gray-400 italic">{item.mat}</td>
+                           <td className="py-6 px-8 text-center">
+                              <div className="flex items-center justify-center gap-1.5">
+                                 <Star size={12} className="fill-orange-primary text-orange-primary" />
+                                 <span className="font-black text-navy text-xs italic">{item.score}</span>
+                              </div>
+                           </td>
+                           <td className="py-6 px-8 text-right">
+                              <Link to={`/brands/${item.id}`} className="px-6 py-2 border-2 border-navy text-navy font-black text-[10px] uppercase tracking-widest rounded-full hover:bg-navy hover:text-white transition-all transform hover:scale-105 italic inline-block">Visit Page</Link>
+                           </td>
+                        </tr>
+                     ))}
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </motion.section>
+
+      {/* Report Safe Portal Modal Integration */}
+      <ReportModal 
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        type="brand"
+        targetId={String(brand.id)}
+        targetName={brand.name}
+      />
+
     </div>
   );
 }

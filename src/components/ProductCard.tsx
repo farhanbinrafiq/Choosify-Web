@@ -1,8 +1,9 @@
 import React from 'react';
-import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers, ImageOff } from 'lucide-react';
+import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers, ImageOff, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useDashboard } from '../context/DashboardContext';
+import { useGlobalState } from '../context/GlobalStateContext';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import toast from 'react-hot-toast';
 
@@ -18,6 +19,10 @@ export function ProductCard({
 }) {
   const navigate = useNavigate();
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
+  const { mode, allBrands, addToCart } = useGlobalState();
+
+  const brandObj = allBrands?.find((b: any) => b.id === product.brandId);
+  const brandName = brandObj ? brandObj.name : (product.brand || 'APEX');
   
   const isSaved = savedProducts.some(p => p.id === product.id);
   const isInCompare = comparedProducts.some(p => p.id === product.id);
@@ -100,7 +105,7 @@ export function ProductCard({
          <div className="relative z-10 flex-1 flex flex-col justify-center py-4 px-2">
             <div className="flex items-center justify-between mb-5">
                <div className="flex items-center gap-3">
-                  <span className="text-[11px] font-black text-gray-400 uppercase tracking-[0.4em] italic">{product.brand || 'APEX'}</span>
+                  <span className="text-[11px] font-black text-gray-400 uppercase tracking-[0.4em] italic">{brandName}</span>
                   <div className="bg-[#FF5B00] text-white text-[9px] font-black px-4 py-2 rounded-full shadow-lg flex items-center gap-2 italic uppercase tracking-[0.1em] shadow-orange-primary/20 leading-none">
                      <Star size={12} className="fill-current" /> FEATURED
                   </div>
@@ -124,11 +129,11 @@ export function ProductCard({
                   <span className="text-4xl font-black text-[#FF5B00] italic leading-none tracking-tighter">BDT {product.price}</span>
                </div>
                
-               <button className="flex flex-col items-center group/btn-featured-mini shrink-0">
+               <button type="button" onClick={(e) => { e.stopPropagation(); const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); }} className="flex flex-col items-center group/btn-featured-mini shrink-0">
                   <div className="w-14 h-14 rounded-full border-2 border-[#1B5CFF] flex items-center justify-center text-[#1B5CFF] group-hover/btn-featured-mini:bg-[#1B5CFF] group-hover/btn-featured-mini:text-white transition-all shadow-xl active:scale-90">
-                     <ArrowRight size={24} className="-rotate-45" />
+                     <Plus size={24} />
                   </div>
-                  <span className="text-[10px] font-black text-[#1B5CFF] uppercase mt-2 tracking-widest italic">Go Buy</span>
+                  <span className="text-[10px] font-black text-[#1B5CFF] uppercase mt-2 tracking-widest italic">{mode === 'retail' ? 'Add To Cart' : `Bulk Add (${product.moq || 10})`}</span>
                </button>
             </div>
          </div>
@@ -173,11 +178,21 @@ export function ProductCard({
         </div>
         <div className="flex flex-col gap-2 flex-1">
           <div className="flex items-center justify-between">
-            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">{product.brand || 'APEX'}</span>
+            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">{brandName}</span>
             <div className={cn("text-[8px] font-black text-white px-3 py-1 rounded-full uppercase tracking-tighter leading-none italic bg-orange-primary", product.tagColor)}>
               {product.tag || 'HOT'}
             </div>
           </div>
+          {mode === 'wholesale' && (
+            <div className="flex flex-wrap gap-1">
+              <span className="bg-[#FF5B00] text-white text-[6px] font-black px-1 py-0.5 rounded uppercase tracking-tighter italic">
+                WHOLESALE
+              </span>
+              <span className="bg-[#FF5B00]/10 text-[#FF5B00] border border-[#FF5B00]/10 text-[6px] font-black px-1 py-0.5 rounded uppercase tracking-tighter italic">
+                DISTRIBUTOR
+              </span>
+            </div>
+          )}
           <h4 className="text-[11px] font-black text-navy leading-tight line-clamp-2 min-h-[2.2em] group-hover:text-orange-primary transition-colors">
             {product.title}
           </h4>
@@ -186,11 +201,11 @@ export function ProductCard({
           
           <div className="flex items-center justify-between gap-4 mt-auto pt-2 border-t border-gray-50/50">
              <span className="text-[15px] font-black text-orange-primary italic leading-none shrink-0">BDT {product.price}</span>
-             <button className="flex flex-col items-center group/btn-mini shrink-0">
+             <button type="button" onClick={(e) => { e.stopPropagation(); const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); }} className="flex flex-col items-center group/btn-mini shrink-0">
                 <div className="w-9 h-9 rounded-full border border-[#1B5CFF] flex items-center justify-center text-[#1B5CFF] group-hover/btn-mini:bg-[#1B5CFF] group-hover/btn-mini:text-white transition-all shadow-md">
-                   <ArrowRight size={16} className="-rotate-45" />
+                   <Plus size={14} />
                 </div>
-                <span className="text-[8px] font-black text-[#1B5CFF] uppercase mt-1.5 tracking-tighter italic">Go Buy</span>
+                <span className="text-[8px] font-black text-[#1B5CFF] uppercase mt-1.5 tracking-tighter italic">{mode === 'retail' ? 'Add To Cart' : `Bulk Add (${product.moq || 10})`}</span>
              </button>
           </div>
         </div>
@@ -232,11 +247,27 @@ export function ProductCard({
         </div>
         <div className="flex-1 flex flex-col py-1">
           <div className="flex items-center justify-between gap-2 mb-3">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">{product.brand || 'APEX'}</span>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">{brandName}</span>
             <div className={cn("text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-tighter leading-none italic bg-[#FF5B00]", product.tagColor)}>
               {product.tag || 'HOT'}
             </div>
           </div>
+          {mode === 'wholesale' && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              <span className="bg-gradient-to-r from-[#FF5B00] to-[#FF7A00] text-white text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-tighter italic">
+                WHOLESALE
+              </span>
+              <span className="bg-[#FF5B00]/10 text-[#FF5B00] border border-[#FF5B00]/20 text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-tighter italic">
+                BULK PRICE
+              </span>
+              <span className="bg-[#0A0B1E] text-[#FF5B00] border border-[#FF5B00]/20 text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-tighter italic">
+                DISTRIBUTOR
+              </span>
+              <span className="bg-orange-primary/5 text-orange-primary/80 text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-tighter italic">
+                SUPPLIER APPROVED
+              </span>
+            </div>
+          )}
           <h3 className="text-lg font-black text-navy leading-tight line-clamp-1 mb-2 group-hover:text-orange-primary transition-colors uppercase italic tracking-tighter">
             {product.title}
           </h3>
@@ -256,8 +287,16 @@ export function ProductCard({
                 <span className="text-[14px] text-gray-300 line-through font-black italic">BDT {product.originalPrice}</span>
               )}
             </div>
-            <button className="flex items-center gap-3 px-10 py-3.5 bg-[#1B5CFF] text-white rounded-xl text-[12px] font-black uppercase tracking-widest italic shadow-xl shadow-blue-500/20 hover:scale-105 transition-all w-full sm:w-auto justify-center">
-              GO BUY NOW <ArrowRight size={16} className="-rotate-45" />
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const qty = mode === 'retail' ? 1 : (product.moq || 10);
+                addToCart(product, qty);
+              }}
+              className="flex items-center gap-3 px-10 py-3.5 bg-[#1B5CFF] hover:bg-orange-primary text-white rounded-xl text-[12px] font-black uppercase tracking-widest italic shadow-xl shadow-blue-500/20 hover:scale-105 transition-all w-full sm:w-auto justify-center"
+            >
+              {mode === 'retail' ? 'ADD TO RETAIL CART' : `BULK ADD (${product.moq || 10} units)`} <Plus size={16} />
             </button>
           </div>
         </div>
@@ -326,39 +365,86 @@ export function ProductCard({
       </div>
       
       <div className="p-6 pb-8 flex flex-col flex-1">
+        {mode === 'wholesale' && (
+          <div className="flex flex-wrap gap-1.5 mb-2.5">
+            <span className="bg-gradient-to-r from-[#FF5B00] to-[#FF7A00] text-white text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter italic">
+              WHOLESALE
+            </span>
+            <span className="bg-[#FF5B00]/10 text-[#FF5B00] border border-[#FF5B00]/20 text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter italic">
+              BULK PRICE
+            </span>
+            <span className="bg-[#0A0A1F] text-[#FF5B00] border border-[#FF5B00]/20 text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter italic">
+              SUPPLIER
+            </span>
+          </div>
+        )}
         <h3 className="text-[14px] font-black text-navy line-clamp-2 mb-2 group-hover:text-orange-primary transition-colors min-h-[40px] leading-tight tracking-tighter uppercase italic">
           {product.title}
         </h3>
         
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-orange-primary font-black uppercase text-[9px] tracking-[0.2em]">{product.brand || 'CHOSEN'}</span>
-          <div className="w-1 h-1 bg-gray-100 rounded-full" />
+        <div className="flex items-center gap-3 mb-4 w-full">
+          <span className="text-orange-primary font-black uppercase text-[9px] tracking-[0.2em]">{brandName}</span>
+          <div className="w-1 h-1 bg-gray-100 rounded-full animate-ping" />
           <div className="flex items-center gap-1">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star key={i} size={8} className={cn(i < Math.floor(product.rating || 4) ? "fill-orange-primary text-orange-primary" : "text-gray-200")} />
             ))}
             <span className="text-[9px] font-bold text-gray-400 ml-1">4.8</span>
           </div>
+          {mode === 'wholesale' && product.moq && (
+            <span className="ml-auto bg-navy text-[#FF5B00] border border-[#FF5B00]/20 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter italic">
+              MOQ {product.moq} Pcs
+            </span>
+          )}
         </div>
 
         <div className="mb-6">
           <StockProgress sm />
         </div>
+
+        {/* Display bulk slabs information on the card for quick selection */}
+        {mode === 'wholesale' && product.pricingTiers && (
+          <div className="mb-4 bg-[#F8FAFC] border border-gray-100 rounded-xl p-2.5">
+            <div className="text-[7.5px] font-black text-navy uppercase tracking-widest mb-1 italic">Business Wholesale Slabs:</div>
+            <div className="flex items-center gap-2 justify-between">
+              {product.pricingTiers.slice(0, 3).map((tier: any, tIdx: number) => (
+                <div key={tIdx} className="bg-white border border-gray-100 rounded-lg p-1 text-center flex-1 max-w-[70px]">
+                  <div className="text-[6.5px] font-black text-gray-400 uppercase tracking-tight">{tier.minQuantity}+ Pcs</div>
+                  <div className="text-[8.5px] font-black font-mono text-[#FF5B00]">৳{tier.price.toLocaleString()}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         
         <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex flex-col min-w-0">
-             <span className="text-[9px] font-black text-gray-300 uppercase italic tracking-widest leading-none mb-1 text-left">Market Price</span>
+             <span className="text-[9px] font-black text-gray-300 uppercase italic tracking-widest leading-none mb-1 text-left">
+               {mode === 'wholesale' ? 'Active Slab Price' : 'Market Price'}
+             </span>
              <div className="flex items-center gap-2">
-                <span className="text-[18px] font-black text-orange-primary italic leading-none whitespace-nowrap">BDT {product.price}</span>
+                <span className="text-[18px] font-black text-orange-primary italic leading-none whitespace-nowrap">
+                  BDT {product.price.toLocaleString()}
+                </span>
                 {product.originalPrice && (
                   <span className="text-[9px] font-bold text-gray-400 uppercase italic line-through whitespace-nowrap opacity-60">৳{product.originalPrice}</span>
                 )}
              </div>
           </div>
           
-          <button className="h-10 px-6 shrink-0 rounded-full bg-navy text-white flex items-center justify-center gap-2 group-hover:bg-orange-primary transition-all shadow-xl shadow-navy/10 active:scale-95 w-full sm:w-auto">
-             <span className="text-[9px] font-black uppercase tracking-widest italic">Details</span>
-             <ArrowRight size={14} className="-rotate-45" />
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const qty = mode === 'retail' ? 1 : (product.moq || 10);
+              addToCart(product, qty);
+            }}
+            className="h-10 px-6 shrink-0 rounded-full bg-[#FF5B00] text-white flex items-center justify-center gap-2 hover:bg-navy transition-all shadow-xl shadow-orange-primary/10 active:scale-95 w-full sm:w-auto"
+          >
+             <span className="text-[9px] font-black uppercase tracking-widest italic leading-none">
+               {mode === 'wholesale' ? `Bulk Add (${product.moq || 10})` : 'Add To Cart'}
+             </span>
+             <Plus size={12} />
           </button>
         </div>
       </div>

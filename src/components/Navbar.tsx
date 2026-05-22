@@ -1,14 +1,23 @@
 import React, { useState } from 'react';
-import { Search, ShoppingBag, User, PlusCircle, ChevronRight, Bell, Bookmark, LogIn, LayoutDashboard, Heart, MessageSquare, Settings } from 'lucide-react';
+import { Search, ShoppingBag, User, PlusCircle, ChevronRight, Bell, Bookmark, LogIn, LayoutDashboard, Heart, MessageSquare, Settings, Briefcase } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SignInModal } from './SignInModal';
 import { motion, AnimatePresence } from 'motion/react';
+import { useGlobalState } from '../context/GlobalStateContext';
+import { CartDrawer } from './CartDrawer';
+import { cn } from '../lib/utils';
+import toast from 'react-hot-toast';
 
 export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isWholesaleConfirmOpen, setIsWholesaleConfirmOpen] = useState(false);
   const navigate = useNavigate();
+
+  const { mode, setMode, retailCart, wholesaleCart } = useGlobalState();
+  const cartItemsCount = mode === 'retail' ? retailCart.length : wholesaleCart.length;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,9 +48,13 @@ export function Navbar() {
         <Link to="/categories" className="hover:text-orange-primary transition-colors">Categories</Link>
         <Link to="/products" className="hover:text-orange-primary transition-colors">Products</Link>
         <Link to="/brands" className="hover:text-orange-primary transition-colors">Brands</Link>
-        <Link to="/guides" className="text-orange-primary hover:text-orange-primary transition-colors">Recommendations</Link>
-        <Link to="/compare" className="hover:text-orange-primary transition-colors">Compare</Link>
-        <Link to="/deals" className="hover:text-orange-primary transition-colors">Deals</Link>
+        {mode !== 'wholesale' && (
+          <>
+            <Link to="/guides" className="text-orange-primary hover:text-orange-primary transition-colors">Recommendations</Link>
+            <Link to="/compare" className="hover:text-orange-primary transition-colors">Compare</Link>
+            <Link to="/deals" className="hover:text-orange-primary transition-colors">Deals</Link>
+          </>
+        )}
       </div>
 
       <div className="flex-1 max-w-md mx-6 hidden xl:block">
@@ -61,7 +74,55 @@ export function Navbar() {
       </div>
 
       <div className="flex items-center gap-5 ml-auto">
-        <div className="flex items-center gap-4 border-r border-white/10 pr-5 hidden sm:flex">
+        {/* Global Retail vs Wholesale switcher */}
+        <div className="flex bg-white/5 border border-white/10 rounded-full p-1 items-center gap-1 scale-95 origin-right">
+          <button 
+            type="button"
+            onClick={() => {
+              setMode('retail');
+              toast.success('Switched to Retail Category Portal');
+            }}
+            className={cn(
+              "px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all italic",
+              mode === 'retail' 
+                ? "bg-orange-primary text-white shadow-md font-black" 
+                : "text-white/60 hover:text-white"
+            )}
+          >
+            Retail
+          </button>
+          <button 
+            type="button"
+            onClick={() => {
+              if (mode === 'retail') {
+                setIsWholesaleConfirmOpen(true);
+              }
+            }}
+            className={cn(
+              "px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all italic flex items-center gap-1",
+              mode === 'wholesale' 
+                ? "bg-navy text-[#FF5B00] border border-white/10 shadow-md font-black" 
+                : "text-white/60 hover:text-white"
+            )}
+          >
+            <Briefcase size={10} /> B2B Wholesale
+          </button>
+        </div>
+
+        <div className="flex items-center gap-4 border-r border-[#ffffff1a] pr-5 hidden sm:flex">
+          <button 
+            type="button"
+            onClick={() => navigate(mode === 'retail' ? '/cart/retail' : '/cart/b2b')}
+            className="relative text-white/60 hover:text-white transition-colors mr-1"
+            title="Shopping Cart Portal"
+          >
+            <ShoppingBag size={20} className={cn(mode === 'wholesale' && "text-orange-primary")} />
+            {cartItemsCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F] animate-bounce">
+                {cartItemsCount}
+              </span>
+            )}
+          </button>
           <button className="relative text-white/60 hover:text-white transition-colors">
             <Bookmark size={20} />
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">3</span>
@@ -142,6 +203,67 @@ export function Navbar() {
       </div>
       
       <SignInModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* Wholesaler Switch Confirmation Modal */}
+      <AnimatePresence>
+        {isWholesaleConfirmOpen && (
+          <div className="fixed inset-0 z-[160] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsWholesaleConfirmOpen(false)}
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md bg-[#0A0A1F] border border-orange-primary/20 rounded-[32px] overflow-hidden shadow-2xl"
+            >
+              {/* Sunset orange glow visual flair */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+              
+              <div className="relative z-10 p-10 pt-12">
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-orange-primary/10 rounded-2xl flex items-center justify-center text-orange-primary mx-auto mb-6 border border-orange-primary/20 shadow-2xl">
+                    <Briefcase size={32} />
+                  </div>
+                  <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-4">
+                    Switch to <span className="text-orange-primary">B2B Wholesale?</span>
+                  </h3>
+                  <p className="text-gray-400 text-[11px] font-medium tracking-wide leading-relaxed">
+                    You are about to enter the B2B wholesale marketplace experience with bulk ordering, MOQ-based pricing, and wholesale suppliers.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <button 
+                    type="button"
+                    onClick={() => setIsWholesaleConfirmOpen(false)}
+                    className="h-14 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all italic"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setMode('wholesale');
+                      setIsWholesaleConfirmOpen(false);
+                    }}
+                    className="h-14 bg-orange-primary hover:bg-orange-deep text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all italic shadow-lg shadow-orange-primary/20"
+                  >
+                    Confirm & Enter B2B
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
