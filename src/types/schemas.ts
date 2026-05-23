@@ -82,6 +82,7 @@ export interface Product {
   price: number;
   description: string;
   category?: string;
+  variants?: any[];
 }
 
 export interface SubOrderItem {

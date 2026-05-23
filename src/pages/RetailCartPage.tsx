@@ -20,14 +20,20 @@ export function RetailCartPage() {
   const sellerIds = Object.keys(groupedCart);
 
   const calculateSellerSubtotal = (items: typeof retailCart) => {
-    return items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    return items.reduce((sum, item) => {
+      const price = item.selectedVariant && item.selectedVariant.price !== undefined ? item.selectedVariant.price : item.product.price;
+      return sum + (price * item.quantity);
+    }, 0);
   };
 
   // Base Delivery fee: ৳120 per seller as they are separate deliveries and packages
   const DELIVERY_FEE_PER_SELLER = 120;
   const deliveryTotal = sellerIds.length * DELIVERY_FEE_PER_SELLER;
 
-  const subtotal = retailCart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const subtotal = retailCart.reduce((sum, item) => {
+    const price = item.selectedVariant && item.selectedVariant.price !== undefined ? item.selectedVariant.price : item.product.price;
+    return sum + (price * item.quantity);
+  }, 0);
   const aggregateTotal = subtotal + deliveryTotal;
 
   // COD is eligible for retail orders under ৳150,000
@@ -38,8 +44,9 @@ export function RetailCartPage() {
     if (newQty <= 0) {
       removeFromCart(item.id);
     } else {
-      if (item.product.stock !== undefined && newQty > item.product.stock) {
-        toast.error(`Only ${item.product.stock} units currently in stock for ${item.product.title}`);
+      const itemStock = item.selectedVariant && item.selectedVariant.stock !== undefined ? item.selectedVariant.stock : (item.product.stock !== undefined ? item.product.stock : 58);
+      if (itemStock !== undefined && newQty > itemStock) {
+        toast.error(`Only ${itemStock} units currently available for this selection.`);
         return;
       }
       updateCartQuantity(item.id, newQty);
@@ -54,8 +61,9 @@ export function RetailCartPage() {
 
     // Verify stock before checkout
     for (const item of retailCart) {
-      if (item.product.stock === 0) {
-        toast.error(`"${item.product.title}" is out of stock! Please remove before checkout.`);
+      const itemStock = item.selectedVariant && item.selectedVariant.stock !== undefined ? item.selectedVariant.stock : (item.product.stock !== undefined ? item.product.stock : 58);
+      if (itemStock === 0) {
+        toast.error(`"${item.product.title}" is out of stock in this combination! Please remove before checkout.`);
         return;
       }
     }
@@ -132,14 +140,15 @@ export function RetailCartPage() {
                     <div className="divide-y divide-gray-100">
                       {items.map((item) => {
                         const product = item.product;
-                        const itemPrice = product.price;
-                        const isStockAvailable = product.stock === undefined || product.stock > 0;
+                        const itemPrice = item.selectedVariant && item.selectedVariant.price !== undefined ? item.selectedVariant.price : item.product.price;
+                        const itemStock = item.selectedVariant && item.selectedVariant.stock !== undefined ? item.selectedVariant.stock : (product.stock !== undefined ? product.stock : 58);
+                        const isStockAvailable = itemStock > 0;
 
                         return (
                           <div key={item.id} className="p-6 flex flex-col sm:flex-row gap-6 hover:bg-gray-50/50 transition-all">
                             {/* Product Image */}
                             <div className="w-20 h-20 bg-white border border-gray-100 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
-                              <img src={product.image} className="w-full h-full object-contain" alt={product.title} />
+                              <img src={item.selectedVariant?.image || product.image} className="w-full h-full object-contain" alt={product.title} />
                             </div>
 
                             {/* Content info */}
@@ -153,16 +162,30 @@ export function RetailCartPage() {
                                     <Trash2 size={16} />
                                   </button>
                                 </div>
+                                
+                                {item.selectedVariant && (
+                                  <div className="flex flex-wrap gap-1 mt-1 mb-1.5 align-middle">
+                                    {Object.entries(item.selectedVariant.attributes).map(([key, value]) => (
+                                      <span key={key} className="bg-orange-primary/10 text-orange-deep text-[8px] font-black uppercase px-2 py-0.5 rounded tracking-wide italic leading-none">
+                                        {key}: {value as string}
+                                      </span>
+                                    ))}
+                                    {item.selectedVariant.sku && (
+                                      <span className="bg-gray-100 text-gray-500 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase font-mono">
+                                        {item.selectedVariant.sku}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+
                                 <div className="flex items-center gap-3 mb-2">
                                   <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{product.category}</span>
-                                  {product.stock !== undefined && (
-                                    <span className={cn(
-                                      "text-[8px] font-black px-2 py-0.5 rounded uppercase italic",
-                                      product.stock === 0 ? "bg-red-50 text-red-500" : "bg-green-50 text-green-600"
-                                    )}>
-                                      {product.stock === 0 ? 'Out of Stock' : `Only ${product.stock} Left`}
-                                    </span>
-                                  )}
+                                  <span className={cn(
+                                    "text-[8px] font-black px-2 py-0.5 rounded uppercase italic",
+                                    itemStock === 0 ? "bg-red-50 text-red-500" : "bg-green-50 text-green-600"
+                                  )}>
+                                    {itemStock === 0 ? 'Out of Stock' : `Only ${itemStock} Left`}
+                                  </span>
                                 </div>
                               </div>
 
@@ -177,7 +200,7 @@ export function RetailCartPage() {
                                   </button>
                                   <span className="text-xs font-black px-3 text-navy italic">{item.quantity}</span>
                                   <button 
-                                    disabled={product.stock !== undefined && item.quantity >= product.stock}
+                                    disabled={itemStock !== undefined && item.quantity >= itemStock}
                                     onClick={() => handleQtyChange(item, 1)}
                                     className="w-7 h-7 rounded-full hover:bg-gray-50 flex items-center justify-center text-gray-400 hover:text-navy transition-colors disabled:opacity-30"
                                   >
@@ -188,7 +211,8 @@ export function RetailCartPage() {
                                 {/* Extended Price */}
                                 <div className="text-right">
                                   <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest block leading-none mb-1">EXT. TOTAL</span>
-                                  <span className="text-[14px] font-black text-orange-primary italic">৳{(itemPrice * item.quantity).toLocaleString()}</span>
+                                  <span className="text-[14px] font-black text-orange-primary italic font-mono">৳{(itemPrice * item.quantity).toLocaleString()}</span>
+                                  <span className="text-[9px] text-gray-400 block font-mono mt-0.5">৳{itemPrice.toLocaleString()} / pc</span>
                                 </div>
                               </div>
                             </div>

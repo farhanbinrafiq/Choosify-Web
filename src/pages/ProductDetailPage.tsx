@@ -30,10 +30,129 @@ export function ProductDetailPage() {
   const brandId = brandObj ? brandObj.id : 1;
   const brandName = brandObj ? brandObj.name : 'Apex';
 
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [activeTab, setActiveTab ] = useState('Overview');
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(1);
   const [b2bQty, setB2bQty] = useState(product?.moq || 10);
+
+  // Variant support state hooks
+  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedRam, setSelectedRam] = useState<string>('');
+  const [selectedStorage, setSelectedStorage] = useState<string>('');
+  const [isSizeChartOpen, setIsSizeChartOpen] = useState<boolean>(false);
+
+  // Sync state options when product changes
+  React.useEffect(() => {
+    if (product && product.variants && product.variants.length > 0) {
+      // Auto select first entry that is in stock, or just first entry
+      const firstAvailable = product.variants.find((v: any) => v.stock > 0) || product.variants[0];
+      if (firstAvailable) {
+        if (firstAvailable.attributes.color !== undefined) setSelectedColor(firstAvailable.attributes.color);
+        if (firstAvailable.attributes.size !== undefined) setSelectedSize(firstAvailable.attributes.size);
+        if (firstAvailable.attributes.ram !== undefined) setSelectedRam(firstAvailable.attributes.ram);
+        if (firstAvailable.attributes.storage !== undefined) setSelectedStorage(firstAvailable.attributes.storage);
+      }
+    } else {
+      setSelectedColor('');
+      setSelectedSize('');
+      setSelectedRam('');
+      setSelectedStorage('');
+    }
+  }, [product]);
+
+  const getSelectedVariant = () => {
+    if (!product || !product.variants || product.variants.length === 0) return null;
+    return product.variants.find((v: any) => {
+      const hasColor = v.attributes.color !== undefined;
+      const hasSize = v.attributes.size !== undefined;
+      const hasRam = v.attributes.ram !== undefined;
+      const hasStorage = v.attributes.storage !== undefined;
+
+      if (hasColor && v.attributes.color !== selectedColor) return false;
+      if (hasSize && v.attributes.size !== selectedSize) return false;
+      if (hasRam && v.attributes.ram !== selectedRam) return false;
+      if (hasStorage && v.attributes.storage !== selectedStorage) return false;
+      return true;
+    });
+  };
+
+  const selectedVariant = getSelectedVariant();
+
+  // Reset active image index to 0 when variant changes
+  React.useEffect(() => {
+    if (selectedVariant?.image) {
+      setCarouselIndex(0);
+    }
+  }, [selectedVariant?.image]);
+
+  // Unique attribute variants computation
+  const uniqueColors = product.variants 
+    ? Array.from(new Set(product.variants.map((v: any) => v.attributes.color).filter(Boolean))) as string[]
+    : [];
+
+  const uniqueSizes = product.variants 
+    ? Array.from(new Set(product.variants.map((v: any) => v.attributes.size).filter(Boolean))) as string[]
+    : [];
+
+  const uniqueRams = product.variants 
+    ? Array.from(new Set(product.variants.map((v: any) => v.attributes.ram).filter(Boolean))) as string[]
+    : [];
+
+  const uniqueStorages = product.variants 
+    ? Array.from(new Set(product.variants.map((v: any) => v.attributes.storage).filter(Boolean))) as string[]
+    : [];
+
+  // Availability lookup helpers for disabled states
+  const isSizeOptionAvailable = (size: string) => {
+    if (!product.variants) return true;
+    return product.variants.some((v: any) => 
+      v.attributes.size === size && 
+      (!selectedColor || v.attributes.color === selectedColor) &&
+      v.stock > 0
+    );
+  };
+
+  const isColorOptionAvailable = (color: string) => {
+    if (!product.variants) return true;
+    return product.variants.some((v: any) => 
+      v.attributes.color === color && 
+      (!selectedSize || v.attributes.size === selectedSize) &&
+      v.stock > 0
+    );
+  };
+
+  const isRamOptionAvailable = (ram: string) => {
+    if (!product.variants) return true;
+    return product.variants.some((v: any) => 
+      v.attributes.ram === ram && 
+      (!selectedStorage || v.attributes.storage === selectedStorage) &&
+      v.stock > 0
+    );
+  };
+
+  const isStorageOptionAvailable = (storage: string) => {
+    if (!product.variants) return true;
+    return product.variants.some((v: any) => 
+      v.attributes.storage === storage && 
+      (!selectedRam || v.attributes.ram === selectedRam) &&
+      v.stock > 0
+    );
+  };
+
+  const getColorHexClass = (colorName: string) => {
+    const norm = colorName.toLowerCase();
+    if (norm.includes('gray') || norm.includes('grey')) return 'bg-gray-400';
+    if (norm.includes('yellow') || norm.includes('gold')) return 'bg-yellow-400';
+    if (norm.includes('violet') || norm.includes('purple')) return 'bg-purple-500';
+    if (norm.includes('black')) return 'bg-gray-900';
+    if (norm.includes('white')) return 'bg-white border border-gray-300';
+    if (norm.includes('silver') || norm.includes('platinum')) return 'bg-slate-300';
+    if (norm.includes('blue')) return 'bg-blue-600';
+    if (norm.includes('red') || norm.includes('crimson')) return 'bg-red-500';
+    if (norm.includes('lime') || norm.includes('green')) return 'bg-lime-400';
+    return 'bg-amber-600';
+  };
 
   // Sync qty with state product MOQ
   React.useEffect(() => {
@@ -75,7 +194,7 @@ export function ProductDetailPage() {
   const tabs = ['Overview', 'Specifications', 'About Choosify.bd', 'Influencer Reviews', 'Public Reviews', 'Comparison'];
 
   const heroImages = [
-    product.image,
+    selectedVariant?.image || product.image,
     "https://images.unsplash.com/photo-1511119253457-36e78921865c?w=1200&h=800&fit=crop",
     "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&h=800&fit=crop",
     "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&h=800&fit=crop",
@@ -95,8 +214,13 @@ export function ProductDetailPage() {
   ];
 
   // Stock calculations
-  const isOutOfStock = product.id === 3 || product.title.includes('MacBook');
-  const stockQuantity = isOutOfStock ? 0 : 58;
+  const isOutOfStock = product.variants && product.variants.length > 0
+    ? (selectedVariant ? selectedVariant.stock === 0 : true)
+    : (product.id === 3 || product.title.includes('MacBook') || product.stock === 0);
+
+  const stockQuantity = product.variants && product.variants.length > 0
+    ? (selectedVariant ? selectedVariant.stock : 0)
+    : (isOutOfStock ? 0 : 58);
 
   // Retrieve matching products for "Similar Products From Similar Brands"
   const similarProducts: any[] = allProducts.filter((p: any) => p.id !== product.id).slice(0, 3);

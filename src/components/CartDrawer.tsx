@@ -32,6 +32,13 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   // Calculates the price based on slabs for a given quantity
   const getSlabPrice = (item: CartItem) => {
     const product = item.product;
+    if (mode === 'retail') {
+      if (item.selectedVariant && item.selectedVariant.price !== undefined) {
+        return item.selectedVariant.price;
+      }
+      return product.price;
+    }
+
     const slabs = product.pricingTiers || product.quantitySlabs || [];
     if (slabs.length === 0) return product.price;
 
@@ -49,6 +56,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
   // Calculates savings compared to base wholesale tier (first slab) or retail price
   const getItemBasePrice = (item: CartItem) => {
+    if (item.selectedVariant && item.selectedVariant.price !== undefined) {
+      return item.selectedVariant.price;
+    }
     return item.product.price;
   };
 
@@ -207,7 +217,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     >
                       {/* Image Thumbnail */}
                       <div className="w-20 h-20 bg-white rounded-xl overflow-hidden border border-gray-100 flex-shrink-0 flex items-center justify-center p-2">
-                        <img src={product.image} className="w-full h-full object-contain" alt={product.title} />
+                        <img src={item.selectedVariant?.image || product.image} className="w-full h-full object-contain" alt={product.title} />
                       </div>
 
                       {/* Info & Quantity controls */}
@@ -224,6 +234,21 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                               <Trash2 size={14} />
                             </button>
                           </div>
+                          
+                          {item.selectedVariant && (
+                            <div className="flex flex-wrap gap-1 mb-1.5 align-middle">
+                              {Object.entries(item.selectedVariant.attributes).map(([key, value]) => (
+                                <span key={key} className="bg-orange-primary/10 text-orange-deep text-[8px] font-black uppercase px-2 py-0.5 rounded tracking-wider italic">
+                                  {key}: {value as string}
+                                </span>
+                              ))}
+                              {item.selectedVariant.sku && (
+                                <span className="bg-gray-100 text-gray-500 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase font-mono">
+                                  {item.selectedVariant.sku}
+                                </span>
+                              )}
+                            </div>
+                          )}
                           
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{product.brand || 'Apex'}</span>

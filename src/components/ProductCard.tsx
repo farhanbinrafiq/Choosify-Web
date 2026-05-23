@@ -199,13 +199,35 @@ export function ProductCard({
           
           <StockProgress sm />
           
-          <div className="flex items-center justify-between gap-4 mt-auto pt-2 border-t border-gray-50/50">
-             <span className="text-[15px] font-black text-orange-primary italic leading-none shrink-0">BDT {product.price}</span>
-             <button type="button" onClick={(e) => { e.stopPropagation(); const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); }} className="flex flex-col items-center group/btn-mini shrink-0">
-                <div className="w-9 h-9 rounded-full border border-[#1B5CFF] flex items-center justify-center text-[#1B5CFF] group-hover/btn-mini:bg-[#1B5CFF] group-hover/btn-mini:text-white transition-all shadow-md">
-                   <Plus size={14} />
-                </div>
-                <span className="text-[8px] font-black text-[#1B5CFF] uppercase mt-1.5 tracking-tighter italic">{mode === 'retail' ? 'Add To Cart' : `Bulk Add (${product.moq || 10})`}</span>
+          <div className="flex items-center justify-between gap-2 mt-auto pt-2.5 border-t border-gray-100 w-full select-none">
+             <div className="flex flex-col text-left justify-center shrink-0">
+                <span className="text-[14px] font-black text-orange-primary italic leading-none">BDT {product.price}</span>
+                {product.originalPrice && (
+                  <span className="text-[9.5px] font-mono font-bold text-gray-400 line-through mt-1 leading-none">৳{product.originalPrice}</span>
+                )}
+             </div>
+             <button 
+               type="button" 
+               onClick={(e) => { 
+                 e.stopPropagation(); 
+                 const qty = mode === 'retail' ? 1 : (product.moq || 10); 
+                 addToCart(product, qty); 
+                 toast.success(`Successfully added ${product.title} to your verification basket!`);
+               }} 
+               className="w-10 h-10 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] text-white flex flex-col items-center justify-center shrink-0 hover:scale-[1.05] active:scale-[0.96] transition-transform shadow-md border-0 pointer-events-auto"
+               aria-label="Add to cart"
+             >
+                {mode === 'retail' ? (
+                   <>
+                      <span className="text-[7.5px] font-black uppercase font-space tracking-tight leading-none">Add To</span>
+                      <span className="text-[7.5px] font-black uppercase font-space tracking-tight leading-none mt-0.5">Cart</span>
+                   </>
+                ) : (
+                   <>
+                      <span className="text-[7.5px] font-black uppercase font-space tracking-tight leading-none">Bulk</span>
+                      <span className="text-[7.5px] font-black uppercase font-space tracking-tight leading-none mt-0.5">Add</span>
+                   </>
+                )}
              </button>
           </div>
         </div>

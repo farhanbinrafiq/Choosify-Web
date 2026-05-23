@@ -3,32 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Choosify.bd Buy Original</title>
-    
-    <!-- Meta Tags -->
-    <meta name="description" content="Choose, Compare & Decide Wisely. Bangladesh’s independent curated product discovery, recommendation, comparison and seller growth ecosystem." />
-    <meta name="keywords" content="Choosify, Bangladesh, shopping, compare products, original buy, authentic" />
-    
-    <!-- Open Graph / Social Media -->
-    <meta property="og:title" content="Choosify.bd Buy Original" />
-    <meta property="og:description" content="Discover, compare, and buy original products in Bangladesh with Choosify.bd." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="/logo.png" />
-    
-    <!-- Favicon / Brand Assets -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png" />
-    
-    <!-- Preload Assets -->
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1200&h=600&fit=crop&q=80" />
+    <title>Choosify.bd — Bangladesh's #1 Brand Discovery Platform</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet font-space">
+    <!-- Swiper.js CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <style>
+      /* Smooth Scrolling and Scrollbar Styling */
+      html, body {
+        scroll-behavior: smooth;
+        background-color: #EEF1F8;
+        font-family: 'Inter', sans-serif;
+      }
+      /* Hide Webkit Scrollbars for sticky sidebars while keeping them scrollable */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+      }
+    </style>
   </head>
-  <body>
+  <body class="bg-[#EEF1F8] text-[#1A1D4E] min-h-screen flex flex-col antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

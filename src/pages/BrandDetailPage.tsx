@@ -8,6 +8,32 @@ import { useNavigate, Link, useParams } from 'react-router-dom';
 import { useCarousel } from '../hooks/useCarousel';
 import { ReportModal } from '../components/ReportModal';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { toast } from 'react-hot-toast';
+
+interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
+  size?: number;
+}
+
+// Safe inline SVG Social Icons to prevent lucide-react compilation errors across different environments
+const FacebookIcon = ({ size = 16, ...props }: CustomIconProps) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" {...props}>
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+
+const InstagramIcon = ({ size = 16, ...props }: CustomIconProps) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+);
+
+const TikTokIcon = ({ size = 16, ...props }: CustomIconProps) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" {...props}>
+    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.81-.74-3.94-1.69-.14-.12-.29-.26-.4-.39-.01 2.3-.01 4.6-.01 6.91-.01 1.63-.44 3.25-1.31 4.58-1.57 2.39-4.42 3.79-7.3 3.47-3.41-.37-6.23-3.23-6.52-6.66-.41-4.75 3.51-8.91 8.26-8.5v4.13c-2.11-.27-4.11 1.17-4.59 3.23-.59 2.5 1.11 5.09 3.63 5.4 2.11.26 4.14-1.07 4.63-3.11.09-.37.11-.75.11-1.13V0h-3.8z" />
+  </svg>
+);
 
 export function BrandDetailPage() {
   const navigate = useNavigate();
@@ -15,6 +41,8 @@ export function BrandDetailPage() {
   const { allBrands, allProducts, mode } = useGlobalState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isLoved, setIsLoved] = useState(false);
+  const [isFollowed, setIsFollowed] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -22,8 +50,9 @@ export function BrandDetailPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Dynamically resolve brand or fallback to Apex (allBrands[2])
-  const brand = allBrands.find(b => String(b.id) === id) || allBrands[2];
+  // Dynamically resolve brand or fallback to Sailor/fashion-oriented layout
+  // Check if find brand with id, otherwise look for Yellow, Aarong, Sailor, or use Apex (allBrands[2])
+  const brand = allBrands.find(b => String(b.id) === id) || allBrands.find(b => b.name === 'Sailor') || allBrands[2];
   
   const brandProducts = allProducts.filter((p: any) => p.brandId === brand.id);
   const displaySuggestedProducts = brandProducts.length > 0 ? brandProducts.slice(0, 4) : allProducts.slice(0, 4);
@@ -78,950 +107,990 @@ export function BrandDetailPage() {
     suggestedCarousel.resume();
   };
 
-  const brandValues = [
-    { icon: <Users className="text-blue-500" />, title: "My Audience", items: ["Family Focused", "Mens Wear", "Teens & Kids", "Ethnic Style", "Teens"] },
-    { icon: <TrendingUp className="text-green-500" />, title: "My Messaging", items: ["Value Driven", "Ethical", "Smart Choice", "Youth Oriented", "Stylish"] },
-    { icon: <Star className="text-yellow-500" />, title: "My Appeal / Vibe", items: ["Modern Collection", "Youth Centric", "Modest Design", "Modern Fit", "Trendy"] },
-    { icon: <Zap className="text-orange-500" />, title: "My Brand / Styling", items: ["Eid Collection", "Durability", "Traditional Touch", "Festive Edition", "Regular Fit"] },
-    { icon: <Package className="text-purple-500" />, title: "Brand Materials", items: ["Premium Cotton", "Handcrafted", "Export Quality", "Traditional Silk", "Vibrant Colors"] },
-    { icon: <Gift className="text-pink-500" />, title: "The Occasion", items: ["Wedding Wear", "Formal Wear", "Daily Casual", "Eid Special", "Cultural Fest"] },
-  ];
+  // Dynamic high-fidelity Brand Overview Resolver
+  const getBrandOverviews = (brandName: string) => {
+    const name = brandName.toLowerCase();
+    
+    if (name.includes('sailor') || name.includes('la reve') || name.includes('yellow') || name.includes('aarong') || name.includes('ethnic') || name.includes('fashion') || name.includes('apex') || name.includes('bata') || name.includes('lotto')) {
+       return {
+          address: "GRAND SHOPPING MALL, HOUSE 2, ROAD 2, SECTOR 92. 1500 - DHAKA BANGLADESH.",
+          website: "www.website.com",
+          map: "https://https://www.google.com/maps",
+          email: "fashion@gmail.com",
+          phone: "01234456789",
+          priceRange: "BDT - 500",
+          ageRange: "AGE: 12 - 40",
+          audience: "MALE, FEMALE, YOUTH & KIDS",
+          services: [
+             "90 DAYS RETURN WITH REFUDN POLICY",
+             "FULL COD ENTIRE BANGLADESH",
+             "6 MONTHS WARRANTY ALL PRODUCT",
+             "CUSTOM GIFT BOX AVAILABLE",
+             "3 HOURS DELIVERY INSIDE DHAKA METRO",
+             "ONLINE & OFFLINE ORDER FACILITIES."
+          ],
+          tags: ["#premium buyers", "#quality driven", "#ethnic wear", "#fashion", "#eid collection", "#trend setter", "#old money", "#summer collection", "#beach wear"]
+       };
+    }
+    
+    // Tech brand overview resolver for Samsung/Apple/Sony etc.
+    return {
+       address: "JAMUNA FUTURE PARK, LEVEL 4, SHOP 22B, DHAKA BANGLADESH.",
+       website: `www.${name}.com.bd`,
+       map: "https://www.google.com/maps",
+       email: `support@${name}.com`,
+       phone: "09612345678",
+       priceRange: "BDT 5,000 - 150,000",
+       ageRange: "AGE: 18 - 60",
+       audience: "TECH ENTHUSIASTS, PROFESSIONALS",
+       services: [
+          "7 DAYS REPLACEMENT WARRANTY",
+          "100% ORIGINAL PRODUCT GUARANTEE",
+          "OFFICIAL BRAND WARRANTY",
+          "EMI AVAILABLE UP TO 24 MONTHS",
+          "EXPRESS HOME DELIVERY",
+          "SECURE CARD & MOBILE PAYMENTS"
+       ],
+       tags: ["#tech", "#gadgets", "#original", "#official warranty", "#smart choice", "#power user", "#premium build", "#trending tech"]
+    };
+  };
+
+  const overviewData = getBrandOverviews(brand.name);
+
+  // Dynamic Popular Categories Previews mapping (Panjabi, Western, Suit or shoes/tech equivalent)
+  const getPopularCategoryPreviews = () => {
+    const cat = (brand.category || '').toLowerCase();
+    const name = brand.name.toLowerCase();
+    if (name.includes('sailor') || name.includes('la reve') || name.includes('yellow') || name.includes('aarong') || cat.includes('fashion') || cat.includes('lifestyle') || cat.includes('clothing') || cat.includes('ethnic')) {
+      return [
+        { label: 'PANJABI', img: 'https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=400&h=600&fit=crop' },
+        { label: 'SUIT', img: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=600&fit=crop' },
+        { label: 'WESTERN', img: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=600&fit=crop' }
+      ];
+    }
+    if (cat.includes('shoe') || cat.includes('footwear') || name.includes('bata') || name.includes('apex') || name.includes('lotto')) {
+      return [
+        { label: 'CASUAL', img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=600&fit=crop' },
+        { label: 'SNEAKERS', img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=600&fit=crop' },
+        { label: 'FORMAL', img: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400&h=600&fit=crop' }
+      ];
+    }
+    // Tech & gadgets placeholder
+    return [
+      { label: 'MOBILES', img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=600&fit=crop' },
+      { label: 'GEAR', img: 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&h=600&fit=crop' },
+      { label: 'WEARABLES', img: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=600&fit=crop' }
+    ];
+  };
+
+  const popularCats = getPopularCategoryPreviews();
+
+  // Dynamic mappers for Brand Logo Graphics to look extremely premium and identical to physical look
+  const renderBrandLogo = (brandObj: any) => {
+    const term = brandObj.name.toLowerCase();
+    if (term.includes('sailor')) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-center bg-[#17192C] w-full text-white px-2 py-3 select-none">
+          <span className="font-serif tracking-widest text-[24px] font-bold leading-none uppercase">sailor</span>
+          <span className="text-[6px] tracking-[0.25em] font-mono text-gray-400 font-bold uppercase mt-1.5">by epyllion</span>
+        </div>
+      );
+    }
+    if (term.includes('apex')) {
+      return (
+        <div className="flex items-center justify-center h-full text-center bg-[#EB1C24] w-full text-white font-black italic tracking-tighter text-3xl select-none">
+          apex
+        </div>
+      );
+    }
+    if (term.includes('bata')) {
+      return (
+        <div className="flex items-center justify-center h-full text-center bg-[#E60012] w-full text-white font-black text-4xl select-none">
+          Bata
+        </div>
+      );
+    }
+    if (term.includes('aarong')) {
+       return (
+        <div className="flex flex-col items-center justify-center h-full text-center bg-[#AC1F24] w-full text-white px-2 py-2 select-none">
+          <span className="font-serif tracking-widest text-[22px] font-extrabold leading-none uppercase">aarong</span>
+        </div>
+      );
+    }
+    if (term.includes('yellow')) {
+       return (
+        <div className="flex items-center justify-center h-full text-center bg-[#FFF100] w-full text-navy font-black text-3xl select-none">
+          YELLOW
+        </div>
+      );
+    }
+    
+    // Fallback standard render
+    return (
+      <div className="w-full h-full bg-gradient-to-br from-navy to-[#2A2E6B] flex items-center justify-center text-4xl font-extrabold text-white">
+        {brandObj.logo || brandObj.name.substring(0, 2)}
+      </div>
+    );
+  };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-[#EEF1F8]">
       
-      {/* 1. Hero Section (Unchanged, with added neutral Report Store button top-right) */}
+      {/* 1. Brand Hero Section */}
       <motion.section 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="relative dark-brand-gradient pt-16 pb-8 overflow-hidden border-b border-white/5"
+        style={{
+          background: 'linear-gradient(135deg, #170E1A 0%, #11133A 50%, #191535 100%)'
+        }}
+        className="relative pt-10 pb-12 overflow-hidden border-b border-white/5"
       >
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
         </div>
 
-        {/* Report Store button - Small, clean neutral style, absolute top-right of hero section */}
-        <div className="absolute top-6 right-6 z-30">
-          <button 
-            onClick={() => setIsReportOpen(true)}
-            className="bg-white/10 backdrop-blur-md text-white border border-white/20 hover:bg-white/20 rounded-full px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] flex items-center gap-2 transition-all cursor-pointer shadow-lg"
-          >
-            <AlertCircle size={13} className="text-orange-primary" />
-            Report Store
-          </button>
+        {/* Global Breadcrumbs in Hero Area */}
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full mb-6">
+          <div className="flex items-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight size={10} className="text-white/20" />
+            <Link to="/brands" className="hover:text-white transition-colors">Brands</Link>
+            <ChevronRight size={10} className="text-white/20" />
+            <span className="text-white">{brand.name}</span>
+          </div>
         </div>
-        
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full mb-8">
-            <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-start">
-              {/* Left: Brand Identity */}
-              <div className="flex-1 w-full">
-                 <div className="flex items-center gap-4 md:gap-6 mb-6 flex-wrap">
-                    <div className="w-20 h-20 md:w-28 md:h-28 rounded-2xl bg-white flex items-center justify-center text-3xl md:text-5xl font-black text-navy shadow-2xl border-4 border-white relative">
-                       {brand.logo}
-                       <div className="absolute -top-2 -right-2 md:-top-3 md:-right-3 w-6 h-6 md:w-8 md:h-8 bg-orange-primary rounded-full flex items-center justify-center text-white border-[3px] md:border-4 border-[#050514] shadow-lg">
-                          <CheckCircle2 size={isMobile ? 12 : 16} />
+
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-center lg:items-start">
+              
+              {/* Left Side: Brand Profile Details */}
+              <div className="flex-1 w-full text-center lg:text-left">
+                 <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 text-center sm:text-left">
+                    
+                    {/* Brand avatar container styled matching Sailor logo mockup */}
+                    <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white relative shrink-0">
+                       {renderBrandLogo(brand)}
+                       <div className="absolute -top-1.5 -right-1.5 w-7 h-7 bg-[#E8500A] rounded-full flex items-center justify-center text-white border-2 border-[#10133A] shadow-lg">
+                          <CheckCircle2 size={13} fill="currentColor" className="text-white stroke-[#E8500A]" />
                        </div>
                     </div>
-                    <div>
-                       <div className="flex items-center gap-3 mb-1 flex-wrap">
-                          <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter shrink-0">{brand.name}</h1>
-                          <div className="bg-green-accent px-2 md:px-3 py-1 rounded-full flex items-center gap-2 shadow-lg w-fit">
-                             <ShieldCheck size={12} className="text-white" />
-                             <span className="text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">Verified Brand</span>
+
+                    <div className="flex-1">
+                       <div className="flex flex-col sm:flex-row items-center gap-3 mb-2 flex-wrap justify-center sm:justify-start">
+                          <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">{brand.name}</h1>
+                          <div className="bg-[#4DBC15] px-3 py-1 rounded-full flex items-center gap-2 shadow-md">
+                             <ShieldCheck size={11} className="text-white" />
+                             <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">Verified Brand</span>
                           </div>
                        </div>
-                       <div className="flex items-center gap-4 md:gap-6 flex-wrap mt-2">
+                       
+                       <p className="text-[10px] md:text-[11px] font-extrabold text-[#E8500A]/90 uppercase tracking-[0.2em] mb-4">
+                         {brand.category || 'Fashion & Clothing'}
+                       </p>
+
+                       <div className="flex items-center gap-5 flex-wrap justify-center sm:justify-start">
                           <div className="flex items-center gap-2">
-                             <span className="white/40 text-[9px] md:text-[10px] font-bold uppercase tracking-widest border-b border-white/20 pb-0.5">Brand of {brand.category || 'Lifestyle'}</span>
+                             <Heart size={14} className="text-[#E8500A] fill-current" />
+                             <span className="text-white font-extrabold text-[10px] uppercase tracking-widest italic">50,000 Shoppers Loves The Brands</span>
                           </div>
-                          <div className="h-3 w-px bg-white/10 hidden sm:block" />
-                          <div className="flex items-center gap-2">
-                             <Heart size={14} className="text-orange-primary fill-current" />
-                             <span className="text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest italic">{brand.followers || '25k'} Loves</span>
-                          </div>
-                          <div className="h-3 w-px bg-white/10 hidden sm:block" />
+                          <div className="h-4 w-px bg-white/10 hidden sm:block" />
                           <div className="flex items-center gap-2">
                              <TrendingUp size={14} className="text-green-accent" />
-                             <span className="text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest italic">Score: 92/100</span>
+                             <span className="text-white font-extrabold text-[10px] uppercase tracking-widest italic">Score: 92/100</span>
                           </div>
                        </div>
                     </div>
                  </div>
 
-                 {/* Top Socials/Quick Stats */}
-                 <div className="flex gap-3 md:gap-4 mb-8 md:mb-10 text-white flex-wrap">
-                    <button className="bg-orange-primary text-white text-[10px] md:text-[11px] font-black uppercase px-6 md:px-10 py-4 md:py-5 rounded-full tracking-[0.2em] shadow-2xl shadow-orange-primary/30 hover:scale-105 active:scale-95 transition-all italic border border-white/10 flex items-center gap-2 md:gap-3">
-                       <Heart size={isMobile ? 14 : 16} /> Love Brand
+                 {/* Action buttons inside landing board */}
+                 <div className="flex flex-wrap gap-3.5 mb-8 justify-center sm:justify-start text-white">
+                    <button 
+                      onClick={() => setIsLoved(!isLoved)}
+                      className={cn(
+                        "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
+                        isLoved 
+                          ? "bg-white text-[#E8500A] border-white shadow-white/5" 
+                          : "bg-[#E8500A] text-white border-[#E8500A]/30 hover:bg-[#ff5d14]"
+                      )}
+                    >
+                       <Heart size={14} className={cn("transition-colors", isLoved && "fill-current text-[#E8500A]")} />
+                       {isLoved ? "Loved" : "Love Brand"}
                     </button>
-                    <button className="bg-white/10 text-white text-[10px] md:text-[11px] font-black uppercase px-6 md:px-10 py-4 md:py-5 rounded-full tracking-[0.2em] hover:bg-white/20 transition-all italic border border-white/10">
-                       Follow Brand
+                    
+                    <button 
+                      onClick={() => {
+                        setIsFollowed(!isFollowed);
+                        toast.success(isFollowed ? `Unfollowed ${brand.name}` : `Following ${brand.name} for exclusive drops!`);
+                      }}
+                      className={cn(
+                        "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer",
+                        isFollowed
+                          ? "bg-[#4DBC15] text-white border-[#4DBC15]" 
+                          : "bg-white text-[#1A1D4E] border-white hover:bg-gray-50"
+                      )}
+                    >
+                       {isFollowed ? "Following" : "Follow the Brand"}
                     </button>
-                    <button className="bg-navy text-white text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-4 md:py-5 rounded-full tracking-[0.2em] hover:bg-navy/80 transition-all italic border border-white/20 flex items-center gap-2 md:gap-3">
-                       <Share2 size={isMobile ? 14 : 16} /> Share
+
+                    <button 
+                      onClick={() => {
+                        const reviewSec = document.getElementById('public-reviews-section');
+                        if (reviewSec) reviewSec.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="bg-transparent text-white border border-white/20 hover:bg-white/10 hover:border-white/40 text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all italic"
+                    >
+                       Write a Review
                     </button>
                  </div>
                  
-                 <div className="w-full md:w-fit">
-                    <button className="w-full md:w-fit bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-6 md:px-8 py-3 md:py-4 flex items-center justify-center gap-4 group hover:bg-white/20 transition-all">
-                       <div className="w-2 h-2 rounded-full bg-green-accent animate-pulse" />
-                       <span className="text-white font-black text-[10px] md:text-xs uppercase tracking-widest italic">Go To Authentic Store</span>
-                       <ChevronRight size={16} className="text-white group-hover:translate-x-1 transition-transform" />
-                    </button>
+                 {/* Social Find Us On Container with customized logo buttons */}
+                 <div className="flex items-center gap-4 mt-8 flex-wrap justify-center sm:justify-start">
+                    <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">Find Us On</span>
+                    <div className="flex items-center gap-5">
+                      <a href="#" className="group flex flex-col items-center gap-1">
+                         <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#1877F2] flex items-center justify-center text-white transition-all shadow-md">
+                           <FacebookIcon size={15} />
+                         </div>
+                         <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Facebook</span>
+                      </a>
+                      <a href="#" className="group flex flex-col items-center gap-1">
+                         <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#C13584] flex items-center justify-center text-white transition-all shadow-md">
+                           <InstagramIcon size={15} />
+                         </div>
+                         <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Instagram</span>
+                      </a>
+                      <a href="#" className="group flex flex-col items-center gap-1">
+                         <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-black flex items-center justify-center text-white transition-all shadow-md">
+                           <TikTokIcon size={14} />
+                         </div>
+                         <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">TikTok</span>
+                      </a>
+                      <a href="#" className="group flex flex-col items-center gap-1">
+                         <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#FF0000] flex items-center justify-center text-white transition-all shadow-md">
+                           <Youtube size={15} />
+                         </div>
+                         <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Youtube</span>
+                      </a>
+                    </div>
                  </div>
               </div>
 
-              {/* Right: Metrics Card */}
-              <div className="w-full md:w-[480px]">
-                 <div className="bg-white/10 backdrop-blur-3xl border border-white/10 rounded-[30px] p-8 text-white relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/20 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
-                    <div className="flex justify-between items-start mb-8">
+              {/* Right Side: Score card and rating bars sidebar panel */}
+              <div className="w-full lg:w-[420px] relative">
+                 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-white relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/10 blur-2xl rounded-full translate-x-1/3 -translate-y-1/3" />
+                    
+                    <div className="flex justify-between items-start mb-6">
                        <div>
-                          <div className="text-[10px] font-black uppercase text-white/40 tracking-widest mb-1">Expert Score</div>
-                          <div className="text-6xl font-black italic">4.3 <span className="text-2xl text-white/40">/5</span></div>
+                          <div className="text-[9px] font-black uppercase text-[#4DBC15] tracking-widest mb-0.5">Choosify Score</div>
+                          <div className="text-5xl font-black italic">4.3 <span className="text-xl text-white/55">/5</span></div>
                        </div>
                        <div className="text-right">
-                          <div className="flex gap-1 justify-end mb-1">
-                             {[1, 2, 3, 4].map(i => <Star key={i} size={14} className="fill-orange-primary text-orange-primary" />)}
-                             <Star size={14} className="fill-white/20 text-white/20" />
+                          <div className="flex gap-0.5 justify-end mb-1">
+                             {[1, 2, 3, 4].map(i => <Star key={i} size={13} className="fill-[#E8500A] text-[#E8500A]" />)}
+                             <Star size={13} className="text-white/20 fill-white/20" />
                           </div>
-                          <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Based on 840 reviews</div>
+                          <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Based on 500+ Reviews</div>
                        </div>
                     </div>
 
-                    <div className="space-y-4 mb-8">
+                    {/* Progress sliders matching mockup */}
+                    <div className="space-y-3.5 mb-6">
                        {[
-                          { label: "Quality", value: 85, color: "bg-green-accent" },
-                          { label: "Longevity", value: 72, color: "bg-orange-primary" },
-                          { label: "Service", value: 92, color: "bg-blue-400" },
-                          { label: "Style", value: 88, color: "bg-purple-400" },
-                          { label: "Price Range", value: 65, color: "bg-yellow-400" }
+                          { label: "Quality", value: 85, color: "bg-[#E8500A]" },
+                          { label: "Service", value: 90, color: "bg-[#4DBC15]" },
+                          { label: "Value", value: 81, color: "bg-[#E8500A]" },
+                          { label: "Delivery", value: 90, color: "bg-[#4DBC15]" },
+                          { label: "Packaging", value: 75, color: "bg-[#4DBC15]" }
                        ].map((m, i) => (
-                          <div key={i} className="flex items-center gap-4">
-                             <div className="w-20 text-[9px] font-bold uppercase tracking-widest text-white/60">{m.label}</div>
-                             <div className="flex-1 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                          <div key={i} className="flex items-center gap-3">
+                             <div className="w-16 text-[9px] font-bold uppercase tracking-wider text-white/60">{m.label}</div>
+                             <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
                                 <motion.div 
                                   initial={{ width: 0 }}
                                   animate={{ width: `${m.value}%` }}
-                                  transition={{ delay: 0.5, duration: 1 }}
+                                  transition={{ delay: 0.3, duration: 0.8 }}
                                   className={cn("h-full rounded-full", m.color)} 
                                 />
                              </div>
-                             <div className="w-8 text-[10px] font-black text-right">{m.value}%</div>
+                             <div className="w-8 text-[9px] font-black text-right text-white/80">{m.value}%</div>
                           </div>
                        ))}
                     </div>
 
-                    <div className="flex items-center gap-4 pt-6 border-t border-white/10">
-                       <div className="w-10 h-10 rounded-full blue-brand-gradient flex items-center justify-center">
-                          <TrendingUp size={20} />
-                       </div>
-                       <div>
-                          <div className="text-sm font-black italic">850+ Socials</div>
-                          <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Community Approved</div>
+                    {/* Recommend buyers board */}
+                    <div className="flex items-center justify-between pt-5 border-t border-white/10">
+                       <div className="text-center w-full">
+                          <div className="text-4xl font-black text-[#50DC17] leading-none mb-1">85%</div>
+                          <div className="text-[9px] font-black text-white/50 uppercase tracking-widest">Of Buyers Recommend This Brand</div>
                        </div>
                     </div>
                  </div>
-              </div>
-            </div>
-        </div>
 
-        {/* Global Breadcrumbs in Hero Area */}
-        <div className="max-w-7xl mx-auto px-8 relative z-10 w-full mb-4">
-          <div className="flex items-center gap-2 text-white/40 text-[9px] font-bold uppercase tracking-widest">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={10} />
-            <Link to="/brands" className="hover:text-white transition-colors">Brands</Link>
-            <ChevronRight size={10} />
-            <span className="text-white">{brand.name}</span>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* 2. Product Line Section (With prominent Browse All button below) */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        id="product-line" 
-        className="bg-white pt-12 pb-16"
-      >
-        <div className="max-w-7xl mx-auto px-8 text-center mb-12">
-           <h2 className="text-4xl font-black text-navy italic tracking-tighter mb-3 uppercase italic">Product Line</h2>
-           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-8">{brand.name}'s Trending Elements</p>
-        </div>
-
-        <div className="max-w-[1440px] mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-center gap-3 md:gap-5 h-[400px] md:h-[580px]">
-            {carouselItems.map((item, i) => {
-              const isActive = i === productLineIndex;
-              
-              return (
-                <motion.div
-                  key={i}
-                  onClick={() => setProductLineIndex(i)}
-                  initial={false}
-                  animate={{
-                    width: isActive ? (isMobile ? '100%' : '60%') : (isMobile ? '0%' : '13%'),
-                    flex: isActive ? 10 : 1,
-                    opacity: isActive ? 1 : 0.7,
-                  }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 20
-                  }}
-                  className={cn(
-                    "relative h-full rounded-[24px] md:rounded-[32px] overflow-hidden cursor-pointer group",
-                    !isActive && "hidden md:block"
-                  )}
-                >
-                  <img 
-                    src={item.img} 
-                    className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" 
-                    alt={item.name} 
-                  />
-                  <div className={cn(
-                     "absolute inset-0 transition-opacity duration-700",
-                     isActive ? "bg-gradient-to-t from-black/80 via-black/20 to-transparent" : "bg-black/30"
-                  )} />
-
-                  {/* Vertical Text for Inactive */}
-                  {!isActive && (
-                    <div className="absolute inset-x-0 bottom-12 flex justify-center translate-y-10 group-hover:translate-y-0 transition-transform">
-                      <span className="text-white/80 text-[11px] font-black uppercase tracking-[0.5em] italic origin-center rotate-[-90deg] whitespace-nowrap">
-                        {item.name}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Active Content - Text Title Only as requested */}
-                  {isActive && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="absolute inset-0 p-12 flex flex-col justify-end items-start"
+                 {/* Floating Save/Share controls on bottom right */}
+                 <div className="absolute -bottom-6 right-4 flex items-center gap-3 z-20">
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        toast.success("Page link copied to clipboard!");
+                      }}
+                      className="w-11 h-11 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50"
                     >
-                      <h3 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter uppercase mb-2 leading-none">
-                        {item.name}
-                      </h3>
-                    </motion.div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
+                       <Share2 size={16} />
+                    </button>
+                    <button 
+                      onClick={() => toast.success(`${brand.name} saved to your bookmarks!`)}
+                      className="w-11 h-11 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50"
+                    >
+                       <Bookmark size={15} />
+                    </button>
+                 </div>
+              </div>
 
-        {/* Navigation Controls */}
-        <div className="mt-12 flex items-center justify-center gap-12">
-          <div className="flex gap-4">
-            {carouselItems.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setProductLineIndex(i)}
-                className={cn(
-                  "h-1.5 transition-all duration-500 rounded-full",
-                  productLineIndex === i ? "w-20 bg-orange-primary" : "w-3 bg-gray-200"
-                )}
-              />
-            ))}
-          </div>
-          
-          <div className="flex gap-6">
-            <button 
-              onClick={handleProductLinePrev} 
-              className="w-14 h-14 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-90 shadow-sm"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <button 
-              onClick={handleProductLineNext} 
-              className="w-14 h-14 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-90 shadow-sm"
-            >
-              <ChevronRight size={24} />
-            </button>
-          </div>
-        </div>
-
-        {/* ADDITION: Prominent "Browse All From This Brand" button below the carousel / banner */}
-        <div className="mt-12 flex justify-center w-full px-4">
-          <Link 
-            to={`/brands/${brand.id}/products`}
-            className="bg-orange-primary hover:bg-orange-600 text-white font-black text-xs md:text-sm uppercase tracking-[0.2em] px-10 py-5 rounded-full shadow-2xl transition-all transform hover:scale-105 active:scale-95 italic inline-flex items-center gap-3 cursor-pointer border border-white/10"
-          >
-            <Shirt size={16} />
-            Browse All From This Brand
-          </Link>
-        </div>
-
-      </motion.section>
-
-      {/* 3. My Audience / My Messaging / My Appeal / My Brand / Brand Materials / The Occasion (Brand Attributes Grid) */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="bg-white py-16 border-b border-gray-100"
-      >
-         <div className="max-w-7xl mx-auto px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-12">
-               {brandValues.map((value, i) => (
-                  <div key={i} className="group">
-                     <div className="flex items-center gap-6 mb-8">
-                        <div className="w-14 h-14 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center group-hover:bg-navy group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-xl group-hover:shadow-navy/10 transform group-hover:rotate-6">
-                           {React.cloneElement(value.icon as React.ReactElement<any>, { size: 24, className: cn((value.icon as any).props.className, "group-hover:text-white") })}
-                        </div>
-                        <h4 className="text-xl font-black text-navy italic tracking-tight">{value.title}</h4>
-                     </div>
-                     <div className="flex flex-wrap gap-2">
-                        {value.items.map((item, j) => (
-                           <div key={j} className="flex items-center gap-2 pl-1 pr-4 py-1.5 bg-gray-50 border border-gray-100 rounded-full group-hover:border-navy/10 transition-colors">
-                              <div className="w-1.5 h-1.5 rounded-full bg-orange-primary" />
-                              <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider whitespace-nowrap">{item}</span>
-                           </div>
-                        ))}
-                     </div>
-                  </div>
-               ))}
             </div>
-         </div>
+        </div>
       </motion.section>
 
-      {/* 4. Top Suggested Products & Review Analysis */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="bg-[#F8FAFC] py-16 overflow-hidden"
-      >
-         <div className="max-w-7xl mx-auto px-8">
-            <div className="flex flex-col lg:flex-row gap-20">
-               {/* Left: Top Suggested Products */}
-               <div className="flex-1">
-                  <div className="flex items-center justify-between mb-12">
-                     <div>
-                        <h3 className="text-3xl font-black text-navy italic tracking-tighter mb-2 uppercase">Top Suggested Products</h3>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">{brand.name} Best Selling Items</p>
-                     </div>
-                     <Link to="/products" className="text-[10px] font-black text-orange-primary uppercase tracking-[0.2em] hover:opacity-70 transition-opacity">View All Lineup</Link>
-                  </div>
-                  
-                  <div className="relative w-full h-[400px] md:h-[480px]">
-                     <div className="flex items-center justify-center gap-3 h-full">
-                        {displaySuggestedProducts.map((p, i) => {
-                           const isActive = i === suggestedIndex;
-                           
-                           return (
-                             <motion.div
-                               key={p.id}
-                               onClick={() => setSuggestedIndex(i)}
-                               initial={false}
-                               animate={{
-                                 width: isActive ? (isMobile ? '100%' : '60%') : (isMobile ? '0%' : '15%'),
-                                 flex: isActive ? 8 : 1,
-                                 opacity: isActive ? 1 : 0.6,
-                               }}
-                               transition={{
-                                 type: "spring",
-                                 stiffness: 100,
-                                 damping: 20
-                               }}
-                               className={cn(
-                                 "relative h-full rounded-[24px] md:rounded-[30px] overflow-hidden cursor-pointer group",
-                                 !isActive && "hidden md:block"
-                               )}
-                             >
-                               <img 
-                                 src={p.image} 
-                                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" 
-                                 alt={p.title} 
-                               />
-                               <div className={cn(
-                                  "absolute inset-0 transition-opacity duration-700",
-                                  isActive ? "bg-gradient-to-t from-black/80 via-black/20 to-transparent" : "bg-black/40"
-                               )} />
+      {/* 2. Main Double Column Dashboard Layout */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 w-full">
+         <div className="grid grid-cols-1 lg:grid-cols-[330px_1fr] gap-8 items-start w-full">
+            
+            {/* LEFT COLUMN: BRAND OVERVIEW, POPULAR PRODUCTS, CODES, ADS */}
+            <div className="flex flex-col gap-8 w-full">
+               
+               {/* A. Brand Overview Section */}
+               <div id="brand-overview-panel" className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80">
+                  <h3 className="text-lg font-black text-[#1A1D4E] tracking-tight uppercase border-b border-gray-100 pb-3 mb-5 flex items-center gap-2">
+                     <span className="w-1.5 h-4 bg-[#E8500A] rounded-full inline-block" />
+                     Brand Overview
+                  </h3>
 
-                               {!isActive && (
-                                 <div className="absolute inset-x-0 bottom-12 flex justify-center translate-y-10 group-hover:translate-y-0 transition-transform">
-                                   <span className="text-white/80 text-[9px] font-black uppercase tracking-[0.5em] italic origin-center rotate-[-90deg] whitespace-nowrap">
-                                     {p.title}
-                                   </span>
-                                 </div>
-                               )}
-
-                               {isActive && (
-                                 <motion.div 
-                                   initial={{ opacity: 0, y: 10 }}
-                                   animate={{ opacity: 1, y: 0 }}
-                                   transition={{ delay: 0.3 }}
-                                   className="absolute inset-0 p-8 flex flex-col justify-end items-start"
-                                 >
-                                    <div className="flex items-center gap-2 mb-4 bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                                       <div className="w-5 h-5 rounded-full bg-orange-primary flex items-center justify-center text-white">
-                                          <Star size={10} className="fill-current" />
-                                       </div>
-                                       <span className="text-[8px] font-black text-white uppercase tracking-[0.2em] italic">TOP PICK</span>
-                                    </div>
-                                    <h4 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none mb-2">
-                                       {p.title}
-                                    </h4>
-                                 </motion.div>
-                               )}
-                             </motion.div>
-                           );
-                        })}
-                     </div>
-                  </div>
-
-                  {/* Navigator for Compact Carousel */}
-                  <div className="mt-8 flex items-center justify-center md:justify-start gap-10">
-                     <div className="flex gap-3">
-                        {[0, 1, 2, 3].map((i) => (
-                          <button
-                            key={i}
-                            onClick={() => setSuggestedIndex(i)}
-                            className={cn(
-                              "h-1 transition-all duration-500 rounded-full",
-                              suggestedIndex === i ? "w-12 bg-orange-primary" : "w-2 bg-gray-300"
-                            )}
-                          />
-                        ))}
-                     </div>
-                     <div className="flex gap-4">
-                        <button onClick={handleSuggestedPrev} className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all">
-                           <ChevronLeft size={18} />
-                        </button>
-                        <button onClick={handleSuggestedNext} className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all">
-                           <ChevronRight size={18} />
-                        </button>
-                     </div>
-                  </div>
-               </div>
-
-               {/* Right: Review Analysis & Comparison Highlights */}
-               <div className="w-full lg:w-[480px] space-y-8">
-                  <div className="bg-white rounded-[40px] p-10 shadow-soft border border-gray-50">
-                     <div className="flex items-center justify-between mb-10">
-                        <h4 className="font-black text-navy italic tracking-tight text-xl text-center">Review Analysis</h4>
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-green-accent/10 sm:text-green-accent rounded-full">
-                           <ShieldCheck size={14} className="text-green-accent" />
-                           <span className="text-[10px] font-bold uppercase text-green-accent tracking-widest italic">Digitally Selected</span>
-                        </div>
-                     </div>
-                     
-                     <div className="grid grid-cols-2 gap-10">
-                        <div>
-                           <div className="flex items-center gap-2 mb-4 text-green-500">
-                              <TrendingUp size={16} />
-                              <span className="text-[10px] font-black uppercase tracking-widest">Pros</span>
+                  <div className="space-y-6">
+                     {/* Address */}
+                     <div className="group">
+                        <div className="flex items-center gap-2.5 mb-1.5">
+                           <div className="w-6 h-6 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
+                              <CheckCircle2 size={13} fill="currentColor" className="text-[#E8500A] stroke-white" />
                            </div>
-                           <ul className="space-y-3">
-                              {["Value Price", "Stylish Build", "Youth Choice", "Durable Fabric"].map((item, i) => (
-                                 <li key={i} className="flex items-center gap-3 text-xs font-bold text-gray-500 italic">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                    {item}
-                                 </li>
-                              ))}
-                           </ul>
+                           <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider">Shop Address & Links</h4>
                         </div>
-                        <div>
-                           <div className="flex items-center gap-2 mb-4 text-red-500">
-                              <AlertCircle size={16} />
-                              <span className="text-[10px] font-black uppercase tracking-widest">Cons</span>
-                           </div>
-                           <ul className="space-y-3">
-                              {["Sizing Issue", "High Cost", "Limited Stock", "Online Only"].map((item, i) => (
-                                 <li key={i} className="flex items-center gap-3 text-xs font-bold text-gray-400 italic">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500/30" />
-                                    {item}
-                                 </li>
-                              ))}
-                           </ul>
-                        </div>
-                     </div>
-
-                     <div className="mt-12 p-8 bg-gray-50 rounded-[30px] relative overflow-hidden group">
-                        <div className="flex items-start gap-6">
-                           <div className="text-6xl font-black text-navy/10 italic leading-none">A+</div>
+                        <div className="pl-8 text-xs text-gray-500 font-bold leading-relaxed space-y-1.5">
+                           <p className="uppercase">{overviewData.address}</p>
                            <div>
-                              <div className="text-xs font-black text-navy uppercase tracking-widest mb-2 italic">Expert Rating</div>
-                              <p className="text-[11px] font-bold text-gray-400 leading-relaxed italic">
-                                {brand.name} has consistently maintained high scores across style and ethnic quality, making it a top choice for festive fashion in 2024.
-                              </p>
+                              <span className="text-[#E8500A] font-black">WEBSITE:</span>{' '}
+                              <a href={`https://${overviewData.website}`} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#1A1D4E]">
+                                 {overviewData.website}
+                              </a>
+                           </div>
+                           <div>
+                              <span className="text-[#E8500A] font-black">MAP:</span>{' '}
+                              <a href={overviewData.map} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#1A1D4E] truncate block max-w-full">
+                                 {overviewData.map}
+                              </a>
                            </div>
                         </div>
                      </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </motion.section>
 
-      {/* 5. Influencer & YouTuber Reviews */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="bg-[#050514] py-16 overflow-hidden relative border-b border-white/5"
-      >
-         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-         
-         <div className="flex justify-center mb-6">
-            <div className="bg-white rounded-full px-6 py-2 flex items-center gap-3 shadow-xl transform -translate-y-12">
-               <Users size={16} className="text-orange-primary" />
-               <span className="text-[10px] font-black text-navy uppercase tracking-widest italic">Creator Community</span>
-            </div>
-         </div>
-
-         <div className="max-w-7xl mx-auto px-8 relative">
-            <div className="text-center mb-16">
-               <h3 className="text-4xl md:text-5xl font-black text-white italic tracking-tighter mb-4 uppercase leading-none">Influencer & Youtuber Reviews</h3>
-               <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] italic mb-2">Trusted Experts Breaking Down {brand.name}</p>
-            </div>
-
-            {/* Featured Row */}
-            <div className="bg-white rounded-[32px] overflow-hidden mb-12 shadow-2xl flex flex-col lg:flex-row border border-white/5 bg-white/5 backdrop-blur-xl text-navy">
-               <div className="lg:w-3/5 relative group h-[400px] lg:h-auto min-h-[400px]">
-                  <img 
-                    src="https://images.unsplash.com/photo-1511119253457-36e78921865c?w=1200&h=800&fit=crop" 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
-                    alt="Featured Review"
-                  />
-                  <div className="absolute inset-0 bg-black/20" />
-                  <div className="absolute top-8 left-8">
-                     <span className="bg-orange-primary text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest italic flex items-center gap-2 shadow-xl">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> TRENDING NOW
-                     </span>
-                  </div>
-                  <div className="absolute top-8 right-8">
-                     <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
-                        <Youtube size={24} />
+                     {/* Contact */}
+                     <div className="group">
+                        <div className="flex items-center gap-2.5 mb-1.5">
+                           <div className="w-6 h-6 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
+                              <CheckCircle2 size={13} fill="currentColor" className="text-[#E8500A] stroke-white" />
+                           </div>
+                           <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider">Contact Informations</h4>
+                        </div>
+                        <div className="pl-8 text-xs text-gray-500 font-bold space-y-1">
+                           <p className="truncate"><span className="text-[#1A1D4E] font-black">EMAIL:</span> {overviewData.email}</p>
+                           <p><span className="text-[#1A1D4E] font-black">PHONE:</span> {overviewData.phone}</p>
+                        </div>
                      </div>
-                  </div>
-                  <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform group-hover:scale-110 transition-all duration-300">
-                     <Play size={28} className="fill-current ml-1" />
-                  </button>
-                  <div className="absolute bottom-10 left-10 text-white flex gap-6 items-end">
-                     <div className="flex flex-col items-start">
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2 italic">Creator Spotlight</p>
-                        <h4 className="text-4xl md:text-6xl font-black italic tracking-tighter leading-none mb-1">{brand.name} Special Edition</h4>
-                        <div className="w-20 h-1.5 bg-orange-primary rounded-full mt-2" />
-                      </div>
-                  </div>
-               </div>
-               <div className="lg:w-2/5 p-12 flex flex-col justify-center bg-white relative">
-                  <span className="text-[10px] font-black text-orange-primary uppercase tracking-[0.4em] mb-6 block italic px-3 py-1 border-l-2 border-orange-primary w-fit">IN-DEPTH REVIEW</span>
-                  <h4 className="text-3xl md:text-4xl font-black text-navy italic tracking-tighter leading-tight mb-6">Why {brand.name} remains a Top Choice in 2024!</h4>
-                  <p className="text-sm text-gray-500 font-medium leading-relaxed mb-10">
-                     Watch as we dive deep into the performance and build quality of {brand.name}'s latest collection. From real-world testing to expert analysis.
-                  </p>
-                  
-                  <div className="w-full h-[1px] bg-gray-100 mb-8" />
-                  
-                  <div className="flex items-center justify-between">
-                     <div className="flex flex-col">
-                        <div className="text-xs font-black text-navy italic uppercase tracking-wider mb-1">Tech Review BD</div>
-                        <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Live from Dhaka</div>
+
+                     {/* Price & Audience */}
+                     <div className="group">
+                        <div className="flex items-center gap-2.5 mb-1.5">
+                           <div className="w-6 h-6 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
+                              <CheckCircle2 size={13} fill="currentColor" className="text-[#E8500A] stroke-white" />
+                           </div>
+                           <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider">Price Range & Audience</h4>
+                        </div>
+                        <div className="pl-8 text-xs text-gray-500 font-bold space-y-1">
+                           <p><span className="text-[#1A1D4E] font-black">BDT</span> - {overviewData.priceRange.replace('BDT - ', '')}</p>
+                           <p>{overviewData.ageRange}</p>
+                           <p className="uppercase">{overviewData.audience}</p>
+                        </div>
                      </div>
-                     <div className="w-14 h-14 rounded-full bg-navy flex items-center justify-center text-white text-[10px] font-black uppercase tracking-tight shadow-xl italic">Choosify.bd</div>
-                  </div>
-               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-               {/* Portrait Card */}
-               <div className="bg-white rounded-[40px] overflow-hidden shadow-2xl border border-white/5 flex flex-col group lg:row-span-1 h-[600px] relative">
-                  <div className="absolute inset-0">
-                     <img 
-                        src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=1200&fit=crop" 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
-                        alt="Reel Review"
-                     />
-                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                  </div>
-                  
-                  <div className="absolute top-8 left-8">
-                     <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30">
-                        <Smartphone size={18} />
+                     {/* Services & Specialties */}
+                     <div className="group">
+                        <div className="flex items-center gap-2.5 mb-1.5">
+                           <div className="w-6 h-6 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
+                              <CheckCircle2 size={13} fill="currentColor" className="text-[#E8500A] stroke-white" />
+                           </div>
+                           <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider">Services & Specialties</h4>
+                        </div>
+                        <ul className="pl-8 space-y-1.5">
+                           {overviewData.services.map((srv, idx) => (
+                              <li key={idx} className="text-[10px] text-gray-500 font-bold uppercase tracking-wide flex items-start gap-1.5">
+                                 <span className="text-[#E8500A] text-xs leading-none">•</span>
+                                 <span>{srv}</span>
+                              </li>
+                           ))}
+                        </ul>
                      </div>
-                  </div>
 
-                  <div className="absolute top-8 right-8">
-                     <span className="bg-orange-primary/90 backdrop-blur-md text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest italic flex items-center gap-2">
-                        Product Reel <Zap size={10} className="fill-current" />
-                     </span>
-                  </div>
-
-                  <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform scale-90 group-hover:scale-100 transition-all opacity-0 group-hover:opacity-100">
-                     <Play size={24} className="fill-current ml-1" />
-                  </button>
-
-                  <div className="absolute bottom-24 left-8 right-8">
-                     <div className="flex items-center gap-2 mb-3">
-                        <div className="flex -space-x-2">
-                           {[1,2,3].map(i => (
-                              <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden">
-                                 <img src={`https://i.pravatar.cc/100?img=${i+20}`} className="w-full h-full object-cover" alt="avatar" />
-                              </div>
+                     {/* Tags */}
+                     <div className="group">
+                        <div className="flex items-center gap-2.5 mb-2.5">
+                           <div className="w-6 h-6 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
+                              <CheckCircle2 size={13} fill="currentColor" className="text-[#E8500A] stroke-white" />
+                           </div>
+                           <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider">Best For #Tags</h4>
+                        </div>
+                        <div className="pl-8 flex flex-wrap gap-1.5">
+                           {overviewData.tags.map((tag, idx) => (
+                              <span key={idx} className="text-[9px] font-black text-[#E8500A] bg-[#FFF0E8] px-2.5 py-1 rounded-full uppercase tracking-wider border border-[#E8500A]/5 select-none">
+                                 {tag}
+                              </span>
                            ))}
                         </div>
-                        <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">+25k Views</span>
-                     </div>
-                     <h5 className="text-2xl font-black text-white italic tracking-tighter mb-2 leading-tight">{brand.name} Style Showcase</h5>
-                  </div>
-
-                  <div className="mt-auto p-8 relative z-10 flex items-center justify-between bg-black/20 backdrop-blur-md">
-                      <div className="flex items-center gap-4">
-                         <div className="w-10 h-10 rounded-full bg-white border-2 border-orange-primary overflow-hidden">
-                            <img src="https://i.pravatar.cc/100?img=44" className="w-full h-full object-cover" alt="Fashion Ally" />
-                         </div>
-                         <div>
-                            <div className="text-xs font-black text-white italic">Style Maven</div>
-                            <div className="text-[9px] font-bold text-white/50">@stylemaven • 1.2m</div>
-                         </div>
-                      </div>
-                      <div className="flex items-center gap-1 text-orange-primary">
-                         <Star size={10} className="fill-current" />
-                         <span className="text-[10px] font-black">5.0</span>
-                      </div>
-                  </div>
-               </div>
-
-               {/* Regular Square Cards Container */}
-               <div className="flex flex-col gap-8 lg:col-span-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-                     {/* Square Card 1 */}
-                     <div className="bg-white rounded-[40px] overflow-hidden shadow-2xl border border-gray-100 flex flex-col group h-full">
-                        <div className="relative h-64 overflow-hidden">
-                           <img 
-                              src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=600&fit=crop" 
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
-                              alt="Review Card"
-                           />
-                           <div className="absolute inset-0 bg-navy/20" />
-                           <div className="absolute top-6 right-6">
-                              <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white border border-white/10">
-                                 <Youtube size={20} />
-                              </div>
-                           </div>
-                           <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform scale-0 group-hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
-                              <Play size={20} className="fill-current ml-1" />
-                           </button>
-                        </div>
-                        <div className="p-8 flex-1 flex flex-col text-navy">
-                           <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-1.5">
-                                 {[1,2,3,4,5].map(i => <Star key={i} size={10} className="fill-orange-primary text-orange-primary" />)}
-                              </div>
-                              <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest italic">Authentic</span>
-                           </div>
-                           <h5 className="text-xl font-black text-navy italic tracking-tighter leading-tight mb-4">{brand.name} Collection: A Deep Dive</h5>
-                           <p className="text-xs text-gray-400 font-medium leading-relaxed mb-8 italic">
-                              Testing the durability and comfort of this latest {brand.name} release.
-                           </p>
-                           
-                           <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
-                               <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center text-white font-black text-[10px] shadow-lg italic">RD</div>
-                                  <div>
-                                     <div className="text-xs font-black text-navy italic">BD Tech Guys</div>
-                                     <div className="text-[9px] font-bold text-gray-400">@bdtechguys • 420k</div>
-                                  </div>
-                               </div>
-                               <Heart size={16} className="text-gray-200 group-hover:text-red-500 transition-colors" />
-                           </div>
-                        </div>
-                     </div>
-
-                     {/* Square Card 2 */}
-                     <div className="bg-white rounded-[40px] overflow-hidden shadow-2xl border border-gray-100 flex flex-col group h-full">
-                        <div className="relative h-64 overflow-hidden">
-                           <img 
-                              src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=600&fit=crop" 
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
-                              alt="Review Card"
-                           />
-                           <div className="absolute inset-0 bg-navy/20" />
-                           <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform scale-0 group-hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
-                              <Play size={20} className="fill-current ml-1" />
-                           </button>
-                        </div>
-                        <div className="p-8 flex-1 flex flex-col text-navy">
-                           <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-1.5">
-                                 {[1,2,3,4].map(i => <Star key={i} size={10} className="fill-orange-primary text-orange-primary" />)}
-                              </div>
-                              <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest italic">Review</span>
-                           </div>
-                           <h5 className="text-xl font-black text-navy italic tracking-tighter leading-tight mb-4">Finding The Perfect Build in {brand.name}</h5>
-                           <p className="text-xs text-gray-400 font-medium leading-relaxed mb-8 italic">
-                              Exploring original luxury quality and how to verify authenticity.
-                           </p>
-                           
-                           <div className="mt-auto pt-6 border-t border-gray-200 flex items-center justify-between">
-                               <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-full bg-orange-primary text-white flex items-center justify-center text-white font-black text-[10px] shadow-lg italic">AM</div>
-                                  <div>
-                                     <div className="text-xs font-black text-navy italic">Auntie Mirpur</div>
-                                     <div className="text-[9px] font-bold text-gray-400">@auntiemirpur • 150k</div>
-                                  </div>
-                               </div>
-                               <Heart size={16} className="text-gray-200 group-hover:text-red-500 transition-colors" />
-                           </div>
-                        </div>
                      </div>
                   </div>
                </div>
-            </div>
-         </div>
-      </motion.section>
 
-      {/* 6. Public Reviews (Immediately after Influencer section) */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="bg-[#F8FAFC] py-16 border-t border-gray-100"
-      >
-         <div className="max-w-7xl mx-auto px-8">
-            <div className="text-center mb-16">
-               <h3 className="text-4xl font-black text-navy italic tracking-tighter mb-4 uppercase">Public Reviews</h3>
-               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em] italic px-4 py-1.5 border border-gray-100 rounded-full w-fit mx-auto bg-white">Verified Customer Experiences</p>
-            </div>
+               {/* B. Popular Products Section */}
+               <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80">
+                  <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-3">
+                     <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight flex items-center gap-2">
+                        <span className="w-1.5 h-4 bg-[#E8500A] rounded-full inline-block" />
+                        Popular Products
+                     </h3>
+                     <Link to="/products" className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider hover:underline">See All</Link>
+                  </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-               {[
-                  {
-                     name: "Tanvir Hasan",
-                     date: "2 weeks ago",
-                     purchaseDate: "April 2024",
-                     comment: `The material quality of the new ${brand.name} collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect for large build individuals as well.`,
-                     rating: 5,
-                     verified: true,
-                     productImages: [
-                        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
-                        "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop"
-                     ],
-                     dp: "https://i.pravatar.cc/150?u=tanvir",
-                     helpful: 124,
-                     unhelpful: 2
-                  },
-                  {
-                     name: "Nusrat Jahan",
-                     date: "1 month ago",
-                     purchaseDate: "March 2024",
-                     comment: "Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the fusion wear collection.",
-                     rating: 4.8,
-                     verified: true,
-                     productImages: [
-                        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop"
-                     ],
-                     dp: "https://i.pravatar.cc/150?u=nusrat",
-                     helpful: 89,
-                     unhelpful: 5
-                  }
-               ].map((review, i) => (
-                  <motion.div 
-                     key={i}
-                     initial={{ opacity: 0, y: 30 }}
-                     whileInView={{ opacity: 1, y: 0 }}
-                     viewport={{ once: true }}
-                     className="bg-white rounded-[40px] p-10 shadow-soft border border-gray-100 flex flex-col group hover:shadow-2xl transition-all duration-500"
-                  >
-                     <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-4">
-                           <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-orange-primary shadow-lg p-0.5">
-                              <img src={review.dp} className="w-full h-full object-cover rounded-[14px]" alt={review.name} />
+                  <div className="grid grid-cols-3 gap-3">
+                     {popularCats.map((cat, idx) => (
+                        <div key={idx} className="flex flex-col items-center group cursor-pointer" onClick={() => navigate('/products')}>
+                           <div className="w-full aspect-[2/3] rounded-xl overflow-hidden relative border border-gray-100 shadow-sm mb-2 group-hover:shadow-md transition-all">
+                              <img src={cat.img} alt={cat.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                              <div className="absolute inset-0 bg-navy/10 group-hover:bg-transparent transition-colors" />
                            </div>
-                           <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                 <span className="font-black text-navy italic tracking-tight text-lg">{review.name}</span>
-                                 {review.verified && (
-                                    <div className="flex items-center gap-1 bg-green-accent/10 px-2 py-0.5 rounded-full">
-                                       <CheckCircle2 size={10} className="text-green-accent" />
-                                       <span className="text-[8px] font-black uppercase text-green-accent italic">Verified</span>
-                                    </div>
-                                 )}
-                              </div>
-                              <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic">Posted {review.date}</div>
-                           </div>
+                           <span className="text-[9px] font-black text-[#1A1D4E] tracking-wider uppercase text-center group-hover:text-[#E8500A] transition-colors">
+                              {cat.label}
+                           </span>
                         </div>
-                        <div className="text-right">
-                           <div className="flex items-center gap-1 mb-1">
-                              {[1, 2, 3, 4, 5].map(star => (
-                                 <Star 
-                                    key={star} 
-                                    size={12} 
-                                    className={cn(
-                                       "fill-current",
-                                       star <= review.rating ? "text-orange-primary" : "text-gray-100"
-                                    )} 
-                                 />
-                              ))}
+                     ))}
+                  </div>
+               </div>
+
+               {/* C. Exclusive Promo Codes Section */}
+               <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80">
+                  <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-3">
+                     <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight flex items-center gap-2">
+                        <span className="w-1.5 h-4 bg-[#E8500A] rounded-full inline-block" />
+                        Promo Codes
+                     </h3>
+                     <Link to="/deals" className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider hover:underline">See All</Link>
+                  </div>
+
+                  <div className="space-y-4">
+                     {[
+                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: "EID26", expiry: "Valid till June 30" },
+                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: `${brand.name.toUpperCase()}500`, expiry: "For New Users Only" },
+                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: `${brand.name.toUpperCase()}20`, expiry: "Valid till June 30" }
+                     ].map((promo, idx) => (
+                        <div key={idx} className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex flex-col items-center text-center relative overflow-hidden group">
+                           <div className="w-8 h-8 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
+                              <Gift size={15} />
                            </div>
-                           <div className="text-lg font-black text-navy italic">{review.rating} <span className="text-[10px] text-gray-300">/ 5</span></div>
+                           <h4 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider mb-0.5">{promo.title}</h4>
+                           <div className="text-sm font-black text-[#E8500A] italic uppercase mb-3 leading-none">{promo.discount}</div>
+                           
+                           <button 
+                             onClick={() => {
+                               navigator.clipboard.writeText(promo.code);
+                               toast.success(`Code ${promo.code} copied!`);
+                             }}
+                             className="w-full py-2 bg-white rounded-xl border border-dashed border-gray-200 hover:border-[#E8500A] font-mono text-[11px] font-extrabold text-[#1A1D4E] tracking-widest uppercase transition-colors flex flex-col items-center justify-center cursor-pointer"
+                           >
+                              <span className="text-[7px] text-gray-400 font-sans tracking-wide uppercase font-black">PROMO CODE</span>
+                              <span>{promo.code}</span>
+                           </button>
+                           
+                           <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2">{promo.expiry}</span>
                         </div>
+                     ))}
+                  </div>
+               </div>
+
+               {/* D. Sponsored Ad Section */}
+               <div className="bg-[#100D2B] rounded-3xl p-6 text-white text-center relative overflow-hidden shadow-md">
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
+                  <div className="relative z-10">
+                     <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4">
+                        Sponsored Ad
+                     </span>
+                     
+                     <div className="w-full aspect-square rounded-2xl overflow-hidden mb-5 border border-white/10 shadow-lg">
+                        <img 
+                          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop" 
+                          alt="Sponsor AD" 
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
+                        />
                      </div>
+                     
+                     <h4 className="font-serif text-lg font-bold tracking-widest uppercase mb-1">AARONG</h4>
+                     <p className="text-[9px] font-black text-white/50 tracking-wider uppercase mb-3">Heritage Shopping Brand</p>
+                     
+                     <p className="text-[11px] text-white/70 font-medium leading-relaxed mb-6 px-1">
+                        New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
+                     </p>
+                     
+                     <button className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-full shadow-lg hover:shadow-[#E8500A]/20 transition-all cursor-pointer">
+                        Shop Now
+                     </button>
+                  </div>
+               </div>
 
-                     {/* Product Images */}
-                     <div className="flex gap-3 mb-8">
-                        {review.productImages.map((img, j) => (
-                           <div key={j} className="w-24 h-24 rounded-2xl overflow-hidden border border-gray-50 group-hover:border-navy/10 transition-colors cursor-zoom-in">
-                              <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="product review" />
-                           </div>
+            </div>
+
+            {/* RIGHT COLUMN: PRODUCT LINE (ACCORDION), CREATOR SPOTLIGHT, REVIEW CARDS, COMPARISON TABLE */}
+            <div className="flex flex-col gap-8 w-full">
+               
+               {/* A. Product Line Carousel Grid (Accordion style preserved) */}
+               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
+                  <div className="flex justify-between items-center mb-6">
+                     <div>
+                        <h2 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase flex items-center gap-2">
+                           <span className="w-1.5 h-5 bg-[#E8500A] rounded-full inline-block" />
+                           Product Line
+                        </h2>
+                     </div>
+                     <Link to={`/brands/${brand.id}/products`} className="text-[10px] font-black text-[#E8500A] hover:underline uppercase tracking-wider">Browse All Product</Link>
+                  </div>
+
+                  {/* Interactive accordions section */}
+                  <div className="flex flex-col md:flex-row gap-3.5 h-[340px] md:h-[460px] overflow-hidden w-full">
+                     {carouselItems.map((item, idx) => {
+                        const isActive = idx === productLineIndex;
+                        return (
+                           <motion.div
+                             key={idx}
+                             onClick={() => setProductLineIndex(idx)}
+                             initial={false}
+                             animate={{
+                               width: isActive ? (isMobile ? '100%' : '60%') : (isMobile ? '0%' : '13%'),
+                               flex: isActive ? 10 : 1,
+                               opacity: isActive ? 1 : 0.75,
+                             }}
+                             transition={{
+                               type: "spring",
+                               stiffness: 85,
+                               damping: 17
+                             }}
+                             className={cn(
+                               "relative h-full rounded-2xl overflow-hidden cursor-pointer group",
+                               !isActive && "hidden md:block"
+                             )}
+                           >
+                             <img src={item.img} alt={item.name} className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-105" />
+                             <div className={cn(
+                                "absolute inset-0 transition-opacity duration-700",
+                                isActive ? "bg-gradient-to-t from-black/85 via-black/25 to-transparent" : "bg-black/35"
+                             )} />
+
+                             {/* Sideway labels for collapsed panels */}
+                             {!isActive && (
+                                <div className="absolute inset-x-0 bottom-12 flex justify-center translate-y-10 group-hover:translate-y-0 transition-transform">
+                                   <span className="text-white/80 text-[10px] font-black uppercase tracking-[0.4em] italic origin-center rotate-[-90deg] whitespace-nowrap">
+                                      {item.name}
+                                   </span>
+                                </div>
+                             )}
+
+                             {/* Full Title on active panels */}
+                             {isActive && (
+                                <motion.div 
+                                  initial={{ opacity: 0, y: 15 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.2 }}
+                                  className="absolute inset-0 p-8 flex flex-col justify-end items-start"
+                                >
+                                   <span className="text-[8px] font-black text-white/60 uppercase tracking-[0.3em] mb-1 italic">{item.category}</span>
+                                   <h3 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
+                                      {item.name}
+                                   </h3>
+                                </motion.div>
+                             )}
+                           </motion.div>
+                        );
+                     })}
+                  </div>
+
+                  {/* Accordion Carousel buttons and paginations */}
+                  <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                     <div className="flex gap-2.5">
+                        {carouselItems.map((_, idx) => (
+                           <button
+                             key={idx}
+                             onClick={() => setProductLineIndex(idx)}
+                             className={cn(
+                               "h-1.5 transition-all duration-300 rounded-full",
+                               productLineIndex === idx ? "w-10 bg-[#E8500A]" : "w-2 bg-gray-200 hover:bg-gray-300"
+                             )}
+                           />
                         ))}
                      </div>
+                     
+                     <div className="flex gap-3">
+                        <button onClick={handleProductLinePrev} className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 bg-white transition-all active:scale-95 shadow-sm cursor-pointer">
+                           <ChevronLeft size={18} className="text-[#1A1D4E]" />
+                        </button>
+                        <button onClick={handleProductLineNext} className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 bg-white transition-all active:scale-95 shadow-sm cursor-pointer">
+                           <ChevronRight size={18} className="text-[#1A1D4E]" />
+                        </button>
+                     </div>
+                  </div>
 
-                     <div className="p-8 bg-gray-50 rounded-[30px] mb-8 relative">
-                        <div className="absolute top-4 right-6 text-4xl font-black text-navy/5 italic">"</div>
-                        <p className="text-sm text-navy/80 font-bold leading-relaxed italic">
-                           {review.comment}
-                        </p>
+                  {/* Primary browse all button below */}
+                  <div className="mt-8 border-t border-gray-50 pt-6 flex justify-center">
+                     <Link 
+                       to={`/brands/${brand.id}/products`}
+                       className="bg-[#E8500A] hover:bg-[#ff5d14] text-white text-xs font-black uppercase tracking-[0.2em] px-8 py-4 rounded-full shadow-lg transition-transform transform hover:scale-[1.03] active:scale-[0.97] italic inline-flex items-center gap-2"
+                     >
+                        Browse All Product
+                     </Link>
+                  </div>
+               </div>
+
+               {/* B. Influencer & YouTuber Reviews section */}
+               <div className="bg-[#0C0C16] rounded-3xl p-6 md:p-8 text-white relative overflow-hidden border border-white/5">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#E8500A]/5 blur-3xl pointer-events-none" />
+                  
+                  <div className="flex items-center gap-2 mb-4 bg-white/5 border border-white/10 rounded-full px-3 py-1 w-fit">
+                     <Users size={12} className="text-[#E8500A]" />
+                     <span className="text-[8px] font-black uppercase tracking-widest italic text-white/70">Creator Community</span>
+                  </div>
+
+                  <div className="mb-8">
+                     <h3 className="text-xl md:text-2xl font-black italic uppercase tracking-tight mb-2">
+                        Influencer & Youtuber Reviews
+                     </h3>
+                     <p className="text-[10px] uppercase tracking-[0.3em] font-black text-white/30 italic">
+                        Trusted Experts Breaking Down {brand.name}
+                     </p>
+                  </div>
+
+                  {/* Main YouTube Feature block */}
+                  <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md mb-8">
+                     <div className="relative aspect-video xl:aspect-auto xl:h-[300px] group overflow-hidden">
+                        <img 
+                          src="https://images.unsplash.com/photo-1511119253457-36e78921865c?w=800&h=600&fit=crop" 
+                          alt="Main Review" 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                        />
+                        <div className="absolute inset-0 bg-black/30" />
+                        
+                        <div className="absolute top-4 left-4">
+                           <span className="bg-[#E8500A] text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-wider italic flex items-center gap-1.5 shadow-md">
+                              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> TRENDING NOW
+                           </span>
+                        </div>
+                        
+                        <button 
+                          onClick={() => toast.success("Opening Video Review stream...")}
+                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform scale-100 group-hover:scale-110 transition-transform duration-300 cursor-pointer"
+                        >
+                           <Play size={20} className="fill-current ml-1" />
+                        </button>
+                        
+                        <div className="absolute bottom-4 left-4 right-4 text-white">
+                           <span className="text-[8px] tracking-widest uppercase text-white/50 block font-black mb-1">Creator Spotlight</span>
+                           <h4 className="text-lg md:text-xl font-black italic tracking-tight">{brand.name} Special Edition</h4>
+                        </div>
                      </div>
 
-                     <div className="flex items-center justify-between mt-auto pt-6 border-t border-gray-50">
-                        <div className="flex items-center gap-6">
-                           <div className="flex flex-col">
-                              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 italic">Purchase Date</span>
-                              <span className="text-[10px] font-black text-navy uppercase tracking-widest italic">{review.purchaseDate}</span>
+                     <div className="p-6 md:p-8 flex flex-col justify-center bg-white/5 backdrop-blur-md">
+                        <span className="text-[9px] font-black text-[#E8500A] tracking-widest block uppercase mb-3 italic">IN-DEPTH REVIEW</span>
+                        <h4 className="text-base md:text-lg font-black italic tracking-tight leading-snug mb-3">
+                           Why {brand.name} remains a Top Choice in 2024!
+                        </h4>
+                        <p className="text-xs text-white/60 font-medium leading-relaxed mb-6">
+                           Watch as we dive deep into the performance and build quality of {brand.name}'s latest collection. From real-world testing to expert material analysis.
+                        </p>
+                        
+                        <div className="w-full h-px bg-white/10 mb-5" />
+                        
+                        <div className="flex items-center justify-between flex-wrap gap-4">
+                           <div>
+                              <div className="text-[10px] font-black text-white italic">{brand.name === 'Apex' ? 'Tech Review BD' : 'Style Talk BD'}</div>
+                              <div className="text-[8px] font-black text-white/40 tracking-wider uppercase">Live from Dhaka</div>
+                           </div>
+                           <span className="text-[10px] font-black uppercase text-[#E8500A] tracking-widest bg-white/5 px-3 py-1.5 rounded border border-white/5 select-none">CHOOSIFY APPROVED</span>
+                        </div>
+                     </div>
+                  </div>
+
+                  {/* Reels & Other Reviews Container */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                     
+                     {/* Reel Card */}
+                     <div className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 h-[280px] relative flex flex-col group">
+                        <div className="absolute inset-0">
+                           <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=800&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Style Reel" />
+                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                        </div>
+                        
+                        <div className="absolute top-3 left-3 bg-white/20 backdrop-blur-md rounded-full w-7 h-7 flex items-center justify-center text-white font-extrabold border border-white/10">
+                           <Smartphone size={13} />
+                        </div>
+                        <div className="absolute top-3 right-3 bg-[#E8500A]/90 backdrop-blur-md rounded-full text-[7px] font-black px-2.5 py-1 uppercase tracking-wider text-white">
+                           Product Reel
+                        </div>
+
+                        <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-red-600 shadow-xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transform scale-90 group-hover:scale-100 transition-all cursor-pointer">
+                           <Play size={14} className="fill-current ml-0.5" />
+                        </div>
+
+                        <div className="mt-auto p-4 relative z-10">
+                           <h5 className="text-sm font-black italic tracking-tight text-white mb-2 leading-tight">
+                              {brand.name} Style Showcase
+                           </h5>
+                           <div className="flex items-center gap-2 justify-between border-t border-white/10 pt-2 text-[9px]">
+                              <span className="text-white/60 font-black tracking-wider uppercase">@stylemaven</span>
+                              <span className="text-white/40 font-bold">12K Views</span>
                            </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                           <button className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border border-gray-100 hover:border-navy hover:text-navy transition-all shadow-sm group/btn">
-                              <ThumbsUp size={14} className="group-hover/btn:-translate-y-0.5 transition-transform" />
-                              <span className="text-[10px] font-black uppercase tracking-widest italic">Helpful ({review.helpful})</span>
-                           </button>
-                           <button className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 text-gray-300 hover:text-red-500 hover:bg-red-55 transition-all">
-                              <ThumbsUp size={14} className="rotate-180" />
-                           </button>
+                     </div>
+
+                     {/* Second Review Card */}
+                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white">
+                        <div className="relative h-28 overflow-hidden bg-black">
+                           <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Apex Showcase" />
+                           <div className="absolute inset-0 bg-black/10" />
+                           <div className="absolute top-2.5 right-2.5 bg-black/40 backdrop-blur-md rounded-full w-7 h-7 flex items-center justify-center border border-white/10">
+                              <Youtube size={14} className="text-red-600" />
+                           </div>
+                        </div>
+                        <div className="p-4 flex-1 flex flex-col text-white">
+                           <div className="flex items-center justify-between mb-2">
+                              <div className="flex gap-0.5">
+                                 {[1,2,3,4,5].map(i => <Star key={i} size={8} className="fill-[#E8500A] text-[#E8500A]" />)}
+                              </div>
+                              <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase">AUTHENTIC</span>
+                           </div>
+                           <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5">{brand.name} Collection review</h5>
+                           <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic mb-4">Testing durability and comfort on first wear of latest releases.</p>
+                           
+                           <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60">
+                              <span className="font-extrabold">BD Tech Guys</span>
+                              <span className="text-white/30">420K • 5.0</span>
+                           </div>
                         </div>
                      </div>
-                  </motion.div>
-               ))}
-            </div>
-            
-            <div className="mt-16 flex justify-center">
-               <button className="px-12 py-4 border-2 border-navy text-navy font-black text-[10px] uppercase tracking-widest rounded-full hover:bg-navy hover:text-white transition-all transform hover:scale-105 active:scale-95 italic">Load More Reviews</button>
-            </div>
-         </div>
-      </motion.section>
 
-      {/* 7. Exclusive Brand Promo Codes */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="bg-white py-16 border-t border-gray-100 relative overflow-hidden"
-      >
-         <div className="absolute top-0 right-0 w-1/4 h-full bg-orange-primary/5 blur-[100px] rounded-full translate-x-1/2" />
-         <div className="max-w-7xl mx-auto px-8 relative">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-               <div>
-                  <h3 className="text-4xl font-black text-navy italic tracking-tighter mb-4 uppercase">Exclusive Brand Promo Codes</h3>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em] italic mb-2">Limited Time Offers & Vouchers</p>
+                     {/* Third Review Card */}
+                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white">
+                        <div className="relative h-28 overflow-hidden bg-black">
+                           <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=300&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Perfume Showcase" />
+                           <div className="absolute inset-0 bg-black/10" />
+                           <div className="absolute top-2.5 right-2.5 bg-black/40 backdrop-blur-md rounded-full w-7 h-7 flex items-center justify-center border border-white/10">
+                              <Youtube size={14} className="text-red-600" />
+                           </div>
+                        </div>
+                        <div className="p-4 flex-1 flex flex-col text-white">
+                           <div className="flex items-center justify-between mb-2">
+                              <div className="flex gap-0.5">
+                                 {[1,2,3,4].map(i => <Star key={i} size={8} className="fill-[#E8500A] text-[#E8500A]" />)}
+                              </div>
+                              <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase">DEEP DIVE</span>
+                           </div>
+                           <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5">Finding perfection in {brand.name}</h5>
+                           <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic mb-4">Exploring luxury and comfort and how to verify original tags.</p>
+                           
+                           <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60">
+                              <span className="font-extrabold">Auntie Mirpur</span>
+                              <span className="text-white/30">150K • 4.5</span>
+                           </div>
+                        </div>
+                     </div>
+
+                  </div>
                </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-               {[
-                  { title: "Eid Special Voucher", discount: "20% OFF", code: `${brand.name.toUpperCase()}EID`, expiry: "Valid till June 30", icon: <Gift /> },
-                  { title: "First Purchase Offer", discount: "৳ 500 FLAT", code: `${brand.name.toUpperCase()}500`, expiry: "New Users Only", icon: <DollarSign /> },
-                  { title: "Free Shipping", discount: "MIN ৳ 2000", code: `${brand.name.toUpperCase()}SHIP`, expiry: "Selected Areas", icon: <Package /> }
-               ].map((deal, i) => (
-                  <motion.div 
-                     key={i}
-                     whileHover={{ y: -10 }}
-                     className="bg-gray-50 rounded-[30px] p-8 border border-gray-100 flex flex-col items-center text-center group hover:bg-white hover:shadow-2xl transition-all duration-500"
-                  >
-                     <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-navy mb-6 shadow-sm group-hover:scale-110 group-hover:rotate-6 transition-transform">
-                        {React.cloneElement(deal.icon as React.ReactElement<any>, { size: 28 })}
-                     </div>
-                     <h4 className="text-xl font-black text-navy italic tracking-tight mb-2">{deal.title}</h4>
-                     <div className="text-3xl font-black text-orange-primary italic tracking-tighter mb-6 underline decoration-navy/10 underline-offset-8">
-                        {deal.discount}
-                     </div>
-                     
-                     <div className="w-full p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200 mb-6 flex flex-col items-center relative overflow-hidden group/code">
-                        <div className="absolute top-0 right-0 w-8 h-8 bg-gray-50 rotate-45 translate-x-1/2 -translate-y-1/2 border-l border-b border-gray-100" />
-                        <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest mb-1 italic">Promo Code</span>
-                        <span className="text-xl font-black text-navy tracking-[0.2em]">{deal.code}</span>
-                     </div>
-                     
-                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic">{deal.expiry}</span>
-                  </motion.div>
-               ))}
-            </div>
-         </div>
-      </motion.section>
+               {/* C. Public Reviews Customer Dashboard (ID matched to CTA) */}
+               <div id="public-reviews-section" className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
+                  <div className="text-center mb-8 border-b border-gray-100 pb-5">
+                     <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
+                        Public Reviews
+                     </h3>
+                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
+                        Verified Customer Experiences
+                     </p>
+                  </div>
 
-      {/* 8. Similar Brands Comparison (Moved to the very bottom, just above the footer) */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="bg-white py-16 border-t border-gray-100"
-      >
-         <div className="max-w-7xl mx-auto px-8">
-            <h3 className="text-3xl font-black text-navy italic tracking-tighter mb-12 text-center uppercase italic underline decoration-orange-primary underline-offset-8">Similar Brands Comparison</h3>
-            
-            <div className="overflow-x-auto no-scrollbar rounded-[30px] border border-gray-100 shadow-soft bg-white">
-               <table className="w-full text-left border-collapse">
-                  <thead>
-                     <tr className="bg-gray-50 border-b border-gray-100">
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic">Brand Identity</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Quality</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Service</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Price Range</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Materials</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-gray-400 uppercase tracking-widest italic text-center">Rating</th>
-                        <th className="py-6 px-8 text-[11px] font-black text-navy uppercase tracking-widest text-right italic">Action</th>
-                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      {[
-                        { name: "Apex Shoes", id: 3, logo: "Ap", quality: "Premium", service: "Excellent", price: "High (৳৳৳)", mat: "P. Cotton", score: "4.8" },
-                        { name: "Aarong Brand", id: 10, logo: "Aa", quality: "Elite", service: "Good", price: "Mid (৳৳)", mat: "Pure Silk", score: "4.7" },
-                        { name: "Lotto Wear", id: 6, logo: "L", quality: "Basic", service: "Fast", price: "Economy (৳)", mat: "Synthetic", score: "4.2" },
-                        { name: "Yellow Shop", id: 11, logo: "Y", quality: "Fashion", service: "Med", price: "Premium (৳৳৳)", mat: "Cotton Blend", score: "4.5" }
-                     ].map((item, i) => (
-                        <tr key={i} className="hover:bg-gray-50/50 transition-colors group">
-                           <td className="py-6 px-8">
-                              <div className="flex items-center gap-4">
-                                 <div className="w-10 h-10 rounded-xl bg-navy text-white font-black flex items-center justify-center text-sm">{item.logo}</div>
-                                 <span className="font-black text-navy italic text-sm">{item.name}</span>
+                        {
+                           name: "Tanvir Hasan",
+                           date: "2 weeks ago",
+                           purchaseDate: "April 2024",
+                           comment: `The material quality of the new ${brand.name} collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect.`,
+                           rating: 5,
+                           verified: true,
+                           productImages: [
+                              "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
+                              "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop"
+                           ],
+                           dp: "https://i.pravatar.cc/150?u=tanvir",
+                           helpful: 124
+                        },
+                        {
+                           name: "Nusrat Jahan",
+                           date: "1 month ago",
+                           purchaseDate: "March 2024",
+                           comment: "Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the collection.",
+                           rating: 4.8,
+                           verified: true,
+                           productImages: [
+                              "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop"
+                           ],
+                           dp: "https://i.pravatar.cc/150?u=nusrat",
+                           helpful: 89
+                        }
+                     ].map((review, i) => (
+                        <div key={i} className="bg-gray-50 border border-gray-100/50 rounded-2xl p-6 flex flex-col group hover:shadow-md transition-shadow duration-300">
+                           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                              <div className="flex items-center gap-3">
+                                 <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-[#E8500A] p-0.5">
+                                    <img src={review.dp} className="w-full h-full object-cover rounded-lg" alt={review.name} />
+                                 </div>
+                                 <div>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                       <span className="font-extrabold text-[#1A1D4E] text-sm italic">{review.name}</span>
+                                       {review.verified && (
+                                          <span className="bg-[#4DBC15]/10 text-[#4DBC15] text-[7px] font-black uppercase px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                             <CheckCircle2 size={8} className="text-[#4DBC15]" /> Verfied
+                                          </span>
+                                       )}
+                                    </div>
+                                    <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider block mt-0.5">Posted {review.date}</span>
+                                 </div>
                               </div>
-                           </td>
-                           <td className="py-6 px-8 text-center"><span className="px-3 py-1 bg-green-accent text-white text-[9px] font-black uppercase rounded-full tracking-widest italic">{item.quality}</span></td>
-                           <td className="py-6 px-8 text-center text-xs font-bold text-gray-400 italic uppercase tracking-wider">{item.service}</td>
-                           <td className="py-6 px-8 text-center text-xs font-bold text-navy italic">{item.price}</td>
-                           <td className="py-6 px-8 text-center text-xs font-bold text-gray-400 italic">{item.mat}</td>
-                           <td className="py-6 px-8 text-center">
-                              <div className="flex items-center justify-center gap-1.5">
-                                 <Star size={12} className="fill-orange-primary text-orange-primary" />
-                                 <span className="font-black text-navy text-xs italic">{item.score}</span>
+                              <div className="text-right">
+                                 <div className="flex gap-0.5 justify-end">
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                       <Star key={star} size={10} className={cn("fill-current", star <= review.rating ? "text-[#E8500A]" : "text-gray-200")} />
+                                    ))}
+                                 </div>
+                                 <div className="text-sm font-black text-[#1A1D4E] mt-0.5 italic">{review.rating} <span className="text-[8px] text-gray-300 font-sans">/ 5</span></div>
                               </div>
-                           </td>
-                           <td className="py-6 px-8 text-right">
-                              <Link to={`/brands/${item.id}`} className="px-6 py-2 border-2 border-navy text-navy font-black text-[10px] uppercase tracking-widest rounded-full hover:bg-navy hover:text-white transition-all transform hover:scale-105 italic inline-block">Visit Page</Link>
-                           </td>
-                        </tr>
-                     ))}
-                  </tbody>
-               </table>
-            </div>
-         </div>
-      </motion.section>
+                           </div>
 
-      {/* Report Safe Portal Modal Integration */}
+                           {/* Media Files */}
+                           <div className="flex gap-2 mb-4">
+                              {review.productImages.map((img, j) => (
+                                 <div key={j} className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 cursor-zoom-in">
+                                    <img src={img} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" alt="review attachments" />
+                                 </div>
+                              ))}
+                           </div>
+
+                           <div className="p-4 bg-white border border-gray-100 rounded-xl mb-4 relative flex-1">
+                              <p className="text-xs text-navy/80 font-bold leading-relaxed italic">
+                                 "{review.comment}"
+                              </p>
+                           </div>
+
+                           <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100/50">
+                              <div className="flex flex-col">
+                                 <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest italic mb-0.5">Purchase Date</span>
+                                 <span className="text-[9px] font-black text-[#1A1D4E] uppercase tracking-wider italic">{review.purchaseDate}</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                 <button 
+                                   onClick={() => toast.success("Marked as helpful!")}
+                                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-gray-100 hover:border-navy text-[#1A1D4E] font-black text-[9px] uppercase tracking-widest italic transition-colors cursor-pointer"
+                                 >
+                                    <ThumbsUp size={10} /> Helpful ({review.helpful})
+                                 </button>
+                              </div>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+
+                  <div className="mt-8 flex justify-center">
+                     <button onClick={() => toast.success("Loading all customer reviews...")} className="px-10 py-3.5 border border-[#1A1D4E] text-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white transition-all text-[9.5px] font-black uppercase tracking-widest rounded-full italic cursor-pointer">
+                        Load More Reviews
+                     </button>
+                  </div>
+               </div>
+
+               {/* D. Similar/Related Brands Column Block */}
+               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
+                  <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-8 text-center italic">
+                     Similar Brands Comparison
+                  </h3>
+
+                  <div className="overflow-x-auto no-scrollbar rounded-2xl border border-gray-100">
+                     <table className="w-full text-left border-collapse">
+                        <thead>
+                           <tr className="bg-gray-50 border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-wider italic">
+                              <th className="py-4.5 px-6">Brand Identity</th>
+                              <th className="py-4.5 px-6 text-center">Quality</th>
+                              <th className="py-4.5 px-6 text-center">Price Range</th>
+                              <th className="py-4.5 px-6 text-center">Rating</th>
+                              <th className="py-4.5 px-6 text-right">Action</th>
+                           </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 text-xs">
+                           {[
+                              { name: "Apex Shoes", id: 3, logo: "Ap", quality: "Premium", price: "High (৳৳৳)", score: "4.8" },
+                              { name: "Aarong Brand", id: 10, logo: "Aa", quality: "Elite", price: "Mid (৳৳)", score: "4.7" },
+                              { name: "Lotto Wear", id: 6, logo: "L", quality: "Basic", price: "Economy (৳)", score: "4.2" },
+                              { name: "Yellow Shop", id: 11, logo: "Y", quality: "Fashion", price: "Premium (৳৳৳)", score: "4.5" }
+                           ].map((item, idx) => (
+                              <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                                 <td className="py-4.5 px-6">
+                                    <div className="flex items-center gap-3">
+                                       <div className="w-8 h-8 rounded-lg bg-[#1A1D4E] text-white font-extrabold flex items-center justify-center text-[10px]">
+                                          {item.logo}
+                                       </div>
+                                       <span className="font-extrabold text-[#1A1D4E] italic">{item.name}</span>
+                                    </div>
+                                 </td>
+                                 <td className="py-4.5 px-6 text-center">
+                                    <span className="px-2.5 py-0.5 bg-[#4DBC15]/10 text-[#4DBC15] text-[8px] font-black uppercase rounded tracking-wider italic">
+                                       {item.quality}
+                                    </span>
+                                 </td>
+                                 <td className="py-4.5 px-6 text-center text-[10px] font-semibold text-gray-500 italic">{item.price}</td>
+                                 <td className="py-4.5 px-6 text-center">
+                                    <div className="flex items-center justify-center gap-1 text-[11px] font-extrabold text-navy italic">
+                                       <Star size={10} className="fill-[#E8500A] text-[#E8500A]" />
+                                       <span>{item.score}</span>
+                                    </div>
+                                 </td>
+                                 <td className="py-4.5 px-6 text-right">
+                                    <Link to={`/brands/${item.id}`} className="px-4 py-1.5 border border-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white text-[#1A1D4E] font-black text-[9px] uppercase tracking-wider rounded-full italic transition-all inline-block">
+                                       Visit
+                                    </Link>
+                                 </td>
+                              </tr>
+                           ))}
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+
+            </div>
+
+         </div>
+      </div>
+
+      {/* Small Small small Report Modal portal trigger */}
       <ReportModal 
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}

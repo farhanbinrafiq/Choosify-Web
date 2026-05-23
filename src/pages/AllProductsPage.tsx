@@ -14,18 +14,22 @@ export function AllProductsPage() {
   // Active query parameters / search inputs
   const rawQuery = searchParams.get('q') || '';
   const [sidebarSearch, setSidebarSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get('category') || null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [moqFilter, setMoqFilter] = useState<number>(0);
   const [priceTierSlab, setPriceTierSlab] = useState<number>(100000);
   const [sortOption, setSortOption] = useState<'popular' | 'price-asc' | 'price-desc' | 'moq-asc'>('popular');
 
-  // Sync internal state with URL query search initially
+  // Sync internal state with URL query parameters initially and on changes
   useEffect(() => {
     if (rawQuery) {
       setSidebarSearch(rawQuery);
     }
-  }, [rawQuery]);
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [rawQuery, searchParams]);
 
   // Handle local text search execute
   const executeSearch = (term: string) => {
