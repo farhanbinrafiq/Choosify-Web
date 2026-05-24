@@ -45,7 +45,7 @@ export function Navbar() {
       </div>
 
       <div className="hidden lg:flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest mr-auto italic">
-        <Link to="/" className="hover:text-orange-primary transition-colors">Home</Link>
+        <Link to="/" className="text-[#FF6B00] hover:text-[#FF6B00] transition-colors font-black">Home</Link>
         <Link to="/categories" className="hover:text-orange-primary transition-colors">Categories</Link>
         <Link to="/products" className="hover:text-orange-primary transition-colors">Products</Link>
         <Link to="/brands" className="hover:text-orange-primary transition-colors">Brands</Link>
@@ -233,9 +233,9 @@ export function Navbar() {
         ) : (
           <button 
             onClick={() => setIsSignInOpen(true)}
-            className="h-10 px-6 bg-orange-primary text-white text-[10px] uppercase font-black rounded-full tracking-widest hover:bg-orange-deep transition-all flex items-center gap-2 italic"
+            className="h-10 px-6 bg-[#FF6B00] text-white text-[10px] uppercase font-black rounded-full tracking-widest hover:bg-orange-deep transition-all flex items-center gap-2 italic"
           >
-            Sign In <LogIn size={14} />
+            Sign Up <LogIn size={14} />
           </button>
         )}
       </div>

@@ -405,7 +405,7 @@ export function HomePage() {
       </div>
 
       {/* SECTION 4 — THREE COLUMN GRID */}
-      <main className="max-w-[1440px] mx-auto px-6 py-10 w-full grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-8 relative">
+      <main className="max-w-[1700px] mx-auto px-6 py-10 w-full grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-8 relative">
         
         {/* LEFT STICKY SIDEBAR */}
         <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-6 flex-shrink-0">
@@ -563,7 +563,7 @@ export function HomePage() {
         </aside>
 
         {/* CENTER FEED */}
-        <section className="flex flex-col gap-8 w-full min-w-0">
+        <section className="flex flex-col gap-8 w-[1000px] min-w-0">
           
           {/* Categories Tab Bar */}
           <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-100/80 p-3 shadow-[0_8px_30px_rgba(26,29,78,0.02)] select-none relative z-40 sticky top-20">
@@ -1594,7 +1594,7 @@ export function HomePage() {
         </section>
 
         {/* RIGHT SIDEBAR */}
-        <aside className="hidden xl:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-6 flex-shrink-0">
+        <aside className="hidden xl:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar mr-0 pl-[2px] pb-[500px] w-[310px] flex-shrink-0">
           
           {/* Card 1 — TRENDING DEALS */}
           <div className="bg-white rounded-[24px] border border-gray-100 p-5.5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] text-left">

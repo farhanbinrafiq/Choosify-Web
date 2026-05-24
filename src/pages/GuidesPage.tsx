@@ -241,34 +241,38 @@ export function GuidesPage() {
             </div>
 
             {/* Popular Topics Widget */}
-            <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-2xl shadow-gray-100/50">
-               <h4 className="font-black text-navy text-[10px] uppercase tracking-[0.4em] mb-8 italic opacity-30">POPULAR TOPICS</h4>
-               <div className="space-y-6">
+            <div className="bg-white rounded-[40px] p-8 border border-gray-100/80 shadow-2xl shadow-gray-100/40">
+               <h4 className="font-extrabold text-[#8e9aa8] text-[11px] uppercase tracking-[0.3em] mb-10 italic pl-1">POPULAR TOPICS</h4>
+               <div className="space-y-7">
                   {[
-                     { title: 'Best Cheap Brands For Everyone That Looks Great Always', cat: 'FASHION', reads: '5K READS', img: 'https://images.unsplash.com/photo-1546868823-05b0521e4cba?w=100' },
-                     { title: 'Winter Skin Care Essentials for BD Climate', cat: 'BEAUTY', reads: '12K READS', img: 'https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=100' },
-                     { title: 'Top 10 Smartwatches in Bangladesh 2026', cat: 'GADGETS', reads: '2K READS', img: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=100' },
-                     { title: 'How To Choose Your First DSLR Camera', cat: 'ELECTRONICS', reads: '4K READS', img: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=100' },
-                     { title: 'Luxury Watches Every Man Should Own', cat: 'FASHION', reads: '3K READS', img: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=100' }
+                     { title: 'Best Cheap Brands For Everyone That Looks Great Always', cat: 'FASHION', reads: '5K READS', img: 'https://images.unsplash.com/photo-1546868823-05b0521e4cba?w=120' },
+                     { title: 'Winter Skin Care Essentials for BD Climate', cat: 'BEAUTY', reads: '12K READS', img: 'https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=120' },
+                     { title: 'Top 10 Smartwatches in Bangladesh 2026', cat: 'GADGETS', reads: '2K READS', img: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=120' },
+                     { title: 'How To Choose Your First DSLR Camera', cat: 'ELECTRONICS', reads: '4K READS', img: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=120' },
+                     { title: 'Luxury Watches Every Man Should Own', cat: 'FASHION', reads: '3K READS', img: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=120' }
                   ].map((topic, i) => (
-                    <div key={i} className="flex gap-4 group cursor-pointer items-start">
-                       <div className="w-16 h-16 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden border border-gray-100 shadow-sm">
-                          <img src={topic.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <div key={i} className="flex gap-5 group cursor-pointer items-center">
+                       <div className="w-[68px] h-[68px] rounded-[22px] bg-slate-50 flex-shrink-0 overflow-hidden border border-gray-100 shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex items-center justify-center relative">
+                          <img 
+                            src={topic.img} 
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                          />
                        </div>
-                       <div className="flex-1 pt-1">
-                          <h5 className="font-black text-navy text-[11px] leading-tight group-hover:text-orange-primary transition-colors mb-1 italic uppercase tracking-tight">
+                       <div className="flex-1 min-w-0">
+                          <h5 className="font-black text-[#0c133c] text-[11.5px] leading-[1.35] group-hover:text-orange-primary transition-colors mb-1 italic uppercase tracking-tight">
                              {topic.title}
                           </h5>
-                          <div className="flex items-center gap-2 text-[8px] font-black text-gray-400 uppercase tracking-widest italic">
+                          <div className="flex items-center gap-2 text-[8px] font-black text-[#8a92a6] uppercase tracking-wider italic">
                              <span>{topic.cat}</span>
-                             <span className="opacity-30">•</span>
+                             <span className="text-[6px] text-[#8a92a6]/50">•</span>
                              <span>{topic.reads}</span>
                           </div>
                        </div>
                     </div>
                   ))}
                </div>
-               <button className="w-full mt-10 py-3.5 bg-gray-50 text-gray-400 font-black text-[9px] uppercase tracking-widest rounded-xl hover:bg-navy hover:text-white transition-all border border-gray-100 italic">
+               <button className="w-full mt-10 py-4 bg-[#f5f7fb] text-[#8a92a6] font-bold text-[9.5px] uppercase tracking-[0.2em] rounded-[18px] hover:bg-[#0c133c] hover:text-white hover:shadow-lg transition-all border border-transparent italic flex items-center justify-center">
                   LOAD MORE
                </button>
             </div>
