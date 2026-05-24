@@ -152,51 +152,42 @@ function AppContent() {
 
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
-      {isOverview ? (
+      {!isOverview && <Navbar />}
+      <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
-          <Overview />
+          <Routes location={location}>
+            <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
+            <Route path="/overview" element={<Overview />} />
+            <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
+            <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
+            <Route path="/brands" element={<PageWrapper><BrandsPage /></PageWrapper>} />
+            <Route path="/brands/:id" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
+            <Route path="/brands/:id/products" element={<PageWrapper><BrandProductPage /></PageWrapper>} />
+            <Route path="/categories" element={<PageWrapper><CategoriesPage /></PageWrapper>} />
+            <Route path="/deals" element={<PageWrapper><DealsPage /></PageWrapper>} />
+            <Route path="/compare" element={<PageWrapper><ComparePage /></PageWrapper>} />
+            <Route path="/guides" element={<PageWrapper><GuidesPage /></PageWrapper>} />
+            <Route path="/guides/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
+            <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
+            <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
+            <Route path="/post-offer" element={<PageWrapper><PostOfferPage /></PageWrapper>} />
+            <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
+            <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
+            <Route path="/cart/b2b" element={<PageWrapper><B2BCartPage /></PageWrapper>} />
+            <Route path="/checkout" element={<PageWrapper><CheckoutPage /></PageWrapper>} />
+            <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
+            <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />
+            <Route path="/seller/orders" element={<PageWrapper><SellerIncomingOrdersPage /></PageWrapper>} />
+            <Route path="/seller/orders/:id" element={<PageWrapper><SellerOrderDetailsPage /></PageWrapper>} />
+            <Route path="/dashboard" element={<PageWrapper><DashboardPage /></PageWrapper>} />
+            <Route path="/messages" element={<PageWrapper><MessagesPage /></PageWrapper>} />
+            <Route path="/messages/:threadId" element={<PageWrapper><MessagesPage /></PageWrapper>} />
+            <Route path="/profile/orders" element={<PageWrapper><CustomerOrdersPage /></PageWrapper>} />
+            <Route path="*" element={<PageWrapper><NotFoundPage /></PageWrapper>} />
+          </Routes>
         </Suspense>
-      ) : (
-        <div className="max-w-[1440px] mx-auto w-full min-h-screen flex flex-col relative shadow-[0_0_80px_rgba(0,0,0,0.1)] bg-[#EEF1F8]">
-          <Navbar />
-          <div className="flex-1 w-full">
-            <AnimatePresence mode="wait">
-              <Suspense fallback={<LoadingFallback />}>
-                <Routes location={location}>
-                  <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
-                  <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
-                  <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
-                  <Route path="/brands" element={<PageWrapper><BrandsPage /></PageWrapper>} />
-                  <Route path="/brands/:id" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
-                  <Route path="/brands/:id/products" element={<PageWrapper><BrandProductPage /></PageWrapper>} />
-                  <Route path="/categories" element={<PageWrapper><CategoriesPage /></PageWrapper>} />
-                  <Route path="/deals" element={<PageWrapper><DealsPage /></PageWrapper>} />
-                  <Route path="/compare" element={<PageWrapper><ComparePage /></PageWrapper>} />
-                  <Route path="/guides" element={<PageWrapper><GuidesPage /></PageWrapper>} />
-                  <Route path="/guides/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
-                  <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
-                  <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
-                  <Route path="/post-offer" element={<PageWrapper><PostOfferPage /></PageWrapper>} />
-                  <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
-                  <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
-                  <Route path="/cart/b2b" element={<PageWrapper><B2BCartPage /></PageWrapper>} />
-                  <Route path="/checkout" element={<PageWrapper><CheckoutPage /></PageWrapper>} />
-                  <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
-                  <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />
-                  <Route path="/seller/orders" element={<PageWrapper><SellerIncomingOrdersPage /></PageWrapper>} />
-                  <Route path="/seller/orders/:id" element={<PageWrapper><SellerOrderDetailsPage /></PageWrapper>} />
-                  <Route path="/dashboard" element={<PageWrapper><DashboardPage /></PageWrapper>} />
-                  <Route path="/messages" element={<PageWrapper><MessagesPage /></PageWrapper>} />
-                  <Route path="/messages/:threadId" element={<PageWrapper><MessagesPage /></PageWrapper>} />
-                  <Route path="/profile/orders" element={<PageWrapper><CustomerOrdersPage /></PageWrapper>} />
-                  <Route path="*" element={<PageWrapper><NotFoundPage /></PageWrapper>} />
-                </Routes>
-              </Suspense>
-            </AnimatePresence>
-          </div>
-          <Footer />
-        </div>
-      )}
+      </AnimatePresence>
+      {!isOverview && <Footer />}
     </div>
   );
 }
