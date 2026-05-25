@@ -129,8 +129,8 @@ const OverviewSection = () => {
         <StatCard icon={Bell} label="Pending Alerts" value="03" color="bg-[#7C3AED]" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
-        <div className="xl:col-span-2 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="lg:col-span-2 space-y-8">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-black text-white italic uppercase flex items-center gap-3">
               <Clock className="text-[#F96500]" size={20} /> Recently Viewed

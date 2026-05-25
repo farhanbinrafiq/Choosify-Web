@@ -351,7 +351,7 @@ export function GuideDetailPage() {
          </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-[1700px] mx-auto px-6 w-full">
         {/* Content Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 mb-32 items-start relative">
           {/* Main Content (8 cols) */}

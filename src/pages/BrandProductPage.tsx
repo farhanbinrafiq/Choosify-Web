@@ -73,9 +73,9 @@ export function BrandProductPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 w-full flex flex-col lg:flex-row gap-8 py-16">
+      <div className="max-w-[1700px] mx-auto px-6 w-full flex flex-col lg:flex-row gap-10 xl:gap-12 py-16 relative">
         {/* Sidebar Filters */}
-        <aside className="w-full lg:w-60 flex-shrink-0">
+        <aside className="w-full lg:w-60 xl:w-64 flex-shrink-0">
           <div className="space-y-8 sticky top-32">
             {/* Active Filters (Moved from main) */}
             <div className="bg-[#0A0B1E] rounded-[20px] p-6 shadow-2xl relative overflow-hidden group">
@@ -293,6 +293,18 @@ export function BrandProductPage() {
             </>
           )}
         </main>
+
+        {/* RIGHT SIDEBAR PLACEHOLDER FOR FUTURE EXPANSION */}
+        <aside className="hidden lg:flex flex-col gap-8 w-60 xl:w-64 flex-shrink-0">
+          <div className="bg-[#0A0B1E] rounded-[24px] p-6 border border-white/10 text-left relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-orange-primary/10 rounded-full -translate-y-1/3 translate-x-1/3 blur-xl" />
+            <h4 className="text-xs font-black text-[#E8500A] uppercase tracking-widest mb-2.5">Pro Insights</h4>
+            <p className="text-[10px] text-gray-400 font-bold leading-relaxed mb-4">View verified batch benchmarks and direct importer logs for genuine stock items.</p>
+            <button className="text-[10px] font-black text-white hover:text-orange-primary uppercase tracking-widest transition-colors">
+              Access Benchmarks
+            </button>
+          </div>
+        </aside>
       </div>
     </div>
   );

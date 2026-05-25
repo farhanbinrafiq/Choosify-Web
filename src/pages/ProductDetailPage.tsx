@@ -191,7 +191,7 @@ export function ProductDetailPage() {
     toast.success(`Added ${b2bQty} units of ${product.title} to your cart successfully!`);
   };
 
-  const tabs = ['Overview', 'Specifications', 'About Choosify.bd', 'Influencer Reviews', 'Public Reviews', 'Comparison'];
+  const tabs = ['Overview', 'Specifications', 'About Choosify.bd', 'Influencer Reviews', 'Comparison'];
 
   const heroImages = [
     selectedVariant?.image || product.image,
@@ -249,7 +249,7 @@ export function ProductDetailPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="bg-[#050514] pt-6 pb-24 overflow-hidden relative border-b border-white/5">
+      <section className="bg-[#1a1d4e] pt-6 pb-24 overflow-hidden relative border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-center gap-3 md:gap-5 w-full max-w-[934px] mx-auto h-[320px] md:h-[458.641px] mb-0 pl-[1px]">
             {heroImages.map((img, i) => {
@@ -650,8 +650,8 @@ export function ProductDetailPage() {
 
       {/* Main Content Area */}
       <main className="bg-[#F8FAFC] py-10">
-         <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+         <div className="max-w-[1700px] mx-auto px-6 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-12 items-start w-full relative">
                
                {/* Left Column Section (Column 1) */}
                <div className="lg:col-span-3 space-y-8">
@@ -1218,122 +1218,7 @@ export function ProductDetailPage() {
          </div>
       </main>
 
-      {/* Public Review Section */}
-      <section className="bg-[#F8FAFC] py-16 border-t border-gray-100 overflow-hidden relative">
-         <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center">
-            <div className="text-center mb-20 flex flex-col items-center">
-               <h2 className="text-6xl font-black text-navy italic tracking-tighter mb-4 uppercase">Public Reviews</h2>
-               <div className="bg-white rounded-full px-8 py-2.5 shadow-sm border border-gray-100">
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic font-mono">Actual Verified Customers</span>
-               </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 w-full mb-20 animate-in fade-in duration-500">
-               {[
-                 {
-                   name: "Tanvir Hasan",
-                   avatar: "https://i.pravatar.cc/150?u=tanvir",
-                   time: "POSTED 2 WEEKS AGO",
-                   rating: "5",
-                   content: `Outstanding weave texture. Simply the finest release by ${product.brand} this season. Elegant fitting with great durability!`,
-                   date: "MAY 2026",
-                   helpful: 124,
-                   images: [product.image]
-                 },
-                 {
-                   name: "Nusrat Jahan",
-                   avatar: "https://i.pravatar.cc/150?u=nusrat",
-                   time: "POSTED 1 MONTH AGO",
-                   rating: "4.8",
-                   content: "A beautiful design that exceeds standard expectation! Fitting was perfect.",
-                   date: "APRIL 2026",
-                   helpful: 89,
-                   images: [product.image]
-                 }
-               ].map((review, i) => (
-                  <div key={i} className="bg-white rounded-[60px] p-12 shadow-2xl shadow-navy/5 border border-white flex flex-col h-full">
-                     <div className="flex items-start justify-between mb-10">
-                        <div className="flex items-center gap-5">
-                           <div className="w-16 h-16 rounded-2xl border-2 border-orange-primary/20 p-1 bg-white">
-                              <img src={review.avatar} className="w-full h-full rounded-xl object-cover" alt={review.name} />
-                           </div>
-                           <div className="flex flex-col">
-                              <div className="flex items-center gap-3 mb-1">
-                                 <h4 className="text-xl font-black text-navy italic tracking-tighter uppercase">{review.name}</h4>
-                                 <div className="bg-[#D1FAE5] text-[#059669] text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1">
-                                    <CheckCircle2 size={10} /> VERIFIED
-                                 </div>
-                              </div>
-                              <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest italic">{review.time}</span>
-                           </div>
-                        </div>
-                        <div className="flex flex-col items-end">
-                           <div className="flex gap-1 mb-1">
-                              {[1,2,3,4,5].map(star => (
-                                 <Star key={star} size={14} className={cn("fill-current", star <= Math.floor(Number(review.rating)) ? "text-orange-primary" : "text-gray-100")} />
-                              ))}
-                           </div>
-                           <div className="text-xl font-black text-navy italic tracking-tighter">
-                              {review.rating}<span className="text-gray-300 text-xs ml-1">/ 5</span>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div className="flex gap-4 mb-10">
-                        {review.images.map((img, idx) => (
-                           <div key={idx} className="w-20 h-20 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-                              <img src={img} className="w-full h-full object-cover" alt="review product upload" />
-                           </div>
-                        ))}
-                     </div>
-
-                     <div className="bg-[#F8FAFC] rounded-[40px] p-10 relative mb-auto">
-                        <MessageSquare size={32} className="absolute -top-4 -right-4 text-orange-primary/10 fill-current transform rotate-12" />
-                        <p className="text-sm text-navy font-bold leading-relaxed italic tracking-tight">
-                           {review.content}
-                        </p>
-                     </div>
-                  </div>
-               ))}
-            </div>
-         </div>
-      </section>
-
-      {/* MANDATORY: "Similar Products From Similar Brands" New Section */}
-      <section className="bg-white py-16 border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-black text-navy italic tracking-tighter mb-3 uppercase">Similar Products From Similar Brands</h3>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">Alternate handpicked choices curated from {product.brand}'s equivalent category matches</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {similarProducts.map((p: any) => (
-              <div 
-                key={p.id} 
-                onClick={() => {
-                  navigate(`/products/${p.id}`);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="bg-gray-50 rounded-[32px] p-6 border border-gray-100 flex flex-col group hover:bg-white hover:shadow-2xl transition-all duration-500 cursor-pointer"
-              >
-                <div className="aspect-square rounded-[24px] overflow-hidden mb-6 relative">
-                  <img src={p.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={p.title} />
-                  <div className="absolute top-4 left-4 bg-navy text-white text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest italic">{p.brand}</div>
-                </div>
-                <h4 className="text-xl font-black text-navy italic tracking-tight mb-2 uppercase leading-none">{p.title}</h4>
-                <div className="flex items-center gap-2 mb-6">
-                  {[1,2,3,4].map(star => <Star key={star} size={10} className="fill-orange-primary text-orange-primary" />)}
-                  <span className="text-[9px] font-bold text-gray-400">({p.rating})</span>
-                </div>
-                <div className="mt-auto flex items-center justify-between">
-                  <span className="text-xl font-black text-navy italic">৳{p.price}</span>
-                  <span className="px-5 py-3 bg-navy hover:bg-orange-primary text-white text-[9px] font-black uppercase tracking-widest rounded-full transition-colors italic inline-block">Compare Now</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+  
 
       {/* Comparison Section */}
       <section className="bg-[#050514] py-16 overflow-hidden relative border-t border-white/5">

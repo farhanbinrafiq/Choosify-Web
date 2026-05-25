@@ -132,7 +132,7 @@ export function GuidesPage() {
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-8 w-full py-20 flex flex-col lg:flex-row gap-12 relative z-10">
+      <main className="max-w-[1700px] mx-auto px-6 w-full py-20 flex flex-col lg:flex-row gap-10 xl:gap-12 relative z-10">
          {/* Left Sidebar Navigation */}
          <aside className="w-full lg:w-48 lg:sticky lg:top-36 h-max space-y-3 hidden lg:block shrink-0">
             <h4 className="text-[10px] font-black text-navy uppercase tracking-[0.4em] mb-4 italic opacity-30 px-4">Categories</h4>

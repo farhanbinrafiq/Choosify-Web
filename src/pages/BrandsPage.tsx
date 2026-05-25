@@ -308,7 +308,7 @@ export function BrandsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full pb-16 flex flex-col lg:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full pb-16 flex flex-col lg:flex-row gap-10 xl:gap-12">
         {/* Sidebar Filters */}
         <aside className="w-64 flex-shrink-0 hidden lg:flex flex-col gap-8">
           {/* Filter By Brand */}
@@ -361,7 +361,7 @@ export function BrandsPage() {
                   <motion.div 
                     layout
                     key={brand.id} 
-                    className="bg-white rounded-[24px] p-5 shadow-high-density hover:shadow-3xl transition-all border border-transparent hover:border-orange-primary/10 relative group flex flex-col h-[395px] overflow-y-auto no-scrollbar"
+                    className="bg-white rounded-[24px] p-6 md:p-7 shadow-high-density hover:shadow-3xl transition-all border border-transparent hover:border-orange-primary/10 relative group flex flex-col h-[395px] overflow-y-auto no-scrollbar"
                   >
                     {brand.isHot && (
                       <div className="absolute top-6 right-6 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">HOT</div>
@@ -465,6 +465,18 @@ export function BrandsPage() {
              </div>
           )}
         </main>
+
+        {/* RIGHT SIDEBAR PLACEHOLDER FOR FUTURE EXPANSION */}
+        <aside className="hidden lg:flex flex-col gap-8 w-60 xl:w-64 flex-shrink-0">
+          <div className="bg-gradient-to-br from-[#FFF0E8] to-[#FFEEF6] rounded-[24px] p-6 border border-[#E8500A]/10 text-left relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-[#E8500A]/5 rounded-full -translate-y-1/3 translate-x-1/3 blur-xl" />
+            <h4 className="text-xs font-black text-[#E8500A] uppercase tracking-widest mb-2.5">Platform Picks</h4>
+            <p className="text-[10px] text-gray-500 font-bold leading-relaxed mb-4">Discover curated and verified Bangladesh sellers rated 4.9+ stars.</p>
+            <button className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest hover:underline flex items-center gap-1">
+              Learn more <ArrowRight size={10} />
+            </button>
+          </div>
+        </aside>
       </div>
     </div>
   );

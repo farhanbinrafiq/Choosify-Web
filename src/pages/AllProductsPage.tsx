@@ -199,7 +199,7 @@ export function AllProductsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-col lg:flex-row gap-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-col lg:flex-row gap-10 xl:gap-12 py-8">
         
         {/* Sidebar Filters */}
         <aside className="w-full lg:w-64 flex-shrink-0">
@@ -457,6 +457,18 @@ export function AllProductsPage() {
             </div>
           </div>
         </main>
+
+        {/* RIGHT SIDEBAR PLACEHOLDER FOR FUTURE EXPANSION */}
+        <aside className="hidden lg:flex flex-col gap-[32px] w-60 xl:w-64 flex-shrink-0">
+          <div className="bg-gradient-to-br from-[#EEF1F8] to-white rounded-[24px] p-6 border border-gray-100 text-left relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-orange-primary/5 rounded-full -translate-y-1/3 translate-x-1/3 blur-xl" />
+            <h4 className="text-xs font-black text-navy uppercase tracking-widest mb-2.5">Quick Assistance</h4>
+            <p className="text-[10px] text-gray-500 font-bold leading-relaxed mb-4">Need help choosing authentic products? Join our live interactive community forums.</p>
+            <button type="button" className="text-[10px] font-black text-orange-primary uppercase tracking-widest hover:underline">
+              Visit Forums
+            </button>
+          </div>
+        </aside>
       </div>
     </div>
   );

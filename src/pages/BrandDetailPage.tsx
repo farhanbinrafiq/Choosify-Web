@@ -452,11 +452,11 @@ export function BrandDetailPage() {
         </div>
       </motion.section>
 
-      {/* 2. Main Double Column Dashboard Layout */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 w-full">
-         <div className="grid grid-cols-1 lg:grid-cols-[330px_1fr] gap-8 items-start w-full">
+      {/* 2. Main 3-Column Layout */}
+      <div className="max-w-[1700px] mx-auto px-6 py-10 w-full">
+         <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_250px] xl:grid-cols-[300px_minmax(0,1fr)_280px] gap-10 xl:gap-12 items-start w-full">
             
-            {/* LEFT COLUMN: BRAND OVERVIEW, POPULAR PRODUCTS, CODES, ADS */}
+            {/* LEFT COLUMN: BRAND OVERVIEW, POPULAR PRODUCTS */}
             <div className="flex flex-col gap-8 w-full">
                
                {/* A. Brand Overview Section */}
@@ -583,79 +583,10 @@ export function BrandDetailPage() {
                   </div>
                </div>
 
-               {/* C. Exclusive Promo Codes Section */}
-               <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80">
-                  <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-3">
-                     <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight flex items-center gap-2">
-                        <span className="w-1.5 h-4 bg-[#E8500A] rounded-full inline-block" />
-                        Promo Codes
-                     </h3>
-                     <Link to="/deals" className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider hover:underline">See All</Link>
-                  </div>
-
-                  <div className="space-y-4">
-                     {[
-                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: "EID26", expiry: "Valid till June 30" },
-                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: `${brand.name.toUpperCase()}500`, expiry: "For New Users Only" },
-                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: `${brand.name.toUpperCase()}20`, expiry: "Valid till June 30" }
-                     ].map((promo, idx) => (
-                        <div key={idx} className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex flex-col items-center text-center relative overflow-hidden group">
-                           <div className="w-8 h-8 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
-                              <Gift size={15} />
-                           </div>
-                           <h4 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider mb-0.5">{promo.title}</h4>
-                           <div className="text-sm font-black text-[#E8500A] italic uppercase mb-3 leading-none">{promo.discount}</div>
-                           
-                           <button 
-                             onClick={() => {
-                               navigator.clipboard.writeText(promo.code);
-                               toast.success(`Code ${promo.code} copied!`);
-                             }}
-                             className="w-full py-2 bg-white rounded-xl border border-dashed border-gray-200 hover:border-[#E8500A] font-mono text-[11px] font-extrabold text-[#1A1D4E] tracking-widest uppercase transition-colors flex flex-col items-center justify-center cursor-pointer"
-                           >
-                              <span className="text-[7px] text-gray-400 font-sans tracking-wide uppercase font-black">PROMO CODE</span>
-                              <span>{promo.code}</span>
-                           </button>
-                           
-                           <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2">{promo.expiry}</span>
-                        </div>
-                     ))}
-                  </div>
-               </div>
-
-               {/* D. Sponsored Ad Section */}
-               <div className="bg-[#100D2B] rounded-3xl p-6 text-white text-center relative overflow-hidden shadow-md">
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
-                  <div className="relative z-10">
-                     <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4">
-                        Sponsored Ad
-                     </span>
-                     
-                     <div className="w-full aspect-square rounded-2xl overflow-hidden mb-5 border border-white/10 shadow-lg">
-                        <img 
-                          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop" 
-                          alt="Sponsor AD" 
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
-                        />
-                     </div>
-                     
-                     <h4 className="font-serif text-lg font-bold tracking-widest uppercase mb-1">AARONG</h4>
-                     <p className="text-[9px] font-black text-white/50 tracking-wider uppercase mb-3">Heritage Shopping Brand</p>
-                     
-                     <p className="text-[11px] text-white/70 font-medium leading-relaxed mb-6 px-1">
-                        New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
-                     </p>
-                     
-                     <button className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-full shadow-lg hover:shadow-[#E8500A]/20 transition-all cursor-pointer">
-                        Shop Now
-                     </button>
-                  </div>
-               </div>
-
             </div>
 
-            {/* RIGHT COLUMN: PRODUCT LINE (ACCORDION), CREATOR SPOTLIGHT, REVIEW CARDS, COMPARISON TABLE */}
-            <div className="flex flex-col gap-8 w-full">
+            {/* CENTER Feed: PRODUCTS, REVIEW CARDS, COMPARISON TABLE */}
+            <div className="flex flex-col gap-8 w-full min-w-0">
                
                {/* A. Product Line Carousel Grid (Accordion style preserved) */}
                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
@@ -782,8 +713,8 @@ export function BrandDetailPage() {
                   </div>
 
                   {/* Main YouTube Feature block */}
-                  <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md mb-8">
-                     <div className="relative aspect-video xl:aspect-auto xl:h-[300px] group overflow-hidden">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md mb-8">
+                     <div className="relative aspect-video lg:aspect-auto lg:h-[300px] group overflow-hidden">
                         <img 
                           src="https://images.unsplash.com/photo-1511119253457-36e78921865c?w=800&h=600&fit=crop" 
                           alt="Main Review" 
@@ -1082,6 +1013,80 @@ export function BrandDetailPage() {
                            ))}
                         </tbody>
                      </table>
+                  </div>
+               </div>
+
+            </div>
+
+            {/* RIGHT COLUMN: PROMO CODES & SPONSORED ADS */}
+            <div className="flex flex-col gap-8 w-full lg:max-w-[250px] xl:max-w-[280px] flex-shrink-0">
+               
+               {/* C. Exclusive Promo Codes Section */}
+               <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80">
+                  <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-3">
+                     <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight flex items-center gap-2">
+                        <span className="w-1.5 h-4 bg-[#E8500A] rounded-full inline-block" />
+                        Promo Codes
+                     </h3>
+                     <Link to="/deals" className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider hover:underline">See All</Link>
+                  </div>
+
+                  <div className="space-y-4">
+                     {[
+                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: "EID26", expiry: "Valid till June 30" },
+                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: `${brand.name.toUpperCase()}500`, expiry: "For New Users Only" },
+                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: `${brand.name.toUpperCase()}20`, expiry: "Valid till June 30" }
+                     ].map((promo, idx) => (
+                        <div key={idx} className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex flex-col items-center text-center relative overflow-hidden group">
+                           <div className="w-8 h-8 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
+                              <Gift size={15} />
+                           </div>
+                           <h4 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider mb-0.5">{promo.title}</h4>
+                           <div className="text-sm font-black text-[#E8500A] italic uppercase mb-3 leading-none">{promo.discount}</div>
+                           
+                           <button 
+                             onClick={() => {
+                               navigator.clipboard.writeText(promo.code);
+                               toast.success(`Code ${promo.code} copied!`);
+                             }}
+                             className="w-full py-2 bg-white rounded-xl border border-dashed border-gray-200 hover:border-[#E8500A] font-mono text-[11px] font-extrabold text-[#1A1D4E] tracking-widest uppercase transition-colors flex flex-col items-center justify-center cursor-pointer"
+                           >
+                              <span className="text-[7px] text-gray-400 font-sans tracking-wide uppercase font-black">PROMO CODE</span>
+                              <span>{promo.code}</span>
+                           </button>
+                           
+                           <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2">{promo.expiry}</span>
+                        </div>
+                     ))}
+                  </div>
+               </div>
+
+               {/* D. Sponsored Ad Section */}
+               <div className="bg-[#100D2B] rounded-3xl p-6 text-white text-center relative overflow-hidden shadow-md">
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
+                  <div className="relative z-10">
+                     <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4">
+                        Sponsored Ad
+                     </span>
+                     
+                     <div className="w-full aspect-square rounded-2xl overflow-hidden mb-5 border border-white/10 shadow-lg">
+                        <img 
+                           src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop" 
+                           alt="Sponsor AD" 
+                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
+                        />
+                     </div>
+                     
+                     <h4 className="font-serif text-lg font-bold tracking-widest uppercase mb-1">AARONG</h4>
+                     <p className="text-[9px] font-black text-white/50 tracking-wider uppercase mb-3">Heritage Shopping Brand</p>
+                     
+                     <p className="text-[11px] text-white/70 font-medium leading-relaxed mb-6 px-1">
+                        New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
+                     </p>
+                     
+                     <button className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-full shadow-lg hover:shadow-[#E8500A]/20 transition-all cursor-pointer">
+                        Shop Now
+                     </button>
                   </div>
                </div>
 
