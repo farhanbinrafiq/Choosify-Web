@@ -454,10 +454,10 @@ export function BrandDetailPage() {
 
       {/* 2. Main 3-Column Layout */}
       <div className="max-w-[1700px] mx-auto px-6 py-10 w-full">
-         <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_250px] xl:grid-cols-[300px_minmax(0,1fr)_280px] gap-10 xl:gap-12 items-start w-full">
+         <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_250px] xl:grid-cols-[300px_minmax(0,1fr)_280px] gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 items-start w-full">
             
             {/* LEFT COLUMN: BRAND OVERVIEW, POPULAR PRODUCTS */}
-            <div className="flex flex-col gap-8 w-full">
+            <div className="flex flex-col gap-8 w-full lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
                
                {/* A. Brand Overview Section */}
                <div id="brand-overview-panel" className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80">
@@ -586,7 +586,7 @@ export function BrandDetailPage() {
             </div>
 
             {/* CENTER Feed: PRODUCTS, REVIEW CARDS, COMPARISON TABLE */}
-            <div className="flex flex-col gap-8 w-full min-w-0">
+            <div className="flex flex-col gap-8 w-full min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
                
                {/* A. Product Line Carousel Grid (Accordion style preserved) */}
                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
@@ -1019,7 +1019,7 @@ export function BrandDetailPage() {
             </div>
 
             {/* RIGHT COLUMN: PROMO CODES & SPONSORED ADS */}
-            <div className="flex flex-col gap-8 w-full lg:max-w-[250px] xl:max-w-[280px] flex-shrink-0">
+            <div className="flex flex-col gap-8 w-full lg:max-w-[250px] xl:max-w-[280px] flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
                
                {/* C. Exclusive Promo Codes Section */}
                <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80">

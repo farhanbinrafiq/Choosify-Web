@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram } from 'lucide-react';
+import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -230,125 +230,168 @@ export function BrandsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full pt-8">
-        {/* Choosify Recommends Section */}
-        <div className="mb-12">
-          <div className="flex items-center gap-4 mb-8 overflow-hidden">
-            <div className="flex items-center gap-3 bg-orange-primary px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/20 flex-shrink-0">
-               <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
-               <div className="flex gap-0.5">
-                  <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                  </div>
-                  <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                  </div>
-               </div>
-            </div>
-            <span className="text-[10px] font-black text-[#5C2AFE] uppercase tracking-widest whitespace-nowrap">3 Brands</span>
-            <div className="flex-1 h-px bg-orange-primary/20" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[brands[0], brands[1], brands[2]].map((brand, i) => (
-              <div key={i} className="bg-white rounded-[32px] p-5 shadow-high-density border border-gray-100 flex flex-col h-[395px] hover:shadow-2xl transition-all relative group overflow-y-auto no-scrollbar">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/5 blur-3xl rounded-full" />
-                
-                {/* Compact Header */}
-                <div className="flex items-start justify-between mb-6 relative z-10">
-                  <div className="w-16 h-16 rounded-[18px] bg-[#0A0A1F] flex items-center justify-center p-3 flex-shrink-0 overflow-hidden shadow-xl relative border border-white/10">
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
-                    {brand.logo.length > 2 ? (
-                       <img src={brand.logo} className="w-full h-full object-contain relative z-10" alt={brand.name} />
-                    ) : (
-                      <span className="text-3xl font-black text-white relative z-10">{brand.logo}</span>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-[8px] font-black text-orange-primary uppercase tracking-[0.2em] italic mb-1">Featured Partner</span>
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map(s => (
-                        <Star key={s} size={10} className={cn("fill-orange-primary stroke-orange-primary", s > 4 && "fill-gray-200 stroke-gray-200")} />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Content Area */}
-                <div className="flex-1 relative z-10">
-                  <h3 className="text-xl font-black text-navy leading-tight mb-2 italic tracking-tight uppercase truncate group-hover:text-orange-primary transition-colors">{brand.name}</h3>
-                  <p className="text-[10px] font-bold text-gray-400 mb-4 line-clamp-3 uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
-                </div>
-                
-                <div className="w-full h-[1px] bg-gray-50 mb-6" />
-
-                <div className="grid grid-cols-3 gap-3 mb-6">
-                  <div className="text-center bg-gray-50/50 py-3 rounded-xl border border-gray-100/50">
-                    <span className="text-[8px] font-black text-navy mb-1 uppercase tracking-tight block opacity-40">Best For</span>
-                    <span className="text-[9px] font-bold text-red-500 italic uppercase truncate px-1 block">{brand.bestFor}</span>
-                  </div>
-                  <div className="text-center bg-gray-50/50 py-3 rounded-xl border border-gray-100/50">
-                    <div className="flex flex-col items-center">
-                      <span className="text-lg font-black text-[#6366f1] leading-none mb-1 italic tracking-tighter">{brand.priceRange}</span>
-                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
-                    </div>
-                  </div>
-                  <div className="text-center bg-gray-50/50 py-3 rounded-xl border border-gray-100/50">
-                    <span className="text-lg font-black text-[#10B981] leading-none mb-1 italic tracking-tighter">{brand.recommended}</span>
-                    <span className="text-[7px] font-black text-gray-500 uppercase tracking-widest opacity-60">Success</span>
-                  </div>
-                </div>
-
-                <Link to={`/brands/${brand.id}`} className="w-full py-4 bg-navy text-white text-[9px] font-black uppercase rounded-xl shadow-xl hover:bg-orange-primary active:scale-95 transition-all text-center tracking-widest italic flex items-center justify-center gap-2 group/btn">
-                   Visit Brand Hub <ArrowRight size={14} className="-rotate-45 group-hover/btn:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full pb-16 flex flex-col lg:flex-row gap-10 xl:gap-12">
+      <div className="max-w-[1700px] mx-auto px-6 w-full pt-8 pb-16 flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative">
         {/* Sidebar Filters */}
-        <aside className="w-64 flex-shrink-0 hidden lg:flex flex-col gap-8">
+        <aside className="w-full lg:w-64 flex-shrink-0 hidden lg:flex flex-col gap-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
           {/* Filter By Brand */}
-          <div className="bg-white rounded-[10px] p-6 shadow-soft border border-gray-100">
+          <div className="bg-white rounded-[24px] p-6 shadow-soft border border-gray-100/80 text-left">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xs font-black text-navy uppercase tracking-widest">FILTER BY BRAND TYPE</h3>
               <button className="text-[9px] font-bold text-orange-primary uppercase hover:underline">Clear all</button>
             </div>
             <div className="space-y-3">
-              {['Electronics', 'Fashion clothing', 'Accessories', 'Education'].map(brand => (
-                <label key={brand} className="flex items-center gap-3 cursor-pointer group">
-                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary" />
-                  <span className="text-xs font-bold text-gray-500 group-hover:text-navy transition-colors">{brand}</span>
+              {[
+                { name: 'Apex', checked: true },
+                { name: 'Gadget & Gear', checked: false },
+                { name: 'Nike', checked: false },
+                { name: 'Adidas', checked: true },
+                { name: 'Bay', checked: false },
+                { name: 'Dhaka Boot Barn', checked: false },
+                { name: 'Estilo', checked: false },
+                { name: 'Arlin Shoes', checked: false },
+                { name: 'Eco & Para', checked: false },
+                { name: 'Masco', checked: false }
+              ].map(item => (
+                <label key={item.name} className="flex items-center gap-3 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    defaultChecked={item.checked}
+                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary accent-orange-primary cursor-pointer" 
+                  />
+                  <span className="text-xs font-bold text-gray-500 group-hover:text-navy transition-colors">{item.name}</span>
                 </label>
               ))}
             </div>
-            <button className="mt-6 text-[10px] font-black text-orange-primary uppercase hover:underline">Show All 150 Brands</button>
+            <button className="mt-6 text-[10px] font-black text-orange-primary uppercase hover:underline text-left">Show All Filters</button>
           </div>
 
-          {/* Sponsored Ad */}
-          <div className="bg-navy rounded-[10px] p-8 text-center relative overflow-hidden shadow-2xl">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.2em] mb-4 block">Sponsored</span>
-            <h4 className="text-lg font-black text-white leading-tight mb-4 tracking-tight">List Your Brand On Choosify.bd</h4>
-            <p className="text-[10px] text-white/60 mb-6 leading-relaxed">Reach 100 Million Shoppers<br />Email: ads@choosify.bd</p>
-            <button className="w-full py-3 bg-orange-primary text-white text-[10px] font-black uppercase rounded-xl shadow-lg hover:translate-y-[-2px] transition-all">Partner With Us</button>
-          </div>
+          {/* BUSINESS SELLERS INFO CARD */}
+          <div 
+            id="section-sellers-brands" 
+            className="w-full bg-white rounded-[32px] border border-gray-100 p-6 shadow-[0_15px_35px_rgba(26,29,78,0.03)] relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
+            style={{ height: '480px' }}
+          >
+            <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-4 shrink-0 shadow-sm border border-[#FFF0E8]">
+                <Sparkles className="w-6 h-6 z-10" />
+              </div>
+              
+              <h3 className="font-sans text-lg font-black uppercase tracking-tight text-[#1A1D4E] leading-tight">
+                For Business <span className="text-[#E8500A] italic">& Sellers</span>
+              </h3>
+              
+              <p className="text-[11px] text-gray-400 font-bold mt-2 px-1 leading-relaxed max-w-[220px]">
+                Unlock exclusive tools, secure verified merchant badges, and scale your authentic local reach.
+              </p>
+            </div>
 
-          {/* Ad Slot */}
-          <div className="rounded-[10px] border-2 border-dashed border-gray-300 p-8 text-center flex flex-col items-center">
-             <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Your Ad Here</h5>
-             <p className="text-[9px] text-gray-400 mb-6">Reach 50,000+ Monthly Shoppers<br />Side Bar Placement</p>
-             <button className="flex items-center gap-2 px-4 py-2 bg-navy text-white text-[9px] font-black uppercase rounded-lg">
-                Advertise <ExternalLink size={10} />
-             </button>
+            <div className="border border-dashed border-[#E8500A]/30 bg-gradient-to-b from-[#FFF5F0]/70 to-white/70 rounded-[24px] p-5 text-center flex flex-col items-center justify-center shadow-xs my-3 flex-1">
+              <h4 className="font-sans font-black text-[#1A1D4E] text-xs uppercase tracking-widest mb-1 pb-1">BOOST SALES TODAY</h4>
+              <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
+                Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
+              </p>
+              
+              <Link 
+                to="/post-offer" 
+                className="w-full h-11 bg-[#E8500A] hover:bg-[#CF4400] text-white font-black rounded-full text-[10px] tracking-widest uppercase flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                POST OFFER <PenTool className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="flex items-center justify-center gap-2 text-[9px] font-black text-gray-400 uppercase font-mono tracking-widest shrink-0 mt-2">
+              <Users className="w-4 h-4 text-gray-400/80" /> 100k+ shopper log Daily
+            </div>
           </div>
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 space-y-12">
+        <main className="flex-1 space-y-12 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+          {/* Choosify Recommends Section */}
+          <div className="mb-12">
+            <div className="flex items-center gap-4 mb-8 overflow-hidden">
+              <div className="flex items-center gap-3 bg-orange-primary px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/20 flex-shrink-0">
+                 <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
+                 <div className="flex gap-0.5">
+                    <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                    </div>
+                    <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                    </div>
+                 </div>
+              </div>
+              <span className="text-[10px] font-black text-[#5C2AFE] uppercase tracking-widest whitespace-nowrap">3 Brands</span>
+              <div className="flex-1 h-px bg-orange-primary/20" />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 justify-items-center justify-center w-full">
+              {[brands[0], brands[1], brands[2]].map((brand, i) => (
+                <div 
+                  key={i} 
+                  className="bg-white rounded-[32px] p-6 shadow-high-density border border-gray-100 flex flex-col hover:shadow-2xl transition-all relative group overflow-hidden mx-auto justify-between"
+                  style={{ width: '100%', maxWidth: '350px', height: '350px' }}
+                >
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/5 blur-3xl rounded-full" />
+                  
+                  {/* Horizontal Header Info */}
+                  <div className="flex gap-4 items-start relative z-10 text-left w-full">
+                    <div className="w-16 h-16 rounded-[18px] bg-[#0A0A1F] flex items-center justify-center p-3 flex-shrink-0 overflow-hidden shadow-xl relative border border-white/10">
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+                      {brand.logo.length > 2 ? (
+                         <img src={brand.logo} className="w-full h-full object-contain relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
+                      ) : (
+                         <span className="text-3xl font-black text-white relative z-10">{brand.logo}</span>
+                      )}
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <h3 className="text-lg font-black text-navy leading-tight mb-0.5 italic tracking-tight uppercase truncate group-hover:text-orange-primary transition-colors">{brand.name}</h3>
+                      <p className="text-[10px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <Star key={s} size={10} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(brand.rating) && "fill-gray-200 stroke-gray-200")} />
+                          ))}
+                        </div>
+                        <span className="text-[10px] font-black text-navy italic">{brand.rating}</span>
+                        <span className="text-[9px] font-bold text-gray-300">({brand.reviews})</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content Spacer */}
+                  <div className="flex-1" />
+                  
+                  <div className="w-full h-[1px] bg-gray-150 my-4" />
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center bg-gray-50/50 py-2.5 rounded-xl border border-gray-100/50 min-w-0">
+                      <span className="text-[8px] font-black text-navy mb-1 uppercase tracking-tight block opacity-40">Best For</span>
+                      <span className="text-[9px] font-bold text-red-500 italic uppercase truncate px-1 block">{brand.bestFor}</span>
+                    </div>
+                    <div className="text-center bg-gray-50/50 py-2.5 rounded-xl border border-gray-100/50 min-w-0">
+                      <div className="flex flex-col items-center">
+                        <span className="text-lg font-black text-[#6366f1] leading-none mb-1 italic tracking-tighter">{brand.priceRange}</span>
+                        <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
+                      </div>
+                    </div>
+                    <div className="text-center bg-[#E6F4EA]/80 py-2.5 rounded-xl border border-green-100 min-w-0">
+                      <span className="text-lg font-black text-[#10B981] leading-none mb-1 italic tracking-tighter">{brand.recommended}</span>
+                      <span className="text-[7px] font-black text-navy uppercase tracking-widest opacity-60">Success</span>
+                    </div>
+                  </div>
+
+                  <div className="w-full h-[1px] bg-transparent my-1" />
+
+                  <Link to={`/brands/${brand.id}`} className="w-full py-3 bg-navy text-white text-[9px] font-black uppercase rounded-xl shadow-xl hover:bg-orange-primary active:scale-95 transition-all text-center tracking-widest italic flex items-center justify-center gap-2 group/btn z-10 shrink-0">
+                     Visit Brand Hub <ArrowRight size={14} className="-rotate-45 group-hover/btn:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
           {Object.entries(groupedBrands).map(([letter, letterBrands]) => (
             <div key={letter} className="space-y-6">
               <div className="flex items-center gap-4">
@@ -356,66 +399,71 @@ export function BrandsPage() {
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{letterBrands.length} Brands</span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center justify-center w-full">
                 {letterBrands.map(brand => (
                   <motion.div 
                     layout
                     key={brand.id} 
-                    className="bg-white rounded-[24px] p-6 md:p-7 shadow-high-density hover:shadow-3xl transition-all border border-transparent hover:border-orange-primary/10 relative group flex flex-col h-[395px] overflow-y-auto no-scrollbar"
+                    className="bg-white rounded-[24px] p-5 shadow-high-density hover:shadow-3xl transition-all border border-transparent hover:border-orange-primary/10 relative group flex flex-col justify-between overflow-hidden mx-auto"
+                    style={{ width: '100%', maxWidth: '250px', height: '350px' }}
                   >
                     {brand.isHot && (
-                      <div className="absolute top-6 right-6 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">HOT</div>
+                      <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">HOT</div>
                     )}
                     {brand.isFeatured && (
-                      <div className="absolute top-6 right-6 bg-orange-primary text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">FEATURED</div>
+                      <div className="absolute top-5 right-5 bg-orange-primary text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">FEATURED</div>
                     )}
 
-                    <div className="flex flex-col mb-6 relative z-10">
-                      <div className="w-16 h-16 rounded-[18px] bg-[#0F0F0F] flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xl border border-white/5 mb-6">
+                    {/* Horizontal Header System */}
+                    <div className="flex gap-3 items-start relative z-10 text-left w-full">
+                      <div className="w-14 h-14 rounded-[14px] bg-[#0F0F0F] flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xl border border-white/5">
                         {brand.logo.length > 2 ? (
-                           <div className="w-16 h-16 bg-orange-primary/90 p-2 flex items-center justify-center text-navy font-black text-center leading-none text-[10px] italic tracking-tighter">
-                              LOGO
-                           </div>
+                           <img src={brand.logo} className="w-full h-full object-contain p-2 relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
                         ) : (
-                          <span className="text-3xl font-black text-white">{brand.logo}</span>
+                          <span className="text-2xl font-black text-white">{brand.logo}</span>
                         )}
                       </div>
-                      <div className="flex flex-col">
-                        <h3 className="text-xl font-black text-navy leading-tight mb-2 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
-                        <p className="text-[10px] font-bold text-gray-400 mb-4 line-clamp-3 uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
-                        <div className="flex items-center gap-2">
+                      <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>
+                        <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
+                        <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
+                        <div className="flex items-center gap-1">
                           <div className="flex gap-0.5">
                             {[1, 2, 3, 4, 5].map(s => (
-                              <Star key={s} size={10} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(brand.rating) && "fill-gray-200 stroke-gray-200")} />
+                              <Star key={s} size={8} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(brand.rating) && "fill-gray-200 stroke-gray-200")} />
                             ))}
                           </div>
-                          <span className="text-[10px] font-black text-navy ml-1 italic">{brand.rating}</span>
-                          <span className="text-[10px] font-bold text-gray-300 ml-1">({brand.reviews})</span>
+                          <span className="text-[9px] font-black text-navy italic ml-0.5">{brand.rating}</span>
+                          <span className="text-[8px] font-bold text-gray-300 ml-0.5">({brand.reviews})</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="w-full h-[1px] bg-gray-50 mb-6 mt-auto" />
+                    {/* Content Spacer */}
+                    <div className="flex-1" />
 
-                    <div className="grid grid-cols-3 gap-3 mb-6">
-                      <div className="text-center bg-gray-50/50 py-3 rounded-lg border border-gray-100/50">
-                        <span className="block text-[8px] font-black text-navy mb-1 uppercase tracking-tighter opacity-60">Best For</span>
-                        <span className="block text-[9px] font-bold text-red-500 italic uppercase truncate px-1">{brand.bestFor}</span>
+                    <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
+                        <span className="block text-[7px] font-black text-navy mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
+                        <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{brand.bestFor}</span>
                       </div>
-                      <div className="text-center bg-gray-50/50 py-3 rounded-lg border border-gray-100/50">
+                      <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
                         <div className="flex flex-col items-center">
-                          <span className="text-lg font-black text-[#5C2AFE] leading-none mb-1 italic tracking-tighter">{brand.priceRange}</span>
+                          <span className="text-base font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{brand.priceRange}</span>
                           <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
                         </div>
                       </div>
-                      <div className="text-center bg-gray-50/50 py-3 rounded-lg border border-gray-100/50">
-                        <span className="block text-lg font-black text-[#3FD54F] leading-none mb-1 italic tracking-tighter">{brand.recommended}</span>
-                        <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60">Success</span>
+                      <div className="text-center bg-[#E6F4EA]/80 py-1.5 rounded-lg border border-green-100 min-w-0">
+                        <span className="block text-base font-black text-[#10B981] leading-none mb-0.5 italic tracking-tighter">{brand.recommended}</span>
+                        <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60 font-medium">Success</span>
                       </div>
                     </div>
 
-                    <Link to={`/brands/${brand.id}`} className="w-full py-4 bg-navy text-white text-[10px] font-black rounded-xl shadow-xl hover:bg-orange-primary active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-center italic group/btn">
-                      Visit Hub <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="w-full h-[1px] bg-transparent my-1" />
+
+                    <Link to={`/brands/${brand.id}`} className="w-full py-2 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-orange-primary active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
+                      Visit Hub <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                   </motion.div>
                 ))}
@@ -466,15 +514,76 @@ export function BrandsPage() {
           )}
         </main>
 
-        {/* RIGHT SIDEBAR PLACEHOLDER FOR FUTURE EXPANSION */}
-        <aside className="hidden lg:flex flex-col gap-8 w-60 xl:w-64 flex-shrink-0">
-          <div className="bg-gradient-to-br from-[#FFF0E8] to-[#FFEEF6] rounded-[24px] p-6 border border-[#E8500A]/10 text-left relative overflow-hidden shadow-sm">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-[#E8500A]/5 rounded-full -translate-y-1/3 translate-x-1/3 blur-xl" />
-            <h4 className="text-xs font-black text-[#E8500A] uppercase tracking-widest mb-2.5">Platform Picks</h4>
-            <p className="text-[10px] text-gray-500 font-bold leading-relaxed mb-4">Discover curated and verified Bangladesh sellers rated 4.9+ stars.</p>
-            <button className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest hover:underline flex items-center gap-1">
-              Learn more <ArrowRight size={10} />
-            </button>
+        {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}
+        <aside className="hidden xl:flex flex-col gap-8 w-[280px] flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+          {/* TRENDING BRANDS SECTION */}
+          <div className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] w-full text-left">
+            <h3 className="font-sans font-black text-[12px] tracking-widest text-[#1A1D4E] uppercase text-left mb-5 pb-4 border-b border-gray-50">
+              TRENDING <span className="text-[#E8500A]">BRANDS</span>
+            </h3>
+
+            <div className="flex flex-col gap-3.5">
+              {[
+                { name: "Aarong", desc: "Traditional Handcrafted Products", logo: "Aa", bg: "bg-orange-primary/95" },
+                { name: "Adidas", desc: "Premium Accessories & Sportswear", logo: "Ad", bg: "bg-navy" },
+                { name: "Coca-Cola", desc: "Global Beverage & Refreshments", logo: "Cc", bg: "bg-red-600" },
+                { name: "Starbucks", desc: "Premium Coffee & Brewing", logo: "Sb", bg: "bg-green-800" },
+                { name: "Yellow", desc: "Contemporary Lifestyle Clothing", logo: "Ye", bg: "bg-yellow-500" },
+                { name: "Bata", desc: "Global Footwear & Quality Leather", logo: "Ba", bg: "bg-red-700" }
+              ].map((item, idx) => (
+                <div 
+                  key={idx} 
+                  className="flex items-center gap-3 bg-white border border-gray-100/80 rounded-[16px] p-2.5 hover:shadow-[0_8px_20px_rgba(26,29,78,0.03)] hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                >
+                  <div className={cn("w-10 h-10 rounded-[11px] overflow-hidden shrink-0 border border-transparent flex items-center justify-center text-white font-black text-xs italic shadow-md", item.bg)}>
+                    {item.logo}
+                  </div>
+                  <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
+                    <h4 className="font-sans text-xs font-black uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors truncate">
+                      {item.name}
+                    </h4>
+                    <p className="text-[9px] font-bold text-gray-400 mt-0.5 truncate uppercase">
+                      {item.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="text-center mt-5">
+              <button className="text-[9px] font-black text-orange-primary uppercase tracking-widest hover:underline">
+                Show All
+              </button>
+            </div>
+          </div>
+
+          {/* SPONSOR AD IMAGE CARD */}
+          <div className="bg-[#050514] rounded-[32px] overflow-hidden text-center flex flex-col justify-between w-full h-[500px] shrink-0 mx-auto relative group shadow-2xl border border-white/5">
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent z-10" />
+            <img 
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=320&h=600&fit=crop" 
+              alt="Sponsor Ad" 
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60 pointer-events-none"
+              referrerPolicy="no-referrer"
+            />
+            
+            <div className="p-5 relative z-20 flex flex-col justify-between h-full">
+              <span className="text-[9px] font-black tracking-[0.2em] text-white/70 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full uppercase self-center italic">
+                SPONSOR AD
+              </span>
+              
+              <div className="flex flex-col items-center mt-auto text-left">
+                <h4 className="font-sans text-xl font-black text-white italic tracking-tighter uppercase leading-tight mb-2">
+                  Aarong <span className="text-[#E8500A]">Heritage</span>
+                </h4>
+                <p className="text-[10px] text-white/85 font-semibold mb-4 leading-relaxed max-w-[210px] uppercase tracking-wide">
+                  New Collection Available. Free Delivery overall Dhaka on purchase above BDT 1,500.
+                </p>
+                <button className="w-full h-11 bg-orange-primary hover:bg-[#CF4400] text-white font-black rounded-full text-[10px] tracking-widest uppercase flex items-center justify-center gap-2 transition-all shadow-md">
+                  SHOP NOW <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
         </aside>
       </div>

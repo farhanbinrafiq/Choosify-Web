@@ -39,7 +39,17 @@ export function Navbar() {
     <nav className="w-full bg-[#0A0A1F]/90 text-white h-20 flex items-center px-4 md:px-8 z-50 sticky top-0 border-b border-white/5 shadow-2xl backdrop-blur-md" id="main-navbar">
       <div className="flex items-center gap-3 mr-4 md:mr-8 scale-110">
         <Link to="/" className="flex flex-col items-center group">
-          <img src="/logo.png" className="h-6 w-auto mb-1" alt="Choosify.bd Logo" />
+          <svg className="h-6 w-6 mb-1 text-orange-primary group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="brand-grad" x1="10%" y1="10%" x2="90%" y2="90%">
+                <stop offset="0%" stopColor="#FF5B00" />
+                <stop offset="100%" stopColor="#FF8C3A" />
+              </linearGradient>
+            </defs>
+            <circle cx="12" cy="12" r="10" fill="url(#brand-grad)" />
+            <circle cx="9.5" cy="12" r="2.5" fill="white" />
+            <circle cx="14.5" cy="12" r="2.5" fill="white" opacity="0.4" />
+          </svg>
           <span className="text-xl font-black tracking-tight lowercase font-sans">choosify.bd</span>
         </Link>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart } from 'lucide-react';
+import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BLOGS } from '../constants';
 import { motion } from 'motion/react';
@@ -8,6 +8,19 @@ import { RecommendationCard } from '../components/RecommendationCard';
 
 export function GuidesPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('Fashion');
+
+  const categoriesList = [
+    { name: 'Fashion', icon: <Shirt size={16} className="stroke-[2.5]" />, count: 550 },
+    { name: 'Gadgest', icon: <Smartphone size={16} className="stroke-[2.5]" />, count: 420 },
+    { name: 'Perfume', icon: <Droplets size={16} className="stroke-[2.5]" />, count: 180 },
+    { name: 'Electronics', icon: <Tv size={16} className="stroke-[2.5]" />, count: 350 },
+    { name: 'Travel', icon: <Compass size={16} className="stroke-[2.5]" />, count: 156 },
+    { name: 'Education', icon: <BookOpen size={16} className="stroke-[2.5]" />, count: 210 },
+    { name: 'Parenting', icon: <Heart size={16} className="stroke-[2.5]" />, count: 95 },
+    { name: 'Kids', icon: <Smile size={16} className="stroke-[2.5]" />, count: 240 },
+    { name: 'Cars / Bike', icon: <Car size={16} className="stroke-[2.5]" />, count: 310 }
+  ];
 
   const recommendationTitles = [
     'Top 10 Smartphones 2026',
@@ -132,38 +145,68 @@ export function GuidesPage() {
         </div>
       </div>
 
-      <main className="max-w-[1700px] mx-auto px-6 w-full py-20 flex flex-col lg:flex-row gap-10 xl:gap-12 relative z-10">
+      <main className="max-w-[1700px] mx-auto px-6 w-full py-20 flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative z-10">
          {/* Left Sidebar Navigation */}
-         <aside className="w-full lg:w-48 lg:sticky lg:top-36 h-max space-y-3 hidden lg:block shrink-0">
-            <h4 className="text-[10px] font-black text-navy uppercase tracking-[0.4em] mb-4 italic opacity-30 px-4">Categories</h4>
-            {[
-              { name: 'All', active: true },
-              { name: 'Mobile', icon: '📱' },
-              { name: 'Electronics', icon: '🔌' },
-              { name: 'Car / Bike', icon: '🚗' },
-              { name: 'Gadgets', icon: '⌚' },
-              { name: 'Home Appliances', icon: '🏠' },
-              { name: 'Beauty Care', icon: '💄' },
-              { name: 'Hotels', icon: '🏨' },
-              { name: 'Computer', icon: '💻' },
-              { name: 'Medical', icon: '🏥' }
-            ].map((cat) => (
-              <button 
-                key={cat.name} 
-                className={cn(
-                  "flex items-center gap-3 px-5 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all w-full text-left italic group",
-                  cat.active 
-                  ? 'bg-orange-primary text-white shadow-lg shadow-orange-primary/20' 
-                  : 'text-navy/60 hover:bg-orange-primary/5 hover:text-orange-primary'
-                )}
-              >
-                <span className="group-hover:scale-125 transition-transform text-[14px]">{cat.icon || '🔥'}</span>
-                {cat.name}
-              </button>
-            ))}
+         <aside className="w-full lg:w-64 xl:w-72 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar hidden lg:block shrink-0">
+           <div className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-xl flex flex-col gap-5">
+             <div className="flex flex-col gap-1">
+               <h3 className="text-xl md:text-2xl font-black uppercase text-navy italic tracking-tighter">
+                 <span className="text-orange-primary">CATA</span>GORIES
+               </h3>
+               <div className="w-full h-px bg-gray-100 mt-2" />
+             </div>
+
+             <div className="flex flex-col gap-1">
+               {categoriesList.map((cat) => {
+                 const isActive = activeCategory === cat.name;
+                 return (
+                   <button 
+                     key={cat.name} 
+                     onClick={() => setActiveCategory(cat.name)}
+                     className={cn(
+                       "flex items-center gap-4 py-2.5 px-3 rounded-2xl w-full text-left group transition-all duration-300",
+                       isActive 
+                       ? "bg-orange-primary/5 ring-1 ring-orange-primary/10" 
+                       : "hover:bg-slate-50/80"
+                     )}
+                   >
+                     {/* Circle Icon Container */}
+                     <span className={cn(
+                       "w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-300 flex-shrink-0 relative",
+                       isActive
+                       ? "bg-orange-primary text-white border-orange-primary shadow-lg shadow-orange-primary/20"
+                       : "bg-white text-orange-primary border-gray-100 shadow-[0_4px_10px_rgba(0,0,0,0.04)] group-hover:scale-110 group-hover:border-orange-primary/20"
+                     )}>
+                       {cat.icon}
+                     </span>
+
+                     {/* Content Label */}
+                     <span className="flex-1 min-w-0">
+                       <span className={cn(
+                         "text-[10.5px] md:text-xs font-black uppercase italic tracking-widest transition-colors duration-300 truncate block",
+                         isActive ? "text-orange-primary" : "text-navy group-hover:text-orange-primary"
+                       )}>
+                         {cat.name}
+                       </span>
+                     </span>
+
+                     {/* Count Badge */}
+                     <span className={cn(
+                       "px-2.5 py-1 rounded-[10px] text-[8.5px] font-mono font-black italic tracking-tighter shrink-0 transition-colors duration-300",
+                       isActive
+                       ? "bg-orange-primary text-white"
+                       : "bg-[#EAEFF4] text-navy/70"
+                     )}>
+                       {cat.count}
+                     </span>
+                   </button>
+                 );
+               })}
+             </div>
+           </div>
          </aside>
 
-         <div className="flex-1 min-w-0">
+         <div className="flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
             {/* Featured Guide */}
             <div className="mb-16">
                <RecommendationCard 
@@ -223,7 +266,7 @@ export function GuidesPage() {
          </div>
 
          {/* Right Sidebar Widgets */}
-         <aside className="w-full lg:w-[320px] space-y-8 shrink-0 relative z-10">
+         <aside className="w-full lg:w-[320px] space-y-8 shrink-0 relative z-10 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
             {/* Newsletter Widget */}
             <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-2xl shadow-gray-100/50">
                <h4 className="font-black text-orange-primary text-[10px] uppercase tracking-[0.4em] mb-4 italic">NEWSLETTER</h4>

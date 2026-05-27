@@ -651,10 +651,10 @@ export function ProductDetailPage() {
       {/* Main Content Area */}
       <main className="bg-[#F8FAFC] py-10">
          <div className="max-w-[1700px] mx-auto px-6 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-12 items-start w-full relative">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 items-start w-full relative">
                
                {/* Left Column Section (Column 1) */}
-               <div className="lg:col-span-3 space-y-8">
+               <div className="lg:col-span-3 space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
                   {/* QUICK PRODUCT OVERVIEW CARD */}
                   <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl p-6 space-y-6">
                      <h3 className="text-xs font-black text-navy tracking-tight uppercase border-b border-gray-150 pb-4">
@@ -766,7 +766,7 @@ export function ProductDetailPage() {
                </div>
 
                {/* Middle Column Section (Column 2) */}
-               <div className="lg:col-span-6 space-y-8">
+               <div className="lg:col-span-6 space-y-8 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
                   {/* PRICE ACROSS STORES TABLE CARD */}
                   <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl overflow-hidden">
                      <div className="p-6 flex items-center justify-between border-b border-gray-50">
@@ -1086,7 +1086,7 @@ export function ProductDetailPage() {
                </div>
 
                {/* Right Side Column (Column 3) */}
-               <div className="lg:col-span-3 space-y-8">
+               <div className="lg:col-span-3 space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
                   {/* SAMSUNG BRAND CARD */}
                   <div className="bg-white rounded-[24px] overflow-hidden shadow-xl border border-gray-100 group">
                      <div className="p-6 flex flex-col items-center text-center">

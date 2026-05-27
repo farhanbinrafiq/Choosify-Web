@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Search, ChevronDown, Star, Bookmark, X, Gift, Package, DollarSign } from 'lucide-react';
+import { Search, ChevronDown, Star, Bookmark, X, Gift, Package, DollarSign, Shirt, Smartphone, Droplets, Tv, Compass, BookOpen, Heart, Smile, Car } from 'lucide-react';
 import { PRODUCTS, BRANDS } from '../constants';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
@@ -73,7 +73,7 @@ export function BrandProductPage() {
         </div>
       </div>
 
-      <div className="max-w-[1700px] mx-auto px-6 w-full flex flex-col lg:flex-row gap-10 xl:gap-12 py-16 relative">
+      <div className="max-w-[1700px] mx-auto px-6 w-full flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 py-16 relative">
         {/* Sidebar Filters */}
         <aside className="w-full lg:w-60 xl:w-64 flex-shrink-0">
           <div className="space-y-8 sticky top-32">
@@ -129,7 +129,7 @@ export function BrandProductPage() {
                <span className="text-[10px] font-black text-navy uppercase tracking-widest">Filter By Product Name</span>
                <div className="flex gap-2">
                   <div className="relative flex-1">
-                     <input type="text" placeholder="Search With Product Name" className="w-full h-12 px-4 bg-white rounded-xl text-xs font-bold border border-gray-100 focus:outline-none focus:border-orange-primary shadow-sm" />
+                     <input type="text" placeholder="Search With Product Name" className="w-full h-12 px-4 bg-[#F8FAFC] rounded-xl text-xs font-bold border border-gray-100 focus:outline-none focus:border-orange-primary shadow-sm" />
                   </div>
                   <button className="h-12 px-6 bg-orange-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-orange-primary/20">Search</button>
                </div>
@@ -224,7 +224,7 @@ export function BrandProductPage() {
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">Limited Time Offers From {brand.name}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(188px,1fr))] justify-items-center justify-center gap-6">
                 {finalDeals.map((product, i) => (
                   <ProductCard key={i} product={product} variant="grid" />
                 ))}
@@ -263,7 +263,7 @@ export function BrandProductPage() {
               </div>
 
               {/* Product Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-20">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(188px,1fr))] justify-items-center justify-center gap-6 mb-20">
                 {([...displayProducts, ...displayProducts, ...displayProducts.slice(0, 4)]).map((product, i) => (
                   <ProductCard key={i} product={product} variant="grid" />
                 ))}
@@ -294,16 +294,106 @@ export function BrandProductPage() {
           )}
         </main>
 
-        {/* RIGHT SIDEBAR PLACEHOLDER FOR FUTURE EXPANSION */}
-        <aside className="hidden lg:flex flex-col gap-8 w-60 xl:w-64 flex-shrink-0">
-          <div className="bg-[#0A0B1E] rounded-[24px] p-6 border border-white/10 text-left relative overflow-hidden shadow-2xl">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-orange-primary/10 rounded-full -translate-y-1/3 translate-x-1/3 blur-xl" />
-            <h4 className="text-xs font-black text-[#E8500A] uppercase tracking-widest mb-2.5">Pro Insights</h4>
-            <p className="text-[10px] text-gray-400 font-bold leading-relaxed mb-4">View verified batch benchmarks and direct importer logs for genuine stock items.</p>
-            <button className="text-[10px] font-black text-white hover:text-orange-primary uppercase tracking-widest transition-colors">
-              Access Benchmarks
-            </button>
+        {/* RIGHT SIDEBAR WITH PROMO CODES */}
+        <aside className="hidden xl:flex flex-col gap-8 w-64 xl:w-72 flex-shrink-0">
+          <div className="bg-white rounded-[32px] p-6 border border-gray-100 text-left relative overflow-hidden shadow-xl">
+             <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                   <div className="w-1.5 h-6 bg-orange-primary rounded-full" />
+                   <h4 className="text-base font-black text-navy uppercase tracking-tight italic">Promo Codes</h4>
+                </div>
+                <button className="text-[10px] font-black text-orange-primary hover:underline uppercase tracking-widest">
+                  See All
+                </button>
+             </div>
+             
+             <div className="w-full h-px bg-gray-100 my-4" />
+
+             <div className="space-y-6">
+                {/* Promo Code Card 1 */}
+                <div className="bg-[#F8FAFC] rounded-3xl p-6 border border-gray-100 flex flex-col items-center text-center">
+                   <div className="w-10 h-10 rounded-full bg-orange-primary/10 flex items-center justify-center text-orange-primary mb-4 shadow-sm border border-orange-primary/10">
+                      <Gift size={16} />
+                   </div>
+                   <span className="text-[10px] font-black text-navy uppercase tracking-wider mb-1">First Purchase Offer</span>
+                   <span className="text-lg font-black text-orange-primary italic uppercase tracking-tighter mb-4">BDT 500 FLAT</span>
+                   
+                   <div className="w-full py-3.5 bg-white border border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center mb-3 shadow-xs">
+                      <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 leading-none">Promo Code</span>
+                      <span className="text-sm font-mono font-black text-navy tracking-widest leading-none">EID26</span>
+                   </div>
+                   
+                   <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Valid Till June 30</span>
+                </div>
+
+                {/* Promo Code Card 2 */}
+                <div className="bg-[#F8FAFC] rounded-3xl p-6 border border-gray-100 flex flex-col items-center text-center">
+                   <div className="w-10 h-10 rounded-full bg-orange-primary/10 flex items-center justify-center text-orange-primary mb-4 shadow-sm border border-orange-primary/10">
+                      <Gift size={16} />
+                   </div>
+                   <span className="text-[10px] font-black text-navy uppercase tracking-wider mb-1">First Purchase Offer</span>
+                   <span className="text-lg font-black text-orange-primary italic uppercase tracking-tighter mb-4">BDT 500 FLAT</span>
+                   
+                   <div className="w-full py-3.5 bg-white border border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center mb-3 shadow-xs">
+                      <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 leading-none">Promo Code</span>
+                      <span className="text-sm font-mono font-black text-navy tracking-widest leading-none">APEX500</span>
+                   </div>
+                   
+                   <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">For New Users Only</span>
+                </div>
+
+                {/* Promo Code Card 3 */}
+                <div className="bg-[#F8FAFC] rounded-3xl p-6 border border-gray-100 flex flex-col items-center text-center">
+                   <div className="w-10 h-10 rounded-full bg-orange-primary/10 flex items-center justify-center text-orange-primary mb-4 shadow-sm border border-orange-primary/10">
+                      <Gift size={16} />
+                   </div>
+                   <span className="text-[10px] font-black text-navy uppercase tracking-wider mb-1">First Purchase Offer</span>
+                   <span className="text-lg font-black text-orange-primary italic uppercase tracking-tighter mb-4">BDT 500 FLAT</span>
+                   
+                   <div className="w-full py-3.5 bg-white border border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center mb-3 shadow-xs">
+                      <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 leading-none">Promo Code</span>
+                      <span className="text-sm font-mono font-black text-navy tracking-widest leading-none">APEX20</span>
+                   </div>
+                   
+                   <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Valid Till June 30</span>
+                </div>
+             </div>
           </div>
+
+          {/* SPONSORED AD BANNER */}
+          <div className="bg-[#020215] rounded-[32px] p-6 border border-white/5 text-center relative overflow-hidden shadow-2xl flex flex-col items-center w-full mt-6">
+             {/* Badge */}
+             <div className="border border-white/20 px-4 py-1.5 rounded-full text-[8px] font-black tracking-widest text-[#94A3B8] uppercase mb-5 leading-none">
+                SPONSORED AD
+             </div>
+
+             {/* Fashion Portrait Image */}
+             <div className="w-full relative rounded-2xl overflow-hidden mb-6 aspect-[4/5] border border-white/10 shadow-lg">
+                <img 
+                   src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80" 
+                   className="w-full h-full object-cover relative z-10" 
+                   alt="Aarong Brand Ambassador" 
+                   referrerPolicy="no-referrer"
+                />
+             </div>
+
+             {/* Aarong Typography */}
+             <div className="flex flex-col gap-1.5 mb-5">
+                <h4 className="text-xl font-black text-white uppercase tracking-wider leading-none">AARONG</h4>
+                <h4 className="text-[16px] font-black text-white uppercase tracking-tighter leading-none">HERITAGE SHOPPING</h4>
+                <h4 className="text-xl font-black text-white uppercase tracking-widest leading-none">BRAND</h4>
+             </div>
+
+             {/* Support Text */}
+             <p className="text-[9.5px] text-[#A1A1AA] font-bold leading-relaxed mb-6 max-w-[210px] mx-auto text-center">
+                New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
+             </p>
+
+             {/* CTA Action Button */}
+             <button className="w-full py-3.5 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:opacity-90 active:scale-[0.98] transition-all text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-orange-primary/20 italic">
+                Shop Now
+              </button>
+           </div>
         </aside>
       </div>
     </div>

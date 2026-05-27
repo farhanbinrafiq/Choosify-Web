@@ -322,10 +322,7 @@ export function HomePage() {
 
           {/* Main Typography Header Section */}
           <h1 className="font-space font-extrabold text-[#FFFFFF] text-5xl sm:text-6xl md:text-7xl leading-[1] tracking-tight uppercase mb-6 max-w-4xl max-w-none">
-            Choose, Verify & Shop <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF5B00] via-[#E8500A] to-[#FF8C3A] italic font-black">
-              100% Original
-            </span> Brands
+            buy <span className="text-orange-primary italic font-black">original</span>
           </h1>
 
           {/* Supporting Text */}
@@ -335,7 +332,7 @@ export function HomePage() {
 
           {/* Glassmorphic Search Container */}
           <form onSubmit={handleSearchSubmit} className="relative w-full max-w-3xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-full border border-white/10 shadow-[0_30px_60px_rgba(11,13,38,0.5)] focus-within:border-white/20 transition-all duration-300 mb-6">
-            <div className="flex items-center">
+            <div className="flex items-center bg-white rounded-full">
               <div className="pl-6 text-[#E8500A] shrink-0">
                 <Search className="w-5 h-5" />
               </div>
@@ -344,7 +341,7 @@ export function HomePage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search authentic Fashion hubs, Smart Gadgets & verified outlets..." 
-                className="w-full h-14 bg-transparent outline-none pl-4 pr-32 text-white text-base font-semibold placeholder-gray-400 focus:outline-none focus:ring-0 border-none" 
+                className="w-full h-14 bg-transparent outline-none pl-4 pr-32 text-navy text-base font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
               />
               <button 
                 type="submit"
@@ -405,7 +402,7 @@ export function HomePage() {
       </div>
 
       {/* SECTION 4 — THREE COLUMN GRID */}
-      <main className="max-w-[1700px] mx-auto px-6 py-10 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-10 xl:gap-12 relative">
+      <main className="max-w-[1700px] mx-auto px-6 py-10 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative">
         
         {/* LEFT STICKY SIDEBAR */}
         <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-6 flex-shrink-0">
@@ -971,37 +968,6 @@ export function HomePage() {
                   >
                     BROWSE ALL FROM THIS BRAND
                   </Link>
-                </div>
-              </div>
-
-              {/* FEED SECTION D — FOR BUSINESS & SELLERS */}
-              <div id="section-sellers" className="bg-white rounded-3xl border border-gray-100 p-6 md:p-10 shadow-[0_15px_40px_rgba(26,29,78,0.02)] relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-44 h-44 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-3xl pointer-events-none" />
-                
-                <div className="text-center mb-8">
-                  <span className="font-space text-xl sm:text-2xl font-black uppercase tracking-tight text-[#1A1D4E]">For Business &</span>
-                  <span className="font-space text-xl sm:text-2xl font-black uppercase tracking-tight text-[#E8500A] italic"> Sellers</span>
-                  <p className="text-xs text-gray-400 font-semibold mt-1.5">Are you a merchant? Gain elite verification badges, unlock listing slots, and grow authentic shopper followings.</p>
-                </div>
-
-                <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/40 to-white rounded-[24px] p-8 md:p-10 text-center flex flex-col items-center max-w-[620px] mx-auto shadow-sm">
-                  <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-4 border border-[#E8500A]/5">
-                    <Sparkles className="w-6 h-6" />
-                  </div>
-                  <h4 className="font-space font-extrabold text-[#1A1D4E] text-base uppercase tracking-tight mb-2">Boost Your Sales • Submit Your Exclusive Offer</h4>
-                  <p className="text-xs text-gray-500 max-w-sm mb-6 leading-relaxed">
-                    Access premium exposure metrics, reach verified local shopper lists, and establish uncompromised consumer confidence.
-                  </p>
-                  
-                  <Link 
-                    to="/post-offer" 
-                    className="mb-4 h-12 min-w-[200px] px-8 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white font-black rounded-full text-xs tracking-widest uppercase flex items-center justify-center gap-2.5 transition-all shadow-lg hover:scale-105"
-                  >
-                    Post Business Offer <PenTool className="w-4 h-4" />
-                  </Link>
-                  <div className="flex items-center gap-1.5 text-[9px] font-bold text-gray-400 uppercase font-mono tracking-widest">
-                    <Users className="w-3.5 h-3.5 text-gray-400" /> Over 100,000 Verified shoppers login Daily
-                  </div>
                 </div>
               </div>
 
@@ -1597,98 +1563,271 @@ export function HomePage() {
         <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar mr-0 pl-[2px] pb-[500px] w-full max-w-[260px] xl:max-w-[310px] flex-shrink-0">
           
           {/* Card 1 — TRENDING DEALS */}
-          <div className="bg-white rounded-[24px] border border-gray-100 p-5.5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] text-left">
-            <div className="flex items-center justify-between mb-4.5">
-              <h3 className="text-[9.5px] font-black tracking-widest text-[#1A1D4E]/30 uppercase italic">Trending Deals</h3>
-              <span className="flex items-center gap-1 bg-red-500 text-white text-[7.5px] font-black px-2 py-0.5 rounded-full uppercase italic leading-none shadow-sm animate-pulse-slow">
-                <Flame className="w-2.5 h-2.5" /> FLASH SALE
-              </span>
+          <div className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] text-left">
+            <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-50">
+              <h3 className="font-space font-black text-[18px] tracking-tight italic text-[#1A1D4E] uppercase">
+                TRENDING <span className="text-[#E8500A]">DEALS</span>
+              </h3>
+              <Link 
+                to="/deals" 
+                className="text-[10px] font-black text-[#E8500A] underline uppercase tracking-wider hover:text-[#CF4400]"
+              >
+                SEE ALL
+              </Link>
             </div>
             
-            <div className="space-y-3.5 max-h-[420px] overflow-y-auto pr-1 no-scrollbar">
-              {dealsProducts.map((p: any, idx) => (
+            <div className="flex flex-col gap-5">
+              {[
+                {
+                  id: 1,
+                  title: "Apex Shoes Running Shoes Apex Shoes Running.",
+                  img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=240&h=240&fit=crop",
+                  badge: "BEST VALUE",
+                  badgeClass: "bg-[#3E19FF] text-white",
+                  price: "BDT 2,500"
+                },
+                {
+                  id: 2,
+                  title: "Apex Shoes Running Shoes Apex Shoes Running.",
+                  img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=240&h=240&fit=crop",
+                  badge: "HOT",
+                  badgeClass: "bg-[#DC2626] text-white",
+                  price: "BDT 2,500"
+                },
+                {
+                  id: 3,
+                  title: "Apex Shoes Running Shoes Apex Shoes Running.",
+                  img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=240&h=240&fit=crop",
+                  badge: "NEW",
+                  badgeClass: "bg-[#84CC16] text-white",
+                  price: "BDT 2,500"
+                },
+                {
+                  id: 4,
+                  title: "Apex Shoes Running Shoes Apex Shoes Running.",
+                  img: "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=240&h=240&fit=crop",
+                  badge: "SALE",
+                  badgeClass: "bg-[#0B0C24] text-white",
+                  price: "BDT 2,500"
+                },
+                {
+                  id: 5,
+                  title: "Apex Shoes Running Shoes Apex Shoes Running.",
+                  img: "https://images.unsplash.com/photo-1608248597481-496100c80836?w=240&h=240&fit=crop",
+                  badge: "SALE",
+                  badgeClass: "bg-[#0B0C24] text-white",
+                  price: "BDT 2,500"
+                }
+              ].map((item, idx) => (
                 <div 
                   key={idx}
-                  onClick={() => navigate(`/products/${p.id}`)}
-                  className="flex items-center justify-between gap-3 bg-white hover:bg-[#FFF0E8]/40 border border-gray-150/50 hover:border-[#E8500A]/20 p-2.5 rounded-xl hover:shadow-md transition-all duration-300 cursor-pointer"
+                  className="flex gap-4 bg-white hover:bg-gray-50/30 p-1 rounded-2xl transition-all duration-300 group text-left"
                 >
-                  <div className="w-15 h-15 bg-white rounded-lg flex-shrink-0 overflow-hidden relative border border-gray-100 p-1.5 flex items-center justify-center">
-                    <img src={p.image} className="w-full h-full object-contain" alt={p.title} />
-                    <div className="absolute -bottom-1 -left-1 w-5 h-5 bg-white shadow-md border border-gray-150 rounded-full flex items-center justify-center z-10 select-none">
-                       <Bookmark className="w-2.5 h-2.5 text-[#E8500A] fill-current" />
+                  <div className="w-24 h-24 rounded-[16px] overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center bg-gray-50 relative">
+                    <img 
+                      src={item.img} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toast.success('Added to saved items!');
+                      }}
+                      className="absolute top-1.5 left-1.5 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow border border-orange-100 cursor-pointer hover:scale-110 active:scale-90 transition-transform z-10"
+                    >
+                      <Bookmark className="w-3.5 h-3.5 text-[#E8500A]" />
                     </div>
-                    {p.discount && (
-                      <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[6.5px] font-black px-1 py-0.5 rounded leading-none z-10">
-                        {p.discount} OFF
+                  </div>
+
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-1 text-left">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[8.5px] font-black uppercase text-gray-400 tracking-wider">APEX</span>
+                        <span className={cn("text-[7.2px] font-black uppercase px-2 py-0.5 rounded-[6px] tracking-tight leading-none shrink-0", item.badgeClass)}>
+                          {item.badge}
+                        </span>
+                      </div>
+                      <h4 className="font-space text-[10.5px] font-black uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors line-clamp-2 leading-tight mt-1">
+                        {item.title}
+                      </h4>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-[12px] font-mono font-black text-[#E8500A] tracking-tight">
+                        {item.price}
                       </span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0 flex flex-col justify-center text-left pl-1">
-                    <span className="text-[8px] font-black uppercase text-gray-400 tracking-wider leading-none mb-0.5 block">{p.brand || 'APEX'}</span>
-                    <h4 className="font-space font-extrabold text-[11px] text-[#1A1D4E] uppercase truncate w-full mb-0.5 italic leading-snug">{p.title}</h4>
-                    <div className="flex items-baseline gap-1.5 mt-0.5">
-                      <span className="text-[12px] font-mono font-black text-[#E8500A] leading-none">৳{p.price.toLocaleString()}</span>
-                      {p.originalPrice && (
-                        <span className="text-[9px] font-mono text-gray-400 line-through leading-none">৳{p.originalPrice}</span>
-                      )}
+                      <button 
+                        type="button" 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          addToCart({
+                            id: `apex-promo-${item.id}`,
+                            title: item.title,
+                            price: 2500,
+                            image: item.img,
+                            brand: 'APEX'
+                          }, 1); 
+                          toast.success(`Successfully added ${item.title} to your verification basket!`);
+                        }} 
+                        className="w-10 h-10 rounded-full bg-[#E8500A] hover:bg-[#CF4400] text-white flex flex-col items-center justify-center shrink-0 hover:scale-[1.05] active:scale-[0.96] transition-transform shadow-[0_4px_12px_rgba(232,80,10,0.2)] border-0 cursor-pointer"
+                        aria-label="Add to cart"
+                      >
+                        <span className="text-[7px] font-black uppercase leading-none tracking-tight">Add To</span>
+                        <span className="text-[7px] font-black uppercase leading-none tracking-tight mt-0.5">Cart</span>
+                      </button>
                     </div>
                   </div>
-                  <button 
-                    type="button" 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      addToCart(p, 1); 
-                      toast.success(`Successfully added ${p.title} to your verification basket!`);
-                    }} 
-                    className="w-9 h-9 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] text-white flex flex-col items-center justify-center shrink-0 hover:scale-[1.05] active:scale-[0.96] transition-transform shadow-md border-0 cursor-pointer"
-                    aria-label="Add to cart"
-                  >
-                     <span className="text-[7.2px] font-black uppercase font-space tracking-tight leading-none">Add To</span>
-                     <span className="text-[7.2px] font-black uppercase font-space tracking-tight leading-none mt-0.5">Cart</span>
-                  </button>
                 </div>
               ))}
             </div>
-
-            <button 
-              onClick={() => toast.success('Loading more exclusive active discount slabs!')} 
-              className="w-full text-center text-[10px] font-black text-[#E8500A] hover:text-[#CF4400] uppercase tracking-widest mt-5 flex items-center justify-center gap-1 hover:scale-[1.02] transition-transform"
-            >
-              Load More Slots <ChevronDown className="w-3.5 h-3.5" />
-            </button>
           </div>
 
           {/* Card 2 — POPULAR RECOMMENDATIONS */}
-          <div className="bg-white rounded-[24px] border border-gray-100 p-5.5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] text-left">
-            <div className="flex items-center justify-between mb-4.5">
-              <h3 className="text-[9.5px] font-black tracking-widest text-[#1A1D4E]/30 uppercase italic">Popular Guides</h3>
-              <span className="text-[8.5px] font-black bg-[#FFF0E8] text-[#E8500A] px-2.5 py-1 rounded-full leading-none shadow-sm font-mono tracking-widest uppercase text-center">CURATED</span>
+          <div className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] text-left">
+            <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-50">
+              <h3 className="font-space font-black text-[12px] tracking-wide text-[#1A1D4E] uppercase leading-tight">
+                TRENDING <span className="text-[#E8500A]">BRANDS</span>
+              </h3>
+              <Link 
+                to="/brands" 
+                className="text-[10px] font-black text-[#E8500A] underline uppercase tracking-wider hover:text-[#CF4400]"
+              >
+                SEE ALL
+              </Link>
             </div>
 
-            <div className="space-y-4">
-              {BLOGS.slice(0, 3).map((g) => (
+            <div className="flex flex-col gap-3.5">
+              {[
+                {
+                  title: "TOP 10 SMARTPHONES TO BUY IN 2026",
+                  img: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=160&h=160&fit=crop",
+                  likes: "12k",
+                  views: "1.2k",
+                  shares: "450"
+                },
+                {
+                  title: "IS THE S24 ULTRA STILL WORTH IT IN LATE 2026?",
+                  img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=160&h=160&fit=crop",
+                  likes: "12k",
+                  views: "1.2k",
+                  shares: "450"
+                },
+                {
+                  title: "IS THE S24 ULTRA STILL WORTH IT IN LATE 2026?",
+                  img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=160&h=160&fit=crop",
+                  likes: "12k",
+                  views: "1.2k",
+                  shares: "450"
+                },
+                {
+                  title: "IS THE S24 ULTRA STILL WORTH IT IN LATE 2026?",
+                  img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=160&h=160&fit=crop",
+                  likes: "12k",
+                  views: "1.2k",
+                  shares: "450"
+                },
+                {
+                  title: "IS THE S24 ULTRA STILL WORTH IT IN LATE 2026?",
+                  img: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=160&h=160&fit=crop",
+                  likes: "12k",
+                  views: "1.2k",
+                  shares: "450"
+                },
+                {
+                  title: "IS THE S24 ULTRA STILL WORTH IT IN LATE 2026?",
+                  img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=160&h=160&fit=crop",
+                  likes: "12k",
+                  views: "1.2k",
+                  shares: "450"
+                }
+              ].map((item, idx) => (
                 <div 
-                  key={g.id}
-                  onClick={() => navigate(`/guides/${g.id}`)}
-                  className="group cursor-pointer border-b border-gray-50 pb-3 last:border-b-0 last:pb-0 hover:border-[#E8500A]/30 transition-all duration-300 text-left"
+                  key={idx} 
+                  onClick={() => navigate('/guides')}
+                  className="flex gap-3 bg-white border border-gray-100/80 rounded-[16px] p-2.5 hover:shadow-[0_8px_20px_rgba(26,29,78,0.03)] hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
                 >
-                  <h4 className="font-space font-extrabold text-[11.5px] uppercase text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors line-clamp-2 leading-snug mb-1.5 tracking-tight italic">
-                    {g.title}
-                  </h4>
-                  <div className="flex items-center gap-3 text-[9px] font-mono font-black text-gray-400 uppercase leading-none">
-                    <span>👥 {g.views || '120k'} REVIEWS</span>
-                    <span>📤 {g.shares || '1k'} RE-SAVES</span>
+                  <div className="w-14 h-14 rounded-[12px] overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center bg-gray-50">
+                    <img 
+                      src={item.img} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
+                    <h4 className="font-space text-[9.5px] font-black uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors line-clamp-2 leading-tight">
+                      {item.title}
+                    </h4>
+                    <div className="flex items-center gap-3 text-gray-400 font-mono text-[8px] font-black mt-1">
+                      <div className="flex items-center gap-1">
+                        <Heart className="w-3 h-3 text-[#FF5B00] fill-[#FF5B00]/10" />
+                        <span>{item.likes}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Eye className="w-3 h-3 text-gray-400" />
+                        <span>{item.views}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Share2 className="w-3 h-3 text-gray-400" />
+                        <span>{item.shares}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            <button 
-              onClick={() => navigate('/guides')} 
-              className="w-full text-center text-[10px] font-black text-[#E8500A] hover:text-[#CF4400] uppercase tracking-widest mt-5 flex items-center justify-center gap-1.5 hover:scale-[1.02] transition-transform"
-            >
-              Examine More Guides <ChevronDown className="w-3.5 h-3.5" />
-            </button>
+            <div className="mt-5 pt-4 border-t border-gray-50">
+              <button 
+                onClick={() => navigate('/brands')}
+                className="w-full py-2.5 bg-gray-50 hover:bg-orange-50 hover:text-[#E8500A] text-gray-700 font-space font-black rounded-xl text-[9px] tracking-widest uppercase flex items-center justify-center gap-1.5 transition-all outline-none border border-gray-100 hover:border-[#E8500A]/20 cursor-pointer"
+              >
+                SEE ALL BRANDS <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Card — FOR BUSINESS & SELLERS (REPOSITIONED & EXACT DIMENSIONS) */}
+          <div 
+            id="section-sellers" 
+            className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
+            style={{ width: '280px', height: '464px' }}
+          >
+            <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-3.5 border border-[#E8500A]/5 shrink-0 shadow-sm">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              
+              <h3 className="font-space text-lg font-black uppercase tracking-tight text-[#1A1D4E] leading-snug">
+                For Business <span className="text-[#E8500A] italic">& Sellers</span>
+              </h3>
+              
+              <p className="text-[10.5px] text-gray-400 font-bold mt-2 px-1 leading-relaxed">
+                Unlock exclusive tools, secure verified merchant badges, and scale your authentic local reach.
+              </p>
+            </div>
+
+            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/40 to-white rounded-[20px] p-4 text-center flex flex-col items-center justify-center shadow-sm my-2 flex-1">
+              <h4 className="font-space font-black text-[#1A1D4E] text-[11px] uppercase tracking-wider mb-2 leading-none">Boost Sales Today</h4>
+              <p className="text-[9.5px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
+                Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
+              </p>
+              
+              <Link 
+                to="/post-offer" 
+                className="w-full h-10 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white font-black rounded-full text-[9.5px] tracking-widest uppercase flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Post Offer <PenTool className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            <div className="flex items-center justify-center gap-1.5 text-[8px] font-bold text-gray-400 uppercase font-mono tracking-widest shrink-0">
+              <Users className="w-3.5 h-3.5 text-gray-400" /> 100k+ shopper log Daily
+            </div>
           </div>
 
           {/* Card 3 — NEWSLETTER */}

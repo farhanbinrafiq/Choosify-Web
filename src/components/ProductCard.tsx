@@ -10,12 +10,16 @@ import toast from 'react-hot-toast';
 export function ProductCard({ 
   product, 
   variant = 'grid',
-  showCountdown = false
+  showCountdown = false,
+  imageContainerStyle,
+  titleStyle
 }: { 
   product: any, 
   variant?: 'grid' | 'list' | 'compact' | 'featured',
   showCountdown?: boolean,
-  key?: React.Key
+  key?: React.Key,
+  imageContainerStyle?: React.CSSProperties,
+  titleStyle?: React.CSSProperties
 }) {
   const navigate = useNavigate();
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
@@ -115,7 +119,10 @@ export function ProductCard({
                )}
             </div>
             
-            <h3 className="text-2xl md:text-4xl font-black text-navy uppercase italic tracking-tighter leading-[1.1] mb-6 group-hover:text-orange-primary transition-colors line-clamp-3">
+            <h3 
+              className="text-2xl md:text-4xl font-black text-navy uppercase italic tracking-tighter leading-[1.1] mb-6 group-hover:text-orange-primary transition-colors line-clamp-3"
+              style={titleStyle}
+            >
               {product.title}
             </h3>
 
@@ -147,7 +154,10 @@ export function ProductCard({
         onClick={() => navigate(`/products/${product.id}`)}
         className="bg-white rounded-[15px] p-4 flex flex-col gap-4 border border-gray-100 shadow-sm hover:shadow-xl transition-all cursor-pointer group relative h-full"
       >
-        <div className="w-full aspect-square bg-gray-50 rounded-[12px] relative overflow-hidden flex items-center justify-center p-3">
+        <div 
+          className="w-full aspect-square bg-gray-50 rounded-[12px] relative overflow-hidden flex items-center justify-center p-3"
+          style={imageContainerStyle}
+        >
             <div className="absolute top-2 left-2 z-10 flex flex-col gap-1.5">
                <button 
                  onClick={toggleSave}
@@ -323,135 +333,124 @@ export function ProductCard({
           </div>
         </div>
       </div>
-    );
-  }
-
-  return (
+    )  }  return (
     <div 
-      className="bg-white rounded-[20px] shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full relative border border-gray-100 overflow-hidden cursor-pointer" 
+      className="bg-white rounded-[16px] p-3 shadow-[0_4px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_30px_rgba(26,29,78,0.06)] hover:border-[#FF5B00]/20 transition-all duration-300 group flex flex-col relative border border-gray-100 overflow-hidden cursor-pointer" 
       onClick={() => navigate(`/products/${product.id}`)}
       id={`product-${product.id}`}
+      style={{ width: '188px', height: '368px' }}
     >
-      <div className="relative aspect-[1/1.1] bg-[#F9FAFB] overflow-hidden flex items-center justify-center p-5 mt-2 mx-2 rounded-[15px]">
+      <div className="relative h-[126px] w-full bg-[#F9FAFB] overflow-hidden flex items-center justify-center p-3 rounded-[12px] shrink-0">
         <img 
           src={product.image} 
           alt={product.title} 
           loading="lazy"
           onError={handleImageError}
-          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" 
+          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" 
         />
-        <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
           <button 
             onClick={toggleSave}
             className={cn(
-              "w-10 h-10 rounded-full border flex items-center justify-center shadow-sm hover:scale-110 transition-transform",
-              isSaved ? "bg-[#F96500] border-[#F96500] text-white" : "bg-white border-gray-100 text-[#F96500]"
+              "w-6.5 h-6.5 rounded-full border flex items-center justify-center shadow-xs hover:scale-110 transition-transform bg-white",
+              isSaved ? "bg-[#F96500] border-[#F96500] text-white" : "border-gray-100 text-[#F96500]"
             )}
           >
-             <Bookmark size={18} className={isSaved ? "fill-current" : ""} />
+             <Bookmark size={11} className={isSaved ? "fill-current" : ""} />
           </button>
           <button 
             onClick={handleCompare}
             className={cn(
-               "w-10 h-10 rounded-full border flex items-center justify-center shadow-sm hover:scale-110 transition-transform",
-               isInCompare ? "bg-[#07DD05] border-[#07DD05] text-white" : "bg-white border-gray-100 text-[#1B5CFF]"
+              "w-6.5 h-6.5 rounded-full border flex items-center justify-center shadow-xs hover:scale-110 transition-transform bg-white",
+              isInCompare ? "bg-[#07DD05] border-[#07DD05] text-white" : "border-gray-100 text-[#1B5CFF]"
             )}
           >
-             <Layers size={18} />
+             <Layers size={11} />
           </button>
         </div>
         {product.tag && (
-          <div className={cn("absolute top-4 right-4 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter leading-none italic shadow-md", product.tagColor || "bg-orange-primary")}>
+          <div className={cn("absolute top-2 right-2 text-white text-[7.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter leading-none italic shadow-xs", product.tagColor || "bg-orange-primary")}>
             {product.tag}
           </div>
         )}
         
         {showCountdown && (
-          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-center gap-3 bg-white/80 backdrop-blur-md py-2 rounded-full border border-white/40 shadow-xl z-20">
-             <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-black text-navy italic leading-none">08</span>
-                <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">hrs</span>
+          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-center gap-1.5 bg-white/85 backdrop-blur-xs py-0.5 rounded-full border border-white/50 shadow-sm z-20 text-[8.5px]">
+             <div className="flex items-center gap-0.5">
+                <span className="font-mono font-black text-navy italic leading-none text-[9px]">08</span>
+                <span className="text-[5.5px] font-bold text-gray-400 uppercase">h</span>
              </div>
-             <div className="w-px h-3 bg-gray-200" />
-             <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-black text-orange-primary italic leading-none">42</span>
-                <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">min</span>
+             <div className="w-px h-2 bg-gray-250" />
+             <div className="flex items-center gap-0.5">
+                <span className="font-mono font-black text-orange-primary italic leading-none text-[9px]">42</span>
+                <span className="text-[5.5px] font-bold text-gray-400 uppercase">m</span>
              </div>
-             <div className="w-px h-3 bg-gray-200" />
-             <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-black text-navy italic leading-none">12</span>
-                <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">sec</span>
+             <div className="w-px h-2 bg-gray-250" />
+             <div className="flex items-center gap-0.5">
+                <span className="font-mono font-black text-navy italic leading-none text-[9px]">12</span>
+                <span className="text-[5.5px] font-bold text-gray-400 uppercase">s</span>
              </div>
           </div>
         )}
       </div>
       
-      <div className="p-6 pb-8 flex flex-col flex-1">
+      <div className="pt-2.5 flex flex-col flex-1 min-h-0">
         {mode === 'wholesale' && (
-          <div className="flex flex-wrap gap-1.5 mb-2.5">
-            <span className="bg-gradient-to-r from-[#FF5B00] to-[#FF7A00] text-white text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter italic">
-              WHOLESALE
-            </span>
-            <span className="bg-[#FF5B00]/10 text-[#FF5B00] border border-[#FF5B00]/20 text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter italic">
+          <div className="flex flex-wrap gap-1 mb-1.5 opacity-90">
+            <span className="bg-[#FF5B00] text-white text-[6.5px] font-black px-1 rounded uppercase tracking-tighter italic">
               BULK PRICE
             </span>
-            <span className="bg-[#0A0A1F] text-[#FF5B00] border border-[#FF5B00]/20 text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter italic">
-              SUPPLIER
+            <span className="bg-[#0A0A1F] text-[#FF5B00] border border-[#FF5B00]/25 text-[6.5px] font-black px-1 rounded uppercase tracking-tighter italic">
+              SUPPLIER APPROVED
             </span>
           </div>
         )}
-        <h3 className="text-[14px] font-black text-navy line-clamp-2 mb-2 group-hover:text-orange-primary transition-colors min-h-[40px] leading-tight tracking-tighter uppercase italic">
+        <h3 className="text-[11px] font-black text-navy line-clamp-2 mb-1 group-hover:text-orange-primary transition-colors min-h-[30px] leading-tight tracking-tight uppercase italic text-left">
           {product.title}
         </h3>
         
-        <div className="flex items-center gap-3 mb-4 w-full">
-          <span className="text-orange-primary font-black uppercase text-[9px] tracking-[0.2em]">{brandName}</span>
-          <div className="w-1 h-1 bg-gray-100 rounded-full animate-ping" />
-          <div className="flex items-center gap-1">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} size={8} className={cn(i < Math.floor(product.rating || 4) ? "fill-orange-primary text-orange-primary" : "text-gray-200")} />
-            ))}
-            <span className="text-[9px] font-bold text-gray-400 ml-1">4.8</span>
+        <div className="flex items-center gap-2 mb-1.5 w-full justify-between">
+          <span className="text-orange-primary font-black uppercase text-[8px] tracking-wider truncate max-w-[85px] text-left">{brandName}</span>
+          <div className="flex items-center gap-0.5 shrink-0">
+            <Star size={7.5} className="fill-orange-primary text-orange-primary" />
+            <span className="text-[8px] font-black text-[#A3A8DF]">4.8</span>
           </div>
           {mode === 'wholesale' && product.moq && (
-            <span className="ml-auto bg-navy text-[#FF5B00] border border-[#FF5B00]/20 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter italic">
-              MOQ {product.moq} Pcs
+            <span className="bg-navy text-[#FF5B00] text-[6.5px] font-black px-1.5 py-0.2 rounded uppercase tracking-tighter italic whitespace-nowrap">
+              MOQ {product.moq}
             </span>
           )}
         </div>
 
-        <div className="mb-6">
+        <div className="mb-2">
           <StockProgress sm />
         </div>
 
         {/* Display bulk slabs information on the card for quick selection */}
-        {mode === 'wholesale' && product.pricingTiers && (
-          <div className="mb-4 bg-[#F8FAFC] border border-gray-100 rounded-xl p-2.5">
-            <div className="text-[7.5px] font-black text-navy uppercase tracking-widest mb-1 italic">Business Wholesale Slabs:</div>
-            <div className="flex items-center gap-2 justify-between">
+        {mode === 'wholesale' && product.pricingTiers ? (
+          <div className="mb-2 bg-[#F8FAFC]/90 border border-gray-100 rounded-lg p-1">
+            <div className="text-[6.5px] font-black text-navy uppercase tracking-wider mb-0.5 italic text-left">Wholesale Slabs:</div>
+            <div className="flex items-center gap-1 justify-between">
               {product.pricingTiers.slice(0, 3).map((tier: any, tIdx: number) => (
-                <div key={tIdx} className="bg-white border border-gray-100 rounded-lg p-1 text-center flex-1 max-w-[70px]">
-                  <div className="text-[6.5px] font-black text-gray-400 uppercase tracking-tight">{tier.minQuantity}+ Pcs</div>
-                  <div className="text-[8.5px] font-black font-mono text-[#FF5B00]">৳{tier.price.toLocaleString()}</div>
+                <div key={tIdx} className="bg-white border border-gray-50 rounded p-0.5 text-center flex-1 max-w-[48px]">
+                  <div className="text-[5.5px] font-bold text-gray-400 whitespace-nowrap text-center leading-none">{tier.minQuantity}+ Pcs</div>
+                  <div className="text-[7.5px] font-black font-mono text-[#FF5B00] mt-0.5 leading-none">৳{tier.price}</div>
                 </div>
               ))}
             </div>
           </div>
-        )}
+        ) : null}
         
-        <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="mt-auto pt-2.5 border-t border-gray-100/80 flex items-center justify-between gap-1">
           <div className="flex flex-col min-w-0">
-             <span className="text-[9px] font-black text-gray-300 uppercase italic tracking-widest leading-none mb-1 text-left">
-               {mode === 'wholesale' ? 'Active Slab Price' : 'Market Price'}
-             </span>
-             <div className="flex items-center gap-2">
-                <span className="text-[18px] font-black text-orange-primary italic leading-none whitespace-nowrap">
-                  BDT {product.price.toLocaleString()}
-                </span>
-                {product.originalPrice && (
-                  <span className="text-[9px] font-bold text-gray-400 uppercase italic line-through whitespace-nowrap opacity-60">৳{product.originalPrice}</span>
-                )}
-             </div>
+             <span className="text-[7.5px] font-black text-gray-300 uppercase italic tracking-widest leading-none mb-0.5 text-left">
+               {mode === 'wholesale' ? 'Active Slab' : 'Market Price'}
+              </span>
+              <div className="flex items-baseline gap-1">
+                 <span className="text-[12.5px] font-black text-orange-primary italic leading-none whitespace-nowrap font-mono">
+                   BDT {product.price.toLocaleString()}
+                 </span>
+              </div>
           </div>
           
           <button 
@@ -461,12 +460,10 @@ export function ProductCard({
               const qty = mode === 'retail' ? 1 : (product.moq || 10);
               addToCart(product, qty);
             }}
-            className="h-10 px-6 shrink-0 rounded-full bg-[#FF5B00] text-white flex items-center justify-center gap-2 hover:bg-navy transition-all shadow-xl shadow-orange-primary/10 active:scale-95 w-full sm:w-auto"
+            className="w-7 h-7 shrink-0 rounded-full bg-[#FF5B00] text-white flex items-center justify-center hover:bg-navy transition-all shadow-md active:scale-95"
+            aria-label="Add to cart"
           >
-             <span className="text-[9px] font-black uppercase tracking-widest italic leading-none">
-               {mode === 'wholesale' ? `Bulk Add (${product.moq || 10})` : 'Add To Cart'}
-             </span>
-             <Plus size={12} />
+             <Plus size={11} />
           </button>
         </div>
       </div>

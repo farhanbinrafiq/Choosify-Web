@@ -199,10 +199,10 @@ export function AllProductsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-col lg:flex-row gap-10 xl:gap-12 py-8">
+      <div className="max-w-[1700px] mx-auto px-6 w-full flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 py-8 relative">
         
         {/* Sidebar Filters */}
-        <aside className="w-full lg:w-64 flex-shrink-0">
+        <aside className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
           <div className="space-y-8">
             
             {/* Quick Search Widget */}
@@ -354,7 +354,7 @@ export function AllProductsPage() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1">
+        <main className="flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
           {/* Top Bar / Sorting */}
           <div className="flex flex-col gap-6 mb-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -430,7 +430,7 @@ export function AllProductsPage() {
             <div className={cn(
               "mb-20",
               viewMode === 'grid' 
-                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6" 
+                ? "grid grid-cols-[repeat(auto-fill,minmax(188px,1fr))] justify-items-center justify-center gap-5" 
                 : "flex flex-col gap-6"
             )}>
               {filteredProducts.map((product, i) => (
@@ -458,15 +458,49 @@ export function AllProductsPage() {
           </div>
         </main>
 
-        {/* RIGHT SIDEBAR PLACEHOLDER FOR FUTURE EXPANSION */}
-        <aside className="hidden lg:flex flex-col gap-[32px] w-60 xl:w-64 flex-shrink-0">
-          <div className="bg-gradient-to-br from-[#EEF1F8] to-white rounded-[24px] p-6 border border-gray-100 text-left relative overflow-hidden shadow-sm">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-orange-primary/5 rounded-full -translate-y-1/3 translate-x-1/3 blur-xl" />
-            <h4 className="text-xs font-black text-navy uppercase tracking-widest mb-2.5">Quick Assistance</h4>
-            <p className="text-[10px] text-gray-500 font-bold leading-relaxed mb-4">Need help choosing authentic products? Join our live interactive community forums.</p>
-            <button type="button" className="text-[10px] font-black text-orange-primary uppercase tracking-widest hover:underline">
-              Visit Forums
-            </button>
+        {/* RIGHT SIDEBAR WITH PREMIUM AARONG AD BANNER */}
+        <aside className="hidden lg:flex flex-col gap-[32px] w-60 xl:w-64 flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+          <div className="w-full bg-[#060714] text-white rounded-[24px] p-5 border border-white/5 relative overflow-hidden shadow-2xl flex flex-col items-center">
+            {/* Top Pill - Sponsored Ad */}
+            <div className="border border-white/20 rounded-full px-3 py-1 text-[8.5px] font-space font-black tracking-[0.2em] text-[#A3A8DF]/80 uppercase mb-5 leading-none max-w-max">
+              Sponsored Ad
+            </div>
+
+            {/* Premium Image Container */}
+            <div className="w-full aspect-[4/5] rounded-[18px] overflow-hidden bg-[#1B1B36] relative shrink-0 border border-white/5 shadow-md mb-5">
+              <img 
+                src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500&auto=format&fit=crop&q=80" 
+                alt="Aarong Heritage Model" 
+                className="w-full h-full object-cover object-top hover:scale-[1.03] transition-transform duration-500 ease-out"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+
+            {/* Brand Title Lines */}
+            <div className="flex flex-col items-center text-center gap-0.5 mb-3.5">
+              <span className="font-space font-black text-[20px] tracking-tight text-white uppercase leading-none">
+                AARONG
+              </span>
+              <span className="font-space font-black text-[20px] tracking-tight text-white uppercase leading-none">
+                HERITAGE SHOPPING
+              </span>
+              <span className="font-space font-black text-[20px] tracking-tight text-white uppercase leading-none">
+                BRAND
+              </span>
+            </div>
+
+            {/* Description */}
+            <p className="text-[10px] text-[#A3A8DF]/90 font-medium leading-relaxed max-w-[210px] text-center mb-5">
+              New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
+            </p>
+
+            {/* CTA Button */}
+            <Link 
+              to="/brands"
+              className="w-full inline-flex items-center justify-center py-2.5 bg-gradient-to-r from-[#D96B27] to-[#C94F1C] hover:from-[#ED7F3B] hover:to-[#DE5D28] text-white font-space font-black rounded-full text-[10px] tracking-widest uppercase transition-all shadow-lg hover:scale-[1.02] active:scale-[0.98] duration-200"
+            >
+              Shop Now
+            </Link>
           </div>
         </aside>
       </div>
