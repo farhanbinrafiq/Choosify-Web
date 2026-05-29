@@ -3,6 +3,22 @@ import { ProductModeType, Product, User, Seller, Brand, Order, SubOrder, SubOrde
 import { PRODUCTS, BRANDS } from '../constants';
 import { toast } from 'react-hot-toast';
 
+export interface B2BRfq {
+  id: string;
+  item: string;
+  category: string;
+  quantity: number;
+  targetPrice?: number;
+  status: 'pending' | 'replied' | 'ordered';
+  date: string;
+  notes: string;
+  supplierName?: string;
+  supplierAvatar?: string;
+  pricePerUnit?: number;
+  totalOfferPrice?: number;
+  responseNotes?: string;
+}
+
 export interface CartItem {
   id: number;
   product: any;
@@ -33,6 +49,9 @@ export interface GlobalStateContextType {
   sellers: Seller[];
   allBrands: Brand[];
   allProducts: Product[];
+  rfqs: B2BRfq[];
+  submitRfq: (rfq: Omit<B2BRfq, 'id' | 'date' | 'status'>) => void;
+  acceptQuotation: (rfqId: string) => void;
 }
 
 const DEFAULT_USER: User = {
@@ -130,6 +149,34 @@ const INITIAL_SELLERS: Seller[] = [
   }
 ];
 
+const INITIAL_RFQS: B2BRfq[] = [
+  {
+    id: "RFQ-5219",
+    item: "High-density custom dyed cotton Polo shirts with company logo embroidery",
+    category: "Fashion & Lifestyle",
+    quantity: 500,
+    targetPrice: 320,
+    status: "replied",
+    date: "2 hours ago",
+    notes: "We need custom sizes distributed globally. S-XXL. Split ratios: 1:2:2:1.",
+    supplierName: "Epyllion Trade Syndicate",
+    supplierAvatar: "ET",
+    pricePerUnit: 300,
+    totalOfferPrice: 150000,
+    responseNotes: "Special vendor rate offered for prompt dispatch. Bulk tax certificate invoice generated."
+  },
+  {
+    id: "RFQ-8812",
+    item: "Original Bulk Samsung A35 lots for employee rewards program",
+    category: "Mobile & Phones",
+    quantity: 35,
+    targetPrice: 35000,
+    status: "pending",
+    date: "1 day ago",
+    notes: "Require authentic BSTI verified products. Brand warranty sheets must be pre-filled."
+  }
+];
+
 const GlobalStateContext = createContext<GlobalStateContextType | undefined>(undefined);
 
 export function GlobalStateProvider({ children }: { children: React.ReactNode }) {
@@ -168,6 +215,56 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const setIsLoggedIn = (val: boolean) => {
     setIsLoggedInState(val);
     localStorage.setItem('choosify_is_logged_in', String(val));
+  };
+
+  const [rfqs, setRfqs] = useState<B2BRfq[]>(() => {
+    const saved = localStorage.getItem('choosify_b2b_rfqs');
+    return saved ? JSON.parse(saved) : INITIAL_RFQS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('choosify_b2b_rfqs', JSON.stringify(rfqs));
+  }, [rfqs]);
+
+  const submitRfq = (newRfqData: Omit<B2BRfq, 'id' | 'date' | 'status'>) => {
+    const rfqId = `RFQ-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newRfq: B2BRfq = {
+      ...newRfqData,
+      id: rfqId,
+      date: 'Just now',
+      status: 'pending'
+    };
+    setRfqs(prev => [newRfq, ...prev]);
+    toast.success(`Broadcasting RFQ ${rfqId} to verified South Asian Wholesalers!`);
+
+    // Dynamic reply simulation
+    setTimeout(() => {
+      setRfqs(prev => 
+        prev.map(q => {
+          if (q.id === rfqId) {
+            const calculatedPerUnit = q.targetPrice ? Math.round(Number(q.targetPrice) * 0.95) : 340;
+            return {
+              ...q,
+              status: 'replied',
+              supplierName: q.category.includes('Tech') || q.category.includes('Mobile') ? 'Bengal Tech Distributors' : 'Epyllion Trade Syndicate',
+              supplierAvatar: q.category.includes('Tech') || q.category.includes('Mobile') ? 'BT' : 'ET',
+              pricePerUnit: calculatedPerUnit,
+              totalOfferPrice: calculatedPerUnit * q.quantity,
+              responseNotes: 'Verified commercial wholesale catalog rate authorized direct dispatch.'
+            };
+          }
+          return q;
+        })
+      );
+      toast.success(`You received a direct seller quote for ${rfqId}! Check 'Live RFQs' tab.`);
+    }, 4500);
+  };
+
+  const acceptQuotation = (rfqId: string) => {
+    setRfqs(prev => 
+      prev.map(q => q.id === rfqId ? { ...q, status: 'ordered' } : q)
+    );
+    toast.success('Quota offer accepted and invoice dispatched to Wholesale Settlement!');
   };
 
   const setMode = (newMode: ProductModeType) => {
@@ -677,7 +774,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       buyerReputations: INITIAL_BUYER_REPUTATIONS,
       sellers: INITIAL_SELLERS,
       allBrands,
-      allProducts
+      allProducts,
+      rfqs,
+      submitRfq,
+      acceptQuotation
     }}>
       {children}
     </GlobalStateContext.Provider>

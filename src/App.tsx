@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Link, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
@@ -29,7 +29,6 @@ const BrandProductPage = lazy(() => import('./pages/BrandProductPage').then(m =>
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const BrandDealsPage = lazy(() => import('./pages/BrandDealsPage').then(m => ({ default: m.BrandDealsPage })));
 const RetailCartPage = lazy(() => import('./pages/RetailCartPage').then(m => ({ default: m.RetailCartPage })));
-const B2BCartPage = lazy(() => import('./pages/B2BCartPage').then(m => ({ default: m.B2BCartPage })));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage').then(m => ({ default: m.OrderSuccessPage })));
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(m => ({ default: m.OrderTrackingPage })));
@@ -38,6 +37,17 @@ const SellerOrderDetailsPage = lazy(() => import('./pages/SellerOrderDetailsPage
 const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })));
 const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+// Lazy load B2B pages for performance
+const B2BHomePage = lazy(() => import('./pages/b2b/B2BHomePage').then(m => ({ default: m.B2BHomePage })));
+const B2BSuppliersPage = lazy(() => import('./pages/b2b/B2BSuppliersPage').then(m => ({ default: m.B2BSuppliersPage })));
+const B2BProductsPage = lazy(() => import('./pages/b2b/B2BProductsPage').then(m => ({ default: m.B2BProductsPage })));
+const B2BSupplierDetailPage = lazy(() => import('./pages/b2b/B2BSupplierDetailPage').then(m => ({ default: m.B2BSupplierDetailPage })));
+const B2BProductDetailPage = lazy(() => import('./pages/b2b/B2BProductDetailPage').then(m => ({ default: m.B2BProductDetailPage })));
+const B2BRfqPage = lazy(() => import('./pages/b2b/B2BRfqPage').then(m => ({ default: m.B2BRfqPage })));
+const B2BBrandsPage = lazy(() => import('./pages/b2b/B2BBrandsPage').then(m => ({ default: m.B2BBrandsPage })));
+const B2BNationwidePage = lazy(() => import('./pages/b2b/B2BNationwidePage').then(m => ({ default: m.B2BNationwidePage })));
+const B2BCartPage = lazy(() => import('./pages/b2b/B2BCartPage').then(m => ({ default: m.B2BCartPage })));
 
 // Shell for all 13 screens overview
 function Overview() {
@@ -146,9 +156,12 @@ function ScreenPreview({ title, children, id }: { title: string, children: React
   );
 }
 
+import { useGlobalState } from './context/GlobalStateContext';
+
 function AppContent() {
   const location = useLocation();
   const isOverview = location.pathname === '/overview';
+  const { mode } = useGlobalState();
 
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
@@ -156,7 +169,16 @@ function AppContent() {
       <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
           <Routes location={location}>
-            <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
+            <Route path="/" element={<PageWrapper>{mode === 'wholesale' ? <B2BHomePage /> : <HomePage />}</PageWrapper>} />
+            <Route path="/b2b" element={<PageWrapper><B2BHomePage /></PageWrapper>} />
+            <Route path="/b2b/suppliers" element={<PageWrapper><B2BSuppliersPage /></PageWrapper>} />
+            <Route path="/b2b/supplier/:slug" element={<PageWrapper><B2BSupplierDetailPage /></PageWrapper>} />
+            <Route path="/b2b/products" element={<PageWrapper><B2BProductsPage /></PageWrapper>} />
+            <Route path="/b2b/product/:id" element={<PageWrapper><B2BProductDetailPage /></PageWrapper>} />
+            <Route path="/b2b/rfq" element={<PageWrapper><B2BRfqPage /></PageWrapper>} />
+            <Route path="/b2b/brands" element={<PageWrapper><B2BBrandsPage /></PageWrapper>} />
+            <Route path="/b2b/nationwide" element={<PageWrapper><B2BNationwidePage /></PageWrapper>} />
+            <Route path="/cart/b2b" element={<PageWrapper><B2BCartPage /></PageWrapper>} />
             <Route path="/overview" element={<Overview />} />
             <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
             <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
@@ -173,7 +195,6 @@ function AppContent() {
             <Route path="/post-offer" element={<PageWrapper><PostOfferPage /></PageWrapper>} />
             <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
-            <Route path="/cart/b2b" element={<PageWrapper><B2BCartPage /></PageWrapper>} />
             <Route path="/checkout" element={<PageWrapper><CheckoutPage /></PageWrapper>} />
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />

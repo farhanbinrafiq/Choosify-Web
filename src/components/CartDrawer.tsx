@@ -126,11 +126,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
   const handleCheckout = () => {
     onClose();
-    if (mode === 'retail') {
-      navigate('/cart/retail');
-    } else {
-      navigate('/cart/b2b');
-    }
+    navigate('/cart/retail');
   };
 
   return (

@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Search, ShoppingBag, User, PlusCircle, ChevronRight, Bell, Bookmark, LogIn, LayoutDashboard, Heart, MessageSquare, Settings, Briefcase, Package } from 'lucide-react';
+import { 
+  Search, ShoppingBag, User, PlusCircle, ChevronRight, Bell, Bookmark, LogIn, 
+  LayoutDashboard, Heart, MessageSquare, Settings, Briefcase, Package, ShieldCheck, 
+  FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare
+} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SignInModal } from './SignInModal';
 import { motion, AnimatePresence } from 'motion/react';
@@ -13,17 +17,42 @@ export function Navbar() {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isWholesaleConfirmOpen, setIsWholesaleConfirmOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  
   const navigate = useNavigate();
-
   const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn } = useGlobalState();
-  const cartItemsCount = mode === 'retail' ? retailCart.length : wholesaleCart.length;
+
+  // Pick cart count depending on current mode
+  const activeCartCount = mode === 'wholesale' ? wholesaleCart.length : retailCart.length;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/products?q=${encodeURIComponent(searchQuery)}`);
+      if (mode === 'wholesale') {
+        navigate(`/b2b/products?q=${encodeURIComponent(searchQuery)}`);
+      } else {
+        navigate(`/products?q=${encodeURIComponent(searchQuery)}`);
+      }
     }
+  };
+
+  const triggerModeSwitch = () => {
+    if (mode === 'retail') {
+      // Trigger confirmation modal for entering B2B
+      setIsConfirmModalOpen(true);
+    } else {
+      // Direct revert to retail
+      setMode('retail');
+      toast.success('Switched back to Retail Product Discovery Platform');
+      navigate('/');
+    }
+  };
+
+  const confirmSwitchToB2B = () => {
+    setMode('wholesale');
+    setIsConfirmModalOpen(false);
+    toast.success('Successfully entered verified B2B Wholesale Portal!');
+    navigate('/');
   };
 
   const dashboardMiniMenu = [
@@ -36,282 +65,310 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="w-full bg-[#0A0A1F]/90 text-white h-20 flex items-center px-4 md:px-8 z-50 sticky top-0 border-b border-white/5 shadow-2xl backdrop-blur-md" id="main-navbar">
-      <div className="flex items-center gap-3 mr-4 md:mr-8 scale-110">
-        <Link to="/" className="flex flex-col items-center group">
-          <svg className="h-6 w-6 mb-1 text-orange-primary group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="brand-grad" x1="10%" y1="10%" x2="90%" y2="90%">
-                <stop offset="0%" stopColor="#FF5B00" />
-                <stop offset="100%" stopColor="#FF8C3A" />
-              </linearGradient>
-            </defs>
-            <circle cx="12" cy="12" r="10" fill="url(#brand-grad)" />
-            <circle cx="9.5" cy="12" r="2.5" fill="white" />
-            <circle cx="14.5" cy="12" r="2.5" fill="white" opacity="0.4" />
-          </svg>
-          <span className="text-xl font-black tracking-tight lowercase font-sans">choosify.bd</span>
-        </Link>
-      </div>
+    <>
+      <nav className={cn(
+        "w-full text-white h-20 flex items-center px-4 md:px-8 z-50 sticky top-0 border-b shadow-2xl backdrop-blur-md transition-all duration-300",
+        mode === 'wholesale' 
+          ? "bg-[#081120]/95 border-[#FF0038]/15" 
+          : "bg-[#0A0A1F]/90 border-white/5"
+      )} id="main-navbar">
+        
+        {/* LOGO SECTOR */}
+        <div className="flex items-center gap-3 mr-4 md:mr-8 scale-110">
+          <Link to="/" className="flex flex-col items-center group">
+            <svg className="h-6 w-6 mb-1 text-orange-primary group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" fill={mode === 'wholesale' ? "#FF0038" : "#FF5B00"} />
+              <circle cx="9.5" cy="12" r="2.5" fill="white" />
+              <circle cx="14.5" cy="12" r="2.5" fill="white" opacity="0.4" />
+            </svg>
+            <span className="text-xl font-black tracking-tight lowercase font-sans">
+              choosify<span className={mode === 'wholesale' ? "text-[#FF0038]" : "text-white"}>.bd</span>
+            </span>
+          </Link>
+        </div>
 
-      <div className="hidden lg:flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest mr-auto italic">
-        <Link to="/" className="text-[#FF6B00] hover:text-[#FF6B00] transition-colors font-black">Home</Link>
-        <Link to="/categories" className="hover:text-orange-primary transition-colors">Categories</Link>
-        <Link to="/products" className="hover:text-orange-primary transition-colors">Products</Link>
-        <Link to="/brands" className="hover:text-orange-primary transition-colors">Brands</Link>
-        {mode !== 'wholesale' && (
-          <>
-            <Link to="/guides" className="text-orange-primary hover:text-orange-primary transition-colors">Recommendations</Link>
-            <Link to="/compare" className="hover:text-orange-primary transition-colors">Compare</Link>
-            <Link to="/deals" className="hover:text-orange-primary transition-colors">Deals</Link>
-          </>
-        )}
-      </div>
-
-      <div className="flex-1 max-w-md mx-6 hidden xl:block">
-        <form onSubmit={handleSearch} className="relative">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30">
-            <Search size={16} />
-          </div>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search Products, Brands, Reviews..."
-            className="w-full h-10 pl-11 pr-12 rounded-full bg-white/5 text-white placeholder:text-white/30 text-[10px] focus:outline-none focus:bg-white/10 transition-all border border-white/10 italic font-bold"
-          />
-          <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-white/40 uppercase tracking-widest hover:text-orange-primary transition-colors italic">Search</button>
-        </form>
-      </div>
-
-      <div className="flex items-center gap-5 ml-auto">
-        {/* Global Retail vs Wholesale switcher */}
-        <div className="flex bg-white/5 border border-white/10 rounded-full p-1 items-center gap-1 scale-95 origin-right">
+        {/* MODE TOGGLE SWITCH (GLOBAL) */}
+        <div className="flex items-center gap-2 border border-white/10 p-1 rounded-2xl bg-black/40 mr-6 scale-95 shrink-0 select-none">
           <button 
-            type="button"
+            type="button" 
             onClick={() => {
-              setMode('retail');
-              toast.success('Switched to Retail Category Portal');
+              if (mode === 'wholesale') triggerModeSwitch();
             }}
             className={cn(
-              "px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all italic",
+              "px-3.5 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider font-sans transition-all duration-200",
               mode === 'retail' 
-                ? "bg-orange-primary text-white shadow-md font-black" 
-                : "text-white/60 hover:text-white"
+                ? "bg-gradient-to-r from-[#FF5B00] to-orange-deep text-white shadow-lg" 
+                : "text-gray-400 hover:text-white"
             )}
           >
             Retail
           </button>
           <button 
-            type="button"
+            type="button" 
             onClick={() => {
-              if (mode === 'retail') {
-                setIsWholesaleConfirmOpen(true);
-              }
+              if (mode === 'retail') triggerModeSwitch();
             }}
             className={cn(
-              "px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all italic flex items-center gap-1",
+              "px-3.5 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider font-sans transition-all duration-200 flex items-center gap-1",
               mode === 'wholesale' 
-                ? "bg-navy text-[#FF5B00] border border-white/10 shadow-md font-black" 
-                : "text-white/60 hover:text-white"
+                ? "bg-[#FF0038] text-white shadow-lg shadow-[#FF0038]/15" 
+                : "text-gray-400 hover:text-white"
             )}
           >
-            <Briefcase size={10} /> B2B Wholesale
+            B2B Wholesale Mini
           </button>
         </div>
 
-        <div className="hidden sm:flex items-center gap-4 border-r border-[#ffffff1a] pr-5">
-          <button 
-            type="button"
-            onClick={() => navigate(mode === 'retail' ? '/cart/retail' : '/cart/b2b')}
-            className="relative text-white/60 hover:text-white transition-colors mr-1"
-            title="Shopping Cart Portal"
-          >
-            <ShoppingBag size={20} className={cn(mode === 'wholesale' && "text-orange-primary")} />
-            {cartItemsCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F] animate-bounce">
-                {cartItemsCount}
-              </span>
-            )}
-          </button>
-          <button 
-            type="button"
-            onClick={() => navigate('/dashboard', { state: { activeTab: 'saved-products' } })}
-            className="relative text-white/60 hover:text-white transition-colors"
-            title="Saved Vault"
-          >
-            <Bookmark size={20} />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">3</span>
-          </button>
-          <button 
-            type="button"
-            onClick={() => navigate('/messages')}
-            className="relative text-white/60 hover:text-white transition-colors"
-            title="Secure Support Chats"
-          >
-            <MessageSquare size={19} className="text-orange-primary" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 text-black text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">2</span>
-          </button>
-          <button 
-            type="button"
-            onClick={() => navigate('/dashboard', { state: { activeTab: 'notifications' } })}
-            className="relative text-white/60 hover:text-white transition-colors"
-            title="Notification Alerts"
-          >
-            <Bell size={20} />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">5</span>
-          </button>
-        </div>
-
-        {!isLoggedIn && (
-          <Link to="/post-offer" className="hidden md:block">
-            <button className="h-10 px-6 bg-white/5 border border-white/10 text-white text-[10px] uppercase font-black rounded-full tracking-widest hover:bg-white/10 transition-all flex items-center gap-2 italic">
-              Post Deal <ChevronRight size={14} className="text-orange-primary" />
-            </button>
-          </Link>
-        )}
-        
-        {isLoggedIn ? (
-          <div className="relative">
-            <div 
-              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
-              className="flex items-center gap-3 group cursor-pointer"
-            >
-              <div className="w-10 h-10 rounded-full border-2 border-orange-primary overflow-hidden group-hover:scale-105 transition-all">
-                <img src="https://i.pravatar.cc/150?u=me" className="w-full h-full object-cover" alt="Profile" />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block italic text-white/70 group-hover:text-white transition-colors">Hi, Farhan</span>
-            </div>
-
-            <AnimatePresence>
-              {isUserMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-[-1]" onClick={() => setIsUserMenuOpen(false)} />
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                    className="absolute right-0 mt-4 w-64 bg-[#050514] border border-white/10 rounded-2xl shadow-2xl p-4 z-50 overflow-hidden"
-                  >
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 blur-2xl rounded-full" />
-                    
-                    <div className="flex items-center gap-3 p-3 mb-4 bg-white/5 rounded-xl border border-white/5">
-                      <img src="https://i.pravatar.cc/150?u=me" className="w-10 h-10 rounded-full object-cover border border-orange-primary/30" alt="" />
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-black text-white italic uppercase truncate">Farhan Bin Rafiq</p>
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest truncate">farhan-88@gmail.com</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      {dashboardMiniMenu.map((item, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            if (item.tab) {
-                              navigate(item.path, { state: { activeTab: item.tab } });
-                            } else {
-                              navigate(item.path);
-                            }
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-white hover:bg-white/5 rounded-xl transition-all group"
-                        >
-                          <item.icon size={16} className="group-hover:text-orange-primary transition-colors" />
-                          <span className="italic">{item.label}</span>
-                        </button>
-                      ))}
-                      <div className="mt-2 pt-2 border-t border-white/5">
-                        <button 
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            setIsLoggedIn(false);
-                            toast.success('Successfully logged out.');
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-red-400 uppercase tracking-widest hover:bg-red-500/5 rounded-xl transition-all group"
-                        >
-                          <LogIn size={16} className="rotate-180" />
-                          <span className="italic">Sign Out</span>
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
+        {/* DYNAMIC CATEGORIES FOR EACH MODE */}
+        {mode === 'wholesale' ? (
+          /* B2B wholesale active category links */
+          <div className="hidden lg:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest mr-auto italic">
+            <Link to="/" className="text-[#FF0038] hover:text-white transition-colors">B2B Core</Link>
+            <Link to="/b2b/suppliers" className="hover:text-[#FF0038] text-gray-300 transition-colors">Suppliers</Link>
+            <Link to="/b2b/products" className="hover:text-[#FF0038] text-gray-300 transition-colors">Products</Link>
+            <Link to="/b2b/nationwide" className="hover:text-[#FF0038] text-gray-300 transition-colors">Nationwide</Link>
+            <Link to="/b2b/brands" className="hover:text-[#FF0038] text-gray-300 transition-colors">Brands Showcase</Link>
           </div>
         ) : (
-          <button 
-            onClick={() => setIsSignInOpen(true)}
-            className="h-10 px-6 bg-[#FF6B00] text-white text-[10px] uppercase font-black rounded-full tracking-widest hover:bg-orange-deep transition-all flex items-center gap-2 italic"
-          >
-            Sign Up <LogIn size={14} />
-          </button>
+          /* Retail Mode general navigation links */
+          <div className="hidden lg:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest mr-auto italic text-gray-300">
+            <Link to="/" className="text-orange-primary hover:text-white transition-colors">Home</Link>
+            <Link to="/categories" className="hover:text-orange-primary transition-colors">Categories</Link>
+            <Link to="/products" className="hover:text-orange-primary transition-colors">Products</Link>
+            <Link to="/brands" className="hover:text-orange-primary transition-colors">Brands</Link>
+            <Link to="/guides" className="text-orange-primary hover:text-orange-primary transition-colors">Recommendations</Link>
+            <Link to="/compare" className="hover:text-orange-primary transition-colors">Compare</Link>
+            <Link to="/deals" className="hover:text-orange-primary transition-colors">Deals</Link>
+          </div>
         )}
-      </div>
-      
+
+        {/* SEARCH BAR */}
+        <div className="flex-1 max-w-xs mx-4 hidden xl:block">
+          <form onSubmit={handleSearch} className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30">
+              <Search size={16} />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={mode === 'wholesale' ? "Search RMG factories, wholesale loads..." : "Search Products, Brands, Reviews..."}
+              className="w-full h-10 pl-11 pr-12 rounded-full bg-white/5 text-white placeholder:text-white/30 text-[10px] focus:outline-none focus:bg-white/10 transition-all border border-white/10 italic font-bold"
+            />
+            <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-white/40 uppercase tracking-widest hover:text-[#FF0038] transition-colors italic">Sourcing</button>
+          </form>
+        </div>
+
+        {/* ACTIONS & MESSAGES */}
+        <div className="flex items-center gap-5 ml-auto">
+          
+          {/* CART SECTIONS DEPENDENT ON STATE */}
+          <div className="hidden sm:flex items-center gap-4 border-r border-[#ffffff1a] pr-5">
+            <button 
+              type="button"
+              onClick={() => {
+                if (mode === 'wholesale') {
+                  navigate('/cart/b2b');
+                } else {
+                  navigate('/cart/retail');
+                }
+              }}
+              className="relative text-white/60 hover:text-white transition-colors mr-1"
+              title={mode === 'wholesale' ? 'Commercial Freight Cart' : 'Shopping Cart'}
+            >
+              <ShoppingBag size={20} className={cn("transition-colors", mode === 'wholesale' && "text-[#FF0038]")} />
+              {activeCartCount > 0 && (
+                <span className={cn(
+                  "absolute -top-1 -right-1 w-4 h-4 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F] animate-bounce",
+                  mode === 'wholesale' ? "bg-[#FF0038]" : "bg-orange-primary"
+                )}>
+                  {activeCartCount}
+                </span>
+              )}
+            </button>
+            <button 
+              type="button"
+              onClick={() => navigate('/dashboard', { state: { activeTab: 'saved-products' } })}
+              className="relative text-white/60 hover:text-white transition-colors"
+              title="Saved Vault"
+            >
+              <Bookmark size={20} />
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary/30 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">3</span>
+            </button>
+            <button 
+              type="button"
+              onClick={() => navigate('/messages')}
+              className="relative text-white/60 hover:text-white transition-colors"
+              title="Secure Support Chats"
+            >
+              <MessageSquare size={19} className="text-orange-primary animate-pulse" />
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 text-black text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">2</span>
+            </button>
+          </div>
+
+          {/* MODE-SPECIFIC BUTTONS ON THE RIGHT */}
+          {mode === 'wholesale' ? (
+            <div className="hidden md:flex items-center gap-3">
+              <button 
+                onClick={() => navigate('/b2b/rfq')}
+                className="h-10 px-4 bg-[#FF0038]/10 hover:bg-[#FF0038]/20 border border-[#FF0038]/30 text-white hover:text-white text-[9.5px] uppercase font-black rounded-xl tracking-wider transition-all flex items-center gap-1.5 italic"
+              >
+                <FileCheck2 size={13} className="text-[#FF0038]" /> RFQ Desk
+              </button>
+              <button 
+                onClick={() => {
+                  toast.success('Redirecting to Bangladesh Factory Registration Desk');
+                  navigate('/post-offer');
+                }}
+                className="h-10 px-4 bg-white/5 border border-white/10 hover:border-[#FF0038]/50 text-white hover:bg-white/10 text-[9.5px] uppercase font-black rounded-xl tracking-wider transition-all flex items-center gap-1.5 italic"
+              >
+                <Building2 size={13} className="text-[#FF0038]" /> Become Supplier
+              </button>
+            </div>
+          ) : (
+            !isLoggedIn && (
+              <Link to="/post-offer" className="hidden md:block">
+                <button className="h-10 px-6 bg-white/5 border border-white/10 text-white text-[10px] uppercase font-black rounded-full tracking-widest hover:bg-white/10 transition-all flex items-center gap-2 italic">
+                  Post Deal <ChevronRight size={14} className="text-orange-primary" />
+                </button>
+              </Link>
+            )
+          )}
+          
+          {isLoggedIn ? (
+            <div className="relative">
+              <div 
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
+                className="flex items-center gap-3 group cursor-pointer animate-in fade-in"
+              >
+                <div className="w-10 h-10 rounded-full border-2 border-orange-primary overflow-hidden group-hover:scale-105 transition-all">
+                  <img src="https://i.pravatar.cc/150?u=me" className="w-full h-full object-cover" alt="Profile" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block italic text-white/70 group-hover:text-white transition-colors">Hi, Farhan</span>
+              </div>
+
+              <AnimatePresence>
+                {isUserMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-[-1]" onClick={() => setIsUserMenuOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                      className="absolute right-0 mt-4 w-6 coordinate bg-[#050514] border border-white/10 rounded-2xl shadow-2xl p-4 z-50 overflow-hidden min-w-[240px]"
+                    >
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 blur-2xl rounded-full" />
+                      
+                      <div className="flex items-center gap-3 p-3 mb-4 bg-white/5 rounded-xl border border-white/5">
+                        <img src="https://i.pravatar.cc/150?u=me" className="w-10 h-10 rounded-full object-cover border border-orange-primary/30" alt="" />
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-black text-white italic uppercase truncate">Farhan Bin Rafiq</p>
+                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">Corporate Sourcing Desk</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        {dashboardMiniMenu.map((item, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              if (item.tab) {
+                                navigate(item.path, { state: { activeTab: item.tab } });
+                              } else {
+                                navigate(item.path);
+                              }
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-white hover:bg-white/5 rounded-xl transition-all group"
+                          >
+                            <item.icon size={16} className="group-hover:text-orange-primary transition-colors" />
+                            <span className="italic">{item.label}</span>
+                          </button>
+                        ))}
+                        <div className="mt-2 pt-2 border-t border-white/5">
+                          <button 
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              setIsLoggedIn(false);
+                              toast.success('Successfully logged out.');
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-red-400 uppercase tracking-widest hover:bg-red-500/5 rounded-xl transition-all group"
+                          >
+                            <LogIn size={16} className="rotate-180" />
+                            <span className="italic">Sign Out</span>
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <button 
+              onClick={() => setIsSignInOpen(true)}
+              className={cn(
+                "h-10 px-6 text-white text-[10px] uppercase font-black rounded-full tracking-widest transition-all flex items-center gap-2 italic",
+                mode === 'wholesale' ? "bg-[#FF0038] hover:bg-[#d6002f]" : "bg-[#FF6B00] hover:bg-orange-deep"
+              )}
+            >
+              Sign Up <LogIn size={14} />
+            </button>
+          )}
+        </div>
+        
+      </nav>
+
       <SignInModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
-      {/* Wholesaler Switch Confirmation Modal */}
+      {/* DYNAMIC CONFIRMATION MODAL TO B2B MODE */}
       <AnimatePresence>
-        {isWholesaleConfirmOpen && (
-          <div className="fixed inset-0 z-[160] flex items-center justify-center p-4">
+        {isConfirmModalOpen && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
             <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsWholesaleConfirmOpen(false)}
-              className="absolute inset-0 bg-black/85 backdrop-blur-md"
-            />
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-md bg-[#0A0A1F] border border-orange-primary/20 rounded-[32px] overflow-hidden shadow-2xl"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#081120] border border-white/10 p-8 rounded-[32px] w-full max-w-md relative text-gray-100 shadow-2xl overflow-hidden"
             >
-              {/* Sunset orange glow visual flair */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-              
-              <div className="relative z-10 p-10 pt-12">
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-orange-primary/10 rounded-2xl flex items-center justify-center text-orange-primary mx-auto mb-6 border border-orange-primary/20 shadow-2xl">
-                    <Briefcase size={32} />
-                  </div>
-                  <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-4">
-                    Switch to <span className="text-orange-primary">B2B Wholesale?</span>
-                  </h3>
-                  <p className="text-gray-400 text-[11px] font-medium tracking-wide leading-relaxed">
-                    You are about to enter the B2B wholesale marketplace experience with bulk ordering, MOQ-based pricing, and wholesale suppliers.
-                  </p>
-                </div>
+              {/* Highlight gradient lines */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF0038]/5 blur-3xl pointer-events-none" />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <button 
-                    type="button"
-                    onClick={() => setIsWholesaleConfirmOpen(false)}
-                    className="h-14 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all italic"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setMode('wholesale');
-                      setIsWholesaleConfirmOpen(false);
-                    }}
-                    className="h-14 bg-orange-primary hover:bg-orange-deep text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all italic shadow-lg shadow-orange-primary/20"
-                  >
-                    Confirm & Enter B2B
-                  </button>
+              <div className="flex items-center gap-3.5 border-b border-white/5 pb-4 mb-5">
+                <div className="p-3 bg-[#FF0038]/10 text-[#FF0038] rounded-2xl">
+                  <ArrowLeftRight size={20} />
                 </div>
+                <div>
+                  <h3 className="text-xl font-black text-white italic uppercase tracking-tight">Enter B2B Wholesale Ecosystem</h3>
+                  <p className="text-[9px] uppercase font-mono tracking-wider text-gray-500">Corporate platform gateway</p>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-400 font-sans leading-relaxed font-semibold">
+                This will switch the entire application feed to B2B Wholesale Mode containing verified industrial manufacturers, Bulk volume tier prices and escrow protection trades. Are you sure you wish to continue?
+              </p>
+
+              <div className="flex gap-4 mt-8 border-t border-white/5 pt-5 justify-end">
+                <button 
+                  type="button" 
+                  onClick={() => setIsConfirmModalOpen(false)}
+                  className="px-6 h-11 bg-white/5 hover:bg-white/10 border border-white/10 text-white hover:text-white text-[10px] font-black uppercase tracking-widest italic rounded-xl transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  onClick={confirmSwitchToB2B}
+                  className="px-6 h-11 bg-[#FF0038] hover:bg-[#d6002f] text-white text-[10px] font-black uppercase tracking-widest italic rounded-xl transition-all shadow-lg"
+                >
+                  Confirm & Continue
+                </button>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
-    </nav>
+    </>
   );
 }

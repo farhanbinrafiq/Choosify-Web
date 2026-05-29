@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Heart, 
@@ -25,7 +25,10 @@ import {
   ShieldCheck,
   TrendingUp,
   Filter,
-  X
+  X,
+  Truck,
+  FileText,
+  Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard } from '../context/DashboardContext';
@@ -36,7 +39,6 @@ import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
-import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 // Hex Colors as per instruction
@@ -45,6 +47,14 @@ const COLORS = {
   orange: '#F96500',
   green: '#07DD05',
 };
+
+// --- SUB-COMPONENTS ---
+
+
+
+
+
+
 
 // --- SUB-COMPONENTS ---
 
@@ -624,8 +634,9 @@ const SettingsSection = () => {
 export function DashboardPage() {
   const { setIsLoggedIn } = useGlobalState();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState('overview');
   const navigate = useNavigate();
+
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (location.state && location.state.activeTab) {
@@ -636,7 +647,7 @@ export function DashboardPage() {
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
   };
-  
+
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'saved-products', label: 'Saved Products', icon: Heart },
@@ -651,6 +662,7 @@ export function DashboardPage() {
 
   const renderContent = () => {
     switch (activeTab) {
+      // Retail Tabs
       case 'overview': return <OverviewSection />;
       case 'saved-products': return <SavedProductsSection />;
       case 'saved-brands': return <SavedBrandsSection />;
@@ -706,6 +718,7 @@ export function DashboardPage() {
         </div>
       );
       case 'settings': return <SettingsSection />;
+
       default: return <OverviewSection />;
     }
   };
@@ -714,16 +727,16 @@ export function DashboardPage() {
     <div className="flex flex-col min-h-screen bg-[#0A0A1F] text-white">
       {/* Mobile Top Header */}
       <div className="lg:hidden p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0A0A1F] z-50">
-        <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white">
+        <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white border-0 cursor-pointer">
           <ArrowLeft size={20} />
         </button>
       </div>
 
       <div className="flex flex-1">
         {/* Sidebar Desktop */}
-        <aside className="hidden lg:flex w-[320px] flex-col border-r border-white/5 bg-[#050514]/40 h-screen sticky top-0 overflow-y-auto no-scrollbar">
-          <div className="p-10 border-b border-white/5">
-            <Link to="/" className="flex flex-col items-start group mb-10">
+        <aside className="hidden lg:flex w-[320px] flex-col border-r border-[#ffffff0d] bg-[#050514]/40 h-screen sticky top-0 overflow-y-auto no-scrollbar">
+          <div className="p-10 border-b border-[#ffffff0d]">
+            <Link to="/" className="flex flex-col items-start group mb-8">
               <div className="flex gap-1 mb-1">
                 <div className="w-4 h-4 rounded-full border-2 border-[#F96500] flex items-center justify-center">
                   <div className="w-1.5 h-1.5 bg-[#F96500] rounded-full" />
@@ -737,7 +750,7 @@ export function DashboardPage() {
             </Link>
           </div>
 
-          <nav className="flex-1 py-8 overflow-y-auto no-scrollbar">
+          <nav className="flex-1 py-4 overflow-y-auto no-scrollbar">
             <div className="px-10 text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-4 italic">Platform Control</div>
             {menuItems.slice(0, 5).map((item) => (
               <SidebarItem
@@ -771,7 +784,7 @@ export function DashboardPage() {
                 navigate('/');
                 toast.success('Successfully logged out.');
               }}
-              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:bg-white/10 transition-all"
+              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:bg-white/10 transition-all cursor-pointer"
             >
                <LogOut size={16} className="text-[#F96500]" /> Curator Log Out
             </button>
@@ -802,7 +815,7 @@ export function DashboardPage() {
            <div className="py-20 text-center opacity-20 hidden lg:block">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <div className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center">
-                  <div className="w-1 h-1 bg-white rounded-full" />
+                  <div className="w-1.5 h-1.5 bg-white rounded-full" />
                 </div>
                 <span className="text-xl font-bold tracking-tight lowercase">choosify.bd</span>
               </div>
