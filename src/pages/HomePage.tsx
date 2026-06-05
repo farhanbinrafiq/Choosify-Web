@@ -301,7 +301,7 @@ export function HomePage() {
     <div className="bg-[#EEF1F8] min-h-screen text-[#1A1D4E] antialiased pb-16 font-sans overflow-x-clip">
       
       {/* SECTION 2 — HERO BANNER */}
-      <section className="relative bg-gradient-to-br from-[#0B0D26] via-[#10133A] to-[#1F1746] text-white overflow-hidden py-24 px-6 shadow-inner-lg">
+      <section className="hero-section hero-container relative bg-gradient-to-br from-[#0B0D26] via-[#10133A] to-[#1F1746] text-white overflow-hidden py-24 px-6 shadow-inner-lg">
         {/* Luminous dynamic background accents */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(232,80,10,0.18)_0%,_transparent_55%)] pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#EEF1F8]/10 to-transparent pointer-events-none" />
@@ -309,7 +309,7 @@ export function HomePage() {
         {/* Subtle grid pattern helper */}
         <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
-        <div className="max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center">
+        <div className="hero-content max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center">
           
           {/* Tagline Badge */}
           <div className="inline-flex items-center gap-2.5 px-4.5 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-[10.5px] tracking-widest text-[#E8500A] font-extrabold uppercase mb-8 shadow-glow hover:border-white/25 transition-all duration-300">
@@ -321,13 +321,13 @@ export function HomePage() {
           </div>
 
           {/* Main Typography Header Section */}
-          <h1 className="font-space font-extrabold text-[#FFFFFF] text-5xl sm:text-6xl md:text-7xl leading-[1] tracking-tight uppercase mb-6 max-w-4xl max-w-none">
-            buy <span className="text-orange-primary italic font-black">original</span>
+          <h1 className="font-space font-extrabold text-[#FFFFFF] text-5xl sm:text-6xl md:text-7xl leading-[1] tracking-tight mb-6 max-w-none">
+            buy <span className="text-orange-primary italic font-black">ORIGINAL</span>
           </h1>
 
           {/* Supporting Text */}
           <p className="text-sm sm:text-base text-gray-300 max-w-2xl mx-auto font-medium mb-12 leading-relaxed opacity-95">
-            Weary of online counter-feiting and merchant fraud? Choosify.bd empowers your daily shopping with state-of-the-art independent brand verification systems in Bangladesh.
+            Weary of online counterfeiting and merchant fraud? Choosify.bd empowers your daily shopping with state-of-the-art independent brand verification systems in Bangladesh.
           </p>
 
           {/* Glassmorphic Search Container */}

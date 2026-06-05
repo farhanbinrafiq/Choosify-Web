@@ -12,6 +12,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { toast } from 'react-hot-toast';
+import { ProductMediaGallery } from '../components/ProductMediaGallery';
 
 export function ProductDetailPage() {
   const { id } = useParams();
@@ -193,17 +194,6 @@ export function ProductDetailPage() {
 
   const tabs = ['Overview', 'Specifications', 'About Choosify.bd', 'Influencer Reviews', 'Comparison'];
 
-  const heroImages = [
-    selectedVariant?.image || product.image,
-    "https://images.unsplash.com/photo-1511119253457-36e78921865c?w=1200&h=800&fit=crop",
-    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&h=800&fit=crop",
-    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&h=800&fit=crop",
-    "https://images.unsplash.com/photo-1445205170230-053b830c6050?w=1200&h=800&fit=crop",
-  ];
-
-  const handleNext = () => setCarouselIndex((prev) => (prev + 1) % heroImages.length);
-  const handlePrev = () => setCarouselIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length);
-
   const productSpecs = [
     { label: "Material", value: "Premium Linen Wear" },
     { label: "Category", value: product.category || "Lifestyle" },
@@ -251,68 +241,8 @@ export function ProductDetailPage() {
       {/* Hero Section */}
       <section className="bg-[#1a1d4e] pt-6 pb-24 overflow-hidden relative border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-center gap-3 md:gap-5 w-full max-w-[934px] mx-auto h-[320px] md:h-[458.641px] mb-0 pl-[1px]">
-            {heroImages.map((img, i) => {
-              const isActive = i === carouselIndex;
-              
-              return (
-                <motion.div
-                  key={i}
-                  onClick={() => setCarouselIndex(i)}
-                  initial={false}
-                  animate={{
-                    width: isActive ? (isMobile ? '100%' : '60%') : (isMobile ? '0%' : '12%'),
-                    flex: isActive ? 10 : 1,
-                    opacity: isActive ? 1 : 0.6,
-                  }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 20
-                  }}
-                  className={cn(
-                    "relative h-full rounded-[24px] md:rounded-[32px] overflow-hidden cursor-pointer group",
-                    !isActive && "hidden md:block"
-                  )}
-                >
-                  <img src={img} className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" alt="product detail banner" />
-                  <div className={cn(
-                     "absolute inset-0 transition-opacity duration-700",
-                     isActive ? "bg-gradient-to-t from-black/40 via-transparent to-transparent" : "bg-black/20"
-                  )} />
-                </motion.div>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center justify-center gap-12 mb-16">
-            <div className="flex gap-4">
-              {heroImages.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCarouselIndex(i)}
-                  className={cn(
-                    "h-1.5 transition-all duration-500 rounded-full",
-                    carouselIndex === i ? "w-20 bg-orange-primary" : "w-3 bg-white/10 hover:bg-white/20"
-                  )}
-                />
-              ))}
-            </div>
-            
-            <div className="flex gap-6">
-              <button 
-                onClick={handlePrev} 
-                className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all active:scale-90 shadow-sm"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button 
-                onClick={handleNext} 
-                className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all active:scale-90 shadow-sm"
-              >
-                <ChevronRight size={24} />
-              </button>
-            </div>
+          <div className="w-full max-w-4xl mx-auto mb-12">
+            <ProductMediaGallery product={product} selectedVariantImage={selectedVariant?.image} />
           </div>
 
           <div className="w-full max-w-4xl mx-auto text-left text-white relative mt-12 bg-transparent p-0 border-none shadow-none">

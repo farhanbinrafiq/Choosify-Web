@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
 import * as LucideIcons from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { CategoryCardSkeleton } from '../components/Skeleton';
 
 interface Subcategory {
   name: string;
@@ -26,6 +27,16 @@ export function CategoriesPage() {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isBrandsCollapsed, setIsBrandsCollapsed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulated content refresh loader
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [mode, searchQuery]);
 
   const brandsYouFollow = [
     { name: "AARONG", sub: "Traditional Handcrafted Products", init: "AA", bg: "bg-[#452a1b]" },
@@ -351,37 +362,44 @@ export function CategoriesPage() {
 
         {/* CENTER COLUMN: MAIN CATEGORIES STREAM */}
         <div className="flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
-          <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {categoriesList.map((cat, i) => {
-              const IconComponent = (LucideIcons as any)[cat.icon] || LucideIcons.Package;
-              const isExpanded = expandedCategory === cat.name;
-              
-              return (
-                <React.Fragment key={cat.name}>
-                  <motion.div 
-                    layout="position"
-                    onClick={() => handleCategoryClick(cat.name)}
-                    className={cn(
-                      "bg-white rounded-2xl p-6 flex flex-col items-center text-center shadow-soft hover:shadow-xl transition-all cursor-pointer group border-2 relative overflow-hidden",
-                      isExpanded ? "border-navy ring-4 ring-navy/5 z-20" : "border-transparent hover:border-navy/10"
-                    )}
-                  >
-                    {/* Colorful Background Accent */}
-                    <div className={cn(
-                      "absolute top-0 left-0 w-full h-1 bg-gradient-to-r transition-opacity duration-500",
-                      cat.color,
-                      isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-40"
-                    )} />
+          {isLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {Array.from({ length: 12 }).map((_, idx) => (
+                <CategoryCardSkeleton key={idx} />
+              ))}
+            </div>
+          ) : (
+            <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {categoriesList.map((cat, i) => {
+                const IconComponent = (LucideIcons as any)[cat.icon] || LucideIcons.Package;
+                const isExpanded = expandedCategory === cat.name;
+                
+                return (
+                  <React.Fragment key={cat.name}>
+                    <motion.div 
+                      layout="position"
+                      onClick={() => handleCategoryClick(cat.name)}
+                      className={cn(
+                        "bg-white rounded-2xl p-6 flex flex-col items-center text-center shadow-soft hover:shadow-xl transition-all cursor-pointer group border-2 relative overflow-hidden",
+                        isExpanded ? "border-navy ring-4 ring-navy/5 z-20" : "border-transparent hover:border-navy/10"
+                      )}
+                    >
+                      {/* Colorful Background Accent */}
+                      <div className={cn(
+                        "absolute top-0 left-0 w-full h-1 bg-gradient-to-r transition-opacity duration-500",
+                        cat.color,
+                        isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-40"
+                      )} />
 
-                    <div className={cn(
-                      "w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all duration-500 bg-white shadow-lg border border-gray-100",
-                      isExpanded ? "scale-110 shadow-xl" : "group-hover:scale-110 shadow-gray-200/50"
-                    )}>
-                      <IconComponent size={28} className={cn("transition-colors duration-500", isExpanded ? "text-navy" : "text-gray-400 group-hover:text-navy")} />
-                      <div className={cn("absolute inset-0 opacity-10 rounded-2xl transition-opacity", cat.color)} />
-                    </div>
-                    <h3 className="text-sm font-black text-navy uppercase tracking-tight mb-1 group-hover:text-orange-primary transition-colors">{cat.name}</h3>
-                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{cat.count} Products</span>
+                      <div className={cn(
+                        "w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all duration-500 bg-white shadow-lg border border-gray-100",
+                        isExpanded ? "scale-110 shadow-xl" : "group-hover:scale-110 shadow-gray-200/50"
+                      )}>
+                        <IconComponent size={28} className={cn("transition-colors duration-500", isExpanded ? "text-navy" : "text-gray-400 group-hover:text-navy")} />
+                        <div className={cn("absolute inset-0 opacity-10 rounded-2xl transition-opacity", cat.color)} />
+                      </div>
+                      <h3 className="text-sm font-black text-navy uppercase tracking-tight mb-1 group-hover:text-orange-primary transition-colors">{cat.name}</h3>
+                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{cat.count} Products</span>
                     
                     {isExpanded && (
                       <motion.div 
@@ -462,6 +480,7 @@ export function CategoriesPage() {
               );
             })}
           </motion.div>
+        )}
         </div>
 
         {/* RIGHT COLUMN: FOR BUSINESS & SELLERS CARD & SPONSORED AD */}

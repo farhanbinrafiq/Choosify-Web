@@ -4,12 +4,23 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
+import { ProductCardSkeleton } from '../components/Skeleton';
 import { useGlobalState } from '../context/GlobalStateContext';
 
 export function AllProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchParams, setSearchParams] = useSearchParams();
   const { allProducts, allBrands, mode } = useGlobalState();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Trigger brief simulation of fetching state on filter change / refresh to boost perceived interaction response
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [mode, searchParams]);
 
   // Active query parameters / search inputs
   const rawQuery = searchParams.get('q') || '';
@@ -419,7 +430,18 @@ export function AllProductsPage() {
           </div>
 
           {/* Product Grid */}
-          {filteredProducts.length === 0 ? (
+          {isLoading ? (
+            <div className={cn(
+              "mb-20",
+              viewMode === 'grid' 
+                ? "grid grid-cols-[repeat(auto-fill,minmax(188px,1fr))] justify-items-center justify-center gap-5" 
+                : "flex flex-col gap-6"
+            )}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <ProductCardSkeleton key={i} variant={viewMode === 'list' ? 'list' : 'grid'} />
+              ))}
+            </div>
+          ) : filteredProducts.length === 0 ? (
             <div className="py-24 text-center bg-white rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-4 text-gray-400">
               <SlidersHorizontal size={40} className="stroke-1 text-gray-300" />
               <div className="text-xs font-black uppercase tracking-widest italic text-navy">No products matched active filters.</div>

@@ -11,6 +11,7 @@ import { BLOGS, PRODUCTS } from '../constants';
 import { cn } from '../lib/utils';
 import { EvaluationData, ComparisonProduct } from '../types/evaluation';
 import evaluationsData from '../data/evaluations.json';
+import { RecommendationMediaGallery } from '../components/RecommendationMediaGallery';
 
 const evaluations = evaluationsData as EvaluationData[];
 
@@ -173,90 +174,9 @@ export function GuideDetailPage() {
               {guide.title}
             </h1>
 
-            {/* Media Row: Video Left, Photos Right */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-               {/* Video Card (Left) */}
-               <div className="aspect-video rounded-[16px] overflow-hidden relative group border border-white/5 shadow-2xl">
-                  <img 
-                    src="https://images.unsplash.com/photo-1718043323049-d757d5494191?w=1200" 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                    alt="Video Thumbnail" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-                  
-                  {/* YouTube Tag */}
-                  <div className="absolute top-6 left-6 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 z-20">
-                     <Youtube size={14} className="text-red-500 fill-current" />
-                     <span className="text-[10px] font-black text-white/60 uppercase tracking-widest italic">Youtube</span>
-                  </div>
-
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                     <motion.button 
-                       whileHover={{ scale: 1.1 }}
-                       whileTap={{ scale: 0.95 }}
-                       className="w-20 h-20 rounded-full bg-red-600 text-white flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.5)] z-20 pointer-events-auto"
-                     >
-                        <Play size={32} fill="currentColor" strokeWidth={0} className="ml-1" />
-                     </motion.button>
-                     {/* Ripple Effect */}
-                     <div className="absolute w-20 h-20 rounded-full bg-red-600 animate-ping opacity-20 pointer-events-none" />
-                  </div>
-
-                  {/* Text Overlay */}
-                  <div className="absolute bottom-10 left-10 max-w-[250px] pointer-events-none">
-                     <h3 className="text-2xl font-black text-white uppercase italic leading-tight tracking-tighter">
-                        Introducing the new Galaxy <span className="text-orange-primary underline decoration-2 underline-offset-4">S26 Ultra</span>
-                     </h3>
-                  </div>
-               </div>
-
-               {/* Photo Slider Card (Right) */}
-               <div className="aspect-video rounded-[16px] overflow-hidden relative group border border-white/5 shadow-2xl">
-                  <AnimatePresence mode="wait">
-                    <motion.img 
-                      key={currentImageIndex}
-                      initial={{ opacity: 0, scale: 1.1 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0 }}
-                      src={guideImages[currentImageIndex]} 
-                      className="w-full h-full object-cover" 
-                      alt="Product Gallery" 
-                    />
-                  </AnimatePresence>
-                  
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-
-                  {/* Navigation Arrows */}
-                  <div className="absolute inset-0 flex items-center justify-between px-6 pointer-events-none">
-                     <button 
-                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevImage(); }}
-                       className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all pointer-events-auto z-30"
-                     >
-                        <ChevronLeft size={24} />
-                     </button>
-                     <button 
-                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextImage(); }}
-                       className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all pointer-events-auto z-30"
-                     >
-                        <ChevronRight size={24} />
-                     </button>
-                  </div>
-
-                  {/* Image Counter */}
-                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 z-20">
-                     <span className="text-[10px] font-black text-white uppercase tracking-widest italic">
-                        Image {currentImageIndex + 1} - {guideImages.length}
-                     </span>
-                  </div>
-
-                  {/* Floating S26 Text Overlay */}
-                  <div className="absolute bottom-10 right-10 pointer-events-none">
-                     <span className="text-4xl font-black text-white/20 uppercase italic tracking-tighter">
-                        S26 Ultra
-                     </span>
-                  </div>
-               </div>
+            {/* Unified Media Gallery */}
+            <div className="w-full max-w-4xl mx-auto mb-8">
+               <RecommendationMediaGallery guide={guide} />
             </div>
 
             {/* Content Divider */}

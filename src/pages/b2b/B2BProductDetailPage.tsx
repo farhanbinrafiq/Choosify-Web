@@ -7,6 +7,7 @@ import {
 import { useGlobalState } from '../../context/GlobalStateContext';
 import { B2B_SUPPLIERS } from '../../data/b2bData';
 import toast from 'react-hot-toast';
+import { ProductMediaGallery } from '../../components/ProductMediaGallery';
 
 export function B2BProductDetailPage() {
   const { id } = useParams();
@@ -104,12 +105,10 @@ export function B2BProductDetailPage() {
         
         {/* Left Side: Product Image & Factory Stats Carousel - 5 cols */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="aspect-square rounded-[32px] bg-[#F7F8FA] overflow-hidden border border-slate-200 relative shadow-md">
-            <img src={product.image} className="w-full h-full object-cover" alt="" />
-            <div className="absolute bottom-4 left-4 right-4 bg-[#081120]/95 p-4 rounded-2xl border-none text-white">
-              <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">Escrow Protected Cargo Standard</span>
-              <p className="text-xs text-slate-300 font-bold mt-1">Insured freight delivery with customs certified bill declarations.</p>
-            </div>
+          <ProductMediaGallery product={product} isB2B={true} />
+          <div className="bg-[#081120] p-4 rounded-2xl border-none text-white shadow-sm">
+            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">Escrow Protected Cargo Standard</span>
+            <p className="text-xs text-slate-300 font-bold mt-1">Insured freight delivery with customs certified bill declarations.</p>
           </div>
 
           {/* Slabs Detail Box */}

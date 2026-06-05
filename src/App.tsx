@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation, Link, Navigate } from 'react
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
+import { FloatingOverlays } from './components/FloatingOverlays';
 import { DashboardProvider } from './context/DashboardContext';
 import { GlobalStateProvider } from './context/GlobalStateContext';
 import { Toaster } from 'react-hot-toast';
@@ -208,6 +209,7 @@ function AppContent() {
           </Routes>
         </Suspense>
       </AnimatePresence>
+      {!isOverview && <FloatingOverlays />}
       {!isOverview && <Footer />}
     </div>
   );

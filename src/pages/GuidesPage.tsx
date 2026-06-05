@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BLOGS } from '../constants';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { RecommendationCard } from '../components/RecommendationCard';
+import { RecommendationCardSkeleton } from '../components/Skeleton';
 
 export function GuidesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('Fashion');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Trigger simulated loading effect on category change
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [activeCategory, searchQuery]);
 
   const categoriesList = [
     { name: 'Fashion', icon: <Shirt size={16} className="stroke-[2.5]" />, count: 550 },
@@ -38,12 +49,12 @@ export function GuidesPage() {
   return (
     <div id="guides-root" className="flex flex-col min-h-screen bg-[#FDFDFD]">
       {/* Hero Section */}
-      <div id="guides-hero" className="w-full bg-[#0A0A1F] py-24 px-8 relative overflow-hidden">
+      <div id="guides-hero" className="hero-section hero-container w-full bg-[#0A0A1F] py-24 px-8 relative overflow-hidden">
         {/* Background Gradients */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
-        <div className="max-w-7xl mx-auto text-center relative z-10">
+        <div className="hero-content max-w-7xl mx-auto text-center relative z-10">
           <h1 id="hero-title" className="text-[60px] md:text-[80px] font-black italic uppercase tracking-tighter mb-6 leading-none text-white transition-transform hover:scale-105 duration-700">
             RECOMMENDATIONS
           </h1>
@@ -51,9 +62,9 @@ export function GuidesPage() {
           <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[11px] md:text-[13px] mb-12 uppercase tracking-[0.2em] opacity-80 leading-relaxed">
             DISCOVER EXPERT GUIDES, BUYING ADVICE, AND LATEST TECH RECOMMENDATIONS
           </p>
- 
+  
           <div className="max-w-4xl mx-auto flex flex-col md:flex-row gap-4 items-center mb-20">
-             <button className="h-16 px-8 orange-brand-gradient text-white font-black rounded-full shadow-xl flex items-center gap-2 whitespace-nowrap uppercase tracking-widest text-[10px] italic hover:brightness-110 transition-all">
+             <button className="h-16 px-8 orange-brand-gradient text-white font-black rounded-full shadow-xl flex items-center gap-2 whitespace-nowrap uppercase tracking-widest text-[10px] italic hover:brightness-110 transition-all text-left">
                 <LucidePenTool size={16} /> Post Recommendation
              </button>
              <div className="flex-1 w-full relative group">
@@ -72,11 +83,11 @@ export function GuidesPage() {
                  placeholder="Search by Brand Name or Category..." 
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
-                 className="w-full h-16 pl-24 pr-8 rounded-full bg-gradient-to-r from-[#000A2A] to-[#0A0A1F] text-white border border-white/10 focus:outline-none focus:border-orange-primary/40 transition-all font-bold placeholder:text-white/20 shadow-3xl text-[13px] italic tracking-wide" 
+                 className="w-full h-16 pl-24 pr-8 rounded-full bg-gradient-to-r from-[#000A2A] to-[#0A0A1F] text-white border border-white/10 focus:outline-none focus:border-orange-primary/40 transition-all font-bold placeholder:text-white/20 shadow-3xl text-[13px] italic tracking-wide animate-none" 
                 />
              </div>
           </div>
- 
+  
           {/* Article Titles Marquee */}
           <div className="w-full overflow-hidden py-4 border-y border-white/5 relative">
             <motion.div 
@@ -96,7 +107,6 @@ export function GuidesPage() {
                      {title}
                  </span>
                ))}
-               {/* Loop Duplicate */}
                {recommendationTitles.map((title, i) => (
                  <span 
                    key={`dup-${i}`} 
@@ -114,9 +124,8 @@ export function GuidesPage() {
         </div>
       </div>
 
-
       {/* Category Nav Bar (Mobile/Tablet Only) */}
-      <div className="w-full bg-white border-b border-gray-100 px-8 sticky top-20 z-40 shadow-sm overflow-x-auto scrollbar-hide lg:hidden">
+      <div className="w-full bg-white border-b border-gray-100 px-8 sticky top-20 z-40 shadow-sm overflow-x-auto scrollbar-hide lg:hidden text-left">
         <div className="max-w-7xl mx-auto flex items-center gap-4 py-4 min-w-max">
            {[
              { name: 'All', active: true },
@@ -150,7 +159,7 @@ export function GuidesPage() {
          <aside className="w-full lg:w-64 xl:w-72 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar hidden lg:block shrink-0">
            <div className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-xl flex flex-col gap-5">
              <div className="flex flex-col gap-1">
-               <h3 className="text-xl md:text-2xl font-black uppercase text-navy italic tracking-tighter">
+               <h3 className="text-xl md:text-2xl font-black uppercase text-navy italic tracking-tighter text-left">
                  <span className="text-orange-primary">CATA</span>GORIES
                </h3>
                <div className="w-full h-px bg-gray-100 mt-2" />
@@ -170,7 +179,6 @@ export function GuidesPage() {
                        : "hover:bg-slate-50/80"
                      )}
                    >
-                     {/* Circle Icon Container */}
                      <span className={cn(
                        "w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-300 flex-shrink-0 relative",
                        isActive
@@ -180,7 +188,6 @@ export function GuidesPage() {
                        {cat.icon}
                      </span>
 
-                     {/* Content Label */}
                      <span className="flex-1 min-w-0">
                        <span className={cn(
                          "text-[10.5px] md:text-xs font-black uppercase italic tracking-widest transition-colors duration-300 truncate block",
@@ -190,11 +197,10 @@ export function GuidesPage() {
                        </span>
                      </span>
 
-                     {/* Count Badge */}
                      <span className={cn(
-                       "px-2.5 py-1 rounded-[10px] text-[8.5px] font-mono font-black italic tracking-tighter shrink-0 transition-colors duration-300",
-                       isActive
-                       ? "bg-orange-primary text-white"
+                       "px-2.5 py-1 text-[9px] font-mono font-bold rounded-full transition-colors duration-300 shrink-0",
+                       isActive 
+                       ? "bg-orange-primary text-white" 
                        : "bg-[#EAEFF4] text-navy/70"
                      )}>
                        {cat.count}
@@ -207,34 +213,53 @@ export function GuidesPage() {
          </aside>
 
          <div className="flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
-            {/* Featured Guide */}
-            <div className="mb-16">
-               <RecommendationCard 
-                 guide={BLOGS[0]} 
-                 index={0} 
-                 variant="featured" 
-               />
-            </div>
+            {isLoading ? (
+               <div className="flex flex-col gap-12">
+                  <div className="mb-16">
+                     <RecommendationCardSkeleton variant="featured" />
+                  </div>
 
-            {/* Content Feed - Varied grid for articles and shorts */}
-            <div className="flex flex-col gap-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 md:gap-10 auto-rows-min">
-                   {BLOGS.slice(1).map((guide, i) => {
-                      const isShorts = guide.type === 'shorts' || guide.type === 'reels';
-                      return (
-                        <div 
-                          key={guide.id}
-                          className={cn(
-                            "transition-all duration-500",
-                            isShorts ? "col-span-1" : "col-span-1" // Keeping it balanced grid
-                          )}
-                        >
-                          <RecommendationCard guide={guide} index={i + 1} />
-                        </div>
-                      );
-                   })}
-                </div>
-            </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 md:gap-10 auto-rows-min">
+                     {Array.from({ length: 4 }).map((_, i) => (
+                        <RecommendationCardSkeleton 
+                           key={i} 
+                           variant={i % 3 === 0 ? "shorts" : "default"} 
+                        />
+                     ))}
+                  </div>
+               </div>
+            ) : (
+               <>
+                  {/* Featured Guide */}
+                  <div className="mb-16">
+                     <RecommendationCard 
+                       guide={BLOGS[0]} 
+                       index={0} 
+                       variant="featured" 
+                     />
+                  </div>
+
+                  {/* Content Feed - Varied grid for articles and shorts */}
+                  <div className="flex flex-col gap-12">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 md:gap-10 auto-rows-min">
+                         {BLOGS.slice(1).map((guide, i) => {
+                            const isShorts = guide.type === 'shorts' || guide.type === 'reels';
+                            return (
+                              <div 
+                                key={guide.id}
+                                className={cn(
+                                  "transition-all duration-500",
+                                  isShorts ? "col-span-1" : "col-span-1"
+                                )}
+                              >
+                                <RecommendationCard guide={guide} index={i + 1} />
+                              </div>
+                            );
+                         })}
+                      </div>
+                  </div>
+               </>
+            )}
             
             {/* Pagination Component */}
             <div className="mt-24 pt-16 border-t border-gray-100 flex flex-col items-center gap-10">
@@ -262,13 +287,12 @@ export function GuidesPage() {
                
                <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">Results 1-8 of 156 Stories</p>
             </div>
-
          </div>
 
          {/* Right Sidebar Widgets */}
-         <aside className="w-full lg:w-[320px] space-y-8 shrink-0 relative z-10 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+         <aside className="w-full lg:w-[320px] space-y-8 shrink-0 relative z-10 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar hidden lg:block">
             {/* Newsletter Widget */}
-            <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-2xl shadow-gray-100/50">
+            <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-2xl shadow-gray-100/50 text-left animate-none">
                <h4 className="font-black text-orange-primary text-[10px] uppercase tracking-[0.4em] mb-4 italic">NEWSLETTER</h4>
                <p className="text-navy text-[16px] font-black italic leading-tight mb-8">Get the latest industry style fresh look straight to your inbox.</p>
                <div className="space-y-4">
@@ -284,7 +308,7 @@ export function GuidesPage() {
             </div>
 
             {/* Popular Topics Widget */}
-            <div className="bg-white rounded-[40px] p-8 border border-gray-100/80 shadow-2xl shadow-gray-100/40">
+            <div className="bg-white rounded-[40px] p-8 border border-gray-100/80 shadow-2xl shadow-gray-100/40 text-left">
                <h4 className="font-extrabold text-[#8e9aa8] text-[11px] uppercase tracking-[0.3em] mb-10 italic pl-1">POPULAR TOPICS</h4>
                <div className="space-y-7">
                   {[
@@ -320,7 +344,7 @@ export function GuidesPage() {
                </button>
             </div>
 
-            <div className="bg-navy rounded-[24px] p-10 text-white relative overflow-hidden group shadow-2xl">
+            <div className="bg-navy rounded-[24px] p-10 text-white relative overflow-hidden group shadow-2xl text-left">
                <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Search size={120} /></div>
                <h4 className="text-xl font-black mb-4 italic uppercase tracking-tighter">Need Customer Help?</h4>
                <p className="text-white/40 text-xs font-medium leading-relaxed mb-10 italic">Ask our AI Shopping Assistant for a personalized recommendation based on your budget & lifestyle.</p>

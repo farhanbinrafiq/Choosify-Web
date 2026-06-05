@@ -239,7 +239,7 @@ export function B2BHomePage() {
     <div className="min-h-screen bg-white text-[#081120] font-sans selection:bg-[#FF0038] selection:text-white pb-16" id="b2b-portal-home">
       
       {/* 1. INDUSTRIAL HERO SECTION - Premium Carmine Red-forward Industrial Gradient */}
-      <section className="relative bg-gradient-to-br from-[#081120] via-[#0b1c33] to-[#FF0038] text-white overflow-hidden py-24 px-6 shadow-inner-lg">
+      <section className="hero-section hero-container relative bg-gradient-to-br from-[#081120] via-[#0b1c33] to-[#FF0038] text-white overflow-hidden py-24 px-6 shadow-inner-lg">
         {/* Luminous dynamic background accents */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,0,56,0.30)_0%,_transparent_55%)] pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#081120]/10 to-transparent pointer-events-none" />
@@ -247,7 +247,7 @@ export function B2BHomePage() {
         {/* Subtle grid pattern helper */}
         <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
-        <div className="max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center">
+        <div className="hero-content max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center">
           
           {/* Tagline Badge */}
           <div className="inline-flex items-center gap-2.5 px-4.5 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-[10.5px] tracking-widest text-[#FF0038] font-extrabold uppercase mb-8 shadow-glow hover:border-white/25 transition-all duration-300">
@@ -260,7 +260,7 @@ export function B2BHomePage() {
 
           {/* Main Typography Header Section */}
           <h1 className="font-space font-black text-white text-5xl sm:text-6xl md:text-7xl leading-[1] tracking-tight uppercase mb-6 max-w-none">
-            source <span className="text-[#FF0038] italic font-black">direct</span>
+            buy <span className="text-[#FF0038] italic font-black">WHOLESALE</span>
           </h1>
 
           {/* Supporting Text */}

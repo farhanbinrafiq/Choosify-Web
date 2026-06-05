@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Search, ShoppingBag, User, PlusCircle, ChevronRight, Bell, Bookmark, LogIn, 
   LayoutDashboard, Heart, MessageSquare, Settings, Briefcase, Package, ShieldCheck, 
-  FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare
+  FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SignInModal } from './SignInModal';
@@ -18,6 +18,7 @@ export function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const navigate = useNavigate();
   const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn } = useGlobalState();
@@ -115,7 +116,8 @@ export function Navbar() {
                 : "text-gray-400 hover:text-white"
             )}
           >
-            B2B Wholesale Mini
+            <span className="hidden sm:inline">B2B Wholesale Mini</span>
+            <span className="inline sm:hidden">B2B</span>
           </button>
         </div>
 
@@ -160,7 +162,7 @@ export function Navbar() {
         </div>
 
         {/* ACTIONS & MESSAGES */}
-        <div className="flex items-center gap-5 ml-auto">
+        <div className="flex items-center gap-5 ml-auto nav-actions">
           
           {/* CART SECTIONS DEPENDENT ON STATE */}
           <div className="hidden sm:flex items-center gap-4 border-r border-[#ffffff1a] pr-5">
@@ -236,7 +238,7 @@ export function Navbar() {
           )}
           
           {isLoggedIn ? (
-            <div className="relative">
+            <div className="relative profile-avatar">
               <div 
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
                 className="flex items-center gap-3 group cursor-pointer animate-in fade-in"
@@ -315,12 +317,149 @@ export function Navbar() {
               Sign Up <LogIn size={14} />
             </button>
           )}
+
+          {/* MODERN MOBILE HAMBURGER BUTTON (lg:hidden, far right) */}
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all relative z-50 shrink-0 hamburger"
+            aria-label="Toggle navigation menu"
+          >
+            <Menu size={22} className={cn("transition-transform duration-300", isMobileMenuOpen && "rotate-90")} />
+          </button>
         </div>
         
       </nav>
 
       <SignInModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* MOBILE / TABLET SLIDE-OUT HAMBURGER MENU */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+            />
+            {/* Slide-out Menu Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className={cn(
+                "fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] h-full z-[101] shadow-2xl p-6 flex flex-col justify-between overflow-y-auto border-l",
+                mode === 'wholesale' ? "bg-[#081120] border-[#FF0038]/15 text-white" : "bg-[#0A0A1F] border-white/5 text-white"
+              )}
+            >
+              <div className="flex flex-col gap-6">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <span className="text-sm font-black uppercase tracking-widest text-[#FF5B00] italic">Sourcing Menu</span>
+                  <button 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-2 text-white/60 hover:text-white hover:bg-white/5 rounded-full transition-all"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {/* Sourcing/Search on Mobile */}
+                <div className="w-full">
+                  <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30">
+                      <Search size={14} />
+                    </div>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder={mode === 'wholesale' ? "Search suppliers, loads..." : "Search products, brands..."}
+                      className="w-full h-11 pl-10 pr-12 rounded-xl bg-white/5 text-white placeholder:text-white/30 text-xs focus:outline-none focus:bg-white/10 transition-all border border-white/10 italic font-bold"
+                    />
+                    <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-orange-primary uppercase tracking-widest italic">Search</button>
+                  </form>
+                </div>
+
+                {/* Quick links stream */}
+                <div className="flex flex-col gap-3">
+                  <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Explore Sections</span>
+                  {mode === 'wholesale' ? (
+                    <>
+                      <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-[#FF0038] bg-[#FF0038]/5 border border-[#FF0038]/10">
+                        <span className="italic">B2B Core</span>
+                      </Link>
+                      <Link to="/b2b/suppliers" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="italic">Suppliers List</span>
+                      </Link>
+                      <Link to="/b2b/products" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="italic">Wholesale Products</span>
+                      </Link>
+                      <Link to="/b2b/nationwide" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="italic">Nationwide Logistics</span>
+                      </Link>
+                      <Link to="/b2b/brands" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="italic">Brands Showcase</span>
+                      </Link>
+                      <div className="h-px bg-white/10 my-1" />
+                      <button onClick={() => { navigate('/b2b/rfq'); setIsMobileMenuOpen(false); }} className="w-full flex items-center justify-start gap-3 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-white bg-[#FF0038]/10 hover:bg-[#FF0038]/20 border border-[#FF0038]/30 transition-all text-left">
+                        <FileCheck2 size={14} className="text-[#FF0038]" />
+                        <span className="italic">RFQ Desk</span>
+                      </button>
+                      <button onClick={() => { navigate('/post-offer'); setIsMobileMenuOpen(false); }} className="w-full flex items-center justify-start gap-3 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-left">
+                        <Building2 size={14} className="text-[#FF0038]" />
+                        <span className="italic">Become Supplier</span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-orange-primary bg-orange-primary/5 border border-orange-primary/10">
+                        <span className="italic">Home</span>
+                      </Link>
+                      <Link to="/categories" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="italic">All Categories</span>
+                      </Link>
+                      <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="italic">Products Library</span>
+                      </Link>
+                      <Link to="/brands" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="italic">Explore Brands</span>
+                      </Link>
+                      <Link to="/guides" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="italic">Recommendations</span>
+                      </Link>
+                      <Link to="/compare" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="italic">Compare Engine</span>
+                      </Link>
+                      <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                        <span className="italic">Flash Deals</span>
+                      </Link>
+                      
+                      <div className="h-px bg-white/10 my-1" />
+                      
+                      <Link to="/post-offer" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all justify-center">
+                        <span className="italic">Post Your Deal</span>
+                        <ChevronRight size={14} className="text-orange-primary" />
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/10 flex flex-col gap-4">
+                <div className="text-center">
+                  <span className="text-[8px] font-mono font-bold text-gray-500 uppercase tracking-widest">Choosify Bangladesh • Design system v1.0</span>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* DYNAMIC CONFIRMATION MODAL TO B2B MODE */}
       <AnimatePresence>

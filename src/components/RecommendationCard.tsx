@@ -116,7 +116,7 @@ export function RecommendationCard(props: any) {
     return (
       <Link 
         to={`/guides/${guide.id}`} 
-        className="group cursor-pointer block bg-white rounded-[32px] border border-gray-100 hover:shadow-3xl transition-all duration-500 shadow-xl shadow-gray-100/30 h-full relative p-2 md:p-3"
+        className="group cursor-pointer block bg-white rounded-[32px] border border-gray-100 hover:shadow-3xl transition-all duration-500 shadow-xl shadow-gray-100/30 h-full relative p-2 md:p-3 max-w-[285px] sm:max-w-[320px] md:max-w-none mx-auto w-full"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
