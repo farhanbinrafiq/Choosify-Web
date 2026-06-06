@@ -6,7 +6,7 @@ import {
   Play, ShieldCheck, DollarSign, Star, AlertCircle, PenTool, Award as Trophy,
   Shirt, Smartphone, Gem, Gamepad2, Monitor, Utensils, Cpu, Tv, Home, Baby,
   Palette, Luggage,
-  Flame, Sparkles, Send, Users, ShieldAlert, BadgeCheck, Zap, Clock
+  Flame, Sparkles, Send, Users, ShieldAlert, BadgeCheck, Zap, Clock, Book
 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { PRODUCTS, BRANDS, BLOGS } from '../constants';
@@ -495,6 +495,24 @@ export function HomePage() {
                 </div>
                 <span className="bg-[#EEF1F8] text-[#1A1D4E]/80 font-mono text-[10px] font-bold px-3 py-1 rounded-full shrink-0 shadow-sm">
                   15
+                </span>
+              </Link>
+
+              {/* My Cashbook Card */}
+              <Link 
+                to="/cashbook" 
+                className="bg-white rounded-[20px] border border-gray-100 p-4 px-5 flex items-center justify-between shadow-[0_8px_30px_rgba(26,29,78,0.02)] hover:border-[#E8500A]/25 hover:shadow-[0_12px_40px_rgba(26,29,78,0.05)] transition-all duration-300 group"
+              >
+                <div className="flex items-center gap-4.5">
+                  <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
+                    <Book className="w-5 h-5 text-[#E8500A] group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="font-space font-black italic text-[#1A1D4E] uppercase tracking-wider text-xs">
+                    MY CASHBOOK
+                  </span>
+                </div>
+                <span className="bg-[#FFF0E8] text-[#E8500A] font-mono text-[10px] font-bold px-3 py-1 rounded-full shrink-0 shadow-sm">
+                  NEW
                 </span>
               </Link>
             </div>
@@ -1109,7 +1127,7 @@ export function HomePage() {
                 </div>
 
                 {/* Sub Guides Grid matching elements visually */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6.5 mb-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6.5 mb-10">
                   
                   {/* CARD 1: Reels Card 1 (Vertical Aspect Video) */}
                   <div className="bg-white border border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">

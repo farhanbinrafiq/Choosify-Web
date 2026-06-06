@@ -91,7 +91,13 @@ export function MessagesPage() {
         <div className="flex items-center gap-3">
           <button 
             type="button" 
-            onClick={() => navigate('/dashboard')} 
+            onClick={() => {
+              if (threadId && window.innerWidth < 768) {
+                navigate('/messages');
+              } else {
+                navigate('/dashboard');
+              }
+            }} 
             className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/70 hover:text-white transition-colors"
           >
             <ArrowLeft size={16} />
@@ -126,7 +132,7 @@ export function MessagesPage() {
       {/* Main container */}
       <div className="flex flex-1 overflow-hidden h-[calc(100vh-130px)]">
         {/* Sidebar: list of chat threads */}
-        <aside className="w-full md:w-[320px] lg:w-[380px] bg-[#050514]/50 border-r border-white/5 flex flex-col shrink-0">
+        <aside className={`w-full md:w-[320px] lg:w-[380px] bg-[#050514]/50 border-r border-white/5 flex flex-col shrink-0 ${threadId ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-6 border-b border-white/5 space-y-4">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block italic">ACTIVE TRANSMISSION CHANNELS</span>
             <div className="relative">
@@ -179,7 +185,7 @@ export function MessagesPage() {
         </aside>
 
         {/* Messaging / Conversation content viewport */}
-        <main className="flex-1 flex flex-col bg-[#08081A]">
+        <main className={`flex-1 flex flex-col bg-[#08081A] ${threadId ? 'flex' : 'hidden md:flex'}`}>
           {activeThread ? (
             <>
               {/* Header inside open thread Chat */}

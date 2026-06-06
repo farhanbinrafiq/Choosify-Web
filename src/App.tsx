@@ -39,6 +39,11 @@ const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ defa
 const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
+// Lazy load CashBook pages
+const CashBookHome = lazy(() => import('./pages/cashbook/CashBookHome').then(m => ({ default: m.CashBookHome })));
+const CashBookDetail = lazy(() => import('./pages/cashbook/CashBookDetail').then(m => ({ default: m.CashBookDetail })));
+const CashBookReports = lazy(() => import('./pages/cashbook/CashBookReports').then(m => ({ default: m.CashBookReports })));
+
 // Lazy load B2B pages for performance
 const B2BHomePage = lazy(() => import('./pages/b2b/B2BHomePage').then(m => ({ default: m.B2BHomePage })));
 const B2BSuppliersPage = lazy(() => import('./pages/b2b/B2BSuppliersPage').then(m => ({ default: m.B2BSuppliersPage })));
@@ -202,6 +207,9 @@ function AppContent() {
             <Route path="/seller/orders" element={<PageWrapper><SellerIncomingOrdersPage /></PageWrapper>} />
             <Route path="/seller/orders/:id" element={<PageWrapper><SellerOrderDetailsPage /></PageWrapper>} />
             <Route path="/dashboard" element={<PageWrapper><DashboardPage /></PageWrapper>} />
+            <Route path="/cashbook" element={<PageWrapper><CashBookHome /></PageWrapper>} />
+            <Route path="/cashbook/:bookId" element={<PageWrapper><CashBookDetail /></PageWrapper>} />
+            <Route path="/cashbook/:bookId/reports" element={<PageWrapper><CashBookReports /></PageWrapper>} />
             <Route path="/messages" element={<PageWrapper><MessagesPage /></PageWrapper>} />
             <Route path="/messages/:threadId" element={<PageWrapper><MessagesPage /></PageWrapper>} />
             <Route path="/profile/orders" element={<PageWrapper><CustomerOrdersPage /></PageWrapper>} />
@@ -240,6 +248,7 @@ export default function App() {
             <ScrollToTop />
             <AppContent />
             <MobileNav />
+            <PWAInstallPrompt />
           </DashboardProvider>
         </GlobalStateProvider>
       </ErrorBoundary>
@@ -255,8 +264,115 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
+      className="pb-28 lg:pb-0"
     >
       {children}
     </motion.div>
   );
 }
+
+// PWA Install Prompt — shows Android "Add to Home Screen" banner
+function PWAInstallPrompt() {
+  const [deferredPrompt, setDeferredPrompt] = 
+    React.useState<any>(null);
+  const [showPrompt, setShowPrompt] = React.useState(false);
+
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      // Only show after 30 seconds to not interrupt initial browse
+      setTimeout(() => setShowPrompt(true), 30000);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener(
+      'beforeinstallprompt', handler
+    );
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setShowPrompt(false);
+      setDeferredPrompt(null);
+    }
+  };
+
+  const handleDismiss = () => {
+    setShowPrompt(false);
+    // Don't show again for 7 days
+    localStorage.setItem(
+      'pwa-prompt-dismissed', 
+      String(Date.now())
+    );
+  };
+
+  // Check if dismissed recently
+  React.useEffect(() => {
+    const dismissed = localStorage.getItem('pwa-prompt-dismissed');
+    if (dismissed) {
+      const daysSince = 
+        (Date.now() - Number(dismissed)) / (1000 * 60 * 60 * 24);
+      if (daysSince < 7) setShowPrompt(false);
+    }
+  }, []);
+
+  // Don't show if already installed as PWA
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    return null;
+  }
+
+  if (!showPrompt) return null;
+
+  return (
+    <div className="fixed bottom-[100px] left-3 right-3 
+                    lg:left-auto lg:right-6 lg:bottom-6 
+                    lg:w-80 z-[150] 
+                    bg-[#0A0A1F] border border-white/10 
+                    rounded-2xl p-4 shadow-2xl
+                    flex items-center gap-3">
+      <div className="w-10 h-10 rounded-xl bg-orange-primary/10 
+                      border border-orange-primary/20 
+                      flex items-center justify-center shrink-0">
+        <div className="w-4 h-4 border-2 border-orange-primary 
+                        rounded-full flex items-center 
+                        justify-center">
+          <div className="w-1.5 h-1.5 border-2 
+                          border-orange-primary rounded-full" />
+        </div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-white text-[11px] font-black uppercase 
+                      tracking-wider">
+          Install Choosify
+        </p>
+        <p className="text-white/40 text-[10px] mt-0.5 
+                      leading-relaxed">
+          Add to home screen for faster access
+        </p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={handleDismiss}
+          className="text-white/30 hover:text-white/60 
+                     text-[10px] font-bold uppercase 
+                     tracking-wider transition-colors"
+        >
+          Later
+        </button>
+        <button
+          onClick={handleInstall}
+          className="bg-orange-primary text-white 
+                     text-[10px] font-black uppercase 
+                     tracking-wider px-3 py-2 
+                     rounded-lg whitespace-nowrap"
+        >
+          Install
+        </button>
+      </div>
+    </div>
+  );
+}
+

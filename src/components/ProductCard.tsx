@@ -451,10 +451,10 @@ export function ProductCard({
 
   return (
     <div 
-      className="bg-white rounded-[16px] p-3 shadow-[0_4px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_30px_rgba(26,29,78,0.06)] hover:border-[#FF5B00]/20 transition-all duration-300 group flex flex-col relative border border-gray-100 overflow-hidden cursor-pointer animate-in fade-in duration-300" 
+      className="w-full bg-white rounded-[16px] p-3 shadow-[0_4px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_30px_rgba(26,29,78,0.06)] hover:border-[#FF5B00]/20 transition-all duration-300 group flex flex-col relative border border-gray-100 overflow-hidden cursor-pointer animate-in fade-in duration-300" 
       onClick={() => navigate(`/products/${product.id}`)}
       id={`product-${product.id}`}
-      style={{ width: '188px', height: '368px' }}
+      style={{ height: '368px' }}
     >
       <div className="relative h-[126px] w-full bg-[#F9FAFB] overflow-hidden flex items-center justify-center p-3 rounded-[12px] shrink-0">
         <ProductCardImageCarousel 

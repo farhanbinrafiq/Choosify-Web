@@ -139,16 +139,22 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black z-50 cursor-pointer"
+            className="fixed inset-0 bg-black z-[200] cursor-pointer"
           />
 
           {/* Cart Sidebar */}
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={{ 
+              y: window.innerWidth < 640 ? '100%' : '0%', 
+              x: window.innerWidth >= 640 ? '100%' : '0%' 
+            }}
+            animate={{ y: 0, x: 0 }}
+            exit={{ 
+              y: window.innerWidth < 640 ? '100%' : '0%', 
+              x: window.innerWidth >= 640 ? '100%' : '0%' 
+            }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 w-full sm:w-[480px] bg-white text-navy z-50 flex flex-col shadow-2xl overflow-hidden border-l border-gray-100"
+            className="fixed bottom-0 inset-x-0 rounded-t-2xl h-[85vh] sm:inset-x-auto sm:right-0 sm:top-0 sm:h-full sm:w-[480px] sm:rounded-none bg-white text-navy z-[210] flex flex-col shadow-2xl overflow-hidden border-l border-gray-100"
           >
             {/* Header */}
             <div className={cn(

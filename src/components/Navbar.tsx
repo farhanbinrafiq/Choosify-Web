@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, ShoppingBag, User, PlusCircle, ChevronRight, Bell, Bookmark, LogIn, 
   LayoutDashboard, Heart, MessageSquare, Settings, Briefcase, Package, ShieldCheck, 
-  FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X
+  FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X, Book
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { SignInModal } from './SignInModal';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -21,7 +21,28 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const navigate = useNavigate();
+  const location = useLocation();
   const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn } = useGlobalState();
+
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Handle clicking outside profile menu dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Pick cart count depending on current mode
   const activeCartCount = mode === 'wholesale' ? wholesaleCart.length : retailCart.length;
@@ -62,6 +83,7 @@ export function Navbar() {
     { label: 'Messages', path: '/messages', icon: MessageSquare },
     { label: 'Saved Products', path: '/dashboard', tab: 'saved-products', icon: Heart },
     { label: 'Notifications', path: '/dashboard', tab: 'notifications', icon: Bell },
+    { label: 'My Cashbook', path: '/cashbook', icon: Book, dividerAbove: true },
     { label: 'Settings', path: '/dashboard', tab: 'settings', icon: Settings },
   ];
 
@@ -238,7 +260,7 @@ export function Navbar() {
           )}
           
           {isLoggedIn ? (
-            <div className="relative profile-avatar">
+            <div className="relative profile-avatar" ref={profileMenuRef}>
               <div 
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
                 className="flex items-center gap-3 group cursor-pointer animate-in fade-in"
@@ -271,21 +293,25 @@ export function Navbar() {
 
                       <div className="space-y-1">
                         {dashboardMiniMenu.map((item, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => {
-                              setIsUserMenuOpen(false);
-                              if (item.tab) {
-                                navigate(item.path, { state: { activeTab: item.tab } });
-                              } else {
-                                navigate(item.path);
-                              }
-                            }}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-white hover:bg-white/5 rounded-xl transition-all group"
-                          >
-                            <item.icon size={16} className="group-hover:text-orange-primary transition-colors" />
-                            <span className="italic">{item.label}</span>
-                          </button>
+                          <React.Fragment key={idx}>
+                            {item.dividerAbove && (
+                              <div className="my-1 border-t border-white/5" />
+                            )}
+                            <button
+                              onClick={() => {
+                                setIsUserMenuOpen(false);
+                                if (item.tab) {
+                                  navigate(item.path, { state: { activeTab: item.tab } });
+                                } else {
+                                  navigate(item.path);
+                                }
+                              }}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-white hover:bg-white/5 rounded-xl transition-all group"
+                            >
+                              <item.icon size={16} className="group-hover:text-orange-primary transition-colors" />
+                              <span className="italic">{item.label}</span>
+                            </button>
+                          </React.Fragment>
                         ))}
                         <div className="mt-2 pt-2 border-t border-white/5">
                           <button 

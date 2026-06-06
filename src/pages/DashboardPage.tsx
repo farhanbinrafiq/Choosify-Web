@@ -654,6 +654,7 @@ export function DashboardPage() {
     { id: 'saved-brands', label: 'Loved Brands', icon: Store },
     { id: 'saved-recommendations', label: 'Saved Guides', icon: Bookmark },
     { id: 'my-comparisons', label: 'My Comparisons', icon: Layers },
+    { id: 'cashbook', label: 'CashBook Ledger', icon: BookOpen, href: '/cashbook' },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'my-reviews', label: 'My Reviews', icon: Star },
@@ -752,24 +753,36 @@ export function DashboardPage() {
 
           <nav className="flex-1 py-4 overflow-y-auto no-scrollbar">
             <div className="px-10 text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-4 italic">Platform Control</div>
-            {menuItems.slice(0, 5).map((item) => (
+            {menuItems.slice(0, 6).map((item) => (
               <SidebarItem
                 key={item.id}
                 icon={item.icon}
                 label={item.label}
                 active={activeTab === item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  if (item.href) {
+                    navigate(item.href);
+                  } else {
+                    setActiveTab(item.id);
+                  }
+                }}
               />
             ))}
             
             <div className="mt-12 px-10 text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-4 italic">Communication & Account</div>
-            {menuItems.slice(5).map((item) => (
+            {menuItems.slice(6).map((item) => (
               <SidebarItem
                 key={item.id}
                 icon={item.icon}
                 label={item.label}
                 active={activeTab === item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  if (item.href) {
+                    navigate(item.href);
+                  } else {
+                    setActiveTab(item.id);
+                  }
+                }}
               />
             ))}
           </nav>
@@ -800,7 +813,13 @@ export function DashboardPage() {
                   key={item.id}
                   label={item.label}
                   active={activeTab === item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    if (item.href) {
+                      navigate(item.href);
+                    } else {
+                      setActiveTab(item.id);
+                    }
+                  }}
                 />
               ))}
            </div>

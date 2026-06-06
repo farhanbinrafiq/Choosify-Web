@@ -106,7 +106,7 @@ export function FloatingOverlays() {
   const activeThreadObj = threads.find(t => t.id === activeThreadId);
 
   return (
-    <div className="fixed bottom-28 md:bottom-10 right-6 z-[95] flex flex-col gap-4 text-[#1A1D4E] font-sans antialiased">
+    <div className="fixed bottom-[100px] lg:bottom-8 right-2 sm:right-6 z-[85] flex flex-col gap-4 text-[#1A1D4E] font-sans antialiased">
       
       {/* PERSISTENT FLOATING PANEL POPUPS */}
       <AnimatePresence>
