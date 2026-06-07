@@ -50,19 +50,11 @@ const COLORS = {
 
 // --- SUB-COMPONENTS ---
 
-
-
-
-
-
-
-// --- SUB-COMPONENTS ---
-
 const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
   <button
     onClick={onClick}
     className={cn(
-      "w-full flex items-center gap-4 px-6 py-4 transition-all relative group overflow-hidden",
+      "w-full flex items-center gap-4 px-6 py-4 transition-all relative group overflow-hidden border-none text-left bg-transparent cursor-pointer",
       active ? "text-white" : "text-gray-400 hover:text-white"
     )}
   >
@@ -81,7 +73,7 @@ const TabItem = ({ label, active, onClick }: any) => (
   <button
     onClick={onClick}
     className={cn(
-      "flex-shrink-0 px-6 py-4 text-[10px] font-black uppercase tracking-widest italic transition-all border-b-2",
+      "flex-shrink-0 px-6 py-4 text-[10px] font-black uppercase tracking-widest italic transition-all border-b-2 bg-transparent cursor-pointer",
       active ? "border-[#F96500] text-white" : "border-transparent text-gray-400"
     )}
   >
@@ -146,7 +138,7 @@ const OverviewSection = () => {
               <Clock className="text-[#F96500]" size={20} /> Recently Viewed
             </h3>
             <div className="flex items-center gap-4">
-              <button className="text-[10px] font-black text-[#F96500] uppercase tracking-widest hover:underline italic">See All</button>
+              <button className="text-[10px] font-black text-[#F96500] uppercase tracking-widest hover:underline italic bg-transparent border-none cursor-pointer">See All</button>
             </div>
           </div>
           <div className="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-4 px-2 -mx-2">
@@ -162,7 +154,7 @@ const OverviewSection = () => {
            <h3 className="text-xl font-black text-white italic uppercase flex items-center gap-3">
               <TrendingUp className="text-[#07DD05]" size={20} /> Today's Pick
             </h3>
-            <div className="bg-gradient-to-br from-[#F96500]/20 to-transparent border border-[#F96500]/30 rounded-3xl p-8 relative overflow-hidden group h-[400px] flex flex-col">
+            <div className="bg-gradient-to-br from-[#F96500]/20 to-transparent border border-[#F96500]/30 rounded-3xl p-8 relative overflow-hidden group h-[400px] flex flex-col justify-between">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#F96500]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
               <img 
                 src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop" 
@@ -171,12 +163,12 @@ const OverviewSection = () => {
                 className="w-full h-48 object-contain mb-8 group-hover:scale-110 transition-transform duration-700" 
                 alt="" 
               />
-              <div className="mt-auto">
-                <span className="text-[9px] font-black text-[#F96500] uppercase tracking-[0.4em] mb-2 block">Special Recommendation</span>
-                <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none mb-4">Apex Premium Runner Elite X</h4>
+              <div className="mt-auto text-left">
+                <span className="text-[9px] font-black text-[#F96500] uppercase tracking-[0.4em] mb-2 block font-sans">Special Recommendation</span>
+                <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none mb-4 font-sans">Apex Premium Runner Elite X</h4>
                 <div className="flex items-center justify-between">
-                  <span className="text-xl font-black text-white italic">BDT 4,500</span>
-                  <button className="w-10 h-10 rounded-full bg-white text-navy flex items-center justify-center hover:bg-[#F96500] hover:text-white transition-all">
+                  <span className="text-xl font-black text-white italic font-sans">BDT 4,500</span>
+                  <button className="w-10 h-10 rounded-full bg-white text-slate-800 flex items-center justify-center hover:bg-[#F96500] hover:text-white transition-all cursor-pointer border-none">
                     <ArrowLeft className="rotate-180" size={18} />
                   </button>
                 </div>
@@ -194,16 +186,16 @@ const SavedProductsSection = () => {
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
+        <div className="text-left">
           <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Saved <span className="text-[#F96500]">Vault</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your curated list of premium desires</p>
         </div>
         <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-full px-6 py-2">
            <Filter size={14} className="text-gray-400" />
-           <select className="bg-transparent text-white text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer">
-              <option value="all">All Categories</option>
-              <option value="tech">Tech</option>
-              <option value="fashion">Fashion</option>
+           <select className="bg-transparent text-white text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer border-none">
+              <option value="all" className="bg-[#0A0A1F]">All Categories</option>
+              <option value="tech" className="bg-[#0A0A1F]">Tech</option>
+              <option value="fashion" className="bg-[#0A0A1F]">Fashion</option>
            </select>
         </div>
       </div>

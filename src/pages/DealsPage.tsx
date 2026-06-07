@@ -23,58 +23,60 @@ export function DealsPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <div className="w-full bg-[#0A0A1F] py-16 px-8 relative overflow-hidden">
+      <div className="w-full bg-[#0A0A1F] px-8 relative overflow-hidden flex items-center justify-center" style={{ height: '303px' }}>
         {/* Background Gradients matching other directory pages */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10">
-          <div className="bg-orange-primary text-white text-[11px] font-black px-8 py-2.5 rounded-full mb-8 uppercase tracking-[0.2em] shadow-xl shadow-orange-primary/30 italic">
-            FLASH SALE EVENT
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 relative z-10 w-full">
+          <div className="flex flex-col items-center md:items-start text-center md:text-left max-w-xl">
+            <div className="bg-orange-primary text-white text-[9px] font-black px-4 py-1 rounded-full mb-3 uppercase tracking-[0.2em] shadow-md shadow-orange-primary/30 italic inline-block w-fit">
+              FLASH SALE EVENT
+            </div>
+            
+            <h1 className="text-3xl md:text-[40px] font-black text-white italic uppercase tracking-tighter mb-4 leading-none">
+              HOTTEST <span className="text-orange-primary">DEALS</span> TODAY
+            </h1>
+
+            <button 
+              onClick={() => navigate('/post-offer')}
+              className="group flex items-center gap-3 px-6 py-2.5 bg-white rounded-full transition-all hover:scale-105 hover:shadow-lg active:scale-95"
+            >
+              <div className="w-8 h-8 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
+                 <ExternalLink size={16} />
+              </div>
+              <span className="text-[11px] font-black text-navy uppercase tracking-[0.2em] italic">Post Your Deals</span>
+            </button>
           </div>
           
-          <h1 className="text-6xl md:text-[80px] font-black text-white italic uppercase tracking-tighter mb-8 leading-none">
-            HOTTEST <span className="text-orange-primary">DEALS</span> TODAY
-          </h1>
-          
-          <div className="max-w-md w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-[24px] p-6 md:p-8 relative overflow-hidden shadow-[0_0_50px_rgba(255,91,0,0.1)]">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[16px] p-4 md:p-6 relative overflow-hidden shadow-lg shrink-0">
              <div className="relative z-10">
-                <div className="flex items-center justify-center gap-2 mb-6">
-                   <Zap size={14} className="text-orange-primary fill-orange-primary" />
-                   <span className="text-[11px] font-black text-orange-primary uppercase tracking-[0.3em] italic">ENDS IN</span>
+                <div className="flex items-center justify-center gap-2 mb-3">
+                   <Zap size={12} className="text-orange-primary fill-orange-primary" />
+                   <span className="text-[10px] font-black text-orange-primary uppercase tracking-[0.3em] italic">ENDS IN</span>
                 </div>
                 
-                <div className="flex items-center justify-center gap-6">
+                <div className="flex items-center justify-center gap-3">
                   {[
                     { val: '10', label: 'HRS' },
                     { val: '10', label: 'MIN' },
                     { val: '10', label: 'SEC' }
                   ].map((t, i, arr) => (
                     <React.Fragment key={i}>
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-16 h-20 bg-[#000A24] border border-white/10 rounded-xl flex items-center justify-center shadow-inner group transition-all hover:border-orange-primary/30">
-                           <span className="text-3xl font-black text-white font-mono leading-none tracking-tighter">{t.val}</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="w-12 h-14 bg-[#000A24] border border-white/10 rounded-lg flex items-center justify-center shadow-inner group transition-all hover:border-orange-primary/30">
+                           <span className="text-xl font-black text-white font-mono leading-none tracking-tighter">{t.val}</span>
                         </div>
-                        <span className="text-[9px] font-black text-gray-400 tracking-[0.2em] uppercase italic">{t.label}</span>
+                        <span className="text-[8px] font-black text-gray-400 tracking-[0.2em] uppercase italic">{t.label}</span>
                       </div>
                       {i < arr.length - 1 && (
-                        <div className="text-white/40 font-black text-xl pb-6">:</div>
+                        <div className="text-white/40 font-black text-lg pb-4">:</div>
                       )}
                     </React.Fragment>
                   ))}
                 </div>
              </div>
           </div>
-
-          <button 
-            onClick={() => navigate('/post-offer')}
-            className="mt-10 group flex items-center gap-4 px-10 py-4 bg-white rounded-full transition-all hover:scale-105 hover:shadow-[0_20px_60px_rgba(255,255,255,0.1)] active:scale-95"
-          >
-            <div className="w-10 h-10 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
-               <ExternalLink size={20} />
-            </div>
-            <span className="text-[13px] font-black text-navy uppercase tracking-[0.2em] italic">Post Your Deals</span>
-          </button>
         </div>
       </div>
 
@@ -227,9 +229,9 @@ export function DealsPage() {
                  </div>
                  
                  {/* Small Cards Row */}
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 w-full justify-items-center">
+                 <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full justify-items-center">
                     {PRODUCTS.slice(1, 5).map((product, index) => (
-                       <div key={product.id} className="w-full max-w-[300px] lg:h-[572px] flex-shrink-0">
+                       <div key={product.id} className="w-full max-w-[300px] flex flex-col">
                          <ProductCard 
                            product={{
                              ...product,
@@ -252,9 +254,9 @@ export function DealsPage() {
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic px-2 border-l-4 border-orange-primary">Browse All Handpicked Offers</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-y-10 gap-x-6 w-full place-items-center">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-y-10 gap-x-6 w-full place-items-center">
                 {[...PRODUCTS, ...PRODUCTS.slice(0, 2)].slice(0, 12).map((product, idx) => (
-                  <div key={`${product.id}-${idx}`} className="w-full max-w-[300px] lg:h-[572px] flex-shrink-0">
+                  <div key={`${product.id}-${idx}`} className="w-full max-w-[300px] flex flex-col">
                     <ProductCard 
                       product={{
                         ...product,
@@ -293,27 +295,27 @@ export function DealsPage() {
              {/* Redesigned For Business & Sellers Card */}
              <div 
                id="section-sellers-deals" 
-               className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full" 
+               className="bg-white rounded-xl border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-none" 
                style={{ height: '464px' }}
              >
                <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
                
                <div className="flex flex-col items-center">
-                 <div className="w-10 h-10 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-3 shrink-0 shadow-xs border border-[#FFF0E8]">
+                 <div className="w-10 h-10 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-3 shrink-0 border border-transparent">
                    <Star className="w-4.5 h-4.5 fill-current" />
                  </div>
                  
-                 <h3 className="font-space text-base font-black uppercase tracking-tight text-[#1A1D4E] leading-tight">
-                   For Business <span className="text-[#E8500A] italic">& Sellers</span>
+                 <h3 className="font-space text-base font-semibold uppercase tracking-tight text-[#1A1D4E] leading-tight">
+                   For Business <span className="text-[#E8500A]">& Sellers</span>
                  </h3>
                  
-                 <p className="text-[10px] text-gray-400 font-bold mt-1.5 px-1 leading-relaxed max-w-[210px]">
+                 <p className="text-[10px] text-gray-400 font-semibold mt-1.5 px-1 leading-relaxed max-w-[210px]">
                    Unlock exclusive tools, secure verified merchant badges, and scale your authentic local reach.
                  </p>
                </div>
 
-               <div className="border border-dashed border-[#E8500A]/30 bg-gradient-to-b from-[#FFF5F0]/70 to-white/70 rounded-[20px] p-4 text-center flex flex-col items-center justify-center shadow-xs my-2 flex-1">
-                 <h4 className="font-space font-black text-[#1A1D4E] text-[11px] uppercase tracking-widest mb-1">BOOST SALES TODAY</h4>
+               <div className="border border-dashed border-[#E8500A]/30 bg-gray-50 rounded-lg p-4 text-center flex flex-col items-center justify-center my-2 flex-1 shadow-none">
+                 <h4 className="font-space font-semibold text-[#1A1D4E] text-[11px] uppercase tracking-widest mb-1">BOOST SALES TODAY</h4>
                  <p className="text-[9.5px] text-gray-500 mb-3.5 leading-relaxed max-w-[190px] font-semibold">
                    Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
                  </p>
@@ -321,13 +323,13 @@ export function DealsPage() {
                  <button 
                    type="button"
                    onClick={() => navigate('/post-offer')}
-                   className="w-full h-10 bg-[#E8500A] hover:bg-[#CF4400] text-white font-black rounded-full text-[9px] tracking-widest uppercase flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer border-0"
+                   className="w-full h-10 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded text-[9px] tracking-wide uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer border-0 shadow-none"
                  >
                    POST OFFER <ArrowRight className="w-3.5 h-3.5" />
                  </button>
                </div>
 
-               <div className="flex items-center justify-center gap-1.5 text-[8.5px] font-black text-gray-400 uppercase font-mono tracking-widest shrink-0 mt-1">
+               <div className="flex items-center justify-center gap-1.5 text-[8.5px] font-semibold text-gray-400 uppercase font-mono tracking-widest shrink-0 mt-1">
                  <Star className="w-3.5 h-3.5 text-[#E8500A] fill-current" /> 100k+ shopper log Daily
                </div>
              </div>
@@ -340,36 +342,36 @@ export function DealsPage() {
           <div className="max-w-7xl mx-auto relative z-10">
              <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
                 <div>
-                   <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-3">Featured <span className="text-orange-primary">Brand Deals</span></h2>
-                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic mb-1 px-2 border-l-4 border-orange-primary">Curated Premium Partner Offers • Limited Time</p>
+                   <h2 className="text-3xl font-semibold text-[#1a1a2e] uppercase tracking-tight leading-none mb-3">Featured <span className="text-[#E8500A]">Brand Deals</span></h2>
+                   <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1 px-2 border-l-4 border-orange-primary">Curated Premium Partner Offers • Limited Time</p>
                 </div>
              </div>
              
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[BRANDS[0], BRANDS[1], BRANDS[2], BRANDS[8]].map((brand, i) => {
                   return (
                     <div 
                       key={i} 
                       onClick={() => navigate(`/brands/${brand.id}/products`)}
-                      className="bg-white rounded-[32px] p-10 flex flex-col items-center text-center gap-10 hover:shadow-[0_40px_100px_rgba(0,0,0,0.1)] transition-all cursor-pointer border border-gray-100 group relative overflow-hidden shadow-2xl shadow-gray-200/40"
+                      className="bg-white rounded-xl p-8 flex flex-col items-center text-center gap-6 hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer border border-[#e8edf2] group relative overflow-hidden shadow-none"
                     >
-                       <div className="absolute top-0 right-0 w-40 h-40 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:scale-150 transition-transform duration-700" />
+                       <div className="absolute top-0 right-0 w-40 h-40 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-125 transition-transform duration-500" />
                        
-                       <div className="w-28 h-28 rounded-full bg-[#F8FAFC] flex items-center justify-center text-navy font-black text-4xl shadow-[inset_0_2px_10px_rgba(0,0,0,0.05)] border border-white group-hover:scale-110 transition-transform duration-500 relative z-10">
+                       <div className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] font-semibold text-2xl border border-[#e8edf2] relative z-10">
                           {brand.logo}
                        </div>
                        
-                       <div className="flex flex-col items-center gap-3 relative z-10">
-                          <h4 className="text-2xl font-black text-navy group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter leading-tight">{brand.name}</h4>
-                          <div className="px-6 py-2 bg-orange-primary text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-lg shadow-orange-primary/20 group-hover:scale-110 transition-transform">
+                       <div className="flex flex-col items-center gap-2 relative z-10">
+                          <h4 className="text-xl font-semibold text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors uppercase tracking-tight leading-tight">{brand.name}</h4>
+                          <div className="px-4 py-1.5 bg-[#E8500A] text-white rounded text-[10px] font-semibold uppercase tracking-wider shadow-none">
                              Up to {i % 2 === 0 ? '40%' : '50%'} OFF
                           </div>
                        </div>
 
                        <div className="w-full h-px bg-gray-50 relative z-10" />
 
-                       <div className="flex items-center gap-3 text-[11px] font-black text-navy uppercase tracking-widest italic group-hover:text-orange-primary transition-colors relative z-10">
-                          Grab This Deal <ArrowRight size={18} className="-rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                       <div className="flex items-center gap-3 text-[11px] font-semibold text-[#1a1a2e] uppercase tracking-widest group-hover:text-[#E8500A] transition-colors relative z-10">
+                          Grab This Deal <ArrowRight size={16} className="-rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                        </div>
                     </div>
                   );
@@ -379,7 +381,7 @@ export function DealsPage() {
              <div className="mt-12 flex justify-center">
                 <button 
                   onClick={() => navigate('/brand-deals')}
-                  className="px-16 py-6 bg-navy text-white text-[13px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-orange-primary hover:scale-105 active:scale-95 transition-all shadow-2xl italic"
+                  className="px-8 py-3 bg-[#1A1D4E] hover:bg-[#E8500A] text-white text-xs font-semibold uppercase tracking-wider rounded transition-colors shadow-none"
                 >
                    View All Brand Deals
                 </button>

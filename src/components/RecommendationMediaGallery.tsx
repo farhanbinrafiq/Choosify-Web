@@ -9,73 +9,41 @@ export interface MediaItem {
   url: string;
 }
 
-export function getRecommendationMedia(guide: any): MediaItem[] {
-  const images = [
-    guide.image || "https://images.unsplash.com/photo-1616348436168-de43ad0db179?w=1200",
-    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=800&fit=crop",
-    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=1200&h=800&fit=crop",
-    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=800&fit=crop"
-  ];
-  
-  const isMobile = guide.category?.toUpperCase() === 'MOBILE';
-  const isFashion = guide.category?.toUpperCase() === 'FASHION';
-  const isBeauty = guide.category?.toUpperCase() === 'BEAUTY';
-  const isGaming = guide.category?.toUpperCase() === 'GAMING';
-  
-  const additionalVideos: string[] = [];
-  if (isMobile) {
-    additionalVideos.push('https://assets.mixkit.co/videos/preview/mixkit-taking-photos-with-a-smartphone-34356-large.mp4');
-  } else if (isFashion) {
-    additionalVideos.push('https://assets.mixkit.co/videos/preview/mixkit-man-putting-on-designer-sneakers-42998-large.mp4');
-  } else if (isBeauty) {
-    additionalVideos.push('https://assets.mixkit.co/videos/preview/mixkit-hand-applying-cream-on-the-skin-of-another-hand-4688-large.mp4');
-  } else if (isGaming) {
-    additionalVideos.push('https://assets.mixkit.co/videos/preview/mixkit-man-playing-a-first-person-shooter-video-game-4587-large.mp4');
-  } else {
-    additionalVideos.push('https://assets.mixkit.co/videos/preview/mixkit-coffee-maker-dripping-fresh-beverage-41224-large.mp4');
-  }
-
+export function getGuideMedia(guide: any): MediaItem[] {
   const items: MediaItem[] = [];
-
-  // Add primary video if exists
+  
   if (guide.videoUrl) {
     items.push({ type: 'video', url: guide.videoUrl });
   }
-
-  // Add primary image and other images
-  images.forEach(img => {
-    items.push({ type: 'image', url: img });
-  });
-
-  // Add secondary video
-  additionalVideos.forEach(vUrl => {
-    if (vUrl !== guide.videoUrl) {
-      items.push({ type: 'video', url: vUrl });
-    }
-  });
-
-  // Arrange sequence: [ Video 1 ], [ Photo 1 ], [ Photo 2 ], [ Photo 3 ], [ Video 2 ], [ Photo 4 ]
-  const finalItems: MediaItem[] = [];
-  const videos = items.filter(x => x.type === 'video');
-  const photos = items.filter(x => x.type === 'image');
   
-  if (videos.length > 0) {
-    finalItems.push(videos[0]);
-  }
-  if (photos.length > 0) finalItems.push(photos[0]);
-  if (photos.length > 1) finalItems.push(photos[1]);
-  if (photos.length > 2) finalItems.push(photos[2]);
-  if (videos.length > 1) {
-    finalItems.push(videos[1]);
-  }
-  for (let i = 3; i < photos.length; i++) {
-    finalItems.push(photos[i]);
-  }
-  for (let i = 2; i < videos.length; i++) {
-    finalItems.push(videos[i]);
+  if (guide.image) {
+    items.push({ type: 'image', url: guide.image });
+  } else {
+    items.push({ type: 'image', url: PLACEHOLDER_IMAGE });
   }
 
-  return finalItems;
+  const category = (guide.category || 'general').toLowerCase();
+  if (category.includes('mobile') || category.includes('tech') || category.includes('gaming')) {
+    items.push(
+      { type: 'image', url: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=800&fit=crop' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=1200&h=800&fit=crop' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1200&h=800&fit=crop' }
+    );
+  } else if (category.includes('fashion') || category.includes('lifestyle') || category.includes('beauty')) {
+    items.push(
+      { type: 'image', url: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&h=800&fit=crop' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&h=800&fit=crop' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1445205170230-053b830c6050?w=1200&h=800&fit=crop' }
+    );
+  } else {
+    items.push(
+      { type: 'image', url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&h=800&fit=crop' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1200&h=800&fit=crop' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=1200&h=800&fit=crop' }
+    );
+  }
+
+  return items;
 }
 
 interface RecommendationMediaGalleryProps {
@@ -83,7 +51,7 @@ interface RecommendationMediaGalleryProps {
 }
 
 export function RecommendationMediaGallery({ guide }: RecommendationMediaGalleryProps) {
-  const mediaItems = getRecommendationMedia(guide);
+  const mediaItems = getGuideMedia(guide);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -139,12 +107,12 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
   const currentMedia = mediaItems[carouselIndex] || mediaItems[0];
 
   return (
-    <div className="w-full flex flex-col gap-5 select-none" id={`recommendation-gallery-${guide.id}`}>
+    <div className="w-full flex flex-col gap-5">
       {/* 1. HERO MAIN VIEWPORT container with proportional aspect ratio and smooth transition */}
       <div 
         className={cn(
-          "w-full h-[320px] md:h-[480px] rounded-[24px] md:rounded-[32px] overflow-hidden relative shadow-2xl group border border-white/10",
-          currentMedia.type === 'video' ? 'bg-black' : 'bg-[#1D1D2B]/80'
+          "w-full h-[320px] md:h-[480px] rounded-[24px] md:rounded-[32px] overflow-hidden relative shadow-lg group select-none border border-white/5",
+          currentMedia.type === 'video' ? 'bg-black' : 'bg-[#1e2256]/30'
         )}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -174,12 +142,12 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
                 <button
                   type="button"
                   onClick={() => setIsMuted(prev => !prev)}
-                  className="absolute bottom-4 right-4 z-30 flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black text-white hover:text-orange-primary font-bold text-[10px] rounded-xl border border-white/10 shadow-lg tracking-wider transition-colors cursor-pointer"
+                  className="absolute bottom-4 right-4 z-30 flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black text-white hover:text-orange-primary font-bold text-[10px] rounded-xl border border-white/10 shadow-lg tracking-wider transition-colors"
                 >
                   {isMuted ? (
                     <>
                       <VolumeX size={14} className="text-rose-500 animate-pulse" />
-                      <span>UNMUTE VIDEO REVIEW</span>
+                      <span>UNMUTE PREVIEW VIDEO</span>
                     </>
                   ) : (
                     <>
@@ -214,7 +182,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
                 
                 {/* Visual guideline loupe marker overlay */}
                 {!isZooming && (
-                  <div className="absolute bottom-4 right-4 bg-[#0A0A14]/80 backdrop-blur-md text-white border border-white/15 px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow-sm opacity-60 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute bottom-4 right-4 bg-navy/80 backdrop-blur-sm text-white border border-white/15 px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow-sm opacity-60 group-hover:opacity-100 transition-opacity">
                     <ZoomIn size={12} /> Hover To Magnify
                   </div>
                 )}
@@ -227,7 +195,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
         <button
           type="button"
           onClick={handlePrev}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/25 hover:bg-black/80 border border-white/10 flex items-center justify-center text-white transition-all active:scale-95 shadow-lg group-hover:scale-105 cursor-pointer z-20"
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/25 hover:bg-black/80 border border-white/10 flex items-center justify-center text-white transition-all active:scale-95 shadow-lg group-hover:scale-105"
           aria-label="Previous Media"
         >
           <ChevronLeft size={22} strokeWidth={2.5} />
@@ -235,7 +203,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
         <button
           type="button"
           onClick={handleNext}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/25 hover:bg-black/80 border border-white/10 flex items-center justify-center text-white transition-all active:scale-95 shadow-lg group-hover:scale-105 cursor-pointer z-20"
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/25 hover:bg-black/80 border border-white/10 flex items-center justify-center text-white transition-all active:scale-95 shadow-lg group-hover:scale-105"
           aria-label="Next Media"
         >
           <ChevronRight size={22} strokeWidth={2.5} />
@@ -252,14 +220,14 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
               type="button"
               onClick={() => setCarouselIndex(i)}
               className={cn(
-                "relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden border-2 bg-slate-900 transition-all flex items-center justify-center p-1 cursor-pointer",
+                "relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden border-2 bg-slate-50 transition-all flex items-center justify-center p-1 cursor-pointer",
                 isActive 
                   ? "border-orange-primary scale-105 shadow-md shadow-orange-primary/10" 
-                  : "border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
+                  : "border-slate-200 hover:border-slate-500 opacity-70 hover:opacity-100"
               )}
             >
               {media.type === 'video' ? (
-                <div className="w-full h-full relative flex items-center justify-center bg-black/40">
+                <div className="w-full h-full relative flex items-center justify-center bg-black/10">
                   <video
                     src={media.url}
                     muted
@@ -267,7 +235,8 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
                     playsInline
                     className="w-full h-full object-cover rounded-xl"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-xl">
+                  {/* Rich indicator play badge overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white group-hover:bg-black/20 transition-all rounded-xl">
                     <Play size={20} className="fill-current text-white drop-shadow-md" />
                   </div>
                   <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[6px] font-black uppercase px-1 rounded-sm leading-none">
@@ -294,8 +263,8 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
             type="button"
             onClick={() => setCarouselIndex(i)}
             className={cn(
-              "h-1.5 transition-all duration-300 rounded-full border-none p-0 cursor-pointer",
-              carouselIndex === i ? "w-10 bg-orange-primary" : "w-2 bg-white/20 hover:bg-white/40"
+              "h-1.5 transition-all duration-300 rounded-full border-none p-0",
+              carouselIndex === i ? "w-10 bg-orange-primary" : "w-2 bg-slate-300 hover:bg-slate-400"
             )}
           />
         ))}

@@ -12,8 +12,26 @@ import { cn } from '../lib/utils';
 import { EvaluationData, ComparisonProduct } from '../types/evaluation';
 import evaluationsData from '../data/evaluations.json';
 import { RecommendationMediaGallery } from '../components/RecommendationMediaGallery';
+import { DYNAMIC_GUIDES, DEFAULT_DYNAMIC_GUIDE } from '../data/mockGuides';
+import { CATEGORY_SPEC_CONFIGS } from '../data/guideSpecConfigs';
 
 const evaluations = evaluationsData as EvaluationData[];
+
+const IconMap = {
+  Smartphone: Smartphone,
+  Laptop: Laptop,
+  Zap: Zap,
+  Globe: Globe,
+  MessageSquare: MessageSquare,
+  ShoppingBag: ShoppingBag
+};
+
+const StoreIconMap = {
+  ShoppingBag: <ShoppingBag size={18} className="text-blue-500" />,
+  Smartphone: <Smartphone size={18} className="text-navy/40" />,
+  Globe: <Globe size={18} className="text-blue-400" />,
+  Bookmark: <Bookmark size={18} className="text-orange-primary" />
+};
 
 const COMPARISON_DATA: ComparisonProduct[] = [
   {
@@ -80,6 +98,18 @@ export function GuideDetailPage() {
   // Find the blog/guide. Fallback to first if not found
   const guide = BLOGS.find(b => b.id === Number(id)) || BLOGS[0];
   
+  const guideId = Number(id);
+  const dynamicData = DYNAMIC_GUIDES[guideId] || {
+    ...DEFAULT_DYNAMIC_GUIDE,
+    id: guide.id,
+    title: guide.title,
+    excerpt: guide.excerpt,
+    categorySpecType: (guide.category || 'MOBILE').toLowerCase() === 'fashion' ? 'fashion' : 'mobile'
+  };
+  
+  const creator = dynamicData.creator;
+  const specConfig = CATEGORY_SPEC_CONFIGS[dynamicData.categorySpecType] || CATEGORY_SPEC_CONFIGS.mobile;
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
   
@@ -119,10 +149,22 @@ export function GuideDetailPage() {
   
   // Products related to this guide based on constants mapping
   const recommendedProductIds = (guide as any).recommendedProducts || [];
-  const allGuideProducts = PRODUCTS.filter(p => recommendedProductIds.includes(p.id));
+  const allGuideProducts = PRODUCTS.filter(p => {
+    if (recommendedProductIds.includes(p.id)) return true;
+    const guideCategory = (guide.category || '').toLowerCase();
+    const productCategory = (p.category || '').toLowerCase();
+    if (guideCategory.includes('mobile') && productCategory.includes('phone')) return true;
+    if (guideCategory.includes('fashion') && productCategory.includes('fashion')) return true;
+    if (guideCategory.includes('gaming') && productCategory.includes('gaming')) return true;
+    if (guideCategory.includes('home') && productCategory.includes('home')) return true;
+    if (guideCategory.includes('beauty') && productCategory.includes('beauty')) return true;
+    return false;
+  });
   
-  // If no recommended products, fallback to first 3 products
-  const displayProducts = allGuideProducts.length > 0 ? allGuideProducts.slice(0, visibleCount) : PRODUCTS.slice(0, visibleCount);
+  // If no recommended products, fallback to first 3 products of matched categories, else global
+  const displayProducts = allGuideProducts.length > 0 
+    ? allGuideProducts.slice(0, visibleCount) 
+    : PRODUCTS.slice(0, visibleCount);
 
   const handleViewProducts = () => {
     if (allGuideProducts.length > 6) {
@@ -289,12 +331,7 @@ export function GuideDetailPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  { name: 'Daraz', price: '2,100', delivery: 'Free · 2-3 days', isBest: true, icon: <ShoppingBag size={18} className="text-blue-500" /> },
-                  { name: 'Pickaboo', price: '2,184', delivery: '৳60 · 1-2 days', icon: <Smartphone size={18} className="text-navy/40" /> },
-                  { name: 'Brand Store', price: '2,226', delivery: 'Free · 3-5 days', icon: <Globe size={18} className="text-blue-400" /> },
-                  { name: 'Rokomari', price: '2,289', delivery: '৳50 · 2-4 days', icon: <Bookmark size={18} className="text-orange-primary" /> }
-                ].map((store, i) => (
+                {(dynamicData.priceStores || DEFAULT_DYNAMIC_GUIDE.priceStores!).map((store, i) => (
                   <div key={i} className={cn(
                     "relative bg-white rounded-2xl p-8 border transition-all hover:shadow-2xl hover:border-orange-primary/20 group",
                     store.isBest ? "border-orange-primary/40 shadow-xl shadow-orange-primary/5" : "border-gray-100"
@@ -306,7 +343,7 @@ export function GuideDetailPage() {
                     )}
                     <div className="flex items-center gap-4 mb-8">
                       <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-orange-primary/5 transition-colors">
-                        {store.icon}
+                        {StoreIconMap[store.iconType] || <ShoppingBag size={18} className="text-blue-500" />}
                       </div>
                       <span className="text-sm font-black text-navy italic">{store.name}</span>
                     </div>
@@ -476,48 +513,45 @@ export function GuideDetailPage() {
                    </div>
 
                    <div className="divide-y divide-gray-100">
-                      {[
-                        { icon: <Smartphone size={16} />, label: 'Build quality', pros: ['Durable frame', 'Premium finish'], cons: ['Heavy at 2.1 kg'], best: '#Professionals' },
-                        { icon: <Zap size={16} />, label: 'Performance', pros: ['Fast processor', 'Long battery'], cons: ['Runs warm', 'No USB-A'], best: '#Power users' },
-                        { icon: <ShoppingBag size={16} />, label: 'Value for money', pros: ['Free returns'], cons: ['Premium price', 'Few bundles'], best: '#Buyers' },
-                        { icon: <Globe size={16} />, label: 'Ease of use', pros: ['Intuitive UI', 'Quick setup'], cons: ['Steep curve'], best: '#Beginners' },
-                        { icon: <MessageSquare size={16} />, label: 'After-sales', pros: ['2-yr warranty', '24/7 live chat'], cons: ['Slow responses'], best: '#Long-term' }
-                      ].map((row, idx) => (
-                         <div key={idx} className="grid grid-cols-[1.5fr_1.5fr_1.5fr_1fr] px-8 py-6 items-center hover:bg-gray-50/50 transition-colors">
-                            {/* Criteria Col */}
-                            <div className="flex items-center gap-4">
-                               <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-orange-primary/60">
-                                  {row.icon}
+                      {specConfig.criteriaList.map((row, idx) => {
+                         const CriteriaIcon = IconMap[row.iconName as keyof typeof IconMap] || Smartphone;
+                         return (
+                            <div key={idx} className="grid grid-cols-[1.5fr_1.5fr_1.5fr_1fr] px-8 py-6 items-center hover:bg-gray-50/50 transition-colors">
+                               {/* Criteria Col */}
+                               <div className="flex items-center gap-4">
+                                  <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-orange-primary/60">
+                                     <CriteriaIcon size={16} />
+                                  </div>
+                                  <span className="text-[14px] font-bold text-navy italic">{row.label}</span>
                                </div>
-                               <span className="text-[14px] font-bold text-navy italic">{row.label}</span>
-                            </div>
-                            
-                            {/* Strengths Col */}
-                            <div className="space-y-1">
-                               {row.pros.map(p => (
-                                  <div key={p} className="flex items-center gap-2 text-[12px] font-bold italic text-navy/60">
-                                     <Check size={12} className="text-blue-500" /> {p}
-                                  </div>
-                               ))}
-                            </div>
+                               
+                               {/* Strengths Col */}
+                               <div className="space-y-1">
+                                  {row.pros.map(p => (
+                                     <div key={p} className="flex items-center gap-2 text-[12px] font-bold italic text-navy/60">
+                                        <Check size={12} className="text-blue-500" /> {p}
+                                     </div>
+                                  ))}
+                               </div>
 
-                            {/* Considerations Col */}
-                            <div className="space-y-1">
-                               {row.cons.map(c => (
-                                  <div key={c} className="flex items-center gap-2 text-[12px] font-bold italic text-navy/60">
-                                     <X size={12} className="text-orange-primary/60" /> {c}
-                                  </div>
-                               ))}
-                            </div>
+                               {/* Considerations Col */}
+                               <div className="space-y-1">
+                                  {row.cons.map(c => (
+                                     <div key={c} className="flex items-center gap-2 text-[12px] font-bold italic text-navy/60">
+                                        <X size={12} className="text-orange-primary/60" /> {c}
+                                     </div>
+                                  ))}
+                               </div>
 
-                            {/* Best For Col */}
-                            <div>
-                               <span className="px-4 py-1.5 bg-[#EFF6FF] text-[#1E40AF] rounded-[4px] text-[11px] font-black uppercase tracking-widest italic shadow-sm">
-                                  {row.best}
-                               </span>
+                               {/* Best For Col */}
+                               <div>
+                                  <span className="px-4 py-1.5 bg-[#EFF6FF] text-[#1E40AF] rounded-[4px] text-[11px] font-black uppercase tracking-widest italic shadow-sm">
+                                     {row.best}
+                                  </span>
+                               </div>
                             </div>
-                         </div>
-                      ))}
+                         );
+                      })}
                    </div>
 
                    {/* Footer Bar */}
@@ -537,50 +571,66 @@ export function GuideDetailPage() {
             <div className="bg-white border border-gray-100 rounded-[32px] p-8 shadow-2xl shadow-gray-200/50 flex flex-col items-center text-center">
                {/* Profile Picture */}
                <div className="w-32 h-32 rounded-full border-4 border-orange-primary/20 p-1 mb-6">
-                  <img src="https://i.pravatar.cc/300?u=farhan" className="w-full h-full object-cover rounded-full" alt="Author" />
+                  <img src={creator.avatar} className="w-full h-full object-cover rounded-full" alt={creator.name} />
                </div>
 
                {/* Name & Title */}
-               <h4 className="text-2xl font-black text-navy italic tracking-tighter uppercase mb-2">Farhan Bin Rafiq</h4>
+               <h4 className="text-2xl font-black text-navy italic tracking-tighter uppercase mb-2">{creator.name}</h4>
                
                {/* Social Icons */}
                <div className="flex gap-4 justify-center mb-6">
-                  <button className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm"><Facebook size={16} /></button>
-                  <button className="w-10 h-10 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center hover:bg-sky-500 hover:text-white transition-all shadow-sm"><Twitter size={16} /></button>
-                  <button className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm"><Youtube size={16} /></button>
+                  {creator.socials.facebook && (
+                     <a href={creator.socials.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm"><Facebook size={16} /></a>
+                  )}
+                  {creator.socials.twitter && (
+                     <a href={creator.socials.twitter} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center hover:bg-sky-500 hover:text-white transition-all shadow-sm"><Twitter size={16} /></a>
+                  )}
+                  {creator.socials.youtube && (
+                     <a href={creator.socials.youtube} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm"><Youtube size={16} /></a>
+                  )}
                </div>
 
                {/* Bio */}
                <p className="text-sm font-bold text-gray-500 italic mb-6 leading-relaxed">
-                  Senior Tech Analyst & Digital Product Researcher with 10+ years of experience in the Bangladesh market.
+                  {creator.bio}
                </p>
 
                {/* Verified Badge */}
                <div className="mb-8">
                   <span className="text-[10px] font-black text-orange-primary uppercase tracking-widest italic px-4 py-2 bg-orange-primary/5 rounded-full border border-orange-primary/10">
-                    verified expert contributor
+                     {creator.verifiedStatus}
                   </span>
                </div>
 
                {/* Follow Button */}
                <button className="w-full py-5 bg-navy text-white rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:bg-orange-primary hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-navy/10">
-                  Follow Expert
+                  Follow {creator.name.split(' ')[0]}
                </button>
             </div>
             
             {/* Additional Sidebar Widgets */}
             <div className="mt-8 p-8 bg-gray-50 rounded-[24px] border border-gray-100 italic">
                <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Quick Tip</h5>
-               <p className="text-xs font-bold text-navy opacity-60">Always check for official warranty stickers when buying premium electronics in Bangladesh.</p>
+               <p className="text-xs font-bold text-navy opacity-60">{creator.quickTip}</p>
             </div>
           </aside>
-        </div>        {/* Overall Winner Segment - Redesigned to match Featured Guide Style */}
+        </div>
+
+        {/* Overall Winner Segment - Redesigned to match Featured Guide Style */}
         <section className="border-t border-gray-100 pt-32 mb-40">
            {displayProducts.length > 0 && (
              <div className="mb-32">
                 <div className="mb-16">
-                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic mb-4 px-2 border-l-4 border-orange-primary">Our Definitive Recommendation</p>
-                   <h2 className="text-5xl font-black text-navy uppercase italic tracking-tighter leading-none">THE OVERALL <span className="text-orange-primary">WINNER</span></h2>
+                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic mb-4 px-2 border-l-4 border-orange-primary">
+                      {dynamicData.mode === 'roundup' ? "Our Definitive Recommendation" : "Primary Recommended Product"}
+                   </p>
+                   <h2 className="text-5xl font-black text-navy uppercase italic tracking-tighter leading-none">
+                      {dynamicData.mode === 'roundup' ? (
+                         <>THE OVERALL <span className="text-orange-primary">WINNER</span></>
+                      ) : (
+                         <>OUR FEATURED <span className="text-orange-primary">SELECTION</span></>
+                      )}
+                   </h2>
                 </div>
                 
                 {/* Winner Card - Featured Banner Style */}
@@ -593,8 +643,11 @@ export function GuideDetailPage() {
                     <div className="absolute inset-0 bg-gradient-to-r from-[#0D0B33] via-[#0D0B33]/80 to-transparent" />
                     
                     <div className="absolute inset-0 p-12 md:p-20 flex flex-col justify-center items-start">
-                       <div className="bg-[#FF5C38] text-white text-[10px] font-black px-6 py-2.5 rounded-xl mb-10 uppercase tracking-[0.3em] italic shadow-lg shadow-orange-primary/20">
-                           THE 2026 CHAMPION
+                       <div className={cn(
+                          "text-white text-[10px] font-black px-6 py-2.5 rounded-xl mb-10 uppercase tracking-[0.3em] italic shadow-lg",
+                          dynamicData.mode === 'roundup' ? "bg-[#FF5C38] shadow-orange-primary/20" : "bg-blue-600 shadow-blue-600/20"
+                       )}>
+                           {dynamicData.mode === 'roundup' ? "THE 2026 CHAMPION" : "EXPERT CHOICE SELECTION"}
                        </div>
                        
                        <h3 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter leading-[0.9] mb-12 max-w-2xl uppercase group-hover:tracking-normal transition-all duration-700">
@@ -632,8 +685,16 @@ export function GuideDetailPage() {
 
            <div className="flex items-center justify-between mb-16">
               <div>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic mb-4 px-2 border-l-4 border-orange-primary">Top-Tier Alternatives</p>
-                 <h2 className="text-4xl font-black text-navy uppercase italic tracking-tighter leading-none">OTHER <span className="text-orange-primary">PRODUCTS</span> MENTIONED</h2>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic mb-4 px-2 border-l-4 border-orange-primary">
+                    {dynamicData.mode === 'roundup' ? "Top-Tier Alternatives" : "Additional Evaluated Items"}
+                 </p>
+                 <h2 className="text-4xl font-black text-navy uppercase italic tracking-tighter leading-none">
+                    {dynamicData.mode === 'roundup' ? (
+                       <>OTHER <span className="text-orange-primary">PRODUCTS</span> MENTIONED</>
+                    ) : (
+                       <>OTHER <span className="text-orange-primary">MODELS</span> CONSIDERED</>
+                    )}
+                 </h2>
               </div>
               <button 
                 onClick={handleViewProducts}
@@ -716,26 +777,26 @@ export function GuideDetailPage() {
            </div>
            
            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-20">
-              {BLOGS.slice(0, 3).map((guide, i) => (
-                <Link key={i} to={`/guides/${guide.id}`} className="group cursor-pointer block bg-[#FDFDFD] rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-500 shadow-xl shadow-gray-100/50">
+              {BLOGS.filter(b => b.id !== guide.id).slice(0, 3).map((g, i) => (
+                <Link key={i} to={`/guides/${g.id}`} className="group cursor-pointer block bg-[#FDFDFD] rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-500 shadow-xl shadow-gray-100/50">
                   <div className="aspect-[16/10] overflow-hidden relative">
-                     <img src={guide.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Guide" />
+                     <img src={g.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Guide" />
                      <div className="absolute top-4 left-4">
                         <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
                            <BookOpen size={12} className="text-orange-primary" />
-                           <span className="text-[9px] font-black text-navy uppercase tracking-widest italic">5 min read</span>
+                           <span className="text-[9px] font-black text-navy uppercase tracking-widest italic">{g.readTime || "5 min read"}</span>
                         </div>
                      </div>
                   </div>
                   <div className="p-8">
                       <h3 className="text-lg font-black text-navy uppercase tracking-tighter mb-4 group-hover:text-orange-primary transition-colors leading-tight italic line-clamp-2">
-                         {guide.title}
+                         {g.title}
                       </h3>
-                      <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest italic line-clamp-2 mb-8">{guide.excerpt}</p>
+                      <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest italic line-clamp-2 mb-8">{g.excerpt}</p>
                       <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                          <div className="flex items-center gap-4 text-[9px] font-black text-gray-400 uppercase tracking-widest italic">
-                            <span className="flex items-center gap-1.5"><Heart size={12} className="text-pink-500" /> 12k</span>
-                            <span className="flex items-center gap-1.5 opacity-50">• 450 Shared</span>
+                            <span className="flex items-center gap-1.5"><Heart size={12} className="text-pink-500" /> {g.views || "12k"}</span>
+                            <span className="flex items-center gap-1.5 opacity-50">• {g.shares || "450"} Shared</span>
                          </div>
                          <ArrowRight size={16} className="text-orange-primary group-hover:translate-x-2 transition-transform" />
                       </div>

@@ -99,11 +99,12 @@ export function Navbar() {
         {/* LOGO SECTOR */}
         <div className="flex items-center gap-3 mr-4 md:mr-8 scale-110">
           <Link to="/" className="flex flex-col items-center group">
-            <svg className="h-6 w-6 mb-1 text-orange-primary group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" fill={mode === 'wholesale' ? "#FF0038" : "#FF5B00"} />
-              <circle cx="9.5" cy="12" r="2.5" fill="white" />
-              <circle cx="14.5" cy="12" r="2.5" fill="white" opacity="0.4" />
-            </svg>
+            <img 
+              src="/logo.png" 
+              alt="Choosify" 
+              className="h-7 w-auto mb-0.5 object-contain group-hover:scale-110 transition-transform duration-300" 
+              referrerPolicy="no-referrer"
+            />
             <span className="text-xl font-black tracking-tight lowercase font-sans">
               choosify<span className={mode === 'wholesale' ? "text-[#FF0038]" : "text-white"}>.bd</span>
             </span>

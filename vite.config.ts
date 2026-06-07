@@ -4,8 +4,10 @@ import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { buildAssets } from './generatePwaAssets.js';
+import { buildLogo } from './generateAttachedLogo.js';
 
 buildAssets();
+buildLogo();
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');

@@ -134,7 +134,7 @@ export function CategoriesPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
-      <div className="w-full bg-[#0A0A1F] py-16 px-8 relative overflow-hidden">
+      <div className="w-full bg-[#0A0A1F] px-8 relative overflow-hidden flex items-center justify-center" style={{ height: '303px' }}>
         {/* Background Gradients */}
         {mode === 'wholesale' ? (
           <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
@@ -143,23 +143,23 @@ export function CategoriesPage() {
         )}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
-        <div className="max-w-7xl mx-auto text-center relative z-10">
+        <div className="max-w-7xl mx-auto text-center relative z-10 w-full">
           {mode === 'wholesale' ? (
-            <h1 className="text-[54px] md:text-[64px] font-black italic uppercase tracking-tighter mb-4 leading-none">
+            <h1 className="text-[28px] md:text-[36px] font-black italic uppercase tracking-tighter mb-2 leading-none">
               <span className="text-white">B2B Product Category</span> <span className="text-[#FF5B00]">HUB</span>
             </h1>
           ) : (
-            <h1 className="text-[54px] md:text-[64px] font-black italic uppercase tracking-tighter mb-4 leading-none">
+            <h1 className="text-[28px] md:text-[36px] font-black italic uppercase tracking-tighter mb-2 leading-none">
               <span className="text-white">EXPLORATION</span> <span className="text-orange-primary">HUB</span>
             </h1>
           )}
-
+ 
           {/* Product Name Marquee */}
-          <div className="w-full overflow-hidden mb-12 py-4 border-y border-white/5 relative">
+          <div className="w-full overflow-hidden mb-3 py-1.5 border-y border-white/5 relative">
             <motion.div 
                animate={{ x: [0, -1500] }}
                transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-               className="flex whitespace-nowrap gap-12"
+               className="flex whitespace-nowrap gap-8"
             >
                {[
                  'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
@@ -169,9 +169,9 @@ export function CategoriesPage() {
                  <span 
                    key={i} 
                    className={cn(
-                     "text-6xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
+                     "text-2xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
                      "text-white/10",
-                     "hover:text-orange-primary hover:scale-110 hover:drop-shadow-[0_0_20px_rgba(255,122,0,0.6)]"
+                     "hover:text-orange-primary hover:scale-110"
                    )}
                  >
                     {name}
@@ -186,9 +186,9 @@ export function CategoriesPage() {
                  <span 
                    key={`dup-${i}`} 
                    className={cn(
-                     "text-6xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
+                     "text-2xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
                      "text-white/10",
-                     "hover:text-orange-primary hover:scale-110 hover:drop-shadow-[0_0_20px_rgba(255,122,0,0.6)]"
+                     "hover:text-orange-primary hover:scale-110"
                    )}
                  >
                     {name}
@@ -196,19 +196,19 @@ export function CategoriesPage() {
                ))}
             </motion.div>
           </div>
-
-          <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[11px] md:text-[13px] mb-12 uppercase tracking-[0.2em] opacity-80 leading-relaxed">
+ 
+          <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[9px] md:text-[10.5px] mb-3 uppercase tracking-[0.2em] opacity-80 leading-relaxed">
             DISCOVER PREMIUM PRODUCTS, OFFICIAL STORES, AND BEST DEALS ACROSS BANGLADESH.
           </p>
-
-          <div className="max-w-xl mx-auto relative group">
-             <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+ 
+          <div className="max-w-md mx-auto relative group">
+             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                 <div className="flex gap-1 opacity-80">
-                   <div className="w-5 h-5 rounded-full border-2 border-orange-primary/40 flex items-center justify-center">
-                     <div className="w-2 h-2 bg-orange-primary rounded-full group-hover:scale-150 transition-transform" />
+                   <div className="w-4 h-4 rounded-full border-2 border-orange-primary/40 flex items-center justify-center">
+                     <div className="w-1.5 h-1.5 bg-orange-primary rounded-full group-hover:scale-150 transition-transform" />
                    </div>
-                   <div className="w-5 h-5 rounded-full border-2 border-orange-primary/40 flex items-center justify-center">
-                     <div className="w-2 h-2 bg-orange-primary rounded-full group-hover:scale-150 transition-transform" />
+                   <div className="w-4 h-4 rounded-full border-2 border-orange-primary/40 flex items-center justify-center">
+                     <div className="w-1.5 h-1.5 bg-orange-primary rounded-full group-hover:scale-150 transition-transform" />
                    </div>
                 </div>
              </div>
@@ -217,7 +217,7 @@ export function CategoriesPage() {
               placeholder="Search by Brand Name or Category..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-16 pl-24 pr-8 rounded-full bg-gradient-to-r from-[#000A2A] to-[#0A0A1F] text-white border border-white/10 focus:outline-none focus:border-orange-primary/40 transition-all font-bold placeholder:text-white/20 shadow-3xl text-[13px] italic tracking-wide" 
+              className="w-full h-11 pl-18 pr-6 rounded-full bg-gradient-to-r from-[#000A2A] to-[#0A0A1F] text-white border border-white/10 focus:outline-none focus:border-orange-primary/40 transition-all font-bold placeholder:text-white/20 shadow-3xl text-[11px] italic tracking-wide" 
              />
           </div>
         </div>

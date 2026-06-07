@@ -112,14 +112,14 @@ export function CompareEngine() {
   return (
     <div className="w-full bg-[#F8FAFC]">
       {/* Compare Engine Header (Reference Image Style) */}
-      <div className="bg-[#05051A] pt-24 pb-32 px-6 relative overflow-hidden text-center">
+      <div className="bg-[#05051A] px-6 relative overflow-hidden text-center flex flex-col justify-center items-center" style={{ height: '500px' }}>
          <div className="absolute inset-0 bg-gradient-to-b from-blue-600/5 to-transparent pointer-events-none" />
          
          <motion.div 
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           className="relative z-10"
-         >
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative z-10 w-full max-w-6xl"
+          >
             <h2 className="text-4xl md:text-6xl font-black text-white italic uppercase tracking-tighter leading-none mb-6">
                COMPARE <span className="text-[#FF7A00]">ENGINE</span>
             </h2>
@@ -128,25 +128,25 @@ export function CompareEngine() {
             </p>
 
             {/* Product Selection Slots */}
-            <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                {selectedProducts.map((p, idx) => (
                   <div key={idx} className="relative">
-                     <div className="bg-[#0A0A26] border border-white/5 rounded-2xl p-6 text-left group hover:border-[#FF5C00]/30 transition-all shadow-2xl">
+                     <div className="bg-[#0A0A26] border border-white/5 rounded-2xl p-6 text-left group hover:border-[#FF7A00]/30 transition-all shadow-2xl flex flex-col justify-between h-48">
                         {p.isWinner && (
-                           <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#FF5C00] text-white text-[8px] font-black px-4 py-1 rounded-full uppercase tracking-widest z-20 shadow-xl">
-                              Recommended
+                           <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#FF7A00] text-white text-[8px] font-black px-4 py-1 rounded-full uppercase tracking-widest z-20 shadow-xl">
+                              Winner
                            </div>
                         )}
                         <div className="flex items-center gap-4 mb-6">
-                           <div className="w-16 h-16 rounded-xl overflow-hidden bg-white/5 border border-white/10 p-2">
+                           <div className="w-16 h-16 rounded-xl overflow-hidden bg-white/5 border border-white/10 p-2 shrink-0">
                               <img src={p.image} className="w-full h-full object-contain" alt={p.name} />
                            </div>
-                           <div>
-                              <span className="text-[#FF7A00] text-[9px] font-black uppercase italic tracking-widest">{p.brand}</span>
-                              <h4 className="text-white text-xs font-bold italic line-clamp-1">{p.name}</h4>
+                           <div className="min-w-0">
+                              <span className="text-[#FF7A00] text-[9px] font-black uppercase italic tracking-widest block leading-none">{p.brand}</span>
+                              <h4 className="text-white text-xs font-bold italic line-clamp-2 mt-1">{p.name}</h4>
                            </div>
                         </div>
-                        <button className="w-full py-2 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-white/40 uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2">
+                        <button className="w-full py-2 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-white/40 uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2 mt-4">
                            <Activity size={12} /> Replace
                         </button>
                      </div>
@@ -154,7 +154,7 @@ export function CompareEngine() {
                ))}
                
                {/* Empty Slot */}
-               <div className="bg-transparent border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center p-6 group cursor-pointer hover:border-white/20 transition-all">
+               <div className="bg-transparent border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center p-6 group cursor-pointer hover:border-white/20 transition-all h-48">
                   <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-white/10 group-hover:text-white transition-all mb-4">
                      <Plus size={24} />
                   </div>
@@ -163,11 +163,11 @@ export function CompareEngine() {
             </div>
 
             {/* Quick Action Bar */}
-            <div className="mt-12 max-w-6xl mx-auto flex items-center gap-4 justify-center">
+            <div className="mt-12 flex items-center gap-4 justify-center">
                <div className="flex items-center gap-4 px-6 py-2.5 bg-white/5 border border-white/10 rounded-full">
                   <span className="text-[10px] font-black text-white/40 uppercase italic tracking-widest">Compare Mode:</span>
                   <div className="flex items-center gap-3">
-                     <button className="text-[10px] font-black text-[#FF5C00] uppercase italic">Side-by-Side</button>
+                     <button className="text-[10px] font-black text-[#FF7A00] uppercase italic">Side-by-Side</button>
                      <div className="w-px h-3 bg-white/10" />
                      <button className="text-[10px] font-black text-white/40 uppercase italic hover:text-white">Highlights Only</button>
                   </div>
@@ -309,9 +309,9 @@ export function CompareEngine() {
             <div className="bg-[#FAF9F5] p-10 border-t border-gray-100">
                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                   {selectedProducts.map((p, idx) => (
-                     <div key={idx} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm relative pt-12">
+                     <div key={idx} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-none relative pt-12">
                         <div className="absolute top-0 right-8 -translate-y-1/2">
-                           <div className="w-10 h-10 rounded-full bg-[#FAF9F5] border border-gray-100 flex items-center justify-center text-orange-primary shadow-sm">
+                           <div className="w-10 h-10 rounded-full bg-[#FAF9F5] border border-gray-100 flex items-center justify-center text-orange-primary shadow-none">
                               <MessageSquare size={16} />
                            </div>
                         </div>

@@ -301,60 +301,81 @@ export function HomePage() {
     <div className="bg-[#EEF1F8] min-h-screen text-[#1A1D4E] antialiased pb-16 font-sans overflow-x-clip">
       
       {/* SECTION 2 — HERO BANNER */}
-      <section className="hero-section hero-container relative bg-gradient-to-br from-[#0B0D26] via-[#10133A] to-[#1F1746] text-white overflow-hidden py-24 px-6 shadow-inner-lg">
+      <section 
+        className="hero-section hero-container relative bg-gradient-to-br from-[#0B0D26] via-[#10133A] to-[#1F1746] text-white overflow-hidden py-4 px-6 shadow-inner-lg flex items-center justify-center"
+        style={{ height: '303px' }}
+      >
         {/* Luminous dynamic background accents */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(232,80,10,0.18)_0%,_transparent_55%)] pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#EEF1F8]/10 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#EEF1F8]/10 to-transparent pointer-events-none" />
         
         {/* Subtle grid pattern helper */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
 
-        <div className="hero-content max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center">
+        <div 
+          className="hero-content max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center justify-center w-full"
+        >
           
           {/* Tagline Badge */}
-          <div className="inline-flex items-center gap-2.5 px-4.5 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-[10.5px] tracking-widest text-[#E8500A] font-extrabold uppercase mb-8 shadow-glow hover:border-white/25 transition-all duration-300">
-            <span className="flex h-2 w-2 relative">
+          <div 
+            className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-[9px] tracking-widest text-[#E8500A] font-extrabold uppercase mb-2 shadow-glow hover:border-white/25 transition-all duration-300"
+            style={{ marginBottom: '6px', paddingLeft: '14px', paddingRight: '14px', paddingBottom: '3px', paddingTop: '3px' }}
+          >
+            <span className="flex h-1.5 w-1.5 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
             </span>
             <span className="font-space">Bangladesh's #1 Premium Brand Discovery Shield</span>
           </div>
 
           {/* Main Typography Header Section */}
-          <h1 className="font-space font-extrabold text-[#FFFFFF] text-5xl sm:text-6xl md:text-7xl leading-[1] tracking-tight mb-6 max-w-none">
+          <h1 
+            className="font-space font-extrabold text-[#FFFFFF] text-3xl sm:text-4xl md:text-5xl leading-none tracking-tight mb-2 max-w-none"
+            style={{ marginBottom: '2px', paddingBottom: '2px', paddingRight: '0px', paddingTop: '2px' }}
+          >
             buy <span className="text-orange-primary italic font-black">ORIGINAL</span>
           </h1>
 
           {/* Supporting Text */}
-          <p className="text-sm sm:text-base text-gray-300 max-w-2xl mx-auto font-medium mb-12 leading-relaxed opacity-95">
-            Weary of online counterfeiting and merchant fraud? Choosify.bd empowers your daily shopping with state-of-the-art independent brand verification systems in Bangladesh.
+          <p 
+            className="text-xs text-gray-300 max-w-2xl mx-auto font-medium mb-3 leading-relaxed opacity-95"
+            style={{ marginBottom: '4px', paddingBottom: '2px', paddingTop: '2px' }}
+          >
+            Weary of online counterfeiting and merchant fraud? Choosify.bd empowers your shopping with independent brand verification systems in Bangladesh.
           </p>
 
           {/* Glassmorphic Search Container */}
-          <form onSubmit={handleSearchSubmit} className="relative w-full max-w-3xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-full border border-white/10 shadow-[0_30px_60px_rgba(11,13,38,0.5)] focus-within:border-white/20 transition-all duration-300 mb-6">
+          <form 
+            onSubmit={handleSearchSubmit} 
+            className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-3"
+            style={{ width: '100%', maxWidth: '640px' }}
+          >
             <div className="flex items-center bg-white rounded-full">
-              <div className="pl-6 text-[#E8500A] shrink-0">
-                <Search className="w-5 h-5" />
+              <div className="pl-4 text-[#E8500A] shrink-0">
+                <Search className="w-4 h-4" />
               </div>
               <input 
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search authentic Fashion hubs, Smart Gadgets & verified outlets..." 
-                className="w-full h-14 bg-transparent outline-none pl-4 pr-32 text-navy text-base font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
               />
               <button 
                 type="submit"
-                className="absolute right-2 top-2 bottom-2 px-8 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-xs font-black tracking-widest uppercase flex items-center gap-2 shadow-lg hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
-                DISCOVER NOW
+                DISCOVER
               </button>
             </div>
           </form>
 
           {/* Quick Shortcuts / Suggested */}
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-400 font-semibold mb-12">
-            <span className="font-mono text-gray-500 uppercase tracking-wider text-[10px]">Hot Targets:</span>
+          <div 
+            className="flex flex-wrap items-center justify-center gap-2 text-[10px] text-gray-400 font-semibold mb-0"
+            style={{ paddingBottom: '2px', paddingTop: '2px' }}
+          >
+            <span className="font-mono text-gray-500 uppercase tracking-wider text-[9px]">Hot Targets:</span>
             {['Sailor', 'Aarong', 'Yellow', 'Apex', 'Bata'].map((term) => (
               <button
                 key={term}
@@ -364,28 +385,10 @@ export function HomePage() {
                   toast.success(`Scouting verified stores for: "${term}"`);
                   navigate(`/products?q=${encodeURIComponent(term)}`);
                 }}
-                className="px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-300 rounded-full border border-white/5 hover:border-white/10 transition-all cursor-pointer text-[11px]"
+                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-full border border-white/5 hover:border-white/10 transition-all cursor-pointer text-[10px]"
               >
                 #{term}
               </button>
-            ))}
-          </div>
-
-          {/* Majestic Metrics Deck */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-4xl border-t border-white/10 pt-10">
-            {[
-              { label: 'Verified Brands', val: '500+', desc: 'Strict Quality Shield' },
-              { label: 'Authentic Products', val: '14K+', desc: 'Direct Warranty Lines' },
-              { label: 'Decisive Matches', val: '3M+', desc: 'Anti-Scam Shopping' },
-              { label: 'Protection Rating', val: '99%', desc: 'Verified Outlets Status' },
-            ].map((stat, sidx) => (
-              <div key={sidx} className="flex flex-col items-center">
-                <span className="font-space text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-[#FF8C3A] leading-none tracking-tight">
-                  {stat.val}
-                </span>
-                <span className="font-space text-[10px] font-extrabold text-[#E8500A] uppercase tracking-widest mt-2">{stat.label}</span>
-                <span className="text-[9px] text-gray-500 font-mono mt-0.5">{stat.desc}</span>
-              </div>
             ))}
           </div>
 
@@ -402,26 +405,29 @@ export function HomePage() {
       </div>
 
       {/* SECTION 4 — THREE COLUMN GRID */}
-      <main className="max-w-[1700px] mx-auto px-6 py-10 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative">
+      <main className="max-w-[1700px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
         
         {/* LEFT STICKY SIDEBAR */}
-        <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-6 flex-shrink-0">
+        <aside 
+          className="hidden lg:flex flex-col gap-3 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-0 flex-shrink-0"
+          style={{ paddingLeft: '0px', paddingRight: '0px', paddingBottom: '0px' }}
+        >
           
           {/* USER PROFILE */}
-          <div className="flex flex-col gap-4 mb-2">
-            <h2 className="text-xl font-black italic tracking-wide text-left uppercase">
-              <span className="text-[#1A1D4E]">YOUR</span> <span className="text-[#E8500A]">PROFILE</span>
+          <div className="flex flex-col gap-3 mb-2">
+            <h2 className="text-base font-semibold text-[#1a1a2e] text-left">
+              YOUR <span className="text-[#E8500A]">PROFILE</span>
             </h2>
 
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {/* Profile Card */}
-              <div className="bg-white rounded-[20px] border border-gray-100 p-5 flex items-center gap-4.5 shadow-[0_8px_30px_rgba(26,29,78,0.02)]">
+              <div className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center gap-4.5 shadow-sm">
                 <img 
                   src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop" 
-                  className="w-14 h-14 rounded-full border border-gray-100 object-cover shrink-0 shadow-sm" 
+                  className="w-10 h-10 rounded-full border border-gray-100 object-cover shrink-0 shadow-sm" 
                   alt="Farhan Bin Rafiq" 
                 />
-                <h3 className="font-space font-black italic text-[#1A1D4E] uppercase tracking-tight text-[15px] leading-tight">
+                <h3 className="text-sm font-semibold text-[#1a1a2e]">
                   FARHAN BIN RAFIQ
                 </h3>
               </div>
@@ -429,17 +435,17 @@ export function HomePage() {
               {/* My Orders Card */}
               <Link 
                 to="/dashboard" 
-                className="bg-white rounded-[20px] border border-gray-100 p-4 px-5 flex items-center justify-between shadow-[0_8px_30px_rgba(26,29,78,0.02)] hover:border-[#E8500A]/25 hover:shadow-[0_12px_40px_rgba(26,29,78,0.05)] transition-all duration-300 group"
+                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
               >
-                <div className="flex items-center gap-4.5">
-                  <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
-                    <ShoppingCart className="w-5 h-5 text-[#E8500A] group-hover:scale-110 transition-transform" />
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
+                    <ShoppingCart className="w-5 h-5 text-[#E8500A]" />
                   </div>
-                  <span className="font-space font-black italic text-[#1A1D4E] uppercase tracking-wider text-xs">
+                  <span className="text-[11px] font-semibold text-[#1a1a2e] uppercase">
                     MY ORDERS
                   </span>
                 </div>
-                <span className="bg-[#EEF1F8] text-[#1A1D4E]/80 font-mono text-[10px] font-bold px-3 py-1 rounded-full shrink-0 shadow-sm">
+                <span className="text-[11px] font-medium text-[#8a9bb0] shrink-0">
                   35
                 </span>
               </Link>
@@ -447,17 +453,17 @@ export function HomePage() {
               {/* Messages Card */}
               <Link 
                 to="/messages" 
-                className="bg-white rounded-[20px] border border-gray-100 p-4 px-5 flex items-center justify-between shadow-[0_8px_30px_rgba(26,29,78,0.02)] hover:border-[#E8500A]/25 hover:shadow-[0_12px_40px_rgba(26,29,78,0.05)] transition-all duration-300 group"
+                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
               >
-                <div className="flex items-center gap-4.5">
-                  <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
-                    <MessageSquare className="w-5 h-5 text-[#E8500A] group-hover:scale-110 transition-transform" />
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
+                    <MessageSquare className="w-5 h-5 text-[#E8500A]" />
                   </div>
-                  <span className="font-space font-black italic text-[#1A1D4E] uppercase tracking-wider text-xs">
+                  <span className="text-[11px] font-semibold text-[#1a1a2e] uppercase">
                     MESSAGES
                   </span>
                 </div>
-                <span className="bg-[#EEF1F8] text-[#1A1D4E]/80 font-mono text-[10px] font-bold px-3 py-1 rounded-full shrink-0 shadow-sm">
+                <span className="text-[11px] font-medium text-[#8a9bb0] shrink-0">
                   20
                 </span>
               </Link>
@@ -465,17 +471,17 @@ export function HomePage() {
               {/* Saved Items Card */}
               <Link 
                 to="/dashboard" 
-                className="bg-white rounded-[20px] border border-gray-100 p-4 px-5 flex items-center justify-between shadow-[0_8px_30px_rgba(26,29,78,0.02)] hover:border-[#E8500A]/25 hover:shadow-[0_12px_40px_rgba(26,29,78,0.05)] transition-all duration-300 group"
+                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
               >
-                <div className="flex items-center gap-4.5">
-                  <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
-                    <Bookmark className="w-5 h-5 text-[#E8500A] group-hover:scale-110 transition-transform" />
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
+                    <Bookmark className="w-5 h-5 text-[#E8500A]" />
                   </div>
-                  <span className="font-space font-black italic text-[#1A1D4E] uppercase tracking-wider text-xs">
+                  <span className="text-[11px] font-semibold text-[#1a1a2e] uppercase">
                     SAVED ITEMS
                   </span>
                 </div>
-                <span className="bg-[#EEF1F8] text-[#1A1D4E]/80 font-mono text-[10px] font-bold px-3 py-1 rounded-full shrink-0 shadow-sm">
+                <span className="text-[11px] font-medium text-[#8a9bb0] shrink-0">
                   550
                 </span>
               </Link>
@@ -483,17 +489,17 @@ export function HomePage() {
               {/* Recently Viewed Card */}
               <Link 
                 to="/dashboard" 
-                className="bg-white rounded-[20px] border border-gray-100 p-4 px-5 flex items-center justify-between shadow-[0_8px_30px_rgba(26,29,78,0.02)] hover:border-[#E8500A]/25 hover:shadow-[0_12px_40px_rgba(26,29,78,0.05)] transition-all duration-300 group"
+                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
               >
-                <div className="flex items-center gap-4.5">
-                  <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
-                    <Clock className="w-5 h-5 text-[#E8500A] group-hover:scale-110 transition-transform" />
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
+                    <Clock className="w-5 h-5 text-[#E8500A]" />
                   </div>
-                  <span className="font-space font-black italic text-[#1A1D4E] uppercase tracking-wider text-xs">
+                  <span className="text-[11px] font-semibold text-[#1a1a2e] uppercase">
                     RECENTLY VIEWED
                   </span>
                 </div>
-                <span className="bg-[#EEF1F8] text-[#1A1D4E]/80 font-mono text-[10px] font-bold px-3 py-1 rounded-full shrink-0 shadow-sm">
+                <span className="text-[11px] font-medium text-[#8a9bb0] shrink-0">
                   15
                 </span>
               </Link>
@@ -501,17 +507,17 @@ export function HomePage() {
               {/* My Cashbook Card */}
               <Link 
                 to="/cashbook" 
-                className="bg-white rounded-[20px] border border-gray-100 p-4 px-5 flex items-center justify-between shadow-[0_8px_30px_rgba(26,29,78,0.02)] hover:border-[#E8500A]/25 hover:shadow-[0_12px_40px_rgba(26,29,78,0.05)] transition-all duration-300 group"
+                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
               >
-                <div className="flex items-center gap-4.5">
-                  <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
-                    <Book className="w-5 h-5 text-[#E8500A] group-hover:scale-110 transition-transform" />
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
+                    <Book className="w-5 h-5 text-[#E8500A]" />
                   </div>
-                  <span className="font-space font-black italic text-[#1A1D4E] uppercase tracking-wider text-xs">
+                  <span className="text-[11px] font-semibold text-[#1a1a2e] uppercase">
                     MY CASHBOOK
                   </span>
                 </div>
-                <span className="bg-[#FFF0E8] text-[#E8500A] font-mono text-[10px] font-bold px-3 py-1 rounded-full shrink-0 shadow-sm">
+                <span className="text-[11px] font-semibold text-[#E8500A] shrink-0">
                   NEW
                 </span>
               </Link>
@@ -519,9 +525,9 @@ export function HomePage() {
           </div>
 
           {/* QUICK ACCESS */}
-          <div className="bg-white rounded-[24px] border border-gray-100/95 p-5.5 shadow-[0_10px_30px_rgba(26,29,78,0.02)]">
-            <h3 className="text-[9.5px] font-black tracking-widest text-[#1A1D4E]/30 uppercase mb-4.5 italic text-left">QUICK HIGHWAYS</h3>
-            <div className="space-y-1.5 font-bold text-xs text-[#1A1D4E] text-left">
+          <div className="bg-white rounded-xl border border-[#e8edf2] p-4 shadow-sm">
+            <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase mb-3 text-left">QUICK HIGHWAYS</h3>
+            <div className="space-y-1 text-xs text-[#1A1D4E] text-left">
               {[
                 { to: '/products', icon: <Award className="w-4 h-4 text-[#E8500A]" />, label: 'ALL PRODUCTS' },
                 { to: '/brands', icon: <Trophy className="w-4 h-4 text-[#E8500A]" />, label: 'ALL BRANDS' },
@@ -532,35 +538,35 @@ export function HomePage() {
                 <Link 
                   key={lidx} 
                   to={link.to} 
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#FFF0E8] hover:text-[#CF4400] border border-transparent hover:border-[#E8500A]/10 transition-all duration-200"
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#FFF0E8] hover:text-[#CF4400] border border-transparent hover:border-[#E8500A]/10 transition-all duration-200"
                 >
                   {link.icon}
-                  <span className="font-space font-extrabold tracking-wider">{link.label}</span>
+                  <span className="font-medium text-[12px]">{link.label}</span>
                 </Link>
               ))}
             </div>
           </div>
 
           {/* BRANDS FOLLOWED */}
-          <div className="bg-white rounded-[24px] border border-gray-100 p-5.5 shadow-[0_10px_30px_rgba(26,29,78,0.02)]">
-            <div className="flex items-center justify-between mb-4.5">
-              <h3 className="text-[9.5px] font-black tracking-widest text-[#1A1D4E]/30 uppercase italic text-left">Brands You Follow</h3>
-              <span className="text-[8.5px] font-black text-[#E8500A] uppercase italic tracking-wider bg-[#FFF0E8] px-2.5 py-1 rounded-full leading-none shadow-sm">{initialFollowedBrands.length} Active</span>
+          <div className="bg-white rounded-xl border border-[#e8edf2] p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[11px] font-semibold text-[#1a1a2e] uppercase text-left">Brands You Follow</h3>
+              <span className="text-[10px] font-medium text-[#E8500A] uppercase tracking-wider bg-[#FFF0E8] px-2.5 py-0.5 rounded-full leading-none">{initialFollowedBrands.length} Active</span>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               {visibleFollowedBrands.map((b, i) => (
                 <div 
                   key={i} 
                   onClick={() => navigate(`/brands/${b.brandId}`)}
-                  className="flex items-center gap-3.5 p-2 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all duration-300 cursor-pointer text-left"
+                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all duration-300 cursor-pointer text-left"
                 >
-                  <div className={`w-9 h-9 rounded-full ${b.bg} text-white font-black flex items-center justify-center text-xs shadow-md border-2 border-white outline outline-1 outline-gray-200 shrink-0`}>
+                  <div className={`w-9 h-9 rounded-full ${b.bg} text-white font-black flex items-center justify-center text-xs shadow border-2 border-white outline outline-1 outline-gray-200 shrink-0`}>
                     {b.avatar}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-[#1A1D4E] truncate leading-tight uppercase italic tracking-tight">{b.name}</p>
-                    <p className="text-[9.5px] text-gray-400 font-bold truncate mt-0.5">{b.desc}</p>
+                    <p className="text-[12px] font-medium text-[#1A1D4E] truncate leading-tight uppercase">{b.name}</p>
+                    <p className="text-[11px] text-gray-400 font-normal truncate mt-0.5">{b.desc}</p>
                   </div>
                 </div>
               ))}
@@ -568,7 +574,7 @@ export function HomePage() {
 
             <button 
               onClick={() => setShowAllFollowed(!showAllFollowed)} 
-              className="w-full text-center text-[10px] font-black text-[#E8500A] hover:text-[#CF4400] uppercase tracking-widest mt-5.5 flex items-center justify-center gap-1.5 leading-none hover:scale-[1.02] transition-transform"
+              className="w-full text-center text-[10px] font-semibold text-[#E8500A] hover:text-[#CF4400] uppercase tracking-widest mt-3 flex items-center justify-center gap-1.5 leading-none transition-transform"
             >
               {showAllFollowed ? 'Collapse List' : 'Expand All'} 
               <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${showAllFollowed ? 'rotate-180' : ''}`} />
@@ -578,10 +584,16 @@ export function HomePage() {
         </aside>
 
         {/* CENTER FEED */}
-        <section className="flex flex-col gap-8 w-full min-w-0">
+        <section 
+          className="flex flex-col gap-4 w-full min-w-0"
+          style={{ paddingTop: '0px', paddingLeft: '0px', paddingRight: '0px' }}
+        >
           
           {/* Categories Tab Bar */}
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-100/80 p-3 shadow-[0_8px_30px_rgba(26,29,78,0.02)] select-none relative z-40 sticky top-20">
+          <div 
+            className="bg-white/80 backdrop-blur-md rounded-2xl border border-[#e8edf2] p-2.5 shadow-sm select-none relative z-40 sticky top-20"
+            style={{ paddingRight: '10px' }}
+          >
             <div className="flex items-center gap-3 overflow-x-auto no-scrollbar scroll-smooth">
               {categoryTabs.map((tab) => (
                 <button
@@ -590,9 +602,9 @@ export function HomePage() {
                     setActiveTab(tab.id);
                     toast.success(`Loading verification grid for: ${tab.id}`);
                   }}
-                  className={`flex items-center gap-2 px-5 py-3 rounded-full text-[10.5px] font-black tracking-widest whitespace-nowrap uppercase leading-none border transition-all duration-300 ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-medium whitespace-nowrap uppercase leading-none border transition-all duration-300 ${
                     activeTab === tab.id 
-                      ? 'bg-gradient-to-r from-[#FF5B00] to-[#E8500A] border-[#E8500A] text-white shadow-lg shadow-orange-primary/10' 
+                      ? 'bg-[#E8500A] border-[#E8500A] text-white' 
                       : 'bg-gray-50/50 border-gray-100 text-[#1A1D4E]/80 hover:bg-[#EEF1F8]/80 hover:text-[#1A1D4E]'
                   }`}
                 >
@@ -606,19 +618,19 @@ export function HomePage() {
           {activeTab === 'FEED' ? (
             <>
               {/* FEED SECTION A — TRENDING BRANDS */}
-              <div id="section-trending-brands" className="bg-white rounded-3xl border border-gray-100/90 p-6 md:p-8 shadow-[0_15px_40px_rgba(26,29,78,0.02)]">
-                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-5 mb-6 gap-4">
+              <div id="section-trending-brands" className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm">
+                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
                   <div className="text-left">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="font-space text-xl sm:text-2xl font-black uppercase tracking-tight text-[#1A1D4E]">Trending</span>
-                      <span className="font-space text-xl sm:text-2xl font-black uppercase tracking-tight text-[#E8500A] italic">Brands</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-base font-semibold text-[#1a1a2e]">Trending</span>
+                      <span className="text-base font-semibold text-[#E8500A]">Brands</span>
                     </div>
-                    <p className="text-xs text-gray-400 font-semibold pl-3 border-l-2 border-[#E8500A] leading-tight">
+                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
                       Connect with thousands of authentic shopper tests and verify brand credentials today.
                     </p>
                   </div>
-                  <Link to="/brands" className="text-[10px] font-black text-[#E8500A] hover:text-[#CF4400] uppercase tracking-widest shrink-0 flex items-center gap-1.5 leading-none bg-[#FFF0E8] px-4.5 py-2.5 rounded-full border border-[#E8500A]/10 hover:border-[#E8500A]/30 hover:scale-105 transition-all">
-                    View All Brands <Search className="w-3.5 h-3.5" />
+                  <Link to="/brands" className="text-[12px] font-medium text-[#FF5B00] shrink-0 hover:underline">
+                    View All Brands
                   </Link>
                 </div>
 
@@ -754,24 +766,24 @@ export function HomePage() {
               </div>
 
               {/* FEED SECTION B — POPULAR PRODUCTS */}
-              <div id="section-popular-products" className="bg-white rounded-3xl border border-gray-100/90 p-6 md:p-8 shadow-[0_15px_40px_rgba(26,29,78,0.02)]">
-                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-5 mb-6 gap-4">
+              <div id="section-popular-products" className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm">
+                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
                   <div className="text-left">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="font-space text-xl sm:text-2xl font-black uppercase tracking-tight text-[#1A1D4E]">Popular</span>
-                      <span className="font-space text-xl sm:text-2xl font-black uppercase tracking-tight text-[#E8500A] italic">Products</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-base font-semibold text-[#1a1a2e]">Popular</span>
+                      <span className="text-base font-semibold text-[#E8500A]">Products</span>
                     </div>
-                    <p className="text-xs text-gray-400 font-semibold pl-3 border-l-2 border-[#E8500A] leading-tight">
+                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
                       Handpicked, verified, and community tested luxury catalog direct from approved vendors.
                     </p>
                   </div>
-                  <Link to="/products" className="text-[10px] font-black text-[#E8500A] hover:text-[#CF4400] uppercase tracking-widest shrink-0 flex items-center gap-1.5 leading-none bg-[#FFF0E8] px-4.5 py-2.5 rounded-full border border-[#E8500A]/10 hover:border-[#E8500A]/30 hover:scale-105 transition-all">
-                    BROWSE ALL <Search className="w-3.5 h-3.5" />
+                  <Link to="/products" className="text-[12px] font-medium text-[#FF5B00] shrink-0 hover:underline">
+                    BROWSE ALL
                   </Link>
                 </div>
 
                 {/* Popular Product list in visual cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {rightProductsList.slice(0, 4).map((p) => (
                     <ProductCard key={p.id} product={p} variant="compact" />
                   ))}
@@ -779,68 +791,64 @@ export function HomePage() {
               </div>
 
               {/* FEED SECTION C — SPOTLIGHT BRAND (Sponsored) */}
-              <div className="flex flex-col md:flex-row md:items-end justify-between mb-5 mt-12 gap-3">
+              <div className="flex flex-col md:flex-row md:items-end justify-between mb-4 mt-8 gap-3">
                 <div className="text-left">
-                  <h2 className="font-space text-3xl font-black italic tracking-tight uppercase leading-none">
-                    <span className="text-[#E8500A]">SPOTLIGHT</span> <span className="text-[#1A1D4E]">BRAND</span>
+                  <h2 className="text-base font-semibold text-[#1a1a2e]">
+                    SPOTLIGHT <span className="text-[#E8500A]">BRAND</span>
                   </h2>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="shrink-0 w-1 h-[14px] bg-[#E8500A] rounded-full inline-block" />
-                    <p className="text-[11px] text-[#1A1D4E] font-bold tracking-wide leading-none uppercase">
-                      Connect with millions of shoppers and boost your brand visibility today.
-                    </p>
-                  </div>
+                  <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
+                    Connect with millions of shoppers and boost your brand visibility today.
+                  </p>
                 </div>
                 <div className="flex shrink-0">
-                  <span className="border border-[#E8500A]/40 text-[#E8500A] text-[9.5px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full leading-none font-mono">
+                  <span className="border border-[#E8500A]/30 text-[#E8500A] text-[9.5px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded inline-block leading-none font-mono">
                     SPONSORED AD
                   </span>
                 </div>
               </div>
 
-              <div id="section-spotlight-brand" className="relative overflow-hidden rounded-[20px] bg-[#2E171C] text-white p-6 md:p-8 shadow-2xl leading-relaxed mb-12">
+              <div id="section-spotlight-brand" className="relative overflow-hidden rounded-2xl bg-[#2E171C] text-white p-5 border border-[#3E1FA2]/10 shadow-sm leading-relaxed mb-6">
                 {/* Spotlight Main Header */}
-                <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-7 items-center pb-6 border-b border-white/10 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-5 items-center pb-5 border-b border-white/10 relative z-10">
                   
                   {/* Left Logo and View Brand link */}
-                  <div className="flex flex-col items-center gap-2.5 shrink-0">
-                    <div className="w-[115px] h-[115px] bg-[#1a1c3a] border border-[#2d2f5a] rounded-xl flex flex-col items-center justify-center p-3 relative group transition-transform duration-300 hover:scale-[1.03] shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
-                      <span className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-[#E8500A] text-white rounded-full flex items-center justify-center border-2 border-[#1a1c3a] shadow-lg">
-                        <Check className="w-3.5 h-3.5 font-black stroke-[3]" />
+                  <div className="flex flex-col items-center gap-2 shrink-0">
+                    <div className="w-[100px] h-[100px] bg-[#1a1c3a] border border-[#2d2f5a] rounded-xl flex flex-col items-center justify-center p-3 relative group transition-transform duration-300 hover:scale-[1.02] shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
+                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#E8500A] text-white rounded-full flex items-center justify-center border-2 border-[#1a1c3a] shadow">
+                        <Check className="w-3 h-3 font-black stroke-[3]" />
                       </span>
-                      <div className="text-center font-space font-black text-white text-2xl uppercase leading-none italic tracking-tighter">
+                      <div className="text-center font-space font-black text-white text-xl uppercase leading-none italic tracking-tighter">
                         sailor
-                        <div className="text-[7.5px] font-sans tracking-[0.25em] mt-1.5 uppercase font-medium text-gray-400">BY EPLLYION</div>
+                        <div className="text-[7px] font-sans tracking-[0.2em] mt-1 uppercase font-medium text-gray-400">BY EPLLYION</div>
                       </div>
                     </div>
-                    <Link to="/brands/3" className="text-[10px] font-bold text-white/95 hover:text-[#E8500A] tracking-wider uppercase underline transition-colors">
-                      VIEW BRAND PROFILE
+                    <Link to="/brands/3" className="text-[10px] font-medium text-white/90 hover:text-[#E8500A] tracking-wider uppercase underline transition-colors">
+                      VIEW PROFILE
                     </Link>
                   </div>
 
                   {/* Middle brand descriptive block */}
-                  <div className="flex flex-col gap-2.5 text-left md:pl-2">
+                  <div className="flex flex-col gap-2 text-left md:pl-2">
                     <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="font-space font-black text-4xl text-white uppercase italic tracking-tight leading-none">
+                      <h3 className="text-xl font-bold text-white uppercase italic">
                         Sailor
                       </h3>
-                      <span className="bg-[#00D03C] text-white text-[9.5px] font-black px-3 py-1 rounded-full uppercase tracking-wider leading-none font-mono">
+                      <span className="bg-[#00D03C] text-white text-[9.5px] font-semibold px-2 py-0.5 rounded uppercase tracking-wider leading-none font-mono">
                         VERIFIED BRAND
                       </span>
                     </div>
                     <div>
-                      <p className="text-[10.5px] text-white/80 font-black uppercase tracking-widest leading-none font-sans">
+                      <p className="text-[10px] text-white/70 font-medium tracking-wider uppercase leading-none">
                         FASHION & CLOTHING
                       </p>
-                      <div className="h-[1px] bg-white/20 w-36 mt-1.5" />
                     </div>
                     
-                    <div className="flex flex-col gap-2 mt-1">
-                      <span className="text-[11px] text-white font-extrabold flex items-center gap-2 tracking-wide uppercase font-mono animate-pulse">
+                    <div className="flex flex-col gap-1.5 mt-1">
+                      <span className="text-[11px] text-white font-normal flex items-center gap-2 tracking-wide uppercase font-mono">
                         <span className="text-rose-500 text-sm">❤️</span> 50,000 SHOPPERS LOVES THE BRANDS
                       </span>
-                      <span className="text-[11px] text-white font-extrabold flex items-center gap-2 tracking-wide uppercase font-mono">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-[18px] h-[18px] text-[#00D03C]">
+                      <span className="text-[11px] text-white font-normal flex items-center gap-2 tracking-wide uppercase font-mono">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-[14px] h-[14px] text-[#00D03C]">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.94" />
                         </svg>
                         SCORE: 92/100
@@ -849,25 +857,25 @@ export function HomePage() {
                   </div>
 
                   {/* Right Stats Block */}
-                  <div className="grid grid-cols-3 gap-5 md:gap-7 bg-white/5 border border-white/10 rounded-2xl p-4.5 mt-2 md:mt-0">
+                  <div className="grid grid-cols-3 gap-4 bg-white/5 border border-white/10 rounded-xl p-3.5 mt-2 md:mt-0">
                     <div className="flex flex-col text-left">
-                      <span className="text-[#00D03C] text-[10.5px] font-black tracking-widest uppercase font-mono leading-none">BEST FOR</span>
-                      <span className="text-white text-[11.5px] font-black uppercase tracking-wider mt-1.5 leading-none">HANDICRAFTS</span>
+                      <span className="text-[#00D03C] text-[10px] font-semibold tracking-wider uppercase font-mono leading-none">BEST FOR</span>
+                      <span className="text-white text-[11px] font-semibold uppercase tracking-wider mt-1 leading-none">HANDICRAFTS</span>
                     </div>
-                    <div className="flex flex-col text-left border-l border-white/10 pl-5">
-                      <span className="text-[#00D03C] text-[10.5px] font-black tracking-widest uppercase font-mono leading-none">BDT 500</span>
-                      <span className="text-white text-[11.5px] font-black uppercase tracking-wider mt-1.5 leading-none font-sans">PRICE RANGE</span>
+                    <div className="flex flex-col text-left border-l border-white/10 pl-4">
+                      <span className="text-[#00D03C] text-[10px] font-semibold tracking-wider uppercase font-mono leading-none">BDT 500</span>
+                      <span className="text-white text-[11px] font-semibold uppercase tracking-wider mt-1 leading-none">PRICE RANGE</span>
                     </div>
-                    <div className="flex flex-col text-[#00D03C] text-left border-l border-white/10 pl-5">
-                      <span className="text-[#00D03C] text-[10.5px] font-black tracking-widest uppercase font-mono leading-none">95%</span>
-                      <span className="text-white text-[11.5px] font-black uppercase tracking-wider mt-1.5 leading-none font-sans">RECOMMENDED</span>
+                    <div className="flex flex-col text-[#00D03C] text-left border-l border-white/10 pl-4">
+                      <span className="text-[#00D03C] text-[10.5px] font-black tracking-wider uppercase font-mono leading-none">95%</span>
+                      <span className="text-white text-[11px] font-semibold uppercase tracking-wider mt-1 leading-none">RECOMMENDED</span>
                     </div>
                   </div>
 
                 </div>
 
                 {/* Sub-list of 4 spotlight products in pristine mockup cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4.5 pt-6 relative z-10 text-[#1A1D4E]">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-5 relative z-10 text-[#1a1a2e]">
                   {[...sailorProductList, ...rightProductsList].slice(0, 4).map((product, idx) => {
                     const mockImages = [
                       "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop",
@@ -885,23 +893,23 @@ export function HomePage() {
                           handleSpotlightProductReact(pKey, 'views');
                           navigate(`/products/${product.id}`);
                         }}
-                        className="bg-white border border-gray-100 hover:border-[#E8500A]/30 rounded-2xl p-4 shadow-md hover:shadow-xl hover:scale-[1.03] transition-all duration-300 cursor-pointer flex flex-col gap-3 group"
+                        className="bg-white border border-[#e8edf2] hover:border-[#E8500A]/30 rounded-xl p-3 shadow-sm hover:scale-[1.01] transition-all duration-300 cursor-pointer flex flex-col gap-2.5 group"
                       >
-                        <div className="w-full aspect-square bg-[#ECEFF1] rounded-xl overflow-hidden relative border border-gray-100 shrink-0">
+                        <div className="w-full aspect-square bg-[#ECEFF1] rounded-lg overflow-hidden relative border border-gray-100 shrink-0">
                           <img 
                             src={mockImages[idx]} 
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                             alt={product.title || "Product"} 
                           />
                         </div>
-                        <div className="flex flex-col gap-2 flex-1">
-                          <h5 className="font-sans font-bold text-[#1A1D4E] text-[11px] leading-snug text-left line-clamp-3">
+                        <div className="flex flex-col gap-1.5 flex-1">
+                          <h5 className="font-sans font-medium text-[#1a1a2e] text-[11px] leading-snug text-left line-clamp-3">
                             QCY PB10C 10000mAh 38W PD Fast Charging Mini Power Bank.
                           </h5>
                           
                           {/* Mini Reaction Toolbar for all product cards */}
-                          <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-auto select-none">
-                            <div className="flex items-center gap-2.5 text-[10px] font-mono font-bold text-gray-450">
+                          <div className="flex items-center justify-between border-t border-gray-100 pt-2 mt-auto select-none">
+                            <div className="flex items-center gap-2 text-[10px] font-mono text-gray-400">
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -909,10 +917,10 @@ export function HomePage() {
                                 }}
                                 className={cn(
                                   "flex items-center gap-0.5 transition-colors",
-                                  pState.liked ? "text-rose-500 font-black" : "hover:text-rose-500"
+                                  pState.liked ? "text-rose-500 font-semibold" : "hover:text-rose-500"
                                 )}
                               >
-                                <Heart className={cn("w-3.5 h-3.5", pState.liked ? "fill-current text-rose-500" : "")} />
+                                <Heart className={cn("w-3 h-3", pState.liked ? "fill-current text-rose-500" : "")} />
                                 <span>{pState.liked ? "12.1k" : "12k"}</span>
                               </button>
                               
@@ -923,7 +931,7 @@ export function HomePage() {
                                 }}
                                 className="flex items-center gap-0.5 hover:text-[#E8500A]"
                               >
-                                <Eye className="w-3.5 h-3.5" />
+                                <Eye className="w-3 h-3" />
                                 <span>{(pState.views / 1000).toFixed(1)}k</span>
                               </button>
 
@@ -934,7 +942,7 @@ export function HomePage() {
                                 }}
                                 className="flex items-center gap-0.5 hover:text-[#E8500A]"
                               >
-                                <Share2 className="w-3.5 h-3.5" />
+                                <Share2 className="w-3 h-3" />
                                 <span>{pState.shares}</span>
                               </button>
                             </div>
@@ -946,18 +954,18 @@ export function HomePage() {
                 </div>
 
                 {/* Footer Reactions Toolbar & Browse Brand Link */}
-                <div className="flex items-center justify-between border-t border-white/10 pt-5 mt-6 pb-2">
-                  <div className="flex items-center gap-6 text-[11px] font-black text-gray-300 uppercase font-mono select-none">
+                <div className="flex items-center justify-between border-t border-white/10 pt-4 mt-5 pb-1">
+                  <div className="flex items-center gap-5 text-[11px] text-gray-300 font-mono select-none">
                     
                     {/* Main Container React Button */}
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleSpotlightAction('likes'); }}
                       className={cn(
                         "flex items-center gap-1.5 transition-all text-[11px] cursor-pointer transform active:scale-95",
-                        spotlightStates.liked ? "text-rose-500 font-extrabold" : "hover:text-rose-400 text-gray-300"
+                        spotlightStates.liked ? "text-rose-500 font-semibold" : "hover:text-rose-450 text-gray-300"
                       )}
                     >
-                      <Heart className={cn("w-4.5 h-4.5", spotlightStates.liked ? "fill-current text-rose-500 scale-110" : "")} />
+                      <Heart className={cn("w-4 h-4", spotlightStates.liked ? "fill-current text-rose-500 scale-105" : "")} />
                       <span>{spotlightStates.liked ? "12.1k" : "12k"}</span>
                     </button>
 
@@ -966,7 +974,7 @@ export function HomePage() {
                       onClick={(e) => { e.stopPropagation(); handleSpotlightAction('views'); }}
                       className="flex items-center gap-1.5 hover:text-[#E8500A] text-gray-300 transition-colors cursor-pointer"
                     >
-                      <Eye className="w-4.5 h-4.5" />
+                      <Eye className="w-4 h-4" />
                       <span>{(spotlightStates.views / 1000).toFixed(1)}k</span>
                     </button>
 
@@ -975,14 +983,14 @@ export function HomePage() {
                       onClick={(e) => { e.stopPropagation(); handleSpotlightAction('shares'); }}
                       className="flex items-center gap-1.5 hover:text-[#E8500A] text-gray-300 transition-colors cursor-pointer"
                     >
-                      <Share2 className="w-4.5 h-4.5" />
+                      <Share2 className="w-4 h-4" />
                       <span>{spotlightStates.shares}</span>
                     </button>
                   </div>
 
                   <Link 
                     to="/brands/3" 
-                    className="text-[11.5px] font-black text-white hover:text-[#E8500A] uppercase tracking-wider italic flex items-center gap-1 transition-colors font-sans"
+                    className="text-[11px] font-medium text-white hover:text-[#E8500A] uppercase tracking-wider flex items-center gap-1 transition-colors"
                   >
                     BROWSE ALL FROM THIS BRAND
                   </Link>
@@ -990,23 +998,20 @@ export function HomePage() {
               </div>
 
               {/* FEED SECTION E — FEATURED RECOMMENDATIONS */}
-              <div id="section-recommendations" className="bg-white rounded-[32px] border border-gray-100 p-6 md:p-10 shadow-[0_15px_40px_rgba(26,29,78,0.02)]">
+              <div id="section-recommendations" className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm">
                 
                 {/* Section Header */}
-                <div className="text-center mb-10 flex flex-col items-center">
-                  <h2 className="font-space text-3xl font-black italic tracking-tight text-center uppercase leading-none">
-                    <span className="text-[#1A1D4E]">FEATURED</span> <span className="text-[#E8500A]">RECOMMENDATIONS</span>
+                <div className="text-left mb-6">
+                  <h2 className="text-base font-semibold text-[#1a1a2e]">
+                    FEATURED <span className="text-[#E8500A]">RECOMMENDATIONS</span>
                   </h2>
-                  <div className="flex items-center gap-2.5 mt-2.5 justify-center max-w-[620px]">
-                    <span className="shrink-0 w-1 h-5 bg-[#E8500A] rounded-full inline-block" />
-                    <p className="text-xs text-[#1A1D4E]/90 font-bold tracking-wide text-left uppercase">
-                      Connect with millions of shoppers and boost your brand visibility today.
-                    </p>
-                  </div>
+                  <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
+                    Connect with millions of shoppers and boost your brand visibility today.
+                  </p>
                 </div>
 
                 {/* Main Featured Buying Guide banner blog layout */}
-                <div className="border border-gray-100 rounded-[28px] overflow-hidden shadow-md hover:shadow-xl hover:border-gray-200/80 transition-all duration-300 mb-9 bg-white flex flex-col group">
+                <div className="border border-[#e8edf2] rounded-xl overflow-hidden shadow-sm hover:border-gray-200/80 transition-all duration-300 mb-6 bg-white flex flex-col group">
                   <div 
                     onClick={() => {
                       handleRecView('featured');
@@ -1016,86 +1021,86 @@ export function HomePage() {
                   >
                     <img 
                       src="https://images.unsplash.com/photo-1531538606174-0f90ff5dce83?w=1200&h=675&fit=crop" 
-                      className="w-full h-full object-cover opacity-85 group-hover:scale-[1.03] transition-transform duration-700" 
+                      className="w-full h-full object-cover opacity-85 group-hover:scale-[1.02] transition-transform duration-700" 
                       alt="Featured recommendation" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/25 pointer-events-none" />
                     
                     {/* Top-Left Featured Badge */}
-                    <span className="absolute top-5 left-5 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#E8500A] text-white text-[9.5px] font-black uppercase tracking-wider rounded-lg shadow-md font-mono">
+                    <span className="absolute top-4 left-4 inline-flex items-center gap-1 px-2 py-1 bg-[#E8500A] text-white text-[9px] font-semibold uppercase tracking-wider rounded shadow pointer-events-none">
                       ★ FEATURED
                     </span>
 
                     {/* Top-Right YouTube Badge */}
-                    <div className="absolute top-5 right-5 flex flex-col items-center">
-                      <div className="w-9 h-9 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-[#E8500A] transition-colors shadow-md">
-                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                    <div className="absolute top-4 right-4 flex flex-col items-center">
+                      <div className="w-8 h-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-[#E8500A] transition-colors shadow">
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                           <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.516 0-9.387.507A3.003 3.003 0 0 0 .503 6.163C0 8.044 0 12 0 12s0 3.956.503 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.507 9.387.507 9.387.507s7.517 0 9.387-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.956 24 12 24 12s0-3.956-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                         </svg>
                       </div>
-                      <span className="text-[8px] font-bold text-white tracking-widest uppercase mt-1 drop-shadow-sm font-mono leading-none">Youtube</span>
+                      <span className="text-[7.5px] font-medium text-white tracking-wider uppercase mt-0.5">Youtube</span>
                     </div>
 
                     {/* Large Red Circular Play Button Center Override */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-16 h-16 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-2xl scale-100 group-hover:scale-110 transition-transform duration-300 border border-white/10">
-                        <Play className="w-7 h-7 fill-current ml-1 text-white" />
+                      <div className="w-14 h-14 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow scale-100 group-hover:scale-105 transition-transform duration-300 border border-white/10">
+                        <Play className="w-6 h-6 fill-current ml-1 text-white" />
                       </div>
                     </div>
 
                     {/* Lower Image Info text overlays */}
-                    <div className="absolute bottom-5 left-5 pr-24 text-left pointer-events-none">
-                      <h3 className="font-space font-black text-white text-xl uppercase tracking-tight leading-tight mb-2 pr-12">
+                    <div className="absolute bottom-4 left-4 pr-24 text-left pointer-events-none">
+                      <h3 className="text-lg font-bold text-white uppercase tracking-tight leading-tight mb-1">
                         TOP 10 SMARTPHONES TO BUY IN 2026
                       </h3>
-                      <p className="text-[10px] text-white/80 font-semibold line-clamp-1 italic max-w-2xl pr-8">
-                        Top 10 Smartphones to Buy in 2026. Find the best phone deals Top 10 Smartphones to Buy in 2026. Find the best phone dealsTop 10 Smartphones to Buy in 2026. Find the best phone deals................
+                      <p className="text-[10px] text-white/70 font-normal line-clamp-1 italic max-w-2xl">
+                        Top 10 Smartphones to Buy in 2026. Find the best phone deals...
                       </p>
                     </div>
 
                     {/* Length Ticker pill of video element */}
-                    <span className="absolute bottom-5 right-5 bg-black/75 backdrop-blur-md text-white text-[9px] font-mono font-black tracking-widest px-2.5 py-1 rounded-md border border-white/10 shadow-lg">
+                    <span className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md text-white text-[9px] font-mono px-2 py-0.5 rounded">
                       8:10
                     </span>
                   </div>
 
                   {/* Featured Card lower body block */}
-                  <div className="p-6 md:p-8 text-left bg-white">
+                  <div className="p-5 text-left bg-white">
                     <h4 
                       onClick={() => {
                         handleRecView('featured');
                         navigate(`/guides/${featuredBlog.id}`);
                       }}
-                      className="font-space font-black text-xl lg:text-2xl uppercase text-[#1A1D4E] leading-snug hover:text-[#E8500A] transition-colors cursor-pointer mb-2"
+                      className="text-base font-semibold uppercase text-[#1a1a2e] leading-snug hover:text-[#E8500A] transition-colors cursor-pointer mb-2"
                     >
                       TOP 10 SMARTPHONES TO BUY IN 2026
                     </h4>
-                    <p className="text-xs text-[#6B7280] leading-relaxed mb-6 font-semibold max-w-4xl">
+                    <p className="text-xs text-[#6B7280] leading-relaxed mb-4">
                       Top 10 Smartphones to Buy in 2026. Find the best phone deals. Complete shopping guidelines containing direct warranty verifications and merchant scoring formulas based on real user trials.
                     </p>
 
                     {/* Active dynamic interactive toolbar aligned to template */}
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-5 mt-auto">
-                      <div className="flex items-center gap-6 text-[10.5px] font-black text-gray-400 uppercase font-mono select-none">
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-auto">
+                      <div className="flex items-center gap-5 text-[10.5px] text-gray-400 font-mono select-none">
                         
                         {/* React/Love Button */}
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleRecLike('featured'); }}
                           className={cn(
-                            "flex items-center gap-1.5 transition-all duration-250 cursor-pointer transform active:scale-90 hover:scale-[1.05]",
-                            recommendationStates.featured.liked ? "text-rose-500 font-extrabold" : "hover:text-[#E8500A] text-gray-500"
+                            "flex items-center gap-1.5 transition-all duration-250 cursor-pointer",
+                            recommendationStates.featured.liked ? "text-rose-500 font-semibold" : "hover:text-[#E8500A]"
                           )}
                         >
-                          <Heart className={cn("w-4.5 h-4.5", recommendationStates.featured.liked ? "fill-current text-rose-500 scale-110" : "")} /> 
+                          <Heart className={cn("w-4 h-4", recommendationStates.featured.liked ? "fill-current text-rose-500 scale-105" : "")} /> 
                           <span>{recommendationStates.featured.liked ? "12.1k" : "12k"}</span>
                         </button>
 
                         {/* Viewed Button */}
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleRecView('featured'); }}
-                          className="flex items-center gap-1.5 hover:text-[#E8500A] text-gray-500 transition-colors cursor-pointer"
+                          className="flex items-center gap-1.5 hover:text-[#E8500A] transition-colors cursor-pointer"
                         >
-                          <Eye className="w-4.5 h-4.5" /> 
+                          <Eye className="w-4 h-4" /> 
                           <span>{(recommendationStates.featured.views / 1000).toFixed(1)}k</span>
                         </button>
 
@@ -1113,13 +1118,13 @@ export function HomePage() {
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleRecBookmark('featured'); }}
                         className={cn(
-                          "w-11 h-11 rounded-full border border-gray-100 flex items-center justify-center transition-all bg-white hover:shadow-md transform active:scale-95 cursor-pointer",
+                          "w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all hover:shadow-sm cursor-pointer",
                           recommendationStates.featured.bookmarked ? "border-[#E8500A]/30 bg-[#FFF0E8]/40" : "hover:border-gray-200"
                         )}
                       >
                         <Bookmark className={cn(
-                          "w-5 h-5 stroke-[2] transition-colors duration-200", 
-                          recommendationStates.featured.bookmarked ? "fill-[#E8500A] text-[#E8500A]" : "text-amber-700/85"
+                          "w-4 h-4 transition-colors duration-200", 
+                          recommendationStates.featured.bookmarked ? "fill-[#E8500A] text-[#E8505A]" : "text-gray-400"
                         )} />
                       </button>
                     </div>
@@ -1127,13 +1132,16 @@ export function HomePage() {
                 </div>
 
                 {/* Sub Guides Grid matching elements visually */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6.5 mb-10">
+                <div 
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
+                  style={{ paddingTop: '0px', paddingBottom: '0px' }}
+                >
                   
                   {/* CARD 1: Reels Card 1 (Vertical Aspect Video) */}
-                  <div className="bg-white border border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
+                  <div className="bg-white border border-[#e8edf2] rounded-xl overflow-hidden shadow-sm hover:scale-[1.01] transition-all duration-350 flex flex-col group">
                     <div 
                       onClick={() => handleRecView('card1')}
-                      className="relative h-[320px] bg-slate-950 overflow-hidden cursor-pointer"
+                      className="relative h-[240px] bg-slate-950 overflow-hidden cursor-pointer"
                     >
                       <img 
                         src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=1000&fit=crop" 
@@ -1143,72 +1151,68 @@ export function HomePage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 pointer-events-none" />
                       
                       {/* Top-Left Reel Badge */}
-                      <span className="absolute top-4 left-4 inline-flex items-center px-3 py-1 bg-white hover:bg-gray-100 text-black text-[9px] font-black uppercase tracking-wider rounded-lg shadow-sm border border-gray-100">
+                      <span className="absolute top-3 left-3 inline-flex items-center px-2 py-0.5 bg-white text-black text-[8.5px] font-semibold uppercase tracking-wider rounded border border-gray-100">
                         REEL
                       </span>
 
                       {/* Top-Right Instagram Badge */}
-                      <div className="absolute top-4 right-4 flex flex-col items-center">
-                        <div className="w-8 h-8 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-white">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-white">
+                      <div className="absolute top-3 right-3 flex flex-col items-center">
+                        <div className="w-7 h-7 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-white">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-white">
                             <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                             <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                           </svg>
                         </div>
-                        <span className="text-[7.5px] font-bold text-white uppercase mt-0.5 tracking-wider font-mono">Instagram</span>
                       </div>
 
                       {/* Small Center Play Button */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-11 h-11 bg-red-600 rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                          <Play className="w-5 h-5 fill-current ml-0.5 text-white" />
+                        <div className="w-9 h-9 bg-red-600 rounded-full flex items-center justify-center shadow">
+                          <Play className="w-4 h-4 fill-current ml-0.5 text-white" />
                         </div>
                       </div>
 
                       {/* Bottom title overlays on image */}
-                      <div className="absolute bottom-4 left-4 pr-12 text-left pointer-events-none">
-                        <h4 className="font-space font-black text-white text-sm uppercase tracking-tight leading-tight mb-1">
+                      <div className="absolute bottom-3 left-3 pr-12 text-left pointer-events-none">
+                        <h4 className="text-sm font-semibold text-white tracking-tight leading-tight">
                           TOP 10 SMARTPHONES TO BUY IN 2026
                         </h4>
-                        <p className="text-[9px] text-white/80 font-medium line-clamp-1 italic">
-                          Top 10 Smartphones to Buy in 2026. Find the best phone deals.........
-                        </p>
                       </div>
 
                       {/* Video length badge inside image */}
-                      <span className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md text-white text-[8px] font-mono font-black px-2 py-0.5 rounded border border-white/10">
+                      <span className="absolute bottom-3 right-3 bg-black/75 backdrop-blur-md text-white text-[8px] font-mono px-1.5 py-0.5 rounded">
                         8:10
                       </span>
                     </div>
 
                     {/* Card Footer bar actions */}
-                    <div className="p-4.5 bg-white border-t border-gray-50 flex items-center justify-between text-left">
-                      <div className="flex items-center gap-4 text-[10px] font-black text-gray-450 uppercase font-mono select-none">
+                    <div className="p-3 bg-white border-t border-gray-100 flex items-center justify-between text-left">
+                      <div className="flex items-center gap-3 text-[10px] font-mono text-gray-400 select-none">
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleRecLike('card1'); }}
                           className={cn(
-                            "flex items-center gap-1 shrink-0 transition-transform active:scale-95 cursor-pointer",
-                            recommendationStates.card1.liked ? "text-rose-500 font-extrabold" : "hover:text-[#E8500A] text-gray-500"
+                            "flex items-center gap-1 shrink-0 transition-colors cursor-pointer",
+                            recommendationStates.card1.liked ? "text-rose-500 font-semibold" : "hover:text-[#E8500A]"
                           )}
                         >
-                          <Heart className={cn("w-4 h-4", recommendationStates.card1.liked ? "fill-current text-rose-500 scale-110" : "")} />
+                          <Heart className={cn("w-3.5 h-3.5", recommendationStates.card1.liked ? "fill-current text-rose-500" : "")} />
                           <span>{recommendationStates.card1.liked ? "12.1k" : "12k"}</span>
                         </button>
 
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleRecView('card1'); }}
-                          className="flex items-center gap-1 hover:text-[#E8500A] text-gray-500 transition-colors cursor-pointer"
+                          className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-3.5 h-3.5" />
                           <span>1.2k</span>
                         </button>
 
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleRecShare('card1'); }}
-                          className="flex items-center gap-1 hover:text-[#E8500A] text-gray-500 transition-colors cursor-pointer"
+                          className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
                         >
-                          <Share2 className="w-4 h-4" />
+                          <Share2 className="w-3.5 h-3.5" />
                           <span>{recommendationStates.card1.shares}</span>
                         </button>
                       </div>
@@ -1217,20 +1221,20 @@ export function HomePage() {
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleRecBookmark('card1'); }}
                         className={cn(
-                          "w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all transform active:scale-95 cursor-pointer",
+                          "w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all hover:shadow cursor-pointer",
                           recommendationStates.card1.bookmarked ? "bg-[#FFF0E8]/40 border-[#E8500A]/30 text-[#E8500A]" : "hover:border-gray-200"
                         )}
                       >
-                        <Bookmark className={cn("w-4 h-4 stroke-[2]", recommendationStates.card1.bookmarked ? "fill-[#E8500A] text-[#E8500A]" : "text-amber-700/80")} />
+                        <Bookmark className={cn("w-3.5 h-3.5", recommendationStates.card1.bookmarked ? "fill-[#E8505A] text-[#E8505A]" : "text-gray-400")} />
                       </button>
                     </div>
                   </div>
 
                   {/* CARD 2: Blog Text Card 2 (Wide Landscape image & Body) */}
-                  <div className="bg-white border border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group text-left">
+                  <div className="bg-white border border-[#e8edf2] rounded-xl overflow-hidden shadow-sm hover:scale-[1.01] transition-all duration-350 flex flex-col group text-left">
                     <div 
                       onClick={() => handleRecView('card2')}
-                      className="relative h-44 bg-slate-900 overflow-hidden cursor-pointer"
+                      className="relative h-28 bg-slate-900 overflow-hidden cursor-pointer"
                     >
                       <img 
                         src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&h=500&fit=crop" 
@@ -1240,57 +1244,56 @@ export function HomePage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
                       
                       {/* Top-Left Read Time Badge */}
-                      <span className="absolute top-4 left-4 inline-flex items-center px-3 py-1 bg-white text-black text-[9px] font-black uppercase tracking-wider rounded-lg shadow-sm border border-gray-100 font-mono">
+                      <span className="absolute top-3 left-3 inline-flex items-center px-2 py-0.5 bg-white text-black text-[8.5px] font-semibold uppercase tracking-wider rounded border border-gray-100 font-mono">
                         8 MIN READ
                       </span>
 
                       {/* Top-Right Blog badge */}
-                      <div className="absolute top-4 right-4 flex flex-col items-center">
-                        <div className="w-8 h-8 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-white">
-                          <PenTool className="w-4 h-4 text-white" />
+                      <div className="absolute top-3 right-3 flex flex-col items-center">
+                        <div className="w-7 h-7 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-white">
+                          <PenTool className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <span className="text-[7.5px] font-bold text-white uppercase mt-0.5 tracking-wider font-mono">Blog</span>
                       </div>
                     </div>
 
                     {/* Card Content body with heading and excerpt */}
-                    <div className="p-4.5 flex-1 flex flex-col justify-between">
-                      <div className="mb-4">
-                        <h4 className="font-space font-black text-xs uppercase text-[#1A1D4E] group-hover:text-[#E8500A] leading-snug mb-1.5 transition-colors line-clamp-2">
+                    <div className="p-3 flex-1 flex flex-col justify-between">
+                      <div className="mb-2">
+                        <h4 className="text-xs font-semibold uppercase text-[#1a1a2e] group-hover:text-[#E8500A] leading-snug mb-1 transition-colors line-clamp-2">
                           TOP 10 SMARTPHONES TO BUY IN 2026
                         </h4>
-                        <p className="text-[10px] text-gray-450 font-medium line-clamp-2 leading-relaxed">
-                          Top 10 Smartphones to Buy in 2026. Find the best phone deals.........
+                        <p className="text-[11px] text-gray-450 line-clamp-2 leading-relaxed">
+                          Top 10 Smartphones to Buy in 2026. Find the best phone deals...
                         </p>
                       </div>
 
                       {/* Card actions row */}
-                      <div className="border-t border-gray-50 pt-4 mt-auto flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-[10px] font-black text-gray-450 uppercase font-mono select-none">
+                      <div className="border-t border-gray-100 pt-3 mt-auto flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-[10px] font-mono text-gray-400 select-none">
                           <button 
                             onClick={(e) => { e.stopPropagation(); handleRecLike('card2'); }}
                             className={cn(
-                              "flex items-center gap-1 transition-transform active:scale-95 cursor-pointer",
-                              recommendationStates.card2.liked ? "text-rose-500 font-extrabold" : "hover:text-[#E8500A] text-gray-500"
+                              "flex items-center gap-1 transition-colors cursor-pointer",
+                              recommendationStates.card2.liked ? "text-rose-500 font-semibold" : "hover:text-[#E8500A]"
                             )}
                           >
-                            <Heart className={cn("w-4 h-4", recommendationStates.card2.liked ? "fill-current text-rose-500 scale-110" : "")} />
+                            <Heart className={cn("w-3.5 h-3.5", recommendationStates.card2.liked ? "fill-current text-rose-500" : "")} />
                             <span>{recommendationStates.card2.liked ? "12.1k" : "12k"}</span>
                           </button>
 
                           <button 
                             onClick={(e) => { e.stopPropagation(); handleRecView('card2'); }}
-                            className="flex items-center gap-1 hover:text-[#E8500A] text-gray-500 transition-colors cursor-pointer"
+                            className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-3.5 h-3.5" />
                             <span>1.2k</span>
                           </button>
 
                           <button 
                             onClick={(e) => { e.stopPropagation(); handleRecShare('card2'); }}
-                            className="flex items-center gap-1 hover:text-[#E8500A] text-gray-500 transition-colors cursor-pointer"
+                            className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
                           >
-                            <Share2 className="w-4 h-4" />
+                            <Share2 className="w-3.5 h-3.5" />
                             <span>{recommendationStates.card2.shares}</span>
                           </button>
                         </div>
@@ -1299,21 +1302,21 @@ export function HomePage() {
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleRecBookmark('card2'); }}
                           className={cn(
-                            "w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all transform active:scale-95 cursor-pointer",
+                            "w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all hover:shadow cursor-pointer",
                             recommendationStates.card2.bookmarked ? "bg-[#FFF0E8]/40 border-[#E8500A]/30 text-[#E8500A]" : "hover:border-gray-200"
                           )}
                         >
-                          <Bookmark className={cn("w-4 h-4 stroke-[2]", recommendationStates.card2.bookmarked ? "fill-[#E8500A] text-[#E8500A]" : "text-amber-700/80")} />
+                          <Bookmark className={cn("w-3.5 h-3.5", recommendationStates.card2.bookmarked ? "fill-[#E8500A] text-[#E8500A]" : "text-gray-400")} />
                         </button>
                       </div>
                     </div>
                   </div>
 
                   {/* CARD 3: Reels Card 3 (Vertical Aspect Video) */}
-                  <div className="bg-white border border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
+                  <div className="bg-white border border-[#e8edf2] rounded-xl overflow-hidden shadow-sm hover:scale-[1.01] transition-all duration-350 flex flex-col group">
                     <div 
                       onClick={() => handleRecView('card3')}
-                      className="relative h-[320px] bg-slate-950 overflow-hidden cursor-pointer"
+                      className="relative h-[240px] bg-slate-950 overflow-hidden cursor-pointer"
                     >
                       <img 
                         src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=1000&fit=crop" 
@@ -1323,72 +1326,68 @@ export function HomePage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 pointer-events-none" />
                       
                       {/* Top-Left Reel Badge */}
-                      <span className="absolute top-4 left-4 inline-flex items-center px-3 py-1 bg-white hover:bg-gray-100 text-black text-[9px] font-black uppercase tracking-wider rounded-lg shadow-sm border border-gray-100">
+                      <span className="absolute top-3 left-3 inline-flex items-center px-2 py-0.5 bg-white text-black text-[8.5px] font-semibold uppercase tracking-wider rounded border border-gray-100">
                         REEL
                       </span>
 
                       {/* Top-Right Instagram Badge */}
-                      <div className="absolute top-4 right-4 flex flex-col items-center">
-                        <div className="w-8 h-8 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-white">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-white">
+                      <div className="absolute top-3 right-3 flex flex-col items-center">
+                        <div className="w-7 h-7 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-white">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-white">
                             <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                             <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                           </svg>
                         </div>
-                        <span className="text-[7.5px] font-bold text-white uppercase mt-0.5 tracking-wider font-mono">Instagram</span>
                       </div>
 
                       {/* Small Center Play Button */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-11 h-11 bg-red-600 rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                          <Play className="w-5 h-5 fill-current ml-0.5 text-white" />
+                        <div className="w-9 h-9 bg-red-600 rounded-full flex items-center justify-center shadow">
+                          <Play className="w-4 h-4 fill-current ml-0.5 text-white" />
                         </div>
                       </div>
 
                       {/* Bottom title overlays on image */}
-                      <div className="absolute bottom-4 left-4 pr-12 text-left pointer-events-none">
-                        <h4 className="font-space font-black text-white text-sm uppercase tracking-tight leading-tight mb-1">
+                      <div className="absolute bottom-3 left-3 pr-12 text-left pointer-events-none">
+                        <h4 className="text-sm font-semibold text-white tracking-tight leading-tight">
                           TOP 10 SMARTPHONES TO BUY IN 2026
                         </h4>
-                        <p className="text-[9px] text-white/80 font-medium line-clamp-1 italic">
-                          Top 10 Smartphones to Buy in 2026. Find the best phone deals.........
-                        </p>
                       </div>
 
                       {/* Video length badge inside image */}
-                      <span className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md text-white text-[8px] font-mono font-black px-2 py-0.5 rounded border border-white/10">
+                      <span className="absolute bottom-3 right-3 bg-black/75 backdrop-blur-md text-white text-[8px] font-mono px-1.5 py-0.5 rounded">
                         8:10
                       </span>
                     </div>
 
                     {/* Card Footer bar actions */}
-                    <div className="p-4.5 bg-white border-t border-gray-50 flex items-center justify-between text-left">
-                      <div className="flex items-center gap-4 text-[10px] font-black text-gray-450 uppercase font-mono select-none">
+                    <div className="p-3 bg-white border-t border-gray-100 flex items-center justify-between text-left">
+                      <div className="flex items-center gap-3 text-[10px] font-mono text-gray-400 select-none">
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleRecLike('card3'); }}
                           className={cn(
-                            "flex items-center gap-1 transition-transform active:scale-95 cursor-pointer",
-                            recommendationStates.card3.liked ? "text-rose-500 font-extrabold" : "hover:text-[#E8500A] text-gray-500"
+                            "flex items-center gap-1 shrink-0 transition-colors cursor-pointer",
+                            recommendationStates.card3.liked ? "text-rose-500 font-semibold" : "hover:text-[#E8500A]"
                           )}
                         >
-                          <Heart className={cn("w-4 h-4", recommendationStates.card3.liked ? "fill-current text-rose-500 scale-110" : "")} />
+                          <Heart className={cn("w-3.5 h-3.5", recommendationStates.card3.liked ? "fill-current text-rose-500" : "")} />
                           <span>{recommendationStates.card3.liked ? "12.1k" : "12k"}</span>
                         </button>
 
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleRecView('card3'); }}
-                          className="flex items-center gap-1 hover:text-[#E8500A] text-gray-500 transition-colors cursor-pointer"
+                          className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-3.5 h-3.5" />
                           <span>1.2k</span>
                         </button>
 
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleRecShare('card3'); }}
-                          className="flex items-center gap-1 hover:text-[#E8500A] text-gray-500 transition-colors cursor-pointer"
+                          className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
                         >
-                          <Share2 className="w-4 h-4" />
+                          <Share2 className="w-3.5 h-3.5" />
                           <span>{recommendationStates.card3.shares}</span>
                         </button>
                       </div>
@@ -1397,11 +1396,11 @@ export function HomePage() {
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleRecBookmark('card3'); }}
                         className={cn(
-                          "w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all transform active:scale-95 cursor-pointer",
+                          "w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all hover:shadow cursor-pointer",
                           recommendationStates.card3.bookmarked ? "bg-[#FFF0E8]/40 border-[#E8500A]/30 text-[#E8500A]" : "hover:border-gray-200"
                         )}
                       >
-                        <Bookmark className={cn("w-4 h-4 stroke-[2]", recommendationStates.card3.bookmarked ? "fill-[#E8500A] text-[#E8500A]" : "text-amber-700/80")} />
+                        <Bookmark className={cn("w-3.5 h-3.5", recommendationStates.card3.bookmarked ? "fill-[#E8505A] text-[#E8505A]" : "text-gray-400")} />
                       </button>
                     </div>
                   </div>
@@ -1412,58 +1411,51 @@ export function HomePage() {
                 <div className="text-center">
                   <Link 
                     to="/guides" 
-                    className="inline-flex items-center gap-2.5 px-9 py-3.5 bg-[#E8500A] hover:bg-[#CF4400] font-black text-white text-[11px] tracking-widest uppercase rounded-full shadow-lg hover:shadow-xl duration-300 hover:scale-105 active:scale-95 transition-all"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] uppercase rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-all font-medium"
                   >
-                    <span>EXPLORE ALL RECOMMENDATION</span>
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white text-xs">
-                      →
-                    </span>
+                    <span>EXPLORE ALL RECOMMENDATIONS</span>
                   </Link>
                 </div>
               </div>
 
               {/* FEED SECTION F — POPULAR CATEGORIES */}
-              <div id="section-categories" className="bg-white rounded-[32px] border border-gray-100 p-6 md:p-10 shadow-[0_15px_40px_rgba(26,29,78,0.02)]">
+              <div id="section-categories" className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm">
                 
                 {/* Section Header */}
-                <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100/60">
+                <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-100">
                   <div className="text-left">
-                    <h2 className="font-space text-3xl font-black italic tracking-tight uppercase leading-none">
-                      <span className="text-[#1A1D4E]">POPULAR</span> <span className="text-[#E8500A]">CATEGORIES</span>
+                    <h2 className="text-base font-semibold text-[#1a1a2e]">
+                      POPULAR <span className="text-[#E8500A]">CATEGORIES</span>
                     </h2>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="shrink-0 w-1 h-[14px] bg-[#E8500A] rounded-full inline-block" />
-                      <p className="text-[11px] text-[#1A1D4E] font-bold tracking-wide leading-none uppercase">
-                        EXPLORE BY INDUSTRY & NICHE
-                      </p>
-                    </div>
+                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
+                      EXPLORE BY INDUSTRY & NICHE
+                    </p>
                   </div>
                   
                   {/* Show All Category Button on right */}
                   <div className="flex shrink-0">
                     <Link 
                       to="/categories" 
-                      className="border border-gray-200/90 hover:border-[#E8500A]/30 text-[#1A1D4E] hover:text-[#E8500A] font-space text-[10px] font-black tracking-widest uppercase rounded-full px-5 py-2.5 flex items-center gap-2 bg-white shadow-sm transition-all hover:scale-105 active:scale-95"
+                      className="border border-[#e8edf2] hover:border-[#E8500A]/30 text-[#1a1a2e] hover:text-[#E8500A] text-[10px] font-medium uppercase tracking-wider rounded-lg px-4 py-2 bg-white transition-all hover:scale-[1.01] active:scale-95"
                     >
-                      <span>SHOW ALL CATEGORY</span>
-                      <Search className="w-3.5 h-3.5 text-[#1A1D4E] stroke-[3]" />
+                      SHOW ALL CATEGORIES
                     </Link>
                   </div>
                 </div>
 
                 {/* Categories Grid - 6 beautiful cards exactly matching screenshot */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6.5 text-left">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-left">
                   {popularCategoriesMock.map((cat, idx) => {
                     // Custom high-fidelity category icon picker helper
                     const getCategoryMockIcon = (catName: string) => {
                       const name = catName.toLowerCase();
-                      if (name.includes('fashion')) return <Shirt className="w-[21px] h-[21px] text-blue-600 stroke-[2.5]" />;
-                      if (name.includes('tech') || name.includes('electronics')) return <Cpu className="w-[21px] h-[21px] text-[#1A73E8] stroke-[2.5]" />;
-                      if (name.includes('family') || name.includes('kids')) return <Baby className="w-[21px] h-[21px] text-blue-500 stroke-[2.5]" />;
-                      if (name.includes('jewelry') || name.includes('accessories')) return <Gem className="w-[21px] h-[21px] text-yellow-500 stroke-[2.5]" />;
-                      if (name.includes('hobby') || name.includes('creativity') || name.includes('hobbies')) return <Palette className="w-[21px] h-[21px] text-orange-500 stroke-[2.5]" />;
-                      if (name.includes('travel') || name.includes('hospitality')) return <Luggage className="w-[21px] h-[21px] text-rose-500 stroke-[2.5]" />;
-                      return <ShoppingBag className="w-[21px] h-[21px] text-gray-500 stroke-[2.5]" />;
+                      if (name.includes('fashion')) return <Shirt className="w-5 h-5 text-blue-600 stroke-[2]" />;
+                      if (name.includes('tech') || name.includes('electronics')) return <Cpu className="w-5 h-5 text-[#1A73E8] stroke-[2]" />;
+                      if (name.includes('family') || name.includes('kids')) return <Baby className="w-5 h-5 text-blue-500 stroke-[2]" />;
+                      if (name.includes('jewelry') || name.includes('accessories')) return <Gem className="w-5 h-5 text-yellow-500 stroke-[2]" />;
+                      if (name.includes('hobby') || name.includes('creativity') || name.includes('hobbies')) return <Palette className="w-5 h-5 text-orange-500 stroke-[2]" />;
+                      if (name.includes('travel') || name.includes('hospitality')) return <Luggage className="w-5 h-5 text-rose-500 stroke-[2]" />;
+                      return <ShoppingBag className="w-5 h-5 text-gray-500 stroke-[2]" />;
                     };
 
                     return (
@@ -1473,18 +1465,18 @@ export function HomePage() {
                           setActiveTab(cat.id);
                           toast.success(`Active Category: ${cat.id}`);
                         }}
-                        className="bg-white border border-gray-100 rounded-[20px] p-6 flex flex-col items-start shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-lg hover:border-gray-200/90 transition-all duration-300 cursor-pointer group"
+                        className="bg-white border border-[#e8edf2] rounded-xl p-4 flex flex-col items-start hover:border-gray-200/90 hover:scale-[1.01] transition-all duration-200 cursor-pointer group"
                       >
                         {/* Perfect white circle around the icon styled like mockup */}
-                        <div className="w-11 h-11 bg-white border border-slate-100/90 rounded-full flex items-center justify-center shadow-sm mb-5 group-hover:scale-105 transition-transform duration-250 shrink-0">
+                        <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
                           {getCategoryMockIcon(cat.name)}
                         </div>
                         
                         <div className="w-full">
-                          <h4 className="font-sans font-bold text-sm text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors leading-tight mb-1.5 uppercase tracking-tight">
+                          <h4 className="font-medium text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-tight mb-1 uppercase tracking-tight">
                             {cat.name}
                           </h4>
-                          <p className="text-[11px] text-red-500 font-bold leading-none uppercase font-mono tracking-tight">
+                          <p className="text-[10px] text-red-500 font-semibold leading-none uppercase font-mono">
                             {cat.count}
                           </p>
                         </div>
@@ -1496,34 +1488,34 @@ export function HomePage() {
             </>
           ) : (
             /* NON-FEED CATEGORY DISPLAY GRID */
-            <div className="bg-white rounded-[32px] border border-gray-100 p-6 md:p-8 shadow-[0_15px_40px_rgba(26,29,78,0.02)] min-h-[480px]">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-5 mb-8 text-left">
+            <div className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm min-h-[480px]">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6 text-left">
                 <div>
-                  <h3 className="font-space font-black text-2xl uppercase text-[#1A1D4E] flex items-center gap-2.5 leading-none">
-                    <span className="text-3xl leading-none">{categoryTabs.find(t=>t.id===activeTab)?.emoji}</span> {activeTab}
+                  <h3 className="font-semibold text-base uppercase text-[#1a1a2e] flex items-center gap-2 leading-none">
+                    <span className="text-lg leading-none">{categoryTabs.find(t=>t.id===activeTab)?.emoji}</span> {activeTab}
                   </h3>
-                  <p className="text-[10.5px] text-gray-400 mt-1.5 uppercase tracking-wider font-mono">BROWSING SECURED ORIGINAL PRODUCTS CATALOG</p>
+                  <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-mono">BROWSING SECURED ORIGINAL PRODUCTS CATALOG</p>
                 </div>
                 <button 
                   onClick={() => setActiveTab('FEED')}
-                  className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 hover:scale-105 rounded-full text-[10px] font-black uppercase tracking-widest transition-all"
+                  className="px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-[10px] uppercase tracking-wider transition-all border border-[#e8edf2]"
                 >
                   Return to Feed
                 </button>
               </div>
 
               {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredProducts.map((p: any) => (
                     <ProductCard key={p.id} product={p} variant="compact" />
                   ))}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="w-14 h-14 rounded-full bg-slate-150 text-slate-300 flex items-center justify-center mb-4">
-                    <AlertCircle className="w-8 h-8" />
+                  <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-350 flex items-center justify-center mb-3">
+                    <AlertCircle className="w-6 h-6" />
                   </div>
-                  <h4 className="font-space font-extrabold text-[#1A1D4E] uppercase tracking-wide mb-1.5">No original items cataloged</h4>
+                  <h4 className="font-medium text-[#1a1a2e] uppercase tracking-wide mb-1">No original items cataloged</h4>
                   <p className="text-xs text-gray-400 max-w-sm leading-relaxed">
                     We are currently executing strict brand quality assays on outlets in this category. New products update weekly!
                   </p>
@@ -1533,40 +1525,40 @@ export function HomePage() {
           )}
 
           {/* FEED SECTION G — TRUST BADGES */}
-          <div id="section-trust" className="bg-white rounded-3xl border border-gray-100/90 p-6 md:p-8 shadow-[0_15px_40px_rgba(26,29,78,0.02)]">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 rounded-[24px] border border-[#CFD4E6] p-7 lg:p-10 bg-gradient-to-b from-[#EEF1F8]/10 to-white/40 shadow-sm">
+          <div id="section-trust" className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 rounded-xl border border-[#e8edf2] p-5 bg-[#EEF1F8]/10 shadow-none">
               
-              <div className="text-center flex flex-col items-center gap-3.5 text-left md:text-center">
-                <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shadow-sm shrink-0 border border-[#E8500A]/5">
-                  <ShieldCheck className="w-6 h-6" />
+              <div className="text-center flex flex-col items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shrink-0 border border-[#E8500A]/5">
+                  <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-space font-black text-sm text-[#1A1D4E] uppercase tracking-wider mb-2 leading-none">CONSUMER ADVOCACY</h4>
-                  <p className="text-[10.5px] text-gray-500 leading-relaxed font-semibold max-w-xs mx-auto">
+                  <h4 className="text-xs font-semibold text-[#1a1a2e] uppercase tracking-wide mb-1 leading-none">CONSUMER ADVOCACY</h4>
+                  <p className="text-[10.5px] text-gray-500 leading-relaxed max-w-xs mx-auto">
                     Choosify lists merchant networks complying strictly with independent shopper audits. Our sole intention is safety-oriented purchasing.
                   </p>
                 </div>
               </div>
 
-              <div className="text-center flex flex-col items-center gap-3.5 border-t md:border-t-0 md:border-x border-[#CFD4E6]/50 pt-7 md:pt-0">
-                <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shadow-sm shrink-0 border border-[#E8500A]/5">
-                  <DollarSign className="w-6 h-6" />
+              <div className="text-center flex flex-col items-center gap-3 border-t md:border-t-0 md:border-x border-[#CFD4E6]/40 pt-5 md:pt-0">
+                <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shrink-0 border border-[#E8500A]/5">
+                  <DollarSign className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-space font-black text-sm text-[#1A1D4E] uppercase tracking-wider mb-2 leading-none">NO PAID PROMOTION</h4>
-                  <p className="text-[10.5px] text-gray-500 leading-relaxed font-semibold max-w-xs mx-auto">
+                  <h4 className="text-xs font-semibold text-[#1a1a2e] uppercase tracking-wide mb-1 leading-none">NO PAID PROMOTION</h4>
+                  <p className="text-[10.5px] text-gray-500 leading-relaxed max-w-xs mx-auto">
                     We refuse merchant sponsorship commissions directly. Brands appear based purely on inventory availability and client satisfaction ratings.
                   </p>
                 </div>
               </div>
 
-              <div className="text-center flex flex-col items-center gap-3.5 border-t md:border-t-0 pt-7 md:pt-0">
-                <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shadow-sm shrink-0 border border-[#E8500A]/5">
-                  <Star className="w-6 h-6" />
+              <div className="text-center flex flex-col items-center gap-3 border-t md:border-t-0 pt-5 md:pt-0">
+                <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shrink-0 border border-[#E8500A]/5">
+                  <Star className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-space font-black text-sm text-[#1A1D4E] uppercase tracking-wider mb-2 leading-none">CURATED EXCELLENCE</h4>
-                  <p className="text-[10.5px] text-gray-500 leading-relaxed font-semibold max-w-xs mx-auto">
+                  <h4 className="text-xs font-semibold text-[#1a1a2e] uppercase tracking-wide mb-1 leading-none">CURATED EXCELLENCE</h4>
+                  <p className="text-[10.5px] text-gray-500 leading-relaxed max-w-xs mx-auto">
                     All listed retail lots feature solid distributor warranties and standard brand authenticity stamps, guaranteed.
                   </p>
                 </div>
@@ -1578,30 +1570,33 @@ export function HomePage() {
         </section>
 
         {/* RIGHT SIDEBAR */}
-        <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar mr-0 pl-[2px] pb-[500px] w-full max-w-[260px] xl:max-w-[310px] flex-shrink-0">
+        <aside 
+          className="hidden lg:flex flex-col gap-5 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar mr-0 pl-[2px] pb-0 w-full max-w-[260px] xl:max-w-[310px] flex-shrink-0 animate-fade-in"
+          style={{ paddingLeft: '0px', paddingBottom: '0px' }}
+        >
           
           {/* Card 1 — TRENDING DEALS */}
-          <div className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] text-left">
-            <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-50">
-              <h3 className="font-space font-black text-[18px] tracking-tight italic text-[#1A1D4E] uppercase">
+          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-left">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+              <h3 className="text-sm font-semibold tracking-tight text-[#1a1a2e]">
                 TRENDING <span className="text-[#E8500A]">DEALS</span>
               </h3>
               <Link 
                 to="/deals" 
-                className="text-[10px] font-black text-[#E8500A] underline uppercase tracking-wider hover:text-[#CF4400]"
+                className="text-[10px] font-semibold text-[#E8500A] uppercase tracking-wider hover:text-[#CF4400]"
               >
                 SEE ALL
               </Link>
             </div>
             
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-4">
               {[
                 {
                   id: 1,
                   title: "Apex Shoes Running Shoes Apex Shoes Running.",
                   img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=240&h=240&fit=crop",
                   badge: "BEST VALUE",
-                  badgeClass: "bg-[#3E19FF] text-white",
+                  badgeClass: "bg-blue-600 text-white",
                   price: "BDT 2,500"
                 },
                 {
@@ -1609,7 +1604,7 @@ export function HomePage() {
                   title: "Apex Shoes Running Shoes Apex Shoes Running.",
                   img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=240&h=240&fit=crop",
                   badge: "HOT",
-                  badgeClass: "bg-[#DC2626] text-white",
+                  badgeClass: "bg-rose-600 text-white",
                   price: "BDT 2,500"
                 },
                 {
@@ -1617,7 +1612,7 @@ export function HomePage() {
                   title: "Apex Shoes Running Shoes Apex Shoes Running.",
                   img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=240&h=240&fit=crop",
                   badge: "NEW",
-                  badgeClass: "bg-[#84CC16] text-white",
+                  badgeClass: "bg-emerald-600 text-white",
                   price: "BDT 2,500"
                 },
                 {
@@ -1625,7 +1620,7 @@ export function HomePage() {
                   title: "Apex Shoes Running Shoes Apex Shoes Running.",
                   img: "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=240&h=240&fit=crop",
                   badge: "SALE",
-                  badgeClass: "bg-[#0B0C24] text-white",
+                  badgeClass: "bg-gray-900 text-white",
                   price: "BDT 2,500"
                 },
                 {
@@ -1633,19 +1628,19 @@ export function HomePage() {
                   title: "Apex Shoes Running Shoes Apex Shoes Running.",
                   img: "https://images.unsplash.com/photo-1608248597481-496100c80836?w=240&h=240&fit=crop",
                   badge: "SALE",
-                  badgeClass: "bg-[#0B0C24] text-white",
+                  badgeClass: "bg-gray-900 text-white",
                   price: "BDT 2,500"
                 }
               ].map((item, idx) => (
                 <div 
                   key={idx}
-                  className="flex gap-4 bg-white hover:bg-gray-50/30 p-1 rounded-2xl transition-all duration-300 group text-left"
+                  className="flex gap-3 bg-white hover:bg-gray-50/50 p-1.5 rounded-xl transition-all duration-200 group text-left"
                 >
-                  <div className="w-24 h-24 rounded-[16px] overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center bg-gray-50 relative">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-[#e8edf2] flex items-center justify-center bg-gray-50 relative">
                     <img 
                       src={item.img} 
                       alt={item.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
                     />
                     <div 
@@ -1653,27 +1648,27 @@ export function HomePage() {
                         e.stopPropagation();
                         toast.success('Added to saved items!');
                       }}
-                      className="absolute top-1.5 left-1.5 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow border border-orange-100 cursor-pointer hover:scale-110 active:scale-90 transition-transform z-10"
+                      className="absolute top-1 left-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 cursor-pointer hover:scale-110 active:scale-90 transition-transform z-10"
                     >
-                      <Bookmark className="w-3.5 h-3.5 text-[#E8500A]" />
+                      <Bookmark className="w-3 h-3 text-[#E8500A]" />
                     </div>
                   </div>
 
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-1 text-left">
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
                     <div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[8.5px] font-black uppercase text-gray-400 tracking-wider">APEX</span>
-                        <span className={cn("text-[7.2px] font-black uppercase px-2 py-0.5 rounded-[6px] tracking-tight leading-none shrink-0", item.badgeClass)}>
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[8px] font-bold uppercase text-gray-400">APEX</span>
+                        <span className={cn("text-[7.2px] font-semibold uppercase px-1.5 py-0.5 rounded tracking-tight shrink-0", item.badgeClass)}>
                           {item.badge}
                         </span>
                       </div>
-                      <h4 className="font-space text-[10.5px] font-black uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors line-clamp-2 leading-tight mt-1">
+                      <h4 className="text-[11px] font-medium text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors line-clamp-1 leading-tight mt-1">
                         {item.title}
                       </h4>
                     </div>
                     
                     <div className="flex items-center justify-between mt-1">
-                      <span className="text-[12px] font-mono font-black text-[#E8500A] tracking-tight">
+                      <span className="text-[11px] font-mono font-semibold text-[#E8500A]">
                         {item.price}
                       </span>
                       <button 
@@ -1689,11 +1684,10 @@ export function HomePage() {
                           }, 1); 
                           toast.success(`Successfully added ${item.title} to your verification basket!`);
                         }} 
-                        className="w-10 h-10 rounded-full bg-[#E8500A] hover:bg-[#CF4400] text-white flex flex-col items-center justify-center shrink-0 hover:scale-[1.05] active:scale-[0.96] transition-transform shadow-[0_4px_12px_rgba(232,80,10,0.2)] border-0 cursor-pointer"
+                        className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded text-[8px] uppercase tracking-wide cursor-pointer transition-colors"
                         aria-label="Add to cart"
                       >
-                        <span className="text-[7px] font-black uppercase leading-none tracking-tight">Add To</span>
-                        <span className="text-[7px] font-black uppercase leading-none tracking-tight mt-0.5">Cart</span>
+                        ADD TO BASKET
                       </button>
                     </div>
                   </div>
@@ -1702,21 +1696,21 @@ export function HomePage() {
             </div>
           </div>
 
-          {/* Card 2 — POPULAR RECOMMENDATIONS */}
-          <div className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] text-left">
-            <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-50">
-              <h3 className="font-space font-black text-[12px] tracking-wide text-[#1A1D4E] uppercase leading-tight">
+          {/* Card 2 — TRENDING BRANDS */}
+          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-left">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+              <h3 className="text-sm font-semibold tracking-tight text-[#1a1a2e]">
                 TRENDING <span className="text-[#E8500A]">BRANDS</span>
               </h3>
               <Link 
                 to="/brands" 
-                className="text-[10px] font-black text-[#E8500A] underline uppercase tracking-wider hover:text-[#CF4400]"
+                className="text-[10px] font-semibold text-[#E8500A] uppercase tracking-wider hover:text-[#CF4400]"
               >
                 SEE ALL
               </Link>
             </div>
 
-            <div className="flex flex-col gap-3.5">
+            <div className="flex flex-col gap-3">
               {[
                 {
                   title: "TOP 10 SMARTPHONES TO BUY IN 2026",
@@ -1764,23 +1758,23 @@ export function HomePage() {
                 <div 
                   key={idx} 
                   onClick={() => navigate('/guides')}
-                  className="flex gap-3 bg-white border border-gray-100/80 rounded-[16px] p-2.5 hover:shadow-[0_8px_20px_rgba(26,29,78,0.03)] hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                  className="flex gap-3 bg-white border border-[#e8edf2] rounded-xl p-2.5 hover:border-gray-200 transition-all duration-200 group cursor-pointer"
                 >
-                  <div className="w-14 h-14 rounded-[12px] overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center bg-gray-50">
+                  <div className="w-11 h-11 rounded-lg overflow-hidden shrink-0 border border-[#e8edf2] flex items-center justify-center bg-gray-50">
                     <img 
                       src={item.img} 
                       alt={item.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
                     />
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
-                    <h4 className="font-space text-[9.5px] font-black uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors line-clamp-2 leading-tight">
+                    <h4 className="text-[11px] font-medium text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors line-clamp-1 leading-tight">
                       {item.title}
                     </h4>
-                    <div className="flex items-center gap-3 text-gray-400 font-mono text-[8px] font-black mt-1">
+                    <div className="flex items-center gap-2.5 text-gray-400 font-mono text-[9px] mt-1">
                       <div className="flex items-center gap-1">
-                        <Heart className="w-3 h-3 text-[#FF5B00] fill-[#FF5B00]/10" />
+                        <Heart className="w-3 h-3 text-rose-500 fill-rose-50" />
                         <span>{item.likes}</span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -1797,10 +1791,10 @@ export function HomePage() {
               ))}
             </div>
 
-            <div className="mt-5 pt-4 border-t border-gray-50">
+            <div className="mt-4 pt-3 border-t border-gray-100">
               <button 
                 onClick={() => navigate('/brands')}
-                className="w-full py-2.5 bg-gray-50 hover:bg-orange-50 hover:text-[#E8500A] text-gray-700 font-space font-black rounded-xl text-[9px] tracking-widest uppercase flex items-center justify-center gap-1.5 transition-all outline-none border border-gray-100 hover:border-[#E8500A]/20 cursor-pointer"
+                className="w-full py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-lg text-[10px] font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors border border-[#e8edf2] cursor-pointer"
               >
                 SEE ALL BRANDS <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -1810,49 +1804,49 @@ export function HomePage() {
           {/* Card — FOR BUSINESS & SELLERS (REPOSITIONED & EXACT DIMENSIONS) */}
           <div 
             id="section-sellers" 
-            className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
-            style={{ width: '280px', height: '464px' }}
+            className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
+            style={{ width: '282px', height: '464px' }}
           >
-            <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1c1c3c]/5 rounded-full blur-2xl pointer-events-none" />
             
             <div className="flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-3.5 border border-[#E8500A]/5 shrink-0 shadow-sm">
+              <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-3 border border-[#E8500A]/5 shrink-0 shadow-sm">
                 <Sparkles className="w-5 h-5" />
               </div>
               
-              <h3 className="font-space text-lg font-black uppercase tracking-tight text-[#1A1D4E] leading-snug">
+              <h3 className="text-sm font-semibold uppercase tracking-tight text-[#1a1a2e] leading-snug">
                 For Business <span className="text-[#E8500A] italic">& Sellers</span>
               </h3>
               
-              <p className="text-[10.5px] text-gray-400 font-bold mt-2 px-1 leading-relaxed">
+              <p className="text-[11px] text-gray-400 font-medium mt-2 px-1 leading-relaxed">
                 Unlock exclusive tools, secure verified merchant badges, and scale your authentic local reach.
               </p>
             </div>
 
-            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/40 to-white rounded-[20px] p-4 text-center flex flex-col items-center justify-center shadow-sm my-2 flex-1">
-              <h4 className="font-space font-black text-[#1A1D4E] text-[11px] uppercase tracking-wider mb-2 leading-none">Boost Sales Today</h4>
-              <p className="text-[9.5px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
+            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+              <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">Boost Sales Today</h4>
+              <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px]">
                 Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
               </p>
               
               <Link 
                 to="/post-offer" 
-                className="w-full h-10 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white font-black rounded-full text-[9.5px] tracking-widest uppercase flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm"
               >
                 Post Offer <PenTool className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            <div className="flex items-center justify-center gap-1.5 text-[8px] font-bold text-gray-400 uppercase font-mono tracking-widest shrink-0">
-              <Users className="w-3.5 h-3.5 text-gray-400" /> 100k+ shopper log Daily
+            <div className="flex items-center justify-center gap-1 text-[8.5px] font-semibold text-gray-400 uppercase font-mono tracking-widest shrink-0">
+              <Users className="w-3.5 h-3.5" /> 100k+ shopper log Daily
             </div>
           </div>
 
           {/* Card 3 — NEWSLETTER */}
-          <div className="bg-white rounded-[24px] border border-gray-100 p-5.5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] text-left">
+          <div className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm text-left">
             <div className="mb-4">
-              <h3 className="text-[9.5px] font-black tracking-widest text-[#1A1D4E]/30 uppercase mb-1.5 italic">NEWS DISPATCH</h3>
-              <p className="text-[11.5px] text-gray-500 font-semibold leading-relaxed">
+              <h3 className="text-[9px] font-bold tracking-widest text-[#1a1a2e]/40 uppercase mb-1">NEWS DISPATCH</h3>
+              <p className="text-[11px] text-gray-500 leading-relaxed">
                 Receive newly verified outlet approvals, scam alerts, and business wholesale deals weekly.
               </p>
             </div>
@@ -1864,14 +1858,14 @@ export function HomePage() {
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="Enter your email address..." 
-                  className="w-full h-11 px-4.5 bg-gray-50 border border-gray-150 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8500A]/20 transition-all text-left" 
+                  className="w-full h-10 px-4 bg-gray-50 border border-[#e8edf2] hover:bg-gray-100 rounded-lg text-xs font-medium text-[#1a1a2e] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#E8500A]/30 transition-all text-left" 
                 />
               </div>
               <button 
                 type="submit" 
-                className="w-full h-11 bg-[#E8500A] hover:bg-[#CF4400] rounded-xl text-xs font-black text-white tracking-widest uppercase transition-all shadow-md active:scale-95 text-center flex items-center justify-center gap-2 hover:scale-[1.02]"
+                className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] rounded-lg text-[10.5px] font-semibold text-white tracking-wider uppercase transition-colors shadow-sm text-center flex items-center justify-center gap-2"
               >
-                SUBSCRIBE NOW <Send className="w-3.5 h-3.5 text-white" />
+                SUBSCRIBE NOW <Send className="w-3.5 h-3.5" />
               </button>
             </form>
           </div>

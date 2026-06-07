@@ -239,60 +239,63 @@ export function B2BHomePage() {
     <div className="min-h-screen bg-white text-[#081120] font-sans selection:bg-[#FF0038] selection:text-white pb-16" id="b2b-portal-home">
       
       {/* 1. INDUSTRIAL HERO SECTION - Premium Carmine Red-forward Industrial Gradient */}
-      <section className="hero-section hero-container relative bg-gradient-to-br from-[#081120] via-[#0b1c33] to-[#FF0038] text-white overflow-hidden py-24 px-6 shadow-inner-lg">
+      <section 
+        className="hero-section hero-container relative bg-gradient-to-br from-[#081120] via-[#0b1c33] to-[#FF0038] text-white overflow-hidden py-4 px-6 shadow-inner-lg flex items-center justify-center"
+        style={{ height: '303px' }}
+      >
         {/* Luminous dynamic background accents */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,0,56,0.30)_0%,_transparent_55%)] pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#081120]/10 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#081120]/10 to-transparent pointer-events-none" />
         
         {/* Subtle grid pattern helper */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
 
-        <div className="hero-content max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center">
+        <div className="hero-content max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center justify-center w-full">
           
           {/* Tagline Badge */}
-          <div className="inline-flex items-center gap-2.5 px-4.5 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-[10.5px] tracking-widest text-[#FF0038] font-extrabold uppercase mb-8 shadow-glow hover:border-white/25 transition-all duration-300">
-            <span className="flex h-2 w-2 relative">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-[9px] tracking-widest text-[#FF0038] font-extrabold uppercase mb-2 shadow-glow hover:border-white/25 transition-all duration-300">
+            <span className="flex h-1.5 w-1.5 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-450 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
             </span>
             <span className="font-space font-black">Bangladesh's #1 Verified B2B Sourcing Gateway</span>
           </div>
 
           {/* Main Typography Header Section */}
-          <h1 className="font-space font-black text-white text-5xl sm:text-6xl md:text-7xl leading-[1] tracking-tight uppercase mb-6 max-w-none">
+          <h1 className="font-space font-black text-white text-3xl sm:text-4xl md:text-5xl leading-none tracking-tight uppercase mb-2 max-w-none">
             buy <span className="text-[#FF0038] italic font-black">WHOLESALE</span>
           </h1>
 
           {/* Supporting Text */}
-          <p className="text-sm sm:text-base text-gray-300 max-w-2xl mx-auto font-medium mb-12 leading-relaxed opacity-95">
+          <p className="text-xs text-gray-300 max-w-2xl mx-auto font-medium mb-3 leading-relaxed opacity-95">
             Weary of raw material counterfeits and supplier trade fraud? Choosify.bd empowers your corporate sourcing with state-of-the-art escrow-protected factory networks in Bangladesh.
           </p>
 
           {/* Glassmorphic Search Container */}
-          <form onSubmit={handleSearchSubmit} className="relative w-full max-w-3xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-full border border-white/10 shadow-[0_30px_60px_rgba(11,13,38,0.5)] focus-within:border-white/20 transition-all duration-300 mb-6 font-sans">
+          <form onSubmit={handleSearchSubmit} className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-3 font-sans" style={{ width: '100%', maxWidth: '640px' }}>
             <div className="flex items-center bg-white rounded-full">
-              <div className="pl-6 text-[#FF0038] shrink-0">
-                <Search className="w-5 h-5" />
+              <div className="pl-4 text-[#FF0038] shrink-0">
+                <Search className="w-4 h-4" />
               </div>
               <input 
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search verified corporate factories, bulk RMG apparel & wholesale centers..." 
-                className="w-full h-14 bg-transparent outline-none pl-4 pr-32 text-[#081120] text-sm sm:text-base font-semibold placeholder-slate-400 focus:outline-[#FF0038] focus:ring-0 border-none" 
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-[#081120] text-xs font-semibold placeholder-slate-400 focus:outline-[#FF0038] focus:ring-0 border-none" 
               />
               <button 
                 type="submit"
-                className="absolute right-2 top-2 bottom-2 px-8 rounded-full bg-gradient-to-r from-[#FF0038] to-[#D6002F] hover:from-[#D6002F] hover:to-[#FF0038] text-white text-xs font-black tracking-widest uppercase flex items-center gap-2 shadow-lg hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF0038] to-[#D6002F] hover:from-[#D6002F] hover:to-[#FF0038] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
               >
-                SOURCE NOW
+                SOURCE
               </button>
             </div>
           </form>
 
           {/* Quick Shortcuts / Suggested */}
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-400 font-semibold mb-12">
-            <span className="font-mono text-gray-500 uppercase tracking-wider text-[10px]">Hot Targets:</span>
+          <div className="flex flex-wrap items-center justify-center gap-2 text-[10px] text-gray-400 font-semibold mb-0">
+            <span className="font-mono text-gray-500 uppercase tracking-wider text-[9px]">Hot Targets:</span>
             {['Knitwear', 'RMG Polo', 'Denim Bulk', 'Smart Phones'].map((term) => (
               <button
                 key={term}
@@ -303,7 +306,7 @@ export function B2BHomePage() {
                   const el = document.getElementById('b2b-products-section');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-300 rounded-full border border-white/5 hover:border-white/10 transition-all cursor-pointer text-[11px] font-bold"
+                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-full border border-white/5 hover:border-white/10 transition-all cursor-pointer text-[10px] font-bold"
               >
                 #{term}
               </button>
@@ -311,28 +314,10 @@ export function B2BHomePage() {
             <button
               type="button"
               onClick={() => setIsRfqOpen(true)}
-              className="px-3 py-1 bg-[#FF0038]/20 hover:bg-[#FF0038]/30 text-white rounded-full border border-[#FF0038]/40 hover:border-white/30 transition-all cursor-pointer text-[11px] font-black uppercase tracking-wider"
+              className="px-2 py-0.5 bg-[#FF0038]/20 hover:bg-[#FF0038]/30 text-white rounded-full border border-[#FF0038]/40 hover:border-white/30 transition-all cursor-pointer text-[10px] font-black uppercase tracking-wider"
             >
-              ⚡ Submit Custom RFQ
+              ⚡ RFQ
             </button>
-          </div>
-
-          {/* Majestic Metrics Deck */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-4xl border-t border-white/10 pt-10">
-            {[
-              { label: 'Verified Factories', val: '1,200+', desc: 'Strict Onsite Audits' },
-              { label: 'Sourcing Match', val: '15 SEC', desc: 'Direct Factory Directives' },
-              { label: 'Wholesale Trade', val: '৳150 CR+', desc: 'Placed and Cleared' },
-              { label: 'Escrow Protection', val: '100%', desc: 'Assurance Guarantee' },
-            ].map((stat, sidx) => (
-              <div key={sidx} className="flex flex-col items-center">
-                <span className="font-space text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-[#FF0038] leading-none tracking-tight">
-                  {stat.val}
-                </span>
-                <span className="font-space text-[10px] font-extrabold text-[#FF0038] uppercase tracking-widest mt-2">{stat.label}</span>
-                <span className="text-[9px] text-gray-500 font-mono mt-0.5">{stat.desc}</span>
-              </div>
-            ))}
           </div>
 
         </div>
@@ -485,6 +470,39 @@ export function B2BHomePage() {
             </div>
           </div>
 
+          {/* Card — FOR FACTORIES & SELLERS (REPOSITIONED & SMALL CARD) */}
+          <div 
+            id="section-sellers" 
+            className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] relative overflow-hidden flex flex-col gap-3 text-left w-full shrink-0"
+          >
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#FF0038]/5 to-[#081120]/5 rounded-full blur-xl pointer-events-none" />
+            
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-full bg-[#FF0038]/10 text-[#FF0038] flex items-center justify-center border border-[#FF0038]/5 shrink-0 shadow-sm">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-space text-sm font-black uppercase tracking-tight text-[#081120] leading-tight">
+                  For Factories <span className="text-[#FF0038] italic">& Exporters</span>
+                </h3>
+                <span className="text-[8px] font-bold text-gray-400 uppercase font-mono tracking-widest block mt-0.5">
+                   1,200+ active plants
+                </span>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-gray-400 font-bold leading-normal">
+              Direct enterprise sourcing connections & secure smart trade contracts.
+            </p>
+
+            <button 
+              onClick={() => setIsRfqOpen(true)}
+              className="w-full h-9 bg-gradient-to-r from-[#FF0038] to-[#D6002F] text-white font-black rounded-xl text-[9px] tracking-widest uppercase flex items-center justify-center gap-1.5 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] border-none cursor-pointer"
+            >
+              Send Custom Quote <PenTool className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
         </aside>
 
         {/* CENTER FEED SECTION - KEY INTERACTION CANVAS */}
@@ -622,7 +640,7 @@ export function B2BHomePage() {
                 </div>
 
                 {/* Popular Product list in visual cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   {wholesaleProducts.slice(0, 4).map((p) => (
                     <ProductCard key={p.id} product={p} variant="compact" />
                   ))}
@@ -1296,7 +1314,7 @@ export function B2BHomePage() {
               </div>
 
               {wholesaleProducts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
                   {wholesaleProducts.map((p: any) => (
                     <ProductCard key={p.id} product={p} variant="compact" />
                   ))}
@@ -1534,46 +1552,7 @@ export function B2BHomePage() {
             </div>
           </div>
 
-          {/* Card 3 — FOR FACTORIES & SELLERS (REPOSITIONED & EXACT DIMENSIONS PARITY TO RETAIL) */}
-          <div 
-            id="section-sellers" 
-            className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
-            style={{ width: '280px', height: '464px' }}
-          >
-            <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#FF0038]/5 to-[#081120]/5 rounded-full blur-2xl pointer-events-none" />
-            
-            <div className="flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-[#FF0038]/10 text-[#FF0038] flex items-center justify-center mb-3.5 border border-[#FF0038]/5 shrink-0 shadow-sm">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              
-              <h3 className="font-space text-lg font-black uppercase tracking-tight text-[#081120] leading-snug">
-                For Factories <span className="text-[#FF0038] italic">& Exporters</span>
-              </h3>
-              
-              <p className="text-[10.5px] text-gray-400 font-bold mt-2 px-1 leading-relaxed">
-                Connect directly with enterprise sourcing directors, submit digital blueprints, and lock secure trade contracts.
-              </p>
-            </div>
-
-            <div className="border border-dashed border-[#FF0038]/20 bg-gradient-to-b from-[#FF0038]/5 to-white rounded-[20px] p-4 text-center flex flex-col items-center justify-center shadow-sm my-2 flex-1">
-              <h4 className="font-space font-black text-[#081120] text-[11px] uppercase tracking-wider mb-2 leading-none">Broadcast Factory Load</h4>
-              <p className="text-[9.5px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
-                Submit direct quotations on active RFQs and clear worker welfare validations.
-              </p>
-              
-              <button 
-                onClick={() => setIsRfqOpen(true)}
-                className="w-full h-10 bg-gradient-to-r from-[#FF0038] to-[#D6002F] hover:from-[#D6002F] hover:to-[#FF0038] text-white font-black rounded-full text-[9.5px] tracking-widest uppercase flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer outline-none border-none"
-              >
-                Send Custom Quote <PenTool className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <div className="flex items-center justify-center gap-1.5 text-[8px] font-bold text-gray-400 uppercase font-mono tracking-widest shrink-0">
-              <Users className="w-3.5 h-3.5 text-gray-400" /> 1200+ mills active today
-            </div>
-          </div>
+          {/* Card 3 — FOR FACTORIES & SELLERS REPOSITIONED */}
 
           {/* Card 4 — B2B NEWSLETTER DISPATCH */}
           <div className="bg-white rounded-[24px] border border-gray-100 p-5.5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] text-left">
