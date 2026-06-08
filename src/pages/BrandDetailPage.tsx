@@ -35,6 +35,61 @@ const TikTokIcon = ({ size = 16, ...props }: CustomIconProps) => (
   </svg>
 );
 
+import { InfluencerReviews } from '../components/InfluencerReviews';
+
+function WithInfluencerReviews({ brandName, brandLogo }: { brandName: string; brandLogo?: string }) {
+  const featuredReview = {
+    image: "https://images.unsplash.com/photo-1511119253457-36e78921865c?w=1200&h=800&fit=crop",
+    title: `${brandName} Collaborative Campaign`,
+    excerpt: `Dive deep into the fabric, longevity, and brand heritage of ${brandName}. Real-world creators share their personal daily style experiences.`,
+    authorName: brandName === 'Apex' ? 'TECH REVIEW BD' : `${brandName.toUpperCase()} TALK BD`,
+    authorSub: "Dhaka Headquarters",
+    authorLogo: brandLogo || brandName.substring(0, 2),
+    badgeText: "BRAND PARTNERSHIP"
+  };
+
+  const reviews = [
+    {
+      id: 1,
+      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=800&fit=crop",
+      category: brandName === 'Apex' ? 'FOOTWEAR' : 'FASHION VIBES',
+      title: `${brandName} Style & Creators Showcase`,
+      authorName: "Style Maven",
+      authorHandle: "@stylemaven • 12m",
+      authorAvatar: "https://i.pravatar.cc/100?u=style",
+    },
+    {
+      id: 2,
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=800&fit=crop",
+      category: brandName === 'Apex' ? 'FOOTWEAR' : 'CASUAL WEAR',
+      title: `${brandName} Seasonal Collection Review`,
+      authorName: "BB Fashion Talk",
+      authorHandle: "@bbtalk • 15h",
+      authorAvatar: "https://i.pravatar.cc/100?u=bbtech",
+      badgeBg: "bg-blue-600/95"
+    },
+    {
+      id: 3,
+      image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=800&fit=crop",
+      category: "CREATOR OPINION",
+      title: `Is ${brandName} the Best Local Brand in 2024?`,
+      authorName: "Avishek Mojumder",
+      authorHandle: "@avishek • 1d",
+      authorAvatar: "https://i.pravatar.cc/100?u=avishek",
+      badgeBg: "bg-purple-600/95"
+    }
+  ];
+
+  return (
+    <InfluencerReviews 
+      title="BRAND CAMPAIGN & INFLUENCERS"
+      subtitle={`CREATOR EXPERIENCES WITH ${brandName.toUpperCase()}`}
+      featuredReview={featuredReview}
+      reviews={reviews}
+    />
+  );
+}
+
 export function BrandDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -695,163 +750,7 @@ export function BrandDetailPage() {
                </div>
 
                {/* B. Influencer & YouTuber Reviews section */}
-               <div className="bg-[#0C0C16] rounded-3xl p-6 md:p-8 text-white relative overflow-hidden border border-white/5">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#E8500A]/5 blur-3xl pointer-events-none" />
-                  
-                  <div className="flex items-center gap-2 mb-4 bg-white/5 border border-white/10 rounded-full px-3 py-1 w-fit">
-                     <Users size={12} className="text-[#E8500A]" />
-                     <span className="text-[8px] font-black uppercase tracking-widest italic text-white/70">Creator Community</span>
-                  </div>
-
-                  <div className="mb-8">
-                     <h3 className="text-xl md:text-2xl font-black italic uppercase tracking-tight mb-2">
-                        Influencer & Youtuber Reviews
-                     </h3>
-                     <p className="text-[10px] uppercase tracking-[0.3em] font-black text-white/30 italic">
-                        Trusted Experts Breaking Down {brand.name}
-                     </p>
-                  </div>
-
-                  {/* Main YouTube Feature block */}
-                  <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md mb-8">
-                     <div className="relative aspect-video lg:aspect-auto lg:min-h-[300px] lg:h-full group overflow-hidden">
-                        <img 
-                          src="https://images.unsplash.com/photo-1511119253457-36e78921865c?w=800&h=600&fit=crop" 
-                          alt="Main Review" 
-                          className="w-full h-full object-cover lg:absolute lg:inset-0 group-hover:scale-105 transition-transform duration-1000"
-                        />
-                        <div className="absolute inset-0 bg-black/30" />
-                        
-                        <div className="absolute top-4 left-4">
-                           <span className="bg-[#E8500A] text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-wider italic flex items-center gap-1.5 shadow-md">
-                              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> TRENDING NOW
-                           </span>
-                        </div>
-                        
-                        <button 
-                          onClick={() => toast.success("Opening Video Review stream...")}
-                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform scale-100 group-hover:scale-110 transition-transform duration-300 cursor-pointer"
-                        >
-                           <Play size={20} className="fill-current ml-1" />
-                        </button>
-                        
-                        <div className="absolute bottom-4 left-4 right-4 text-white">
-                           <span className="text-[8px] tracking-widest uppercase text-white/50 block font-black mb-1">Creator Spotlight</span>
-                           <h4 className="text-lg md:text-xl font-black italic tracking-tight">{brand.name} Special Edition</h4>
-                        </div>
-                     </div>
-
-                     <div className="p-6 md:p-8 flex flex-col justify-center bg-white/5 backdrop-blur-md">
-                        <span className="text-[9px] font-black text-[#E8500A] tracking-widest block uppercase mb-3 italic">IN-DEPTH REVIEW</span>
-                        <h4 className="text-base md:text-lg font-black italic tracking-tight leading-snug mb-3">
-                           Why {brand.name} remains a Top Choice in 2024!
-                        </h4>
-                        <p className="text-xs text-white/60 font-medium leading-relaxed mb-6">
-                           Watch as we dive deep into the performance and build quality of {brand.name}'s latest collection. From real-world testing to expert material analysis.
-                        </p>
-                        
-                        <div className="w-full h-px bg-white/10 mb-5" />
-                        
-                        <div className="flex items-center justify-between flex-wrap gap-4">
-                           <div>
-                              <div className="text-[10px] font-black text-white italic">{brand.name === 'Apex' ? 'Tech Review BD' : 'Style Talk BD'}</div>
-                              <div className="text-[8px] font-black text-white/40 tracking-wider uppercase">Live from Dhaka</div>
-                           </div>
-                           <span className="text-[10px] font-black uppercase text-[#E8500A] tracking-widest bg-white/5 px-3 py-1.5 rounded border border-white/5 select-none">CHOOSIFY APPROVED</span>
-                        </div>
-                     </div>
-                  </div>
-
-                  {/* Reels & Other Reviews Container */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                     
-                     {/* Reel Card */}
-                     <div className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 h-[280px] relative flex flex-col group">
-                        <div className="absolute inset-0">
-                           <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=800&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Style Reel" />
-                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                        </div>
-                        
-                        <div className="absolute top-3 left-3 bg-white/20 backdrop-blur-md rounded-full w-7 h-7 flex items-center justify-center text-white font-extrabold border border-white/10">
-                           <Smartphone size={13} />
-                        </div>
-                        <div className="absolute top-3 right-3 bg-[#E8500A]/90 backdrop-blur-md rounded-full text-[7px] font-black px-2.5 py-1 uppercase tracking-wider text-white">
-                           Product Reel
-                        </div>
-
-                        <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-red-600 shadow-xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transform scale-90 group-hover:scale-100 transition-all cursor-pointer">
-                           <Play size={14} className="fill-current ml-0.5" />
-                        </div>
-
-                        <div className="mt-auto p-4 relative z-10">
-                           <h5 className="text-sm font-black italic tracking-tight text-white mb-2 leading-tight">
-                              {brand.name} Style Showcase
-                           </h5>
-                           <div className="flex items-center gap-2 justify-between border-t border-white/10 pt-2 text-[9px]">
-                              <span className="text-white/60 font-black tracking-wider uppercase">@stylemaven</span>
-                              <span className="text-white/40 font-bold">12K Views</span>
-                           </div>
-                        </div>
-                     </div>
-
-                     {/* Second Review Card */}
-                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white h-[280px]">
-                        <div className="relative h-28 overflow-hidden bg-black flex-shrink-0">
-                           <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Apex Showcase" />
-                           <div className="absolute inset-0 bg-black/10" />
-                           <div className="absolute top-2.5 right-2.5 bg-black/40 backdrop-blur-md rounded-full w-7 h-7 flex items-center justify-center border border-white/10">
-                              <Youtube size={14} className="text-red-600" />
-                           </div>
-                        </div>
-                        <div className="p-4 flex-1 flex flex-col text-white justify-between min-h-0">
-                           <div>
-                              <div className="flex items-center justify-between mb-2">
-                                 <div className="flex gap-0.5">
-                                    {[1,2,3,4,5].map(i => <Star key={i} size={8} className="fill-[#E8500A] text-[#E8500A]" />)}
-                                 </div>
-                                 <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase">AUTHENTIC</span>
-                              </div>
-                              <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5 truncate">{brand.name} Collection review</h5>
-                              <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic line-clamp-2">Testing durability and comfort on first wear of latest releases.</p>
-                           </div>
-                           
-                           <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60 flex-shrink-0">
-                              <span className="font-extrabold">BD Tech Guys</span>
-                              <span className="text-white/30">420K • 5.0</span>
-                           </div>
-                        </div>
-                     </div>
-
-                     {/* Third Review Card */}
-                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white h-[280px]">
-                        <div className="relative h-28 overflow-hidden bg-black flex-shrink-0">
-                           <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=300&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Perfume Showcase" />
-                           <div className="absolute inset-0 bg-black/10" />
-                           <div className="absolute top-2.5 right-2.5 bg-black/40 backdrop-blur-md rounded-full w-7 h-7 flex items-center justify-center border border-white/10">
-                              <Youtube size={14} className="text-red-600" />
-                           </div>
-                        </div>
-                        <div className="p-4 flex-1 flex flex-col text-white justify-between min-h-0">
-                           <div>
-                              <div className="flex items-center justify-between mb-2">
-                                 <div className="flex gap-0.5">
-                                    {[1,2,3,4].map(i => <Star key={i} size={8} className="fill-[#E8500A] text-[#E8500A]" />)}
-                                 </div>
-                                 <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase">DEEP DIVE</span>
-                              </div>
-                              <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5 truncate">Finding perfection in {brand.name}</h5>
-                              <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic line-clamp-2">Exploring luxury and comfort and how to verify original tags.</p>
-                           </div>
-                              
-                           <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60 flex-shrink-0">
-                              <span className="font-extrabold">Auntie Mirpur</span>
-                              <span className="text-white/30">150K • 4.5</span>
-                           </div>
-                        </div>
-                     </div>
-
-                  </div>
-               </div>
+               <WithInfluencerReviews brandName={brand.name} brandLogo={brand.logo} />
 
                {/* C. Public Reviews Customer Dashboard (ID matched to CTA) */}
                <div id="public-reviews-section" className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">

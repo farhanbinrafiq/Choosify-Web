@@ -13,6 +13,60 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { toast } from 'react-hot-toast';
 import { ProductMediaGallery } from '../components/ProductMediaGallery';
+import { InfluencerReviews } from '../components/InfluencerReviews';
+
+function WithInfluencerReviews({ brandName }: { brandName: string }) {
+  const featuredReview = {
+    image: "https://images.unsplash.com/photo-1511119253457-36e78921865c?w=1200&h=800&fit=crop",
+    title: `${brandName} Special Edition`,
+    excerpt: `Watch as we dive deep into the performance and build quality of ${brandName}'s latest collection. From real-world testing to expert analysis.`,
+    authorName: "TECH REVIEW BD",
+    authorSub: "Dhaka Headquarters",
+    authorLogo: brandName,
+    badgeText: "TRENDING NOW"
+  };
+
+  const reviews = [
+    {
+      id: 1,
+      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=800&fit=crop",
+      category: "FASHION VIBES",
+      title: `${brandName} Style Showcase`,
+      authorName: "Style Maven",
+      authorHandle: "@stylemaven • 12m",
+      authorAvatar: "https://i.pravatar.cc/100?u=style",
+    },
+    {
+      id: 2,
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=800&fit=crop",
+      category: "FOOTWEAR",
+      title: `${brandName} Collection: A Deep Dive`,
+      authorName: "BB Tech Reviews",
+      authorHandle: "@bbtech • 15h",
+      authorAvatar: "https://i.pravatar.cc/100?u=bbtech",
+      badgeBg: "bg-blue-600/95"
+    },
+    {
+      id: 3,
+      image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=800&fit=crop",
+      category: "UNBOXING",
+      title: `Finding The Perfect Build in ${brandName}`,
+      authorName: "Avishek Mojumder",
+      authorHandle: "@avishek • 1d",
+      authorAvatar: "https://i.pravatar.cc/100?u=avishek",
+      badgeBg: "bg-purple-600/95"
+    }
+  ];
+
+  return (
+    <InfluencerReviews 
+      title="INFLUENCER & CREATOR REVIEWS"
+      subtitle={`TRUSTED EXPERTS BREAKING DOWN ${brandName.toUpperCase()}`}
+      featuredReview={featuredReview}
+      reviews={reviews}
+    />
+  );
+}
 
 export function ProductDetailPage() {
   const { id } = useParams();
@@ -211,9 +265,6 @@ export function ProductDetailPage() {
   const stockQuantity = product.variants && product.variants.length > 0
     ? (selectedVariant ? selectedVariant.stock : 0)
     : (isOutOfStock ? 0 : 58);
-
-  // Retrieve matching products for "Similar Products From Similar Brands"
-  const similarProducts: any[] = allProducts.filter((p: any) => p.id !== product.id).slice(0, 3);
 
   const handleLoveBrand = () => {
     toast.success(`You added ${product.brand} to your Favorite Brands!`);
@@ -758,138 +809,9 @@ export function ProductDetailPage() {
                   </div>
 
                   {/* INFLUENCER & CREATOR REVIEWS CARD (The dark deep purple box) */}
-                  <div className="bg-gradient-to-b from-[#220B1B] to-[#0A0208] text-white p-6 rounded-[24px] space-y-6 border border-white/5 shadow-2xl">
-                     <div className="text-center space-y-1 mb-2">
-                        <h3 className="text-xl md:text-2xl font-black italic tracking-tighter uppercase text-white">
-                           INFLUENCER & CREATOR REVIEWS
-                        </h3>
-                        <p className="text-[8.5px] font-black text-white/40 uppercase tracking-[0.3em] italic">
-                           TRUSTED EXPERTS BREAKING DOWN APEX
-                        </p>
-                     </div>
-
-                     {/* Featured Landscape Card */}
-                     <div className="bg-white rounded-[20px] overflow-hidden shadow-xl flex flex-col md:flex-row border border-gray-100 text-navy">
-                        <div className="md:w-7/12 relative h-[180px] md:h-auto min-h-[180px] bg-black group overflow-hidden">
-                           <img 
-                              src="https://images.unsplash.com/photo-1511119253457-36e78921865c?w=1200&h=800&fit=crop" 
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-80" 
-                              alt="Reviewer Banner"
-                           />
-                           <div className="absolute top-3 left-3">
-                              <span className="bg-orange-primary text-white text-[7.5px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest italic flex items-center gap-1 shadow-md">
-                                 <div className="w-1 h-1 rounded-full bg-white animate-pulse" /> TRENDING NOW
-                              </span>
-                           </div>
-                           <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white shadow-lg transform group-hover:scale-110 transition-all duration-300">
-                              <Play size={14} className="fill-current ml-0.5" />
-                           </button>
-                           <div className="absolute bottom-3 left-3 right-3 text-white">
-                              <p className="text-[7.5px] font-black uppercase tracking-wider opacity-60 italic leading-none mb-1">CREATOR SPOTLIGHT</p>
-                              <h4 className="text-lg font-black italic tracking-tight leading-none">Apex Special Edition</h4>
-                           </div>
-                        </div>
-                        <div className="md:w-5/12 p-5 flex flex-col justify-between bg-white relative">
-                           <div className="space-y-2">
-                              <span className="text-[8px] font-black text-orange-primary uppercase tracking-widest block italic">IN-DEPTH REVIEW</span>
-                              <h4 className="text-base font-black text-navy italic tracking-tight leading-tight">Why Apex remains a Top Choice in 2024!</h4>
-                              <p className="text-[9.5px] text-gray-500 font-bold leading-relaxed">
-                                 Watch as we dive deep into the performance and build quality of Apex's latest collection. From real-world testing to expert analysis.
-                              </p>
-                           </div>
-                           <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-3">
-                              <div className="flex flex-col">
-                                 <div className="text-[9px] font-black text-navy italic uppercase tracking-wider">TECH REVIEW BD</div>
-                                 <div className="text-[7.5px] font-black text-gray-400 uppercase tracking-widest">Dhaka Headquarters</div>
-                              </div>
-                              <div className="w-8 h-8 rounded-full bg-navy/10 flex items-center justify-center text-navy text-[8.5px] font-black uppercase tracking-tight shadow-sm italic">
-                                 Apex
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-
-                     {/* Row of 3 Cards */}
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        {/* Card 1 */}
-                        <div className="bg-white/5 backdrop-blur-md rounded-[16px] overflow-hidden border border-white/10 flex flex-col h-full group hover:border-white/20 transition-all">
-                           <div className="aspect-[3/4] relative overflow-hidden bg-black">
-                              <img 
-                                 src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=800&fit=crop" 
-                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" 
-                                 alt="Style Showcase"
-                              />
-                              <div className="absolute top-2 left-2">
-                                 <span className="bg-orange-primary/95 text-white text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider italic">FASHION VIBES</span>
-                              </div>
-                              <div className="absolute bottom-2 left-2 right-2 text-white">
-                                 <h4 className="text-[10px] font-black italic tracking-tight leading-tight drop-shadow-md">Apex Style Showcase</h4>
-                              </div>
-                           </div>
-                           <div className="p-2.5 flex items-center gap-2 mt-auto border-t border-white/5 bg-black/20">
-                              <div className="w-6 h-6 rounded-md overflow-hidden bg-white/10 flex-shrink-0">
-                                 <img src="https://i.pravatar.cc/100?u=style" className="w-full h-full object-cover" />
-                              </div>
-                              <div className="flex flex-col min-w-0">
-                                 <span className="text-[8.5px] font-black text-white/90 truncate leading-none mb-0.5">Style Maven</span>
-                                 <span className="text-[7px] font-bold text-white/40 truncate">@stylemaven • 12m</span>
-                              </div>
-                           </div>
-                        </div>
-
-                        {/* Card 2 */}
-                        <div className="bg-white/5 backdrop-blur-md rounded-[16px] overflow-hidden border border-white/10 flex flex-col h-full group hover:border-white/20 transition-all">
-                           <div className="aspect-[3/4] relative overflow-hidden bg-black">
-                              <img 
-                                 src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=800&fit=crop" 
-                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" 
-                                 alt="A Deep Dive"
-                              />
-                              <div className="absolute top-2 left-2">
-                                 <span className="bg-blue-600/95 text-white text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider italic">FOOTWEAR</span>
-                              </div>
-                              <div className="absolute bottom-2 left-2 right-2 text-white">
-                                 <h4 className="text-[10px] font-black italic tracking-tight leading-tight drop-shadow-md">Apex Collection: A Deep Dive</h4>
-                              </div>
-                           </div>
-                           <div className="p-2.5 flex items-center gap-2 mt-auto border-t border-white/5 bg-black/20">
-                              <div className="w-6 h-6 rounded-md overflow-hidden bg-white/10 flex-shrink-0">
-                                 <img src="https://i.pravatar.cc/100?u=bbtech" className="w-full h-full object-cover" />
-                              </div>
-                              <div className="flex flex-col min-w-0">
-                                 <span className="text-[8.5px] font-black text-white/90 truncate leading-none mb-0.5">BB Tech Reviews</span>
-                                 <span className="text-[7px] font-bold text-white/40 truncate">@bbtech • 15h</span>
-                              </div>
-                           </div>
-                        </div>
-
-                        {/* Card 3 */}
-                        <div className="bg-white/5 backdrop-blur-md rounded-[16px] overflow-hidden border border-white/10 flex flex-col h-full group hover:border-white/20 transition-all">
-                           <div className="aspect-[3/4] relative overflow-hidden bg-black">
-                              <img 
-                                 src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=800&fit=crop" 
-                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" 
-                                 alt="Creative Showcase"
-                              />
-                              <div className="absolute top-2 left-2">
-                                 <span className="bg-purple-600/95 text-white text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider italic">UNBOXING</span>
-                              </div>
-                              <div className="absolute bottom-2 left-2 right-2 text-white">
-                                 <h4 className="text-[10px] font-black italic tracking-tight leading-tight drop-shadow-md">Finding The Perfect Build in Apex</h4>
-                              </div>
-                           </div>
-                           <div className="p-2.5 flex items-center gap-2 mt-auto border-t border-white/5 bg-black/20">
-                              <div className="w-6 h-6 rounded-md overflow-hidden bg-white/10 flex-shrink-0">
-                                 <img src="https://i.pravatar.cc/100?u=avishek" className="w-full h-full object-cover" />
-                              </div>
-                              <div className="flex flex-col min-w-0">
-                                 <span className="text-[8.5px] font-black text-white/90 truncate leading-none mb-0.5">Avishek Mojumder</span>
-                                 <span className="text-[7px] font-bold text-white/40 truncate">@avishek • 1d</span>
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
+                  <WithInfluencerReviews 
+                     brandName={brandName}
+                  />
 
                   {/* PUBLIC REVIEWS CARD TO MATCH ATTACHED SCREENSHOT */}
                   <div className="bg-white rounded-[40px] p-8 border border-gray-100/80 shadow-2xl shadow-gray-100/40 space-y-8">
@@ -1147,116 +1069,6 @@ export function ProductDetailPage() {
             </div>
          </div>
       </main>
-
-  
-
-      {/* Comparison Section */}
-      <section className="bg-[#050514] py-16 overflow-hidden relative border-t border-white/5">
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        
-        <div className="max-w-7xl mx-auto px-6">
-           <div className="flex flex-col items-center mb-16">
-              <div className="bg-white rounded-full px-6 py-2 flex items-center gap-3 shadow-xl mb-4">
-                 <div className="w-5 h-5 bg-orange-primary rounded flex items-center justify-center p-1">
-                    <Save size={14} className="text-white" />
-                 </div>
-                 <span className="text-[10px] font-black text-navy uppercase tracking-widest italic">Compare With Similar Products</span>
-              </div>
-              <p className="text-[11px] font-black text-white/40 uppercase tracking-[0.2em] italic">Side By Side Specs Comparison</p>
-           </div>
-
-           <div className="bg-white rounded-[32px] overflow-hidden shadow-2xl border border-white/5 flex flex-col md:flex-row relative z-10">
-              {/* Left Labels Column */}
-              <div className="md:w-1/4 p-10 flex flex-col">
-                 <div className="mb-20">
-                    <h4 className="text-orange-primary text-2xl font-black italic tracking-tighter uppercase mb-1">COMPARING</h4>
-                    <div className="text-4xl font-black text-navy italic tracking-tighter">2 Products</div>
-                 </div>
-                 <div className="flex flex-col gap-14">
-                    {['Price', 'Rating', 'Reviews', 'Category', 'Fitting'].map((label) => (
-                       <div key={label} className="text-xl font-black text-navy/40 italic tracking-tight">{label}</div>
-                    ))}
-                 </div>
-              </div>
-
-              {/* Product Columns Container */}
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-3">
-                 {[
-                   { 
-                     name: `${product.brand} Elite Version`, 
-                     brand: product.brand, 
-                     price: `৳${product.price}`, 
-                     rating: product.rating, 
-                     reviews: product.reviews || "1.2k", 
-                     category: product.category || "Lifestyle", 
-                     value: "Standard", 
-                     img: product.image,
-                     active: true,
-                     color: "bg-orange-primary"
-                   },
-                   { 
-                     name: `${similarProducts[0]?.brand} Competitor`, 
-                     brand: similarProducts[0]?.brand || "Alternative", 
-                     price: `৳${similarProducts[0]?.price || "2,500"}`, 
-                     rating: similarProducts[0]?.rating || "4.5", 
-                     reviews: similarProducts[0]?.reviews || "85", 
-                     category: similarProducts[0]?.category || "Lifestyle", 
-                     value: "Standard", 
-                     img: similarProducts[0]?.image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
-                     color: "bg-[#6366F1]"
-                   },
-                   { 
-                     name: `${similarProducts[1]?.brand} Competitor`, 
-                     brand: similarProducts[1]?.brand || "Alternative", 
-                     price: `৳${similarProducts[1]?.price || "3,200"}`, 
-                     rating: similarProducts[1]?.rating || "4.4", 
-                     reviews: similarProducts[1]?.reviews || "110", 
-                     category: similarProducts[1]?.category || "Lifestyle", 
-                     value: "Standard", 
-                     img: similarProducts[1]?.image || "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop",
-                     color: "bg-[#6366F1]"
-                   }
-                 ].map((comp, idx) => (
-                    <div key={idx} className={cn("flex flex-col border-l border-gray-50 bg-[#F8FAFC]/30 group transition-all", idx === 0 && "bg-white")}>
-                       <div className={cn("h-1 w-full", comp.color)} />
-                       <div className="p-10 flex flex-col">
-                          <div className="aspect-square rounded-[24px] overflow-hidden mb-6 border-4 border-white shadow-xl">
-                             <img src={comp.img} className="w-full h-full object-cover" alt="product cover thumbnail" />
-                          </div>
-                          <div className="mb-8">
-                             <div className="flex items-center gap-1 text-orange-primary text-[8px] font-black uppercase italic mb-1">
-                                <Star size={10} className="fill-current" /> THIS PRODUCT
-                             </div>
-                             <h5 className="text-[13px] font-black text-navy/80 italic tracking-tight leading-tight mb-0.5">{comp.name}</h5>
-                             <div className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{comp.brand}</div>
-                          </div>
-
-                          <div className="flex flex-col gap-12">
-                             <div className="text-xl font-black text-navy italic tracking-tighter">{comp.price}</div>
-                             <div className="flex items-center gap-2">
-                                <span className="text-xl font-black text-navy italic tracking-tighter">{comp.rating}</span>
-                                <div className="flex gap-0.5">
-                                   {[1,2,3,4,5].map(s => <Star key={s} size={12} className={cn(s <= 4 ? "fill-orange-primary text-orange-primary" : "text-gray-200")} />)}
-                                </div>
-                             </div>
-                             <div className="text-xl font-black text-navy italic tracking-tighter">{comp.reviews}</div>
-                             <div className="text-xl font-black text-orange-primary italic tracking-tight">{comp.category}</div>
-                             <div className="text-xl font-black text-navy italic tracking-tight">{comp.value}</div>
-                          </div>
-
-                          <button className={cn(
-                            "mt-12 w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all italic",
-                            comp.active ? "bg-orange-primary text-white shadow-xl shadow-orange-primary/20" : "bg-[#6366F1] text-white shadow-xl shadow-[#6366F1]/20 group-hover:scale-105"
-                          )}>
-                             {comp.active ? "Selected" : "View Details"}
-                          </button>
-                       </div>
-                    </div>
-                 ))}
-              </div>
-           </div>
-        </div>
-      </section>
 
       {/* Trust Section */}
       <section className="w-full bg-[#F4F9FF] border-t border-blue-50 py-12">
