@@ -648,26 +648,29 @@ export function B2BHomePage() {
               </div>
 
               {/* FEED SECTION C — SPOTLIGHT FACTORY (Sponsored) */}
-              <div className="flex flex-col md:flex-row md:items-end justify-between mb-5 mt-4 text-left gap-3">
-                <div className="text-left">
-                  <h2 className="font-space text-3xl font-black italic tracking-tight uppercase leading-none">
-                    <span className="text-[#FF0038]">SPOTLIGHT</span> <span className="text-[#081120]">FACTORY</span>
-                  </h2>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="shrink-0 w-1 h-[14px] bg-[#FF0038] rounded-full inline-block" />
-                    <p className="text-[11px] text-[#081120] font-bold tracking-wide leading-none uppercase">
-                      BSCI field audits conducted. Direct-to-mill contracts & raw cargo tracking.
-                    </p>
+              <div id="section-spotlight-brand" className="relative overflow-hidden rounded-[20px] bg-[#081120] text-white p-6 md:p-8 shadow-2xl leading-relaxed mb-4">
+                
+                {/* Embedded Sponsored Spotlight Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-white/10 text-left gap-3 relative z-10">
+                  <div className="text-left">
+                    <span className="text-[9px] font-mono font-black tracking-[0.25em] text-[#FF0038] uppercase block mb-1">SPONSORED PLATFORM SPOTLIGHT</span>
+                    <h2 className="font-space text-2xl font-black italic tracking-tight uppercase leading-none">
+                      <span className="text-[#FF0038]">SPOTLIGHT</span> <span className="text-white">FACTORY</span>
+                    </h2>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="shrink-0 w-1 h-[14px] bg-[#FF0038] rounded-full inline-block" />
+                      <p className="text-[11px] text-zinc-300 font-bold tracking-wide leading-none uppercase">
+                        BSCI field audits conducted. Direct-to-mill contracts & raw cargo tracking.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0">
+                    <span className="border border-[#FF0038]/50 text-[#FF0038] bg-[#FF0038]/10 text-[9.5px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full leading-none font-mono">
+                      VERIFIED PARTNER
+                    </span>
                   </div>
                 </div>
-                <div className="flex shrink-0">
-                  <span className="border border-[#FF0038]/40 text-[#FF0038] text-[9.5px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full leading-none font-mono">
-                    VERIFIED PARTNER
-                  </span>
-                </div>
-              </div>
 
-              <div id="section-spotlight-brand" className="relative overflow-hidden rounded-[20px] bg-[#081120] text-white p-6 md:p-8 shadow-2xl leading-relaxed mb-4">
                 {/* Spotlight Main Header */}
                 <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-7 items-center pb-6 border-b border-white/10 relative z-10">
                   
@@ -876,7 +879,7 @@ export function B2BHomePage() {
                 </div>
 
                 {/* Main Sourcing Guide banner blog layout */}
-                <div className="border border-gray-100 rounded-[28px] overflow-hidden shadow-md hover:shadow-xl hover:border-gray-200/80 transition-all duration-300 mb-9 bg-white flex flex-col group">
+                <div className="border border-[#e8edf2] rounded-xl overflow-hidden hover:border-[#FF0038]/30 hover:scale-[1.01] transition-all duration-300 mb-9 bg-white flex flex-col group shadow-xs">
                   <div 
                     onClick={() => {
                       handleRecView('featured');
@@ -997,7 +1000,7 @@ export function B2BHomePage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6.5 mb-10">
                   
                   {/* CARD 1: Video Reel Guideline */}
-                  <div className="bg-white border border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group text-left">
+                  <div className="bg-white border border-[#e8edf2] rounded-xl overflow-hidden hover:border-[#FF0038]/30 hover:scale-[1.01] transition-all duration-300 flex flex-col group text-left shadow-xs">
                     <div 
                       onClick={() => handleRecView('card1')}
                       className="relative h-[240px] bg-[#081120] overflow-hidden cursor-pointer"
@@ -1068,7 +1071,7 @@ export function B2BHomePage() {
                   </div>
 
                   {/* CARD 2: Text Sourcing Manual */}
-                  <div className="bg-white border border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group text-left">
+                  <div className="bg-white border border-[#e8edf2] rounded-xl overflow-hidden hover:border-[#FF0038]/30 hover:scale-[1.01] transition-all duration-300 flex flex-col group text-left shadow-xs">
                     <div 
                       onClick={() => handleRecView('card2')}
                       className="relative h-44 bg-[#081120] overflow-hidden cursor-pointer"
@@ -1123,7 +1126,7 @@ export function B2BHomePage() {
                   </div>
 
                   {/* CARD 3: Video Reel Guidelines 2 */}
-                  <div className="bg-white border border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group text-left">
+                  <div className="bg-white border border-[#e8edf2] rounded-xl overflow-hidden hover:border-[#FF0038]/30 hover:scale-[1.01] transition-all duration-300 flex flex-col group text-left shadow-xs">
                     <div 
                       onClick={() => handleRecView('card3')}
                       className="relative h-[240px] bg-[#081120] overflow-hidden cursor-pointer"

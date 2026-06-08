@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Home, ShoppingBag, Store, Sparkles, Tag, User, Building2, Grid, BookOpen 
-} from 'lucide-react';
+import { Home, ShoppingBag, Store, Sparkles, Tag, User, Grid } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { SignInModal } from './SignInModal';
-import { useGlobalState } from '../context/GlobalStateContext';
 
 export function MobileNav() {
-  const { mode } = useGlobalState();
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const location = useLocation();
 
@@ -40,32 +36,14 @@ export function MobileNav() {
     { icon: User, label: 'Profile', path: '/dashboard', state: { activeTab: 'overview' } },
   ];
 
-  // 2. B2B Wholesale Bottom Navigation Tabs (6-tabs layout)
-  const b2bItems = [
-    { icon: Home, label: 'Home', path: '/b2b', state: null },
-    { icon: Grid, label: 'Categories', path: '/categories', state: null },
-    { icon: Building2, label: 'Suppliers', path: '/b2b/suppliers', state: null },
-    { icon: ShoppingBag, label: 'Products', path: '/b2b/products', state: null },
-    { icon: BookOpen, label: 'Business Guide', path: '/guides', state: null },
-    { icon: User, label: 'Profile', path: '/dashboard', state: { activeTab: 'overview' } },
-  ];
-
-  // Pick current items list based on global mode toggle state
-  const navItems = mode === 'wholesale' ? b2bItems : retailItems;
-
   return (
     <>
       <div 
-        className={cn(
-          "lg:hidden fixed bottom-6 left-2 right-2 sm:left-6 sm:right-6 z-[100] backdrop-blur-xl border rounded-[28px] p-1 shadow-[0_20px_50px_rgba(0,0,0,0.6)] transition-colors duration-300 overflow-hidden",
-          mode === 'wholesale' 
-            ? "bg-[#081120]/95 border-[#FF0038]/15 text-white" 
-            : "bg-[#0A0A1F]/90 border-white/10 text-white"
-        )}
+        className="lg:hidden fixed bottom-6 left-2 right-2 sm:left-6 sm:right-6 z-[100] backdrop-blur-xl border rounded-[28px] p-1 shadow-[0_20px_50px_rgba(0,0,0,0.6)] bg-[#0A0A1F]/90 border-white/10 text-white overflow-hidden"
         id="mobile-bottom-navigation-dock"
       >
         <div className="flex items-center justify-around w-full gap-0.5">
-          {navItems.map((item, index) => {
+          {retailItems.map((item, index) => {
             const Active = isActive(item.path, item.state);
             return (
               <Link 
@@ -75,18 +53,15 @@ export function MobileNav() {
                 className={cn(
                   "flex flex-col items-center gap-1 py-1.5 px-1 text-center sm:px-3 rounded-[20px] transition-all duration-300 shrink-0 relative",
                   Active 
-                    ? (mode === 'wholesale' ? "bg-[#FF0038]/15 text-[#FF0038]" : "bg-orange-primary/10 text-orange-primary") 
+                    ? "bg-orange-primary/10 text-orange-primary" 
                     : "text-white/40 hover:text-white"
                 )}
               >
-                <item.icon size={14} className={cn("transition-transform duration-300", Active && "scale-110", Active && mode !== 'wholesale' && "animate-pulse")} />
+                <item.icon size={14} className={cn("transition-transform duration-300", Active && "scale-110", Active && "animate-pulse")} />
                 
                 {/* Visual Accent Pulse Glow on Hover/Active */}
                 {Active && (
-                  <span className={cn(
-                    "absolute -bottom-1 w-1 h-1 rounded-full",
-                    mode === 'wholesale' ? "bg-[#FF0038]" : "bg-orange-primary"
-                  )} />
+                  <span className="absolute -bottom-1 w-1 h-1 bg-orange-primary rounded-full" />
                 )}
                 
                 {/* Standard Choosify font pairings and capital style matching */}

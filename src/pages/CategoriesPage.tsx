@@ -145,12 +145,12 @@ export function CategoriesPage() {
         
         <div className="max-w-7xl mx-auto text-center relative z-10 w-full">
           {mode === 'wholesale' ? (
-            <h1 className="text-[28px] md:text-[36px] font-black italic uppercase tracking-tighter mb-2 leading-none">
-              <span className="text-white">B2B Product Category</span> <span className="text-[#FF5B00]">HUB</span>
+            <h1 className="text-[28px] md:text-[36px] font-black uppercase tracking-tighter mb-2 leading-none">
+              <span className="text-white not-italic">B2B Product Category</span> <span className="text-[#FF5B00] not-italic">HUB</span>
             </h1>
           ) : (
-            <h1 className="text-[28px] md:text-[36px] font-black italic uppercase tracking-tighter mb-2 leading-none">
-              <span className="text-white">EXPLORATION</span> <span className="text-orange-primary">HUB</span>
+            <h1 className="text-[28px] md:text-[36px] font-black uppercase tracking-tighter mb-2 leading-none">
+              <span className="text-white not-italic">EXPLORATION</span> <span className="text-orange-primary not-italic">HUB</span>
             </h1>
           )}
  
@@ -232,8 +232,8 @@ export function CategoriesPage() {
             className="bg-white rounded-[24px] border border-gray-100 p-6 shadow-[0_10px_30px_rgba(26,29,78,0.02)] w-full"
           >
             <div className="flex items-center gap-1.5 pb-4 mb-5 border-b border-gray-100 px-1">
-              <span className="text-xl font-black italic tracking-wider text-orange-primary uppercase font-sans">QUICK</span>
-              <span className="text-xl font-black italic tracking-wider text-navy uppercase font-sans">ACCESS</span>
+              <span className="text-xl font-black tracking-wider text-orange-primary uppercase font-sans">QUICK</span>
+              <span className="text-xl font-black tracking-wider text-navy uppercase font-sans">ACCESS</span>
             </div>
             <div className="space-y-4 text-left">
               {[
@@ -319,7 +319,10 @@ export function CategoriesPage() {
                     <div className="w-14 h-14 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-soft group-hover:scale-105 group-hover:border-orange-primary/30 transition-all duration-300 shrink-0">
                       {link.icon}
                     </div>
-                    <span className="font-sans font-extrabold text-xs text-navy uppercase italic tracking-wide group-hover:text-orange-primary transition-colors duration-300">{link.label}</span>
+                    <span className={cn(
+                      "font-sans text-xs text-navy uppercase tracking-wide group-hover:text-orange-primary transition-colors duration-300",
+                      lidx === 2 ? "font-bold" : "font-extrabold"
+                    )}>{link.label}</span>
                   </div>
                   <span className="px-2.5 py-1 bg-[#D6E1EC]/60 text-navy/90 text-[10px] font-black rounded-full font-mono leading-none tracking-tight">550</span>
                 </Link>

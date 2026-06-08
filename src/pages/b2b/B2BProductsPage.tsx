@@ -5,6 +5,7 @@ import {
   HelpCircle, ChevronRight, ShoppingCart, Info, TrendingUp
 } from 'lucide-react';
 import { useGlobalState } from '../../context/GlobalStateContext';
+import { ProductCard } from '../../components/ProductCard';
 import toast from 'react-hot-toast';
 
 export function B2BProductsPage() {
@@ -127,63 +128,9 @@ export function B2BProductsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((p) => {
-              const basePrice = p.pricingTiers?.[0]?.price || p.price;
-              const maxSavingsPrice = p.pricingTiers?.[p.pricingTiers.length - 1]?.price || basePrice;
-
-              return (
-                <div 
-                  key={p.id}
-                  onClick={() => navigate(`/b2b/product/${p.id}`)}
-                  className="bg-[#F7F8FA] border border-slate-200 hover:border-[#FF0038]/40 rounded-[28px] p-5 transition-all duration-300 relative cursor-pointer group flex flex-col justify-between shadow-sm"
-                >
-                  <div>
-                    {/* Catalog Image */}
-                    <div className="w-full aspect-square rounded-2xl bg-white overflow-hidden border border-slate-200/60 relative">
-                      <img src={p.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="" />
-                      <div className="absolute top-3 left-3 px-3 py-1 bg-[#081120] rounded-lg text-[9px] font-black text-white uppercase tracking-widest italic font-mono">
-                        MOQ: {p.moq || 10} Units
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase">{p.category}</p>
-                      <h3 className="font-black text-[#081120] italic text-base mt-1 group-hover:text-[#FF0038] transition-colors truncate">{p.title}</h3>
-                      <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed font-medium">{p.description}</p>
-                    </div>
-
-                    {/* Slabs Grid Display */}
-                    {p.pricingTiers && (
-                      <div className="grid grid-cols-3 gap-2 mt-4 bg-white border border-slate-200 p-2 rounded-xl text-center shadow-sm">
-                        {p.pricingTiers.slice(0, 3).map((tier, idx) => (
-                          <div key={idx} className="border-r border-slate-100 last:border-0">
-                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider font-mono">
-                              Qty {tier.minQuantity}+
-                            </p>
-                            <p className="text-[10px] font-black text-emerald-600 font-mono italic mt-0.5">
-                              ৳{tier.price.toLocaleString()}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Sourcing Price Range CTA */}
-                  <div className="mt-6 pt-3 border-t border-slate-200/80 flex items-center justify-between">
-                    <div>
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 block">Slab Rate Limit</span>
-                      <span className="text-sm font-black text-[#081120] font-mono italic">
-                        ৳{maxSavingsPrice.toLocaleString()} - ৳{basePrice.toLocaleString()}
-                      </span>
-                    </div>
-                    <button className="px-3.5 py-2 bg-[#081120] hover:bg-[#FF0038] hover:text-white border-none text-[9px] font-black text-white uppercase tracking-widest italic transition-all rounded-xl">
-                      Inquire Lot
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            {filteredProducts.map((p) => (
+              <ProductCard key={p.id} product={p} variant="grid" />
+            ))}
           </div>
         )}
       </div>

@@ -791,23 +791,26 @@ export function HomePage() {
               </div>
 
               {/* FEED SECTION C — SPOTLIGHT BRAND (Sponsored) */}
-              <div className="flex flex-col md:flex-row md:items-end justify-between mb-4 mt-8 gap-3">
-                <div className="text-left">
-                  <h2 className="text-base font-semibold text-[#1a1a2e]">
-                    SPOTLIGHT <span className="text-[#E8500A]">BRAND</span>
-                  </h2>
-                  <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
-                    Connect with millions of shoppers and boost your brand visibility today.
-                  </p>
+              <div id="section-spotlight-brand" className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#2E171C] to-[#1E1114] text-white p-5 md:p-6 border border-[#E8500A]/20 shadow-xl leading-relaxed mb-6">
+                
+                {/* Embedded Sponsored Spotlight Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between pb-5 mb-5 border-b border-white/10 text-left gap-3 relative z-10">
+                  <div className="text-left">
+                    <span className="text-[9px] font-mono font-black tracking-[0.25em] text-[#E8500A] uppercase block mb-1">SPONSORED PLATFORM SPOTLIGHT</span>
+                    <h2 className="font-space text-2xl font-black italic tracking-tight uppercase leading-none text-white">
+                      SPOTLIGHT <span className="text-[#E8500A]">BRAND</span>
+                    </h2>
+                    <p className="text-[11px] text-zinc-300 font-medium tracking-wide mt-1.5 text-left leading-none">
+                      Connect with millions of shoppers and boost your brand visibility today.
+                    </p>
+                  </div>
+                  <div className="flex shrink-0">
+                    <span className="border border-[#E8500A]/40 text-[#E8500A] bg-[#E8500A]/10 text-[9.5px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full leading-none font-mono">
+                      SPONSORED AD
+                    </span>
+                  </div>
                 </div>
-                <div className="flex shrink-0">
-                  <span className="border border-[#E8500A]/30 text-[#E8500A] text-[9.5px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded inline-block leading-none font-mono">
-                    SPONSORED AD
-                  </span>
-                </div>
-              </div>
 
-              <div id="section-spotlight-brand" className="relative overflow-hidden rounded-2xl bg-[#2E171C] text-white p-5 border border-[#3E1FA2]/10 shadow-sm leading-relaxed mb-6">
                 {/* Spotlight Main Header */}
                 <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-5 items-center pb-5 border-b border-white/10 relative z-10">
                   
@@ -874,9 +877,9 @@ export function HomePage() {
 
                 </div>
 
-                {/* Sub-list of 4 spotlight products in pristine mockup cards */}
+                {/* Sub-list of 4 spotlight products in pristine rollup cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-5 relative z-10 text-[#1a1a2e]">
-                  {[...sailorProductList, ...rightProductsList].slice(0, 4).map((product, idx) => {
+                  {[...sailorProductList, ...rightProductsList].slice(0, 4).map((product: any, idx) => {
                     const mockImages = [
                       "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop",
                       "https://images.unsplash.com/photo-1587314168485-3236d6710814?w=400&h=400&fit=crop",
@@ -893,22 +896,70 @@ export function HomePage() {
                           handleSpotlightProductReact(pKey, 'views');
                           navigate(`/products/${product.id}`);
                         }}
-                        className="bg-white border border-[#e8edf2] hover:border-[#E8500A]/30 rounded-xl p-3 shadow-sm hover:scale-[1.01] transition-all duration-300 cursor-pointer flex flex-col gap-2.5 group"
+                        className="bg-white border border-[#e8edf2] hover:border-[#E8500A]/30 rounded-xl p-3 shadow-md hover:scale-[1.01] transition-all duration-300 cursor-pointer flex flex-col gap-2.5 group relative"
                       >
-                        <div className="w-full aspect-square bg-[#ECEFF1] rounded-lg overflow-hidden relative border border-gray-100 shrink-0">
+                        {/* Sponsored Badge overlay */}
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="bg-orange-primary/15 text-[#E8500A] text-[7.5px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider leading-none">
+                            SPONSORED
+                          </span>
+                        </div>
+
+                        {/* Product Image */}
+                        <div className="w-full aspect-square bg-gray-50 rounded-lg overflow-hidden relative border border-gray-100 shrink-0">
                           <img 
-                            src={mockImages[idx]} 
+                            src={product.image || mockImages[idx]} 
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                             alt={product.title || "Product"} 
                           />
                         </div>
-                        <div className="flex flex-col gap-1.5 flex-1">
-                          <h5 className="font-sans font-medium text-[#1a1a2e] text-[11px] leading-snug text-left line-clamp-3">
-                            QCY PB10C 10000mAh 38W PD Fast Charging Mini Power Bank.
-                          </h5>
+
+                        <div className="flex flex-col gap-1.5 flex-1 text-left min-h-0">
+                          {/* Brand & Rating row */}
+                          <div className="flex items-center justify-between gap-1 w-full">
+                            <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider truncate max-w-[80px]">
+                              {product.brand || 'SAILOR'}
+                            </span>
+                            <div className="flex items-center gap-0.5 shrink-0 ml-auto bg-gray-50 px-1 py-0.5 rounded">
+                              <Star size={7.5} className="fill-orange-primary text-orange-primary" />
+                              <span className="text-[8px] font-semibold text-gray-500">{product.rating || '4.8'}</span>
+                            </div>
+                          </div>
+
+                          {/* Product Title */}
+                          <h4 className="text-[11px] font-medium text-[#1a1a2e] leading-snug line-clamp-2 h-[34px] group-hover:text-orange-primary transition-colors">
+                            {product.title}
+                          </h4>
                           
-                          {/* Mini Reaction Toolbar for all product cards */}
-                          <div className="flex items-center justify-between border-t border-gray-100 pt-2 mt-auto select-none">
+                          {/* Pricing and primary CTA row */}
+                          <div className="flex items-center justify-between gap-2 mt-auto pt-2 border-t border-gray-100 w-full select-none">
+                            <div className="flex flex-col text-left justify-center min-w-0">
+                              <span className="text-[11px] font-mono font-semibold text-[#E8500A] tracking-tight">
+                                BDT {(product.price || 1200).toLocaleString()}
+                              </span>
+                              {product.originalPrice && (
+                                <span className="text-[8px] font-mono text-gray-400 line-through mt-0.5">
+                                  ৳{product.originalPrice}
+                                </span>
+                              )}
+                            </div>
+                            
+                            <button 
+                              type="button" 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                addToCart(product, 1); 
+                                toast.success(`Successfully added ${product.title} to your verification basket!`);
+                              }} 
+                              className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[8px] font-black rounded uppercase tracking-wider cursor-pointer transition-colors leading-none"
+                              aria-label="Add to cart"
+                            >
+                              ADD
+                            </button>
+                          </div>
+
+                          {/* Mini Reaction Toolbar for secondary social values */}
+                          <div className="flex items-center justify-between border-t border-gray-100 pt-2 mt-2 select-none">
                             <div className="flex items-center gap-2 text-[10px] font-mono text-gray-400">
                               <button 
                                 onClick={(e) => {
@@ -947,6 +998,7 @@ export function HomePage() {
                               </button>
                             </div>
                           </div>
+
                         </div>
                       </div>
                     );
@@ -962,7 +1014,7 @@ export function HomePage() {
                       onClick={(e) => { e.stopPropagation(); handleSpotlightAction('likes'); }}
                       className={cn(
                         "flex items-center gap-1.5 transition-all text-[11px] cursor-pointer transform active:scale-95",
-                        spotlightStates.liked ? "text-rose-500 font-semibold" : "hover:text-rose-450 text-gray-300"
+                        spotlightStates.liked ? "text-rose-500 font-semibold" : "hover:text-rose-455 text-gray-300"
                       )}
                     >
                       <Heart className={cn("w-4 h-4", spotlightStates.liked ? "fill-current text-rose-500 scale-105" : "")} />

@@ -44,16 +44,7 @@ const CashBookHome = lazy(() => import('./pages/cashbook/CashBookHome').then(m =
 const CashBookDetail = lazy(() => import('./pages/cashbook/CashBookDetail').then(m => ({ default: m.CashBookDetail })));
 const CashBookReports = lazy(() => import('./pages/cashbook/CashBookReports').then(m => ({ default: m.CashBookReports })));
 
-// Lazy load B2B pages for performance
-const B2BHomePage = lazy(() => import('./pages/b2b/B2BHomePage').then(m => ({ default: m.B2BHomePage })));
-const B2BSuppliersPage = lazy(() => import('./pages/b2b/B2BSuppliersPage').then(m => ({ default: m.B2BSuppliersPage })));
-const B2BProductsPage = lazy(() => import('./pages/b2b/B2BProductsPage').then(m => ({ default: m.B2BProductsPage })));
-const B2BSupplierDetailPage = lazy(() => import('./pages/b2b/B2BSupplierDetailPage').then(m => ({ default: m.B2BSupplierDetailPage })));
-const B2BProductDetailPage = lazy(() => import('./pages/b2b/B2BProductDetailPage').then(m => ({ default: m.B2BProductDetailPage })));
-const B2BRfqPage = lazy(() => import('./pages/b2b/B2BRfqPage').then(m => ({ default: m.B2BRfqPage })));
-const B2BBrandsPage = lazy(() => import('./pages/b2b/B2BBrandsPage').then(m => ({ default: m.B2BBrandsPage })));
-const B2BNationwidePage = lazy(() => import('./pages/b2b/B2BNationwidePage').then(m => ({ default: m.B2BNationwidePage })));
-const B2BCartPage = lazy(() => import('./pages/b2b/B2BCartPage').then(m => ({ default: m.B2BCartPage })));
+
 
 // Shell for all 13 screens overview
 function Overview() {
@@ -175,16 +166,7 @@ function AppContent() {
       <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
           <Routes location={location}>
-            <Route path="/" element={<PageWrapper>{mode === 'wholesale' ? <B2BHomePage /> : <HomePage />}</PageWrapper>} />
-            <Route path="/b2b" element={<PageWrapper><B2BHomePage /></PageWrapper>} />
-            <Route path="/b2b/suppliers" element={<PageWrapper><B2BSuppliersPage /></PageWrapper>} />
-            <Route path="/b2b/supplier/:slug" element={<PageWrapper><B2BSupplierDetailPage /></PageWrapper>} />
-            <Route path="/b2b/products" element={<PageWrapper><B2BProductsPage /></PageWrapper>} />
-            <Route path="/b2b/product/:id" element={<PageWrapper><B2BProductDetailPage /></PageWrapper>} />
-            <Route path="/b2b/rfq" element={<PageWrapper><B2BRfqPage /></PageWrapper>} />
-            <Route path="/b2b/brands" element={<PageWrapper><B2BBrandsPage /></PageWrapper>} />
-            <Route path="/b2b/nationwide" element={<PageWrapper><B2BNationwidePage /></PageWrapper>} />
-            <Route path="/cart/b2b" element={<PageWrapper><B2BCartPage /></PageWrapper>} />
+            <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
             <Route path="/overview" element={<Overview />} />
             <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
             <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />

@@ -65,7 +65,7 @@ export function B2BBrandsPage() {
                 toast.success(`Opening ${brand.name} corporate wholesale showroom`);
                 navigate('/b2b/products');
               }}
-              className="bg-[#F7F8FA] border border-slate-200 hover:border-[#FF0038]/30 rounded-[32px] p-6 transition-all duration-300 cursor-pointer group flex flex-col justify-between shadow-sm text-slate-850"
+              className="bg-white border border-[#e8edf2] hover:border-[#FF0038]/30 rounded-xl p-6 hover:scale-[1.01] transition-all duration-300 cursor-pointer group flex flex-col justify-between shadow-xs text-slate-850"
             >
               <div>
                 <div className="flex items-start justify-between">

@@ -349,19 +349,18 @@ export function B2BSuppliersPage() {
               {[suppliers[0], suppliers[1], suppliers[2]].map((brand, i) => (
                 <div 
                   key={i} 
-                  className="bg-white rounded-[32px] p-6 shadow-high-density border border-gray-100 flex flex-col hover:shadow-2xl transition-all relative group overflow-hidden mx-auto justify-between"
+                  className="bg-white rounded-xl p-6 border border-[#e8edf2] hover:border-[#FF0038]/30 hover:scale-[1.01] transition-all duration-300 flex flex-col relative group overflow-hidden mx-auto justify-between shadow-xs"
                   style={{ width: '100%', maxWidth: '350px', height: '350px' }}
                 >
                   <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF0038]/5 blur-3xl rounded-full" />
                   
                   {/* Horizontal Header Info */}
                   <div className="flex gap-4 items-start relative z-10 text-left w-full">
-                    <div className="w-16 h-16 rounded-[18px] bg-[#081120] flex items-center justify-center p-3 flex-shrink-0 overflow-hidden shadow-xl relative border border-white/10">
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+                    <div className="w-16 h-16 rounded-lg bg-gray-50 flex items-center justify-center p-2.5 flex-shrink-0 overflow-hidden border border-gray-100 shadow-xs">
                       {brand.logo.length > 2 ? (
                          <img src={brand.logo} className="w-full h-full object-contain relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
                       ) : (
-                         <span className="text-3xl font-black text-white relative z-10">{brand.logo}</span>
+                         <span className="text-3xl font-black text-navy relative z-10">{brand.logo}</span>
                       )}
                     </div>
                     <div className="flex flex-col min-w-0 flex-1">
@@ -409,7 +408,7 @@ export function B2BSuppliersPage() {
 
                   <div className="w-full h-[1px] bg-transparent my-1" />
 
-                  <Link to={`/b2b/supplier/${brand.slug}`} className="w-full py-3 bg-navy text-white text-[9px] font-black uppercase rounded-xl shadow-xl hover:bg-[#FF0038] active:scale-95 transition-all text-center tracking-widest italic flex items-center justify-center gap-2 group/btn z-10 shrink-0">
+                  <Link to={`/b2b/supplier/${brand.slug}`} className="w-full py-3 bg-navy text-white text-[9px] font-black uppercase rounded-lg shadow-md hover:bg-[#FF0038] active:scale-95 transition-all text-center tracking-widest italic flex items-center justify-center gap-2 group/btn z-10 shrink-0">
                      Visit Supplier Hub <ArrowRight size={14} className="-rotate-45 group-hover/btn:translate-x-1 transition-transform" />
                   </Link>
                 </div>
@@ -429,7 +428,7 @@ export function B2BSuppliersPage() {
                   <motion.div 
                     layout
                     key={brand.id} 
-                    className="bg-white rounded-[24px] p-5 shadow-high-density hover:shadow-3xl transition-all border border-transparent hover:border-[#FF0038]/10 relative group flex flex-col justify-between overflow-hidden mx-auto"
+                    className="bg-white rounded-xl p-5 border border-[#e8edf2] hover:border-[#FF0038]/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
                     style={{ width: '100%', maxWidth: '250px', height: '350px' }}
                   >
                     {brand.isHot && (
@@ -441,16 +440,16 @@ export function B2BSuppliersPage() {
 
                     {/* Horizontal Header System */}
                     <div className="flex gap-3 items-start relative z-10 text-left w-full">
-                      <div className="w-14 h-14 rounded-[14px] bg-[#081120] flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xl border border-white/5">
+                      <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-2 shadow-xs">
                         {brand.logo.length > 2 ? (
                            <img src={brand.logo} className="w-full h-full object-contain p-2 relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
                         ) : (
-                          <span className="text-2xl font-black text-white">{brand.logo}</span>
+                          <span className="text-2xl font-black text-navy">{brand.logo}</span>
                         )}
                       </div>
                       <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>
                         <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-[#FF0038] transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
-                        <p className="text-[9px] font-bold text-gray-400 mb-1 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
+                        <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
                         
                         {/* Category text Tag */}
                         <span className="text-[8px] font-bold text-[#FF0038] uppercase tracking-wider block mt-0.5 bg-[#FF0038]/5 px-1.5 py-0.5 rounded-md w-max italic font-mono border border-[#FF0038]/15">

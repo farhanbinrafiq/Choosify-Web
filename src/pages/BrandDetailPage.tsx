@@ -714,11 +714,11 @@ export function BrandDetailPage() {
 
                   {/* Main YouTube Feature block */}
                   <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md mb-8">
-                     <div className="relative aspect-video lg:aspect-auto lg:h-[300px] group overflow-hidden">
+                     <div className="relative aspect-video lg:aspect-auto lg:min-h-[300px] lg:h-full group overflow-hidden">
                         <img 
                           src="https://images.unsplash.com/photo-1511119253457-36e78921865c?w=800&h=600&fit=crop" 
                           alt="Main Review" 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                          className="w-full h-full object-cover lg:absolute lg:inset-0 group-hover:scale-105 transition-transform duration-1000"
                         />
                         <div className="absolute inset-0 bg-black/30" />
                         
@@ -795,25 +795,27 @@ export function BrandDetailPage() {
                      </div>
 
                      {/* Second Review Card */}
-                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white">
-                        <div className="relative h-28 overflow-hidden bg-black">
+                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white h-[280px]">
+                        <div className="relative h-28 overflow-hidden bg-black flex-shrink-0">
                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Apex Showcase" />
                            <div className="absolute inset-0 bg-black/10" />
                            <div className="absolute top-2.5 right-2.5 bg-black/40 backdrop-blur-md rounded-full w-7 h-7 flex items-center justify-center border border-white/10">
                               <Youtube size={14} className="text-red-600" />
                            </div>
                         </div>
-                        <div className="p-4 flex-1 flex flex-col text-white">
-                           <div className="flex items-center justify-between mb-2">
-                              <div className="flex gap-0.5">
-                                 {[1,2,3,4,5].map(i => <Star key={i} size={8} className="fill-[#E8500A] text-[#E8500A]" />)}
+                        <div className="p-4 flex-1 flex flex-col text-white justify-between min-h-0">
+                           <div>
+                              <div className="flex items-center justify-between mb-2">
+                                 <div className="flex gap-0.5">
+                                    {[1,2,3,4,5].map(i => <Star key={i} size={8} className="fill-[#E8500A] text-[#E8500A]" />)}
+                                 </div>
+                                 <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase">AUTHENTIC</span>
                               </div>
-                              <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase">AUTHENTIC</span>
+                              <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5 truncate">{brand.name} Collection review</h5>
+                              <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic line-clamp-2">Testing durability and comfort on first wear of latest releases.</p>
                            </div>
-                           <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5">{brand.name} Collection review</h5>
-                           <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic mb-4">Testing durability and comfort on first wear of latest releases.</p>
                            
-                           <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60">
+                           <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60 flex-shrink-0">
                               <span className="font-extrabold">BD Tech Guys</span>
                               <span className="text-white/30">420K • 5.0</span>
                            </div>
@@ -821,25 +823,27 @@ export function BrandDetailPage() {
                      </div>
 
                      {/* Third Review Card */}
-                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white">
-                        <div className="relative h-28 overflow-hidden bg-black">
+                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white h-[280px]">
+                        <div className="relative h-28 overflow-hidden bg-black flex-shrink-0">
                            <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=300&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Perfume Showcase" />
                            <div className="absolute inset-0 bg-black/10" />
                            <div className="absolute top-2.5 right-2.5 bg-black/40 backdrop-blur-md rounded-full w-7 h-7 flex items-center justify-center border border-white/10">
                               <Youtube size={14} className="text-red-600" />
                            </div>
                         </div>
-                        <div className="p-4 flex-1 flex flex-col text-white">
-                           <div className="flex items-center justify-between mb-2">
-                              <div className="flex gap-0.5">
-                                 {[1,2,3,4].map(i => <Star key={i} size={8} className="fill-[#E8500A] text-[#E8500A]" />)}
+                        <div className="p-4 flex-1 flex flex-col text-white justify-between min-h-0">
+                           <div>
+                              <div className="flex items-center justify-between mb-2">
+                                 <div className="flex gap-0.5">
+                                    {[1,2,3,4].map(i => <Star key={i} size={8} className="fill-[#E8500A] text-[#E8500A]" />)}
+                                 </div>
+                                 <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase">DEEP DIVE</span>
                               </div>
-                              <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase">DEEP DIVE</span>
+                              <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5 truncate">Finding perfection in {brand.name}</h5>
+                              <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic line-clamp-2">Exploring luxury and comfort and how to verify original tags.</p>
                            </div>
-                           <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5">Finding perfection in {brand.name}</h5>
-                           <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic mb-4">Exploring luxury and comfort and how to verify original tags.</p>
-                           
-                           <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60">
+                              
+                           <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60 flex-shrink-0">
                               <span className="font-extrabold">Auntie Mirpur</span>
                               <span className="text-white/30">150K • 4.5</span>
                            </div>

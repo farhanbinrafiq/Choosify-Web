@@ -239,16 +239,16 @@ export function ProductDetailPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="bg-[#1a1d4e] pt-6 pb-24 overflow-hidden relative border-b border-white/5">
+      <section className="bg-[#1a1d4e] pt-4 pb-8 overflow-y-auto relative border-b border-white/5" style={{ height: '900px' }}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="w-full max-w-4xl mx-auto mb-12">
+          <div className="w-full max-w-4xl mx-auto mb-6">
             <ProductMediaGallery product={product} selectedVariantImage={selectedVariant?.image} />
           </div>
 
-          <div className="w-full max-w-4xl mx-auto text-left text-white relative mt-12 bg-transparent p-0 border-none shadow-none">
+          <div className="w-full max-w-4xl mx-auto text-left text-white relative mt-6 bg-transparent p-0 border-none shadow-none">
              <div className="relative">
                 {/* Row 1: Brand / Category and Reviews/Stock status */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
                    <div className="flex items-center gap-3">
                       <span className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-[0.25em] block font-sans">
                          {product.brand?.toUpperCase()} . {product.category?.toUpperCase()}
@@ -280,13 +280,13 @@ export function ProductDetailPage() {
                 </div>
 
                 {/* Row 2: Title */}
-                <h1 className="text-4xl sm:text-6xl md:text-7xl font-sans font-black text-white tracking-tighter leading-[0.95] uppercase mb-4 text-left">
+                <h1 className="text-[30px] font-sans font-black text-white tracking-tighter leading-[0.95] uppercase mb-2 text-left" style={{ fontSize: '30px' }}>
                   {product.title}
                 </h1>
 
                 {/* Row 3: Price Display & Quick controls */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-white/10 pb-6">
-                  <div className="text-3xl sm:text-5xl md:text-4xl font-extrabold text-[#FF6B00] italic uppercase tracking-tight font-sans leading-none">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-white/10 pb-4">
+                  <div className="text-[25px] font-extrabold text-[#FF6B00] italic uppercase tracking-tight font-sans leading-none" style={{ fontSize: '25px' }}>
                     BDT - {product.price}
                   </div>
                   <div className="flex items-center gap-2.5">
@@ -324,7 +324,7 @@ export function ProductDetailPage() {
              </div>
 
              {/* Dynamic Variants & Beautiful Interactive Callouts */}
-             <div className="w-full border-t border-white/10 pt-6 flex flex-col items-center justify-center text-center space-y-6">
+             <div className="w-full border-t border-white/10 pt-4 flex flex-col items-center justify-center text-center space-y-4 font-sans">
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.25em] block">SELECT OPTIONS</span>
                   <span className="text-xs font-bold text-white uppercase tracking-wider block">COLOR: {selectedColor || 'SUNSET ORANGE'}</span>

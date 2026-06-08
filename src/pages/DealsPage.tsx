@@ -239,7 +239,7 @@ export function DealsPage() {
                              tagColor: "bg-[#E98B8B]",
                            }} 
                            variant="compact"
-                           showCountdown={index < 3} imageContainerStyle={{ height: '240px' }}
+                           showCountdown={index < 3}
                          />
                        </div>
                     ))}
@@ -264,7 +264,7 @@ export function DealsPage() {
                         tagColor: idx % 3 === 0 ? "bg-[#E93B3B]" : idx % 3 === 1 ? "bg-[#E98B8B]" : "bg-[#7CD93B]",
                       }} 
                       variant="compact"
-                      showCountdown={idx < 4} imageContainerStyle={{ height: '240px' }}
+                      showCountdown={idx < 4}
                     />
                   </div>
                 ))}

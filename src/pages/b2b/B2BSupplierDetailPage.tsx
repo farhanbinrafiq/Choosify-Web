@@ -618,11 +618,11 @@ export function B2BSupplierDetailPage() {
 
                   {/* Main YouTube Feature block */}
                   <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md mb-8">
-                     <div className="relative aspect-video lg:aspect-auto lg:h-[300px] group overflow-hidden">
+                     <div className="relative aspect-video lg:aspect-auto lg:min-h-[300px] lg:h-full group overflow-hidden">
                         <img 
                           src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=800&h=600&fit=crop" 
                           alt="Factory Audit Stream" 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                          className="w-full h-full object-cover lg:absolute lg:inset-0 group-hover:scale-105 transition-transform duration-1000"
                         />
                         <div className="absolute inset-0 bg-black/30" />
                         
@@ -699,25 +699,27 @@ export function B2BSupplierDetailPage() {
                      </div>
 
                      {/* Second Review Card */}
-                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white">
-                        <div className="relative h-28 overflow-hidden bg-black">
+                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white h-[280px]">
+                        <div className="relative h-28 overflow-hidden bg-black flex-shrink-0">
                            <img src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=300&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Dyeing Facility" />
                            <div className="absolute inset-0 bg-black/10" />
                            <div className="absolute top-2.5 right-2.5 bg-black/40 backdrop-blur-md rounded-full w-7 h-7 flex items-center justify-center border border-white/10">
                               <Youtube size={14} className="text-red-600" />
                            </div>
                         </div>
-                        <div className="p-4 flex-1 flex flex-col text-white">
-                           <div className="flex items-center justify-between mb-2">
-                              <div className="flex gap-0.5">
-                                 {[1,2,3,4,5].map(i => <Star key={i} size={8} className="fill-[#FF0038] text-[#FF0038]" />)}
+                        <div className="p-4 flex-1 flex flex-col text-white justify-between min-h-0">
+                           <div>
+                              <div className="flex items-center justify-between mb-2">
+                                 <div className="flex gap-0.5">
+                                    {[1,2,3,4,5].map(i => <Star key={i} size={8} className="fill-[#FF0038] text-[#FF0038]" />)}
+                                 </div>
+                                 <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase font-mono">ASTM COMPLIANCE</span>
                               </div>
-                              <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase font-mono">ASTM COMPLIANCE</span>
+                              <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5 truncate">Fabric Tear & Weight Stress Check</h5>
+                              <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic line-clamp-2">Independent testing with custom tensile strain weights on raw fabrics.</p>
                            </div>
-                           <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5">Fabric Tear & Weight Stress Check</h5>
-                           <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic mb-4">Independent testing with custom tensile strain weights on raw fabrics.</p>
                            
-                           <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60">
+                           <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60 flex-shrink-0">
                               <span className="font-extrabold">SGS Quality Lab BD</span>
                               <span className="text-white/30">12K Views • 5.0 Rating</span>
                            </div>
@@ -725,25 +727,27 @@ export function B2BSupplierDetailPage() {
                      </div>
 
                      {/* Third Review Card */}
-                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white">
-                        <div className="relative h-28 overflow-hidden bg-black">
+                     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col group text-white h-[280px]">
+                        <div className="relative h-28 overflow-hidden bg-black flex-shrink-0">
                            <img src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=400&h=300&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Treatment Plant" />
                            <div className="absolute inset-0 bg-black/10" />
                            <div className="absolute top-2.5 right-2.5 bg-black/40 backdrop-blur-md rounded-full w-7 h-7 flex items-center justify-center border border-white/10">
                               <Youtube size={14} className="text-red-600" />
                            </div>
                         </div>
-                        <div className="p-4 flex-1 flex flex-col text-white">
-                           <div className="flex items-center justify-between mb-2">
-                              <div className="flex gap-0.5">
-                                 {[1,2,3,4].map(i => <Star key={i} size={8} className="fill-[#FF0038] text-[#FF0038]" />)}
+                        <div className="p-4 flex-1 flex flex-col text-white justify-between min-h-0">
+                           <div>
+                              <div className="flex items-center justify-between mb-2">
+                                 <div className="flex gap-0.5">
+                                    {[1,2,3,4].map(i => <Star key={i} size={8} className="fill-[#FF0038] text-[#FF0038]" />)}
+                                 </div>
+                                 <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase font-mono">ECO INSPECTION</span>
                               </div>
-                              <span className="text-[7px] text-white/40 tracking-wider font-extrabold uppercase font-mono">ECO INSPECTION</span>
+                              <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5 truncate">Effluent Treatment Ecology Audit</h5>
+                              <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic line-clamp-2">Water recycling purity and zero sulfur pollutant footprint parameters checked.</p>
                            </div>
-                           <h5 className="text-xs font-black italic tracking-tight uppercase leading-snug mb-1.5">Effluent Treatment Ecology Audit</h5>
-                           <p className="text-[10px] text-white/50 leading-relaxed font-semibold italic mb-4">Water recycling purity and zero sulfur pollutant footprint parameters checked.</p>
                            
-                           <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60">
+                           <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-white/60 flex-shrink-0">
                               <span className="font-extrabold">EcoAudit Bangladesh</span>
                               <span className="text-white/30">8.4K Views • 4.8 Rating</span>
                            </div>
