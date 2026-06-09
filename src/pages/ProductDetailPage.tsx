@@ -90,6 +90,61 @@ export function ProductDetailPage() {
   const [carouselIndex, setCarouselIndex] = useState(1);
   const [b2bQty, setB2bQty] = useState(product?.moq || 10);
 
+  // States for Stats Bar and ScrollSpy
+  const [loveCount, setLoveCount] = useState(1243);
+  const [hasLoved, setHasLoved] = useState(false);
+  const [purchasedCount, setPurchasedCount] = useState(854);
+  const [hasPurchased, setHasPurchased] = useState(false);
+  const [viewCount] = useState(14238);
+  const [activeSection, setActiveSection] = useState('All');
+
+  const handlePurchasedClicked = () => {
+    if (hasPurchased) {
+      setPurchasedCount(prev => prev - 1);
+      setHasPurchased(false);
+      toast.success("Removed your verified purchase status.");
+    } else {
+      setPurchasedCount(prev => prev + 1);
+      setHasPurchased(true);
+      toast.success("Verified purchase recorded!");
+    }
+  };
+
+  // Interactive ScrollSpy Effect
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 220; // safe offset for active section detection
+
+      if (window.scrollY < 200) {
+        setActiveSection('All');
+        return;
+      }
+
+      const sections = [
+        { id: 'influencer-reviews-section', name: 'Influencer Reviews' },
+        { id: 'public-reviews-section', name: 'Public Reviews' },
+        { id: 'product-overview-section', name: 'Product Overview' },
+        { id: 'brand-overview-section', name: 'Brand Overview' }
+      ];
+
+      let currentSection = 'All';
+      for (const section of sections) {
+        const el = document.getElementById(section.id);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPosition >= top && scrollPosition <= top + height) {
+            currentSection = section.name;
+          }
+        }
+      }
+      setActiveSection(currentSection);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Variant support state hooks
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('');
@@ -274,24 +329,68 @@ export function ProductDetailPage() {
     toast.success(`Inbound chat connected. Messaging support desk for ${product.brand} ${product.title}...`);
   };
 
+  const handleLoveClicked = () => {
+    if (hasLoved) {
+      setLoveCount(prev => prev - 1);
+      setHasLoved(false);
+      toast.success("Removed love react.");
+    } else {
+      setLoveCount(prev => prev + 1);
+      setHasLoved(true);
+      toast.success("Thanks for loving this product!");
+    }
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    if (sectionId === 'all-section') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setActiveSection('All');
+    } else {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        const offset = 140; // Offset for sticky stats/header/nav
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+        const labels: { [key: string]: string } = {
+          'influencer-reviews-section': 'Influencer Reviews',
+          'public-reviews-section': 'Public Reviews',
+          'product-overview-section': 'Product Overview',
+          'brand-overview-section': 'Brand Overview'
+        };
+        setActiveSection(labels[sectionId] || 'All');
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Breadcrumbs */}
-      <div className="bg-[#050514] pt-4 px-6">
-        <div className="max-w-7xl mx-auto flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40 italic">
-          <Link to="/" className="hover:text-orange-primary transition-colors">Home</Link>
-          <ArrowRight size={10} />
-          <Link to="/products" className="hover:text-orange-primary transition-colors">Products</Link>
-          <ArrowRight size={10} />
-          <span className="text-white/60">{product.category}</span>
-          <ArrowRight size={10} />
-          <span className="text-orange-primary">{product.title}</span>
-        </div>
-      </div>
+      {/* Hero Section styled with Brand Details color treatment */}
+      <section 
+         className="relative pt-6 pb-12 overflow-visible border-b border-white/5"
+         style={{
+            background: 'linear-gradient(135deg, #170E1A 0%, #11133A 50%, #191535 100%)'
+         }}
+      >
+         {/* Absolute blur background sphere matching Brand Detail Page layout */}
+         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none z-0">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#E8500A] rounded-full translate-x-1/2 -translate-y-1/2" />
+         </div>
 
-      {/* Hero Section */}
-      <section className="bg-[#1a1d4e] pt-4 pb-8 overflow-y-auto relative border-b border-white/5" style={{ height: '900px' }}>
-        <div className="max-w-7xl mx-auto px-6">
+         <div className="max-w-7xl mx-auto px-6 relative z-10">
+            {/* Breadcrumbs integrated seamlessly inside the hero section with low transparency */}
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#FFF]/40 italic mb-6">
+              <Link to="/" className="hover:text-[#E8500A] transition-colors">Home</Link>
+              <ArrowRight size={10} />
+              <Link to="/products" className="hover:text-[#E8500A] transition-colors">Products</Link>
+              <ArrowRight size={10} />
+              <span className="text-white/60">{product.category}</span>
+              <ArrowRight size={10} />
+              <span className="text-[#E8500A]">{product.title}</span>
+            </div>
           <div className="w-full max-w-4xl mx-auto mb-6">
             <ProductMediaGallery product={product} selectedVariantImage={selectedVariant?.image} />
           </div>
@@ -341,18 +440,6 @@ export function ProductDetailPage() {
                     BDT - {product.price}
                   </div>
                   <div className="flex items-center gap-2.5">
-                    <button 
-                      onClick={() => toast.success("Self-price tracking alert scheduled!")}
-                      className="h-10 px-5 border border-white/30 hover:bg-white/5 hover:border-white/50 text-white rounded-full font-bold text-[10px] uppercase tracking-widest transition-all flex items-center justify-center bg-transparent"
-                    >
-                      PRICE ALERT
-                    </button>
-                    <button 
-                      onClick={() => setIsQuoteModalOpen(true)}
-                      className="h-10 px-5 border border-white/30 hover:bg-white/5 hover:border-white/50 text-white rounded-full font-bold text-[10px] uppercase tracking-widest transition-all flex items-center justify-center bg-transparent"
-                    >
-                      GET FACTORY QUOTE
-                    </button>
                     <button 
                       onClick={() => {
                         navigator.clipboard.writeText(window.location.href);
@@ -578,227 +665,192 @@ export function ProductDetailPage() {
              </div>
           </div>
 
-          <div className="flex flex-col items-end gap-8 mt-12 lg:mt-0 shadow-lg md:shadow-none">
-                <div className="flex gap-4">
-                   {[
-                     { icon: <Save size={18}/>, label: "Save", color: "hover:text-blue-400" },
-                     { icon: <Facebook size={18}/>, label: "FB", color: "hover:text-blue-600" },
-                     { icon: <Instagram size={18}/>, label: "IG", color: "hover:text-pink-500" },
-                     { icon: <Youtube size={18}/>, label: "YT", color: "hover:text-red-500" },
-                     { icon: <Share2 size={18}/>, label: "TK", color: "hover:text-cyan-400" }
-                   ].map((item, i) => (
-                      <div key={i} className="flex flex-col items-center gap-2 group cursor-pointer">
-                         <div className={cn("w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 transition-all group-hover:bg-white group-hover:scale-110", item.color)}>
-                            {item.icon}
-                         </div>
-                         <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">{item.label}</span>
-                      </div>
-                   ))}
-                </div>
-             </div>
+          
         </div>
       </section>
 
-      {/* Tabs Sub-Nav */}
-      <div className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm overflow-x-auto no-scrollbar">
-         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-8">
-               {tabs.map((tab) => (
+      {/* Post-Hero Stats Bar */}
+      <div className="bg-white border-y border-gray-100 py-4.5 px-6 shadow-sm z-20 relative">
+         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100 text-center gap-4 md:gap-0">
+            {/* LOVE REACTS */}
+            <div className="flex flex-row items-center justify-between md:justify-center gap-4 px-6 py-2.5 md:py-0 text-left">
+               <div>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Love Reacts</span>
+                  <span className="text-xl font-black text-navy font-sans tracking-tight block">{loveCount.toLocaleString()} Likes</span>
+               </div>
+               <button 
+                  onClick={handleLoveClicked}
+                  className={cn(
+                     "h-10 px-5 rounded-full font-black text-[10px] uppercase tracking-wider italic flex items-center gap-2 transition-all cursor-pointer active:scale-95",
+                     hasLoved 
+                        ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 border border-[#E8500A]" 
+                        : "bg-gray-50 border border-gray-150 text-gray-500 hover:bg-gray-100"
+                  )}
+               >
+                  <Heart size={13} className={cn(hasLoved && "fill-current")} />
+                  {hasLoved ? "Loved!" : "Love"}
+               </button>
+            </div>
+
+            {/* PURCHASED */}
+            <div className="flex flex-row items-center justify-between md:justify-center gap-4 px-6 py-2.5 md:py-0 text-left">
+               <div>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Purchased</span>
+                  <span className="text-xl font-black text-[#4DBC15] font-sans tracking-tight block">{purchasedCount.toLocaleString()} Verified Orders</span>
+               </div>
+               <button 
+                  onClick={handlePurchasedClicked}
+                  className={cn(
+                     "h-10 px-5 rounded-full font-black text-[10px] uppercase tracking-wider italic flex items-center gap-2 transition-all cursor-pointer active:scale-95 whitespace-nowrap",
+                     hasPurchased 
+                        ? "bg-[#4DBC15] text-white shadow-md shadow-[#4DBC15]/10 border border-[#4DBC15]" 
+                        : "bg-gray-50 border border-gray-150 text-gray-500 hover:bg-gray-100"
+                  )}
+               >
+                  <CheckCircle2 size={13} className={cn(hasPurchased && "fill-current text-white", !hasPurchased && "text-[#4DBC15]")} />
+                  {hasPurchased ? "Purchased!" : "Purchase"}
+               </button>
+            </div>
+
+            {/* VIEWS */}
+            <div className="flex flex-row items-center justify-between md:justify-center gap-4 px-6 py-2.5 md:py-0 text-left">
+               <div>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Product Views</span>
+                  <span className="text-xl font-black text-navy font-sans tracking-tight block">{viewCount.toLocaleString()} Sessions</span>
+               </div>
+               <div className="h-10 px-4.5 bg-[#E8500A]/5 text-[#E8500A] rounded-full text-[9px] font-black uppercase tracking-widest italic flex items-center gap-1.5 border border-[#E8500A]/10 select-none">
+                  <TrendingUp size={11} className="text-[#E8500A] animate-pulse" />
+                  Trending Rapidly
+               </div>
+            </div>
+         </div>
+      </div>
+
+      {/* Sticky Section Navigation */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-2 overflow-x-auto no-scrollbar">
+         <div className="max-w-[1440px] mx-auto px-6 flex items-center justify-between gap-4">
+            <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
+               {[
+                  { label: 'All', id: 'all-section', icon: <Package size={13} /> },
+                  { label: 'Influencer Reviews', id: 'influencer-reviews-section', icon: <Play size={13} /> },
+                  { label: 'Public Reviews', id: 'public-reviews-section', icon: <Star size={13} /> },
+                  { label: 'Product Overview', id: 'product-overview-section', icon: <Info size={13} /> }
+               ].map((item) => (
                   <button 
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={cn(
-                      "text-[10px] font-black uppercase tracking-[0.25em] relative h-full transition-all whitespace-nowrap",
-                      activeTab === tab ? "text-navy" : "text-gray-300 hover:text-navy"
-                    )}
+                     key={item.id}
+                     onClick={() => scrollToSection(item.id)}
+                     className={cn(
+                        "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px]",
+                        activeSection === item.label 
+                           ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
+                           : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100"
+                     )}
                   >
-                    {tab}
-                    {activeTab === tab && (
-                       <motion.div 
-                         layoutId="product-active-tab-indicator"
-                         className="absolute bottom-0 left-0 w-full h-1 bg-orange-primary rounded-t-full" 
-                       />
-                    )}
+                     {item.icon}
+                     <span>{item.label}</span>
                   </button>
                ))}
             </div>
-            <button className="flex items-center gap-2 text-gray-400 hover:text-navy transition-colors">
-               <span className="text-[10px] font-black uppercase tracking-widest">Share Now</span>
-               <Share2 size={14} />
+            <button 
+               onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Product share link copied directly to clipboard!");
+               }}
+               className="flex items-center gap-2 text-gray-400 hover:text-[#1A1D4E] transition-colors shrink-0 font-sans cursor-pointer"
+            >
+               <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Share Now</span>
+               <Share2 size={13} />
             </button>
          </div>
       </div>
 
       {/* Main Content Area */}
-      <main className="bg-[#F8FAFC] py-10">
+      <main id="all-section" className="bg-[#F8FAFC] py-10">
          <div className="max-w-[1440px] mx-auto px-6 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 items-start w-full relative">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full relative">
                
                {/* Left Column Section (Column 1) */}
                <div className="lg:col-span-3 space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
-                  {/* QUICK PRODUCT OVERVIEW CARD */}
-                  <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl p-6 space-y-6">
-                     <h3 className="text-xs font-black text-navy tracking-tight uppercase border-b border-gray-150 pb-4">
-                        QUICK <span className="text-orange-primary">PRODUCT</span> OVERVIEW
+                  {/* PRODUCT SPECIFICATIONS */}
+                  <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl overflow-hidden p-6 space-y-4 font-sans text-left">
+                     <h3 className="text-xs font-black text-navy uppercase tracking-tight pb-2 border-b border-gray-50 flex items-center gap-2">
+                        <span className="w-1 h-3.5 bg-[#E8500A] rounded-full inline-block" />
+                        Specifications
                      </h3>
-
-                     {/* Section 1 */}
-                     <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-xs font-black text-navy tracking-wide">
-                           <Tag size={16} className="text-orange-primary" />
-                           PRODUCT QUALITY & MATERIAL
-                        </div>
-                        <div className="pl-6 space-y-1.5 text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-relaxed">
-                           <div>• WATER PROOF IPS67/DF</div>
-                           <div>• GORILLA GLASS VICTUS 2</div>
-                           <div>• 2 YEARS DISPLAY WARRANTY</div>
-                        </div>
-                     </div>
-
-                     {/* Section 2 */}
-                     <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-xs font-black text-navy tracking-wide">
-                           <Award size={16} className="text-orange-primary" />
-                           FEATURES & BENEFITS
-                        </div>
-                        <div className="pl-6 space-y-1.5 text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-relaxed">
-                           <div>• 15 DAYS REPLACEMENT WITH FULL REFUND GUARANTEE</div>
-                           <div>• EMI FACILITIES WITH ZERO 0% INTEREST</div>
-                           <div>• 2 YEARS DISPLAY WARRANTY</div>
-                           <div>• FREE COD DELIVERY ALL OVER BANGLADESH</div>
-                           <div>• 3 HOURS DELIVERY INSIDE DHAKA METRO</div>
-                           <div>• ONLINE & OFFLINE ORDER FACILITY</div>
-                           <div>• FREE GIFTS & GOODIES</div>
-                        </div>
-                     </div>
-
-                     {/* Section 3 */}
-                     <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-xs font-black text-navy tracking-wide">
-                           <Users size={16} className="text-orange-primary" />
-                           AUDIENCE & USE CASE
-                        </div>
-                        <div className="pl-6 space-y-1.5 text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-relaxed">
-                           <div>• BUSINESS PROFESSIONALS</div>
-                           <div>• VLOGGERS & CONTENT CREATORS</div>
-                           <div>• POWER USERS & GAMERS</div>
-                           <div>• MALE, FEMALE, YOUTH & KIDS</div>
-                        </div>
-                     </div>
-
-                     {/* Section 4 */}
-                     <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-xs font-black text-navy tracking-wide">
-                           <ShieldCheck size={16} className="text-orange-primary" />
-                           CUSTOMER SUPPORT, TRUST & ASSURANCE
-                        </div>
-                        <div className="pl-6 space-y-1.5 text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-relaxed">
-                           <div>• 15 DAYS REPLACEMENT WITH FULL REFUND GUARANTEE</div>
-                           <div>• EMI FACILITIES WITH ZERO 0% INTEREST</div>
-                           <div>• 3 YEARS DISPLAY WARRANTY</div>
-                           <div>• FREE COD DELIVERY ALL OVER BANGLADESH</div>
-                           <div>• 3 HOURS DELIVERY INSIDE DHAKA METRO</div>
-                           <div>• ONLINE & OFFLINE ORDER FACILITY</div>
-                           <div>• FREE GIFTS & GOODIES</div>
-                        </div>
-                     </div>
-
-                     {/* Section 5 */}
-                     <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-xs font-black text-navy tracking-wide">
-                           <span className="text-orange-primary font-black text-base">#</span>
-                           BEST FOR #TAGS.
-                        </div>
-                        <div className="pl-6 flex flex-wrap gap-1.5 pt-1">
-                           {['#premium buyers', '#equality driven', '#festive wear', '#deshi vibe collection', '#trend setter', '#old money/summer collection', '#beach wear'].map((tag) => (
-                              <span key={tag} className="text-[9px] font-black text-orange-primary bg-orange-primary/5 px-2 py-0.5 rounded-full transition-colors hover:bg-orange-primary/10 cursor-default">
-                                 {tag}
-                              </span>
-                           ))}
-                        </div>
-                     </div>
-                  </div>
-
-                  {/* SPECIFICATIONS TABLE */}
-                  <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl overflow-hidden p-6 space-y-4">
-                     <h3 className="text-xs font-black text-navy uppercase tracking-tight pb-2 border-b border-gray-50">
-                        SPECIFICATIONS
-                     </h3>
-                     <div className="divide-y divide-gray-100 text-[11px] font-bold">
+                     <div className="divide-y divide-gray-150 text-[11px] font-bold">
                         {[
-                           { label: "BRAND", value: "Sailor" },
-                           { label: "CATEGORY", value: "Women's Dress" },
-                           { label: "MATERIAL", value: "Premium Cotton" },
-                           { label: "ORIGIN", value: "Made In Bangladesh" },
-                           { label: "WARRANTY", value: "N/A" },
-                           { label: "PRODUCT", value: "3 Pc Shalwar Kameez" },
-                           { label: "COLOR", value: "Dark Blue" },
-                           { label: "SIZE", value: "34 - 42" },
-                           { label: "CODE", value: "Code #SKU-123-SU03" },
-                           { label: "MISC", value: "Available In All Store" }
+                           { label: "BRAND", value: brandObj?.name || product.brand || "Sailor" },
+                           { label: "CATEGORY", value: product.category || "Lifestyle" },
+                           { label: "MATERIAL", value: "Premium Grade Build" },
+                           { label: "ORIGIN", value: "Local Production / Auth" },
+                           { label: "WARRANTY", value: "1 Year Care Warranty" },
+                           { label: "MODEL", value: product.title?.substring(0, 16) || "Classic" },
+                           { label: "RATING", value: `${product.rating || "4.8"} / 5` },
+                           { label: "STATUS", value: isOutOfStock ? "Out of Stock" : "In Stock" }
                         ].map((spec, i) => (
                            <div key={i} className={cn("flex justify-between py-3 px-3", i % 2 !== 0 ? "bg-gray-50/50" : "bg-white")}>
                               <span className="text-gray-400 font-extrabold uppercase tracking-wider text-[9px]">{spec.label}</span>
-                              <span className="text-navy font-black text-right">{spec.value}</span>
+                              <span className="text-navy font-black text-right text-[11px]">{spec.value}</span>
                            </div>
                         ))}
                      </div>
                   </div>
+
+
+
+
+               </div>
+                      {/* Middle Column Section (Column 2) - Center Content */}
+               <div className="lg:col-span-6 space-y-8 min-w-0">
+                  {/* INFLUENCER & CREATOR REVIEWS */}
+                  <div id="influencer-reviews-section" className="scroll-mt-36">
+                     <WithInfluencerReviews 
+                        brandName={brandName}
+                     />
+                  </div>
                </div>
 
-               {/* Middle Column Section (Column 2) */}
-               <div className="lg:col-span-6 space-y-8 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+               {/* Right Side Column (Column 3) */}
+               <div className="lg:col-span-3 space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+                  
                   {/* PRICE ACROSS STORES TABLE CARD */}
-                  <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl overflow-hidden">
+                  <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl overflow-hidden font-sans text-left">
                      <div className="p-6 flex items-center justify-between border-b border-gray-50">
-                        <h3 className="text-sm font-black text-navy uppercase tracking-tight">
+                        <h3 className="text-xs font-black text-navy uppercase tracking-tight flex items-center gap-2">
+                           <span className="w-1 h-3.5 bg-[#E8500A] rounded-full inline-block" />
                            PRICE ACROSS <span className="text-orange-primary">STORES</span>
                         </h3>
-                        <span className="text-[10px] font-black text-orange-primary italic uppercase tracking-wider">3 Stores Available</span>
+                        <span className="text-[9px] font-black text-orange-primary italic uppercase tracking-wider">3 Deals</span>
                      </div>
                      <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                            <thead>
                               <tr className="bg-[#0A0A1F] text-white">
-                                 <th className="px-6 py-3.5 text-[9px] font-black uppercase tracking-wider">Store</th>
-                                 <th className="px-6 py-3.5 text-[9px] font-black uppercase tracking-wider text-center">Price</th>
-                                 <th className="px-6 py-3.5 text-[9px] font-black uppercase tracking-wider text-center">Delivery</th>
-                                 <th className="px-6 py-3.5 text-[9px] font-black uppercase tracking-wider text-center">Action</th>
+                                 <th className="px-3.5 py-3 text-[8.5px] font-black uppercase tracking-wider">Store</th>
+                                 <th className="px-3.5 py-3 text-[8.5px] font-black uppercase tracking-wider text-center">Price</th>
+                                 <th className="px-3.5 py-3 text-[8.5px] font-black uppercase tracking-wider text-center">Action</th>
                               </tr>
                            </thead>
                            <tbody className="divide-y divide-gray-150">
                               {[
-                                 { name: "DARAZ", logo: "D", rating: "4.5", price: "BDT 38,000", delivery: "3 - 5 DAYS" },
-                                 { name: "APPLEGADGETSBD", logo: "A", rating: "4.5", price: "BDT 39,000", delivery: "24 HOURS" },
-                                 { name: "PICKABOO", logo: "P", rating: "4.5", price: "BDT 39,500", delivery: "1 HOUR DELIVERY DHAKA METRO ONLY" }
+                                 { name: "Daraz BD", rating: "4.5", price: Math.round((product.price || 1500) * 0.96) },
+                                 { name: `${brandName} Store`, rating: "5.0", price: (product.price || 1500) },
+                                 { name: "Pickaboo Metro", rating: "4.8", price: Math.round((product.price || 1500) * 1.02) }
                               ].map((store, i) => (
-                                 <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-6 py-4.5">
-                                       <div className="flex items-center gap-3">
-                                          <div className="w-8 h-8 rounded-full bg-navy/5 border border-navy/10 flex items-center justify-center font-black text-navy text-[11px] font-mono shadow-sm">
-                                             {store.logo}
-                                          </div>
-                                          <div className="flex flex-col">
-                                             <span className="text-[11px] font-black text-navy uppercase tracking-tight">{store.name}</span>
-                                             <div className="flex items-center gap-0.5">
-                                                <Star size={8} className="fill-orange-primary text-orange-primary" />
-                                                <span className="text-[8px] font-black text-gray-400">{store.rating}</span>
-                                             </div>
-                                          </div>
-                                       </div>
+                                 <tr key={i} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-3.5 py-3">
+                                       <span className="text-[10px] font-black text-navy block tracking-tight">{store.name}</span>
+                                       <span className="text-[7.5px] font-bold text-gray-400 block mt-0.5">⭐ {store.rating} Rating</span>
                                     </td>
-                                    <td className="px-6 py-4.5 text-center">
-                                       <span className="text-xs font-black text-orange-primary italic tracking-tight">{store.price}</span>
+                                    <td className="px-3.5 py-3 text-center">
+                                       <span className="text-[10.5px] font-black text-[#E8500A] font-mono">৳{store.price.toLocaleString()}</span>
                                     </td>
-                                    <td className="px-6 py-4.5 text-center max-w-[150px]">
-                                       <span className="text-[8.5px] font-extrabold text-gray-400 uppercase tracking-wider leading-tight block">{store.delivery}</span>
-                                    </td>
-                                    <td className="px-6 py-4.5 text-center">
+                                    <td className="px-3.5 py-3 text-center">
                                        <button 
-                                          onClick={() => toast.success(`Redirecting to ${store.name}...`)}
-                                          className="px-4 py-2 border border-blue-500 hover:bg-blue-500 hover:text-white text-blue-500 text-[8.5px] font-black uppercase tracking-widest rounded-full transition-all italic leading-none"
+                                          onClick={() => toast.success(`Redirecting to official BDT deal with ${store.name}...`)}
+                                          className="px-2.5 py-1.5 bg-[#0A0A1F] text-white hover:bg-orange-primary transition-all rounded-[10px] text-[8px] font-black uppercase tracking-widest leading-none cursor-pointer"
                                        >
-                                          GO TO STORE
+                                          BUY
                                        </button>
                                     </td>
                                  </tr>
@@ -808,143 +860,12 @@ export function ProductDetailPage() {
                      </div>
                   </div>
 
-                  {/* INFLUENCER & CREATOR REVIEWS CARD (The dark deep purple box) */}
-                  <WithInfluencerReviews 
-                     brandName={brandName}
-                  />
-
-                  {/* PUBLIC REVIEWS CARD TO MATCH ATTACHED SCREENSHOT */}
-                  <div className="bg-white rounded-[40px] p-8 border border-gray-100/80 shadow-2xl shadow-gray-100/40 space-y-8">
-                     <div className="text-center flex flex-col items-center">
-                        <h3 className="text-3xl font-black italic tracking-tighter uppercase text-navy">
-                           PUBLIC <span className="text-orange-primary">REVIEWS</span>
-                        </h3>
-                        <p className="text-[9px] font-black text-navy/40 uppercase tracking-[0.3em] italic mt-1">
-                           VERIFIED BUYER REVIEWS
-                        </p>
-                     </div>
-
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {[
-                           {
-                              name: "Tanvir Hasan",
-                              avatar: "https://i.pravatar.cc/150?u=tanvir",
-                              time: "POSTED 2 WEEKS AGO",
-                              rating: "5",
-                              content: "The material quality of the new Apex collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect for large build individuals as well.",
-                              date: "APRIL 2024",
-                              helpful: 124,
-                              images: [
-                                 "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&h=150&fit=crop",
-                                 "https://images.unsplash.com/photo-1541643600914-78b084683601?w=150&h=150&fit=crop"
-                              ]
-                           },
-                           {
-                              name: "Nusrat Jahan",
-                              avatar: "https://i.pravatar.cc/150?u=nusrat",
-                              time: "POSTED 1 MONTH AGO",
-                              rating: "4.8",
-                              content: "Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the fusion wear collection.",
-                              date: "MARCH 2024",
-                              helpful: 89,
-                              images: [
-                                 "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=150&h=150&fit=crop"
-                              ]
-                           }
-                        ].map((review, i) => (
-                           <div key={i} className="bg-white rounded-[32px] p-6 border border-gray-150/50 shadow-xl flex flex-col h-full gap-5">
-                              {/* Header row */}
-                              <div className="flex items-start justify-between gap-3">
-                                 <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl border-2 border-orange-primary/20 p-0.5 bg-white flex-shrink-0">
-                                       <img src={review.avatar} className="w-full h-full rounded-xl object-cover" alt={review.name} />
-                                    </div>
-                                    <div className="flex flex-col">
-                                       <div className="flex items-center gap-2 flex-wrap">
-                                          <h4 className="text-xs font-black text-navy uppercase tracking-tight italic">{review.name}</h4>
-                                          <div className="bg-[#E6FBF0] text-[#059669] text-[7.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider h-4 inline-flex items-center gap-0.5">
-                                             <CheckCircle2 size={8} /> VERIFIED
-                                          </div>
-                                       </div>
-                                       <span className="text-[7.5px] font-black text-gray-400 tracking-wider mt-1 uppercase italic">{review.time}</span>
-                                    </div>
-                                 </div>
-                                 <div className="flex flex-col items-end flex-shrink-0">
-                                    <div className="flex gap-0.5 mb-1">
-                                       {[1,2,3,4,5].map(star => (
-                                          <Star key={star} size={9} className={cn("fill-current", star <= Math.floor(Number(review.rating)) ? "text-orange-primary" : "text-gray-100")} />
-                                       ))}
-                                    </div>
-                                    <div className="text-xs font-black text-navy italic tracking-tighter">
-                                       {review.rating}<span className="text-gray-300 text-[10px] ml-0.5">/ 5</span>
-                                    </div>
-                                 </div>
-                              </div>
-
-                              {/* Images row */}
-                              <div className="flex gap-2">
-                                 {review.images.map((img, idx) => (
-                                    <div key={idx} className="w-14 h-14 rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50">
-                                       <img src={img} className="w-full h-full object-cover" alt="review upload" />
-                                    </div>
-                                 ))}
-                              </div>
-
-                              {/* Content box */}
-                              <div className="bg-[#F8FAFC] rounded-[24px] p-4 relative min-h-[90px] flex items-center mb-auto">
-                                 <MessageSquare size={24} className="absolute -top-2.5 -right-2 text-orange-primary/10 fill-current transform rotate-12" />
-                                 <p className="text-[10px] text-navy font-bold leading-normal italic tracking-tight">
-                                    "{review.content}"
-                                 </p>
-                              </div>
-
-                              {/* Footer row */}
-                              <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
-                                 <div>
-                                    <span className="text-[7px] text-gray-400 font-bold uppercase tracking-widest block mb-0.5">PURCHASE DATE</span>
-                                    <span className="text-[9px] font-black text-navy uppercase tracking-wider">{review.date}</span>
-                                 </div>
-                                 <div className="flex items-center gap-1.5">
-                                    <button 
-                                       onClick={() => toast.success("Thanks for voting this review as helpful!")}
-                                       className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-full hover:bg-gray-50 text-gray-500 hover:text-navy hover:border-navy transition-all"
-                                    >
-                                       <ThumbsUp size={10} />
-                                       <span className="text-[8px] font-black uppercase tracking-wider">HELPFUL ({review.helpful})</span>
-                                    </button>
-                                    <button 
-                                       onClick={() => toast.success("Thanks for the feedback!")}
-                                       className="w-7 h-7 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 transition-all"
-                                    >
-                                       <ThumbsDown size={10} />
-                                    </button>
-                                 </div>
-                              </div>
-                           </div>
-                        ))}
-                     </div>
-
-                     {/* Load more */}
-                     <div className="flex justify-center pt-2">
-                        <button 
-                           onClick={() => toast.success("All reviews are fully loaded.")}
-                           className="w-full py-4 bg-[#f5f7fb] text-[#8a92a6] font-bold text-[9.5px] uppercase tracking-[0.2em] rounded-[18px] hover:bg-[#0c133c] hover:text-white hover:shadow-lg transition-all border border-transparent italic flex items-center justify-center"
-                        >
-                           LOAD MORE REVIEWS
-                        </button>
-                     </div>
-                  </div>
-
-               </div>
-
-               {/* Right Side Column (Column 3) */}
-               <div className="lg:col-span-3 space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
-                  {/* SAMSUNG BRAND CARD */}
-                  <div className="bg-white rounded-[24px] overflow-hidden shadow-xl border border-gray-100 group">
+                  {/* BRAND PROFILE CARD - ONLY ONE AT RIGHT SIDEBAR */}
+                  <div className="bg-white rounded-[24px] overflow-hidden shadow-xl border border-gray-100 group text-left">
                      <div className="p-6 flex flex-col items-center text-center">
                         <div className="relative mb-4 mt-2">
                            <div className="w-20 h-20 rounded-2xl bg-black flex items-center justify-center p-2.5 shadow-lg scale-100 group-hover:scale-105 transition-transform duration-500">
-                              <div className="font-black text-sm text-white tracking-widest uppercase">SAMSUNG</div>
+                              <div className="font-black text-sm text-white tracking-widest uppercase">{brandName}</div>
                            </div>
                            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-orange-primary flex items-center justify-center text-white border-2 border-white shadow-md">
                               <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 20 20">
@@ -953,7 +874,7 @@ export function ProductDetailPage() {
                            </div>
                         </div>
 
-                        <h4 className="text-lg font-black text-navy uppercase tracking-widest mb-1">SAMSUNG</h4>
+                        <h4 className="text-lg font-black text-navy uppercase tracking-widest mb-1">{brandName}</h4>
                         
                         <div className="flex gap-0.5 mb-6">
                            {[1,2,3,4,5].map(i => (
@@ -964,7 +885,7 @@ export function ProductDetailPage() {
                         <div className="space-y-2.5 w-full">
                            <button 
                               onClick={handleMessageOrder}
-                              className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[9.5px] font-black uppercase tracking-wider transform active:scale-98 transition-all inline-flex items-center justify-center gap-1.5 leading-none"
+                              className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[9.5px] font-black uppercase tracking-wider transform active:scale-98 transition-all inline-flex items-center justify-center gap-1.5 leading-none cursor-pointer"
                            >
                               MESSAGE TO ORDER
                            </button>
@@ -972,13 +893,13 @@ export function ProductDetailPage() {
                            <div className="grid grid-cols-2 gap-2">
                               <button 
                                  onClick={handleLoveBrand}
-                                 className="py-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-500 text-[8.5px] font-black uppercase tracking-widest transition-all leading-none"
+                                 className="py-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-500 text-[8.5px] font-black uppercase tracking-widest transition-all leading-none cursor-pointer"
                               >
                                  FOLLOW THE BRAND
                               </button>
                               <button 
-                                 onClick={() => toast.success("Contacting Samsung Official Desk...")}
-                                 className="py-3 rounded-xl bg-orange-primary hover:bg-orange-600 text-white text-[8.5px] font-black uppercase tracking-widest transition-all leading-none"
+                                 onClick={() => toast.success(`Contacting ${brandName} Official Desk...`)}
+                                 className="py-3 rounded-xl bg-orange-primary hover:bg-orange-600 text-white text-[8.5px] font-black uppercase tracking-widest transition-all leading-none cursor-pointer"
                               >
                                  CONTACT US
                               </button>
@@ -986,7 +907,7 @@ export function ProductDetailPage() {
                            
                            <Link 
                               to={`/brands/${brandId}`}
-                              className="w-full py-3.5 rounded-xl bg-navy text-white text-[9.5px] font-black uppercase tracking-wider hover:bg-orange-primary transition-all inline-block leading-none mt-2"
+                              className="w-full py-3.5 rounded-xl bg-navy text-white text-[9.5px] font-black uppercase tracking-wider hover:bg-orange-primary transition-all inline-block leading-none mt-2 text-center"
                            >
                               VIEW BRAND PROFILE
                            </Link>
@@ -1012,8 +933,9 @@ export function ProductDetailPage() {
                   </div>
 
                   {/* PHYSICAL STORES */}
-                  <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-xl space-y-4">
-                     <h3 className="text-xs font-black text-navy uppercase tracking-tight pb-2 border-b border-gray-50">
+                  <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-xl space-y-4 text-left">
+                     <h3 className="text-xs font-black text-navy uppercase tracking-tight pb-2 border-b border-gray-50 flex items-center gap-2">
+                        <span className="w-1 h-3.5 bg-[#E8500A] rounded-full inline-block" />
                         PHYSICAL <span className="text-orange-primary">STORES</span>
                      </h3>
                      <div className="space-y-3">
@@ -1022,46 +944,250 @@ export function ProductDetailPage() {
                            "JAMUNA FUTURE PARK, LEVEL 3, ZONE A, SHOP 120",
                            "JAMUNA FUTURE PARK, LEVEL 2, ZONE A, SHOP 121"
                         ].map((loc, i) => (
-                           <div key={i} className="p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-start gap-2.5 hover:bg-navy hover:border-navy hover:text-white transition-all duration-300 group">
-                              <Globe size={14} className="text-orange-primary flex-shrink-0 mt-0.5 group-hover:text-white" />
+                           <div key={i} className="p-3 bg-gray-50 rounded-xl border border-gray-150 flex items-start gap-2.5 hover:bg-navy hover:border-navy hover:text-white transition-all duration-300 group">
+                              <Globe size={14} className="text-[#E8500A] flex-shrink-0 mt-0.5 group-hover:text-white" />
                               <span className="text-[9.5px] font-black text-navy uppercase tracking-wide leading-tight group-hover:text-white">{loc}</span>
                            </div>
                         ))}
                      </div>
                   </div>
 
-                  {/* PRODUCT VERDICT */}
-                  <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-xl space-y-5">
-                     <h3 className="text-xs font-black text-navy uppercase tracking-tight pb-2 border-b border-gray-50">
-                        PRODUCT <span className="text-orange-primary">VERDICT</span>
-                     </h3>
+                  {/* SPONSORED ADVERTISEMENT */}
+                  <div className="bg-[#1A1D4E] text-white rounded-[24px] p-6 relative overflow-hidden text-left shadow-xl border border-white/5 font-sans">
+                     {/* Orange glowing bubble */}
+                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/20 blur-2xl rounded-full translate-x-1/4 -translate-y-1/4" />
                      
-                     {/* What We Like section */}
-                     <div className="space-y-3">
-                        <h4 className="text-[10px] font-black text-orange-primary uppercase tracking-widest flex items-center gap-1.5 italic">
-                           <ThumbsUp size={12} /> WHAT WE LIKE:
-                        </h4>
-                        <div className="pl-3.5 space-y-1.5">
-                           {['Brand Value', 'Fabric Quality', 'Product Range', 'Nationwide Store', 'Online Order'].map((item, i) => (
-                              <div key={i} className="flex items-center gap-2 text-[10px] font-black text-navy uppercase">
-                                 <div className="w-1 h-1 rounded-full bg-orange-primary" /> {item}
+                     <span className="text-[7.5px] font-black text-[#E8500A] uppercase tracking-[0.2em] block mb-1.5 italic">SPONSORED AD</span>
+                     <h4 className="text-xs font-black uppercase tracking-tight mb-2 text-white">Upgrade To Express Delivery</h4>
+                     <p className="text-[9.5px] text-white/60 leading-relaxed mb-4 uppercase font-bold">
+                        Get free 1-hour home deliveries inside Dhaka metro area under Choosify.bd Premium Club membership.
+                     </p>
+                     <button 
+                        onClick={() => toast.success("Choosify Premium Club VIP services requested!")}
+                        className="bg-[#E8500A] hover:bg-orange-600 text-white px-4 py-2.5 rounded-full text-[8px] font-black uppercase tracking-widest transition-all shadow-md active:scale-95 cursor-pointer leading-none"
+                     >
+                        Learn More
+                     </button>
+                  </div>
+
+               </div>
+
+            </div> {/* Close 12-column split grid */}
+
+            {/* FULL-WIDTH CONTENT PRIORITIZED AND EXPANDED */}
+            <div className="space-y-12 mt-12 w-full">
+               
+               {/* PUBLIC REVIEWS (ID: 'public-reviews-section') */}
+               <div id="public-reviews-section" className="scroll-mt-36 bg-white rounded-[40px] p-8 border border-gray-100/85 shadow-2xl shadow-gray-100/40 space-y-8 font-sans text-left w-full">
+                  <div className="text-center flex flex-col items-center">
+                     <h3 className="text-3xl font-black italic tracking-tighter uppercase text-navy">
+                        PUBLIC <span className="text-orange-primary">REVIEWS</span>
+                     </h3>
+                     <p className="text-[9.5px] font-black text-navy/40 uppercase tracking-[0.3em] italic mt-1 bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5">
+                        VERIFIED Customer Experiences
+                     </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     {[
+                        {
+                           name: "Tanvir Hasan",
+                           avatar: "https://i.pravatar.cc/150?u=tanvir",
+                           time: "POSTED 2 WEEKS AGO",
+                           rating: "5",
+                           content: "The material quality of the new Apex collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect for large build individuals as well.",
+                           date: "APRIL 2024",
+                           helpful: 124,
+                           images: [
+                              "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&h=150&fit=crop",
+                              "https://images.unsplash.com/photo-1541643600914-78b084683601?w=150&h=150&fit=crop"
+                           ]
+                        },
+                        {
+                           name: "Nusrat Jahan",
+                           avatar: "https://i.pravatar.cc/150?u=nusrat",
+                           time: "POSTED 1 MONTH AGO",
+                           rating: "4.8",
+                           content: "Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the fusion wear collection.",
+                           date: "MARCH 2024",
+                           helpful: 89,
+                           images: [
+                              "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=150&h=150&fit=crop"
+                           ]
+                        }
+                     ].map((review, i) => (
+                        <div key={i} className="bg-white rounded-[32px] p-6 border border-gray-150/50 shadow-xl flex flex-col h-full gap-5">
+                           {/* Header row */}
+                           <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-center gap-4">
+                                 <div className="w-14 h-14 rounded-2xl border-2 border-orange-primary/20 p-0.5 bg-white flex-shrink-0">
+                                    <img src={review.avatar} className="w-full h-full rounded-xl object-cover" alt={review.name} />
+                                 </div>
+                                 <div className="flex flex-col">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                       <h4 className="text-xs font-black text-navy uppercase tracking-tight italic">{review.name}</h4>
+                                       <div className="bg-[#E6FBF0] text-[#059669] text-[7.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider h-4 inline-flex items-center gap-0.5">
+                                          <CheckCircle2 size={8} /> VERIFIED
+                                       </div>
+                                    </div>
+                                    <span className="text-[7.5px] font-black text-gray-400 tracking-wider mt-1 uppercase italic">{review.time}</span>
+                                 </div>
                               </div>
-                           ))}
+                              <div className="flex flex-col items-end flex-shrink-0">
+                                 <div className="flex gap-0.5 mb-1">
+                                    {[1,2,3,4,5].map(star => (
+                                       <Star key={star} size={9} className={cn("fill-current", star <= Math.floor(Number(review.rating)) ? "text-orange-primary" : "text-gray-100")} />
+                                    ))}
+                                 </div>
+                                 <div className="text-xs font-black text-navy italic tracking-tighter">
+                                    {review.rating}<span className="text-gray-300 text-[10px] ml-0.5">/ 5</span>
+                                 </div>
+                              </div>
+                           </div>
+
+                           {/* Images row */}
+                           <div className="flex gap-2">
+                              {review.images.map((img, idx) => (
+                                 <div key={idx} className="w-14 h-14 rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50">
+                                    <img src={img} className="w-full h-full object-cover" alt="review upload" />
+                                 </div>
+                              ))}
+                           </div>
+
+                           {/* Content box */}
+                           <div className="bg-[#F8FAFC] rounded-[24px] p-4 relative min-h-[90px] flex items-center mb-auto">
+                              <MessageSquare size={24} className="absolute -top-2.5 -right-2 text-orange-primary/10 fill-current transform rotate-12" />
+                              <p className="text-[10px] text-navy font-bold leading-normal italic tracking-tight">
+                                 "{review.content}"
+                              </p>
+                           </div>
+
+                           {/* Footer row */}
+                           <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
+                              <div>
+                                 <span className="text-[7px] text-gray-400 font-bold uppercase tracking-widest block mb-0.5">PURCHASE DATE</span>
+                                 <span className="text-[9px] font-black text-navy uppercase tracking-wider">{review.date}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                 <button 
+                                    onClick={() => toast.success("Thanks for voting this review as helpful!")}
+                                    className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-full hover:bg-gray-50 text-gray-500 hover:text-navy hover:border-navy transition-all cursor-pointer"
+                                 >
+                                    <ThumbsUp size={10} />
+                                    <span className="text-[8px] font-black uppercase tracking-wider">HELPFUL ({review.helpful})</span>
+                                 </button>
+                                 <button 
+                                    onClick={() => toast.success("Thanks for the feedback!")}
+                                    className="w-7 h-7 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 transition-all cursor-pointer"
+                                 >
+                                    <ThumbsDown size={10} />
+                                 </button>
+                              </div>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+
+                  {/* Load more */}
+                  <div className="flex justify-center pt-2">
+                     <button 
+                        onClick={() => toast.success("All customer reviews are fully loaded.")}
+                        className="w-full py-4 bg-[#f5f7fb] text-[#8a92a6] font-bold text-[9.5px] uppercase tracking-[0.2em] rounded-[18px] hover:bg-[#0c133c] hover:text-white hover:shadow-lg transition-all border border-transparent italic flex items-center justify-center cursor-pointer"
+                     >
+                        LOAD MORE REVIEWS
+                     </button>
+                  </div>
+               </div>
+
+               {/* PRODUCT OVERVIEW (ID: 'product-overview-section') */}
+               <div id="product-overview-section" className="scroll-mt-36 bg-white rounded-[32px] p-8 border border-gray-100/80 shadow-xl space-y-8 text-left font-sans w-full">
+                  <div>
+                     <h3 className="text-2xl font-black italic tracking-tighter uppercase text-navy">
+                        PRODUCT <span className="text-orange-primary">OVERVIEW</span>
+                     </h3>
+                     <p className="text-[9px] font-black text-navy/40 uppercase tracking-[0.3em] italic mt-1">
+                        BENEFITS, QUALITY STRUCTURE & TRUST
+                     </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     {/* Quality & Materials */}
+                     <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-3">
+                        <div className="flex items-center gap-2.5 text-xs font-black text-navy uppercase tracking-wide">
+                           <div className="p-1.5 bg-orange-primary/10 rounded-lg text-orange-primary">
+                              <Tag size={16} />
+                           </div>
+                           Quality & Materials
+                        </div>
+                        <div className="space-y-2 text-[10px] font-black text-gray-500 uppercase tracking-wider leading-relaxed">
+                           <div>• AUTHENTIC STANDARD SEWING WITH BRAND LABELS</div>
+                           <div>• HIGH DUST & SPILL PROOF COATED EXTERIOR</div>
+                           <div>• UNBREAKABLE GRADE FINISHING STRUCTURE</div>
+                           <div>• BREATHABLE PREMIUM CLOTHS IDEAL FOR LONG WEAR</div>
                         </div>
                      </div>
 
-                     {/* What to consider section */}
-                     <div className="space-y-3 pt-2 border-t border-gray-50">
-                        <h4 className="text-[10px] font-black text-red-500 uppercase tracking-widest flex items-center gap-1.5 italic">
-                           <ThumbsDown size={12} /> WHAT TO CONSIDER:
-                        </h4>
-                        <div className="pl-3.5 space-y-1.5">
-                           {['Price Range', 'Age Limit', 'Refund Policy', 'Limited Stock', 'Delivery'].map((item, i) => (
-                              <div key={i} className="flex items-center gap-2 text-[10px] font-black text-navy uppercase opacity-70">
-                                 <div className="w-1.5 h-1.5 rounded-full bg-red-400" /> {item}
-                              </div>
-                           ))}
+                     {/* Features & Benefits */}
+                     <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-3">
+                        <div className="flex items-center gap-2.5 text-xs font-black text-navy uppercase tracking-wide">
+                           <div className="p-1.5 bg-orange-primary/10 rounded-lg text-orange-primary">
+                              <Award size={16} />
+                           </div>
+                           Features & Benefits
                         </div>
+                        <div className="space-y-2 text-[10px] font-black text-gray-500 uppercase tracking-wider leading-relaxed">
+                           <div>• 7 DAYS SATISFACTION REFUND/EXCHANGE GUARANTEE</div>
+                           <div>• SECURE PARTNER CHECKOUT INTEGRATIONS</div>
+                           <div>• OFFICIAL DECK WARRANTY ACTIVE WITH UNIQUE SERIAL CODE</div>
+                           <div>• NATIONWIDE COMPLIANCE DELIVERY COVERAGE</div>
+                        </div>
+                     </div>
+
+                     {/* Audience & Use Cases */}
+                     <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-3">
+                        <div className="flex items-center gap-2.5 text-xs font-black text-navy uppercase tracking-wide">
+                           <div className="p-1.5 bg-orange-primary/10 rounded-lg text-orange-primary">
+                              <Users size={16} />
+                           </div>
+                           Audience & Use Cases
+                        </div>
+                        <div className="space-y-2 text-[10px] font-black text-gray-500 uppercase tracking-wider leading-relaxed">
+                           <div>• VALUE ORIENTED BUYERS APPRAISING BUILD INTEGRITY</div>
+                           <div>• LIFESTYLE CREATORS REQUIRING RELIABLE WEARS</div>
+                           <div>• B2B & BULK ORGANIZATIONS WITH B2B PRICE SLAB TARGETS</div>
+                           <div>• MODERN BANGLADESHI LIFESTYLE AND ACTIVE CIRCLES</div>
+                        </div>
+                     </div>
+
+                     {/* Customer Support & Assurance */}
+                     <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-3">
+                        <div className="flex items-center gap-2.5 text-xs font-black text-navy uppercase tracking-wide">
+                           <div className="p-1.5 bg-orange-primary/10 rounded-lg text-orange-primary">
+                              <ShieldCheck size={16} />
+                           </div>
+                           Customer Support & Assurance
+                        </div>
+                        <div className="space-y-2 text-[10px] font-black text-gray-500 uppercase tracking-wider leading-relaxed">
+                           <div>• REAL-TIME MSG BACKING FROM HIGH PRIORITY STAFF</div>
+                           <div>• COMPLETE VERIFICATION CERTIFICATES DEPOSITED</div>
+                           <div>• EASY ACCESS TRANSIT SYSTEM INTEGRATIONS</div>
+                           <div>• SECURED PERSONALIZED INBOUND SUPPORT LOG</div>
+                        </div>
+                     </div>
+                  </div>
+
+                  {/* Best For Tags */}
+                  <div className="pt-4 border-t border-gray-50 space-y-3">
+                     <div className="flex items-center gap-2 text-xs font-black text-navy uppercase tracking-wide">
+                        <span className="text-orange-primary font-black text-base">#</span>
+                        Best For tags
+                     </div>
+                     <div className="flex flex-wrap gap-2">
+                        {['#premium lifestyle', '#quality driven', '#modern apparel', '#exclusive designs', '#sustainable wear', '#best in segment BBDT', '#elite deshi collect'].map((tag) => (
+                           <span key={tag} className="text-[10px] font-black text-orange-primary bg-orange-primary/5 px-3 py-1 rounded-full transition-colors hover:bg-orange-primary/10 cursor-default">
+                              {tag}
+                           </span>
+                        ))}
                      </div>
                   </div>
                </div>

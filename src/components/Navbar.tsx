@@ -63,6 +63,28 @@ export function Navbar() {
     { label: 'Settings', path: '/dashboard', tab: 'settings', icon: Settings },
   ];
 
+  const getLinkClass = (path: string) => {
+    const isActive = path === '/' 
+      ? location.pathname === '/' 
+      : location.pathname.startsWith(path);
+    return cn(
+      "transition-colors hover:text-orange-primary",
+      isActive ? "text-orange-primary font-black" : "text-gray-300"
+    );
+  };
+
+  const getMobileLinkClass = (path: string) => {
+    const isActive = path === '/' 
+      ? location.pathname === '/' 
+      : location.pathname.startsWith(path);
+    return cn(
+      "flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+      isActive 
+        ? "text-orange-primary bg-orange-primary/5 border border-orange-primary/10" 
+        : "text-gray-300 hover:text-white hover:bg-white/5 border border-transparent"
+    );
+  };
+
   return (
     <>
       <nav className="w-full text-white h-20 flex items-center px-4 md:px-8 z-50 sticky top-0 border-b shadow-2xl backdrop-blur-md transition-all duration-300 bg-[#0A0A1F]/90 border-white/5" id="main-navbar">
@@ -84,13 +106,13 @@ export function Navbar() {
 
         {/* Retail Mode general navigation links */}
         <div className="hidden lg:flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest mr-auto text-gray-300">
-          <Link to="/" className="text-orange-primary hover:text-white transition-colors">Home</Link>
-          <Link to="/categories" className="hover:text-orange-primary transition-colors">Categories</Link>
-          <Link to="/products" className="hover:text-orange-primary transition-colors">Products</Link>
-          <Link to="/brands" className="hover:text-orange-primary transition-colors">Brands</Link>
-          <Link to="/guides" className="text-orange-primary hover:text-orange-primary transition-colors">Recommendations</Link>
-          <Link to="/compare" className="hover:text-orange-primary transition-colors">Compare</Link>
-          <Link to="/deals" className="hover:text-orange-primary transition-colors">Deals</Link>
+          <Link to="/" className={getLinkClass('/')}>Home</Link>
+          <Link to="/categories" className={getLinkClass('/categories')}>Categories</Link>
+          <Link to="/products" className={getLinkClass('/products')}>Products</Link>
+          <Link to="/brands" className={getLinkClass('/brands')}>Brands</Link>
+          <Link to="/guides" className={getLinkClass('/guides')}>Recommendations</Link>
+          <Link to="/compare" className={getLinkClass('/compare')}>Compare</Link>
+          <Link to="/deals" className={getLinkClass('/deals')}>Deals</Link>
         </div>
 
         {/* SEARCH BAR */}
@@ -309,25 +331,25 @@ export function Navbar() {
                 {/* Quick links stream */}
                 <div className="flex flex-col gap-3">
                   <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Explore Sections</span>
-                  <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-orange-primary bg-orange-primary/5 border border-orange-primary/10">
+                  <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/')}>
                     <span className="italic">Home</span>
                   </Link>
-                  <Link to="/categories" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                  <Link to="/categories" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/categories')}>
                     <span className="italic">All Categories</span>
                   </Link>
-                  <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                  <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/products')}>
                     <span className="italic">Products Library</span>
                   </Link>
-                  <Link to="/brands" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                  <Link to="/brands" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/brands')}>
                     <span className="italic">Explore Brands</span>
                   </Link>
-                  <Link to="/guides" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                  <Link to="/guides" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/guides')}>
                     <span className="italic">Recommendations</span>
                   </Link>
-                  <Link to="/compare" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                  <Link to="/compare" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/compare')}>
                     <span className="italic">Compare Engine</span>
                   </Link>
-                  <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 transition-all">
+                  <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/deals')}>
                     <span className="italic">Flash Deals</span>
                   </Link>
                   
