@@ -210,7 +210,7 @@ export function AllProductsPage() {
         </div>
       </div>
 
-      <div className="max-w-[1700px] mx-auto px-6 w-full flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 py-8 relative">
+      <div className="max-w-[1440px] mx-auto px-6 w-full flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 py-8 relative">
         
         {/* Sidebar Filters */}
         <aside className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">

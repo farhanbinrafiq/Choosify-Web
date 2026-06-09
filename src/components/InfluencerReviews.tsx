@@ -314,22 +314,6 @@ export function InfluencerReviews({
   featuredReview,
   reviews,
 }: InfluencerReviewsProps) {
-  const [activePlatformFilter, setActivePlatformFilter] = useState<'ALL' | 'YouTube' | 'Instagram' | 'TikTok' | 'Facebook'>('ALL');
-  const [playingVideoId, setPlayingVideoId] = useState<string | number | null>(null);
-  const [localReviews, setLocalReviews] = useState<InfluencerReviewCard[]>([]);
-
-  // Toggleable submission form state at bottom
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [formData, setFormData] = useState({
-    authorName: '',
-    authorHandle: '',
-    platform: 'YouTube' as 'YouTube' | 'Instagram' | 'TikTok' | 'Facebook',
-    title: '',
-    category: 'Product Review',
-    videoUrl: '',
-    aspectRatio: 'landscape' as 'landscape' | 'portrait',
-  });
-
   // Gracefully filter/merge external properties avoiding TS typing errors
   const baseReviews = reviews && reviews.length > 0 ? reviews.map((r, i) => {
     const defaultCard = curatedReviews[i % curatedReviews.length];
@@ -350,6 +334,22 @@ export function InfluencerReviews({
   }) : curatedReviews;
 
   const reviewsKey = JSON.stringify(reviews);
+
+  const [activePlatformFilter, setActivePlatformFilter] = useState<'ALL' | 'YouTube' | 'Instagram' | 'TikTok' | 'Facebook'>('ALL');
+  const [playingVideoId, setPlayingVideoId] = useState<string | number | null>(null);
+  const [localReviews, setLocalReviews] = useState<InfluencerReviewCard[]>(baseReviews);
+
+  // Toggleable submission form state at bottom
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [formData, setFormData] = useState({
+    authorName: '',
+    authorHandle: '',
+    platform: 'YouTube' as 'YouTube' | 'Instagram' | 'TikTok' | 'Facebook',
+    title: '',
+    category: 'Product Review',
+    videoUrl: '',
+    aspectRatio: 'landscape' as 'landscape' | 'portrait',
+  });
 
   // Initialize and sync base reviews list
   useEffect(() => {
@@ -596,7 +596,7 @@ export function InfluencerReviews({
       {/* PART 3 — CARD GRID */}
       {filteredReviews.length === 0 ? (
         <div className="w-full text-center py-10 bg-[#161B22] border border-[#21262D] rounded-[10px] text-gray-400">
-          No reviews available for this filter category.
+          Creator content coming soon
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[1px] bg-[#21262D]/60 rounded-[10px] overflow-hidden border border-[#21262D]/60 shadow-inner">

@@ -405,7 +405,7 @@ export function HomePage() {
       </div>
 
       {/* SECTION 4 — THREE COLUMN GRID */}
-      <main className="max-w-[1700px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
+      <main className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
         
         {/* LEFT STICKY SIDEBAR */}
         <aside 

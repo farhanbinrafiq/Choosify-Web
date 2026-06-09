@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Youtube, Star, ChevronDown, CheckCircle2, Bookmark, ChevronLeft, ChevronRight, Zap, TrendingUp, HelpCircle, AlertCircle, Share2, MessageCircle, BarChart3, Users, Play, Smartphone, Gift, Shirt, Info, Package, DollarSign, ShieldCheck, ThumbsUp, Heart } from 'lucide-react';
+import { Search, Youtube, Star, ChevronDown, CheckCircle2, Bookmark, ChevronLeft, ChevronRight, Zap, TrendingUp, HelpCircle, AlertCircle, Share2, MessageCircle, BarChart3, Users, Play, Smartphone, Gift, Shirt, Info, Package, DollarSign, ShieldCheck, ThumbsUp, Heart, X } from 'lucide-react';
 import { BRANDS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { motion, AnimatePresence } from 'motion/react';
@@ -9,12 +9,13 @@ import { useCarousel } from '../hooks/useCarousel';
 import { ReportModal } from '../components/ReportModal';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
+import { BrandOverviewSection } from '../components/BrandOverviewSection';
 
 interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
 }
 
-// Safe inline SVG Social Icons to prevent lucide-react compilation errors across different environments
+// Inline Social SVG Icons matching design guidelines
 const FacebookIcon = ({ size = 16, ...props }: CustomIconProps) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" {...props}>
     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
@@ -93,11 +94,20 @@ function WithInfluencerReviews({ brandName, brandLogo }: { brandName: string; br
 export function BrandDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { allBrands, allProducts, mode } = useGlobalState();
+  const { allBrands, allProducts } = useGlobalState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isLoved, setIsLoved] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
+
+  // Filter States (from Brand Products page)
+  const [activeFilter, setActiveFilter] = useState('Full Experience'); // Show Component View Selector
+  const [searchFilter, setSearchFilter] = useState('');
+  const [currentSearchInput, setCurrentSearchInput] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>([]);
+  const [selectedPriceLimit, setSelectedPriceLimit] = useState<number>(100000);
+  const [activeSection, setActiveSection] = useState('all');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -106,17 +116,158 @@ export function BrandDetailPage() {
   }, []);
 
   // Dynamically resolve brand or fallback to Sailor/fashion-oriented layout
-  // Check if find brand with id, otherwise look for Yellow, Aarong, Sailor, or use Apex (allBrands[2])
   const brand = allBrands.find(b => String(b.id) === id) || allBrands.find(b => b.name === 'Sailor') || allBrands[2];
   
-  const brandProducts = allProducts.filter((p: any) => p.brandId === brand.id);
-  const displaySuggestedProducts = brandProducts.length > 0 ? brandProducts.slice(0, 4) : allProducts.slice(0, 4);
+  // Resolve products listed under this brand
+  const brandNameLower = brand.name.toLowerCase();
+  const brandProducts = allProducts.filter((p: any) => 
+    p.brandId === brand.id || 
+    (p.brand && p.brand.toLowerCase() === brandNameLower)
+  );
 
-  const [activeAccordionIndex, setActiveAccordionIndex] = useState(1);
+  // Dynamic Categories options
+  const dynamicCategories = Array.from(new Set(brandProducts.map((p: any) => p.category).filter(Boolean))).map((catName: any) => {
+    const count = brandProducts.filter((p: any) => p.category === catName).length;
+    return { name: catName, count: count };
+  });
+  const defaultCats = [
+    { name: "Mobile", count: 12 },
+    { name: "Headphone", count: 8 },
+    { name: "Chargers & Batteries", count: 5 },
+    { name: "Accessories", count: 7 }
+  ];
+  const finalCategoriesList = dynamicCategories.length > 0 ? dynamicCategories : defaultCats;
+
+  const productTypes = [
+    "Drives", "Flash", "Ram", "Batteries", "SSD", "Keyboard", "Monitors", "Mouse", "Cases", "Fans", "Software", "CPU"
+  ];
+
+  // Filters Engine Implementation
+  const filteredProducts = brandProducts.filter((p: any) => {
+    // 1. Search Box
+    if (searchFilter && !p.title.toLowerCase().includes(searchFilter.toLowerCase())) {
+      return false;
+    }
+    // 2. Categories
+    if (selectedCategories.length > 0) {
+      if (!p.category || !selectedCategories.includes(p.category)) {
+        return false;
+      }
+    }
+    // 3. Price Limit
+    if (p.price) {
+      const priceNum = typeof p.price === 'number' 
+        ? p.price 
+        : parseInt(String(p.price).replace(/[^0-9]/g, '')) || 0;
+      if (priceNum > selectedPriceLimit) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  // Extract deals (with specific tags or Sale flags)
+  const filteredDeals = filteredProducts.filter((p: any) => 
+    p.tag === 'SALE' || p.tag === 'HOT' || p.tag === 'NEW' || p.discount
+  );
+  // Guarantee always active deals fallback
+  const finalDeals = filteredDeals.length > 0 ? filteredDeals : filteredProducts.slice(0, 3);
+  
+  // Counts
+  const totalDealsFound = finalDeals.length;
+  const totalProductsFound = filteredProducts.length || brandProducts.length;
+
+  const handleCategoryToggle = (catName: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(catName) ? prev.filter(c => c !== catName) : [...prev, catName]
+    );
+  };
+
+  const handleProductTypeToggle = (type: string) => {
+    setSelectedProductTypes(prev => 
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
+
+  const clearAllFilters = () => {
+    setSearchFilter('');
+    setCurrentSearchInput('');
+    setSelectedCategories([]);
+    setSelectedProductTypes([]);
+    setSelectedPriceLimit(100000);
+    setActiveFilter('Full Experience');
+  };
+
+  const activeChips = [];
+  if (searchFilter) activeChips.push({ type: 'search', label: `Search: ${searchFilter}` });
+  selectedCategories.forEach(cat => activeChips.push({ type: 'category', label: cat }));
+  selectedProductTypes.forEach(type => activeChips.push({ type: 'type', label: type }));
+  if (selectedPriceLimit < 100000) activeChips.push({ type: 'price', label: `Under ৳${selectedPriceLimit.toLocaleString()}` });
+
+  // ScrollSpy Active Section Detection
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 200; // offset matches sticky selector
+
+      const sections = [
+        { id: 'deals-section', name: 'deals' },
+        { id: 'products-section', name: 'products' },
+        { id: 'influencer-reviews-section', name: 'influencer' },
+        { id: 'public-reviews-section', name: 'public' },
+        { id: 'brand-overview-section', name: 'overview' }
+      ];
+
+      if (window.scrollY < 200) {
+        setActiveSection('all');
+        return;
+      }
+
+      let currentSection = 'all';
+      for (const section of sections) {
+        const el = document.getElementById(section.id);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPosition >= top && scrollPosition <= top + height) {
+            currentSection = section.name;
+          }
+        }
+      }
+      setActiveSection(currentSection);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    if (id === 'all') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setActiveSection('all');
+    } else {
+      const el = document.getElementById(id);
+      if (el) {
+        const offset = 180; // Offset for navbar + sticky selectors
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+        
+        const nameMap: { [key: string]: string } = {
+          'deals-section': 'deals',
+          'products-section': 'products',
+          'influencer-reviews-section': 'influencer',
+          'public-reviews-section': 'public',
+          'brand-overview-section': 'overview'
+        };
+        setActiveSection(nameMap[id] || 'all');
+      }
+    }
+  };
+
   const [productLineIndex, setProductLineIndex] = useState(1);
-  const [suggestedIndex, setSuggestedIndex] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const isDraggingRef = useRef(false);
 
   const carouselItems = [
     { name: "Premium Comfort", category: "Classic Collection", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=800&fit=crop" },
@@ -125,59 +276,23 @@ export function BrandDetailPage() {
     { name: "Festive Spirit", category: "Seasonal Wear", img: "https://images.unsplash.com/photo-1511741454500-ddbf7ef33554?w=1200&h=800&fit=crop" }
   ];
 
-  const productLineCarousel = useCarousel(carouselItems.length, 3500);
-  const suggestedCarousel = useCarousel(3, 3000);
-
   const handleProductLineNext = () => setProductLineIndex((prev) => (prev + 1) % carouselItems.length);
   const handleProductLinePrev = () => setProductLineIndex((prev) => (prev - 1 + carouselItems.length) % carouselItems.length);
 
-  const handleSuggestedNext = () => setSuggestedIndex((prev) => (prev + 1) % 4);
-  const handleSuggestedPrev = () => setSuggestedIndex((prev) => (prev - 1 + 4) % 4);
-
-  const dragStart = useRef<number | null>(null);
-  
-  const handleSuggestedPointerDown = (e: React.PointerEvent) => {
-    dragStart.current = e.clientX;
-    suggestedCarousel.pause();
-  };
-  
-  const handleSuggestedPointerMove = (e: React.PointerEvent) => {
-    if (dragStart.current !== null) {
-      if (Math.abs(e.clientX - dragStart.current) > 5) {
-        isDraggingRef.current = true;
-        setIsDragging(true);
-      }
-    }
-  };
-
-  const handleSuggestedPointerUp = (e: React.PointerEvent) => {
-    if (dragStart.current !== null) {
-      const diff = e.clientX - dragStart.current;
-      if (diff > 50) suggestedCarousel.prev();
-      else if (diff < -50) suggestedCarousel.next();
-    }
-    dragStart.current = null;
-    isDraggingRef.current = false;
-    setIsDragging(false);
-    suggestedCarousel.resume();
-  };
-
-  // Dynamic high-fidelity Brand Overview Resolver
   const getBrandOverviews = (brandName: string) => {
     const name = brandName.toLowerCase();
-    
     if (name.includes('sailor') || name.includes('la reve') || name.includes('yellow') || name.includes('aarong') || name.includes('ethnic') || name.includes('fashion') || name.includes('apex') || name.includes('bata') || name.includes('lotto')) {
        return {
           address: "GRAND SHOPPING MALL, HOUSE 2, ROAD 2, SECTOR 92. 1500 - DHAKA BANGLADESH.",
           website: "www.website.com",
-          map: "https://https://www.google.com/maps",
+          map: "https://www.google.com/maps",
           email: "fashion@gmail.com",
           phone: "01234456789",
           priceRange: "BDT - 500",
           ageRange: "AGE: 12 - 40",
           audience: "MALE, FEMALE, YOUTH & KIDS",
           services: [
-             "90 DAYS RETURN WITH REFUDN POLICY",
+             "90 DAYS RETURN WITH REFUND POLICY",
              "FULL COD ENTIRE BANGLADESH",
              "6 MONTHS WARRANTY ALL PRODUCT",
              "CUSTOM GIFT BOX AVAILABLE",
@@ -188,7 +303,6 @@ export function BrandDetailPage() {
        };
     }
     
-    // Tech brand overview resolver for Samsung/Apple/Sony etc.
     return {
        address: "JAMUNA FUTURE PARK, LEVEL 4, SHOP 22B, DHAKA BANGLADESH.",
        website: `www.${name}.com.bd`,
@@ -212,7 +326,6 @@ export function BrandDetailPage() {
 
   const overviewData = getBrandOverviews(brand.name);
 
-  // Dynamic Popular Categories Previews mapping (Panjabi, Western, Suit or shoes/tech equivalent)
   const getPopularCategoryPreviews = () => {
     const cat = (brand.category || '').toLowerCase();
     const name = brand.name.toLowerCase();
@@ -230,7 +343,6 @@ export function BrandDetailPage() {
         { label: 'FORMAL', img: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400&h=600&fit=crop' }
       ];
     }
-    // Tech & gadgets placeholder
     return [
       { label: 'MOBILES', img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=600&fit=crop' },
       { label: 'GEAR', img: 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&h=600&fit=crop' },
@@ -240,7 +352,6 @@ export function BrandDetailPage() {
 
   const popularCats = getPopularCategoryPreviews();
 
-  // Dynamic mappers for Brand Logo Graphics to look extremely premium and identical to physical look
   const renderBrandLogo = (brandObj: any) => {
     const term = brandObj.name.toLowerCase();
     if (term.includes('sailor')) {
@@ -279,8 +390,6 @@ export function BrandDetailPage() {
         </div>
       );
     }
-    
-    // Fallback standard render
     return (
       <div className="w-full h-full bg-gradient-to-br from-navy to-[#2A2E6B] flex items-center justify-center text-4xl font-extrabold text-white">
         {brandObj.logo || brandObj.name.substring(0, 2)}
@@ -289,7 +398,7 @@ export function BrandDetailPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#EEF1F8]">
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       
       {/* 1. Brand Hero Section */}
       <motion.section 
@@ -322,8 +431,6 @@ export function BrandDetailPage() {
               {/* Left Side: Brand Profile Details */}
               <div className="flex-1 w-full text-center lg:text-left">
                  <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 text-center sm:text-left">
-                    
-                    {/* Brand avatar container styled matching Sailor logo mockup */}
                     <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white relative shrink-0">
                        {renderBrandLogo(brand)}
                        <div className="absolute -top-1.5 -right-1.5 w-7 h-7 bg-[#E8500A] rounded-full flex items-center justify-center text-white border-2 border-[#10133A] shadow-lg">
@@ -358,7 +465,7 @@ export function BrandDetailPage() {
                     </div>
                  </div>
 
-                 {/* Action buttons inside landing board */}
+                 {/* Action buttons */}
                  <div className="flex flex-wrap gap-3.5 mb-8 justify-center sm:justify-start text-white">
                     <button 
                       onClick={() => setIsLoved(!isLoved)}
@@ -389,17 +496,14 @@ export function BrandDetailPage() {
                     </button>
 
                     <button 
-                      onClick={() => {
-                        const reviewSec = document.getElementById('public-reviews-section');
-                        if (reviewSec) reviewSec.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="bg-transparent text-white border border-white/20 hover:bg-white/10 hover:border-white/40 text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all italic"
+                      onClick={() => scrollToSection('public-reviews-section')}
+                      className="bg-transparent text-white border border-white/20 hover:bg-white/10 hover:border-white/40 text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all italic cursor-pointer"
                     >
                        Write a Review
                     </button>
                  </div>
                  
-                 {/* Social Find Us On Container with customized logo buttons */}
+                 {/* Social links */}
                  <div className="flex items-center gap-4 mt-8 flex-wrap justify-center sm:justify-start">
                     <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">Find Us On</span>
                     <div className="flex items-center gap-5">
@@ -431,7 +535,7 @@ export function BrandDetailPage() {
                  </div>
               </div>
 
-              {/* Right Side: Score card and rating bars sidebar panel */}
+              {/* Right Side: Score card */}
               <div className="w-full lg:w-[420px] relative">
                  <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-white relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/10 blur-2xl rounded-full translate-x-1/3 -translate-y-1/3" />
@@ -450,7 +554,6 @@ export function BrandDetailPage() {
                        </div>
                     </div>
 
-                    {/* Progress sliders matching mockup */}
                     <div className="space-y-3.5 mb-6">
                        {[
                           { label: "Quality", value: 85, color: "bg-[#E8500A]" },
@@ -474,7 +577,6 @@ export function BrandDetailPage() {
                        ))}
                     </div>
 
-                    {/* Recommend buyers board */}
                     <div className="flex items-center justify-between pt-5 border-t border-white/10">
                        <div className="text-center w-full">
                           <div className="text-4xl font-black text-[#50DC17] leading-none mb-1">85%</div>
@@ -483,7 +585,7 @@ export function BrandDetailPage() {
                     </div>
                  </div>
 
-                 {/* Floating Save/Share controls on bottom right */}
+                 {/* Save share controls */}
                  <div className="absolute -bottom-6 right-4 flex items-center gap-3 z-20">
                     <button 
                       onClick={() => {
@@ -507,498 +609,548 @@ export function BrandDetailPage() {
         </div>
       </motion.section>
 
-      {/* 2. Main 3-Column Layout */}
-      <div className="max-w-[1700px] mx-auto px-6 py-10 w-full">
-         <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_250px] xl:grid-cols-[300px_minmax(0,1fr)_280px] gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 items-start w-full">
-            
-            {/* LEFT COLUMN: BRAND OVERVIEW, POPULAR PRODUCTS */}
-            <div className="flex flex-col gap-8 w-full lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
-               
-               {/* A. Brand Overview Section */}
-               <div id="brand-overview-panel" className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80">
-                  <h3 className="text-lg font-black text-[#1A1D4E] tracking-tight uppercase border-b border-gray-100 pb-3 mb-5 flex items-center gap-2">
-                     <span className="w-1.5 h-4 bg-[#E8500A] rounded-full inline-block" />
-                     Brand Overview
-                  </h3>
-
-                  <div className="space-y-6">
-                     {/* Address */}
-                     <div className="group">
-                        <div className="flex items-center gap-2.5 mb-1.5">
-                           <div className="w-6 h-6 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                              <CheckCircle2 size={13} fill="currentColor" className="text-[#E8500A] stroke-white" />
-                           </div>
-                           <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider">Shop Address & Links</h4>
-                        </div>
-                        <div className="pl-8 text-xs text-gray-500 font-bold leading-relaxed space-y-1.5">
-                           <p className="uppercase">{overviewData.address}</p>
-                           <div>
-                              <span className="text-[#E8500A] font-black">WEBSITE:</span>{' '}
-                              <a href={`https://${overviewData.website}`} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#1A1D4E]">
-                                 {overviewData.website}
-                              </a>
-                           </div>
-                           <div>
-                              <span className="text-[#E8500A] font-black">MAP:</span>{' '}
-                              <a href={overviewData.map} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#1A1D4E] truncate block max-w-full">
-                                 {overviewData.map}
-                              </a>
-                           </div>
-                        </div>
-                     </div>
-
-                     {/* Contact */}
-                     <div className="group">
-                        <div className="flex items-center gap-2.5 mb-1.5">
-                           <div className="w-6 h-6 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                              <CheckCircle2 size={13} fill="currentColor" className="text-[#E8500A] stroke-white" />
-                           </div>
-                           <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider">Contact Informations</h4>
-                        </div>
-                        <div className="pl-8 text-xs text-gray-500 font-bold space-y-1">
-                           <p className="truncate"><span className="text-[#1A1D4E] font-black">EMAIL:</span> {overviewData.email}</p>
-                           <p><span className="text-[#1A1D4E] font-black">PHONE:</span> {overviewData.phone}</p>
-                        </div>
-                     </div>
-
-                     {/* Price & Audience */}
-                     <div className="group">
-                        <div className="flex items-center gap-2.5 mb-1.5">
-                           <div className="w-6 h-6 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                              <CheckCircle2 size={13} fill="currentColor" className="text-[#E8500A] stroke-white" />
-                           </div>
-                           <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider">Price Range & Audience</h4>
-                        </div>
-                        <div className="pl-8 text-xs text-gray-500 font-bold space-y-1">
-                           <p><span className="text-[#1A1D4E] font-black">BDT</span> - {overviewData.priceRange.replace('BDT - ', '')}</p>
-                           <p>{overviewData.ageRange}</p>
-                           <p className="uppercase">{overviewData.audience}</p>
-                        </div>
-                     </div>
-
-                     {/* Services & Specialties */}
-                     <div className="group">
-                        <div className="flex items-center gap-2.5 mb-1.5">
-                           <div className="w-6 h-6 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                              <CheckCircle2 size={13} fill="currentColor" className="text-[#E8500A] stroke-white" />
-                           </div>
-                           <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider">Services & Specialties</h4>
-                        </div>
-                        <ul className="pl-8 space-y-1.5">
-                           {overviewData.services.map((srv, idx) => (
-                              <li key={idx} className="text-[10px] text-gray-500 font-bold uppercase tracking-wide flex items-start gap-1.5">
-                                 <span className="text-[#E8500A] text-xs leading-none">•</span>
-                                 <span>{srv}</span>
-                              </li>
-                           ))}
-                        </ul>
-                     </div>
-
-                     {/* Tags */}
-                     <div className="group">
-                        <div className="flex items-center gap-2.5 mb-2.5">
-                           <div className="w-6 h-6 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                              <CheckCircle2 size={13} fill="currentColor" className="text-[#E8500A] stroke-white" />
-                           </div>
-                           <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider">Best For #Tags</h4>
-                        </div>
-                        <div className="pl-8 flex flex-wrap gap-1.5">
-                           {overviewData.tags.map((tag, idx) => (
-                              <span key={idx} className="text-[9px] font-black text-[#E8500A] bg-[#FFF0E8] px-2.5 py-1 rounded-full uppercase tracking-wider border border-[#E8500A]/5 select-none">
-                                 {tag}
-                              </span>
-                           ))}
-                        </div>
-                     </div>
-                  </div>
-               </div>
-
-               {/* B. Popular Products Section */}
-               <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80">
-                  <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-3">
-                     <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight flex items-center gap-2">
-                        <span className="w-1.5 h-4 bg-[#E8500A] rounded-full inline-block" />
-                        Popular Products
-                     </h3>
-                     <Link to="/products" className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider hover:underline">See All</Link>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                     {popularCats.map((cat, idx) => (
-                        <div key={idx} className="flex flex-col items-center group cursor-pointer" onClick={() => navigate('/products')}>
-                           <div className="w-full aspect-[2/3] rounded-xl overflow-hidden relative border border-gray-100 shadow-sm mb-2 group-hover:shadow-md transition-all">
-                              <img src={cat.img} alt={cat.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                              <div className="absolute inset-0 bg-navy/10 group-hover:bg-transparent transition-colors" />
-                           </div>
-                           <span className="text-[9px] font-black text-[#1A1D4E] tracking-wider uppercase text-center group-hover:text-[#E8500A] transition-colors">
-                              {cat.label}
-                           </span>
-                        </div>
-                     ))}
-                  </div>
-               </div>
-
+      {/* 2. SECTION SUMMARY BAR */}
+      <div className="w-full bg-[#3D251A] text-white py-4.5 border-y border-white/5 font-space font-black italic uppercase tracking-[0.2em] text-[11px] md:text-xs">
+         <div className="max-w-[1440px] mx-auto px-6 flex flex-wrap justify-center sm:justify-around items-center gap-y-4 gap-x-12 text-center">
+            <div className="flex items-center gap-2">
+               <span className="text-[#E8500A] text-lg font-space font-black">★</span>
+               <span>{totalDealsFound} Deals Found</span>
             </div>
-
-            {/* CENTER Feed: PRODUCTS, REVIEW CARDS, COMPARISON TABLE */}
-            <div className="flex flex-col gap-8 w-full min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
-               
-               {/* A. Product Line Carousel Grid (Accordion style preserved) */}
-               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
-                  <div className="flex justify-between items-center mb-6">
-                     <div>
-                        <h2 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase flex items-center gap-2">
-                           <span className="w-1.5 h-5 bg-[#E8500A] rounded-full inline-block" />
-                           Product Line
-                        </h2>
-                     </div>
-                     <Link to={`/brands/${brand.id}/products`} className="text-[10px] font-black text-[#E8500A] hover:underline uppercase tracking-wider">Browse All Product</Link>
-                  </div>
-
-                  {/* Interactive accordions section */}
-                  <div className="flex flex-col md:flex-row gap-3.5 h-[340px] md:h-[460px] overflow-hidden w-full">
-                     {carouselItems.map((item, idx) => {
-                        const isActive = idx === productLineIndex;
-                        return (
-                           <motion.div
-                             key={idx}
-                             onClick={() => setProductLineIndex(idx)}
-                             initial={false}
-                             animate={{
-                               width: isActive ? (isMobile ? '100%' : '60%') : (isMobile ? '0%' : '13%'),
-                               flex: isActive ? 10 : 1,
-                               opacity: isActive ? 1 : 0.75,
-                             }}
-                             transition={{
-                               type: "spring",
-                               stiffness: 85,
-                               damping: 17
-                             }}
-                             className={cn(
-                               "relative h-full rounded-2xl overflow-hidden cursor-pointer group",
-                               !isActive && "hidden md:block"
-                             )}
-                           >
-                             <img src={item.img} alt={item.name} className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-105" />
-                             <div className={cn(
-                                "absolute inset-0 transition-opacity duration-700",
-                                isActive ? "bg-gradient-to-t from-black/85 via-black/25 to-transparent" : "bg-black/35"
-                             )} />
-
-                             {/* Sideway labels for collapsed panels */}
-                             {!isActive && (
-                                <div className="absolute inset-x-0 bottom-12 flex justify-center translate-y-10 group-hover:translate-y-0 transition-transform">
-                                   <span className="text-white/80 text-[10px] font-black uppercase tracking-[0.4em] italic origin-center rotate-[-90deg] whitespace-nowrap">
-                                      {item.name}
-                                   </span>
-                                </div>
-                             )}
-
-                             {/* Full Title on active panels */}
-                             {isActive && (
-                                <motion.div 
-                                  initial={{ opacity: 0, y: 15 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: 0.2 }}
-                                  className="absolute inset-0 p-8 flex flex-col justify-end items-start"
-                                >
-                                   <span className="text-[8px] font-black text-white/60 uppercase tracking-[0.3em] mb-1 italic">{item.category}</span>
-                                   <h3 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
-                                      {item.name}
-                                   </h3>
-                                </motion.div>
-                             )}
-                           </motion.div>
-                        );
-                     })}
-                  </div>
-
-                  {/* Accordion Carousel buttons and paginations */}
-                  <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                     <div className="flex gap-2.5">
-                        {carouselItems.map((_, idx) => (
-                           <button
-                             key={idx}
-                             onClick={() => setProductLineIndex(idx)}
-                             className={cn(
-                               "h-1.5 transition-all duration-300 rounded-full",
-                               productLineIndex === idx ? "w-10 bg-[#E8500A]" : "w-2 bg-gray-200 hover:bg-gray-300"
-                             )}
-                           />
-                        ))}
-                     </div>
-                     
-                     <div className="flex gap-3">
-                        <button onClick={handleProductLinePrev} className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 bg-white transition-all active:scale-95 shadow-sm cursor-pointer">
-                           <ChevronLeft size={18} className="text-[#1A1D4E]" />
-                        </button>
-                        <button onClick={handleProductLineNext} className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 bg-white transition-all active:scale-95 shadow-sm cursor-pointer">
-                           <ChevronRight size={18} className="text-[#1A1D4E]" />
-                        </button>
-                     </div>
-                  </div>
-
-                  {/* Primary browse all button below */}
-                  <div className="mt-8 border-t border-gray-50 pt-6 flex justify-center">
-                     <Link 
-                       to={`/brands/${brand.id}/products`}
-                       className="bg-[#E8500A] hover:bg-[#ff5d14] text-white text-xs font-black uppercase tracking-[0.2em] px-8 py-4 rounded-full shadow-lg transition-transform transform hover:scale-[1.03] active:scale-[0.97] italic inline-flex items-center gap-2"
-                     >
-                        Browse All Product
-                     </Link>
-                  </div>
-               </div>
-
-               {/* B. Influencer & YouTuber Reviews section */}
-               <WithInfluencerReviews brandName={brand.name} brandLogo={brand.logo} />
-
-               {/* C. Public Reviews Customer Dashboard (ID matched to CTA) */}
-               <div id="public-reviews-section" className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
-                  <div className="text-center mb-8 border-b border-gray-100 pb-5">
-                     <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
-                        Public Reviews
-                     </h3>
-                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
-                        Verified Customer Experiences
-                     </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     {[
-                        {
-                           name: "Tanvir Hasan",
-                           date: "2 weeks ago",
-                           purchaseDate: "April 2024",
-                           comment: `The material quality of the new ${brand.name} collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect.`,
-                           rating: 5,
-                           verified: true,
-                           productImages: [
-                              "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
-                              "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop"
-                           ],
-                           dp: "https://i.pravatar.cc/150?u=tanvir",
-                           helpful: 124
-                        },
-                        {
-                           name: "Nusrat Jahan",
-                           date: "1 month ago",
-                           purchaseDate: "March 2024",
-                           comment: "Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the collection.",
-                           rating: 4.8,
-                           verified: true,
-                           productImages: [
-                              "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop"
-                           ],
-                           dp: "https://i.pravatar.cc/150?u=nusrat",
-                           helpful: 89
-                        }
-                     ].map((review, i) => (
-                        <div key={i} className="bg-gray-50 border border-gray-100/50 rounded-2xl p-6 flex flex-col group hover:shadow-md transition-shadow duration-300">
-                           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                              <div className="flex items-center gap-3">
-                                 <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-[#E8500A] p-0.5">
-                                    <img src={review.dp} className="w-full h-full object-cover rounded-lg" alt={review.name} />
-                                 </div>
-                                 <div>
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                       <span className="font-extrabold text-[#1A1D4E] text-sm italic">{review.name}</span>
-                                       {review.verified && (
-                                          <span className="bg-[#4DBC15]/10 text-[#4DBC15] text-[7px] font-black uppercase px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                                             <CheckCircle2 size={8} className="text-[#4DBC15]" /> Verfied
-                                          </span>
-                                       )}
-                                    </div>
-                                    <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider block mt-0.5">Posted {review.date}</span>
-                                 </div>
-                              </div>
-                              <div className="text-right">
-                                 <div className="flex gap-0.5 justify-end">
-                                    {[1, 2, 3, 4, 5].map(star => (
-                                       <Star key={star} size={10} className={cn("fill-current", star <= review.rating ? "text-[#E8500A]" : "text-gray-200")} />
-                                    ))}
-                                 </div>
-                                 <div className="text-sm font-black text-[#1A1D4E] mt-0.5 italic">{review.rating} <span className="text-[8px] text-gray-300 font-sans">/ 5</span></div>
-                              </div>
-                           </div>
-
-                           {/* Media Files */}
-                           <div className="flex gap-2 mb-4">
-                              {review.productImages.map((img, j) => (
-                                 <div key={j} className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 cursor-zoom-in">
-                                    <img src={img} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" alt="review attachments" />
-                                 </div>
-                              ))}
-                           </div>
-
-                           <div className="p-4 bg-white border border-gray-100 rounded-xl mb-4 relative flex-1">
-                              <p className="text-xs text-navy/80 font-bold leading-relaxed italic">
-                                 "{review.comment}"
-                              </p>
-                           </div>
-
-                           <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100/50">
-                              <div className="flex flex-col">
-                                 <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest italic mb-0.5">Purchase Date</span>
-                                 <span className="text-[9px] font-black text-[#1A1D4E] uppercase tracking-wider italic">{review.purchaseDate}</span>
-                              </div>
-                              
-                              <div className="flex items-center gap-2">
-                                 <button 
-                                   onClick={() => toast.success("Marked as helpful!")}
-                                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-gray-100 hover:border-navy text-[#1A1D4E] font-black text-[9px] uppercase tracking-widest italic transition-colors cursor-pointer"
-                                 >
-                                    <ThumbsUp size={10} /> Helpful ({review.helpful})
-                                 </button>
-                              </div>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-
-                  <div className="mt-8 flex justify-center">
-                     <button onClick={() => toast.success("Loading all customer reviews...")} className="px-10 py-3.5 border border-[#1A1D4E] text-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white transition-all text-[9.5px] font-black uppercase tracking-widest rounded-full italic cursor-pointer">
-                        Load More Reviews
-                     </button>
-                  </div>
-               </div>
-
-               {/* D. Similar/Related Brands Column Block */}
-               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
-                  <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-8 text-center italic">
-                     Similar Brands Comparison
-                  </h3>
-
-                  <div className="overflow-x-auto no-scrollbar rounded-2xl border border-gray-100">
-                     <table className="w-full text-left border-collapse">
-                        <thead>
-                           <tr className="bg-gray-50 border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-wider italic">
-                              <th className="py-4.5 px-6">Brand Identity</th>
-                              <th className="py-4.5 px-6 text-center">Quality</th>
-                              <th className="py-4.5 px-6 text-center">Price Range</th>
-                              <th className="py-4.5 px-6 text-center">Rating</th>
-                              <th className="py-4.5 px-6 text-right">Action</th>
-                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50 text-xs">
-                           {[
-                              { name: "Apex Shoes", id: 3, logo: "Ap", quality: "Premium", price: "High (৳৳৳)", score: "4.8" },
-                              { name: "Aarong Brand", id: 10, logo: "Aa", quality: "Elite", price: "Mid (৳৳)", score: "4.7" },
-                              { name: "Lotto Wear", id: 6, logo: "L", quality: "Basic", price: "Economy (৳)", score: "4.2" },
-                              { name: "Yellow Shop", id: 11, logo: "Y", quality: "Fashion", price: "Premium (৳৳৳)", score: "4.5" }
-                           ].map((item, idx) => (
-                              <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                                 <td className="py-4.5 px-6">
-                                    <div className="flex items-center gap-3">
-                                       <div className="w-8 h-8 rounded-lg bg-[#1A1D4E] text-white font-extrabold flex items-center justify-center text-[10px]">
-                                          {item.logo}
-                                       </div>
-                                       <span className="font-extrabold text-[#1A1D4E] italic">{item.name}</span>
-                                    </div>
-                                 </td>
-                                 <td className="py-4.5 px-6 text-center">
-                                    <span className="px-2.5 py-0.5 bg-[#4DBC15]/10 text-[#4DBC15] text-[8px] font-black uppercase rounded tracking-wider italic">
-                                       {item.quality}
-                                    </span>
-                                 </td>
-                                 <td className="py-4.5 px-6 text-center text-[10px] font-semibold text-gray-500 italic">{item.price}</td>
-                                 <td className="py-4.5 px-6 text-center">
-                                    <div className="flex items-center justify-center gap-1 text-[11px] font-extrabold text-navy italic">
-                                       <Star size={10} className="fill-[#E8500A] text-[#E8500A]" />
-                                       <span>{item.score}</span>
-                                    </div>
-                                 </td>
-                                 <td className="py-4.5 px-6 text-right">
-                                    <Link to={`/brands/${item.id}`} className="px-4 py-1.5 border border-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white text-[#1A1D4E] font-black text-[9px] uppercase tracking-wider rounded-full italic transition-all inline-block">
-                                       Visit
-                                    </Link>
-                                 </td>
-                              </tr>
-                           ))}
-                        </tbody>
-                     </table>
-                  </div>
-               </div>
-
+            <div className="hidden sm:block h-4 w-px bg-white/20" />
+            <div className="flex items-center gap-2">
+               <span className="text-[#E8500A] text-lg font-space font-black">✦</span>
+               <span>{totalProductsFound} Products Found</span>
             </div>
-
-            {/* RIGHT COLUMN: PROMO CODES & SPONSORED ADS */}
-            <div className="flex flex-col gap-8 w-full lg:max-w-[250px] xl:max-w-[280px] flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
-               
-               {/* C. Exclusive Promo Codes Section */}
-               <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80">
-                  <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-3">
-                     <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight flex items-center gap-2">
-                        <span className="w-1.5 h-4 bg-[#E8500A] rounded-full inline-block" />
-                        Promo Codes
-                     </h3>
-                     <Link to="/deals" className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider hover:underline">See All</Link>
-                  </div>
-
-                  <div className="space-y-4">
-                     {[
-                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: "EID26", expiry: "Valid till June 30" },
-                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: `${brand.name.toUpperCase()}500`, expiry: "For New Users Only" },
-                        { title: "First Purchase Offer", discount: "BDT 500 FLAT", code: `${brand.name.toUpperCase()}20`, expiry: "Valid till June 30" }
-                     ].map((promo, idx) => (
-                        <div key={idx} className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex flex-col items-center text-center relative overflow-hidden group">
-                           <div className="w-8 h-8 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
-                              <Gift size={15} />
-                           </div>
-                           <h4 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider mb-0.5">{promo.title}</h4>
-                           <div className="text-sm font-black text-[#E8500A] italic uppercase mb-3 leading-none">{promo.discount}</div>
-                           
-                           <button 
-                             onClick={() => {
-                               navigator.clipboard.writeText(promo.code);
-                               toast.success(`Code ${promo.code} copied!`);
-                             }}
-                             className="w-full py-2 bg-white rounded-xl border border-dashed border-gray-200 hover:border-[#E8500A] font-mono text-[11px] font-extrabold text-[#1A1D4E] tracking-widest uppercase transition-colors flex flex-col items-center justify-center cursor-pointer"
-                           >
-                              <span className="text-[7px] text-gray-400 font-sans tracking-wide uppercase font-black">PROMO CODE</span>
-                              <span>{promo.code}</span>
-                           </button>
-                           
-                           <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2">{promo.expiry}</span>
-                        </div>
-                     ))}
-                  </div>
-               </div>
-
-               {/* D. Sponsored Ad Section */}
-               <div className="bg-[#100D2B] rounded-3xl p-6 text-white text-center relative overflow-hidden shadow-md">
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
-                  <div className="relative z-10">
-                     <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4">
-                        Sponsored Ad
-                     </span>
-                     
-                     <div className="w-full aspect-square rounded-2xl overflow-hidden mb-5 border border-white/10 shadow-lg">
-                        <img 
-                           src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop" 
-                           alt="Sponsor AD" 
-                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
-                        />
-                     </div>
-                     
-                     <h4 className="font-serif text-lg font-bold tracking-widest uppercase mb-1">AARONG</h4>
-                     <p className="text-[9px] font-black text-white/50 tracking-wider uppercase mb-3">Heritage Shopping Brand</p>
-                     
-                     <p className="text-[11px] text-white/70 font-medium leading-relaxed mb-6 px-1">
-                        New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
-                     </p>
-                     
-                     <button className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-full shadow-lg hover:shadow-[#E8500A]/20 transition-all cursor-pointer">
-                        Shop Now
-                     </button>
-                  </div>
-               </div>
-
+            <div className="hidden sm:block h-4 w-px bg-white/20" />
+            <div className="flex items-center gap-2">
+               <span className="text-[#E8500A] text-lg font-space font-black">🎁</span>
+               <span>3 Promo Codes Found</span>
             </div>
-
          </div>
       </div>
 
-      {/* Small Small small Report Modal portal trigger */}
+      {/* 3. STICKY SECTION NAVIGATION */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-2">
+         <div className="max-w-[1440px] mx-auto px-6">
+            <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
+               
+               <button 
+                 onClick={() => scrollToSection('all')}
+                 className={cn(
+                   "px-6 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
+                   activeSection === 'all' 
+                     ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
+                     : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100"
+                 )}
+               >
+                  All
+               </button>
+
+               {[
+                 { id: 'deals-section', name: 'deals', label: 'Deals', icon: <Gift size={13} /> },
+                 { id: 'products-section', name: 'products', label: 'Products', icon: <Package size={13} /> },
+                 { id: 'influencer-reviews-section', name: 'influencer', label: 'Influencer Reviews', icon: <Play size={13} /> },
+                 { id: 'public-reviews-section', name: 'public', label: 'Public Reviews', icon: <Star size={13} /> },
+                 { id: 'brand-overview-section', name: 'overview', label: 'Brand Overview', icon: <Info size={13} /> }
+               ].map(item => (
+                 <button 
+                   key={item.id}
+                   onClick={() => scrollToSection(item.id)}
+                   className={cn(
+                     "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
+                     activeSection === item.name 
+                       ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
+                       : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100"
+                   )}
+                 >
+                    {item.icon}
+                    <span>{item.label}</span>
+                 </button>
+               ))}
+            </div>
+         </div>
+      </div>
+
+      {/* 4. Unified Scrollable Body Wrapper */}
+      <div className="max-w-[1440px] mx-auto px-6 py-10 w-full flex flex-col gap-16">
+         
+         {/* EXCLUSIVE DEALS & PRODUCT CATALOG THREE COLUMN SPLIT GRID */}
+         <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_250px] xl:grid-cols-[300px_minmax(0,1fr)_280px] gap-8 xl:gap-12 items-start w-full relative">
+            
+            {/* COLUMN 1: SIDEBAR FILTERS (from Brand Wise Products page) */}
+            <aside className="w-full lg:sticky lg:top-36 lg:max-h-[calc(100vh-160px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+               <div className="flex flex-col gap-6">
+                  
+                  {/* Active Selection Chips */}
+                  {activeChips.length > 0 && (
+                     <div className="bg-[#0b0c1e] rounded-3xl p-5 shadow-sm border border-white/5 text-left">
+                        <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em] mb-4 flex items-center justify-between">
+                           Selection
+                           <button onClick={clearAllFilters} className="text-[#E8500A] cursor-pointer hover:underline text-[9px] font-black uppercase">Clear</button>
+                        </h3>
+                        <div className="flex flex-wrap gap-1.5">
+                           {activeChips.map((chip, i) => (
+                             <div 
+                               key={i} 
+                               className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-white uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer"
+                               onClick={() => {
+                                 if (chip.type === 'search') { setSearchFilter(''); setCurrentSearchInput(''); }
+                                 else if (chip.type === 'category') handleCategoryToggle(chip.label);
+                                 else if (chip.type === 'type') handleProductTypeToggle(chip.label);
+                                 else if (chip.type === 'price') setSelectedPriceLimit(100000);
+                               }}
+                             >
+                               <span>{chip.label}</span>
+                               <X size={10} className="text-[#E8500A]" />
+                             </div>
+                           ))}
+                        </div>
+                     </div>
+                  )}
+
+                  {/* Filter by Product Name Search box */}
+                  <div className="flex flex-col gap-2 text-left">
+                     <span className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Filter By Product Name</span>
+                     <div className="flex gap-2">
+                        <div className="relative flex-1">
+                           <input 
+                              type="text" 
+                              placeholder="Search brand products..." 
+                              value={currentSearchInput}
+                              onChange={(e) => setCurrentSearchInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') setSearchFilter(currentSearchInput);
+                              }}
+                              className="w-full h-11 px-4 bg-white rounded-xl text-xs font-bold border border-gray-100 focus:outline-none focus:border-[#E8500A] shadow-sm text-left" 
+                           />
+                        </div>
+                        <button 
+                          onClick={() => setSearchFilter(currentSearchInput)}
+                          className="h-11 px-4 bg-[#E8500A] text-white rounded-xl font-black text-[10px] uppercase tracking-widest cursor-pointer transition-colors"
+                        >
+                           Search
+                        </button>
+                     </div>
+                  </div>
+
+                  {/* Filter By Category list */}
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm relative overflow-hidden text-left">
+                     <div className="absolute top-0 right-0 w-2.5 h-full bg-[#E8500A]/5" />
+                     <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">By Category</h3>
+                        <button onClick={() => setSelectedCategories([])} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Reset</button>
+                     </div>
+                     <div className="space-y-2.5 max-h-[180px] overflow-y-auto pr-1 no-scrollbar">
+                       {finalCategoriesList.map((cat, i) => {
+                         const isChecked = selectedCategories.includes(cat.name);
+                         return (
+                           <label key={i} className="flex items-center justify-between group cursor-pointer select-none">
+                             <div className="flex items-center gap-2.5">
+                                <input 
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => handleCategoryToggle(cat.name)}
+                                  className="rounded border-gray-200 text-[#E8500A] focus:ring-[#E8500A] w-3.5 h-3.5 cursor-pointer"
+                                />
+                                <span className={cn("text-[11px] font-bold transition-colors uppercase tracking-wide", isChecked ? "text-[#1A1D4E]" : "text-gray-400 group-hover:text-navy")}>
+                                  {cat.name}
+                                </span>
+                             </div>
+                             <span className="text-[9px] font-mono text-gray-300 font-bold">({cat.count})</span>
+                           </label>
+                         );
+                       })}
+                     </div>
+                  </div>
+
+                  {/* Filter By Popular Product Type tags */}
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm text-left">
+                     <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Product Type</h3>
+                        <button onClick={() => setSelectedProductTypes([])} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Reset</button>
+                     </div>
+                     <div className="flex flex-wrap gap-1.5">
+                       {productTypes.slice(0, 10).map((type, i) => {
+                         const isSelected = selectedProductTypes.includes(type);
+                         return (
+                           <button 
+                             key={i} 
+                             onClick={() => handleProductTypeToggle(type)}
+                             className={cn(
+                               "px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer", 
+                               isSelected 
+                                 ? "bg-[#E8500A] text-white shadow-sm" 
+                                 : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                             )}
+                           >
+                              {type}
+                           </button>
+                         );
+                       })}
+                     </div>
+                  </div>
+
+                  {/* Price limit selection */}
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm text-left">
+                     <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Price Limit</h3>
+                        <button onClick={() => setSelectedPriceLimit(100000)} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Clear</button>
+                     </div>
+                     <div className="space-y-4">
+                        <input 
+                          type="range" 
+                          min="500" 
+                          max="100000" 
+                          step="500"
+                          value={selectedPriceLimit}
+                          onChange={(e) => setSelectedPriceLimit(parseInt(e.target.value))}
+                          className="w-full accent-[#E8500A] cursor-ew-resize"
+                        />
+                        <div className="flex items-center justify-between text-xs font-bold text-[#1A1D4E]">
+                           <span>৳500</span>
+                           <span className="bg-[#FFF0E8] text-[#E8500A] font-extrabold px-3 py-1 rounded-full text-[10px]">
+                              Max: ৳{selectedPriceLimit.toLocaleString()}
+                           </span>
+                        </div>
+                     </div>
+                  </div>
+
+               </div>
+            </aside>
+
+            {/* COLUMN 2: EXCLUSIVE DEALS & PRODUCTS CATALOG (Center scroll) */}
+            <main className="flex-1 min-w-0 flex flex-col gap-12">
+               
+               {/* A. DEALS SECTION */}
+               {(activeFilter === 'Full Experience' || activeFilter === 'Exclusive Deals Only') && (
+                  <div id="deals-section" className="scroll-mt-36">
+                     <div className="mb-6 text-left">
+                        <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">Exclusive Deals</h2>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">Deals found matching current selections</p>
+                     </div>
+                     
+                     {finalDeals.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                           {finalDeals.map((product: any, i: number) => (
+                              <ProductCard key={product.id || i} product={product} variant="grid" />
+                           ))}
+                        </div>
+                     ) : (
+                        <div className="p-10 text-center bg-white border border-gray-100 rounded-3xl text-gray-400 text-xs font-black uppercase">
+                           No Active Deals Found Match Current Filters.
+                        </div>
+                     )}
+                  </div>
+               )}
+
+               {/* B. PRODUCTS SECTION */}
+               {(activeFilter === 'Full Experience' || activeFilter === 'Product Catalogs Only') && (
+                  <div id="products-section" className="scroll-mt-36">
+                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 text-left">
+                        <div>
+                           <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">Product Catalog</h2>
+                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">Full authorized selection available</p>
+                        </div>
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic font-mono bg-white border border-gray-150 rounded-full px-4 py-2">
+                           Showing <span className="text-[#1A1D4E] font-black">{filteredProducts.length}</span> items
+                        </span>
+                     </div>
+
+                     {filteredProducts.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                           {filteredProducts.map((product: any, i: number) => (
+                              <ProductCard key={product.id || i} product={product} variant="grid" />
+                           ))}
+                        </div>
+                     ) : (
+                        <div className="p-16 text-center bg-white border border-gray-150 rounded-3xl text-gray-400 text-xs font-black uppercase space-y-2">
+                           <p>No Products Match Chosen Criteria.</p>
+                           <button onClick={clearAllFilters} className="text-[#E8500A] underline hover:text-[#ff5d14] text-[10px]">Clear Selections</button>
+                        </div>
+                     )}
+
+                     {/* Pagination footer (from Brand Wise Products page) */}
+                     <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-8 mt-12 text-left">
+                        <div className="flex items-center gap-4 bg-white px-6 py-2 rounded-full border border-gray-100 shadow-sm overflow-x-auto no-scrollbar max-w-full">
+                           <button className="text-[10px] font-black text-gray-300 uppercase tracking-widest cursor-default">Prev</button>
+                           <div className="flex items-center gap-3">
+                              {[1, 2, 3, "...", 15].map((p, idx) => (
+                                 <button key={idx} className={cn("w-8 h-8 rounded-full text-xs font-black flex items-center justify-center cursor-pointer hover:bg-gray-50", p === 1 ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 scale-105" : "text-gray-400")}>{p}</button>
+                              ))}
+                           </div>
+                           <button onClick={() => toast.success('Loading Page 2...')} className="text-[10px] font-black text-[#1A1D4E] hover:text-[#E8500A] uppercase tracking-widest cursor-pointer">Next</button>
+                        </div>
+                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-100 px-5 py-2.5 rounded-full">
+                           Authorized Distribution
+                        </span>
+                     </div>
+                  </div>
+               )}
+            </main>
+
+            {/* COLUMN 3: PROMO CODES & ADS (Right column) */}
+            <aside className="w-full lg:sticky lg:top-36 lg:max-h-[calc(100vh-160px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+               <div className="flex flex-col gap-6">
+
+                  {/* Promo Coupons Cards list */}
+                  <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                     <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-3 text-left">
+                        <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight flex items-center gap-1.5">
+                           <span className="w-1.5 h-4 bg-[#E8500A] rounded-full inline-block" />
+                           Promo Codes
+                        </h3>
+                        <span className="text-[9px] font-black text-gray-400">3 Verified</span>
+                     </div>
+
+                     <div className="space-y-4 text-left">
+                        {[
+                           { title: "First Order Gift", discount: "BDT 500 FLAT", code: `${brand.name.toUpperCase()}500`, expiry: "Valid till June 30" },
+                           { title: "Eid Celebration Offer", discount: "BDT 1,000 FLAT", code: "EID26", expiry: "Minimum purchase BDT 4,000" },
+                           { title: "Limited VIP Discount", discount: "20% FLAT OFF", code: `${brand.name.toUpperCase()}20`, expiry: "For New Registries" }
+                        ].map((promo, idx) => (
+                           <div key={idx} className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all">
+                              <div className="w-8 h-8 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
+                                 <Gift size={14} />
+                              </div>
+                              <h4 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider mb-0.5">{promo.title}</h4>
+                              <div className="text-sm font-black text-[#E8500A] italic uppercase mb-3 leading-none">{promo.discount}</div>
+                              
+                              <button 
+                                onClick={() => {
+                                  navigator.clipboard.writeText(promo.code);
+                                  toast.success(`Promo Code "${promo.code}" copied to clipboard!`);
+                                }}
+                                className="w-full py-2 bg-white rounded-xl border border-dashed border-gray-200 hover:border-[#E8500A] font-mono text-[11px] font-black text-[#1A1D4E] tracking-widest uppercase transition-colors flex flex-col items-center justify-center cursor-pointer shadow-xs active:scale-[0.98] transition-transform"
+                              >
+                                 <span className="text-[7px] text-gray-400 font-sans tracking-wide uppercase font-black">PROMO CODE</span>
+                                 <span>{promo.code}</span>
+                              </button>
+                              
+                              <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2 block">{promo.expiry}</span>
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+
+                  {/* Sponsored Ad space block */}
+                  <div className="bg-[#100D2B] rounded-3xl p-6 text-white text-center relative overflow-hidden shadow-md">
+                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
+                     <div className="relative z-10 text-center">
+                        <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4">
+                           Sponsored Ad
+                        </span>
+                        <div className="w-full aspect-square rounded-2xl overflow-hidden mb-5 border border-white/10 shadow-lg">
+                           <img 
+                              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop" 
+                              alt="Sponsor AD" 
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
+                           />
+                        </div>
+                        <h4 className="font-serif text-base font-bold tracking-widest uppercase mb-1">AARONG</h4>
+                        <p className="text-[9px] font-black text-white/50 tracking-wider uppercase mb-3">Heritage Shopping Brand</p>
+                        <p className="text-[10px] text-white/70 font-medium leading-relaxed mb-5 px-1 uppercase">
+                           New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
+                        </p>
+                        <button className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-full shadow-lg hover:shadow-[#E8500A]/20 transition-all cursor-pointer">
+                           Shop Now
+                        </button>
+                     </div>
+                  </div>
+
+               </div>
+            </aside>
+
+         </div>
+
+         {/* FULL WIDTH INFLUENCER REVIEWS SECTION */}
+         <div id="influencer-reviews-section" className="scroll-mt-36 w-full">
+            <WithInfluencerReviews brandName={brand.name} brandLogo={brand.logo} />
+         </div>
+
+         {/* FULL WIDTH PUBLIC REVIEWS SECTION */}
+         <div id="public-reviews-section" className="scroll-mt-36 w-full bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
+            <div className="text-center mb-8 border-b border-gray-100 pb-5">
+               <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
+                  Public Reviews
+               </h3>
+               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
+                  Verified Customer Experiences
+               </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+               {[
+                  {
+                     name: "Tanvir Hasan",
+                     date: "2 weeks ago",
+                     purchaseDate: "April 2024",
+                     comment: `The material quality of the new ${brand.name} collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect.`,
+                     rating: 5,
+                     verified: true,
+                     productImages: [
+                        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
+                        "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop"
+                     ],
+                     dp: "https://i.pravatar.cc/150?u=tanvir",
+                     helpful: 124
+                  },
+                  {
+                     name: "Nusrat Jahan",
+                     date: "1 month ago",
+                     purchaseDate: "March 2024",
+                     comment: "Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the collection.",
+                     rating: 4.8,
+                     verified: true,
+                     productImages: [
+                        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop"
+                     ],
+                     dp: "https://i.pravatar.cc/150?u=nusrat",
+                     helpful: 89
+                  }
+               ].map((review, i) => (
+                  <div key={i} className="bg-gray-50 border border-gray-100/50 rounded-2xl p-6 flex flex-col group hover:shadow-md transition-shadow duration-300">
+                     <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                        <div className="flex items-center gap-3">
+                           <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-[#E8500A] p-0.5">
+                              <img src={review.dp} className="w-full h-full object-cover rounded-lg" alt={review.name} />
+                           </div>
+                           <div>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                 <span className="font-extrabold text-[#1A1D4E] text-sm italic">{review.name}</span>
+                                 {review.verified && (
+                                    <span className="bg-[#4DBC15]/10 text-[#4DBC15] text-[7px] font-black uppercase px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                       <CheckCircle2 size={8} className="text-[#4DBC15]" /> Verified
+                                    </span>
+                                 )}
+                              </div>
+                              <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider block mt-0.5">Posted {review.date}</span>
+                           </div>
+                        </div>
+                        <div className="text-right">
+                           <div className="flex gap-0.5 justify-end">
+                              {[1, 2, 3, 4, 5].map(star => (
+                                 <Star key={star} size={10} className={cn("fill-current", star <= review.rating ? "text-[#E8500A]" : "text-gray-200")} />
+                              ))}
+                           </div>
+                           <div className="text-sm font-black text-[#1A1D4E] mt-0.5 italic">{review.rating} <span className="text-[8px] text-gray-300 font-sans">/ 5</span></div>
+                        </div>
+                     </div>
+
+                     <div className="flex gap-2 mb-4">
+                        {review.productImages.map((img, j) => (
+                           <div key={j} className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 cursor-zoom-in">
+                              <img src={img} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" alt="review attachments" />
+                           </div>
+                        ))}
+                     </div>
+
+                     <div className="p-4 bg-white border border-gray-100 rounded-xl mb-4 relative flex-1">
+                        <p className="text-xs text-navy/80 font-bold leading-relaxed italic">
+                           "{review.comment}"
+                        </p>
+                     </div>
+
+                     <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100/50">
+                        <div className="flex flex-col">
+                           <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest italic mb-0.5">Purchase Date</span>
+                           <span className="text-[9px] font-black text-[#1A1D4E] uppercase tracking-wider italic">{review.purchaseDate}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           <button 
+                             onClick={() => toast.success("Marked as helpful!")}
+                             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-gray-100 hover:border-navy text-[#1A1D4E] font-black text-[9px] uppercase tracking-widest italic transition-colors cursor-pointer"
+                           >
+                              <ThumbsUp size={10} /> Helpful ({review.helpful})
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+               ))}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+               <button onClick={() => toast.success("Loading all customer reviews...")} className="px-10 py-3.5 border border-[#1A1D4E] text-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white transition-all text-[9.5px] font-black uppercase tracking-widest rounded-full italic cursor-pointer">
+                  Load More Reviews
+               </button>
+            </div>
+         </div>
+
+         {/* FULL WIDTH BRAND OVERVIEW SECTION */}
+         <BrandOverviewSection brandName={brand.name} overviewData={overviewData} />
+
+         {/* TRUST STATEMENT BACKGROUND BANNER */}
+         <div className="w-full bg-gradient-to-r from-[#1A1D4E] to-[#0D1022] rounded-[32px] p-8 md:p-12 text-center text-white relative overflow-hidden shadow-lg border border-white/5">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-primary/10 blur-[120px] rounded-full pointer-events-none" />
+            <div className="relative z-10 space-y-4">
+               <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto text-[#4DBC15] border border-white/10">
+                  <ShieldCheck size={24} />
+               </div>
+               <h3 className="font-space font-black italic text-2xl tracking-tight uppercase">CHOOSIFY.BD TRUST STATEMENT</h3>
+               <p className="text-sm text-gray-300 font-semibold leading-relaxed max-w-2xl mx-auto italic">
+                  "Only verified sellers and completely unbiased, authentic brand experiences are list on Choosify."
+               </p>
+            </div>
+         </div>
+
+         {/* Similar Brands Comparison Table */}
+         <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
+            <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-8 text-center italic">
+               Similar Brands Comparison
+            </h3>
+
+            <div className="overflow-x-auto no-scrollbar rounded-2xl border border-gray-100">
+               <table className="w-full text-left border-collapse">
+                  <thead>
+                     <tr className="bg-gray-50 border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-wider italic">
+                        <th className="py-4.5 px-6">Brand Identity</th>
+                        <th className="py-4.5 px-6 text-center">Quality</th>
+                        <th className="py-4.5 px-6 text-center">Price Range</th>
+                        <th className="py-4.5 px-6 text-center">Rating</th>
+                        <th className="py-2.5 px-6 text-right">Action</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50 text-xs">
+                     {[
+                        { name: "Apex Shoes", id: 3, logo: "Ap", quality: "Premium", price: "High (৳৳৳)", score: "4.8" },
+                        { name: "Aarong Brand", id: 10, logo: "Aa", quality: "Elite", price: "Mid (৳৳)", score: "4.7" },
+                        { name: "Lotto Wear", id: 6, logo: "L", quality: "Basic", price: "Economy (৳)", score: "4.2" },
+                        { name: "Yellow Shop", id: 11, logo: "Y", quality: "Fashion", price: "Premium (৳৳৳)", score: "4.5" }
+                     ].map((item, idx) => (
+                        <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                           <td className="py-4.5 px-6 text-left">
+                              <div className="flex items-center gap-3">
+                                 <div className="w-8 h-8 rounded-lg bg-[#1A1D4E] text-white font-extrabold flex items-center justify-center text-[10px]">
+                                    {item.logo}
+                                 </div>
+                                 <span className="font-extrabold text-[#1A1D4E] italic">{item.name}</span>
+                              </div>
+                           </td>
+                           <td className="py-4.5 px-6 text-center">
+                              <span className="px-2.5 py-0.5 bg-[#4DBC15]/10 text-[#4DBC15] text-[8px] font-black uppercase rounded tracking-wider italic">
+                                 {item.quality}
+                              </span>
+                           </td>
+                           <td className="py-4.5 px-6 text-center text-[10px] font-semibold text-gray-500 italic">{item.price}</td>
+                           <td className="py-4.5 px-6 text-center">
+                              <div className="flex items-center justify-center gap-1 text-[11px] font-extrabold text-navy italic">
+                                 <Star size={10} className="fill-[#E8500A] text-[#E8500A]" />
+                                 <span>{item.score}</span>
+                              </div>
+                           </td>
+                           <td className="py-4.5 px-6 text-right">
+                              <button onClick={() => navigate(`/brands/${item.id}`)} className="px-4 py-1.5 border border-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white text-[#1A1D4E] font-black text-[9px] uppercase tracking-wider rounded-full italic transition-all inline-block cursor-pointer">
+                                 Visit
+                              </button>
+                           </td>
+                        </tr>
+                     ))}
+                  </tbody>
+               </table>
+            </div>
+         </div>
+
+      </div>
+
       <ReportModal 
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}

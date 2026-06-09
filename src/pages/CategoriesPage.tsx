@@ -224,7 +224,7 @@ export function CategoriesPage() {
       </div>
 
 
-      <div className="max-w-[1700px] mx-auto px-6 py-10 w-full flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative">
+      <div className="max-w-[1440px] mx-auto px-6 py-10 w-full flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative">
         {/* LEFT COLUMN: QUICK HIGHWAYS ASIDE COLUMN */}
         <aside className="hidden lg:flex flex-col gap-6 w-[300px] flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pb-10 pr-2 no-scrollbar">
           {/* QUICK ACCESS CARD */}

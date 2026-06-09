@@ -631,7 +631,7 @@ export function ProductDetailPage() {
 
       {/* Main Content Area */}
       <main className="bg-[#F8FAFC] py-10">
-         <div className="max-w-[1700px] mx-auto px-6 w-full">
+         <div className="max-w-[1440px] mx-auto px-6 w-full">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 items-start w-full relative">
                
                {/* Left Column Section (Column 1) */}

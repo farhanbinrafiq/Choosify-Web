@@ -26,7 +26,7 @@ const GuideDetailPage = lazy(() => import('./pages/GuideDetailPage').then(m => (
 const GuideProductsPage = lazy(() => import('./pages/GuideProductsPage').then(m => ({ default: m.GuideProductsPage })));
 const LoginSignUpPage = lazy(() => import('./pages/LoginSignUpPage').then(m => ({ default: m.LoginSignUpPage })));
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
-const BrandProductPage = lazy(() => import('./pages/BrandProductPage').then(m => ({ default: m.BrandProductPage })));
+
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const BrandDealsPage = lazy(() => import('./pages/BrandDealsPage').then(m => ({ default: m.BrandDealsPage })));
 const RetailCartPage = lazy(() => import('./pages/RetailCartPage').then(m => ({ default: m.RetailCartPage })));
@@ -172,7 +172,7 @@ function AppContent() {
             <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
             <Route path="/brands" element={<PageWrapper><BrandsPage /></PageWrapper>} />
             <Route path="/brands/:id" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
-            <Route path="/brands/:id/products" element={<PageWrapper><BrandProductPage /></PageWrapper>} />
+            <Route path="/brands/:id/products" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
             <Route path="/categories" element={<PageWrapper><CategoriesPage /></PageWrapper>} />
             <Route path="/deals" element={<PageWrapper><DealsPage /></PageWrapper>} />
             <Route path="/compare" element={<PageWrapper><ComparePage /></PageWrapper>} />

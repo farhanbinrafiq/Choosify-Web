@@ -135,7 +135,7 @@ export function DealsPage() {
         </div>
 
         {/* Master Flex Column Structure below sticky bar */}
-        <div className="max-w-[1700px] mx-auto py-12 px-6 w-full flex flex-col lg:flex-row gap-8 lg:gap-12 xl:gap-16 2xl:gap-24 relative items-start">
+        <div className="max-w-[1440px] mx-auto py-12 px-6 w-full flex flex-col lg:flex-row gap-8 lg:gap-12 xl:gap-16 2xl:gap-24 relative items-start">
           
           {/* LEFT SIDEBAR: CATEGORIES CARD */}
           <aside className="w-full lg:w-64 xl:w-72 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar shrink-0">
