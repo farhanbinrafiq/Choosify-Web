@@ -19,11 +19,14 @@ function TikTokIcon({ size = 20 }: { size?: number }) {
 export function Footer() {
   return (
     <footer 
-      className="w-full bg-[#0d0d2b] text-gray-400 font-sans relative overflow-hidden" 
+      className="w-full footer-brand-gradient text-gray-400 font-sans relative overflow-hidden" 
       id="global-footer"
     >
-      {/* Background radial ambiance */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* Background radial ambiance & brand luminous elements */}
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#FF5B00]/12 rounded-full blur-[130px] pointer-events-none" />
+      <div className="absolute top-[10%] right-[-10%] w-[550px] h-[550px] bg-amber-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[10%] left-1/3 w-[800px] h-[400px] bg-[#000435]/40 rounded-full blur-[110px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[10%] w-[500px] h-[400px] bg-[#E8500A]/12 rounded-full blur-[100px] pointer-events-none" />
 
       {/* TOP SECTION (main footer body) */}
       <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] pt-[64px] pb-[48px] relative z-10">

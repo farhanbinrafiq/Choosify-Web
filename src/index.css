@@ -92,6 +92,10 @@
   background: linear-gradient(90deg, #B4411C 0%, #D15E32 100%);
 }
 
+.footer-brand-gradient {
+  background: linear-gradient(135deg, #1C0A06 0%, #3D150B 25%, #7C2A12 55%, #150D24 85%, #040417 100%);
+}
+
 .shadow-soft {
   box-shadow: 0 2px 10px rgba(0, 4, 53, 0.04);
 }
