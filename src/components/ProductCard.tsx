@@ -544,80 +544,90 @@ export function ProductCard({
 
   return (
     <div 
-      className="w-full bg-white rounded-xl p-3 shadow-none hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer" 
+      className="bg-white rounded-xl p-2.5 shadow-none hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer shrink-0" 
       onClick={() => navigate(`/products/${product.id}`)}
       id={`product-${product.id}`}
-      style={{ height: '385px' }}
+      style={{
+        width: isGuideDetail ? '100%' : '174px',
+        height: isGuideDetail ? '385px' : '258.125px',
+        boxSizing: 'border-box'
+      }}
     >
-      <div className="relative h-[135px] w-full bg-gray-50 overflow-hidden flex items-center justify-center p-2.5 rounded-lg shrink-0">
+      <div className={cn(
+        "relative w-full bg-gray-50 overflow-hidden flex items-center justify-center rounded-lg shrink-0",
+        isGuideDetail ? "h-[135px] p-2.5" : "h-[105px] p-2"
+      )}>
         <ProductCardImageCarousel 
           images={getProductCardImages(product)} 
           alt={product.title} 
-          containerClassName="absolute inset-0 p-2.5"
+          containerClassName="absolute inset-0 p-2"
         />
-        <div className="absolute top-2 left-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+        <div className="absolute top-1.5 left-1.5 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
           <button 
             onClick={toggleSave}
             className={cn(
-              "w-6 h-6 rounded-full border flex items-center justify-center bg-white border-gray-100 shadow-none transition-transform hover:scale-105",
+              "w-5 h-5 rounded-full border flex items-center justify-center bg-white border-gray-100 shadow-none transition-transform hover:scale-105",
               isSaved ? "text-[#E8500A]" : "text-gray-400 hover:text-[#E8500A]"
             )}
           >
-             <Bookmark size={10} className={isSaved ? "fill-current" : ""} />
+             <Bookmark size={9} className={isSaved ? "fill-current" : ""} />
           </button>
           <button 
             onClick={handleCompare}
             className={cn(
-              "w-6 h-6 rounded-full border flex items-center justify-center bg-white border-gray-100 shadow-none transition-transform hover:scale-105",
+              "w-5 h-5 rounded-full border flex items-center justify-center bg-white border-gray-100 shadow-none transition-transform hover:scale-105",
               isInCompare ? "text-green-500" : "text-gray-400 hover:text-blue-500"
             )}
           >
-             <Layers size={10} />
+             <Layers size={9} />
           </button>
         </div>
         {product.tag && (
-          <div className={cn("absolute top-2 right-2 text-white text-[7.5px] font-semibold px-2 py-0.5 rounded uppercase z-25", product.tagColor || "bg-[#E8500A]")}>
+          <div className={cn("absolute top-1.5 right-1.5 text-white text-[7px] font-semibold px-1.5 py-0.5 rounded uppercase z-25 leading-none", product.tagColor || "bg-[#E8500A]")}>
             {product.tag}
           </div>
         )}
       </div>
       
-      <div className="pt-2 flex flex-col flex-grow min-h-0 text-left justify-between">
+      <div className="pt-1.5 flex flex-col flex-grow min-h-0 text-left justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-1 w-full justify-between">
-            <span className="text-[#E8500A] font-medium uppercase text-[8px] tracking-wider truncate max-w-[100px]">{brandName}</span>
-            <div className="flex items-center gap-0.5 shrink-0 ml-auto bg-gray-50 px-1 py-0.5 rounded">
-              <Star size={7.5} className="fill-orange-primary text-orange-primary" />
-              <span className="text-[8px] font-semibold text-gray-500">4.8</span>
+          <div className="flex items-center gap-1.5 mb-1 w-full justify-between leading-none">
+            <span className="text-[#E8500A] font-medium uppercase text-[7.5px] tracking-wider truncate max-w-[80px]">{brandName}</span>
+            <div className="flex items-center gap-0.5 shrink-0 ml-auto bg-gray-50 px-1 py-0.5 rounded leading-none">
+              <Star size={7} className="fill-orange-primary text-orange-primary" />
+              <span className="text-[7.5px] font-semibold text-gray-500">4.8</span>
             </div>
             {mode === 'wholesale' && product.moq && (
-              <span className="bg-gray-100 text-gray-600 text-[7px] font-semibold px-1 rounded uppercase tracking-wider shrink-0 ml-1">
+              <span className="bg-gray-100 text-gray-600 text-[6.5px] font-semibold px-1 rounded uppercase tracking-wider shrink-0 ml-1 leading-none">
                 MOQ {product.moq}
               </span>
             )}
           </div>
 
-          <h3 className="text-xs font-semibold text-[#1a1a2e] line-clamp-1 group-hover:text-orange-primary transition-colors leading-snug">
+          <h3 className={cn(
+            "font-semibold text-[#1a1a2e] group-hover:text-orange-primary transition-colors leading-snug break-words",
+            isGuideDetail ? "text-xs line-clamp-1" : "text-[10px] line-clamp-1"
+          )}>
             {product.title}
           </h3>
 
           {/* New Recommendation Snapshot Section */}
-          {(() => {
+          {isGuideDetail && (() => {
              const recData = getRecommendationData(product);
              return (
-                <div className="mt-2.5 pt-2 border-t border-dashed border-gray-150 text-left">
-                   <div className="text-[8px] font-black text-[#E8500A] uppercase tracking-wider mb-2 leading-none font-mono">
+                <div className="mt-2 pt-1.5 border-t border-dashed border-gray-150 text-left">
+                   <div className="text-[7.5px] font-black text-[#E8500A] uppercase tracking-wider mb-1 leading-none font-mono">
                       RECOMMENDATION ON THIS
                    </div>
-                   <div className="flex flex-wrap gap-1 max-h-[36px] overflow-hidden leading-none">
+                   <div className="flex flex-wrap gap-1 max-h-[30px] overflow-hidden leading-none">
                       {recData.tags.map((tag) => (
-                         <span key={tag} className="px-1.5 py-0.5 text-[7px] font-bold bg-[#E8500A]/5 text-[#E8500A] rounded-full uppercase tracking-wider font-sans border border-[#E8500A]/10 whitespace-nowrap inline-block">
+                         <span key={tag} className="px-1 py-0.5 text-[6.5px] font-bold bg-[#E8500A]/5 text-[#E8500A] rounded-full uppercase tracking-wider font-sans border border-[#E8500A]/10 whitespace-nowrap inline-block">
                             {tag}
                          </span>
                       ))}
                    </div>
                    {recData.verdict && (
-                      <p className="text-[8.5px] font-semibold text-gray-500 italic mt-2 line-clamp-1 leading-snug">
+                      <p className="text-[8px] font-semibold text-gray-500 italic mt-1 line-clamp-1 leading-snug">
                          "{recData.verdict}"
                       </p>
                    )}
@@ -626,12 +636,12 @@ export function ProductCard({
           })()}
         </div>
         
-        <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-1.5">
+        <div className="mt-auto pt-1 border-t border-gray-100 flex items-center justify-between gap-1">
           <div className="flex flex-col min-w-0">
-             <span className="text-[7.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">
+             <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-0.5">
                {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
               </span>
-              <span className="text-[12.5px] font-mono font-semibold text-[#E8500A] leading-none whitespace-nowrap">
+              <span className="text-[11px] font-mono font-semibold text-[#E8500A] leading-none whitespace-nowrap">
                 BDT {product.price.toLocaleString()}
               </span>
           </div>
@@ -644,7 +654,7 @@ export function ProductCard({
               addToCart(product, qty);
               toast.success(`Successfully added ${product.title} to your verification basket!`);
             }}
-            className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[8px] font-semibold rounded uppercase tracking-wider transition-colors shrink-0"
+            className="px-2 py-0.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[7.5px] font-semibold rounded uppercase tracking-wider transition-colors shrink-0 leading-none h-6 flex items-center"
           >
              {isGuideDetail ? 'SHOP NOW' : 'ADD'}
           </button>

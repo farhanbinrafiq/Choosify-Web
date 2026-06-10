@@ -101,6 +101,19 @@ export function FloatingOverlays() {
     }, 1500);
   };
 
+  // Auto-close open drawers if count falls to zero
+  useEffect(() => {
+    if (activePanel === 'cart' && totalCartItems === 0) {
+      setActivePanel(null);
+    }
+  }, [totalCartItems, activePanel]);
+
+  useEffect(() => {
+    if (activePanel === 'inbox' && unreadCount === 0) {
+      setActivePanel(null);
+    }
+  }, [unreadCount, activePanel]);
+
   // Active message stream for selected thread
   const activeMessages = threadMessages.filter(m => m.threadId === activeThreadId);
   const activeThreadObj = threads.find(t => t.id === activeThreadId);
@@ -446,61 +459,81 @@ export function FloatingOverlays() {
       </AnimatePresence>
 
       {/* FLOATING ACTION ICON TRIGGER DOCK */}
-      <div className="flex md:flex-col items-center gap-3.5">
-        
-        {/* BUTTON 1: FLOATING MESSAGING INBOX TRIGGER */}
-        <motion.button
-          onClick={() => setActivePanel(activePanel === 'inbox' ? null : 'inbox')}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.94 }}
-          className={`w-14 h-14 rounded-full flex items-center justify-center relative shadow-[0_8px_30px_rgba(0,0,0,0.5)] border transition-all duration-300
-            ${activePanel === 'inbox' 
-              ? 'bg-[#1877F2] border-[#2C85F3] text-white shadow-[#1877F2]/30' 
-              : 'bg-[#0A0B1E]/90 hover:bg-[#0F112D] border-white/10 hover:border-white/20 text-white'
-            }`}
-          title="Merchant Support Line"
-        >
-          <MessageSquare size={22} />
+      {(unreadCount > 0 || totalCartItems > 0) && (
+        <div className="flex md:flex-col items-center gap-3.5">
           
-          {/* Badge indicator count inside floating trigger */}
-          {unreadCount > 0 && (
-            <motion.span 
-              animate={inboxBadgeBounce ? { scale: [1, 1.4, 0.9, 1.2, 1] } : { scale: 1 }}
-              transition={{ duration: 0.6 }}
-              className="absolute -top-1 -right-1 bg-red-500 text-white font-mono text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0A0B1E] animate-pulse shadow-md"
-            >
-              {unreadCount}
-            </motion.span>
-          )}
-        </motion.button>
+          {/* BUTTON 1: FLOATING MESSAGING INBOX TRIGGER — only when unreadCount > 0 */}
+          <AnimatePresence>
+            {unreadCount > 0 && (
+              <motion.button
+                key="support-trigger"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                onClick={() => setActivePanel(activePanel === 'inbox' ? null : 'inbox')}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.94 }}
+                className={`w-14 h-14 rounded-full flex items-center justify-center relative shadow-[0_8px_30px_rgba(0,0,0,0.5)] border transition-all duration-300
+                  ${activePanel === 'inbox' 
+                    ? 'bg-[#1877F2] border-[#2C85F3] text-white shadow-[#1877F2]/30' 
+                    : 'bg-[#0A0B1E]/90 hover:bg-[#0F112D] border-white/10 hover:border-white/20 text-white'
+                  }`}
+                title="Merchant Support Line"
+              >
+                <MessageSquare size={22} />
+                
+                {/* Badge indicator count inside floating trigger */}
+                {unreadCount > 0 && (
+                  <motion.span 
+                    animate={inboxBadgeBounce ? { scale: [1, 1.4, 0.9, 1.2, 1] } : { scale: 1 }}
+                    transition={{ duration: 0.6 }}
+                    className="absolute -top-1 -right-1 bg-gradient-to-br from-[#FF6A00] to-[#FF9E2C] text-white font-mono text-[9.5px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0A0B1E] animate-pulse shadow-md"
+                  >
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </motion.span>
+                )}
+              </motion.button>
+            )}
+          </AnimatePresence>
 
-        {/* BUTTON 2: FLOATING CART TRIGGER */}
-        <motion.button
-          onClick={() => setActivePanel(activePanel === 'cart' ? null : 'cart')}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.94 }}
-          className={`w-14 h-14 rounded-full flex items-center justify-center relative shadow-[0_8px_30px_rgba(0,0,0,0.5)] border transition-all duration-300
-            ${activePanel === 'cart' 
-              ? 'bg-orange-primary border-[#FF7020] text-white shadow-orange-primary/30' 
-              : 'bg-[#0A0B1E]/90 hover:bg-[#0F112D] border-white/10 hover:border-white/20 text-white'
-            }`}
-          title="Shopping Cart Checklist"
-        >
-          <ShoppingCart size={22} />
-          
-          {/* Badge index sum */}
-          {totalCartItems > 0 && (
-            <motion.span 
-              animate={cartBadgeBounce ? { scale: [1, 1.4, 0.9, 1.2, 1] } : { scale: 1 }}
-              transition={{ duration: 0.6 }}
-              className="absolute -top-1 -right-1 bg-orange-primary text-white font-mono text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0A0B1E] shadow-md"
-            >
-              {totalCartItems}
-            </motion.span>
-          )}
-        </motion.button>
+          {/* BUTTON 2: FLOATING CART TRIGGER — only when totalCartItems > 0 */}
+          <AnimatePresence>
+            {totalCartItems > 0 && (
+              <motion.button
+                key="cart-trigger"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                onClick={() => setActivePanel(activePanel === 'cart' ? null : 'cart')}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.94 }}
+                className={`w-14 h-14 rounded-full flex items-center justify-center relative shadow-[0_8px_30px_rgba(0,0,0,0.5)] border transition-all duration-300
+                  ${activePanel === 'cart' 
+                    ? 'bg-orange-primary border-[#FF7020] text-white shadow-orange-primary/30' 
+                    : 'bg-[#0A0B1E]/90 hover:bg-[#0F112D] border-white/10 hover:border-white/20 text-white'
+                  }`}
+                title="Shopping Cart Checklist"
+              >
+                <ShoppingCart size={22} />
+                
+                {/* Badge index sum */}
+                {totalCartItems > 0 && (
+                  <motion.span 
+                    animate={cartBadgeBounce ? { scale: [1, 1.4, 0.9, 1.2, 1] } : { scale: 1 }}
+                    transition={{ duration: 0.6 }}
+                    className="absolute -top-1 -right-1 bg-gradient-to-br from-[#FF6A00] to-[#FF9E2C] text-white font-mono text-[9.5px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#0A0B1E] shadow-md"
+                  >
+                    {totalCartItems > 99 ? '99+' : totalCartItems}
+                  </motion.span>
+                )}
+              </motion.button>
+            )}
+          </AnimatePresence>
 
-      </div>
+        </div>
+      )}
 
     </div>
   );

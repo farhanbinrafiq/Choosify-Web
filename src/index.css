@@ -209,3 +209,22 @@
   }
 }
 
+/* FIX 2 — HAMBURGER MENU POSITION (MOBILE ONLY) */
+@media (max-width: 767px) {
+  .hamburger-menu,
+  .hamburger,
+  [class*="hamburger"],
+  [class*="menu-toggle"],
+  [aria-label="menu"],
+  [aria-label="open menu"] {
+    margin-right: -4px !important;      /* shift slightly right from current position */
+    margin-left: auto !important;      /* ensure it stays on the right side */
+  }
+
+  .nav-right,
+  .nav-actions,
+  [class*="nav-right"] {
+    padding-right: 12px !important;    /* increase right padding of the right nav cluster */
+  }
+}
+
