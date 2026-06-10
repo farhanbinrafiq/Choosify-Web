@@ -477,7 +477,7 @@ export function InfluencerReviews({
   return (
     <section 
       id="influencer-reviews-section" 
-      className="font-['DM_Sans',_sans-serif] bg-[#0D1117] text-[#F0F6FC] p-4 sm:p-6 md:p-8 rounded-3xl border border-[#21262D]/60 w-full max-w-[680px] mx-auto text-left flex flex-col justify-start shadow-xl my-6 relative overflow-hidden"
+      className="font-['DM_Sans',_sans-serif] hero-gradient text-[#F0F6FC] p-4 sm:p-6 md:p-8 rounded-3xl border border-[#21262D]/60 w-full max-w-[680px] mx-auto text-left flex flex-col justify-start shadow-xl my-6 relative overflow-hidden"
     >
       {/* PART 1 — SECTION HEADER */}
       <div className="text-center mb-6 border-0 p-0 bg-transparent flex flex-col items-center">

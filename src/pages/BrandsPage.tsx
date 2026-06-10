@@ -118,11 +118,7 @@ export function BrandsPage() {
       {/* Hero Section */}
       <div className="w-full bg-[#0A0A1F] px-4 md:px-8 relative overflow-hidden flex items-center justify-center" style={{ height: '303px' }}>
         {/* Background Gradients */}
-        {mode === 'wholesale' ? (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
-        )}
+        <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="max-w-7xl mx-auto text-center relative z-10 w-full animate-fade-in">
@@ -312,7 +308,7 @@ export function BrandsPage() {
           {/* Choosify Recommends Section */}
           <div className="mb-12">
             <div className="flex items-center gap-4 mb-8 overflow-hidden">
-              <div className="flex items-center gap-3 bg-orange-primary px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/20 flex-shrink-0">
+              <div className="flex items-center gap-3 bg-gradient-to-r from-[#FF6B35] to-[#0A0B1A] px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/10 flex-shrink-0 border border-[#FF6B35]/20">
                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
                  <div className="flex gap-0.5">
                     <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
@@ -366,19 +362,52 @@ export function BrandsPage() {
                   <div className="w-full h-[1px] bg-gray-150 my-4" />
 
                   <div className="grid grid-cols-3 gap-3">
-                    <div className="text-center bg-gray-50/50 py-2.5 rounded-xl border border-gray-100/50 min-w-0">
-                      <span className="text-[8px] font-black text-navy mb-1 uppercase tracking-tight block opacity-40">Best For</span>
-                      <span className="text-[9px] font-bold text-red-500 italic uppercase truncate px-1 block">{brand.bestFor}</span>
+                    <div className={cn(
+                      "text-center py-2.5 rounded-xl border min-w-0 transition-all",
+                      i === 0 
+                        ? "bg-[#0A0B1A] border-[#FF6B35]/20 text-white shadow-sm" 
+                        : "bg-gray-50/50 border-gray-100/50"
+                    )}>
+                      <span className={cn(
+                        "text-[8px] font-black mb-1 uppercase tracking-tight block",
+                        i === 0 ? "text-gray-400 tracking-wider" : "text-navy opacity-40"
+                      )}>Best For</span>
+                      <span className={cn(
+                        "text-[9px] font-bold italic uppercase truncate px-1 block",
+                        i === 0 ? "text-[#FF8C66]" : "text-red-500"
+                      )}>{brand.bestFor}</span>
                     </div>
-                    <div className="text-center bg-gray-50/50 py-2.5 rounded-xl border border-gray-100/50 min-w-0">
+                    <div className={cn(
+                      "text-center py-2.5 rounded-xl border min-w-0 transition-all",
+                      i === 0 
+                        ? "bg-[#0A0B1A] border-[#FF6B35]/20 text-white shadow-sm" 
+                        : "bg-gray-50/50 border-gray-100/50"
+                    )}>
                       <div className="flex flex-col items-center">
-                        <span className="text-lg font-black text-[#6366f1] leading-none mb-1 italic tracking-tighter">{brand.priceRange}</span>
-                        <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
+                        <span className={cn(
+                          "text-lg font-black leading-none mb-1 italic tracking-tighter",
+                          i === 0 ? "text-[#FF8C66]" : "text-[#6366f1]"
+                        )}>{brand.priceRange}</span>
+                        <span className={cn(
+                          "text-[7px] font-black uppercase tracking-widest",
+                          i === 0 ? "text-gray-400 opacity-80" : "text-gray-400 opacity-60"
+                        )}>Price</span>
                       </div>
                     </div>
-                    <div className="text-center bg-[#E6F4EA]/80 py-2.5 rounded-xl border border-green-100 min-w-0">
-                      <span className="text-lg font-black text-[#10B981] leading-none mb-1 italic tracking-tighter">{brand.recommended}</span>
-                      <span className="text-[7px] font-black text-navy uppercase tracking-widest opacity-60">Success</span>
+                    <div className={cn(
+                      "text-center py-2.5 rounded-xl border min-w-0 transition-all",
+                      i === 0 
+                        ? "bg-gradient-to-br from-[#FF6B35] to-[#0A0B1A] border-[#FF6B35]/30 text-white shadow-sm" 
+                        : "bg-[#E6F4EA]/80 border-green-100"
+                    )}>
+                      <span className={cn(
+                        "text-lg font-black leading-none mb-1 italic tracking-tighter block",
+                        i === 0 ? "text-white" : "text-[#10B981]"
+                      )}>{brand.recommended}</span>
+                      <span className={cn(
+                        "text-[7px] font-black uppercase tracking-widest block",
+                        i === 0 ? "text-orange-200/80" : "text-navy opacity-60"
+                      )}>Success</span>
                     </div>
                   </div>
 

@@ -136,11 +136,7 @@ export function CategoriesPage() {
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
       <div className="w-full bg-[#0A0A1F] px-8 relative overflow-hidden flex items-center justify-center" style={{ height: '303px' }}>
         {/* Background Gradients */}
-        {mode === 'wholesale' ? (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
-        )}
+        <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="max-w-7xl mx-auto text-center relative z-10 w-full">

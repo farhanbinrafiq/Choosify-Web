@@ -77,7 +77,8 @@
 }
 
 .hero-gradient {
-  background: linear-gradient(180deg, #482319 0%, #08081a 100%);
+  background: radial-gradient(circle at 50% 120%, rgba(210, 80, 15, 0.18) 0%, rgba(13, 10, 42, 0.1) 60%, rgba(2, 6, 38, 0) 100%),
+              linear-gradient(180deg, #020412 0%, #060922 45%, #16102D 75%, #291223 90%, #3F1517 100%);
 }
 
 .button-gradient {
@@ -85,7 +86,8 @@
 }
 
 .dark-brand-gradient {
-  background: linear-gradient(180deg, #482319 0%, #08081a 100%);
+  background: radial-gradient(circle at 50% 120%, rgba(210, 80, 15, 0.18) 0%, rgba(13, 10, 42, 0.1) 60%, rgba(2, 6, 38, 0) 100%),
+              linear-gradient(180deg, #020412 0%, #060922 45%, #16102D 75%, #291223 90%, #3F1517 100%);
 }
 
 .orange-brand-gradient {
@@ -93,7 +95,8 @@
 }
 
 .footer-brand-gradient {
-  background: linear-gradient(135deg, #1C0A06 0%, #3D150B 25%, #7C2A12 55%, #150D24 85%, #040417 100%);
+  background: radial-gradient(circle at 50% 110%, rgba(210, 80, 15, 0.15) 0%, rgba(13, 10, 42, 0.1) 65%, rgba(2, 6, 38, 0) 100%),
+              linear-gradient(180deg, #01030F 0%, #04071D 45%, #120D26 75%, #230F1E 90%, #371113 100%);
 }
 
 .shadow-soft {

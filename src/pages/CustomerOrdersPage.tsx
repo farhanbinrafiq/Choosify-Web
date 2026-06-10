@@ -44,7 +44,7 @@ export function CustomerOrdersPage() {
     <div className="flex flex-col min-h-screen bg-[#0A0A1F] text-white">
       {/* Visual Workspace Hero */}
       <div className="w-full bg-[#050514] pt-12 pb-16 px-6 md:px-12 border-b border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#F96500]/10 via-[#050514] to-[#050514] opacity-95" />
+        <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <Link to="/dashboard" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1.5">

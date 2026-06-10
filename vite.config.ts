@@ -35,6 +35,11 @@ export default defineConfig(({ mode }) => {
           start_url: '/',
           icons: [
             {
+              src: '/icons/icon-48x48.png',
+              sizes: '48x48',
+              type: 'image/png'
+            },
+            {
               src: '/icons/icon-72x72.png',
               sizes: '72x72',
               type: 'image/png'

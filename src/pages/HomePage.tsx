@@ -302,7 +302,7 @@ export function HomePage() {
       
       {/* SECTION 2 — HERO BANNER */}
       <section 
-        className="hero-section hero-container relative bg-gradient-to-br from-[#0B0D26] via-[#10133A] to-[#1F1746] text-white overflow-hidden py-4 px-6 shadow-inner-lg flex items-center justify-center"
+        className="hero-section hero-container relative hero-gradient text-white overflow-hidden py-4 px-6 shadow-inner-lg flex items-center justify-center"
         style={{ height: '303px' }}
       >
         {/* Luminous dynamic background accents */}

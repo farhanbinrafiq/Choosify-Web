@@ -405,10 +405,7 @@ export function BrandDetailPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        style={{
-          background: 'linear-gradient(135deg, #170E1A 0%, #11133A 50%, #191535 100%)'
-        }}
-        className="relative pt-10 pb-12 overflow-hidden border-b border-white/5"
+        className="hero-gradient relative pt-10 pb-12 overflow-hidden border-b border-white/5"
       >
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -610,7 +607,7 @@ export function BrandDetailPage() {
       </motion.section>
 
       {/* 2. SECTION SUMMARY BAR */}
-      <div className="w-full bg-[#3D251A] text-white py-4.5 border-y border-white/5 font-space font-black italic uppercase tracking-[0.2em] text-[11px] md:text-xs">
+      <div className="w-full hero-gradient text-white py-4.5 border-y border-white/5 font-space font-black italic uppercase tracking-[0.2em] text-[11px] md:text-xs">
          <div className="max-w-[1440px] mx-auto px-6 flex flex-wrap justify-center sm:justify-around items-center gap-y-4 gap-x-12 text-center">
             <div className="flex items-center gap-2">
                <span className="text-[#E8500A] text-lg font-space font-black">★</span>
@@ -1079,7 +1076,7 @@ export function BrandDetailPage() {
          <BrandOverviewSection brandName={brand.name} overviewData={overviewData} />
 
          {/* TRUST STATEMENT BACKGROUND BANNER */}
-         <div className="w-full bg-gradient-to-r from-[#1A1D4E] to-[#0D1022] rounded-[32px] p-8 md:p-12 text-center text-white relative overflow-hidden shadow-lg border border-white/5">
+         <div className="w-full hero-gradient rounded-[32px] p-8 md:p-12 text-center text-white relative overflow-hidden shadow-lg border border-white/5">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-primary/10 blur-[120px] rounded-full pointer-events-none" />
             <div className="relative z-10 space-y-4">
                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto text-[#4DBC15] border border-white/10">

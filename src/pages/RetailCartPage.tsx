@@ -75,7 +75,7 @@ export function RetailCartPage() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* Hero Header */}
       <div className="w-full bg-[#0A0B1E] pt-12 pb-16 px-4 md:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-primary/10 via-[#0A0A1F] to-[#0A0A1F] opacity-90" />
+        <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex items-center gap-2 text-gray-400 text-[10px] font-black uppercase tracking-widest mb-4">
             <Link to="/" className="hover:text-white transition-all">Home</Link>

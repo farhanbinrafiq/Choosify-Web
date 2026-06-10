@@ -25,67 +25,117 @@ function createChunk(type, data) {
   return Buffer.concat([len, typeBuf, data, crcBuf]);
 }
 
-function generateLogoPng(width, height) {
+function generateLogoPng(width, height, isTransparent = false) {
   const byteSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
   
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(width, 0);
   ihdr.writeUInt32BE(height, 4);
   ihdr[8] = 8; // bit depth
-  ihdr[9] = 2; // color type: RGB
+  ihdr[9] = 6; // color type: 6 (RGBA)
   ihdr[10] = 0; // compression
   ihdr[11] = 0; // filter
   ihdr[12] = 0; // interlace
 
-  const rowSize = width * 3 + 1;
+  const rowSize = width * 4 + 1;
   const imgData = Buffer.alloc(height * rowSize);
 
-  // Geometric math for rendering logo
+  // Geometric math for rendering precise user's eye logo
   const cx = width / 2;
   const cy = height / 2;
-  const R = 10 * (width / 24);
-  const lx = cx - 2.5 * (width / 24);
-  const rx = cx + 2.5 * (width / 24);
-  const r = 2.5 * (width / 24);
+  
+  // Left and Right eye centers
+  const gap = width * 0.19; // Side-by-side spacing offset
+  const lx = cx - gap;
+  const rx = cx + gap;
+  
+  // Eyeball rings
+  const R_outer = width * 0.17; // Outer eyeball radius
+  const R_inner = width * 0.125; // Inner eyeball radius
 
-  // Navy: #000435 -> [0, 4, 53]
-  // Orange: #FF5B00 -> [255, 91, 0]
-  // White: [255, 255, 255]
-  // Blended Right: 40% White over Orange -> [255, 156, 102]
-  const navy = [0, 4, 53];
-  const orange = [255, 91, 0];
-  const white = [255, 255, 255];
-  const blended = [255, 156, 102];
+  // Pupils shifted slightly left-down
+  const p_shift_x = -width * 0.022;
+  const p_shift_y = width * 0.005;
+  const r_pupil = width * 0.062; // Pupil radius
+  
+  // Wedge reflection (bite) at bottom-right of pupils
+  const ref_shift_x = width * 0.022;
+  const ref_shift_y = width * 0.022;
+  const r_ref = width * 0.022; // Reflection radius
+  
+  // Color values matching the precise vermillion orange-red attached logo
+  const orangeRed = [239, 60, 35, 255]; // #ef3c23
+  const bgCol = isTransparent ? [0, 0, 0, 0] : [0, 4, 53, 255]; // Transparent vs Deep Solid Navy (#000435)
 
   for (let y = 0; y < height; y++) {
     imgData[y * rowSize] = 0; // Filter 0
     for (let x = 0; x < width; x++) {
-      const idx = y * rowSize + 1 + x * 3;
+      const idx = y * rowSize + 1 + x * 4;
       
-      const dx_outer = x - cx;
-      const dy_outer = y - cy;
-      const is_outer = (dx_outer * dx_outer + dy_outer * dy_outer) <= R * R;
-
-      const dx_left = x - lx;
-      const dy_left = y - cy;
-      const is_left = (dx_left * dx_left + dy_left * dy_left) <= r * r;
-
-      const dx_right = x - rx;
-      const dy_right = y - cy;
-      const is_right = (dx_right * dx_right + dy_right * dy_right) <= r * r;
-
-      let color = navy;
-      if (is_left) {
-        color = white;
-      } else if (is_right) {
-        color = blended;
-      } else if (is_outer) {
-        color = orange;
+      const dx_l = x - lx;
+      const dy_l = y - cy;
+      const d_l = Math.sqrt(dx_l * dx_l + dy_l * dy_l);
+      
+      const dx_r = x - rx;
+      const dy_r = y - cy;
+      const d_r = Math.sqrt(dx_r * dx_r + dy_r * dy_r);
+      
+      let col = bgCol;
+      
+      // Left eye calculation
+      if (d_l <= R_outer) {
+        if (d_l >= R_inner) {
+          col = orangeRed;
+        } else {
+          // Inner eyeball logic - check left pupil
+          const px_l = lx + p_shift_x;
+          const py_l = cy + p_shift_y;
+          const d_p_l = Math.sqrt((x - px_l) * (x - px_l) + (y - py_l) * (y - py_l));
+          
+          if (d_p_l <= r_pupil) {
+            // Check reflection bite at bottom-right
+            const rx_l = px_l + ref_shift_x;
+            const ry_l = py_l + ref_shift_y;
+            const d_ref_l = Math.sqrt((x - rx_l) * (x - rx_l) + (y - ry_l) * (y - ry_l));
+            
+            if (d_ref_l <= r_ref) {
+              col = bgCol;
+            } else {
+              col = orangeRed;
+            }
+          }
+        }
+      }
+      
+      // Right eye calculation
+      if (d_r <= R_outer) {
+        if (d_r >= R_inner) {
+          col = orangeRed;
+        } else {
+          // Inner eyeball logic - check right pupil
+          const px_r = rx + p_shift_x;
+          const py_r = cy + p_shift_y;
+          const d_p_r = Math.sqrt((x - px_r) * (x - px_r) + (y - py_r) * (y - py_r));
+          
+          if (d_p_r <= r_pupil) {
+            // Check reflection bite at bottom-right
+            const rx_r = px_r + ref_shift_x;
+            const ry_r = py_r + ref_shift_y;
+            const d_ref_r = Math.sqrt((x - rx_r) * (x - rx_r) + (y - ry_r) * (y - ry_r));
+            
+            if (d_ref_r <= r_ref) {
+              col = bgCol;
+            } else {
+              col = orangeRed;
+            }
+          }
+        }
       }
 
-      imgData[idx] = color[0];
-      imgData[idx + 1] = color[1];
-      imgData[idx + 2] = color[2];
+      imgData[idx] = col[0];
+      imgData[idx + 1] = col[1];
+      imgData[idx + 2] = col[2];
+      imgData[idx + 3] = col[3];
     }
   }
 
@@ -107,31 +157,30 @@ export function buildAssets() {
     fs.mkdirSync(iconsDir, { recursive: true });
   }
 
-  // Create SVGs
-  const maskedIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <circle cx="12" cy="12" r="10" fill="#FF5B00" />
-  <circle cx="9.5" cy="12" r="2.5" fill="#FFFFFF" />
-  <circle cx="14.5" cy="12" r="2.5" fill="#FFFFFF" opacity="0.4" />
+  // Create SVGs — Safari pinned tab / monochrome logo mask
+  const maskedIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="467.15 0 1665.68 815.83">
+  <g fill="currentColor">
+    <path d="M1954.9,489.26c0-76.43-62.01-138.36-138.44-138.36s-138.44,61.93-138.44,138.36,62.01,138.44,138.44,138.44c13.27,0,26.05-1.89,38.17-5.33-5.32-8.68-8.44-19-8.44-29.98,0-31.86,25.81-57.67,57.59-57.67,14.42,0,27.61,5.33,37.68,14.01,8.6-18.02,13.43-38.17,13.43-59.47Z"/>
+    <path d="M1042.05,489.26c0-76.43-62.01-138.36-138.44-138.36s-138.44,61.93-138.44,138.36c0,76.43,62.01,138.44,138.44,138.44,13.27,0,26.05-1.89,38.17-5.33-5.32-8.68-8.44-19-8.44-29.98,0-31.86,25.81-57.67,57.59-57.67,14.42,0,27.61,5.33,37.68,14.01,8.6-18.02,13.43-38.17,13.43-59.47Z"/>
+    <path d="M875.06,815.83c-224.92,0-407.91-182.99-407.91-407.91S650.13,0,875.06,0s407.91,182.99,407.91,407.91-182.99,407.91-407.91,407.91ZM875.06,93.21c-173.53,0-314.71,141.18-314.71,314.71s141.18,314.71,314.71,314.71,314.71-141.18,314.71-314.71-141.18-314.71-314.71-314.71Z"/>
+    <path d="M1724.92,815.83c-224.92,0-407.91-182.99-407.91-407.91S1499.99,0,1724.92,0s407.91,182.99,407.91,407.91-182.99,407.91-407.91,407.91ZM1724.92,93.21c-173.53,0-314.71,141.18-314.71,314.71s141.18,314.71,314.71,314.71,314.71-141.18,314.71-314.71-141.18-314.71-314.71-314.71Z"/>
+  </g>
 </svg>`;
   fs.writeFileSync(path.join(publicDir, 'masked-icon.svg'), maskedIconSvg);
 
-  const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-  <rect width="24" height="24" fill="#000435"/>
-  <circle cx="12" cy="12" r="10" fill="#FF5B00" />
-  <circle cx="9.5" cy="12" r="2.5" fill="#FFFFFF" />
-  <circle cx="14.5" cy="12" r="2.5" fill="#FFFFFF" opacity="0.4" />
-</svg>`;
-  fs.writeFileSync(path.join(publicDir, 'favicon.ico'), generateLogoPng(32, 32)); // Use a real favicon.ico bytes
+  // Generate favicon.ico with solid base
+  fs.writeFileSync(path.join(publicDir, 'favicon.ico'), generateLogoPng(32, 32, false));
 
   // Generate PNG icons of all required sizes
-  const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+  const sizes = [48, 72, 96, 128, 144, 152, 192, 384, 512];
   for (const size of sizes) {
-    const pngBuf = generateLogoPng(size, size);
+    // Generate solid themed background versions for Android, desktop shortcuts, and store launcher definitions
+    const pngBuf = generateLogoPng(size, size, false);
     fs.writeFileSync(path.join(iconsDir, `icon-${size}x${size}.png`), pngBuf);
   }
 
-  // Generate apple-touch-icon.png (180x180 and 152x152 sizes)
-  fs.writeFileSync(path.join(publicDir, 'apple-touch-icon.png'), generateLogoPng(180, 180));
+  // Generate apple-touch-icon.png with solid theme background for iOS homescreen
+  fs.writeFileSync(path.join(publicDir, 'apple-touch-icon.png'), generateLogoPng(180, 180, false));
 
   console.log('PWA logo assets generated successfully in public/');
 }

@@ -470,7 +470,7 @@ export function GuidesPage() {
       {/* Hero Section */}
       <div id="guides-hero" className="hero-section hero-container w-full bg-[#0A0A1F] px-8 relative overflow-hidden flex items-center justify-center" style={{ height: '303px' }}>
         {/* Background Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
+        <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="hero-content max-w-7xl mx-auto text-center relative z-10 w-full">

@@ -459,11 +459,7 @@ export function ProductDetailPage() {
     <div className="flex flex-col min-h-screen bg-white">
       {/* Hero Section styled with Brand Details color treatment */}
       <section
-        className="relative pt-6 pb-12 overflow-visible border-b border-white/5"
-        style={{
-          background:
-            "linear-gradient(135deg, #170E1A 0%, #11133A 50%, #191535 100%)",
-        }}
+        className="hero-gradient relative pt-6 pb-12 overflow-visible border-b border-white/5"
       >
         {/* Absolute blur background sphere matching Brand Detail Page layout */}
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none z-0">
@@ -1143,7 +1139,7 @@ export function ProductDetailPage() {
 
               {/* BRAND PROFILE CARD - ONLY ONE AT RIGHT SIDEBAR */}
               <div className="bg-white rounded-[24px] overflow-hidden shadow-xl border border-gray-100 group text-left">
-                <div className="p-6 flex flex-col items-center text-center">
+                <div className="p-6 flex flex-col items-center text-center hero-gradient text-white">
                   <div className="relative mb-4 mt-2">
                     <div className="w-20 h-20 rounded-2xl bg-black flex items-center justify-center p-2.5 shadow-lg scale-100 group-hover:scale-105 transition-transform duration-500">
                       <div className="font-black text-sm text-white tracking-widest uppercase">
@@ -1160,7 +1156,7 @@ export function ProductDetailPage() {
                     </div>
                   </div>
 
-                  <h4 className="text-lg font-black text-navy uppercase tracking-widest mb-1">
+                  <h4 className="text-lg font-black text-white uppercase tracking-widest mb-1">
                     {brandName}
                   </h4>
 
@@ -1184,21 +1180,21 @@ export function ProductDetailPage() {
 
                     <button
                       onClick={handleLoveBrand}
-                      className="w-full py-3.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-500 text-[9.5px] font-black uppercase tracking-widest transition-all leading-none cursor-pointer"
+                      className="w-full py-3.5 rounded-xl border border-white/20 hover:bg-white/10 text-white/90 text-[9.5px] font-black uppercase tracking-widest transition-all leading-none cursor-pointer"
                     >
                       FOLLOW THE BRAND
                     </button>
 
                     <Link
                       to={`/brands/${brandId}`}
-                      className="w-full py-3.5 rounded-xl bg-navy text-white text-[9.5px] font-black uppercase tracking-wider hover:bg-orange-primary transition-all inline-block leading-none mt-2 text-center"
+                      className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#FF6B35] to-[#E8500A] text-white text-[9.5px] font-black uppercase tracking-wider hover:brightness-110 transition-all inline-block leading-none mt-2 text-center"
                     >
                       VIEW BRAND PROFILE
                     </Link>
                   </div>
 
                   {/* Social Icons row */}
-                  <div className="flex justify-center gap-3 mt-6 pt-5 border-t border-gray-150 w-full">
+                  <div className="flex justify-center gap-3 mt-6 pt-5 border-t border-white/10 w-full">
                     {[
                       {
                         icon: <Facebook size={12} />,
@@ -1227,13 +1223,13 @@ export function ProductDetailPage() {
                       >
                         <div
                           className={cn(
-                            "w-7 h-7 rounded-full bg-gray-50 border border-gray-150 flex items-center justify-center text-gray-400 transition-all group-hover/soc:bg-gray-100 group-hover/soc:scale-110",
+                            "w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all group-hover/soc:bg-white/15 group-hover/soc:scale-110",
                             item.color,
                           )}
                         >
                           {item.icon}
                         </div>
-                        <span className="text-[7px] font-extrabold text-gray-400 uppercase tracking-widest">
+                        <span className="text-[7px] font-extrabold text-white/60 uppercase tracking-widest">
                           {item.label}
                         </span>
                       </div>

@@ -65,7 +65,7 @@ export function OrderTrackingPage() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* Header Panel */}
       <div className="bg-[#0A0B1E] text-white pt-12 pb-16 px-4 md:px-8 border-b border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-primary/10 via-[#0A0A1F] to-[#0A0A1F] opacity-90" />
+        <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-1 text-[10px] text-gray-500 uppercase tracking-widest font-black italic mb-2">

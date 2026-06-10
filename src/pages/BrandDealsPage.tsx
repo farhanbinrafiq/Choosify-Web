@@ -21,7 +21,7 @@ export function BrandDealsPage() {
       {/* Hero Section */}
       <div className="w-full bg-[#0A0A1F] py-16 px-4 md:px-8 relative overflow-hidden">
         {/* Background Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
+        <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10">

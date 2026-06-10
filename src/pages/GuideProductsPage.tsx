@@ -27,7 +27,7 @@ export function GuideProductsPage() {
   return (
     <div className="bg-white min-h-screen pb-32">
       {/* Header Section */}
-      <div className="bg-navy py-20 px-6 overflow-hidden relative">
+      <div className="hero-gradient py-20 px-6 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2" />
         <div className="max-w-7xl mx-auto relative z-10">
           <Link 

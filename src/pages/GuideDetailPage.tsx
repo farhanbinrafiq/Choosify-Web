@@ -282,10 +282,7 @@ export function GuideDetailPage() {
 
 
       {/* Updated Hero Section */}
-      <div className="w-full bg-[#0A0A14] py-12 px-6 relative overflow-hidden">
-        {/* Background Gradients */}
-        <div className="absolute top-0 right-0 w-[800px] h-full bg-orange-primary/5 blur-[150px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-600/5 blur-[150px] pointer-events-none" />
+      <div className="w-full hero-gradient py-12 px-6 relative overflow-hidden">
         
         <div className="max-w-7xl mx-auto">
           {/* Main Container Wrapper */}
@@ -516,7 +513,7 @@ export function GuideDetailPage() {
                      </div>
                      
                      {displayProducts.length > 0 && (
-                       <div id="prod-sec-0" className="group relative w-full rounded-2xl overflow-hidden shadow-md border border-gray-100 flex flex-col bg-[#0D0B33] text-white p-6 md:p-10 mb-8 mt-2 scroll-mt-36">
+                       <div id="prod-sec-0" className="group relative w-full rounded-2xl overflow-hidden shadow-md border border-gray-100 flex flex-col hero-gradient text-white p-6 md:p-10 mb-8 mt-2 scroll-mt-36">
                           {/* Product Image Panel */}
                           <div className="relative w-full aspect-[21/10] md:aspect-[21/9] rounded-xl overflow-hidden mb-6 flex items-center justify-center bg-white border border-white/5 shadow-inner">
                              <img 
@@ -524,7 +521,7 @@ export function GuideDetailPage() {
                                className="max-h-[85%] max-w-[85%] object-contain p-6" 
                                alt={displayProducts[0]?.title} 
                              />
-                             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0D0B33]/85 to-transparent pointer-events-none" />
+                             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#020412]/85 to-transparent pointer-events-none" />
                              
                              <div className="absolute bottom-4 left-6 right-6 flex items-end justify-between z-10">
                                <div className="text-left">
@@ -710,7 +707,7 @@ export function GuideDetailPage() {
                         <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">KEY TAKEAWAYS</h2>
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">Final direct expert conclusion</p>
                      </div>
-                     <div className="bg-gradient-to-r from-navy to-[#181838] text-white rounded-2xl p-6 text-left shadow-sm border border-white/5 relative overflow-hidden">
+                     <div className="hero-gradient text-white rounded-2xl p-6 text-left shadow-sm border border-white/5 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-full bg-[#E8500A]/10 blur-xl pointer-events-none" />
                         <p className="text-[13px] font-black uppercase tracking-wider italic text-[#FF5C38] mb-1 leading-none">The Verdict</p>
                         <p className="text-[12px] font-bold text-gray-200 leading-relaxed italic uppercase max-w-2xl text-left">
