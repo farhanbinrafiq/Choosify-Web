@@ -518,21 +518,22 @@ export function ProductDetailPage() {
 
                 {/* Commercial Primary Buttons aligned horizontally */}
                 {mode === 'retail' ? (
-                  <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg pt-4">
+                  <div className="flex flex-col gap-3 w-full max-w-lg pt-4 px-4 sm:px-0 box-border">
                      <button 
                        onClick={() => {
                          addToCart(product, 1);
                          toast.success(`Added ${product.title} to your Retail Cart!`);
                        }}
-                       className="h-12 px-8 bg-[#FF6B00] hover:bg-[#FF5B00] text-white rounded-full font-bold text-xs uppercase tracking-widest transition-all hover:scale-[1.01] active:scale-95 shadow-md shadow-[#FF6B00]/15 flex items-center justify-center gap-2 flex-1 w-full"
+                       style={{ background: 'linear-gradient(135deg, #FF6A00 0%, #FF9E2C 100%)' }}
+                       className="w-full flex items-center justify-center px-5 py-3.5 rounded-[10px] font-bold text-[15px] text-white border-none tracking-wide cursor-pointer transition-all hover:scale-[1.01] active:scale-95 shadow-md shadow-[#FF6B00]/15"
                      >
                        ADD TO CART
                      </button>
                      <Link 
                        to={`/brands/${brandId}`}
-                       className="h-12 px-8 bg-white hover:bg-gray-100 text-[#120713] rounded-full font-bold text-xs uppercase tracking-widest transition-all hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-2.5 flex-1 w-full border border-white/10"
+                       className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-[10px] font-semibold text-[15px] bg-white border-[1.5px] border-[#0F172A] text-[#0F172A] cursor-pointer transition-all hover:scale-[1.01] active:scale-95"
                      >
-                       VISIT OFFICIAL STORE <span className="w-5 h-5 rounded-full bg-[#1100FF] text-white flex items-center justify-center text-[8px] font-bold">➔</span>
+                       VISIT OFFICIAL STORE <span className="w-[28px] h-[28px] rounded-full text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ background: 'linear-gradient(135deg, #FF6A00 0%, #FF9E2C 100%)' }}>➔</span>
                      </Link>
                   </div>
                 ) : (

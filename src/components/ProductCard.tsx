@@ -42,6 +42,114 @@ function getProductCardImages(product: any): string[] {
   }
 }
 
+function getRecommendationData(product: any) {
+  const title = (product.title || '').toLowerCase();
+  const brand = (product.brand || '').toLowerCase();
+  const cat = (product.category || '').toLowerCase();
+
+  // Pre-mapped tags based on standard model criteria
+  if (product.id === 1 || title.includes('s24') || title.includes('s25') || title.includes('s26')) {
+    return {
+      tags: ['#BEST_CAMERA', '#BEST_DISPLAY', '#CONTENT_CREATION', '#PREMIUM_PICK', '#FLAGSHIP'],
+      verdict: "Best for premium users seeking ultimate camera zoom and brightness."
+    };
+  }
+  if (product.id === 2 || title.includes('wh-1000xm5') || title.includes('sony')) {
+    return {
+      tags: ['#PREMIUM_PICK', '#EDITOR_CHOICE', '#TRAVEL_FRIENDLY', '#QUALITY_DRIVEN'],
+      verdict: "Outstanding long-session active noise cancellation for frequent travelers."
+    };
+  }
+  if (product.id === 3 || title.includes('macbook') || title.includes('m3')) {
+    return {
+      tags: ['#PREMIUM_PICK', '#LONG_BATTERY', '#CREATOR_FRIENDLY', '#EDITOR_CHOICE'],
+      verdict: "Perfect fanless everyday carrying laptop for modern remote creatives."
+    };
+  }
+  if (product.id === 4 || title.includes('air max') || title.includes('nike')) {
+    return {
+      tags: ['#BEST_VALUE', '#QUALITY_DRIVEN', '#TRAVEL_FRIENDLY', '#EDITOR_CHOICE'],
+      verdict: "Superb foot arch support and ventilation for daily walking tasks."
+    };
+  }
+  if (product.id === 5 || title.includes('oled') || title.includes('c3') || title.includes('tv')) {
+    return {
+      tags: ['#BEST_DISPLAY', '#BEST_GAMING', '#PREMIUM_PICK', '#FLAGSHIP'],
+      verdict: "Premier high-refresh 120Hz display with true-pitch black OLED panels."
+    };
+  }
+  if (product.id === 6 || title.includes('ultima pro') || brand.includes('apex')) {
+    return {
+      tags: ['#BEST_VALUE', '#QUALITY_DRIVEN', '#TRAVEL_FRIENDLY', '#UNDER_50000'],
+      verdict: "Impressive responsive midsole cushion for everyday urban jogging."
+    };
+  }
+  if (product.id === 7 || title.includes('a35') || title.includes('galaxy a')) {
+    return {
+      tags: ['#BEST_VALUE', '#LONG_BATTERY', '#UNDER_50000', '#BUSINESS_USERS'],
+      verdict: "Outstanding long-term software support commitments at mid-range budget."
+    };
+  }
+  if (product.id === 8 || title.includes('redmi') || title.includes('note 13')) {
+    return {
+      tags: ['#BEST_VALUE', '#FAST_CHARGING', '#UNDER_50000', '#PHOTOGRAPHY'],
+      verdict: "Astounding 200MP sensor clarity with fast wire recharging."
+    };
+  }
+  if (product.id === 9 || title.includes('poco') || title.includes('x6')) {
+    return {
+      tags: ['#BEST_GAMING', '#BEST_CPU', '#BEST_VALUE', '#UNDER_50000'],
+      verdict: "Supreme raw graphics rendering chipset performance for esports gamers."
+    };
+  }
+  if (product.id === 10 || title.includes('realme 12')) {
+    return {
+      tags: ['#PHOTOGRAPHY', '#EDITOR_CHOICE', '#UNDER_50000', '#QUALITY_DRIVEN'],
+      verdict: "Elite periscope optical portrait camera at mid-tier pricing."
+    };
+  }
+
+  // Dynamic values
+  const tags: string[] = [];
+  let verdict = "Excellent all-rounder delivering dependable regular service.";
+
+  const priceStr = String(product.price || '').replace(/,/g, '');
+  const priceVal = parseFloat(priceStr);
+  
+  if (cat.includes('phone') || cat.includes('mobile')) {
+    tags.push('#BEST_DISPLAY', '#BUSINESS_USERS');
+    if (priceVal && priceVal < 50000) {
+      tags.push('#UNDER_50000');
+    }
+    if (priceVal && priceVal >= 100000) {
+      tags.push('#FLAGSHIP', '#PREMIUM_PICK');
+      verdict = "Premium tier flagship with flawless craftsmanship and power.";
+    } else {
+      tags.push('#BEST_VALUE');
+      verdict = "Exceptional daily capabilities without standard flagship price markup.";
+    }
+  } else if (cat.includes('fashion') || cat.includes('lifestyle') || cat.includes('shoe')) {
+    tags.push('#QUALITY_DRIVEN', '#TRAVEL_FRIENDLY');
+    if (priceVal && priceVal < 10000) {
+      tags.push('#BEST_VALUE');
+    }
+    verdict = "Versatile design certified for excellent all-day usage situations.";
+  } else {
+    tags.push('#QUALITY_DRIVEN', '#EDITOR_CHOICE');
+    if (priceVal && priceVal < 100000) {
+      tags.push('#BEST_VALUE');
+    }
+  }
+
+  // Ensure tags is 3-6 items
+  while (tags.length < 3) {
+    tags.push('#EDITOR_CHOICE');
+  }
+  const finalTags = Array.from(new Set(tags)).slice(0, 6);
+
+  return { tags: finalTags, verdict };
+}
+
 function ProductCardImageCarousel({ images, alt, containerClassName }: { images: string[], alt: string, containerClassName?: string }) {
   const [idx, setIdx] = useState(0);
   const [startX, setStartX] = useState<number | null>(null);
@@ -134,14 +242,16 @@ export function ProductCard({
   variant = 'grid',
   showCountdown = false,
   imageContainerStyle,
-  titleStyle
+  titleStyle,
+  isGuideDetail = false
 }: { 
   product: any, 
   variant?: 'grid' | 'list' | 'compact' | 'featured',
   showCountdown?: boolean,
   key?: React.Key,
   imageContainerStyle?: React.CSSProperties,
-  titleStyle?: React.CSSProperties
+  titleStyle?: React.CSSProperties,
+  isGuideDetail?: boolean
 }) {
   const navigate = useNavigate();
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
@@ -254,10 +364,10 @@ export function ProductCard({
                
                <button 
                  type="button" 
-                 onClick={(e) => { e.stopPropagation(); const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); }} 
+                 onClick={(e) => { e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); } else { const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); } }} 
                  className="px-4 py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white rounded text-[10px] font-semibold uppercase tracking-wider cursor-pointer transition-colors shrink-0"
                >
-                  {mode === 'retail' ? 'Add To Basket' : `Bulk Add (${product.moq || 10})`}
+                  {isGuideDetail ? 'SHOP NOW' : (mode === 'retail' ? 'Add To Basket' : `Bulk Add (${product.moq || 10})`)}
                </button>
             </div>
          </div>
@@ -335,7 +445,7 @@ export function ProductCard({
              <button 
                type="button" 
                onClick={(e) => { 
-                 e.stopPropagation(); 
+                 e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
                  const qty = mode === 'retail' ? 1 : (product.moq || 10); 
                  addToCart(product, qty); 
                  toast.success(`Successfully added ${product.title} to your verification basket!`);
@@ -343,7 +453,7 @@ export function ProductCard({
                className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[8px] font-semibold rounded uppercase tracking-wide cursor-pointer transition-colors"
                aria-label="Add to cart"
              >
-               ADD
+               {isGuideDetail ? 'SHOP NOW' : 'ADD'}
              </button>
           </div>
         </div>
@@ -417,14 +527,14 @@ export function ProductCard({
             <button 
               type="button"
               onClick={(e) => {
-                e.stopPropagation();
+                e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
                 const qty = mode === 'retail' ? 1 : (product.moq || 10);
                 addToCart(product, qty);
                 toast.success(`Successfully added ${product.title} to your verification basket!`);
               }}
               className="px-3 py-1.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[9px] font-semibold rounded uppercase tracking-wider transition-colors"
             >
-              {mode === 'retail' ? 'add to basket' : `BULK ADD (${product.moq || 10})`}
+              {isGuideDetail ? 'SHOP NOW' : (mode === 'retail' ? 'add to basket' : `BULK ADD (${product.moq || 10})`)}
             </button>
           </div>
         </div>
@@ -437,7 +547,7 @@ export function ProductCard({
       className="w-full bg-white rounded-xl p-3 shadow-none hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer" 
       onClick={() => navigate(`/products/${product.id}`)}
       id={`product-${product.id}`}
-      style={{ height: '310px' }}
+      style={{ height: '385px' }}
     >
       <div className="relative h-[135px] w-full bg-gray-50 overflow-hidden flex items-center justify-center p-2.5 rounded-lg shrink-0">
         <ProductCardImageCarousel 
@@ -490,6 +600,30 @@ export function ProductCard({
           <h3 className="text-xs font-semibold text-[#1a1a2e] line-clamp-1 group-hover:text-orange-primary transition-colors leading-snug">
             {product.title}
           </h3>
+
+          {/* New Recommendation Snapshot Section */}
+          {(() => {
+             const recData = getRecommendationData(product);
+             return (
+                <div className="mt-2.5 pt-2 border-t border-dashed border-gray-150 text-left">
+                   <div className="text-[8px] font-black text-[#E8500A] uppercase tracking-wider mb-2 leading-none font-mono">
+                      RECOMMENDATION ON THIS
+                   </div>
+                   <div className="flex flex-wrap gap-1 max-h-[36px] overflow-hidden leading-none">
+                      {recData.tags.map((tag) => (
+                         <span key={tag} className="px-1.5 py-0.5 text-[7px] font-bold bg-[#E8500A]/5 text-[#E8500A] rounded-full uppercase tracking-wider font-sans border border-[#E8500A]/10 whitespace-nowrap inline-block">
+                            {tag}
+                         </span>
+                      ))}
+                   </div>
+                   {recData.verdict && (
+                      <p className="text-[8.5px] font-semibold text-gray-500 italic mt-2 line-clamp-1 leading-snug">
+                         "{recData.verdict}"
+                      </p>
+                   )}
+                </div>
+             );
+          })()}
         </div>
         
         <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-1.5">
@@ -505,14 +639,14 @@ export function ProductCard({
           <button 
             type="button"
             onClick={(e) => {
-              e.stopPropagation();
+              e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
               const qty = mode === 'retail' ? 1 : (product.moq || 10);
               addToCart(product, qty);
               toast.success(`Successfully added ${product.title} to your verification basket!`);
             }}
             className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[8px] font-semibold rounded uppercase tracking-wider transition-colors shrink-0"
           >
-             ADD
+             {isGuideDetail ? 'SHOP NOW' : 'ADD'}
           </button>
         </div>
       </div>

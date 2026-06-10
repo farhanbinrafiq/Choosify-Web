@@ -544,10 +544,10 @@ export function GuideDetailPage() {
                             
                             <div className="flex items-center gap-3">
                                <button 
-                                 onClick={() => { const qty = mode === 'retail' ? 1 : ((displayProducts[0] as any).moq || 10); addToCart(displayProducts[0], qty); toast.success('Added Winner to Basket!'); }}
+                                 onClick={() => { navigate(`/products/${displayProducts[0]?.id}`); }}
                                  className="bg-[#E8500A] hover:bg-[#CF4400] text-white px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest italic transition-all shadow-lg active:scale-95 cursor-pointer border-0 font-bold"
                                >
-                                 Buy Now
+                                 Shop Now
                                </button>
                                <Link to={`/products/${displayProducts[0]?.id}`} className="bg-white/15 hover:bg-white/25 text-white px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest italic transition-all border border-white/10 cursor-pointer font-bold">
                                  See Best Price
@@ -728,7 +728,7 @@ export function GuideDetailPage() {
                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                         {displayProducts.slice(1, 4).map((product, idx) => (
                            <div key={product.id} id={`prod-sec-${idx + 1}`} className="scroll-mt-36">
-                              <ProductCard product={product} variant="grid" />
+                              <ProductCard product={product} variant="grid" isGuideDetail={true} />
                            </div>
                         ))}
                      </div>
@@ -743,7 +743,7 @@ export function GuideDetailPage() {
                      
                      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
                         {displayProducts.map((product) => (
-                           <ProductCard key={product.id} product={product} variant="grid" />
+                           <ProductCard key={product.id} product={product} variant="grid" isGuideDetail={true} />
                         ))}
                      </div>
                      
