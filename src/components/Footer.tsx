@@ -182,10 +182,9 @@ export function Footer() {
 
       {/* GIANT LOWER DECORATIVE LOGO AREA */}
       <div 
-        className="w-full h-[200px] bg-gradient-to-r from-[#1a0a0a] to-[#2d0000] relative flex items-center justify-center overflow-hidden px-8"
+        className="w-full h-[200px] bg-transparent relative flex items-center justify-center overflow-hidden px-8"
         id="giant-footer-logo"
       >
-        <div className="absolute inset-0 bg-black/10 pointer-events-none" />
         <svg 
           id="Layer_1" 
           data-name="Layer 1" 
