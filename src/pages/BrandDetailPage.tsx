@@ -423,12 +423,12 @@ export function BrandDetailPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
-            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-center lg:items-start">
+            <div className="flex flex-col gap-8 items-center justify-center text-center max-w-3xl mx-auto w-full">
               
               {/* Left Side: Brand Profile Details */}
-              <div className="flex-1 w-full text-center lg:text-left">
-                 <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 text-center sm:text-left">
-                    <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white relative shrink-0">
+              <div className="flex-1 w-full text-center flex flex-col items-center justify-center">
+                 <div className="flex flex-col items-center justify-center gap-6 mb-8 text-center">
+                    <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white relative shrink-0 mx-auto">
                        {renderBrandLogo(brand)}
                        <div className="absolute -top-1.5 -right-1.5 w-7 h-7 bg-[#E8500A] rounded-full flex items-center justify-center text-white border-2 border-[#10133A] shadow-lg">
                           <CheckCircle2 size={13} fill="currentColor" className="text-white stroke-[#E8500A]" />
@@ -436,7 +436,7 @@ export function BrandDetailPage() {
                     </div>
 
                     <div className="flex-1">
-                       <div className="flex flex-col sm:flex-row items-center gap-3 mb-2 flex-wrap justify-center sm:justify-start">
+                       <div className="flex flex-col sm:flex-row items-center gap-3 mb-2 flex-wrap justify-center">
                           <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">{brand.name}</h1>
                           <div className="bg-[#4DBC15] px-3 py-1 rounded-full flex items-center gap-2 shadow-md">
                              <ShieldCheck size={11} className="text-white" />
@@ -444,11 +444,11 @@ export function BrandDetailPage() {
                           </div>
                        </div>
                        
-                       <p className="text-[10px] md:text-[11px] font-extrabold text-[#E8500A]/90 uppercase tracking-[0.2em] mb-4">
+                       <p className="text-[10px] md:text-[11px] font-extrabold text-[#E8500A]/90 uppercase tracking-[0.2em] mb-4 text-center">
                          {brand.category || 'Fashion & Clothing'}
                        </p>
 
-                       <div className="flex items-center gap-5 flex-wrap justify-center sm:justify-start">
+                       <div className="flex items-center gap-5 flex-wrap justify-center">
                           <div className="flex items-center gap-2">
                              <Heart size={14} className="text-[#E8500A] fill-current" />
                              <span className="text-white font-extrabold text-[10px] uppercase tracking-widest italic">50,000 Shoppers Loves The Brands</span>
@@ -460,10 +460,36 @@ export function BrandDetailPage() {
                           </div>
                        </div>
                     </div>
-                 </div>
+                                   {/* SEARCH BAR (Added standardized layout) */}
+                  <div 
+                     className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 my-8"
+                     style={{ width: '100%', maxWidth: '640px' }}
+                  >
+                     <div className="flex items-center bg-white rounded-full">
+                        <div className="pl-4 text-[#E8500A] shrink-0">
+                           <Search className="w-4 h-4" />
+                        </div>
+                        <input 
+                           type="text" 
+                           placeholder="Search products of this brand..." 
+                           value={currentSearchInput}
+                           onChange={(e) => setCurrentSearchInput(e.target.value)}
+                           onKeyDown={(e) => {
+                              if (e.key === 'Enter') setSearchFilter(currentSearchInput);
+                           }}
+                           className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none text-left" 
+                        />
+                        <button 
+                           onClick={() => setSearchFilter(currentSearchInput)}
+                           className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                        >
+                           Search
+                        </button>
+                     </div>
+                  </div>  </div>
 
-                 {/* Action buttons */}
-                 <div className="flex flex-wrap gap-3.5 mb-8 justify-center sm:justify-start text-white">
+                  {/* Action buttons */}
+                 <div className="flex flex-wrap gap-3.5 mb-8 justify-center text-white">
                     <button 
                       onClick={() => setIsLoved(!isLoved)}
                       className={cn(
@@ -501,7 +527,7 @@ export function BrandDetailPage() {
                  </div>
                  
                  {/* Social links */}
-                 <div className="flex items-center gap-4 mt-8 flex-wrap justify-center sm:justify-start">
+                 <div className="flex items-center gap-4 mt-8 flex-wrap justify-center">
                     <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">Find Us On</span>
                     <div className="flex items-center gap-5">
                       <a href="#" className="group flex flex-col items-center gap-1">
@@ -680,8 +706,8 @@ export function BrandDetailPage() {
                   
                   {/* Active Selection Chips */}
                   {activeChips.length > 0 && (
-                     <div className="bg-[#0b0c1e] rounded-3xl p-5 shadow-sm border border-white/5 text-left">
-                        <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em] mb-4 flex items-center justify-between">
+                     <div className="bg-white rounded-2xl p-4.5 shadow-sm border border-[#e8edf2] text-left">
+                        <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-4 flex items-center justify-between">
                            Selection
                            <button onClick={clearAllFilters} className="text-[#E8500A] cursor-pointer hover:underline text-[9px] font-black uppercase">Clear</button>
                         </h3>
@@ -689,7 +715,7 @@ export function BrandDetailPage() {
                            {activeChips.map((chip, i) => (
                              <div 
                                key={i} 
-                               className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-white uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer"
+                               className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-[#e8edf2] rounded-lg text-[10px] font-semibold text-gray-600 uppercase tracking-wide hover:bg-gray-100 transition-all cursor-pointer"
                                onClick={() => {
                                  if (chip.type === 'search') { setSearchFilter(''); setCurrentSearchInput(''); }
                                  else if (chip.type === 'category') handleCategoryToggle(chip.label);
@@ -890,13 +916,13 @@ export function BrandDetailPage() {
                <div className="flex flex-col gap-6">
 
                   {/* Promo Coupons Cards list */}
-                  <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-                     <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-3 text-left">
-                        <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight flex items-center gap-1.5">
-                           <span className="w-1.5 h-4 bg-[#E8500A] rounded-full inline-block" />
+                  <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+                     <div className="flex justify-between items-center pb-3 mb-4 border-b border-[#e8edf2] px-0.5 text-left">
+                        <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5">
+                           <span className="w-1.5 h-3 bg-[#E8500A] rounded-full inline-block" />
                            Promo Codes
                         </h3>
-                        <span className="text-[9px] font-black text-gray-400">3 Verified</span>
+                        <span className="text-[9px] font-semibold text-[#8a9bb0]">3 Verified</span>
                      </div>
 
                      <div className="space-y-4 text-left">
@@ -905,21 +931,21 @@ export function BrandDetailPage() {
                            { title: "Eid Celebration Offer", discount: "BDT 1,000 FLAT", code: "EID26", expiry: "Minimum purchase BDT 4,000" },
                            { title: "Limited VIP Discount", discount: "20% FLAT OFF", code: `${brand.name.toUpperCase()}20`, expiry: "For New Registries" }
                         ].map((promo, idx) => (
-                           <div key={idx} className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all">
-                              <div className="w-8 h-8 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
+                           <div key={idx} className="bg-white border border-[#e8edf2] p-3.5 rounded-xl flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all">
+                              <div className="w-7 h-7 rounded-lg bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
                                  <Gift size={14} />
                               </div>
-                              <h4 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider mb-0.5">{promo.title}</h4>
-                              <div className="text-sm font-black text-[#E8500A] italic uppercase mb-3 leading-none">{promo.discount}</div>
+                              <h4 className="text-xs font-semibold text-[#1A1D4E] uppercase tracking-wider mb-0.5">{promo.title}</h4>
+                              <div className="text-sm font-semibold text-[#E8500A] uppercase mb-3 leading-none">{promo.discount}</div>
                               
                               <button 
                                 onClick={() => {
                                   navigator.clipboard.writeText(promo.code);
                                   toast.success(`Promo Code "${promo.code}" copied to clipboard!`);
                                 }}
-                                className="w-full py-2 bg-white rounded-xl border border-dashed border-gray-200 hover:border-[#E8500A] font-mono text-[11px] font-black text-[#1A1D4E] tracking-widest uppercase transition-colors flex flex-col items-center justify-center cursor-pointer shadow-xs active:scale-[0.98] transition-transform"
+                                className="w-full py-2 bg-white rounded-lg border border-dashed border-[#e8edf2] hover:border-[#E8500A] font-mono text-xs font-semibold text-[#1A1D4E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer shadow-xs"
                               >
-                                 <span className="text-[7px] text-gray-400 font-sans tracking-wide uppercase font-black">PROMO CODE</span>
+                                 <span className="text-[8px] text-gray-400 font-sans tracking-wide uppercase font-semibold">PROMO CODE</span>
                                  <span>{promo.code}</span>
                               </button>
                               
@@ -930,7 +956,7 @@ export function BrandDetailPage() {
                   </div>
 
                   {/* Sponsored Ad space block */}
-                  <div className="bg-[#100D2B] rounded-3xl p-6 text-white text-center relative overflow-hidden shadow-md">
+                  <div className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden">
                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
                      <div className="relative z-10 text-center">
                         <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4">

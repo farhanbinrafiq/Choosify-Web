@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, ShoppingBag, Store, Sparkles, Tag, User, Grid } from 'lucide-react';
+import { Home, ShoppingBag, Store, Sparkles, Tag, User, Grid, Flame } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { SignInModal } from './SignInModal';
@@ -25,7 +25,7 @@ export function MobileNav() {
     return true;
   };
 
-  // 1. Retail Bottom Navigation Tabs (7-tabs layout)
+  // 1. Retail Bottom Navigation Tabs (8-tabs layout)
   const retailItems = [
     { icon: Home, label: 'Home', path: '/', state: null },
     { icon: Grid, label: 'Categories', path: '/categories', state: null },
@@ -33,6 +33,7 @@ export function MobileNav() {
     { icon: Store, label: 'Brands', path: '/brands', state: null },
     { icon: Sparkles, label: 'Recommendations', path: '/guides', state: null },
     { icon: Tag, label: 'Deals', path: '/deals', state: null },
+    { icon: Flame, label: 'Viral', path: '/viral-products', state: null },
     { icon: User, label: 'Profile', path: '/dashboard', state: { activeTab: 'overview' } },
   ];
 

@@ -289,7 +289,7 @@ export function GuideDetailPage() {
           <div className="bg-[#1D1D2B]/50 backdrop-blur-xl rounded-[24px] border border-white/10 p-6 md:p-10 shadow-[0_40px_100px_rgba(0,0,0,0.4)] relative overflow-hidden">
             
             {/* Title Header */}
-            <h1 className="text-2xl md:text-4xl font-black text-white uppercase italic tracking-tighter leading-none mb-8 text-left">
+            <h1 className="text-2xl md:text-4xl font-black text-white uppercase italic tracking-tighter leading-none mb-8 text-center">
               {guide.title}
             </h1>
 
@@ -317,7 +317,7 @@ export function GuideDetailPage() {
                               <Star key={star} size={10} className={star <= 4 ? "text-orange-primary fill-current" : "text-white/20"} />
                            ))}
                         </div>
-                        <span className="text-[9px] font-black text-orange-primary uppercase tracking-widest italic ml-1 underline underline-offset-2">Pro Contributor</span>
+                        <span className="text-[10px] font-black text-orange-primary uppercase tracking-widest italic ml-1 underline underline-offset-2">Pro Contributor</span>
                      </div>
                   </div>
                </div>
@@ -325,15 +325,15 @@ export function GuideDetailPage() {
                {/* Meta Stats Group */}
                <div className="flex flex-wrap items-center gap-12 lg:gap-20">
                   <div className="flex flex-col text-left">
-                     <span className="text-[9px] font-black text-white/40 uppercase tracking-widest italic mb-2">Published Date</span>
+                     <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-2">Published Date</span>
                      <span className="text-[11px] font-black text-white uppercase italic tracking-tighter">{guide.date}</span>
                   </div>
                   <div className="flex flex-col text-left">
-                     <span className="text-[9px] font-black text-white/40 uppercase tracking-widest italic mb-2">Read Time</span>
+                     <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-2">Read Time</span>
                      <span className="text-[11px] font-black text-white uppercase italic tracking-tighter">12 Minutes</span>
                   </div>
                   <div className="flex flex-col text-left">
-                     <span className="text-[9px] font-black text-white/40 uppercase tracking-widest italic mb-2">Audience</span>
+                     <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-2">Audience</span>
                      <span className="text-[11px] font-black text-white uppercase italic tracking-tighter">ENTHUSIASTS</span>
                   </div>
                </div>
@@ -415,11 +415,13 @@ export function GuideDetailPage() {
                <aside className="hidden lg:flex flex-col gap-6 sticky top-[160px] h-[calc(100vh-180px)] overflow-y-auto no-scrollbar pb-10 flex-shrink-0">
                   
                   {/* SECTION 1: WHAT IS DISCUSSED */}
-                  <div className="space-y-3 text-left">
-                     <h3 className="text-xs font-black text-navy uppercase tracking-widest flex items-center gap-1.5 font-space">
-                        <span className="w-1.5 h-3.5 bg-[#E8500A] rounded-full inline-block" />
-                        WHAT IS DISCUSSED?
-                     </h3>
+                  <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left">
+                     <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
+                        <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
+                           <span className="w-1.5 h-3 bg-[#E8500A] rounded-full inline-block" />
+                           What is discussed?
+                        </h3>
+                     </div>
                      <div className="flex flex-col gap-2">
                        {displayProducts.map((p, idx) => {
                          const isActive = activeProductIdx === idx;
@@ -443,11 +445,11 @@ export function GuideDetailPage() {
                                  : "bg-white border-gray-100 text-navy hover:border-gray-200"
                              )}
                            >
-                             <span className="text-xs font-black tracking-tight shrink-0">{idx + 1}.</span>
-                             <div className="w-8 h-8 rounded bg-gray-50 border border-gray-100 p-0.5 shrink-0 overflow-hidden flex items-center justify-center">
+                             <span className="text-xs font-semibold tracking-tight shrink-0">{idx + 1}.</span>
+                             <div className="w-8 h-8 rounded bg-gray-50 border border-[#e8edf2] p-0.5 shrink-0 overflow-hidden flex items-center justify-center">
                                <img src={p.image} className="w-full h-full object-contain" alt="" />
                              </div>
-                             <span className="text-[11px] font-bold uppercase truncate tracking-tight">{p.brand} {p.title}</span>
+                             <span className="text-[11px] font-semibold uppercase truncate tracking-tight">{p.brand} {p.title}</span>
                            </button>
                          );
                        })}
@@ -464,7 +466,7 @@ export function GuideDetailPage() {
                          { label: "Real World Usage", icon: <Globe size={13} className="text-emerald-500" /> },
                          { label: "No Sponsored Placement", icon: <ShieldCheck size={13} className="text-purple-500" /> }
                        ].map((item, i) => (
-                         <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg text-[10px] font-black text-navy uppercase tracking-wider">
+                         <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg text-[10px] font-semibold text-navy uppercase tracking-wider">
                            {item.icon}
                            <span>{item.label}</span>
                          </div>
@@ -475,7 +477,7 @@ export function GuideDetailPage() {
                   {/* SECTION 3: WAS THIS HELPFUL? */}
                   <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm text-center">
                      <h4 className="text-[10px] font-black text-navy uppercase tracking-widest mb-3 italic">WAS THIS HELPFUL?</h4>
-                     <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-3 leading-relaxed">YOUR FEEDBACK HELPS TO MAINTAIN OUR 100% UNBIASED STATUS.</p>
+                     <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3 leading-relaxed">YOUR FEEDBACK HELPS TO MAINTAIN OUR 100% UNBIASED STATUS.</p>
                      <div className="flex gap-2">
                        <button 
                          onClick={() => {
@@ -483,7 +485,7 @@ export function GuideDetailPage() {
                            toast.success("Thank you for your feedback!");
                          }}
                          className={cn(
-                           "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-[9px] font-black uppercase tracking-wider italic transition-all active:scale-95 border cursor-pointer",
+                           "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-[10px] font-black uppercase tracking-wider italic transition-all active:scale-95 border cursor-pointer",
                            interactions.isHelpful ? "bg-[#1B5CFF] text-white border-[#1B5CFF]" : "bg-gray-50 text-gray-400 hover:text-[#1B5CFF] border-gray-100 hover:bg-[#1B5CFF]/10"
                          )}
                        >
@@ -493,7 +495,7 @@ export function GuideDetailPage() {
                          onClick={() => {
                            toast.success("We'll work to improve our guides!");
                          }}
-                         className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-[9px] font-black text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 uppercase tracking-wider italic bg-gray-50 border border-gray-100 transition-all active:scale-95 cursor-pointer"
+                         className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-[10px] font-semibold text-gray-500 hover:text-red-500 hover:bg-red-50 hover:border-red-100 uppercase tracking-wider bg-gray-50 border border-[#e8edf2] transition-colors cursor-pointer"
                        >
                          <X size={11} /> NO
                        </button>
@@ -535,7 +537,7 @@ export function GuideDetailPage() {
                           
                           <div className="flex flex-wrap items-center justify-between gap-6 pt-2 border-t border-white/10 text-left">
                             <div className="flex flex-col text-left">
-                               <span className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 font-mono">Market Price</span>
+                               <span className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1 font-mono">Market Price</span>
                                <span className="text-2xl font-black text-[#FF5C38] leading-none font-mono">৳{displayProducts[0]?.price?.toLocaleString()}</span>
                             </div>
                             
@@ -612,7 +614,7 @@ export function GuideDetailPage() {
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Best for */}
                         <div className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm">
-                           <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
+                           <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
                               <Check size={12} className="text-emerald-500" /> BEST FOR
                            </span>
                            <ul className="space-y-1.5 pl-1.5 list-none">
@@ -626,7 +628,7 @@ export function GuideDetailPage() {
                         
                         {/* Not For */}
                         <div className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm">
-                           <span className="text-[9px] font-black text-red-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
+                           <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
                               <X size={12} className="text-red-500" /> NOT FOR
                            </span>
                            <ul className="space-y-1.5 pl-1.5 list-none">
@@ -640,7 +642,7 @@ export function GuideDetailPage() {
 
                         {/* What we like */}
                         <div className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm">
-                           <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
+                           <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
                               <Star size={12} className="text-blue-500" /> WHAT WE LIKE
                            </span>
                            <ul className="space-y-1.5 pl-1.5 list-none">
@@ -654,7 +656,7 @@ export function GuideDetailPage() {
 
                         {/* What to consider */}
                         <div className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm">
-                           <span className="text-[9px] font-black text-[#E8500A] uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
+                           <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
                               <Info size={12} className="text-[#E8500A]" /> WHAT TO CONSIDER
                            </span>
                            <ul className="space-y-1.5 pl-1.5 list-none">
@@ -688,7 +690,7 @@ export function GuideDetailPage() {
                                        <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest italic mb-1 font-mono">CRITERIA 0{i+1}</span>
                                        <h4 className="text-sm font-black text-navy uppercase italic tracking-tight leading-none">{crt.name}</h4>
                                     </div>
-                                    <div className="text-xl font-black text-[#1B5CFF] italic leading-none font-mono">{score} <span className="text-[9px] text-gray-300 font-mono">/10</span></div>
+                                    <div className="text-xl font-black text-[#1B5CFF] italic leading-none font-mono">{score} <span className="text-[10px] text-gray-300 font-mono">/10</span></div>
                                  </div>
                                  
                                  <div className="w-full bg-gray-50 h-1.5 rounded-full overflow-hidden">
@@ -748,7 +750,7 @@ export function GuideDetailPage() {
                         <div className="text-center mt-8 font-bold">
                            <button 
                              onClick={() => setVisibleCount(prev => prev + 4)}
-                             className="px-8 py-3.5 border border-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white text-[#1A1D4E] font-black text-[9px] uppercase tracking-widest rounded-full italic transition-all cursor-pointer bg-white"
+                             className="px-8 py-3.5 border border-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white text-[#1A1D4E] font-black text-[10px] uppercase tracking-widest rounded-full italic transition-all cursor-pointer bg-white"
                            >
                               Load More Products
                            </button>
@@ -762,7 +764,7 @@ export function GuideDetailPage() {
                <aside className="hidden lg:flex flex-col gap-6 sticky top-[160px] max-h-[calc(100vh-180px)] overflow-y-auto no-scrollbar pb-10 flex-shrink-0">
                   
                   {/* SECTION 1: REVIEWER PROFILE */}
-                  <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
+                  <div className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm flex flex-col items-center text-center">
                      <div className="w-20 h-20 rounded-full border-2 border-orange-primary/20 p-0.5 mb-4 shrink-0">
                         <img src={creator.avatar} className="w-full h-full object-cover rounded-full" alt={creator.name} />
                      </div>
@@ -786,53 +788,53 @@ export function GuideDetailPage() {
                         )}
                      </div>
 
-                     <button className="w-full py-3 bg-[#1A1D4E] text-white hover:bg-[#E8500A] text-[9px] font-black uppercase tracking-widest italic rounded-xl active:scale-95 transition-all cursor-pointer shadow-sm border-0 font-bold">
+                     <button className="w-full py-3 bg-[#1A1D4E] text-white hover:bg-[#E8500A] text-[10px] font-black uppercase tracking-widest italic rounded-xl active:scale-95 transition-all cursor-pointer shadow-sm border-0 font-bold">
                         Follow {creator.name.split(' ')[0]}
                      </button>
                   </div>
 
                   {/* SECTION 2: REVIEW CREDIBILITY */}
-                  <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm text-left font-bold">
-                     <h5 className="text-[9px] font-black text-navy uppercase tracking-widest mb-3 italic font-space">REVIEW CREDIBILITY</h5>
+                  <div className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm text-left">
+                     <h5 className="text-[10px] font-black text-navy uppercase tracking-widest mb-3 italic font-space">REVIEW CREDIBILITY</h5>
                      <div className="space-y-2 border-l border-orange-primary/15 pl-3">
-                        <div className="flex flex-col text-[9px] text-left">
-                           <span className="text-gray-400 uppercase font-bold">Last Updated</span>
-                           <span className="text-navy font-black">June 2026</span>
+                        <div className="flex flex-col text-[10px] text-left">
+                           <span className="text-gray-400 uppercase font-semibold">Last Updated</span>
+                           <span className="text-navy font-semibold">June 2026</span>
                         </div>
-                        <div className="flex flex-col text-[9px] text-left">
-                           <span className="text-gray-400 uppercase font-bold">Last Verified</span>
-                           <span className="text-navy font-black">2 Hours Ago</span>
+                        <div className="flex flex-col text-[10px] text-left">
+                           <span className="text-gray-400 uppercase font-semibold">Last Verified</span>
+                           <span className="text-navy font-semibold">2 Hours Ago</span>
                         </div>
-                        <div className="flex flex-col text-[9px] text-left">
-                           <span className="text-gray-400 uppercase font-bold">Review Date</span>
-                           <span className="text-navy font-black">{guide.date || "May 2026"}</span>
+                        <div className="flex flex-col text-[10px] text-left">
+                           <span className="text-gray-400 uppercase font-semibold">Review Date</span>
+                           <span className="text-navy font-semibold">{guide.date || "May 2026"}</span>
                         </div>
-                        <div className="flex flex-col text-[9px] text-left">
-                           <span className="text-gray-400 uppercase font-bold">Research Window</span>
-                           <span className="text-navy font-black">30 Continuous Days</span>
+                        <div className="flex flex-col text-[10px] text-left">
+                           <span className="text-gray-400 uppercase font-semibold">Research Window</span>
+                           <span className="text-navy font-semibold">30 Continuous Days</span>
                         </div>
                      </div>
                   </div>
 
                   {/* SECTION 3: QUICK TIP */}
-                  <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm text-left">
-                     <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 font-space">QUICK TIP</span>
-                     <p className="text-[10px] font-bold text-navy italic leading-relaxed opacity-70">
+                  <div className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm text-left">
+                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2 font-space">QUICK TIP</span>
+                     <p className="text-[11px] font-medium text-navy leading-relaxed opacity-80 pl-1">
                         {creator.quickTip || "Always prioritize verified supplier badges when exploring premium electronics to guarantee genuine warranty and support."}
                      </p>
                   </div>
 
                   {/* SECTION 4: RELATED GUIDES */}
                   <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm text-left">
-                     <h5 className="text-[9px] font-black text-navy uppercase tracking-widest mb-3 italic font-space">RELATED GUIDES</h5>
+                     <h5 className="text-[10px] font-black text-navy uppercase tracking-widest mb-3 italic font-space">RELATED GUIDES</h5>
                      <div className="space-y-3">
                         {BLOGS.filter(b => b.id !== guide.id).slice(0, 3).map((g) => (
                            <Link key={g.id} to={`/guides/${g.id}`} className="flex gap-2 items-center group">
-                              <div className="w-10 h-10 rounded bg-gray-50 border border-gray-100 p-0.5 overflow-hidden shrink-0 flex items-center justify-center">
+                              <div className="w-9 h-9 rounded bg-gray-50 border border-[#e8edf2] p-0.5 overflow-hidden shrink-0 flex items-center justify-center">
                                  <img src={g.image} className="w-full h-full object-cover rounded" alt="" />
                               </div>
                               <div className="flex-1 min-w-0 flex flex-col items-start gap-0.5">
-                                 <span className="text-[10px] uppercase font-black tracking-tight text-navy group-hover:text-orange-primary text-left transition-colors line-clamp-2 leading-tight">
+                                 <span className="text-xs font-semibold uppercase tracking-tight text-navy group-hover:text-orange-primary text-left transition-colors line-clamp-2 leading-tight">
                                     {g.title}
                                  </span>
                                  <span className="text-[8px] text-gray-400 font-medium block">May 2026</span>
@@ -844,12 +846,12 @@ export function GuideDetailPage() {
 
                   {/* SECTION 5: SPONSORED BLOCK */}
                   {(guide.id === 1 || (guide as any).isSponsored || (dynamicData as any).isSponsoredContent) && (
-                     <div className="bg-gradient-to-br from-[#100D2B] to-[#1F1746] rounded-2xl p-6 text-white text-center relative overflow-hidden shadow-md">
+                     <div className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden">
                         <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4 font-mono">
                            SPONSORED
                         </span>
                         <p className="text-xs font-black uppercase italic tracking-tighter mb-2">AARONG HERITAGE SHOPPING BRAND</p>
-                        <p className="text-[9px] text-gray-300 font-medium uppercase mb-4 leading-normal">
+                        <p className="text-[10px] text-gray-300 font-medium uppercase mb-4 leading-normal">
                            New Collection Available. Free Delivery on all Purchases.
                         </p>
                         <div className="w-full aspect-square rounded-xl overflow-hidden mb-5 border border-white/10 shadow-lg">
@@ -911,7 +913,7 @@ export function GuideDetailPage() {
                      <div className="absolute top-4 left-4">
                         <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
                            <BookOpen size={12} className="text-[#E8500A]" />
-                           <span className="text-[9px] font-black text-navy uppercase tracking-widest italic">{g.readTime || "5 min read"}</span>
+                           <span className="text-[10px] font-black text-navy uppercase tracking-widest italic">{g.readTime || "5 min read"}</span>
                         </div>
                      </div>
                   </div>
@@ -921,7 +923,7 @@ export function GuideDetailPage() {
                       </h3>
                       <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest italic line-clamp-2 mb-8">{g.excerpt}</p>
                       <div className="flex items-center justify-between pt-6 border-t border-gray-50">
-                         <div className="flex items-center gap-4 text-[9px] font-black text-gray-400 uppercase tracking-widest italic">
+                         <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
                             <span className="flex items-center gap-1.5"><Heart size={12} className="text-pink-500" /> {g.views || "12k"}</span>
                             <span className="flex items-center gap-1.5 opacity-50 font-bold">• {g.shares || "450"} Shared</span>
                          </div>

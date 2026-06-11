@@ -6,8 +6,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { buildAssets } from './generatePwaAssets.js';
 import { buildLogo } from './generateAttachedLogo.js';
 
-buildAssets();
-buildLogo();
+await buildAssets();
+await buildLogo();
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
@@ -67,6 +67,12 @@ export default defineConfig(({ mode }) => {
             {
               src: '/icons/icon-192x192.png',
               sizes: '192x192',
+              type: 'image/png',
+              purpose: 'any maskable'
+            },
+            {
+              src: '/icons/icon-256x256.png',
+              sizes: '256x256',
               type: 'image/png',
               purpose: 'any maskable'
             },

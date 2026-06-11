@@ -468,7 +468,7 @@ export function ProductDetailPage() {
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           {/* Breadcrumbs integrated seamlessly inside the hero section with low transparency */}
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#FFF]/40 italic mb-6">
+          <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#FFF]/40 italic mb-6">
             <Link to="/" className="hover:text-[#E8500A] transition-colors">
               Home
             </Link>
@@ -491,10 +491,10 @@ export function ProductDetailPage() {
             />
           </div>
 
-          <div className="w-full max-w-4xl mx-auto text-left text-white relative mt-6 bg-transparent p-0 border-none shadow-none">
+          <div className="w-full max-w-4xl mx-auto text-center text-white relative mt-6 bg-transparent p-0 border-none shadow-none">
             <div className="relative">
               {/* Row 1: Brand / Category and Reviews/Stock status */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+              <div className="flex flex-col items-center justify-center gap-4 mb-4">
                 <div className="flex items-center gap-3">
                   <span className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-[0.25em] block font-sans">
                     {product.brand?.toUpperCase()} .{" "}
@@ -502,7 +502,7 @@ export function ProductDetailPage() {
                   </span>
                 </div>
 
-                <div className="flex flex-col sm:items-end gap-1.5 shrink-0 sm:text-right">
+                <div className="flex flex-col items-center justify-center gap-1.5 shrink-0 text-center">
                   <div className="flex items-center gap-2 text-white/80">
                     <div className="flex text-[#FF6B00] gap-0.5">
                       {[1, 2, 3, 4, 5].map((i) => (
@@ -541,14 +541,14 @@ export function ProductDetailPage() {
 
               {/* Row 2: Title */}
               <h1
-                className="text-[30px] font-sans font-black text-white tracking-tighter leading-[0.95] uppercase mb-2 text-left"
+                className="text-[30px] font-sans font-black text-white tracking-tighter leading-[0.95] uppercase mb-4 text-center"
                 style={{ fontSize: "30px" }}
               >
                 {product.title}
               </h1>
 
               {/* Row 3: Price Display & Quick controls */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-white/10 pb-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-4 border-b border-white/10 pb-4">
                 <div
                   className="text-[25px] font-extrabold text-[#FF6B00] italic uppercase tracking-tight font-sans leading-none"
                   style={{ fontSize: "25px" }}

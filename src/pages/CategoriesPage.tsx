@@ -22,6 +22,32 @@ interface CategoryItem {
   subcategories: Subcategory[];
 }
 
+// Custom high-fidelity category icon helper with colors matching Homepage Popular Categories reference
+const getCategoryIconComponent = (catName: string, iconName: string) => {
+  const IconComponent = (LucideIcons as any)[iconName] || LucideIcons.Package;
+  const name = catName.toLowerCase();
+  
+  let colorClass = "text-gray-500";
+  if (name.includes('fashion')) colorClass = "text-blue-600";
+  else if (name.includes('tech') || name.includes('electronics')) colorClass = "text-[#1A73E8]";
+  else if (name.includes('family') || name.includes('kids')) colorClass = "text-blue-500";
+  else if (name.includes('jewelry') || name.includes('accessories')) colorClass = "text-yellow-500";
+  else if (name.includes('hobby') || name.includes('creativity') || name.includes('hobbies')) colorClass = "text-orange-500";
+  else if (name.includes('travel') || name.includes('hospitality')) colorClass = "text-rose-500";
+  else if (name.includes('beauty') || name.includes('personal care')) colorClass = "text-pink-500";
+  else if (name.includes('eyewear') || name.includes('fragrance')) colorClass = "text-sky-500";
+  else if (name.includes('mobile') || name.includes('wearable')) colorClass = "text-emerald-500";
+  else if (name.includes('tv') || name.includes('appliance')) colorClass = "text-red-500";
+  else if (name.includes('gaming') || name.includes('entertainment')) colorClass = "text-purple-500";
+  else if (name.includes('home') || name.includes('living')) colorClass = "text-slate-500";
+  else if (name.includes('vehicle') || name.includes('automotive')) colorClass = "text-blue-500";
+  else if (name.includes('food') || name.includes('essential')) colorClass = "text-green-600";
+  else if (name.includes('health') || name.includes('wellness')) colorClass = "text-emerald-500";
+  else if (name.includes('education') || name.includes('learning')) colorClass = "text-indigo-600";
+  
+  return <IconComponent className={cn("w-5 h-5 stroke-[2]", colorClass)} />;
+};
+
 export function CategoriesPage() {
   const { mode } = useGlobalState();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
@@ -197,24 +223,28 @@ export function CategoriesPage() {
             DISCOVER PREMIUM PRODUCTS, OFFICIAL STORES, AND BEST DEALS ACROSS BANGLADESH.
           </p>
  
-          <div className="max-w-md mx-auto relative group">
-             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <div className="flex gap-1 opacity-80">
-                   <div className="w-4 h-4 rounded-full border-2 border-orange-primary/40 flex items-center justify-center">
-                     <div className="w-1.5 h-1.5 bg-orange-primary rounded-full group-hover:scale-150 transition-transform" />
-                   </div>
-                   <div className="w-4 h-4 rounded-full border-2 border-orange-primary/40 flex items-center justify-center">
-                     <div className="w-1.5 h-1.5 bg-orange-primary rounded-full group-hover:scale-150 transition-transform" />
-                   </div>
-                </div>
-             </div>
-             <input 
-              type="text" 
-              placeholder="Search by Brand Name or Category..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-18 pr-6 rounded-full bg-gradient-to-r from-[#000A2A] to-[#0A0A1F] text-white border border-white/10 focus:outline-none focus:border-orange-primary/40 transition-all font-bold placeholder:text-white/20 shadow-3xl text-[11px] italic tracking-wide" 
-             />
+          {/* SEARCH BAR (Standardized layout) */}
+          <div 
+            className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-3"
+            style={{ width: '100%', maxWidth: '640px' }}
+          >
+            <div className="flex items-center bg-white rounded-full">
+              <div className="pl-4 text-[#E8500A] shrink-0">
+                <LucideIcons.Search className="w-4 h-4" />
+              </div>
+              <input 
+                type="text" 
+                placeholder="Search by Brand Name or Category..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+              />
+              <button 
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+              >
+                Search
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -222,21 +252,22 @@ export function CategoriesPage() {
 
       <div className="max-w-[1440px] mx-auto px-6 py-10 w-full flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative">
         {/* LEFT COLUMN: QUICK HIGHWAYS ASIDE COLUMN */}
-        <aside className="hidden lg:flex flex-col gap-6 w-[300px] flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="hidden lg:flex flex-col gap-4 w-[300px] flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pb-10 pr-2 no-scrollbar">
           {/* QUICK ACCESS CARD */}
           <div 
-            className="bg-white rounded-[24px] border border-gray-100 p-6 shadow-[0_10px_30px_rgba(26,29,78,0.02)] w-full"
+            className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm w-full"
           >
-            <div className="flex items-center gap-1.5 pb-4 mb-5 border-b border-gray-100 px-1">
-              <span className="text-xl font-black tracking-wider text-orange-primary uppercase font-sans">QUICK</span>
-              <span className="text-xl font-black tracking-wider text-navy uppercase font-sans">ACCESS</span>
+            <div className="flex items-center gap-1 pb-3 mb-4 border-b border-[#e8edf2] px-1">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
+                QUICK ACCESS
+              </h3>
             </div>
-            <div className="space-y-4 text-left">
+            <div className="space-y-3.5 text-left">
               {[
                 { 
                   to: '/products', 
                   icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[22px] h-[22px] transform transition-transform group-hover:scale-105">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
                       <path d="M12 4.5L6.5 12.5H17.5L12 4.5Z" fill="#FF5B00" />
                       <rect x="6" y="14" width="5.5" height="5.5" rx="0.5" fill="#FF5B00" />
                       <circle cx="15.5" cy="16.7" r="2.8" fill="#FF5B00" />
@@ -247,7 +278,7 @@ export function CategoriesPage() {
                 { 
                   to: '/categories', 
                   icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[22px] h-[22px] transform transition-transform group-hover:scale-105">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
                       <rect x="5" y="5" width="6" height="6" rx="1.5" fill="#FF5B00" />
                       <rect x="13" y="5" width="6" height="6" rx="1.5" fill="#FF5B00" />
                       <rect x="5" y="13" width="6" height="6" rx="1.5" fill="#FF5B00" />
@@ -259,7 +290,7 @@ export function CategoriesPage() {
                 { 
                   to: '/brands', 
                   icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[22px] h-[22px] transform transition-transform group-hover:scale-105">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
                       <circle cx="8.5" cy="12" r="4.2" stroke="#FF5B00" strokeWidth="2.5" fill="none" />
                       <circle cx="8.5" cy="12" r="1.2" fill="#000435" />
                       <circle cx="15.5" cy="12" r="4.2" stroke="#FF5B00" strokeWidth="2.5" fill="none" />
@@ -271,7 +302,7 @@ export function CategoriesPage() {
                 { 
                   to: '/guides', 
                   icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[22px] h-[22px] transform transition-transform group-hover:scale-105">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
                       <rect x="4" y="6" width="16" height="11" rx="1.5" stroke="#FF5B00" strokeWidth="2.2" fill="none" />
                       <line x1="4" y1="11.5" x2="20" y2="11.5" stroke="#FF5B00" strokeWidth="2" />
                       <line x1="12" y1="6" x2="12" y2="17" stroke="#FF5B00" strokeWidth="2" />
@@ -284,7 +315,7 @@ export function CategoriesPage() {
                 { 
                   to: '/compare', 
                   icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[22px] h-[22px] transform transition-transform group-hover:scale-105">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
                       <rect x="5.5" y="5.5" width="5.5" height="5.5" rx="1.2" fill="#FF5B00" />
                       <circle cx="16.5" cy="16.5" r="3" fill="#FF5B00" />
                       <path d="M16.5 11.5V7.5H12.5" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
@@ -298,7 +329,7 @@ export function CategoriesPage() {
                 { 
                   to: '/deals', 
                   icon: (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[22px] h-[22px] transform transition-transform group-hover:scale-105">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
                       <path d="M12.5 4.5H18.5C19.1 4.5 19.5 4.9 19.5 5.5V11.5C19.5 11.8 19.4 12.0 19.2 12.2L11.7 19.7C11.3 20.1 10.7 20.1 10.3 19.7L5.3 14.7C4.9 14.3 4.9 13.7 5.3 13.3L12.8 5.8C13.0 5.6 13.2 5.5 13.5 5.5" stroke="#FF5B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="#FF5B00" />
                       <circle cx="15.5" cy="8.5" r="1.5" fill="white" />
                     </svg>
@@ -311,39 +342,36 @@ export function CategoriesPage() {
                   to={link.to} 
                   className="flex items-center justify-between py-1 group transition-all duration-300"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-soft group-hover:scale-105 group-hover:border-orange-primary/30 transition-all duration-300 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full border border-[#e8edf2] flex items-center justify-center bg-white shadow-inner group-hover:scale-105 group-hover:border-orange-primary/20 transition-all duration-300 shrink-0">
                       {link.icon}
                     </div>
-                    <span className={cn(
-                      "font-sans text-xs text-navy uppercase tracking-wide group-hover:text-orange-primary transition-colors duration-300",
-                      lidx === 2 ? "font-bold" : "font-extrabold"
-                    )}>{link.label}</span>
+                    <span className="font-sans text-xs text-navy uppercase tracking-wide group-hover:text-orange-primary transition-colors duration-300 font-semibold">{link.label}</span>
                   </div>
-                  <span className="px-2.5 py-1 bg-[#D6E1EC]/60 text-navy/90 text-[10px] font-black rounded-full font-mono leading-none tracking-tight">550</span>
+                  <span className="px-2.5 py-0.5 bg-[#D6E1EC]/30 text-navy/70 text-[9px] font-mono font-semibold rounded-full leading-none">550</span>
                 </Link>
               ))}
             </div>
           </div>
 
           {/* BRANDS YOU FOLLOW CARD */}
-          <div className="bg-white rounded-[24px] border border-gray-100 p-6 shadow-[0_10px_30px_rgba(26,29,78,0.02)] w-full">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-[9.5px] font-black tracking-widest text-[#1A1D4E]/30 uppercase italic text-left">BRANDS YOU FOLLOW</h3>
-              <span className="px-2.5 py-1 bg-[#FFF0E8] rounded-full text-[#E8500A] font-extrabold text-[8px] tracking-wider uppercase shadow-xs">
+          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm w-full">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">BRANDS YOU FOLLOW</h3>
+              <span className="px-2 py-0.5 bg-orange-primary/10 rounded-full text-[#E8500A] font-semibold text-[9px] tracking-wide uppercase">
                  6 active
               </span>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               {(isBrandsCollapsed ? brandsYouFollow.slice(0, 3) : brandsYouFollow).map((brand, bidx) => (
-                <div key={bidx} className="flex items-center gap-3.5 text-left">
-                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-xs shrink-0 shadow-sm border border-black/5 uppercase", brand.bg)}>
+                <div key={bidx} className="flex items-center gap-3 text-left">
+                  <div className={cn("w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-xs shrink-0 shadow-sm border border-black/5 uppercase", brand.bg)}>
                     {brand.init}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="font-space text-xs font-black tracking-wider text-[#1A1D4E] uppercase truncate">{brand.name}</h4>
-                    <p className="text-[9.5px] font-bold text-gray-400 font-sans tracking-tight truncate leading-normal">{brand.sub}</p>
+                    <h4 className="font-sans text-xs font-semibold text-[#1A1D4E] uppercase truncate leading-tight">{brand.name}</h4>
+                    <p className="text-[10px] text-gray-400 font-sans tracking-tight truncate leading-normal">{brand.sub}</p>
                   </div>
                 </div>
               ))}
@@ -351,7 +379,7 @@ export function CategoriesPage() {
 
             <button 
               onClick={() => setIsBrandsCollapsed(!isBrandsCollapsed)}
-              className="w-full flex items-center justify-center gap-2 mt-6 pt-3 border-t border-gray-50 text-[9.5px] font-black uppercase tracking-widest text-[#E8500A] hover:text-[#CF4400] transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-1.5 mt-4 pt-3 border-t border-gray-100 text-[10px] font-semibold uppercase tracking-wider text-[#E8500A] hover:text-[#CF4400] transition-colors cursor-pointer"
             >
               {isBrandsCollapsed ? "Expand List" : "Collapse List"}
               {isBrandsCollapsed ? <LucideIcons.ChevronDown className="w-3.5 h-3.5" /> : <LucideIcons.ChevronUp className="w-3.5 h-3.5" />}
@@ -379,26 +407,25 @@ export function CategoriesPage() {
                       layout="position"
                       onClick={() => handleCategoryClick(cat.name)}
                       className={cn(
-                        "bg-white rounded-2xl p-6 flex flex-col items-center text-center shadow-soft hover:shadow-xl transition-all cursor-pointer group border-2 relative overflow-hidden",
-                        isExpanded ? "border-navy ring-4 ring-navy/5 z-20" : "border-transparent hover:border-navy/10"
+                        "bg-white border rounded-xl p-4 flex flex-col items-start transition-all duration-200 cursor-pointer group relative overflow-hidden",
+                        isExpanded 
+                          ? "border-[#E8500A] ring-4 ring-[#E8500A]/5 z-20 shadow-sm" 
+                          : "border-[#e8edf2] hover:border-gray-200/90 hover:scale-[1.01]"
                       )}
                     >
-                      {/* Colorful Background Accent */}
-                      <div className={cn(
-                        "absolute top-0 left-0 w-full h-1 bg-gradient-to-r transition-opacity duration-500",
-                        cat.color,
-                        isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-40"
-                      )} />
-
-                      <div className={cn(
-                        "w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all duration-500 bg-white shadow-lg border border-gray-100",
-                        isExpanded ? "scale-110 shadow-xl" : "group-hover:scale-110 shadow-gray-200/50"
-                      )}>
-                        <IconComponent size={28} className={cn("transition-colors duration-500", isExpanded ? "text-navy" : "text-gray-400 group-hover:text-navy")} />
-                        <div className={cn("absolute inset-0 opacity-10 rounded-2xl transition-opacity", cat.color)} />
+                      {/* Perfect white circle around the icon styled like mockup */}
+                      <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
+                        {getCategoryIconComponent(cat.name, cat.icon)}
                       </div>
-                      <h3 className="text-sm font-black text-navy uppercase tracking-tight mb-1 group-hover:text-orange-primary transition-colors">{cat.name}</h3>
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{cat.count} Products</span>
+                      
+                      <div className="w-full text-left">
+                        <h4 className="font-medium text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-tight mb-1 uppercase tracking-tight">
+                          {cat.name}
+                        </h4>
+                        <p className="text-[10px] text-red-500 font-semibold leading-none uppercase font-mono">
+                          {cat.count} Products
+                        </p>
+                      </div>
                     
                     {isExpanded && (
                       <motion.div 
@@ -483,71 +510,70 @@ export function CategoriesPage() {
         </div>
 
         {/* RIGHT COLUMN: FOR BUSINESS & SELLERS CARD & SPONSORED AD */}
-        <aside className="hidden lg:flex flex-col gap-8 w-[280px] flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="hidden lg:flex flex-col gap-4 w-[280px] flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pb-10 pr-2 no-scrollbar">
           <div 
             id="section-sellers" 
-            className="bg-white rounded-[32px] border border-gray-100 p-6 shadow-[0_15px_35px_rgba(26,29,78,0.03)] relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full" 
-            style={{ height: '480px' }}
+            className="bg-white rounded-2xl border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
+            style={{ height: '464px' }}
           >
-            <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
             
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-4 shrink-0 shadow-sm border border-[#FFF0E8]">
-                <LucideIcons.Sparkles className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-3 border border-[#E8500A]/5 shrink-0 shadow-sm">
+                <LucideIcons.Sparkles className="w-5 h-5" />
               </div>
               
-              <h3 className="font-space text-lg font-black uppercase tracking-tight text-[#1A1D4E] leading-tight">
+              <h3 className="font-sans text-sm font-semibold uppercase tracking-tight text-[#1A1D4E] leading-snug">
                 For Business <span className="text-[#E8500A] italic">& Sellers</span>
               </h3>
               
-              <p className="text-[11px] text-gray-400 font-bold mt-2 px-1 leading-relaxed max-w-[220px]">
+              <p className="text-[11px] text-gray-400 font-semibold mt-2 px-1 leading-relaxed max-w-[220px]">
                 Unlock exclusive tools, secure verified merchant badges, and scale your authentic local reach.
               </p>
             </div>
 
-            <div className="border border-dashed border-[#E8500A]/30 bg-gradient-to-b from-[#FFF5F0]/70 to-white/70 rounded-[24px] p-5 text-center flex flex-col items-center justify-center shadow-xs my-3 flex-1">
-              <h4 className="font-space font-black text-[#1A1D4E] text-xs uppercase tracking-widest mb-2">BOOST SALES TODAY</h4>
+            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+              <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                 Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
               </p>
               
               <Link 
                 to="/post-offer" 
-                className="w-full h-11 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:bg-gradient-to-r hover:from-[#E8500A] hover:to-[#CF4400] text-white font-black rounded-full text-[10px] tracking-widest uppercase flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
               >
-                POST OFFER <LucideIcons.PenTool className="w-4 h-4" />
+                POST OFFER <LucideIcons.PenTool className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-[9px] font-black text-gray-400 uppercase font-mono tracking-widest shrink-0 mt-2">
-              <LucideIcons.Users className="w-4 h-4 text-gray-400/80" /> 100k+ shopper log Daily
+            <div className="flex items-center justify-center gap-1.5 text-[8.5px] font-semibold text-[#8a9bb0] uppercase font-mono tracking-widest shrink-0">
+               <LucideIcons.Users className="w-3.5 h-3.5 text-gray-400" /> 100k+ shopper log Daily
             </div>
           </div>
 
           {/* Sponsored Ad Section */}
-          <div className="bg-[#100D2B] rounded-[32px] p-6 text-white text-center relative overflow-hidden shadow-md w-full">
-             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
-             <div className="relative z-10">
-                <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4">
-                   Sponsored Ad
-                </span>
+          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
+             <div className="relative z-10 flex flex-col">
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
+                </div>
                 
-                <div className="w-full aspect-square rounded-2xl overflow-hidden mb-5 border border-white/10 shadow-lg">
+                <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
                    <img 
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop" 
+                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=350&fit=crop" 
                       alt="Sponsor AD" 
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
                    />
                 </div>
                 
-                <h4 className="font-serif text-lg font-bold tracking-widest uppercase mb-1">AARONG</h4>
-                <p className="text-[9px] font-black text-white/50 tracking-wider uppercase mb-3">Heritage Shopping Brand</p>
+                <h4 className="font-sans text-xs font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">AARONG</h4>
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Heritage Shopping Brand</p>
                 
-                <p className="text-[11px] text-white/70 font-medium leading-relaxed mb-6 px-1">
+                <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-4 px-1">
                    New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
                 </p>
                 
-                <button className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-full shadow-lg hover:shadow-[#E8500A]/20 transition-all cursor-pointer">
+                <button className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0">
                    Shop Now
                 </button>
              </div>

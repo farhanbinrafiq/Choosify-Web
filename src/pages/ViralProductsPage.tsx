@@ -1,0 +1,869 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Search, Star, CheckCircle2, Heart, Zap, HelpCircle, Info, Package, 
+  ShieldCheck, Bookmark, Plus, X, ListFilter, Flame, Award, Users, 
+  ChevronRight, ArrowUpRight, Check, Send, AlertTriangle
+} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { cn } from '../lib/utils';
+import { motion, AnimatePresence } from 'motion/react';
+import { useGlobalState } from '../context/GlobalStateContext';
+import { ProductCard } from '../components/ProductCard';
+import { CATEGORIES } from '../constants';
+import { toast } from 'react-hot-toast';
+
+export function ViralProductsPage() {
+  const navigate = useNavigate();
+  const { allProducts, allBrands, mode, addToCart } = useGlobalState();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, []);
+
+  // PAGE STATES
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('All Products'); // Sticky categories
+  const [trendingFilter, setTrendingFilter] = useState('🔥 Trending Today'); // Left sidebar Section 1
+  const [selectedSource, setSelectedSource] = useState<string | null>(null); // Left sidebar Section 3
+  const [priceRange, setPriceRange] = useState<string | null>(null); // Left sidebar Section 4
+  
+  // Submit modal state
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [customSubmittedProducts, setCustomSubmittedProducts] = useState<any[]>([]);
+
+  // Category mapping helper
+  const mapTabToCategory = (tab: string) => {
+    if (tab === 'All Products') return null;
+    if (tab === 'Gadgets') return ['Mobile & Phones', 'Tech & Electronics', 'TV & Appliances'];
+    if (tab === 'Jewelry') return ['Jewelry & Accessories'];
+    if (tab === 'Clothing') return ['Fashion & Lifestyle'];
+    if (tab === 'Belts') return ['Fashion & Lifestyle'];
+    if (tab === 'Eyewear') return ['Jewelry & Accessories'];
+    if (tab === 'Footwear') return ['Fashion & Lifestyle'];
+    if (tab === 'Accessories') return ['Jewelry & Accessories'];
+    if (tab === 'Beauty') return ['Beauty'];
+    if (tab === 'Home & Living') return ['Home & Living'];
+    return null;
+  };
+
+  // We tag standard products dynamically with Viral badges
+  const viralProductsList = useMemo(() => {
+    return allProducts.map((p, idx) => {
+      // Define a stable viral tag sequence based on ID
+      let tag = '🔥 Viral';
+      let tagColor = 'bg-[#E8500A]';
+      let source = '⭐ Choosify Picks';
+      
+      const badgeType = idx % 5;
+      if (badgeType === 0) {
+        tag = '🔥 Viral';
+        tagColor = 'bg-[#E8500A]';
+        source = '⭐ Choosify Picks';
+      } else if (badgeType === 1) {
+        tag = '❤️ Customer Favorite';
+        tagColor = 'bg-rose-500';
+        source = '❤️ Customer Favorites';
+      } else if (badgeType === 2) {
+        tag = '⭐ Staff Pick';
+        tagColor = 'bg-amber-500';
+        source = '🏆 Editor Choice';
+      } else if (badgeType === 3) {
+        tag = '🏆 Editor Choice';
+        tagColor = 'bg-indigo-600';
+        source = '🏆 Editor Choice';
+      } else if (badgeType === 4) {
+        tag = '🚀 Trending';
+        tagColor = 'bg-blue-600';
+        source = '👥 Community Submitted';
+      }
+
+      return {
+        ...p,
+        tag,
+        tagColor,
+        source,
+        viralScore: 90 + (idx * 3) % 10,
+        viewsThisWeek: 450 + (idx * 112) % 1200,
+        heartsCount: 120 + (idx * 56) % 800
+      };
+    });
+  }, [allProducts]);
+
+  // CATEGORY STICKY BAR LIST ITEMS
+  const navigationItems = [
+    'All Products', 'Gadgets', 'Jewelry', 'Clothing', 'Belts', 'Eyewear', 'Footwear', 'Accessories', 'Beauty', 'Home & Living'
+  ];
+
+  // LEADERBOARD (Top 5 products by views/viralScore)
+  const viralLeaderboard = useMemo(() => {
+    return [...viralProductsList]
+      .sort((a, b) => b.viralScore - a.viralScore)
+      .slice(0, 5);
+  }, [viralProductsList]);
+
+  // MOST LOVED LIST (compact cards)
+  const mostLovedProducts = useMemo(() => {
+    return [...viralProductsList]
+      .sort((a, b) => b.heartsCount - a.heartsCount)
+      .slice(0, 4);
+  }, [viralProductsList]);
+
+  // SPONSORED SINGLE PRODUCT (Sony WH-1000XM5 or custom placeholder)
+  const sponsoredProduct = useMemo(() => {
+    return viralProductsList.find(p => p.id === 2 || p.id === 1002) || viralProductsList[0];
+  }, [viralProductsList]);
+
+  // CORE FILTER ENGINE: CENTRES MAIN LIST ITEMS
+  const filteredProducts = useMemo(() => {
+    let result = [...viralProductsList];
+
+    // 1. Sticky Category Tab Filtration
+    const targetCategories = mapTabToCategory(activeTab);
+    if (targetCategories) {
+      result = result.filter(p => p.category && targetCategories.includes(p.category));
+
+      // Extra fine-filtering matching specific labels for narrow tags like Belts or Footwear
+      if (activeTab === 'Belts') {
+        result = result.filter(p => p.title.toLowerCase().includes('belt'));
+      } else if (activeTab === 'Footwear') {
+        result = result.filter(p => 
+          p.title.toLowerCase().includes('runner') || 
+          p.title.toLowerCase().includes('shoe') || 
+          p.title.toLowerCase().includes('sneaker') ||
+          p.title.toLowerCase().includes('sandal')
+        );
+      } else if (activeTab === 'Eyewear') {
+        result = result.filter(p => 
+          p.title.toLowerCase().includes('glass') || 
+          p.title.toLowerCase().includes('sun') || 
+          p.title.toLowerCase().includes('eyewear')
+        );
+      }
+    }
+
+    // 2. Search Query filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(p => 
+        p.title.toLowerCase().includes(q) || 
+        (p.category || '').toLowerCase().includes(q) || 
+        (p.brand || '').toLowerCase().includes(q)
+      );
+    }
+
+    // 3. Left Sidebar Section 1 (Trending speed filters)
+    if (trendingFilter === '❤️ Most Loved') {
+      result.sort((a, b) => b.heartsCount - a.heartsCount);
+    } else if (trendingFilter === '🚀 Rising Products') {
+      result.sort((a, b) => b.viewsThisWeek - a.viewsThisWeek);
+    } else if (trendingFilter === '🛒 Most Purchased') {
+      // Shuffled premium values
+      result.sort((a, b) => b.id - a.id);
+    } else if (trendingFilter === '⭐ Staff Picks') {
+      result = result.filter(p => p.tag === '⭐ Staff Pick');
+    }
+
+    // 4. Left Sidebar Section 3 (Product Source Filter)
+    if (selectedSource) {
+      result = result.filter(p => p.source === selectedSource);
+    }
+
+    // 5. Left Sidebar Section 4 (Price limits)
+    if (priceRange) {
+      result = result.filter(p => {
+        const pVal = p.price;
+        if (priceRange === 'under-1000') return pVal < 1000;
+        if (priceRange === '1000-5000') return pVal >= 1000 && pVal <= 5000;
+        if (priceRange === '5000-10000') return pVal >= 5000 && pVal <= 10000;
+        if (priceRange === '10000-25000') return pVal >= 10000 && pVal <= 25000;
+        if (priceRange === '25000-plus') return pVal >= 25000;
+        return true;
+      });
+    }
+
+    return result;
+  }, [viralProductsList, activeTab, searchQuery, trendingFilter, selectedSource, priceRange]);
+
+  // FEATURED: Top 3 items based on views count in filtered list (using `ProductCard` with variant="featured")
+  const featuredViralProducts = useMemo(() => {
+    return [...filteredProducts]
+      .sort((a, b) => b.viewsThisWeek - a.viewsThisWeek)
+      .slice(0, 5);
+  }, [filteredProducts]);
+
+  return (
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+      
+      {/* ================================================= */}
+      {/* 1. HERO SECTION (Standardized centered alignment) */}
+      {/* ================================================= */}
+      <section className="relative pt-12 pb-16 bg-[#0A0B1E] text-white overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/20 via-[#EB4501]/5 to-[#0A0A1F] opacity-90" />
+        <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-radial-gradient from-orange-primary/30 to-transparent blur-3xl pointer-events-none" />
+        
+        <div className="max-w-[1440px] mx-auto px-6 relative z-10 w-full flex flex-col items-center">
+          {/* Breadcrumbs */}
+          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-6 w-full">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight size={10} className="text-white/20" />
+            <span className="text-white">Viral Products</span>
+          </div>
+
+          <div className="max-w-3xl text-center flex flex-col items-center">
+            <span className="inline-block bg-[#E8500A]/10 text-orange-primary text-[10px] font-black uppercase tracking-[0.25em] px-4 py-1.5 rounded-full border border-orange-primary/10 mb-5 font-mono">
+              CHOOSIFY CURATED
+            </span>
+            <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic mb-4 leading-none text-center">
+              Choosify & Customer Favorite Products
+            </h1>
+            <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-8 max-w-2xl text-center">
+              Discover trending, community-recommended and editor-approved products loved by real customers. Verified pricing and seller transparency included.
+            </p>
+
+            {/* SEARCH BAR (Global style matching & standardized layout) */}
+            <div 
+              className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-8"
+              style={{ width: '100%', maxWidth: '640px' }}
+            >
+              <div className="flex items-center bg-white rounded-full">
+                <div className="pl-4 text-[#E8500A] shrink-0">
+                  <Search className="w-4 h-4" />
+                </div>
+                <input 
+                  type="text" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search viral, customer-recommended products..." 
+                  className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none"
+                />
+                <button 
+                  onClick={() => setSearchQuery(searchQuery)}
+                  className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                >
+                  Search
+                </button>
+              </div>
+            </div>
+
+            {/* STATISTICS ROW (Visually centered inside the hero container) */}
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 uppercase font-mono tracking-[0.15em] text-[10px] md:text-xs text-white pb-2">
+              <div className="flex items-center gap-3">
+                <span className="text-lg leading-none">🔥</span>
+                <div className="text-left font-sans">
+                  <p className="text-orange-primary font-black text-sm md:text-base leading-none italic">2,540</p>
+                  <p className="text-white/50 text-[8px] font-bold mt-0.5">Trending Products</p>
+                </div>
+              </div>
+              <div className="h-6 w-px bg-white/10 hidden sm:block" />
+              <div className="flex items-center gap-3">
+                <span className="text-lg leading-none">❤️</span>
+                <div className="text-left font-sans">
+                  <p className="text-rose-500 font-black text-sm md:text-base leading-none italic">18,200</p>
+                  <p className="text-white/50 text-[8px] font-bold mt-0.5">Community Votes</p>
+                </div>
+              </div>
+              <div className="h-6 w-px bg-white/10 hidden sm:block" />
+              <div className="flex items-center gap-3">
+                <span className="text-lg leading-none">⭐</span>
+                <div className="text-left font-sans">
+                  <p className="text-amber-400 font-black text-sm md:text-base leading-none italic">1,120</p>
+                  <p className="text-white/50 text-[8px] font-bold mt-0.5">Editor Picks</p>
+                </div>
+              </div>
+              <div className="h-6 w-px bg-white/10 hidden sm:block" />
+              <button 
+                onClick={() => setIsSubmitModalOpen(true)}
+                className="flex items-center gap-2 cursor-pointer bg-white/5 border border-white/10 hover:border-orange-primary/30 hover:bg-white/10 px-4 py-2 rounded-xl transition-all"
+              >
+                <span className="text-xs">⚡</span>
+                <span className="text-[9px] font-black text-white uppercase italic tracking-wider">Suggest Sourcing</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================= */}
+      {/* 2. ANIMATED MOVING TICKER (Directly below hero content) */}
+      {/* ================================================= */}
+      <div className="relative z-20 bg-gradient-to-r from-[#E8500A] via-[#FF5B00] to-[#E8500A] text-white py-4 overflow-hidden border-y border-[#CF4400]/40 shadow-lg font-space text-[10.5px] font-black tracking-[0.2em] uppercase leading-none">
+        <div className="flex w-max animate-marquee whitespace-nowrap gap-16">
+          <span>🛡️ 100% ORIGINAL PRODUCTS ONLY • VERIFIED SHOPS IN BANGLADESH • CHOOSE WISELY 🛡️</span>
+          <span>💎 AUTHENTIC OUTLETS DIRECTORY • NO MORE ONLINE SCAMS • SHOP WITH CONFIDENCE 💎</span>
+          <span>🛡️ 100% ORIGINAL PRODUCTS ONLY • VERIFIED SHOPS IN BANGLADESH • CHOOSE WISELY 🛡️</span>
+          <span>💎 AUTHENTIC OUTLETS DIRECTORY • NO MORE ONLINE SCAMS • SHOP WITH CONFIDENCE 💎</span>
+        </div>
+      </div>
+
+      {/* ================================================= */}
+      {/* 3. STICKY SUB-NAVIGATION BAR (Directly below hero) */}
+      {/* ================================================= */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-2">
+        <div className="max-w-[1440px] mx-auto px-6">
+          <div className="flex items-center justify-start gap-1.5 md:gap-2.5 overflow-x-auto no-scrollbar py-1 text-[9.5px] font-black uppercase tracking-wider">
+            {navigationItems.map(item => (
+              <button 
+                key={item}
+                onClick={() => {
+                  setActiveTab(item);
+                  window.scrollTo({ top: 320, behavior: 'smooth' });
+                }}
+                className={cn(
+                  "px-5 py-2 rounded-full transition-all shrink-0 cursor-pointer text-center",
+                  activeTab === item 
+                    ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
+                    : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100 border border-transparent"
+                )}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ================================================= */}
+      {/* 4. MAIN THREE-COLUMN CONTAINER (Desktop 3-columns) */}
+      {/* ================================================= */}
+      <div className="max-w-[1440px] mx-auto px-6 w-full py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_250px] xl:grid-cols-[290px_minmax(0,1fr)_290px] gap-6 xl:gap-8 items-start relative w-full">
+          
+          {/* ================================================= */}
+          {/* A. LEFT SIDEBAR (STICKY) */}
+          {/* ================================================= */}
+          <aside className="sticky top-44 lg:h-[calc(100vh-180px)] overflow-y-auto no-scrollbar pb-8 space-y-4">
+            
+            {/* SECTION 1: TRENDING FILTERS */}
+            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
+                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 line-clamp-1">
+                  <Flame size={14} className="text-orange-primary" /> Trending Filters
+                </h3>
+              </div>
+              <div className="space-y-1 text-left">
+                {[
+                  '🔥 Trending Today',
+                  '🔥 Trending This Week',
+                  '🔥 Trending This Month',
+                  '❤️ Most Loved',
+                  '🛒 Most Purchased',
+                  '⭐ Staff Picks',
+                  '🚀 Rising Products'
+                ].map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => {
+                      setTrendingFilter(filter);
+                      toast.success(`Active trending sweep: ${filter}`);
+                    }}
+                    className={cn(
+                      "w-full px-2.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between",
+                      trendingFilter === filter 
+                        ? "bg-orange-primary/10 text-[#E8500A] font-semibold" 
+                        : "text-gray-500 hover:text-navy hover:bg-gray-50"
+                    )}
+                  >
+                    <span>{filter}</span>
+                    {trendingFilter === filter && <Check size={11} className="text-orange-primary stroke-[3px]" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* SECTION 2: CATEGORY FILTERS */}
+            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
+                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
+                  Category Filters
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-left">
+                {CATEGORIES.slice(0, 8).map((cat) => {
+                  const isCuratedCat = activeTab !== 'All Products' && mapTabToCategory(activeTab)?.includes(cat.name);
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        setActiveTab(cat.name === 'Fashion & Lifestyle' ? 'Clothing' : cat.name === 'Jewelry & Accessories' ? 'Jewelry' : cat.name === 'Mobile & Phones' ? 'Gadgets' : 'All Products');
+                        window.scrollTo({ top: 320, behavior: 'smooth' });
+                      }}
+                      className={cn(
+                        "p-2 rounded-lg border text-[10px] font-semibold uppercase text-center flex flex-col items-center justify-center gap-1 transition-colors border-[#e8edf2]",
+                        isCuratedCat
+                          ? "border-[#E8500A] bg-orange-primary/5 text-orange-primary"
+                          : "border-gray-100 hover:border-gray-250 text-navy"
+                      )}
+                    >
+                      <span className="font-semibold line-clamp-1">{cat.name.split(' ')[0]}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* SECTION 3: PRODUCT SOURCE */}
+            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
+                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
+                  Product Source
+                </h3>
+              </div>
+              <div className="space-y-1 text-left">
+                {[
+                  '⭐ Choosify Picks',
+                  '❤️ Customer Favorites',
+                  '👥 Community Submitted',
+                  '🏆 Editor Choice'
+                ].map((src) => (
+                  <button
+                    key={src}
+                    onClick={() => {
+                      setSelectedSource(selectedSource === src ? null : src);
+                    }}
+                    className={cn(
+                      "w-full px-2.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between",
+                      selectedSource === src 
+                        ? "bg-navy text-white font-semibold" 
+                        : "text-gray-500 hover:text-navy hover:bg-gray-50"
+                    )}
+                  >
+                    <span>{src}</span>
+                    {selectedSource === src && <Check size={11} className="text-orange-primary stroke-[3px]" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* SECTION 4: PRICE FILTER */}
+            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
+                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
+                  Price Filter
+                </h3>
+              </div>
+              <div className="space-y-1.5 text-left">
+                {[
+                  { label: 'Under BDT 1,000', value: 'under-1000' },
+                  { label: 'BDT 1,000–5,000', value: '1000-5000' },
+                  { label: 'BDT 5,000–10,000', value: '5000-10000' },
+                  { label: 'BDT 10,000–25,000', value: '10000-25000' },
+                  { label: 'BDT 25,000+', value: '25000-plus' }
+                ].map((priceItem) => (
+                  <button
+                    key={priceItem.value}
+                    onClick={() => setPriceRange(priceRange === priceItem.value ? null : priceItem.value)}
+                    className={cn(
+                      "w-full px-2.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between border border-[#e8edf2]",
+                      priceRange === priceItem.value 
+                        ? "border-[#E8500A] bg-orange-primary/5 text-orange-primary font-semibold" 
+                        : "border-gray-50 text-gray-500 hover:text-navy hover:border-gray-150"
+                    )}
+                  >
+                    <span>{priceItem.label}</span>
+                    {priceRange === priceItem.value && <div className="w-1.5 h-1.5 bg-orange-primary rounded-full" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </aside>
+
+          {/* ================================================= */}
+          {/* B. CENTER FEED (PRIMARY CONTENT FEED) */}
+          {/* ================================================= */}
+          <main className="flex-1 space-y-10 min-w-0">
+            
+            {/* SECTION A: FEATURED VIRAL PRODUCTS (Large cards - Top 5) */}
+            {activeTab === 'All Products' && !searchQuery && featuredViralProducts.length > 0 && (
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-[#E8500A] text-lg font-space font-black animate-pulse">✦</span>
+                  <h2 className="text-sm font-black text-navy uppercase tracking-widest italic">
+                    Spotlight Featured Viral Listings
+                  </h2>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-6">
+                  {featuredViralProducts.map((p, idx) => (
+                    <motion.div
+                      key={`featured-viral-${p.id}-${idx}`}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="relative"
+                    >
+                      {/* Standard Product Card with variant="featured" overlayed */}
+                      <ProductCard product={p} variant="featured" />
+                      
+                      {/* Top Absolute Placement Badge */}
+                      <div className="absolute top-4 right-4 z-20 flex gap-2">
+                        <span className="px-3 py-1 bg-navy text-white text-[8px] font-black uppercase tracking-widest rounded-full border border-white/10 shadow-lg shrink-0">
+                          🔥 SCORE: {p.viralScore}/100
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* SECTION B: ALL VIRAL PRODUCTS (Grid Layout) */}
+            <section className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-150 pb-4">
+                <div className="flex items-center gap-2 text-navy text-xs font-black uppercase tracking-widest italic">
+                  <ListFilter size={16} className="text-orange-primary" />
+                  <span>
+                    {activeTab} Selection ({filteredProducts.length} Items Found)
+                  </span>
+                </div>
+                
+                {/* Active selectors clearing */}
+                {(trendingFilter !== '🔥 Trending Today' || selectedSource || priceRange || searchQuery) && (
+                  <button 
+                    onClick={() => {
+                      setTrendingFilter('🔥 Trending Today');
+                      setSelectedSource(null);
+                      setPriceRange(null);
+                      setSearchQuery('');
+                      setActiveTab('All Products');
+                      toast.success('Sweeps reset to normal listing queues!');
+                    }}
+                    className="text-[9px] font-black uppercase text-[#E8500A] hover:text-[#b03900] tracking-wider italic flex items-center gap-1 shrink-0 cursor-pointer border-0 bg-transparent"
+                  >
+                    Clear Filter Overwrites
+                  </button>
+                )}
+              </div>
+
+              {filteredProducts.length === 0 ? (
+                <div className="text-center py-20 bg-white border border-gray-150 rounded-3xl p-8 max-w-lg mx-auto flex flex-col items-center gap-4">
+                  <AlertTriangle size={36} className="text-orange-primary stroke-1" />
+                  <p className="text-[11px] font-black uppercase tracking-widest text-navy italic">No products matched active filters.</p>
+                  <p className="text-[10px] text-gray-500 leading-relaxed font-bold max-w-sm">
+                    Try reset your sidebar pricing metrics, community tags or searching query to inspect normal listings.
+                  </p>
+                  <button onClick={() => { setTrendingFilter('🔥 Trending Today'); setSelectedSource(null); setPriceRange(null); setSearchQuery(''); setActiveTab('All Products'); }} className="px-5 py-2 rounded-full bg-orange-primary text-white text-[9.5px] font-black uppercase tracking-wider italic">
+                    Load Catalog
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(188px,1fr))] justify-items-center justify-center gap-5">
+                  {filteredProducts.map((p, idx) => (
+                    <div 
+                      key={`viral-col-${p.id}-${idx}`} 
+                      className="relative hover:translate-y-[-2px] transition-transform duration-300"
+                    >
+                      {/* Standard Product Card */}
+                      <ProductCard product={p} variant="grid" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+            
+          </main>
+
+          {/* ================================================= */}
+          {/* C. RIGHT SIDEBAR (STICKY) */}
+          {/* ================================================= */}
+          <aside className="sticky top-44 lg:h-[calc(100vh-180px)] overflow-y-auto no-scrollbar pb-8 space-y-4">
+            
+            {/* SECTION 1: VIRAL LEADERBOARD (Top 5 this week) */}
+            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
+                  <Award size={15} className="text-amber-500" /> Viral Leaderboard
+                </h3>
+              </div>
+              <div className="space-y-2.5">
+                {viralLeaderboard.map((item, idx) => (
+                  <div 
+                    key={`leaderboard-${item.id}-${idx}`} 
+                    onClick={() => navigate(`/products/${item.id}`)}
+                    className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                  >
+                    <span className="font-sans font-semibold text-sm text-gray-400 leading-none w-5">
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <div className="w-9 h-9 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-[#e8edf2] p-0.5 flex items-center justify-center">
+                      <img src={item.image} alt="" className="max-w-full max-h-full object-contain" />
+                    </div>
+                    <div className="min-w-0 flex-1 leading-tight">
+                      <h4 className="text-xs font-semibold text-navy truncate group-hover:text-orange-primary transition-colors">
+                        {item.title}
+                      </h4>
+                      <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mt-0.5">
+                        {item.brand} • {item.viewsThisWeek} Views
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* SECTION 2: MOST LOVED (Products this month) */}
+            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+                <h3 className="text.[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
+                  <Heart size={14} className="text-rose-500 fill-rose-500" /> Most Loved Products
+                </h3>
+              </div>
+              <div className="space-y-2.5">
+                {mostLovedProducts.map((item, idx) => (
+                  <div 
+                    key={`mostlived-${item.id}-${idx}`} 
+                    onClick={() => navigate(`/products/${item.id}`)}
+                    className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                  >
+                    <div className="w-9 h-9 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-[#e8edf2] p-0.5 flex items-center justify-center">
+                      <img src={item.image} alt="" className="max-w-full max-h-full object-contain" />
+                    </div>
+                    <div className="min-w-0 flex-1 leading-tight">
+                      <h4 className="text-xs font-semibold uppercase text-navy truncate group-hover:text-orange-primary transition-colors">
+                        {item.title}
+                      </h4>
+                      <div className="flex gap-4 items-center mt-0.5">
+                        <span className="text-[10px] font-semibold text-orange-primary whitespace-nowrap leading-none">
+                          ৳{item.price.toLocaleString()}
+                        </span>
+                        <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-wide flex items-center gap-0.5 shrink-0 leading-none">
+                          ❤️ {item.heartsCount}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* SECTION 3: SPONSORED PRODUCT */}
+            <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
+               <div className="relative z-10 w-full flex flex-col items-center">
+                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1 w-full text-left">
+                   <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Spotlight</h3>
+                 </div>
+                 
+                 <div onClick={() => navigate(`/products/${sponsoredProduct.id}`)} className="w-full aspect-square rounded-xl overflow-hidden mb-4 border border-[#e8edf2] shadow-inner bg-slate-50 relative shrink-0 p-4 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-[2s]">
+                   <img 
+                     src={sponsoredProduct.image} 
+                     alt={sponsoredProduct.title} 
+                     className="max-w-full max-h-full object-contain"
+                   />
+                 </div>
+                 
+                 <h4 className="font-sans text-xs font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">{sponsoredProduct.brand}</h4>
+                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3 line-clamp-1">{sponsoredProduct.title}</p>
+                 
+                 <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-4 px-1 text-center">
+                   Premium durability backed by verified seller warrants. Instant Dhaka delivery options available.
+                 </p>
+                 
+                 <button 
+                   onClick={() => navigate(`/products/${sponsoredProduct.id}`)}
+                   className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
+                 >
+                   Inquire Deal Spec
+                 </button>
+               </div>
+            </div>
+
+            {/* SECTION 4: SUBMIT A PRODUCT */}
+            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-xl pointer-events-none" />
+              
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
+                  👥 Submit A Product
+                </h3>
+              </div>
+              
+              <p className="text-[11px] text-gray-500 leading-relaxed font-semibold mb-4 px-1">
+                Sourced something viral on TikTok, Facebook groups or Instagram reels recently? Suggest it to our vetting desk today!
+              </p>
+
+              <button 
+                onClick={() => setIsSubmitModalOpen(true)}
+                className="w-full py-2.5 bg-[#050514] hover:bg-[#E8500A] text-white rounded-lg text-[10px] font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer border-0 shadow-sm"
+              >
+                <span>Submit Product</span> <Plus size={12} className="stroke-[3px]" />
+              </button>
+            </div>
+
+          </aside>
+
+        </div>
+      </div>
+
+      {/* ================================================= */}
+      {/* 5. GORGEOUS STICKY COMMUNITY SUBMISSION MODAL */}
+      {/* ================================================= */}
+      <AnimatePresence>
+        {isSubmitModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSubmitModalOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            />
+            
+            {/* Modal Body */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="bg-white rounded-3xl w-full max-w-lg p-6 relative z-50 shadow-3xl text-left border border-gray-100 overflow-hidden"
+            >
+              {/* Abs decoration blob */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-2xl pointer-events-none" />
+              
+              <div className="flex items-center justify-between border-b pb-4 mb-5">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-orange-primary/10 border border-orange-primary/20 flex items-center justify-center text-xs leading-none">👥</span>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-[#1a1a2e] italic">Community Submission Desk</h3>
+                </div>
+                <button 
+                  onClick={() => setIsSubmitModalOpen(false)}
+                  className="p-1.5 hover:bg-gray-100 rounded-full transition-colors border-0 bg-transparent text-gray-400 hover:text-navy cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.currentTarget;
+                const fd = new FormData(form);
+                const title = fd.get('prodTitle') as string;
+                const brand = fd.get('prodBrand') as string;
+                const category = fd.get('prodCategory') as string;
+                const reason = fd.get('prodReason') as string;
+
+                if (!title || !brand || !reason) {
+                  toast.error('Please input mandatory product values!');
+                  return;
+                }
+
+                // Append local mocked product state
+                const customItem = {
+                  id: Date.now(),
+                  title,
+                  brand,
+                  category,
+                  description: reason,
+                  price: 2500,
+                  image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
+                  mode_type: mode,
+                  codSupport: true,
+                  quotationSupport: false,
+                  stock: 0,
+                  tag: '🚀 Submitting'
+                };
+                
+                toast.success(`"${title}" submitted successfully for Review! Waiting for BSTI moderation.`);
+                setCustomSubmittedProducts(prev => [customItem, ...prev]);
+                setIsSubmitModalOpen(false);
+              }} className="space-y-4">
+                
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                    Product Title *
+                  </label>
+                  <input 
+                    type="text" 
+                    name="prodTitle"
+                    required
+                    placeholder="e.g. Vintage Leather Messenger Bag" 
+                    className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                      Brand Name *
+                    </label>
+                    <input 
+                      type="text" 
+                      name="prodBrand"
+                      required
+                      placeholder="e.g. Apex, Samsung, Local Craft" 
+                      className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                      Main Category
+                    </label>
+                    <select 
+                      name="prodCategory"
+                      className="w-full h-11 px-3 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                    >
+                      <option value="Fashion & Lifestyle">Fashion & Lifestyle</option>
+                      <option value="Jewelry & Accessories">Jewelry & Accessories</option>
+                      <option value="Mobile & Phones">Mobile & Phones</option>
+                      <option value="Tech & Electronics">Tech & Electronics</option>
+                      <option value="Home & Living">Home & Living</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                    Social Sourcing Link / Reference
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. https://facebook.com/groups/... or TikTok video url" 
+                    className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                    Describe Why It Is Viral *
+                  </label>
+                  <textarea 
+                    name="prodReason"
+                    required
+                    placeholder="Provide description. E.g. TikTok video has 1.2M views, massive pre-order queues on Dhaka groups." 
+                    rows={3}
+                    className="w-full p-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors resize-none"
+                  />
+                </div>
+
+                <div className="bg-gray-50/50 p-3.5 rounded-xl border border-dashed flex gap-3 text-gray-500 leading-normal">
+                  <Info size={16} className="text-orange-primary shrink-0 mt-0.5" />
+                  <p className="text-[9.5px] font-semibold leading-relaxed">
+                    User submitted products are queued directly to local admins. Sourcing validations require authentic reference links or store catalogs. They will not reflect live instantly.
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsSubmitModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl border hover:bg-gray-50 text-[10px] font-black uppercase tracking-wider italic cursor-pointer bg-white"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="px-6 py-2.5 bg-orange-primary hover:bg-[#ff5a0c] text-white rounded-xl text-[10px] font-black uppercase tracking-wider italic cursor-pointer shadow-lg shadow-orange-primary/20 border-0 flex items-center gap-1.5"
+                  >
+                    Submit Sourcing <Send size={11} className="stroke-[3px]" />
+                  </button>
+                </div>
+
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+}

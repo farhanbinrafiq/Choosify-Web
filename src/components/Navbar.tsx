@@ -126,7 +126,7 @@ export function Navbar() {
         </div>
 
         {/* Retail Mode general navigation links */}
-        <div className="hidden lg:flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest mr-auto text-gray-300">
+        <div className="hidden lg:flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest mr-auto text-gray-300 border-r border-white/5 pr-6">
           <Link to="/" className={getLinkClass('/')}>Home</Link>
           <Link to="/categories" className={getLinkClass('/categories')}>Categories</Link>
           <Link to="/products" className={getLinkClass('/products')}>Products</Link>
@@ -134,6 +134,7 @@ export function Navbar() {
           <Link to="/guides" className={getLinkClass('/guides')}>Recommendations</Link>
           <Link to="/compare" className={getLinkClass('/compare')}>Compare</Link>
           <Link to="/deals" className={getLinkClass('/deals')}>Deals</Link>
+          <Link to="/viral-products" className={getLinkClass('/viral-products')}>Viral Products</Link>
         </div>
 
         {/* SEARCH BAR */}
@@ -398,6 +399,9 @@ export function Navbar() {
                   </Link>
                   <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/deals')}>
                     <span className="italic">Flash Deals</span>
+                  </Link>
+                  <Link to="/viral-products" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/viral-products')}>
+                    <span className="italic">Viral Products</span>
                   </Link>
                   
                   <div className="h-px bg-white/10 my-1" />

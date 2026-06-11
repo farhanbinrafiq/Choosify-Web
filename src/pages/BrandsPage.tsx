@@ -156,24 +156,28 @@ export function BrandsPage() {
             Discover official stores, authorized dealers, and independent brands across Bangladesh.
           </p>
 
-          <div className="max-w-md mx-auto relative group">
-             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <div className="flex gap-1 opacity-80">
-                   <div className="w-4 h-4 rounded-full border-2 border-orange-primary/40 flex items-center justify-center">
-                     <div className="w-1.5 h-1.5 bg-orange-primary rounded-full group-hover:scale-150 transition-transform" />
-                   </div>
-                   <div className="w-4 h-4 rounded-full border-2 border-orange-primary/40 flex items-center justify-center">
-                     <div className="w-1.5 h-1.5 bg-orange-primary rounded-full group-hover:scale-150 transition-transform" />
-                   </div>
-                </div>
-             </div>
-             <input 
-              type="text" 
-              placeholder="Search by Brand Name or Category..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-18 pr-6 rounded-full bg-gradient-to-r from-[#000A2A] to-[#0A0A1F] text-white border border-white/10 focus:outline-none focus:border-orange-primary/40 transition-all font-bold placeholder:text-white/20 shadow-xl text-[11px] italic tracking-wide" 
-             />
+          {/* SEARCH BAR (Standardized layout) */}
+          <div 
+            className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-3"
+            style={{ width: '100%', maxWidth: '640px' }}
+          >
+            <div className="flex items-center bg-white rounded-full">
+              <div className="pl-4 text-[#E8500A] shrink-0">
+                <Search className="w-4 h-4" />
+              </div>
+              <input 
+                type="text" 
+                placeholder="Search by Brand Name or Category..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+              />
+              <button 
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+              >
+                Search
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -228,12 +232,12 @@ export function BrandsPage() {
 
       <div className="max-w-[1440px] mx-auto px-6 w-full pt-8 pb-16 flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative">
         {/* Sidebar Filters */}
-        <aside className="w-full lg:w-64 flex-shrink-0 hidden lg:flex flex-col gap-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="w-full lg:w-64 flex-shrink-0 hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
           {/* Filter By Brand */}
-          <div className="bg-white rounded-[24px] p-6 shadow-soft border border-gray-100/80 text-left">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xs font-black text-navy uppercase tracking-widest">FILTER BY BRAND TYPE</h3>
-              <button className="text-[9px] font-bold text-orange-primary uppercase hover:underline">Clear all</button>
+          <div className="bg-white rounded-2xl p-4.5 shadow-sm border border-[#e8edf2] text-left">
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">FILTER BY BRAND TYPE</h3>
+              <button className="text-[9px] font-semibold text-orange-primary uppercase hover:underline">Clear all</button>
             </div>
             <div className="space-y-3">
               {[
@@ -254,51 +258,51 @@ export function BrandsPage() {
                     defaultChecked={item.checked}
                     className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary accent-orange-primary cursor-pointer" 
                   />
-                  <span className="text-xs font-bold text-gray-500 group-hover:text-navy transition-colors">{item.name}</span>
+                  <span className="text-xs font-semibold text-gray-500 group-hover:text-navy transition-colors">{item.name}</span>
                 </label>
               ))}
             </div>
-            <button className="mt-6 text-[10px] font-black text-orange-primary uppercase hover:underline text-left">Show All Filters</button>
+            <button className="mt-4 text-[10px] font-semibold text-orange-primary uppercase hover:underline text-left">Show All Filters</button>
           </div>
 
           {/* BUSINESS SELLERS INFO CARD */}
           <div 
             id="section-sellers-brands" 
-            className="w-full bg-white rounded-[32px] border border-gray-100 p-6 shadow-[0_15px_35px_rgba(26,29,78,0.03)] relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
-            style={{ height: '480px' }}
+            className="w-full bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
+            style={{ height: '464px' }}
           >
-            <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
             
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-4 shrink-0 shadow-sm border border-[#FFF0E8]">
-                <Sparkles className="w-6 h-6 z-10" />
+              <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-3 border border-[#E8500A]/5 shrink-0 shadow-sm">
+                <Sparkles className="w-5 h-5" />
               </div>
               
-              <h3 className="font-sans text-lg font-black uppercase tracking-tight text-[#1A1D4E] leading-tight">
+              <h3 className="font-sans text-sm font-semibold uppercase tracking-tight text-[#1A1D4E] leading-snug">
                 For Business <span className="text-[#E8500A] italic">& Sellers</span>
               </h3>
               
-              <p className="text-[11px] text-gray-400 font-bold mt-2 px-1 leading-relaxed max-w-[220px]">
+              <p className="text-[11px] text-gray-400 font-semibold mt-2 px-1 leading-relaxed max-w-[220px]">
                 Unlock exclusive tools, secure verified merchant badges, and scale your authentic local reach.
               </p>
             </div>
 
-            <div className="border border-dashed border-[#E8500A]/30 bg-gradient-to-b from-[#FFF5F0]/70 to-white/70 rounded-[24px] p-5 text-center flex flex-col items-center justify-center shadow-xs my-3 flex-1">
-              <h4 className="font-sans font-black text-[#1A1D4E] text-xs uppercase tracking-widest mb-1 pb-1">BOOST SALES TODAY</h4>
+            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+              <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                 Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
               </p>
               
               <Link 
                 to="/post-offer" 
-                className="w-full h-11 bg-[#E8500A] hover:bg-[#CF4400] text-white font-black rounded-full text-[10px] tracking-widest uppercase flex items-center justify-center gap-2 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm"
               >
-                POST OFFER <PenTool className="w-4 h-4" />
+                POST OFFER <PenTool className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-[9px] font-black text-gray-400 uppercase font-mono tracking-widest shrink-0 mt-2">
-              <Users className="w-4 h-4 text-gray-400/80" /> 100k+ shopper log Daily
+            <div className="flex items-center justify-center gap-1 text-[8.5px] font-semibold text-gray-400 uppercase font-mono tracking-widest shrink-0">
+              <Users className="w-3.5 h-3.5 text-gray-400" /> 100k+ shopper log Daily
             </div>
           </div>
         </aside>
@@ -543,17 +547,19 @@ export function BrandsPage() {
         </main>
 
         {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}
-        <aside className="hidden xl:flex flex-col gap-8 w-[280px] flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="hidden xl:flex flex-col gap-4 w-[280px] flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
           {/* TRENDING BRANDS SECTION */}
-          <div className="bg-white rounded-[24px] border border-gray-100 p-5 shadow-[0_10px_30px_rgba(26,29,78,0.02)] w-full text-left">
-            <h3 className="font-sans font-black text-[12px] tracking-widest text-[#1A1D4E] uppercase text-left mb-5 pb-4 border-b border-gray-50">
-              TRENDING <span className="text-[#E8500A]">BRANDS</span>
-            </h3>
+          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm w-full text-left">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
+                TRENDING BRANDS
+              </h3>
+            </div>
 
-            <div className="flex flex-col gap-3.5">
+            <div className="flex flex-col gap-2.5">
               {[
                 { name: "Aarong", desc: "Traditional Handcrafted Products", logo: "Aa", bg: "bg-orange-primary/95" },
-                { name: "Adidas", desc: "Premium Accessories & Sportswear", logo: "Ad", bg: "bg-navy" },
+                { name: "Adidas", desc: "Premium Accessories & Sportwear", logo: "Ad", bg: "bg-navy" },
                 { name: "Coca-Cola", desc: "Global Beverage & Refreshments", logo: "Cc", bg: "bg-red-600" },
                 { name: "Starbucks", desc: "Premium Coffee & Brewing", logo: "Sb", bg: "bg-green-800" },
                 { name: "Yellow", desc: "Contemporary Lifestyle Clothing", logo: "Ye", bg: "bg-yellow-500" },
@@ -561,16 +567,16 @@ export function BrandsPage() {
               ].map((item, idx) => (
                 <div 
                   key={idx} 
-                  className="flex items-center gap-3 bg-white border border-gray-100/80 rounded-[16px] p-2.5 hover:shadow-[0_8px_20px_rgba(26,29,78,0.03)] hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                  className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
                 >
-                  <div className={cn("w-10 h-10 rounded-[11px] overflow-hidden shrink-0 border border-transparent flex items-center justify-center text-white font-black text-xs italic shadow-md", item.bg)}>
+                  <div className={cn("w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-transparent flex items-center justify-center text-white font-semibold text-xs shadow-sm", item.bg)}>
                     {item.logo}
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
-                    <h4 className="font-sans text-xs font-black uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors truncate">
+                    <h4 className="font-sans text-xs font-semibold uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors truncate">
                       {item.name}
                     </h4>
-                    <p className="text-[9px] font-bold text-gray-400 mt-0.5 truncate uppercase">
+                    <p className="text-[9px] font-semibold text-gray-400 mt-0.5 truncate uppercase">
                       {item.desc}
                     </p>
                   </div>
@@ -578,40 +584,40 @@ export function BrandsPage() {
               ))}
             </div>
             
-            <div className="text-center mt-5">
-              <button className="text-[9px] font-black text-orange-primary uppercase tracking-widest hover:underline">
+            <div className="text-center mt-4">
+              <button className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-[#CF4400] transition-colors border-0 bg-transparent cursor-pointer">
                 Show All
               </button>
             </div>
           </div>
 
           {/* SPONSOR AD IMAGE CARD */}
-          <div className="bg-[#050514] rounded-[32px] overflow-hidden text-center flex flex-col justify-between w-full h-[500px] shrink-0 mx-auto relative group shadow-2xl border border-white/5">
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent z-10" />
-            <img 
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=320&h=600&fit=crop" 
-              alt="Sponsor Ad" 
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60 pointer-events-none"
-              referrerPolicy="no-referrer"
-            />
-            
-            <div className="p-5 relative z-20 flex flex-col justify-between h-full">
-              <span className="text-[9px] font-black tracking-[0.2em] text-white/70 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full uppercase self-center italic">
-                SPONSOR AD
-              </span>
-              
-              <div className="flex flex-col items-center mt-auto text-left">
-                <h4 className="font-sans text-xl font-black text-white italic tracking-tighter uppercase leading-tight mb-2">
-                  Aarong <span className="text-[#E8500A]">Heritage</span>
-                </h4>
-                <p className="text-[10px] text-white/85 font-semibold mb-4 leading-relaxed max-w-[210px] uppercase tracking-wide">
-                  New Collection Available. Free Delivery overall Dhaka on purchase above BDT 1,500.
+          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
+             <div className="relative z-10 flex flex-col">
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
+                </div>
+                
+                <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
+                   <img 
+                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=620&h=350&fit=crop" 
+                      alt="Sponsor AD" 
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
+                      referrerPolicy="no-referrer"
+                   />
+                </div>
+                
+                <h4 className="font-sans text-xs font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">AARONG HERITAGE</h4>
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Traditional Handcrafted Brand</p>
+                
+                <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-4 px-1 text-center">
+                   New Collection Available. Free Delivery overall Dhaka on purchase above BDT 1,500.
                 </p>
-                <button className="w-full h-11 bg-orange-primary hover:bg-[#CF4400] text-white font-black rounded-full text-[10px] tracking-widest uppercase flex items-center justify-center gap-2 transition-all shadow-md">
-                  SHOP NOW <ExternalLink className="w-3.5 h-3.5" />
+                
+                <button className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0">
+                   Shop Now
                 </button>
-              </div>
-            </div>
+             </div>
           </div>
         </aside>
       </div>
