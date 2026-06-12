@@ -211,61 +211,61 @@ export function ViralProductsPage() {
       {/* ================================================= */}
       {/* 1. HERO SECTION (Standardized centered alignment) */}
       {/* ================================================= */}
-      <section className="relative pt-8 pb-10 bg-[#0A0B1E] text-white overflow-hidden border-b border-white/5">
+      <section className="relative pt-4 pb-5 bg-[#0A0B1E] text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/20 via-[#EB4501]/5 to-[#0A0A1F] opacity-90" />
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-radial-gradient from-orange-primary/30 to-transparent blur-3xl pointer-events-none" />
         
         <div className="max-w-[1440px] mx-auto px-6 relative z-10 w-full flex flex-col items-center">
           {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-3 w-full">
+          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-2 w-full">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={10} className="text-white/20" />
             <span className="text-white">Viral Products</span>
           </div>
 
           <div className="max-w-3xl text-center flex flex-col items-center">
-            <span className="inline-block bg-[#E8500A]/10 text-orange-primary text-[10px] font-black uppercase tracking-[0.25em] px-4 py-1.5 rounded-full border border-orange-primary/10 mb-3.5 font-mono">
+            <span className="inline-block bg-[#E8500A]/10 text-orange-primary text-[8px] font-black uppercase tracking-[0.25em] px-3 py-1 rounded-full border border-orange-primary/10 mb-1.5 font-mono">
               CHOOSIFY CURATED
             </span>
-            <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic mb-3 leading-none text-center">
+            <h1 className="text-2xl md:text-3.5xl font-black text-white uppercase tracking-tighter italic mb-1.5 leading-none text-center">
               Choosify & Customer Favorite Products
             </h1>
-            <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-3 max-w-2xl text-center">
+            <p className="text-gray-400 text-[11px] md:text-xs font-medium leading-relaxed mb-2.5 max-w-2xl text-center">
               Discover trending, community-recommended and editor-approved products loved by real customers. Verified pricing and seller transparency included.
             </p>
 
             {/* STATISTICS ROW (Visually centered inside the hero container) */}
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 uppercase font-mono tracking-[0.15em] text-[10px] md:text-xs text-white pb-2">
-              <div className="flex items-center gap-3">
-                <span className="text-lg leading-none">🔥</span>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 uppercase font-mono tracking-[0.12em] text-[9px] md:text-[10px] text-white pb-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm leading-none flex items-center">🔥</span>
                 <div className="text-left font-sans">
-                  <p className="text-orange-primary font-black text-sm md:text-base leading-none italic">2,540</p>
-                  <p className="text-white/50 text-[8px] font-bold mt-0.5">Trending Products</p>
+                  <p className="text-orange-primary font-black text-xs md:text-sm leading-none italic">2,540</p>
+                  <p className="text-white/50 text-[7px] font-bold mt-0.5 leading-none">Trending Products</p>
                 </div>
               </div>
-              <div className="h-6 w-px bg-white/10 hidden sm:block" />
-              <div className="flex items-center gap-3">
-                <span className="text-lg leading-none">❤️</span>
+              <div className="h-5 w-px bg-white/10 hidden sm:block" />
+              <div className="flex items-center gap-2">
+                <span className="text-sm leading-none flex items-center">❤️</span>
                 <div className="text-left font-sans">
-                  <p className="text-rose-500 font-black text-sm md:text-base leading-none italic">18,200</p>
-                  <p className="text-white/50 text-[8px] font-bold mt-0.5">Community Votes</p>
+                  <p className="text-rose-500 font-black text-xs md:text-sm leading-none italic">18,200</p>
+                  <p className="text-white/50 text-[7px] font-bold mt-0.5 leading-none">Community Votes</p>
                 </div>
               </div>
-              <div className="h-6 w-px bg-white/10 hidden sm:block" />
-              <div className="flex items-center gap-3">
-                <span className="text-lg leading-none">⭐</span>
+              <div className="h-5 w-px bg-white/10 hidden sm:block" />
+              <div className="flex items-center gap-2">
+                <span className="text-sm leading-none flex items-center">⭐</span>
                 <div className="text-left font-sans">
-                  <p className="text-amber-400 font-black text-sm md:text-base leading-none italic">1,120</p>
-                  <p className="text-white/50 text-[8px] font-bold mt-0.5">Editor Picks</p>
+                  <p className="text-amber-400 font-black text-xs md:text-sm leading-none italic">1,120</p>
+                  <p className="text-white/50 text-[7px] font-bold mt-0.5 leading-none">Editor Picks</p>
                 </div>
               </div>
-              <div className="h-6 w-px bg-white/10 hidden sm:block" />
+              <div className="h-5 w-px bg-white/10 hidden sm:block" />
               <button 
                 onClick={() => setIsSubmitModalOpen(true)}
-                className="flex items-center gap-2 cursor-pointer bg-white/5 border border-white/10 hover:border-orange-primary/30 hover:bg-white/10 px-4 py-2 rounded-xl transition-all"
+                className="flex items-center gap-1.5 cursor-pointer bg-white/5 border border-white/10 hover:border-orange-primary/30 hover:bg-white/10 px-3 py-1.5 rounded-lg transition-all"
               >
                 <span className="text-xs">⚡</span>
-                <span className="text-[9px] font-black text-white uppercase italic tracking-wider">Suggest Sourcing</span>
+                <span className="text-[8px] font-black text-white uppercase italic tracking-wider">Suggest Sourcing</span>
               </button>
             </div>
 

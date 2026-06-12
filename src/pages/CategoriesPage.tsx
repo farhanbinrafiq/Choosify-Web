@@ -161,24 +161,24 @@ export function CategoriesPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
-      <div className="w-full bg-[#0A0A1F] px-6 py-10 md:py-12 relative overflow-hidden flex items-center justify-center">
+      <div className="w-full bg-[#0A0A1F] px-6 py-5 md:py-6 relative overflow-hidden flex items-center justify-center">
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="max-w-7xl mx-auto text-center relative z-10 w-full">
           {mode === 'wholesale' ? (
-            <h1 className="text-[28px] md:text-[36px] font-black uppercase tracking-tighter mb-2 leading-none">
+            <h1 className="text-[22px] md:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
               <span className="text-white not-italic">B2B Product Category</span> <span className="text-[#FF5B00] not-italic">HUB</span>
             </h1>
           ) : (
-            <h1 className="text-[28px] md:text-[36px] font-black uppercase tracking-tighter mb-2 leading-none">
+            <h1 className="text-[22px] md:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
               <span className="text-white not-italic">EXPLORATION</span> <span className="text-orange-primary not-italic">HUB</span>
             </h1>
           )}
  
           {/* Product Name Marquee */}
-          <div className="w-full overflow-hidden mb-3 py-1.5 border-y border-white/5 relative">
+          <div className="w-full overflow-hidden mb-2 py-1 border-y border-white/5 relative">
             <motion.div 
                animate={{ x: [0, -1500] }}
                transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
@@ -192,7 +192,7 @@ export function CategoriesPage() {
                  <span 
                    key={i} 
                    className={cn(
-                     "text-2xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
+                     "text-xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
                      "text-white/10",
                      "hover:text-orange-primary hover:scale-110"
                    )}
@@ -209,7 +209,7 @@ export function CategoriesPage() {
                  <span 
                    key={`dup-${i}`} 
                    className={cn(
-                     "text-2xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
+                     "text-xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
                      "text-white/10",
                      "hover:text-orange-primary hover:scale-110"
                    )}
@@ -220,7 +220,7 @@ export function CategoriesPage() {
             </motion.div>
           </div>
  
-          <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[9px] md:text-[10.5px] mb-1 uppercase tracking-[0.2em] opacity-80 leading-relaxed">
+          <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8px] md:text-[9.5px] mb-0.5 uppercase tracking-[0.2em] opacity-80 leading-relaxed">
             DISCOVER PREMIUM PRODUCTS, OFFICIAL STORES, AND BEST DEALS ACROSS BANGLADESH.
           </p>
         </div>

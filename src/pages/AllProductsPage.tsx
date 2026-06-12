@@ -161,7 +161,7 @@ export function AllProductsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
        {/* Header / Hero Section (Locked Visual Design) */}
-      <div className="w-full bg-[#0A0B1E] pt-8 pb-10 px-4 md:px-8 relative overflow-hidden">
+      <div className="w-full bg-[#0A0B1E] pt-4 pb-5 px-4 md:px-8 relative overflow-hidden">
         {mode === 'wholesale' ? (
           <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
         ) : (
@@ -169,7 +169,7 @@ export function AllProductsPage() {
         )}
         <div className="max-w-4xl mx-auto relative z-10 flex flex-col items-center justify-center text-center">
           {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-3 w-full">
+          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-2 w-full">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={10} className="text-white/20" />
             <span className="text-white">Products</span>
@@ -177,25 +177,25 @@ export function AllProductsPage() {
             <span className="text-white">{mode === 'retail' ? 'Retail Lineup' : 'B2B Slabs'}</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-4 leading-none text-center">
+          <h1 className="text-2xl md:text-3.5xl font-black text-white italic uppercase tracking-tighter mb-1.5 leading-none text-center">
             {mode === 'retail' ? 'All Retail Products' : 'B2B Wholesale Catalog'}
           </h1>
 
           {mode === 'wholesale' && (
-            <div className="inline-block bg-gradient-to-r from-orange-primary/20 via-orange-deep/10 to-transparent border-l-4 border-orange-primary px-4 py-1.5 mb-4 rounded-r-lg">
-              <p className="text-orange-primary text-[10px] font-black uppercase tracking-widest italic leading-none">
+            <div className="inline-block bg-gradient-to-r from-orange-primary/20 via-orange-deep/10 to-transparent border-l-4 border-orange-primary px-3 py-1 mb-1.5 rounded-r-lg">
+              <p className="text-orange-primary text-[8px] font-black uppercase tracking-widest italic leading-none">
                 Wholesale Bulk Products & Suppliers
               </p>
             </div>
           )}
 
-          <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-4 max-w-2xl text-center">
+          <p className="text-gray-400 text-[11px] md:text-xs font-medium leading-relaxed mb-2.5 max-w-2xl text-center">
             {mode === 'retail' 
               ? 'Discover & Compare standard retail items with Cash on Delivery support.' 
               : 'Direct brand inventory sourcing with customized quantity slabs & volume pricing.'}
           </p>
 
-          <div className="text-orange-primary font-black text-xs uppercase tracking-widest shrink-0 bg-white/5 border border-white/10 backdrop-blur-md px-6 py-2.5 rounded-full italic mb-2">
+          <div className="text-orange-primary font-black text-[10px] uppercase tracking-widest shrink-0 bg-white/5 border border-white/10 backdrop-blur-md px-4 py-1.5 rounded-full italic mb-1">
             {filteredProducts.length} Listings Found
           </div>
         </div>

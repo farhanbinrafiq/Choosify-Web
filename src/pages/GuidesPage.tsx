@@ -486,30 +486,30 @@ export function GuidesPage() {
   return (
     <div id="guides-root" className="flex flex-col min-h-screen bg-[#FDFDFD]">
       {/* Hero Section - Standardized Centered Alignment */}
-      <div id="guides-hero" className="w-full bg-[#0A0A1F] py-10 md:py-12 px-6 relative overflow-hidden flex flex-col items-center justify-center">
+      <div id="guides-hero" className="w-full bg-[#0A0A1F] py-5 md:py-6 px-6 relative overflow-hidden flex flex-col items-center justify-center">
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
-        <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full mb-3">
+        <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full mb-1">
           {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-3 w-full">
+          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-2 w-full">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={10} className="text-white/20" />
             <span className="text-white">Guides & Recommendations</span>
           </div>
 
-          <h1 id="hero-title" className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-3 leading-none text-center">
+          <h1 id="hero-title" className="text-2xl md:text-3.5xl font-black text-white italic uppercase tracking-tighter mb-1.5 leading-none text-center">
             RECOMMENDATIONS
           </h1>
 
-          <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-3 max-w-2xl text-center">
+          <p className="text-gray-400 text-[11px] md:text-xs font-medium leading-relaxed mb-2 max-w-2xl text-center">
             Discover expert guides, buying advice, and the latest tech recommendations curated by real shoppers.
           </p>
    
           {/* Action Button Centered underneath */}
-          <button className="h-10 px-6 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-black rounded-full shadow-md flex items-center gap-2 whitespace-nowrap uppercase tracking-widest text-[9px] italic hover:scale-105 active:scale-95 transition-all text-center shrink-0 cursor-pointer mb-2">
-             <LucidePenTool size={14} className="text-[#FF5B00]" /> Post Recommendation
+          <button className="h-8 px-5 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-black rounded-full shadow-md flex items-center gap-2 whitespace-nowrap uppercase tracking-widest text-[8px] italic hover:scale-105 active:scale-95 transition-all text-center shrink-0 cursor-pointer mb-1">
+             <LucidePenTool size={11} className="text-[#FF5B00]" /> Post Recommendation
           </button>
         </div>
   

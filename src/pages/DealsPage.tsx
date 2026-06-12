@@ -52,39 +52,39 @@ export function DealsPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section - Standardized Centered Alignment */}
-      <div className="w-full bg-[#0A0A1F] py-10 md:py-12 px-6 relative overflow-hidden flex flex-col items-center justify-center">
+      <div className="w-full bg-[#0A0A1F] py-5 md:py-6 px-6 relative overflow-hidden flex flex-col items-center justify-center">
         {/* Background Gradients matching other directory pages */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full">
           {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-3 w-full">
+          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-2 w-full">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={10} className="text-white/20" />
             <span className="text-white">Deals & Promotions</span>
           </div>
 
-          <div className="bg-orange-primary text-white text-[9px] font-black px-4 py-1.5 rounded-full mb-3 uppercase tracking-[0.2em] shadow-md shadow-orange-primary/30 italic inline-block w-fit">
+          <div className="bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-full mb-1.5 uppercase tracking-[0.2em] shadow-md shadow-orange-primary/30 italic inline-block w-fit">
             FLASH SALE EVENT
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-3 leading-none text-center">
+          <h1 className="text-2xl md:text-3.5xl font-black text-white italic uppercase tracking-tighter mb-1.5 leading-none text-center">
             HOTTEST <span className="text-orange-primary">DEALS</span> TODAY
           </h1>
 
-          <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-3 max-w-2xl text-center">
+          <p className="text-gray-400 text-[11px] md:text-xs font-medium leading-relaxed mb-2.5 max-w-2xl text-center">
             Discover verified limited-time promotions, exclusive seller invoice discounts, and real-time flash sales happening right now across Bangladesh.
           </p>
 
           {/* Statistics/Timer Row - Centered inside Hero container */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-8 w-full mt-2">
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[16px] p-4 flex items-center gap-4 shadow-lg shrink-0">
-              <div className="flex flex-col items-center gap-1 shrink-0 px-2">
-                <Zap size={12} className="text-orange-primary fill-orange-primary" />
-                <span className="text-[8px] font-black text-orange-primary uppercase tracking-[0.2em] italic">ENDS IN</span>
+          <div className="flex flex-row items-center justify-center gap-4 md:gap-6 w-full mt-1">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[12px] py-1.5 px-3 flex items-center gap-3 shadow-lg shrink-0">
+              <div className="flex flex-col items-center gap-0.5 shrink-0">
+                <Zap size={10} className="text-orange-primary fill-orange-primary" />
+                <span className="text-[7px] font-black text-orange-primary uppercase tracking-[0.15em] italic">ENDS IN</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {[
                   { val: '10', label: 'HRS' },
                   { val: '10', label: 'MIN' },
@@ -92,13 +92,13 @@ export function DealsPage() {
                 ].map((t, i, arr) => (
                   <React.Fragment key={i}>
                     <div className="flex flex-col items-center gap-0.5">
-                      <div className="w-10 h-11 bg-[#000A24] border border-white/10 rounded-lg flex items-center justify-center shadow-inner group transition-all hover:border-orange-primary/30">
-                        <span className="text-sm font-black text-white font-mono leading-none tracking-tighter">{t.val}</span>
+                      <div className="w-8 h-8 bg-[#000A24] border border-white/15 rounded-md flex items-center justify-center shadow-inner group transition-all hover:border-orange-primary/30">
+                        <span className="text-xs font-black text-white font-mono leading-none tracking-tighter">{t.val}</span>
                       </div>
-                      <span className="text-[7.5px] font-black text-gray-400 tracking-[0.1em] uppercase italic">{t.label}</span>
+                      <span className="text-[6.5px] font-black text-gray-400 tracking-[0.1em] uppercase italic">{t.label}</span>
                     </div>
                     {i < arr.length - 1 && (
-                      <div className="text-white/40 font-black text-sm pb-3">:</div>
+                      <div className="text-white/40 font-black text-xs pb-2">:</div>
                     )}
                   </React.Fragment>
                 ))}
@@ -107,12 +107,12 @@ export function DealsPage() {
 
             <button 
               onClick={() => navigate('/post-offer')}
-              className="group flex items-center gap-3 px-6 py-3 bg-white rounded-full transition-all hover:scale-105 hover:shadow-lg active:scale-95 text-navy cursor-pointer"
+              className="group flex items-center gap-2 px-4 py-2.5 bg-white rounded-full transition-all hover:scale-105 hover:shadow-lg active:scale-95 text-navy cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
-                <ExternalLink size={14} />
+              <div className="w-6 h-6 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
+                <ExternalLink size={11} />
               </div>
-              <span className="text-[10px] font-black text-navy uppercase tracking-[0.15em] italic">Post Your Deals</span>
+              <span className="text-[8.5px] font-black text-navy uppercase tracking-[0.12em] italic">Post Your Deals</span>
             </button>
           </div>
         </div>

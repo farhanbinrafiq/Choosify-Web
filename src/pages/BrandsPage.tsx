@@ -151,43 +151,43 @@ export function BrandsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
       {/* Hero Section */}
-      <div className="w-full bg-[#0A0A1F] px-4 md:px-8 py-10 md:py-12 relative overflow-hidden flex items-center justify-center">
+      <div className="w-full bg-[#0A0A1F] px-4 md:px-8 py-5 md:py-6 relative overflow-hidden flex items-center justify-center">
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="max-w-7xl mx-auto text-center relative z-10 w-full animate-fade-in">
           {mode === 'wholesale' ? (
-            <h1 className="text-[28px] md:text-[36px] font-black italic uppercase tracking-tighter mb-2 leading-none">
+            <h1 className="text-[22px] md:text-[28px] font-black italic uppercase tracking-tighter mb-1.5 leading-none">
               <span className="text-[#FF5B00]">B2B BRAND</span> <span className="text-white">DIRECTORY</span>
             </h1>
           ) : (
-            <h1 className="text-[28px] md:text-[36px] font-black italic uppercase tracking-tighter mb-2 leading-none">
+            <h1 className="text-[22px] md:text-[28px] font-black italic uppercase tracking-tighter mb-1.5 leading-none">
               <span className="text-orange-primary">BRAND</span> <span className="text-white">DIRECTORY</span>
             </h1>
           )}
           
           {/* Text-only Carousel (PRD Requirement) */}
-          <div className="w-full overflow-hidden mb-3 py-1.5 border-y border-white/5 relative">
+          <div className="w-full overflow-hidden mb-2 py-1 border-y border-white/5 relative">
             <motion.div 
                animate={{ x: [0, -1000] }}
                transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
                className="flex whitespace-nowrap gap-8"
             >
                {['Aarong', 'Yellow', 'Sailor', 'Apex', 'Ecstasy', 'Richman', 'Lubnan', 'Apex', 'Bata', 'Lotto', 'Le Reve', 'Noir', 'Cats Eye'].map((name, i) => (
-                 <span key={i} className="text-2xl font-black text-white/5 italic uppercase tracking-tighter hover:text-orange-primary transition-all cursor-default">
+                 <span key={i} className="text-xl font-black text-white/5 italic uppercase tracking-tighter hover:text-orange-primary transition-all cursor-default">
                     {name}
                  </span>
                ))}
                {['Aarong', 'Yellow', 'Sailor', 'Apex', 'Ecstasy', 'Richman', 'Lubnan', 'Apex', 'Bata', 'Lotto', 'Le Reve', 'Noir', 'Cats Eye'].map((name, i) => (
-                 <span key={i} className="text-2xl font-black text-white/5 italic uppercase tracking-tighter hover:text-orange-primary transition-all cursor-default">
+                 <span key={i} className="text-xl font-black text-white/5 italic uppercase tracking-tighter hover:text-orange-primary transition-all cursor-default">
                     {name}
                  </span>
                ))}
             </motion.div>
           </div>
 
-          <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[10px] md:text-[11px] mb-3 uppercase tracking-wide opacity-80">
+          <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8.5px] md:text-[9.5px] mb-1 uppercase tracking-wide opacity-80">
             Discover official stores, authorized dealers, and independent brands across Bangladesh.
           </p>
         </div>
