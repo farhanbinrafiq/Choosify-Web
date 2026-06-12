@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ProductCard } from '../components/ProductCard';
-import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ExternalLink, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight } from 'lucide-react';
+import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ExternalLink, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle } from 'lucide-react';
 import { PRODUCTS, BRANDS } from '../constants';
 import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -9,9 +9,23 @@ export function DealsPage() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('Fashion');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('All Deals');
 
   const filteredProducts = React.useMemo(() => {
     let result = [...PRODUCTS];
+
+    if (activeTab === 'Flash Deals') {
+      result = result.filter(p => p.id % 2 === 0);
+    } else if (activeTab === 'Promo Codes') {
+      result = result.filter(p => p.id % 3 === 0);
+    } else if (activeTab === 'Brand Deals') {
+      result = result.filter(p => p.brand);
+    } else if (activeTab === 'Seasonal Campaigns') {
+      result = result.filter(p => p.id % 5 === 0);
+    } else if (activeTab === 'Expired Deals') {
+      result = result.filter(p => p.id % 4 === 1);
+    }
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(p => 
@@ -22,7 +36,7 @@ export function DealsPage() {
       );
     }
     return result;
-  }, [searchQuery]);
+  }, [searchQuery, activeTab]);
 
   const categoriesList = [
     { name: 'Fashion', icon: <Shirt size={16} className="stroke-[2.5]" />, count: 550 },
@@ -38,55 +52,30 @@ export function DealsPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section - Standardized Centered Alignment */}
-      <div className="w-full bg-[#0A0A1F] py-16 md:py-20 px-8 relative overflow-hidden flex flex-col items-center justify-center">
+      <div className="w-full bg-[#0A0A1F] py-10 md:py-12 px-6 relative overflow-hidden flex flex-col items-center justify-center">
         {/* Background Gradients matching other directory pages */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full">
           {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-6 w-full">
+          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-3 w-full">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={10} className="text-white/20" />
             <span className="text-white">Deals & Promotions</span>
           </div>
 
-          <div className="bg-orange-primary text-white text-[9px] font-black px-4 py-1.5 rounded-full mb-4 uppercase tracking-[0.2em] shadow-md shadow-orange-primary/30 italic inline-block w-fit">
+          <div className="bg-orange-primary text-white text-[9px] font-black px-4 py-1.5 rounded-full mb-3 uppercase tracking-[0.2em] shadow-md shadow-orange-primary/30 italic inline-block w-fit">
             FLASH SALE EVENT
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-4 leading-none text-center">
+          <h1 className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-3 leading-none text-center">
             HOTTEST <span className="text-orange-primary">DEALS</span> TODAY
           </h1>
 
-          <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-8 max-w-2xl text-center">
+          <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-3 max-w-2xl text-center">
             Discover verified limited-time promotions, exclusive seller invoice discounts, and real-time flash sales happening right now across Bangladesh.
           </p>
-
-          {/* SEARCH BAR (Added standardized layout matching all discovery pages) */}
-          <div 
-            className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-8"
-            style={{ width: '100%', maxWidth: '640px' }}
-          >
-            <div className="flex items-center bg-white rounded-full">
-              <div className="pl-4 text-[#E8500A] shrink-0">
-                <Search className="w-4 h-4" />
-              </div>
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search deals, products, brands, promotions..." 
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
-              />
-              <button 
-                onClick={() => setSearchQuery(searchQuery)}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-              >
-                Search
-              </button>
-            </div>
-          </div>
 
           {/* Statistics/Timer Row - Centered inside Hero container */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-8 w-full mt-2">
@@ -130,7 +119,7 @@ export function DealsPage() {
       </div>
 
       {/* Repeating Banner / Marquee - Orange Slide Through style */}
-      <div className="w-full bg-orange-primary py-4 px-8 overflow-hidden relative z-20">
+      <div className="w-full bg-orange-primary py-2.5 px-6 overflow-hidden relative z-20">
         <div className="flex items-center gap-12 animate-marquee whitespace-nowrap">
           {Array.from({ length: 12 }).map((_, i) => (
             <span key={i} className="text-white font-black uppercase text-[11px] tracking-[0.3em] italic flex items-center gap-6">
@@ -141,9 +130,78 @@ export function DealsPage() {
         </div>
       </div>
 
+      {/* GLOBAL STICKY NAVIGATION SYSTEM */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-4 transition-all duration-300">
+        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4">
+          
+          {/* 1. Search Bar inside Sticky Navigation */}
+          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
+            <div className="flex items-center bg-white rounded-full">
+              <div className="pl-4 text-[#E8500A] shrink-0">
+                <Search className="w-4 h-4" />
+              </div>
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search deals, brands, categories..." 
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+              />
+              <button 
+                onClick={() => setSearchQuery(searchQuery)}
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+              >
+                Search
+              </button>
+            </div>
+          </div>
+
+          {/* 2. Page Specific Navigation Tabs */}
+          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
+            {[
+              { id: 'all-deals', label: "All Deals", icon: <Package size={13} /> },
+              { id: 'all-deals', label: "Flash Deals", icon: <Zap size={13} /> },
+              { id: 'all-deals', label: "Promo Codes", icon: <Gift size={13} /> },
+              { id: 'featured-brand-deals-section', label: "Brand Deals", icon: <Award size={13} /> },
+              { id: 'all-deals', label: "Seasonal Campaigns", icon: <CalendarDays size={13} /> },
+              { id: 'all-deals', label: "Expired Deals", icon: <XCircle size={13} /> }
+            ].map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => {
+                  setActiveTab(tab.label);
+                  setTimeout(() => {
+                    const el = document.getElementById(tab.id);
+                    if (el) {
+                      const offset = 220; // safe offset for header + sticky nav
+                      const elementPosition = el.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - offset;
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }, 50);
+                }}
+                className={cn(
+                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px]",
+                  activeTab === tab.label
+                    ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent"
+                    : "bg-white border border-gray-200/85 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-50/80"
+                )}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
+        </div>
+      </div>
+
       <main className="w-full bg-[#F3F9FF]/30 min-h-screen">
         {/* Category & Filter Section */}
-        <div className="w-full bg-white border-b border-gray-100 py-6 sticky top-0 z-40 shadow-sm px-8">
+        <div className="w-full bg-white border-b border-gray-100 py-6 px-8">
           <div className="max-w-[1440px] mx-auto flex flex-col gap-8">
             <div className="flex items-center justify-between gap-10">
               <div className="flex-1 overflow-x-auto no-scrollbar">
@@ -387,7 +445,7 @@ export function DealsPage() {
         </div>
 
         {/* Featured Brand Deals Section */}
-        <section className="py-20 bg-white px-8 relative overflow-hidden border-t border-gray-100">
+        <section id="featured-brand-deals-section" className="py-20 bg-white px-8 relative overflow-hidden border-t border-gray-100 scroll-mt-36">
           <div className="max-w-7xl mx-auto relative z-10">
              <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
                 <div>

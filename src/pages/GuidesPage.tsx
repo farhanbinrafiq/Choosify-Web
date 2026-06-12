@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets, Bookmark, Eye, Share2, Play, Instagram, ChevronRight } from 'lucide-react';
+import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets, Bookmark, Eye, Share2, Play, Instagram, ChevronRight, Award, Flame, Zap, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BLOGS } from '../constants';
 import { motion } from 'motion/react';
@@ -413,6 +413,7 @@ function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeType: 'you
 export function GuidesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('Fashion');
+  const [activeTab, setActiveTab] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
 
   // Trigger simulated loading effect on category change
@@ -451,11 +452,28 @@ export function GuidesPage() {
 
   // Dynamic filter supporting the high-fidelity bento bento-grid
   const getFilteredBlogs = () => {
+    let result = [...BLOGS];
+
+    if (activeTab === 'Featured') {
+      result = result.filter(blog => blog.id === 1 || blog.id === 2);
+    } else if (activeTab === 'Editors Choice') {
+      result = result.filter(blog => blog.id % 2 === 0);
+    } else if (activeTab === 'Most Popular') {
+      result = result.filter(blog => {
+        const viewsStr = blog.views || '';
+        return viewsStr.includes('M') || viewsStr.includes('K') || parseInt(viewsStr) > 100;
+      });
+    } else if (activeTab === 'Budget Picks') {
+      result = result.filter(blog => blog.id % 3 === 0);
+    } else if (activeTab === 'Premium Picks') {
+      result = result.filter(blog => blog.id % 4 === 1);
+    }
+
     const q = searchQuery.toLowerCase().trim();
     if (!q) {
-      return BLOGS;
+      return result;
     }
-    return BLOGS.filter(blog => {
+    return result.filter(blog => {
       const titleMatches = blog.title.toLowerCase().includes(q);
       const excerptMatches = blog.excerpt?.toLowerCase().includes(q) || false;
       const categoryMatches = blog.category?.toLowerCase().includes(q) || false;
@@ -468,52 +486,27 @@ export function GuidesPage() {
   return (
     <div id="guides-root" className="flex flex-col min-h-screen bg-[#FDFDFD]">
       {/* Hero Section - Standardized Centered Alignment */}
-      <div id="guides-hero" className="w-full bg-[#0A0A1F] py-16 md:py-20 px-8 relative overflow-hidden flex flex-col items-center justify-center">
+      <div id="guides-hero" className="w-full bg-[#0A0A1F] py-10 md:py-12 px-6 relative overflow-hidden flex flex-col items-center justify-center">
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
         <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full mb-3">
           {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-6 w-full">
+          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-3 w-full">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={10} className="text-white/20" />
             <span className="text-white">Guides & Recommendations</span>
           </div>
 
-          <h1 id="hero-title" className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-4 leading-none text-center">
+          <h1 id="hero-title" className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-3 leading-none text-center">
             RECOMMENDATIONS
           </h1>
 
-          <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-8 max-w-2xl text-center">
+          <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-3 max-w-2xl text-center">
             Discover expert guides, buying advice, and the latest tech recommendations curated by real shoppers.
           </p>
-  
-          {/* SEARCH BAR (Added standardized layout matching all discovery pages) */}
-          <div 
-            className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-6"
-            style={{ width: '100%', maxWidth: '640px' }}
-          >
-            <div className="flex items-center bg-white rounded-full">
-              <div className="pl-4 text-[#E8500A] shrink-0">
-                <Search className="w-4 h-4" />
-              </div>
-              <input 
-                type="text" 
-                placeholder="Search guides and recommendations..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
-              />
-              <button 
-                onClick={() => setSearchQuery(searchQuery)}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-              >
-                Search
-              </button>
-            </div>
-          </div>
-
+   
           {/* Action Button Centered underneath */}
           <button className="h-10 px-6 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-black rounded-full shadow-md flex items-center gap-2 whitespace-nowrap uppercase tracking-widest text-[9px] italic hover:scale-105 active:scale-95 transition-all text-center shrink-0 cursor-pointer mb-2">
              <LucidePenTool size={14} className="text-[#FF5B00]" /> Post Recommendation
@@ -536,7 +529,7 @@ export function GuidesPage() {
                      "hover:text-orange-primary hover:scale-110"
                    )}
                  >
-                      {title}
+                       {title}
                  </span>
                ))}
                {recommendationTitles.map((title, i) => (
@@ -548,40 +541,77 @@ export function GuidesPage() {
                      "hover:text-orange-primary hover:scale-110"
                    )}
                  >
-                      {title}
+                       {title}
                  </span>
                ))}
             </motion.div>
           </div>
         </div>
 
-      {/* Category Nav Bar (Mobile/Tablet Only) */}
-      <div className="w-full bg-white border-b border-gray-100 px-8 sticky top-20 z-40 shadow-sm overflow-x-auto scrollbar-hide lg:hidden text-left">
-        <div className="max-w-7xl mx-auto flex items-center gap-4 py-4 min-w-max">
-           {[
-             { name: 'All', active: true },
-             { name: 'Mobile', icon: '📱' },
-             { name: 'Electronics', icon: '🔌' },
-             { name: 'Car / Bike', icon: '🚗' },
-             { name: 'Gadgets', icon: '⌚' },
-             { name: 'Home Appliances', icon: '🏠' },
-             { name: 'Beauty Care', icon: '💄' },
-             { name: 'Hotels', icon: '🏨' },
-             { name: 'Computer', icon: '💻' },
-             { name: 'Medical', icon: '🏥' }
-           ].map((cat) => (
-             <button 
-                key={cat.name} 
-                className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                  cat.active 
-                  ? 'bg-orange-primary text-white shadow-lg shadow-orange-primary/20' 
-                  : 'bg-ice-blue/50 text-navy/60 hover:bg-ice-blue hover:text-navy border border-gray-200/50'
-                }`}
-             >
-                {cat.icon && <span>{cat.icon}</span>}
-                {cat.name}
-             </button>
-           ))}
+      {/* GLOBAL STICKY NAVIGATION SYSTEM */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
+        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
+          
+          {/* 1. Search Bar inside Sticky Container */}
+          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
+            <div className="flex items-center bg-white rounded-full">
+              <div className="pl-4 text-[#E8500A] shrink-0">
+                <Search className="w-4 h-4" />
+              </div>
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search guides and recommendations..." 
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
+              />
+              <button 
+                onClick={() => setSearchQuery(searchQuery)}
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+              >
+                Search
+              </button>
+            </div>
+          </div>
+
+          {/* 2. Navigation Tabs */}
+          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
+            {[
+              { id: 'All', label: "All", icon: <BookOpen size={13} /> },
+              { id: 'Featured', label: "Featured", icon: <Star size={13} /> },
+              { id: 'Editors Choice', label: "Editors Choice", icon: <Heart size={13} /> },
+              { id: 'Most Popular', label: "Most Popular", icon: <Flame size={13} /> },
+              { id: 'Budget Picks', label: "Budget Picks", icon: <Zap size={13} /> },
+              { id: 'Premium Picks', label: "Premium Picks", icon: <Award size={13} /> }
+            ].map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  const el = document.getElementById("guides-main-display");
+                  if (el) {
+                    const offset = 220; // safe header + sticky offset
+                    const elementPosition = el.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: 'smooth'
+                    });
+                  }
+                }}
+                className={cn(
+                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
+                  activeTab === tab.id
+                    ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
+                    : "bg-white border-gray-250 text-gray-400 hover:text-navy hover:bg-gray-50/80"
+                )}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
         </div>
       </div>
 
@@ -642,7 +672,7 @@ export function GuidesPage() {
             </div>
          </aside>
 
-         <div className="flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+         <div id="guides-main-display" className="scroll-mt-36 flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
             {isLoading ? (
                <div className="flex flex-col gap-12">
                   <div className="mb-16">

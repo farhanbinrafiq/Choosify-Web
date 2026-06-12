@@ -162,11 +162,11 @@
     box-sizing: border-box !important;
   }
 
-  /* Ensure pages have dynamic clearance for the bottom floating nav */
+  /* Ensure pages have dynamic clearance for safety */
   main, 
   .page-wrapper, 
   body {
-    padding-bottom: 90px !important;
+    padding-bottom: 0px !important;
   }
 
   /* Constrain navbar to full viewport width */
@@ -225,7 +225,7 @@
   [aria-label="menu"],
   [aria-label="open menu"] {
     margin-right: -4px !important;      /* shift slightly right from current position */
-    margin-left: auto !important;      /* ensure it stays on the right side */
+    margin-left: 0 !important;       /* keep next to other elements in nav-actions */
   }
 
   .nav-right,

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, Star, CheckCircle2, Heart, Zap, HelpCircle, Info, Package, 
   ShieldCheck, Bookmark, Plus, X, ListFilter, Flame, Award, Users, 
-  ChevronRight, ArrowUpRight, Check, Send, AlertTriangle
+  ChevronRight, ArrowUpRight, Check, Send, AlertTriangle, Eye, Smartphone, Shirt
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -90,10 +90,23 @@ export function ViralProductsPage() {
     });
   }, [allProducts]);
 
-  // CATEGORY STICKY BAR LIST ITEMS
-  const navigationItems = [
-    'All Products', 'Gadgets', 'Jewelry', 'Clothing', 'Belts', 'Eyewear', 'Footwear', 'Accessories', 'Beauty', 'Home & Living'
-  ];
+  // CATEGORY STICKY BAR LIST ITEMS (Dynamically constructed from existing category database)
+  const navigationItems = useMemo(() => {
+    const dbGadgets = CATEGORIES.find(c => c.id === 'mobile') ? 'Gadgets' : '';
+    const dbJewelry = CATEGORIES.find(c => c.id === 'jewelry') ? 'Jewelry' : '';
+    const dbClothing = CATEGORIES.find(c => c.id === 'fashion') ? 'Clothing' : '';
+    const dbHome = CATEGORIES.find(c => c.id === 'home') ? 'Home & Living' : '';
+
+    return [
+      'All Products',
+      dbGadgets,
+      dbJewelry,
+      dbClothing,
+      'Belts',
+      'Eyewear',
+      dbHome
+    ].filter(Boolean);
+  }, []);
 
   // LEADERBOARD (Top 5 products by views/viralScore)
   const viralLeaderboard = useMemo(() => {
@@ -198,53 +211,28 @@ export function ViralProductsPage() {
       {/* ================================================= */}
       {/* 1. HERO SECTION (Standardized centered alignment) */}
       {/* ================================================= */}
-      <section className="relative pt-12 pb-16 bg-[#0A0B1E] text-white overflow-hidden border-b border-white/5">
+      <section className="relative pt-8 pb-10 bg-[#0A0B1E] text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/20 via-[#EB4501]/5 to-[#0A0A1F] opacity-90" />
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-radial-gradient from-orange-primary/30 to-transparent blur-3xl pointer-events-none" />
         
         <div className="max-w-[1440px] mx-auto px-6 relative z-10 w-full flex flex-col items-center">
           {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-6 w-full">
+          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-3 w-full">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={10} className="text-white/20" />
             <span className="text-white">Viral Products</span>
           </div>
 
           <div className="max-w-3xl text-center flex flex-col items-center">
-            <span className="inline-block bg-[#E8500A]/10 text-orange-primary text-[10px] font-black uppercase tracking-[0.25em] px-4 py-1.5 rounded-full border border-orange-primary/10 mb-5 font-mono">
+            <span className="inline-block bg-[#E8500A]/10 text-orange-primary text-[10px] font-black uppercase tracking-[0.25em] px-4 py-1.5 rounded-full border border-orange-primary/10 mb-3.5 font-mono">
               CHOOSIFY CURATED
             </span>
-            <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic mb-4 leading-none text-center">
+            <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic mb-3 leading-none text-center">
               Choosify & Customer Favorite Products
             </h1>
-            <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-8 max-w-2xl text-center">
+            <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-3 max-w-2xl text-center">
               Discover trending, community-recommended and editor-approved products loved by real customers. Verified pricing and seller transparency included.
             </p>
-
-            {/* SEARCH BAR (Global style matching & standardized layout) */}
-            <div 
-              className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-8"
-              style={{ width: '100%', maxWidth: '640px' }}
-            >
-              <div className="flex items-center bg-white rounded-full">
-                <div className="pl-4 text-[#E8500A] shrink-0">
-                  <Search className="w-4 h-4" />
-                </div>
-                <input 
-                  type="text" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search viral, customer-recommended products..." 
-                  className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none"
-                />
-                <button 
-                  onClick={() => setSearchQuery(searchQuery)}
-                  className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                >
-                  Search
-                </button>
-              </div>
-            </div>
 
             {/* STATISTICS ROW (Visually centered inside the hero container) */}
             <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 uppercase font-mono tracking-[0.15em] text-[10px] md:text-xs text-white pb-2">
@@ -300,27 +288,63 @@ export function ViralProductsPage() {
       {/* ================================================= */}
       {/* 3. STICKY SUB-NAVIGATION BAR (Directly below hero) */}
       {/* ================================================= */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-2">
-        <div className="max-w-[1440px] mx-auto px-6">
-          <div className="flex items-center justify-start gap-1.5 md:gap-2.5 overflow-x-auto no-scrollbar py-1 text-[9.5px] font-black uppercase tracking-wider">
-            {navigationItems.map(item => (
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4">
+        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4">
+          
+          {/* A. Search Bar inside Sticky Container */}
+          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
+            <div className="flex items-center bg-white rounded-full">
+              <div className="pl-4 text-[#E8500A] shrink-0">
+                <Search className="w-4 h-4" />
+              </div>
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search viral, customer-recommended products..." 
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+              />
               <button 
-                key={item}
-                onClick={() => {
-                  setActiveTab(item);
-                  window.scrollTo({ top: 320, behavior: 'smooth' });
-                }}
-                className={cn(
-                  "px-5 py-2 rounded-full transition-all shrink-0 cursor-pointer text-center",
-                  activeTab === item 
-                    ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
-                    : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100 border border-transparent"
-                )}
+                onClick={() => setSearchQuery(searchQuery)}
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
               >
-                {item}
+                Search
               </button>
-            ))}
+            </div>
           </div>
+
+          {/* B. Dynamic Navigation Tabs with icons */}
+          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
+            {navigationItems.map(item => {
+              // Micro icon associations matching requirements
+              let icon = <Package size={13} />;
+              if (item === 'Gadgets') icon = <Smartphone size={13} />;
+              if (item === 'Jewelry') icon = <Star size={13} />;
+              if (item === 'Clothing') icon = <Shirt size={13} />;
+              if (item === 'Belts') icon = <Award size={13} />;
+              if (item === 'Eyewear') icon = <Eye size={13} />;
+
+              return (
+                <button 
+                  key={item}
+                  onClick={() => {
+                    setActiveTab(item);
+                    window.scrollTo({ top: 320, behavior: 'smooth' });
+                  }}
+                  className={cn(
+                    "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
+                    activeTab === item 
+                      ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic" 
+                      : "bg-white border-gray-200 text-gray-400 hover:text-navy hover:bg-gray-50"
+                  )}
+                >
+                  {icon}
+                  <span>{item}</span>
+                </button>
+              );
+            })}
+          </div>
+
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Search, ShoppingCart, MessageSquare, Bookmark, ChevronDown, ChevronRight, 
@@ -6,9 +6,11 @@ import {
   Play, ShieldCheck, DollarSign, Star, AlertCircle, PenTool, Award as Trophy,
   Shirt, Smartphone, Gem, Gamepad2, Monitor, Utensils, Cpu, Tv, Home, Baby,
   Palette, Luggage,
-  Flame, Sparkles, Send, Users, ShieldAlert, BadgeCheck, Zap, Clock, Book
+  Flame, Sparkles, Send, Users, ShieldAlert, BadgeCheck, Zap, Clock, Book,
+  Gift, Package
 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
+import { CampaignBannerCarousel } from '../components/CampaignBannerCarousel';
 import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
@@ -73,6 +75,68 @@ export function HomePage() {
   const [carouselIndex, setCarouselIndex] = useState(1);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [showAllFollowed, setShowAllFollowed] = useState(false);
+  const [activeStickySection, setActiveStickySection] = useState('all');
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = [
+        { id: 'section-popular-products', name: 'products' },
+        { id: 'section-trending-brands', name: 'brands' },
+        { id: 'section-spotlight-brand', name: 'deals' },
+        { id: 'section-recommendations', name: 'recommendations' },
+        { id: 'section-guides', name: 'guides' },
+        { id: 'section-viral-products', name: 'viral' }
+      ];
+      
+      const scrollPosition = window.scrollY + 220;
+      let currentSection = 'all';
+      
+      for (const section of sections) {
+        const el = document.getElementById(section.id);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPosition >= top && scrollPosition <= top + height) {
+            currentSection = section.name;
+          }
+        }
+      }
+      setActiveStickySection(currentSection);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    if (id === 'all') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setActiveStickySection('all');
+    } else {
+      const el = document.getElementById(id);
+      if (el) {
+        const offset = 180; // Offset for navbar + sticky selectors
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+        
+        const nameMap: { [key: string]: string } = {
+          'section-popular-products': 'products',
+          'section-trending-brands': 'brands',
+          'section-spotlight-brand': 'deals',
+          'section-recommendations': 'recommendations',
+          'section-guides': 'guides',
+          'section-viral-products': 'viral'
+        };
+        if (nameMap[id]) {
+          setActiveStickySection(nameMap[id]);
+        }
+      }
+    }
+  };
 
   // Recommendations Reactions State
   const [recommendationStates, setRecommendationStates] = useState({
@@ -395,6 +459,10 @@ export function HomePage() {
         </div>
       </section>
 
+
+      {/* FULL WIDTH CAMPAIGN SECTION */}
+      <CampaignBannerCarousel />
+
       {/* SECTION 3 — MARQUEE BANNER */}
       <div className="relative z-20 bg-gradient-to-r from-[#E8500A] via-[#FF5B00] to-[#E8500A] text-white py-4.5 overflow-hidden border-y border-[#CF4400]/40 shadow-lg font-space text-[11.5px] font-black tracking-[0.2em] uppercase leading-none">
         <div className="flex w-max animate-marquee whitespace-nowrap gap-16">
@@ -402,6 +470,49 @@ export function HomePage() {
           <span>💎 AUTHENTIC OUTLETS DIRECTORY • NO MORE ONLINE SCAMS • SHOP WITH CONFIDENCE 💎</span>
           <span>🛡️ 100% ORIGINAL PRODUCTS ONLY • VERIFIED SHOPS IN BANGLADESH • CHOOSE WISELY 🛡️</span>
         </div>
+      </div>
+
+      {/* GLOBAL STICKY NAVIGATION BAR */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-3.5">
+         <div className="max-w-[1440px] mx-auto px-6">
+            <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
+               
+               <button 
+                 onClick={() => scrollToSection('all')}
+                 className={cn(
+                   "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
+                   activeStickySection === 'all' 
+                     ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
+                     : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100"
+                 )}
+               >
+                  All
+               </button>
+
+               {[
+                 { id: 'section-popular-products', name: 'products', label: 'Products', icon: <Package size={13} /> },
+                 { id: 'section-trending-brands', name: 'brands', label: 'Brands', icon: <Award size={13} /> },
+                 { id: 'section-spotlight-brand', name: 'deals', label: 'Deals', icon: <Zap size={13} /> },
+                 { id: 'section-recommendations', name: 'recommendations', label: 'Recommendations', icon: <Sparkles size={13} /> },
+                 { id: 'section-guides', name: 'guides', label: 'Guides', icon: <Book size={13} /> },
+                 { id: 'section-viral-products', name: 'viral', label: 'Viral Products', icon: <Flame size={13} /> }
+               ].map(item => (
+                 <button 
+                   key={item.id}
+                   onClick={() => scrollToSection(item.id)}
+                   className={cn(
+                     "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
+                     activeStickySection === item.name 
+                       ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
+                       : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100"
+                   )}
+                 >
+                    {item.icon}
+                    <span>{item.label}</span>
+                 </button>
+               ))}
+            </div>
+         </div>
       </div>
 
       {/* SECTION 4 — THREE COLUMN GRID */}
@@ -521,6 +632,25 @@ export function HomePage() {
                   NEW
                 </span>
               </Link>
+
+              {/* Viral Products Card */}
+              <Link 
+                id="section-viral-products"
+                to="/viral-products" 
+                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
+                    <Flame className="w-5 h-5 text-[#E8500A]" />
+                  </div>
+                  <span className="text-[11px] font-semibold text-[#1a1a2e] uppercase">
+                    VIRAL PRODUCTS
+                  </span>
+                </div>
+                <span className="text-[11px] font-semibold text-[#E8500A] shrink-0">
+                  HOT
+                </span>
+              </Link>
             </div>
           </div>
 
@@ -589,30 +719,7 @@ export function HomePage() {
           style={{ paddingTop: '0px', paddingLeft: '0px', paddingRight: '0px' }}
         >
           
-          {/* Categories Tab Bar */}
-          <div 
-            className="bg-white/80 backdrop-blur-md rounded-2xl border border-[#e8edf2] p-2.5 shadow-sm select-none relative z-40 sticky top-20"
-            style={{ paddingRight: '10px' }}
-          >
-            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar scroll-smooth">
-              {categoryTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    toast.success(`Loading verification grid for: ${tab.id}`);
-                  }}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-medium whitespace-nowrap uppercase leading-none border transition-all duration-300 ${
-                    activeTab === tab.id 
-                      ? 'bg-[#E8500A] border-[#E8500A] text-white' 
-                      : 'bg-gray-50/50 border-gray-100 text-[#1A1D4E]/80 hover:bg-[#EEF1F8]/80 hover:text-[#1A1D4E]'
-                  }`}
-                >
-                  <span className="text-sm leading-none">{tab.emoji}</span> {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
+
 
           {/* MAIN FEED CONTENT PORTAL */}
           {activeTab === 'FEED' ? (
@@ -1185,6 +1292,7 @@ export function HomePage() {
 
                 {/* Sub Guides Grid matching elements visually */}
                 <div 
+                  id="section-guides"
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
                   style={{ paddingTop: '0px', paddingBottom: '0px' }}
                 >

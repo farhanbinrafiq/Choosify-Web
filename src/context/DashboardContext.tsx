@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { PRODUCTS, BRANDS } from '../constants';
 import toast from 'react-hot-toast';
 
@@ -23,11 +23,32 @@ export interface ThreadMessage {
   avatar?: string;
 }
 
+export interface Campaign {
+  id: string;
+  title: string;
+  tagline: string;
+  ctaText: string;
+  ctaLink: string;
+  image: string;
+  startDate: string;
+  endDate: string;
+  priority: number;
+  active: boolean;
+  sponsorBadge?: string;
+  countdownEnd?: string;
+}
+
 interface DashboardContextType {
   savedProducts: any[];
   setSavedProducts: React.Dispatch<React.SetStateAction<any[]>>;
   savedBrands: any[];
   setSavedBrands: React.Dispatch<React.SetStateAction<any[]>>;
+  lovedBrands: any[];
+  setLovedBrands: React.Dispatch<React.SetStateAction<any[]>>;
+  followedBrands: any[];
+  setFollowedBrands: React.Dispatch<React.SetStateAction<any[]>>;
+  recentlyViewed: any[];
+  setRecentlyViewed: React.Dispatch<React.SetStateAction<any[]>>;
   savedGuides: any[];
   setSavedGuides: React.Dispatch<React.SetStateAction<any[]>>;
   comparedProducts: any[];
@@ -42,8 +63,16 @@ interface DashboardContextType {
   setNotifications: React.Dispatch<React.SetStateAction<any[]>>;
   reviews: any[];
   setReviews: React.Dispatch<React.SetStateAction<any[]>>;
+  campaigns: Campaign[];
+  setCampaigns: React.Dispatch<React.SetStateAction<Campaign[]>>;
+  addCampaign: (campaign: Omit<Campaign, 'id'>) => void;
+  updateCampaign: (campaign: Campaign) => void;
+  deleteCampaign: (id: string) => void;
   removeSavedProduct: (id: number) => void;
   removeSavedBrand: (id: number) => void;
+  toggleLoveBrand: (brand: any) => void;
+  toggleFollowBrand: (brand: any) => void;
+  addRecentlyViewed: (product: any) => void;
   addToCompare: (product: any) => void;
   removeFromCompare: (id: number) => void;
   addMessage: (text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator') => void;
@@ -56,6 +85,9 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [savedProducts, setSavedProducts] = useState([PRODUCTS[0], PRODUCTS[3], PRODUCTS[5]]);
   const [savedBrands, setSavedBrands] = useState([BRANDS[0], BRANDS[2], BRANDS[9]]);
+  const [lovedBrands, setLovedBrands] = useState([BRANDS[1], BRANDS[3], BRANDS[4]]);
+  const [followedBrands, setFollowedBrands] = useState([BRANDS[2], BRANDS[5], BRANDS[6], BRANDS[10]]);
+  const [recentlyViewed, setRecentlyViewed] = useState([PRODUCTS[1], PRODUCTS[2], PRODUCTS[4]]);
   const [savedGuides, setSavedGuides] = useState([
     { id: 1, title: 'Best Budget Smartwatches 2026', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', category: 'Tech' },
     { id: 2, title: 'Top 5 Sustainable Fashion Brands', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=300&fit=crop', category: 'Fashion' }
@@ -102,6 +134,91 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     { id: 2, product: PRODUCTS[5].title, rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
   ]);
 
+  const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
+    const saved = localStorage.getItem('choosify_campaigns');
+    if (saved) return JSON.parse(saved);
+    return [
+      {
+        id: 'camp-1',
+        title: 'BLACK FRIDAY',
+        tagline: 'UP TO 70% OFF SELECT PRODUCTS',
+        ctaText: 'EXPLORE DEALS',
+        ctaLink: '/deals',
+        image: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?w=1600&q=80',
+        startDate: '2026-11-20',
+        endDate: '2026-11-30',
+        priority: 10,
+        active: true,
+        sponsorBadge: 'Platform Promotion',
+        countdownEnd: '2026-11-28T12:00:00Z'
+      },
+      {
+        id: 'camp-2',
+        title: 'SUMMER FEST',
+        tagline: 'SEASONAL PICKS CURATED FOR YOU',
+        ctaText: 'SHOP COLLECTION',
+        ctaLink: '/categories?cat=fashion',
+        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80',
+        startDate: '2026-06-01',
+        endDate: '2026-08-31',
+        priority: 8,
+        active: true,
+        sponsorBadge: 'Summer Special',
+        countdownEnd: '2026-07-15T00:00:00Z'
+      },
+      {
+        id: 'camp-3',
+        title: 'WORLD CUP SPECIAL',
+        tagline: 'FAN FAVORITES & LIMITED EDITIONS',
+        ctaText: 'EXPLORE',
+        ctaLink: '/products',
+        image: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1600&q=80',
+        startDate: '2026-06-10',
+        endDate: '2026-07-10',
+        priority: 9,
+        active: true,
+        sponsorBadge: 'Fan Zone',
+        countdownEnd: '2026-07-12T18:00:00Z'
+      },
+      {
+        id: 'camp-4',
+        title: 'BRAND LAUNCH',
+        tagline: 'DISCOVER NEW ARRIVALS',
+        ctaText: 'VIEW PRODUCTS',
+        ctaLink: '/brands',
+        image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80',
+        startDate: '2026-06-15',
+        endDate: '2026-06-30',
+        priority: 7,
+        active: true,
+        sponsorBadge: 'Exclusive Launch'
+      }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('choosify_campaigns', JSON.stringify(campaigns));
+  }, [campaigns]);
+
+  const addCampaign = (campaign: Omit<Campaign, 'id'>) => {
+    const newCampaign: Campaign = {
+      ...campaign,
+      id: 'camp-' + Date.now()
+    };
+    setCampaigns(prev => [newCampaign, ...prev]);
+    toast.success('Campaign created successfully!');
+  };
+
+  const updateCampaign = (target: Campaign) => {
+    setCampaigns(prev => prev.map(c => c.id === target.id ? target : c));
+    toast.success('Campaign updated successfully!');
+  };
+
+  const deleteCampaign = (id: string) => {
+    setCampaigns(prev => prev.filter(c => c.id !== id));
+    toast.success('Campaign deleted successfully.');
+  };
+
   const removeSavedProduct = (id: number) => {
     setSavedProducts(prev => prev.filter(p => p.id !== id));
     toast.success('Product removed from vault');
@@ -109,8 +226,41 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
   const removeSavedBrand = (id: number) => {
     setSavedBrands(prev => prev.filter(b => b.id !== id));
-    toast.success('Brand removed from loved list');
+    toast.success('Brand removed from saved list');
   };
+
+  const toggleLoveBrand = (brand: any) => {
+    setLovedBrands(prev => {
+      const exists = prev.some(b => b.id === brand.id);
+      if (exists) {
+        toast.success(`${brand.name} removed from Loved Brands`);
+        return prev.filter(b => b.id !== brand.id);
+      } else {
+        toast.success(`Reacted with Love to ${brand.name}!`);
+        return [...prev, brand];
+      }
+    });
+  };
+
+  const toggleFollowBrand = (brand: any) => {
+    setFollowedBrands(prev => {
+      const exists = prev.some(b => b.id === brand.id);
+      if (exists) {
+        toast.success(`Unfollowed ${brand.name}`);
+        return prev.filter(b => b.id !== brand.id);
+      } else {
+        toast.success(`Following ${brand.name} for updates and deals!`);
+        return [...prev, brand];
+      }
+    });
+  };
+
+  const addRecentlyViewed = React.useCallback((product: any) => {
+    setRecentlyViewed(prev => {
+      const filtered = prev.filter(p => p.id !== product.id);
+      return [product, ...filtered].slice(0, 20);
+    });
+  }, []);
 
   const addToCompare = (product: any) => {
     if (comparedProducts.length >= 4) {
@@ -241,6 +391,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     <DashboardContext.Provider value={{
       savedProducts, setSavedProducts,
       savedBrands, setSavedBrands,
+      lovedBrands, setLovedBrands,
+      followedBrands, setFollowedBrands,
+      recentlyViewed, setRecentlyViewed,
       savedGuides, setSavedGuides,
       comparedProducts, setComparedProducts,
       messages, setMessages,
@@ -248,8 +401,15 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       threadMessages, setThreadMessages,
       notifications, setNotifications,
       reviews, setReviews,
+      campaigns, setCampaigns,
+      addCampaign,
+      updateCampaign,
+      deleteCampaign,
       removeSavedProduct,
       removeSavedBrand,
+      toggleLoveBrand,
+      toggleFollowBrand,
+      addRecentlyViewed,
       addToCompare,
       removeFromCompare,
       addMessage,

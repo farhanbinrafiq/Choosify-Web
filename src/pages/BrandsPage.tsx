@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2 } from 'lucide-react';
+import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -24,6 +24,7 @@ export function BrandsPage() {
   const { mode } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('All Brands');
 
   const brands: Brand[] = [
     {
@@ -105,8 +106,42 @@ export function BrandsPage() {
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
+  // Core reactive filtering logic for brand listing
+  const filteredBrands = React.useMemo(() => {
+    let result = [...brands];
+
+    // 1. Filter by Active Tab selection
+    if (activeTab === 'Trending Brands') {
+      result = result.filter(b => b.isHot || b.rating >= 4.7);
+    } else if (activeTab === 'Featured Brands') {
+      result = result.filter(b => b.isFeatured || b.rating >= 4.8);
+    } else if (activeTab === 'Hot Deals Brands') {
+      result = result.filter(b => b.isHot);
+    } else if (activeTab === 'Top Rated Brands') {
+      result = result.filter(b => b.rating >= 4.8);
+    }
+
+    // 2. Filter by search query across Name, bestFor, category, or description
+    const q = searchQuery.toLowerCase().trim();
+    if (q) {
+      result = result.filter(b => 
+        b.name.toLowerCase().includes(q) ||
+        (b.bestFor || '').toLowerCase().includes(q) ||
+        (b.category || '').toLowerCase().includes(q) ||
+        (b.description || '').toLowerCase().includes(q)
+      );
+    }
+
+    // 3. Filter by Selected Letter
+    if (selectedLetter) {
+      result = result.filter(b => b.name.toUpperCase().startsWith(selectedLetter));
+    }
+
+    return result;
+  }, [searchQuery, selectedLetter, activeTab]);
+
   const groupedBrands = letters.reduce((acc, letter) => {
-    const filtered = brands.filter(b => b.name.startsWith(letter));
+    const filtered = filteredBrands.filter(b => b.name.toUpperCase().startsWith(letter));
     if (filtered.length > 0) {
       acc[letter] = filtered;
     }
@@ -116,7 +151,7 @@ export function BrandsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
       {/* Hero Section */}
-      <div className="w-full bg-[#0A0A1F] px-4 md:px-8 relative overflow-hidden flex items-center justify-center" style={{ height: '303px' }}>
+      <div className="w-full bg-[#0A0A1F] px-4 md:px-8 py-10 md:py-12 relative overflow-hidden flex items-center justify-center">
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -155,36 +190,77 @@ export function BrandsPage() {
           <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[10px] md:text-[11px] mb-3 uppercase tracking-wide opacity-80">
             Discover official stores, authorized dealers, and independent brands across Bangladesh.
           </p>
+        </div>
+      </div>
 
-          {/* SEARCH BAR (Standardized layout) */}
-          <div 
-            className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-3"
-            style={{ width: '100%', maxWidth: '640px' }}
-          >
+      {/* GLOBAL STICKY NAVIGATION SYSTEM */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
+        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
+          
+          {/* 1. Search Bar inside Sticky Container */}
+          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
             <div className="flex items-center bg-white rounded-full">
               <div className="pl-4 text-[#E8500A] shrink-0">
                 <Search className="w-4 h-4" />
               </div>
               <input 
                 type="text" 
-                placeholder="Search by Brand Name or Category..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+                placeholder="Search by Brand Name or Category..." 
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
               />
               <button 
+                onClick={() => setSearchQuery(searchQuery)}
                 className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
               >
                 Search
               </button>
             </div>
           </div>
+
+          {/* 2. Navigation Tabs */}
+          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
+            {[
+              { id: 'All Brands', label: "All Brands", icon: <Layers size={13} /> },
+              { id: 'Trending Brands', label: "Trending Brands", icon: <Flame size={13} /> },
+              { id: 'Featured Brands', label: "Featured Brands", icon: <Sparkles size={13} /> },
+              { id: 'Hot Deals Brands', label: "Hot Deals Brands", icon: <Zap size={13} /> },
+              { id: 'Top Rated Brands', label: "Top Rated Brands", icon: <Star size={13} /> }
+            ].map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  const el = document.getElementById("brands-main-display");
+                  if (el) {
+                    const offset = 220; // safe header + sticky offset
+                    const elementPosition = el.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: 'smooth'
+                    });
+                  }
+                }}
+                className={cn(
+                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
+                  activeTab === tab.id
+                    ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
+                    : "bg-white border-gray-250 text-gray-400 hover:text-navy hover:bg-gray-50/80"
+                )}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
         </div>
       </div>
 
-
       {/* Sticky Alphabet Filter Bar */}
-      <div className="sticky top-[64px] z-30 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm py-4">
+      <div className="sticky top-[230px] z-30 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm py-4">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between gap-6 overflow-x-auto no-scrollbar">
             <div className="flex items-center gap-1">
@@ -308,7 +384,7 @@ export function BrandsPage() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 space-y-12 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+        <main id="brands-main-display" className="scroll-mt-36 flex-1 space-y-12 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
           {/* Choosify Recommends Section */}
           <div className="mb-12">
             <div className="flex items-center gap-4 mb-8 overflow-hidden">

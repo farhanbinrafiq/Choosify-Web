@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { PRODUCTS, BRANDS, PLACEHOLDER_IMAGE } from "../constants";
 import { useGlobalState } from "../context/GlobalStateContext";
+import { useDashboard } from "../context/DashboardContext";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
 import { toast } from "react-hot-toast";
@@ -113,10 +114,18 @@ export function ProductDetailPage() {
   }, []);
 
   const { allProducts, allBrands, addToCart, mode } = useGlobalState();
+  const { addRecentlyViewed } = useDashboard();
   const product: any =
     allProducts.find((p: any) => p.id === Number(id)) ||
     allProducts.find((p: any) => p.id === Number(id) + 1000) ||
     allProducts[0];
+
+  React.useEffect(() => {
+    if (product) {
+      addRecentlyViewed(product);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
   const brandObj = allBrands.find((b: any) => b.id === product.brandId);
   const brandId = brandObj ? brandObj.id : 1;
   const brandName = brandObj ? brandObj.name : "Apex";
@@ -939,7 +948,7 @@ export function ProductDetailPage() {
       </div>
 
       {/* Sticky Section Navigation */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-2 overflow-x-auto no-scrollbar">
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-3.5">
         <div className="max-w-[1440px] mx-auto px-6 flex items-center justify-between gap-4">
           <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
             {[
@@ -959,6 +968,11 @@ export function ProductDetailPage() {
                 id: "product-overview-section",
                 icon: <Info size={13} />,
               },
+              {
+                label: "Brand Overview",
+                id: "brand-overview-section",
+                icon: <Award size={13} />,
+              },
             ].map((item) => (
               <button
                 key={item.id}
@@ -966,8 +980,8 @@ export function ProductDetailPage() {
                 className={cn(
                   "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px]",
                   activeSection === item.label
-                    ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic"
-                    : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100",
+                    ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent"
+                    : "bg-white border border-gray-200/85 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-50/80",
                 )}
               >
                 {item.icon}

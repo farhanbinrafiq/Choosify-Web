@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Calculator, Layers } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Calculator, Layers, Award, Flame, Clock, Sparkles } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
@@ -12,6 +12,7 @@ export function AllProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { allProducts, allBrands, mode } = useGlobalState();
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('All Products');
 
   // Trigger brief simulation of fetching state on filter change / refresh to boost perceived interaction response
   useEffect(() => {
@@ -20,7 +21,7 @@ export function AllProductsPage() {
       setIsLoading(false);
     }, 600);
     return () => clearTimeout(timer);
-  }, [mode, searchParams]);
+  }, [mode, searchParams, activeTab]);
 
   // Active query parameters / search inputs
   const rawQuery = searchParams.get('q') || '';
@@ -85,6 +86,19 @@ export function AllProductsPage() {
   const filteredProducts = React.useMemo(() => {
     let result = [...allProducts];
 
+    // 0. Tab Selection Filtering
+    if (activeTab === 'Trending') {
+      result = result.filter(p => p.stock && p.stock > 100);
+    } else if (activeTab === 'Popular') {
+      result = result.filter(p => !p.id || p.id % 2 === 0);
+    } else if (activeTab === 'Newest') {
+      result = [...result].reverse();
+    } else if (activeTab === 'Top Rated') {
+      result = result.filter(p => p.codSupport);
+    } else if (activeTab === 'Featured') {
+      result = result.filter(p => p.id && Math.floor(p.id) % 3 === 0);
+    }
+
     // 1. Text Search across Title, Description, Brand, and Category
     const textQuery = (searchParams.get('q') || '').toLowerCase().trim();
     if (textQuery) {
@@ -133,7 +147,7 @@ export function AllProductsPage() {
     }
 
     return result;
-  }, [allProducts, searchParams, selectedCategory, selectedBrand, mode, moqFilter, priceTierSlab, sortOption]);
+  }, [allProducts, searchParams, selectedCategory, selectedBrand, mode, moqFilter, priceTierSlab, sortOption, activeTab]);
 
   const handleResetFilters = () => {
     setSelectedCategory(null);
@@ -147,7 +161,7 @@ export function AllProductsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
        {/* Header / Hero Section (Locked Visual Design) */}
-      <div className="w-full bg-[#0A0B1E] pt-12 pb-16 px-4 md:px-8 relative overflow-hidden">
+      <div className="w-full bg-[#0A0B1E] pt-8 pb-10 px-4 md:px-8 relative overflow-hidden">
         {mode === 'wholesale' ? (
           <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
         ) : (
@@ -155,7 +169,7 @@ export function AllProductsPage() {
         )}
         <div className="max-w-4xl mx-auto relative z-10 flex flex-col items-center justify-center text-center">
           {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-6 w-full">
+          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-3 w-full">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={10} className="text-white/20" />
             <span className="text-white">Products</span>
@@ -175,17 +189,24 @@ export function AllProductsPage() {
             </div>
           )}
 
-          <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-8 max-w-2xl text-center">
+          <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-4 max-w-2xl text-center">
             {mode === 'retail' 
               ? 'Discover & Compare standard retail items with Cash on Delivery support.' 
               : 'Direct brand inventory sourcing with customized quantity slabs & volume pricing.'}
           </p>
+
+          <div className="text-orange-primary font-black text-xs uppercase tracking-widest shrink-0 bg-white/5 border border-white/10 backdrop-blur-md px-6 py-2.5 rounded-full italic mb-2">
+            {filteredProducts.length} Listings Found
+          </div>
+        </div>
+      </div>
+
+      {/* GLOBAL STICKY NAVIGATION SYSTEM */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
+        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
           
-          {/* SEARCH BAR (Standardized design conforming to source of truth) */}
-          <div 
-            className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-8"
-            style={{ width: '100%', maxWidth: '640px' }}
-          >
+          {/* 1. Search Bar inside Sticky Container */}
+          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
             <div className="flex items-center bg-white rounded-full">
               <div className="pl-4 text-[#E8500A] shrink-0">
                 <Search className="w-4 h-4" />
@@ -196,7 +217,7 @@ export function AllProductsPage() {
                 onChange={(e) => setSidebarSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
                 placeholder={mode === 'retail' ? "Search retail products, brands or details..." : "Search wholesale factory suppliers, bulk slots..."} 
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
               />
               <button 
                 onClick={() => executeSearch(sidebarSearch)}
@@ -207,9 +228,44 @@ export function AllProductsPage() {
             </div>
           </div>
 
-          <div className="text-orange-primary font-black text-xs uppercase tracking-widest shrink-0 bg-white/5 border border-white/10 backdrop-blur-md px-6 py-2.5 rounded-full italic mb-2">
-            {filteredProducts.length} Listings Found
+          {/* 2. Navigation Tabs */}
+          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
+            {[
+              { id: 'All Products', label: "All Products", icon: <Layers size={13} /> },
+              { id: 'Trending', label: "Trending", icon: <Flame size={13} /> },
+              { id: 'Popular', label: "Popular", icon: <Star size={13} /> },
+              { id: 'Newest', label: "Newest", icon: <Clock size={13} /> },
+              { id: 'Top Rated', label: "Top Rated", icon: <Award size={13} /> },
+              { id: 'Featured', label: "Featured", icon: <Sparkles size={13} /> }
+            ].map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  const el = document.getElementById("all-products-display");
+                  if (el) {
+                    const offset = 220; // safe header + sticky offset
+                    const elementPosition = el.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: 'smooth'
+                    });
+                  }
+                }}
+                className={cn(
+                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
+                  activeTab === tab.id
+                    ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
+                    : "bg-white border-gray-250 text-gray-400 hover:text-navy hover:bg-gray-50/80"
+                )}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
+
         </div>
       </div>
 
@@ -367,7 +423,7 @@ export function AllProductsPage() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+        <main id="all-products-display" className="scroll-mt-36 flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
           {/* Top Bar / Sorting */}
           <div className="flex flex-col gap-6 mb-8">
             <div className="flex flex-wrap items-center justify-between gap-4">

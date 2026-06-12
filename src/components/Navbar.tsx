@@ -382,9 +382,6 @@ export function Navbar() {
                   <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/')}>
                     <span className="italic">Home</span>
                   </Link>
-                  <Link to="/categories" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/categories')}>
-                    <span className="italic">All Categories</span>
-                  </Link>
                   <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/products')}>
                     <span className="italic">Products Library</span>
                   </Link>
@@ -394,14 +391,17 @@ export function Navbar() {
                   <Link to="/guides" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/guides')}>
                     <span className="italic">Recommendations</span>
                   </Link>
-                  <Link to="/compare" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/compare')}>
-                    <span className="italic">Compare Engine</span>
-                  </Link>
                   <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/deals')}>
                     <span className="italic">Flash Deals</span>
                   </Link>
                   <Link to="/viral-products" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/viral-products')}>
                     <span className="italic">Viral Products</span>
+                  </Link>
+                  <Link to="/compare" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/compare')}>
+                    <span className="italic">Compare Engine</span>
+                  </Link>
+                  <Link to="/categories" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/categories')}>
+                    <span className="italic">All Categories</span>
                   </Link>
                   
                   <div className="h-px bg-white/10 my-1" />

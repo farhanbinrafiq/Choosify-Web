@@ -4,7 +4,8 @@ import {
   ArrowLeft, Share2, Bookmark, Star, ArrowRight, Play, Info, 
   CheckCircle2, ShoppingBag, Smartphone, Laptop, Zap, Globe, MessageSquare,
   ChevronLeft, ChevronRight, Youtube, Eye, Heart, HelpCircle, Users, Palette, Sparkles, XCircle,
-  PartyPopper, Ruler, Shirt, CalendarDays, Check, X, BookOpen, Facebook, Twitter, ShieldCheck, Layers
+  PartyPopper, Ruler, Shirt, CalendarDays, Check, X, BookOpen, Facebook, Twitter, ShieldCheck, Layers,
+  Package, Award, User, Gift
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BLOGS, PRODUCTS } from '../constants';
@@ -188,7 +189,8 @@ export function GuideDetailPage() {
         { id: 'quick-verdict', name: 'quick-verdict' },
         { id: 'takeaways', name: 'takeaways' },
         { id: 'top-3', name: 'top-3' },
-        { id: 'all-products', name: 'all-products' }
+        { id: 'all-products', name: 'all-products' },
+        { id: 'reviewer-profile', name: 'reviewer-profile' }
       ];
 
       if (window.scrollY < 200) {
@@ -378,28 +380,30 @@ export function GuideDetailPage() {
       </div>
 
       {/* STICKY GUIDE NAVIGATION */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-2">
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-3.5">
          <div className="max-w-[1440px] mx-auto px-6">
             <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
                {[
-                 { id: 'all-section', name: 'all', label: 'ALL' },
-                 { id: 'winner', name: 'winner', label: 'WINNER' },
-                 { id: 'why-won', name: 'why-won', label: 'WHY IT WON' },
-                 { id: 'quick-verdict', name: 'quick-verdict', label: 'QUICK VERDICT' },
-                 { id: 'takeaways', name: 'takeaways', label: 'KEY TAKEAWAYS' },
-                 { id: 'top-3', name: 'top-3', label: 'TOP 3' },
-                 { id: 'all-products', name: 'all-products', label: 'ALL PRODUCTS' }
+                 { id: 'all-section', name: 'all', label: 'All', icon: <Package size={13} /> },
+                 { id: 'winner', name: 'winner', label: 'Winner Product', icon: <Award size={13} /> },
+                 { id: 'why-won', name: 'why-won', label: 'Why It Won', icon: <ShieldCheck size={13} /> },
+                 { id: 'quick-verdict', name: 'quick-verdict', label: 'Quick Verdict', icon: <HelpCircle size={13} /> },
+                 { id: 'takeaways', name: 'takeaways', label: 'Key Takeaways', icon: <Layers size={13} /> },
+                 { id: 'top-3', name: 'top-3', label: 'Top Alternatives', icon: <Star size={13} /> },
+                 { id: 'all-products', name: 'all-products', label: 'All Mentioned Products', icon: <ShoppingBag size={13} /> },
+                 { id: 'reviewer-profile', name: 'reviewer-profile', label: 'Reviewer Profile', icon: <User size={13} /> }
                ].map(item => (
                  <button 
                    key={item.id}
                    onClick={() => scrollToSection(item.id)}
                    className={cn(
-                     "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-bold border-0",
+                     "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px]",
                      activeSection === item.name 
-                       ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
-                       : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100"
+                       ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent" 
+                       : "bg-white border border-gray-200/85 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-50/80"
                    )}
                  >
+                    {item.icon}
                     <span>{item.label}</span>
                  </button>
                ))}
@@ -764,7 +768,7 @@ export function GuideDetailPage() {
                <aside className="hidden lg:flex flex-col gap-6 sticky top-[160px] max-h-[calc(100vh-180px)] overflow-y-auto no-scrollbar pb-10 flex-shrink-0">
                   
                   {/* SECTION 1: REVIEWER PROFILE */}
-                  <div className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm flex flex-col items-center text-center">
+                  <div id="reviewer-profile" className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm flex flex-col items-center text-center scroll-mt-36">
                      <div className="w-20 h-20 rounded-full border-2 border-orange-primary/20 p-0.5 mb-4 shrink-0">
                         <img src={creator.avatar} className="w-full h-full object-cover rounded-full" alt={creator.name} />
                      </div>

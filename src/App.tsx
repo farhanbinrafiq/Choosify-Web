@@ -7,7 +7,6 @@ import { FloatingOverlays } from './components/FloatingOverlays';
 import { DashboardProvider } from './context/DashboardContext';
 import { GlobalStateProvider } from './context/GlobalStateContext';
 import { Toaster } from 'react-hot-toast';
-import { MobileNav } from './components/MobileNav';
 import { AnimatePresence, motion } from 'motion/react';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LoadingFallback } from './components/LoadingFallback';
@@ -231,7 +230,6 @@ export default function App() {
             />
             <ScrollToTop />
             <AppContent />
-            <MobileNav />
             <PWAInstallPrompt />
           </DashboardProvider>
         </GlobalStateProvider>
@@ -248,7 +246,7 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="pb-28 lg:pb-0"
+      className="pb-0"
     >
       {children}
     </motion.div>

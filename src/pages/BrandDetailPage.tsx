@@ -423,111 +423,89 @@ export function BrandDetailPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
-            <div className="flex flex-col gap-8 items-center justify-center text-center max-w-3xl mx-auto w-full">
+            <div className="flex flex-col lg:grid lg:grid-cols-[1.5fr_1fr] xl:grid-cols-[1.6fr_1fr] gap-8 xl:gap-12 lg:items-stretch w-full">
               
-              {/* Left Side: Brand Profile Details */}
-              <div className="flex-1 w-full text-center flex flex-col items-center justify-center">
-                 <div className="flex flex-col items-center justify-center gap-6 mb-8 text-center">
-                    <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white relative shrink-0 mx-auto">
+              {/* Left Side: Brand Profile Details & Info */}
+              <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left gap-6 order-1 lg:order-none lg:justify-between lg:h-full">
+                 <div className="w-full flex-1 flex flex-col items-center lg:items-start gap-6">
+                    <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white relative shrink-0 mx-auto lg:mx-0">
                        {renderBrandLogo(brand)}
                        <div className="absolute -top-1.5 -right-1.5 w-7 h-7 bg-[#E8500A] rounded-full flex items-center justify-center text-white border-2 border-[#10133A] shadow-lg">
                           <CheckCircle2 size={13} fill="currentColor" className="text-white stroke-[#E8500A]" />
                        </div>
                     </div>
 
-                    <div className="flex-1">
-                       <div className="flex flex-col sm:flex-row items-center gap-3 mb-2 flex-wrap justify-center">
-                          <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">{brand.name}</h1>
+                    <div className="w-full flex-1 flex flex-col items-center lg:items-start">
+                       <div className="flex flex-col sm:flex-row items-center gap-3 mb-2 flex-wrap justify-center lg:justify-start">
+                          <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none text-center lg:text-left">{brand.name}</h1>
                           <div className="bg-[#4DBC15] px-3 py-1 rounded-full flex items-center gap-2 shadow-md">
                              <ShieldCheck size={11} className="text-white" />
                              <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">Verified Brand</span>
                           </div>
                        </div>
                        
-                       <p className="text-[10px] md:text-[11px] font-extrabold text-[#E8500A]/90 uppercase tracking-[0.2em] mb-4 text-center">
-                         {brand.category || 'Fashion & Clothing'}
+                       <p className="text-[10px] md:text-[11px] font-extrabold text-[#E8500A]/90 uppercase tracking-[0.2em] mb-3 text-center lg:text-left">
+                         {brand.category || 'Fashion & Clothing'} • Premium Showcase
                        </p>
 
-                       <div className="flex items-center gap-5 flex-wrap justify-center">
+                       <p className="text-xs md:text-sm font-medium text-white/70 max-w-md mb-4 text-center lg:text-left leading-relaxed">
+                         Experience the perfect balance of elite-tier product selections, verified customer rankings, and high-quality local trust.
+                       </p>
+
+                       <div className="flex items-center gap-4 flex-wrap justify-center lg:justify-start">
                           <div className="flex items-center gap-2">
                              <Heart size={14} className="text-[#E8500A] fill-current" />
-                             <span className="text-white font-extrabold text-[10px] uppercase tracking-widest italic">50,000 Shoppers Loves The Brands</span>
+                             <span className="text-white font-extrabold text-[9px] md:text-[10px] uppercase tracking-widest italic whitespace-nowrap">50,000 Love This Brand</span>
                           </div>
-                          <div className="h-4 w-px bg-white/10 hidden sm:block" />
+                          <div className="h-4 w-px bg-white/15 hidden sm:block" />
                           <div className="flex items-center gap-2">
                              <TrendingUp size={14} className="text-green-accent" />
-                             <span className="text-white font-extrabold text-[10px] uppercase tracking-widest italic">Score: 92/100</span>
+                             <span className="text-white font-extrabold text-[9px] md:text-[10px] uppercase tracking-widest italic whitespace-nowrap">Score: 92/100</span>
                           </div>
                        </div>
                     </div>
-                                   {/* SEARCH BAR (Added standardized layout) */}
-                  <div 
-                     className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 my-8"
-                     style={{ width: '100%', maxWidth: '640px' }}
-                  >
-                     <div className="flex items-center bg-white rounded-full">
-                        <div className="pl-4 text-[#E8500A] shrink-0">
-                           <Search className="w-4 h-4" />
-                        </div>
-                        <input 
-                           type="text" 
-                           placeholder="Search products of this brand..." 
-                           value={currentSearchInput}
-                           onChange={(e) => setCurrentSearchInput(e.target.value)}
-                           onKeyDown={(e) => {
-                              if (e.key === 'Enter') setSearchFilter(currentSearchInput);
-                           }}
-                           className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none text-left" 
-                        />
-                        <button 
-                           onClick={() => setSearchFilter(currentSearchInput)}
-                           className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                        >
-                           Search
-                        </button>
-                     </div>
-                  </div>  </div>
 
-                  {/* Action buttons */}
-                 <div className="flex flex-wrap gap-3.5 mb-8 justify-center text-white">
-                    <button 
-                      onClick={() => setIsLoved(!isLoved)}
-                      className={cn(
-                        "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
-                        isLoved 
-                          ? "bg-white text-[#E8500A] border-white shadow-white/5" 
-                          : "bg-[#E8500A] text-white border-[#E8500A]/30 hover:bg-[#ff5d14]"
-                      )}
-                    >
-                       <Heart size={14} className={cn("transition-colors", isLoved && "fill-current text-[#E8500A]")} />
-                       {isLoved ? "Loved" : "Love Brand"}
-                    </button>
-                    
-                    <button 
-                      onClick={() => {
-                        setIsFollowed(!isFollowed);
-                        toast.success(isFollowed ? `Unfollowed ${brand.name}` : `Following ${brand.name} for exclusive drops!`);
-                      }}
-                      className={cn(
-                        "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer",
-                        isFollowed
-                          ? "bg-[#4DBC15] text-white border-[#4DBC15]" 
-                          : "bg-white text-[#1A1D4E] border-white hover:bg-gray-50"
-                      )}
-                    >
-                       {isFollowed ? "Following" : "Follow the Brand"}
-                    </button>
+                    {/* Action buttons */}
+                    <div className="flex flex-wrap gap-3.5 justify-center lg:justify-start text-white w-full">
+                       <button 
+                         onClick={() => setIsLoved(!isLoved)}
+                         className={cn(
+                           "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
+                           isLoved 
+                             ? "bg-white text-[#E8500A] border-white shadow-white/5" 
+                             : "bg-[#E8500A] text-white border-[#E8500A]/30 hover:bg-[#ff5d14]"
+                         )}
+                       >
+                          <Heart size={14} className={cn("transition-colors", isLoved && "fill-current text-[#E8500A]")} />
+                          {isLoved ? "Loved" : "Love Brand"}
+                       </button>
+                       
+                       <button 
+                         onClick={() => {
+                           setIsFollowed(!isFollowed);
+                           toast.success(isFollowed ? `Unfollowed ${brand.name}` : `Following ${brand.name} for exclusive drops!`);
+                         }}
+                         className={cn(
+                           "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer",
+                           isFollowed
+                             ? "bg-[#4DBC15] text-white border-[#4DBC15]" 
+                             : "bg-white text-[#1A1D4E] border-white hover:bg-gray-50"
+                         )}
+                       >
+                          {isFollowed ? "Following" : "Follow the Brand"}
+                       </button>
 
-                    <button 
-                      onClick={() => scrollToSection('public-reviews-section')}
-                      className="bg-transparent text-white border border-white/20 hover:bg-white/10 hover:border-white/40 text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all italic cursor-pointer"
-                    >
-                       Write a Review
-                    </button>
+                       <button 
+                         onClick={() => scrollToSection('public-reviews-section')}
+                         className="bg-transparent text-white border border-white/20 hover:bg-white/10 hover:border-white/40 text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all italic cursor-pointer"
+                       >
+                          Write a Review
+                       </button>
+                    </div>
                  </div>
-                 
-                 {/* Social links */}
-                 <div className="flex items-center gap-4 mt-8 flex-wrap justify-center">
+
+                 {/* Desktop Social links */}
+                 <div className="hidden lg:flex items-center gap-4 mt-2 flex-wrap justify-start">
                     <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">Find Us On</span>
                     <div className="flex items-center gap-5">
                       <a href="#" className="group flex flex-col items-center gap-1">
@@ -559,8 +537,8 @@ export function BrandDetailPage() {
               </div>
 
               {/* Right Side: Score card */}
-              <div className="w-full lg:w-[420px] relative">
-                 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-white relative overflow-hidden group">
+              <div className="w-full lg:w-full max-w-md relative order-3 lg:order-none lg:flex lg:flex-col lg:justify-between lg:h-full">
+                 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-white relative overflow-hidden group mb-auto">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/10 blur-2xl rounded-full translate-x-1/3 -translate-y-1/3" />
                     
                     <div className="flex justify-between items-start mb-6">
@@ -609,22 +587,53 @@ export function BrandDetailPage() {
                  </div>
 
                  {/* Save share controls */}
-                 <div className="absolute -bottom-6 right-4 flex items-center gap-3 z-20">
+                 <div className="absolute lg:relative -bottom-6 lg:bottom-auto right-4 lg:right-auto flex items-center lg:justify-end gap-3 z-20 mt-4 lg:mt-0 lg:pt-2.5">
                     <button 
                       onClick={() => {
                         navigator.clipboard.writeText(window.location.href);
                         toast.success("Page link copied to clipboard!");
                       }}
-                      className="w-11 h-11 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50"
+                      className="w-11 h-11 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50 text-navy"
                     >
                        <Share2 size={16} />
                     </button>
                     <button 
                       onClick={() => toast.success(`${brand.name} saved to your bookmarks!`)}
-                      className="w-11 h-11 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50"
+                      className="w-11 h-11 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50 text-navy"
                     >
                        <Bookmark size={15} />
                     </button>
+                 </div>
+              </div>
+
+              {/* Mobile Social links */}
+              <div className="flex lg:hidden items-center gap-4 mt-8 flex-wrap justify-center order-5 w-full">
+                 <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">Find Us On</span>
+                 <div className="flex items-center gap-5">
+                   <a href="#" className="group flex flex-col items-center gap-1">
+                      <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#1877F2] flex items-center justify-center text-white transition-all shadow-md">
+                        <FacebookIcon size={15} />
+                      </div>
+                      <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Facebook</span>
+                   </a>
+                   <a href="#" className="group flex flex-col items-center gap-1">
+                      <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#C13584] flex items-center justify-center text-white transition-all shadow-md">
+                        <InstagramIcon size={15} />
+                      </div>
+                      <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Instagram</span>
+                   </a>
+                   <a href="#" className="group flex flex-col items-center gap-1">
+                      <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-black flex items-center justify-center text-white transition-all shadow-md">
+                        <TikTokIcon size={14} />
+                      </div>
+                      <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">TikTok</span>
+                   </a>
+                   <a href="#" className="group flex flex-col items-center gap-1">
+                      <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#FF0000] flex items-center justify-center text-white transition-all shadow-md">
+                        <Youtube size={15} />
+                      </div>
+                      <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Youtube</span>
+                   </a>
                  </div>
               </div>
 
@@ -653,8 +662,37 @@ export function BrandDetailPage() {
       </div>
 
       {/* 3. STICKY SECTION NAVIGATION */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-2">
-         <div className="max-w-[1440px] mx-auto px-6">
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-3.5">
+         <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-3.5">
+            
+            {/* Search Bar */}
+            <div 
+               className="relative w-full max-w-2xl mx-auto bg-gray-50 p-1 rounded-full border border-gray-200/50 shadow-sm focus-within:border-gray-200/90 transition-all duration-300"
+               style={{ width: '100%', maxWidth: '640px' }}
+            >
+               <div className="flex items-center bg-white rounded-full">
+                  <div className="pl-4 text-[#E8500A] shrink-0">
+                     <Search className="w-4 h-4" />
+                  </div>
+                  <input 
+                     type="text" 
+                     placeholder="Search products of this brand..." 
+                     value={currentSearchInput}
+                     onChange={(e) => setCurrentSearchInput(e.target.value)}
+                     onKeyDown={(e) => {
+                        if (e.key === 'Enter') setSearchFilter(currentSearchInput);
+                     }}
+                     className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none text-left" 
+                  />
+                  <button 
+                     onClick={() => setSearchFilter(currentSearchInput)}
+                     className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                  >
+                     Search
+                  </button>
+               </div>
+            </div>
+
             <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
                
                <button 
@@ -662,8 +700,8 @@ export function BrandDetailPage() {
                  className={cn(
                    "px-6 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
                    activeSection === 'all' 
-                     ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
-                     : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100"
+                     ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent" 
+                     : "bg-white border border-gray-200/85 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-50/80"
                  )}
                >
                   All
@@ -682,8 +720,8 @@ export function BrandDetailPage() {
                    className={cn(
                      "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
                      activeSection === item.name 
-                       ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
-                       : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100"
+                       ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent" 
+                       : "bg-white border border-gray-200/85 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-50/80"
                    )}
                  >
                     {item.icon}

@@ -52,6 +52,7 @@ export function CategoriesPage() {
   const { mode } = useGlobalState();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategoryTab, setActiveCategoryTab] = useState('All Categories');
   const [isBrandsCollapsed, setIsBrandsCollapsed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -160,7 +161,7 @@ export function CategoriesPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
-      <div className="w-full bg-[#0A0A1F] px-8 relative overflow-hidden flex items-center justify-center" style={{ height: '303px' }}>
+      <div className="w-full bg-[#0A0A1F] px-6 py-10 md:py-12 relative overflow-hidden flex items-center justify-center">
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -219,33 +220,75 @@ export function CategoriesPage() {
             </motion.div>
           </div>
  
-          <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[9px] md:text-[10.5px] mb-3 uppercase tracking-[0.2em] opacity-80 leading-relaxed">
+          <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[9px] md:text-[10.5px] mb-1 uppercase tracking-[0.2em] opacity-80 leading-relaxed">
             DISCOVER PREMIUM PRODUCTS, OFFICIAL STORES, AND BEST DEALS ACROSS BANGLADESH.
           </p>
- 
-          {/* SEARCH BAR (Standardized layout) */}
-          <div 
-            className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-3"
-            style={{ width: '100%', maxWidth: '640px' }}
-          >
+        </div>
+      </div>
+
+      {/* GLOBAL STICKY NAVIGATION SYSTEM */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
+        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4">
+          
+          {/* 1. Search Bar inside Sticky Container */}
+          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
             <div className="flex items-center bg-white rounded-full">
               <div className="pl-4 text-[#E8500A] shrink-0">
                 <LucideIcons.Search className="w-4 h-4" />
               </div>
               <input 
                 type="text" 
-                placeholder="Search by Brand Name or Category..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+                placeholder="Search by Brand Name or Category..." 
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
               />
               <button 
+                onClick={() => setSearchQuery(searchQuery)}
                 className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
               >
                 Search
               </button>
             </div>
           </div>
+
+          {/* 2. Navigation Tabs */}
+          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
+            {[
+              { label: "All Categories", icon: <LucideIcons.Layers size={13} /> },
+              { label: "Popular", icon: <LucideIcons.Flame size={13} /> },
+              { label: "Trending", icon: <LucideIcons.TrendingUp size={13} /> },
+              { label: "New Arrivals", icon: <LucideIcons.Clock size={13} /> },
+              { label: "Top Rated", icon: <LucideIcons.Award size={13} /> }
+            ].map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => {
+                  setActiveCategoryTab(tab.label);
+                  const resultsDiv = document.getElementById("categories-main-display");
+                  if (resultsDiv) {
+                    const offset = 220; // top header offset
+                    const elementPosition = resultsDiv.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: "smooth"
+                    });
+                  }
+                }}
+                className={cn(
+                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
+                  activeCategoryTab === tab.label
+                    ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
+                    : "bg-white border-gray-200 text-gray-400 hover:text-navy hover:bg-gray-50"
+                )}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
         </div>
       </div>
 
@@ -387,16 +430,15 @@ export function CategoriesPage() {
           </div>
         </aside>
 
-        {/* CENTER COLUMN: MAIN CATEGORIES STREAM */}
-        <div className="flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+        <div id="categories-main-display" className="scroll-mt-36 flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
           {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[repeat(auto-fill,237.328px)] xl:grid-cols-[repeat(auto-fill,237.328px)] gap-4 justify-start">
               {Array.from({ length: 12 }).map((_, idx) => (
                 <CategoryCardSkeleton key={idx} />
               ))}
             </div>
           ) : (
-            <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[repeat(auto-fill,237.328px)] xl:grid-cols-[repeat(auto-fill,237.328px)] gap-4 justify-start">
               {categoriesList.map((cat, i) => {
                 const IconComponent = (LucideIcons as any)[cat.icon] || LucideIcons.Package;
                 const isExpanded = expandedCategory === cat.name;
@@ -407,7 +449,7 @@ export function CategoriesPage() {
                       layout="position"
                       onClick={() => handleCategoryClick(cat.name)}
                       className={cn(
-                        "bg-white border rounded-xl p-4 flex flex-col items-start transition-all duration-200 cursor-pointer group relative overflow-hidden",
+                        "bg-white border rounded-xl p-4 flex flex-col items-start transition-all duration-200 cursor-pointer group relative overflow-hidden w-full lg:w-[237.328px]",
                         isExpanded 
                           ? "border-[#E8500A] ring-4 ring-[#E8500A]/5 z-20 shadow-sm" 
                           : "border-[#e8edf2] hover:border-gray-200/90 hover:scale-[1.01]"
@@ -432,7 +474,7 @@ export function CategoriesPage() {
                         layoutId="arrow"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-r border-b border-navy/10"
+                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-r border-b border-[#e8edf2]"
                       />
                     )}
                   </motion.div>
@@ -448,46 +490,67 @@ export function CategoriesPage() {
                           height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] },
                           opacity: { duration: 0.3 }
                         }}
-                        className="col-span-2 md:col-span-3 lg:col-span-3 xl:col-span-4 bg-white shadow-2xl rounded-3xl p-8 border border-gray-100 overflow-hidden z-10"
+                        className="col-span-2 md:col-span-3 lg:col-span-full xl:col-span-full bg-white shadow-md rounded-2xl p-6 md:p-8 border border-[#e8edf2] overflow-hidden z-10 text-left"
                       >
                         <motion.div 
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.1 }}
-                          className="flex items-center gap-4 mb-8"
+                          className="flex items-center justify-between pb-4 mb-6 border-b border-gray-100"
                         >
-                          <div className={cn("w-12 h-12 rounded-xl text-white flex items-center justify-center shadow-lg bg-gradient-to-br", cat.color)}>
-                            <IconComponent size={24} />
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
+                              {getCategoryIconComponent(cat.name, cat.icon)}
+                            </div>
+                            <div className="text-left">
+                              <h2 className="text-base font-semibold text-[#1a1a2e] uppercase tracking-tight">
+                                {cat.name} <span className="text-[#E8500A]">SUBCATEGORIES</span>
+                              </h2>
+                              <p className="text-[10px] text-[#8a9bb0] font-semibold uppercase tracking-[0.2em] mt-1">
+                                {cat.count} Products Across {Math.floor(cat.count/15)} Brands - Curated Recommendations
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h2 className="text-2xl font-black text-navy tracking-tight uppercase italic">{cat.name}</h2>
-                            <p className="text-[10px] font-bold text-orange-primary uppercase tracking-[0.3em]">
-                              {cat.count} Products Across {Math.floor(cat.count/15)} Brands - Updated Today
-                            </p>
-                          </div>
+                          
+                          {/* Easy closing interactive trigger */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedCategory(null);
+                            }}
+                            className="w-8 h-8 rounded-full border border-[#e8edf2] hover:border-[#E8500A]/30 flex items-center justify-center text-gray-400 hover:text-[#E8500A] transition-all hover:scale-105 active:scale-95 cursor-pointer bg-white"
+                            aria-label="Close subcategories"
+                          >
+                            <LucideIcons.X className="w-4 h-4" />
+                          </button>
                         </motion.div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                           {cat.subcategories.length > 0 ? (
                             cat.subcategories.map((sub, j) => {
-                              const SubIcon = (LucideIcons as any)[sub.icon] || LucideIcons.Package;
                               return (
                                 <motion.div
                                   initial={{ opacity: 0, scale: 0.95 }}
                                   animate={{ opacity: 1, scale: 1 }}
                                   transition={{ delay: 0.1 + (j * 0.03), duration: 0.3 }}
                                   key={sub.name}
-                                  className="bg-white rounded-2xl p-6 hover:shadow-2xl transition-all cursor-pointer group border border-gray-50 hover:border-navy/10"
+                                  className="bg-white border border-[#e8edf2] rounded-xl p-4 flex flex-col items-start hover:border-gray-200/90 hover:scale-[1.01] transition-all duration-200 cursor-pointer group text-left"
                                 >
-                                  <div className={cn(
-                                    "w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg transition-transform group-hover:scale-110 bg-gradient-to-br",
-                                    cat.color
-                                  )}>
-                                    <SubIcon size={20} className="text-white" />
+                                  {/* Redesigned to use identical radius, borders, and rounded circular icons as popular categories */}
+                                  <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
+                                    {getCategoryIconComponent(sub.name, sub.icon)}
                                   </div>
-                                  <h4 className="text-sm font-black text-navy mb-1 group-hover:text-orange-primary transition-colors">{sub.name}</h4>
-                                  <div className="flex items-center gap-1.5">
-                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{sub.brands} Brands Verified</span>
+                                  
+                                  <div className="w-full text-left">
+                                    <h4 className="font-medium text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-tight mb-1 uppercase tracking-tight">
+                                      {sub.name}
+                                    </h4>
+                                    <p className="text-[10px] text-red-500 font-semibold leading-none uppercase font-mono mt-1">
+                                      {sub.count} Products • {sub.brands} Brands
+                                    </p>
+                                    <p className="text-[9px] text-[#8a9bb0] font-medium leading-none uppercase mt-1.5">
+                                      Verified Options
+                                    </p>
                                   </div>
                                 </motion.div>
                               );
