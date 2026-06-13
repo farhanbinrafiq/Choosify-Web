@@ -11,6 +11,36 @@ export function DealsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Deals');
 
+  // ScrollSpy Active section detection for DealsPage major sections
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 220; // Safe position matching offsets
+      
+      const brandDealsEl = document.getElementById('featured-brand-deals-section');
+      if (brandDealsEl) {
+        const top = brandDealsEl.getBoundingClientRect().top + window.pageYOffset;
+        const height = brandDealsEl.offsetHeight;
+        if (scrollPosition >= top && scrollPosition < top + height) {
+          setActiveTab('Brand Deals');
+          return;
+        }
+      }
+
+      const allDealsEl = document.getElementById('all-deals');
+      if (allDealsEl) {
+        const top = allDealsEl.getBoundingClientRect().top + window.pageYOffset;
+        const height = allDealsEl.offsetHeight;
+        if (scrollPosition >= top && scrollPosition < top + height) {
+          // If we scroll back up into all-deals, fallback to "All Deals" if user is currently on Brand Deals
+          setActiveTab(prev => prev === 'Brand Deals' ? 'All Deals' : prev);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const filteredProducts = React.useMemo(() => {
     let result = [...PRODUCTS];
 
@@ -200,53 +230,14 @@ export function DealsPage() {
       </div>
 
       <main className="w-full bg-[#F3F9FF]/30 min-h-screen">
-        {/* Category & Filter Section */}
-        <div className="w-full bg-white border-b border-gray-100 py-6 px-8">
-          <div className="max-w-[1440px] mx-auto flex flex-col gap-8">
-            <div className="flex items-center justify-between gap-10">
-              <div className="flex-1 overflow-x-auto no-scrollbar">
-                <div className="flex items-center gap-4 whitespace-nowrap min-w-max">
-                  {[
-                    { name: 'Fashion & Lifestyle', icon: <Shirt size={16} /> },
-                    { name: 'Jewelry & Accessories', icon: <Gem size={16} /> },
-                    { name: 'Mobile & Wearable', icon: <Smartphone size={16} /> },
-                    { name: 'Eye-wear & Fragrances', icon: <Eye size={16} /> },
-                    { name: 'Gaming & Entertainment', icon: <Gamepad2 size={16} /> },
-                    { name: 'Food & Restaurants', icon: <Utensils size={16} /> },
-                    { name: 'Tech & electronics', icon: <Monitor size={16} /> },
-                    { name: 'TV & appliances', icon: <Tv size={16} /> },
-                    { name: 'Home & Kitchen', icon: <Home size={16} /> },
-                  ].map((cat, i) => (
-                    <button 
-                      key={i} 
-                      className={cn(
-                        "flex items-center gap-3 px-6 py-2.5 rounded-full border text-[11px] font-bold uppercase tracking-wider transition-all hover:border-orange-primary hover:text-orange-primary",
-                        i === 0 ? "bg-white border-[#1B5CFF] text-[#1B5CFF] shadow-sm" : "bg-white border-gray-100 text-gray-500"
-                      )}
-                    >
-                      <span className={i === 0 ? "text-[#1B5CFF]" : "text-gray-400 group-hover:text-orange-primary"}>{cat.icon}</span>
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest italic">Sort:</span>
-                <button className="flex items-center gap-3 px-6 py-2 bg-[#FF5B00] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-lg shadow-orange-primary/20">
-                  Most Popular <ChevronDown size={14} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Master Flex Column Structure below sticky bar */}
         <div className="max-w-[1440px] mx-auto py-12 px-6 w-full flex flex-col lg:flex-row gap-8 lg:gap-12 xl:gap-16 2xl:gap-24 relative items-start">
           
           {/* LEFT SIDEBAR: CATEGORIES CARD */}
           <aside className="w-full lg:w-64 xl:w-72 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar shrink-0">
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4">
               <div className="flex flex-col gap-1">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2">
                   <span className="text-orange-primary">CATA</span>GORIES
@@ -314,7 +305,7 @@ export function DealsPage() {
                     <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-2">FEATURED <span className="text-orange-primary">DEALS</span></h2>
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic">Handpicked Top Offers • Limited Time Selection</p>
                  </div>
-                 <div className="flex items-center gap-3 bg-[#F8FAFC] px-6 py-3 rounded-2xl border border-gray-100 shadow-sm">
+                 <div className="flex items-center gap-3 bg-[#F8FAFC] px-6 py-3 rounded-[5px] border border-gray-100 shadow-sm">
                     <ShoppingBag size={16} className="text-navy" />
                     <span className="text-[11px] font-black text-navy uppercase tracking-widest italic">{filteredProducts.length} ITEMS AVAILABLE</span>
                  </div>
@@ -322,7 +313,7 @@ export function DealsPage() {
    
               <div className="flex flex-col gap-10 items-center w-full">
                  {/* Banner Card */}
-                 <div className="w-full lg:h-[395px] flex-shrink-0">
+                 <div className="w-full lg:min-h-[395px] lg:h-auto flex-shrink-0">
                     <ProductCard 
                       product={{
                         ...filteredProducts[0] || PRODUCTS[0],
@@ -330,7 +321,7 @@ export function DealsPage() {
                         tagColor: "bg-[#E93B3B]",
                         originalPrice: "3,500"
                       }} 
-                      variant="featured" titleStyle={{ height: '100px', marginBottom: '11px' }}
+                      variant="featured" titleStyle={{ minHeight: '60px', marginBottom: '11px' }}
                       showCountdown={true}
                     />
                  </div>
@@ -355,7 +346,7 @@ export function DealsPage() {
             </section>
 
             {/* ALL DEALS Section Container */}
-            <section id="all-deals" className="py-16 bg-[#F3F9FF]/20 px-6 rounded-[32px] border border-gray-100 text-center w-full">
+            <section id="all-deals" className="py-16 bg-[#F3F9FF]/20 px-6 rounded-[5px] border border-gray-100 text-center w-full">
               <div className="mb-12 border-l-4 border-orange-primary px-6 text-left">
                  <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-2">ALL <span className="text-orange-primary">DEALS</span></h2>
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic px-2 border-l-4 border-orange-primary">Browse All Handpicked Offers</p>
@@ -402,7 +393,7 @@ export function DealsPage() {
              {/* Redesigned For Business & Sellers Card */}
              <div 
                id="section-sellers-deals" 
-               className="bg-white rounded-2xl border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
+               className="bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
                style={{ height: '464px' }}
              >
                <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
@@ -421,7 +412,7 @@ export function DealsPage() {
                  </p>
                </div>
 
-               <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+               <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
                  <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
                  <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                    Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
@@ -460,7 +451,7 @@ export function DealsPage() {
                     <div 
                       key={i} 
                       onClick={() => navigate(`/brands/${brand.id}/products`)}
-                      className="bg-white rounded-xl p-8 flex flex-col items-center text-center gap-6 hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer border border-[#e8edf2] group relative overflow-hidden shadow-none"
+                      className="bg-white rounded-[5px] p-8 flex flex-col items-center text-center gap-6 hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer border border-[#e8edf2] group relative overflow-hidden shadow-none"
                     >
                        <div className="absolute top-0 right-0 w-40 h-40 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-125 transition-transform duration-500" />
                        

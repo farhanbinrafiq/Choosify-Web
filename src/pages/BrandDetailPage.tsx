@@ -37,6 +37,7 @@ const TikTokIcon = ({ size = 16, ...props }: CustomIconProps) => (
 );
 
 import { InfluencerReviews } from '../components/InfluencerReviews';
+import { PublicReviewCard } from '../components/PublicReviewCard';
 
 function WithInfluencerReviews({ brandName, brandLogo }: { brandName: string; brandLogo?: string }) {
   const featuredReview = {
@@ -207,7 +208,7 @@ export function BrandDetailPage() {
   // ScrollSpy Active Section Detection
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200; // offset matches sticky selector
+      const scrollPosition = window.scrollY + 220; // safe offset matching navbar + sticky selectors
 
       const sections = [
         { id: 'deals-section', name: 'deals' },
@@ -226,9 +227,9 @@ export function BrandDetailPage() {
       for (const section of sections) {
         const el = document.getElementById(section.id);
         if (el) {
-          const top = el.offsetTop;
+          const top = el.getBoundingClientRect().top + window.pageYOffset;
           const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition <= top + height) {
+          if (scrollPosition >= top && scrollPosition < top + height) {
             currentSection = section.name;
           }
         }
@@ -1069,63 +1070,11 @@ export function BrandDetailPage() {
                      helpful: 89
                   }
                ].map((review, i) => (
-                  <div key={i} className="bg-gray-50 border border-gray-100/50 rounded-2xl p-6 flex flex-col group hover:shadow-md transition-shadow duration-300">
-                     <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                        <div className="flex items-center gap-3">
-                           <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-[#E8500A] p-0.5">
-                              <img src={review.dp} className="w-full h-full object-cover rounded-lg" alt={review.name} />
-                           </div>
-                           <div>
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                 <span className="font-extrabold text-[#1A1D4E] text-sm italic">{review.name}</span>
-                                 {review.verified && (
-                                    <span className="bg-[#4DBC15]/10 text-[#4DBC15] text-[7px] font-black uppercase px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                                       <CheckCircle2 size={8} className="text-[#4DBC15]" /> Verified
-                                    </span>
-                                 )}
-                              </div>
-                              <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider block mt-0.5">Posted {review.date}</span>
-                           </div>
-                        </div>
-                        <div className="text-right">
-                           <div className="flex gap-0.5 justify-end">
-                              {[1, 2, 3, 4, 5].map(star => (
-                                 <Star key={star} size={10} className={cn("fill-current", star <= review.rating ? "text-[#E8500A]" : "text-gray-200")} />
-                              ))}
-                           </div>
-                           <div className="text-sm font-black text-[#1A1D4E] mt-0.5 italic">{review.rating} <span className="text-[8px] text-gray-300 font-sans">/ 5</span></div>
-                        </div>
-                     </div>
-
-                     <div className="flex gap-2 mb-4">
-                        {review.productImages.map((img, j) => (
-                           <div key={j} className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 cursor-zoom-in">
-                              <img src={img} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" alt="review attachments" />
-                           </div>
-                        ))}
-                     </div>
-
-                     <div className="p-4 bg-white border border-gray-100 rounded-xl mb-4 relative flex-1">
-                        <p className="text-xs text-navy/80 font-bold leading-relaxed italic">
-                           "{review.comment}"
-                        </p>
-                     </div>
-
-                     <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100/50">
-                        <div className="flex flex-col">
-                           <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest italic mb-0.5">Purchase Date</span>
-                           <span className="text-[9px] font-black text-[#1A1D4E] uppercase tracking-wider italic">{review.purchaseDate}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                           <button 
-                             onClick={() => toast.success("Marked as helpful!")}
-                             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-gray-100 hover:border-navy text-[#1A1D4E] font-black text-[9px] uppercase tracking-widest italic transition-colors cursor-pointer"
-                           >
-                              <ThumbsUp size={10} /> Helpful ({review.helpful})
-                           </button>
-                        </div>
-                     </div>
-                  </div>
+                  <PublicReviewCard
+                     key={i}
+                     review={review}
+                     onHelpfulClick={() => toast.success("Marked as helpful!")}
+                  />
                ))}
             </div>
 

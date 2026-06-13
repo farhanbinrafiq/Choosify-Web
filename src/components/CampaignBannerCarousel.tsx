@@ -94,48 +94,54 @@ export function CampaignBannerCarousel() {
           >
             {/* Background Image with Overlay */}
             <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${currentCampaign.image})` }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-[#030409] via-[#05060f]/90 to-transparent md:bg-gradient-to-r md:from-[#030409] md:via-[#05060f]/85 md:to-[#05060f]/30" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#030409]/95 via-[#05060f]/75 to-[#030409]/95" />
             </div>
 
             {/* Campaign info */}
-            <div className="relative z-10 w-full h-full flex flex-col justify-center px-8 sm:px-12 md:px-16 text-left max-w-[70%] sm:max-w-[60%]">
-              
-              {/* Badges line: Sponsor and Countdown */}
-              <div className="flex flex-wrap items-center gap-3 mb-2 sm:mb-3">
-                {currentCampaign.sponsorBadge && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8500A]/90 backdrop-blur-md border border-[#FF5B00]/40 text-[9px] font-black tracking-widest uppercase text-white shadow-sm">
-                    <Sparkles className="w-2.5 h-2.5" />
-                    {currentCampaign.sponsorBadge}
-                  </span>
-                )}
-                {currentCampaign.countdownEnd && (
-                  <CampaignCountdown deadline={currentCampaign.countdownEnd} />
-                )}
-              </div>
+            <div className="relative z-10 w-full h-full flex flex-col justify-center px-6 sm:px-12 md:px-16 py-4">
+              <div className="flex flex-col sm:flex-row-reverse sm:items-center sm:justify-between gap-4 md:gap-8 w-full">
+                
+                {/* RIGHT SIDE: Campaign Information Area */}
+                <div className="flex flex-col text-left items-start flex-1 order-1 sm:order-2">
+                  {currentCampaign.sponsorBadge && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E8500A]/90 backdrop-blur-md border border-[#FF5B00]/40 text-[8.5px] sm:text-[9.5px] font-black tracking-widest uppercase text-white shadow-sm mb-1.5 sm:mb-2.5">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      {currentCampaign.sponsorBadge}
+                    </span>
+                  )}
 
-              {/* Title matches Choosify branding (Navy + Orange/White) */}
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-black italic tracking-tighter uppercase mb-1 sm:mb-2 text-white">
-                {currentCampaign.title.split(' ').map((word, index) => {
-                  if (index % 2 === 1) {
-                    return <span key={index} className="text-[#FF5B00] ml-1.5">{word}</span>;
-                  }
-                  return <span key={index} className={index > 0 ? "ml-1.5" : ""}>{word}</span>;
-                })}
-              </h2>
+                  {/* Title matches Choosify branding (Navy + Orange/White) */}
+                  <h2 className="text-base sm:text-2xl md:text-3xl font-black italic tracking-tighter uppercase mb-1 sm:mb-1.5 text-white leading-tight">
+                    {currentCampaign.title.split(' ').map((word, index) => {
+                      if (index % 2 === 1) {
+                        return <span key={index} className="text-[#FF5B00] ml-1.5">{word}</span>;
+                      }
+                      return <span key={index} className={index > 0 ? "ml-1.5" : ""}>{word}</span>;
+                    })}
+                  </h2>
 
-              {/* Supporting tagline */}
-              <p className="text-[10px] sm:text-xs md:text-sm text-gray-300 font-medium mb-4 line-clamp-2 max-w-xl">
-                {currentCampaign.tagline}
-              </p>
+                  {/* Supporting tagline */}
+                  <p className="text-[10px] sm:text-[11px] md:text-xs text-gray-300 font-medium mb-1 line-clamp-2 max-w-xl">
+                    {currentCampaign.tagline}
+                  </p>
+                </div>
 
-              {/* CTA button with Choosify style hover effects */}
-              <div>
-                <button
-                  onClick={handleCTAClick}
-                  className="px-6 py-2.5 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9.5px] font-black tracking-widest uppercase rounded-full shadow-lg border border-[#FF5B00]/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 cursor-pointer"
-                >
-                  {currentCampaign.ctaText || 'EXPLORE COLLECTION'}
-                </button>
+                {/* LEFT SIDE: Primary Action Area */}
+                <div className="flex flex-col items-start gap-2 sm:gap-3 shrink-0 order-2 sm:order-1 sm:max-w-[45%]">
+                  {currentCampaign.countdownEnd && (
+                    <CampaignCountdown deadline={currentCampaign.countdownEnd} />
+                  )}
+
+                  <div>
+                    <button
+                      onClick={handleCTAClick}
+                      className="px-5 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[8.5px] sm:text-[9.5px] font-black tracking-widest uppercase rounded-full shadow-lg border border-[#FF5B00]/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 cursor-pointer"
+                    >
+                      {currentCampaign.ctaText || 'EXPLORE COLLECTION'}
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
           </motion.div>

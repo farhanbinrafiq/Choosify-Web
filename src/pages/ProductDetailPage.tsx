@@ -44,6 +44,7 @@ import { cn } from "../lib/utils";
 import { toast } from "react-hot-toast";
 import { ProductMediaGallery } from "../components/ProductMediaGallery";
 import { InfluencerReviews } from "../components/InfluencerReviews";
+import { PublicReviewCard } from "../components/PublicReviewCard";
 
 function WithInfluencerReviews({ brandName }: { brandName: string }) {
   const featuredReview = {
@@ -176,9 +177,9 @@ export function ProductDetailPage() {
       for (const section of sections) {
         const el = document.getElementById(section.id);
         if (el) {
-          const top = el.offsetTop;
+          const top = el.getBoundingClientRect().top + window.pageYOffset;
           const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition <= top + height) {
+          if (scrollPosition >= top && scrollPosition < top + height) {
             currentSection = section.name;
           }
         }
@@ -466,46 +467,48 @@ export function ProductDetailPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Hero Section styled with Brand Details color treatment */}
-      <section
-        className="hero-gradient relative pt-6 pb-12 overflow-visible border-b border-white/5"
-      >
+      {/* Breadcrumb & Meta Info */}
+      <div className="max-w-7xl mx-auto px-6 py-6 border-b border-gray-100 font-sans">
+        <div className="flex items-center justify-start gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 italic">
+          <Link to="/" className="hover:text-[#E8500A] transition-colors">
+            Home
+          </Link>
+          <ChevronRight size={12} />
+          <Link
+            to="/products"
+            className="hover:text-[#E8500A] transition-colors"
+          >
+            Products
+          </Link>
+          <ChevronRight size={12} />
+          <span className="text-gray-500">{product.category}</span>
+          <ChevronRight size={12} />
+          <span className="text-[#E8500A]">{product.title}</span>
+        </div>
+      </div>
+
+      {/* Theater Mode Media Area - Centered 1080px with deep black side letterboxing */}
+      <div className="w-full bg-[#000000] relative">
+        <ProductMediaGallery
+          product={product}
+          selectedVariantImage={selectedVariant?.image}
+        />
+      </div>
+
+      {/* Product Information Panel - Placed completely below the theater media area */}
+      <section className="bg-[#0B0C1E] py-12 px-6 border-b border-white/5 relative overflow-hidden font-sans">
         {/* Absolute blur background sphere matching Brand Detail Page layout */}
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none z-0">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#E8500A] rounded-full translate-x-1/2 -translate-y-1/2" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          {/* Breadcrumbs integrated seamlessly inside the hero section with low transparency */}
-          <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#FFF]/40 italic mb-6">
-            <Link to="/" className="hover:text-[#E8500A] transition-colors">
-              Home
-            </Link>
-            <ArrowRight size={10} />
-            <Link
-              to="/products"
-              className="hover:text-[#E8500A] transition-colors"
-            >
-              Products
-            </Link>
-            <ArrowRight size={10} />
-            <span className="text-white/60">{product.category}</span>
-            <ArrowRight size={10} />
-            <span className="text-[#E8500A]">{product.title}</span>
-          </div>
-          <div className="w-full max-w-4xl mx-auto mb-6">
-            <ProductMediaGallery
-              product={product}
-              selectedVariantImage={selectedVariant?.image}
-            />
-          </div>
-
-          <div className="w-full max-w-4xl mx-auto text-center text-white relative mt-6 bg-transparent p-0 border-none shadow-none">
+        <div className="max-w-[1080px] mx-auto text-center text-white relative z-10">
+          <div className="w-full max-w-4xl mx-auto text-center text-white relative bg-transparent p-0 border-none shadow-none">
             <div className="relative">
               {/* Row 1: Brand / Category and Reviews/Stock status */}
               <div className="flex flex-col items-center justify-center gap-4 mb-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-[0.25em] block font-sans">
+                  <span className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-[0.25em] block">
                     {product.brand?.toUpperCase()} .{" "}
                     {product.category?.toUpperCase()}
                   </span>
@@ -527,7 +530,7 @@ export function ProductDetailPage() {
                         />
                       ))}
                     </div>
-                    <span className="text-[11px] font-bold text-white/70 font-sans leading-none">
+                    <span className="text-[11px] font-bold text-white/70 leading-none">
                       {product.rating} &nbsp;({product.reviews || 840} reviews)
                     </span>
                   </div>
@@ -550,7 +553,7 @@ export function ProductDetailPage() {
 
               {/* Row 2: Title */}
               <h1
-                className="text-[30px] font-sans font-black text-white tracking-tighter leading-[0.95] uppercase mb-4 text-center"
+                className="text-[30px] font-black text-white tracking-tighter leading-[0.95] uppercase mb-4 text-center"
                 style={{ fontSize: "30px" }}
               >
                 {product.title}
@@ -559,7 +562,7 @@ export function ProductDetailPage() {
               {/* Row 3: Price Display & Quick controls */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-4 border-b border-white/10 pb-4">
                 <div
-                  className="text-[25px] font-extrabold text-[#FF6B00] italic uppercase tracking-tight font-sans leading-none"
+                  className="text-[25px] font-extrabold text-[#E8500A] italic uppercase tracking-tight leading-none"
                   style={{ fontSize: "25px" }}
                 >
                   BDT - {product.price}
@@ -570,14 +573,14 @@ export function ProductDetailPage() {
                       navigator.clipboard.writeText(window.location.href);
                       toast.success("Link copied directly to clipboard!");
                     }}
-                    className="w-10 h-10 rounded-full bg-white hover:bg-white/90 text-[#120713] flex items-center justify-center transition-all shadow-md"
+                    className="w-10 h-10 rounded-full bg-white hover:bg-white/90 text-[#120713] flex items-center justify-center transition-all shadow-md cursor-pointer border-none"
                     title="Share link"
                   >
                     <Share2 size={15} />
                   </button>
                   <button
                     onClick={() => toast.success("Product bookmarked!")}
-                    className="w-10 h-10 rounded-full bg-white hover:bg-white/95 text-[#120713] flex items-center justify-center transition-all shadow-md"
+                    className="w-10 h-10 rounded-full bg-white hover:bg-white/95 text-[#120713] flex items-center justify-center transition-all shadow-md cursor-pointer border-none"
                     title="Save Bookmark"
                   >
                     <Bookmark size={15} />
@@ -587,7 +590,7 @@ export function ProductDetailPage() {
             </div>
 
             {/* Dynamic Variants & Beautiful Interactive Callouts */}
-            <div className="w-full border-t border-white/10 pt-4 flex flex-col items-center justify-center text-center space-y-4 font-sans">
+            <div className="w-full border-t border-white/10 pt-4 flex flex-col items-center justify-center text-center space-y-4">
               <div className="space-y-1">
                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.25em] block">
                   SELECT OPTIONS
@@ -606,10 +609,10 @@ export function ProductDetailPage() {
                       key={color}
                       onClick={() => setSelectedColor(color)}
                       className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center transition-all border-2",
+                        "w-10 h-10 rounded-full flex items-center justify-center transition-all border-2 cursor-pointer bg-transparent",
                         isSelected
-                          ? "border-[#FF6B00] bg-transparent"
-                          : "border-transparent bg-transparent hover:border-white/20",
+                          ? "border-[#E8500A]"
+                          : "border-transparent hover:border-white/20",
                       )}
                     >
                       <span
@@ -644,10 +647,10 @@ export function ProductDetailPage() {
                             setSelectedRam(size);
                         }}
                         className={cn(
-                          "h-9 px-5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border flex items-center justify-center font-mono",
+                          "h-9 px-5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border flex items-center justify-center font-mono cursor-pointer bg-transparent",
                           isSelected
-                            ? "bg-transparent border-[#FF6B00] text-white"
-                            : "bg-transparent border-white/25 text-white/80 hover:bg-white/5 hover:border-white/40 hover:text-white",
+                            ? "border-[#E8500A] text-white"
+                            : "border-white/25 text-white/80 hover:bg-white/5 hover:border-white/40 hover:text-white",
                         )}
                       >
                         {size}
@@ -656,7 +659,7 @@ export function ProductDetailPage() {
                   })}
                   <button
                     onClick={() => setIsSizeChartOpen(true)}
-                    className="text-[10px] font-bold text-[#FF6B00] uppercase hover:underline italic flex items-center gap-1 ml-2 self-center font-sans tracking-widest pl-1"
+                    className="text-[10px] font-bold text-[#E8500A] uppercase hover:underline italic flex items-center gap-1 ml-2 self-center tracking-widest pl-1 cursor-pointer bg-transparent border-none"
                   >
                     SIZE GUIDE
                   </button>
@@ -675,9 +678,9 @@ export function ProductDetailPage() {
                     }}
                     style={{
                       background:
-                        "linear-gradient(135deg, #FF6A00 0%, #FF9E2C 100%)",
+                        "linear-gradient(135deg, #E8500A 0%, #FF9E2C 100%)",
                     }}
-                    className="w-full flex items-center justify-center px-5 py-3.5 rounded-[10px] font-bold text-[15px] text-white border-none tracking-wide cursor-pointer transition-all hover:scale-[1.01] active:scale-95 shadow-md shadow-[#FF6B00]/15"
+                    className="w-full flex items-center justify-center px-5 py-3.5 rounded-[10px] font-bold text-[15px] text-white border-none tracking-wide cursor-pointer transition-all hover:scale-[1.01] active:scale-95 shadow-md shadow-[#E8500A]/15"
                   >
                     ADD TO CART
                   </button>
@@ -690,7 +693,7 @@ export function ProductDetailPage() {
                       className="w-[28px] h-[28px] rounded-full text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0"
                       style={{
                         background:
-                          "linear-gradient(135deg, #FF6A00 0%, #FF9E2C 100%)",
+                          "linear-gradient(135deg, #E8500A 0%, #FF9E2C 100%)",
                       }}
                     >
                       ➔
@@ -700,18 +703,18 @@ export function ProductDetailPage() {
               ) : (
                 /* B2B Wholesale channels calculator inside the dark theme wrapper as well! */
                 <div className="w-full max-w-2xl bg-white/5 border border-white/10 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm text-left">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6B00]/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#E8500A]/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl" />
 
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-white/10">
                     <div className="text-left">
-                      <span className="text-[10px] font-black text-[#FF5B00] uppercase tracking-widest italic block mb-1 text-left font-sans">
+                      <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic block mb-1 text-left">
                         B2B Wholesale Channel
                       </span>
-                      <h4 className="text-lg font-black text-white uppercase tracking-tighter italic text-left font-sans">
+                      <h4 className="text-lg font-black text-white uppercase tracking-tighter italic text-left">
                         Bulk Trade Sourcing Panel
                       </h4>
                     </div>
-                    <div className="bg-[#FF5B00]/10 border border-[#FF5B00]/30 text-[#FF5B00] text-[9px] font-black px-3.5 py-1.5 rounded-full uppercase italic tracking-wider">
+                    <div className="bg-[#E8500A]/10 border border-[#E8500A]/30 text-[#E8500A] text-[9px] font-black px-3.5 py-1.5 rounded-full uppercase italic tracking-wider">
                       MOQ: {product.moq || 10} Units Enforced
                     </div>
                   </div>
@@ -719,7 +722,7 @@ export function ProductDetailPage() {
                   {/* Quantity slabs layout */}
                   {product.pricingTiers && (
                     <div className="mb-6 text-left">
-                      <span className="text-[9px] font-black text-white/40 uppercase tracking-widest block mb-2 italic font-sans">
+                      <span className="text-[9px] font-black text-white/40 uppercase tracking-widest block mb-2 italic">
                         Sourcing Pricing Slabs
                       </span>
                       <div className="grid grid-cols-3 gap-3">
@@ -735,18 +738,18 @@ export function ProductDetailPage() {
                               className={cn(
                                 "rounded-xl p-3 border text-center transition-all bg-white/5",
                                 isCurrentSlab
-                                  ? "border-[#FF5B00] bg-[#FF5B00]/5 scale-102"
+                                  ? "border-[#E8500A] bg-[#E8500A]/5 scale-102"
                                   : "border-white/10",
                               )}
                             >
                               <div className="text-[9px] font-black text-white/55">
                                 {tier.minQuantity}+ Pcs
                               </div>
-                              <div className="text-base font-black font-mono text-orange-primary mt-1">
+                              <div className="text-base font-black font-mono text-[#E8500A] mt-1">
                                 ৳{tier.price.toLocaleString()}
                               </div>
                               {isCurrentSlab && (
-                                <div className="text-[7px] font-black text-[#FF5B00] uppercase tracking-tighter mt-1 italic">
+                                <div className="text-[7px] font-black text-[#E8500A] uppercase tracking-tighter mt-1 italic">
                                   ✓ Selected
                                 </div>
                               )}
@@ -760,7 +763,7 @@ export function ProductDetailPage() {
                   {/* Calculator */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                     <div className="space-y-2 text-left">
-                      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-[#FFF]/40 font-sans">
+                      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-[#FFF]/40">
                         <span>Enter Order Qty:</span>
                         {product.moq && b2bQty < product.moq && (
                           <span className="text-red-500 font-bold font-mono">
@@ -772,7 +775,7 @@ export function ProductDetailPage() {
                         <button
                           type="button"
                           onClick={() => setB2bQty(Math.max(1, b2bQty - 1))}
-                          className="text-white/60 hover:text-white font-black text-sm p-1"
+                          className="text-white/60 hover:text-white font-black text-sm p-1 cursor-pointer bg-transparent border-none"
                         >
                           -
                         </button>
@@ -789,7 +792,7 @@ export function ProductDetailPage() {
                         <button
                           type="button"
                           onClick={() => setB2bQty(b2bQty + 1)}
-                          className="text-white/60 hover:text-white font-black text-sm p-1"
+                          className="text-white/60 hover:text-white font-black text-sm p-1 cursor-pointer bg-transparent border-none"
                         >
                           +
                         </button>
@@ -798,18 +801,18 @@ export function ProductDetailPage() {
 
                     <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-between items-center text-left">
                       <div>
-                        <span className="text-[8px] font-black text-white/40 uppercase tracking-widest italic block font-sans">
+                        <span className="text-[8px] font-black text-white/40 uppercase tracking-widest italic block">
                           Calculated Total
                         </span>
-                        <span className="text-xl font-mono font-black text-white font-sans">
+                        <span className="text-xl font-mono font-black text-white">
                           ৳{activeTotalPrice.toLocaleString()}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[8px] font-black text-white/40 uppercase tracking-widest italic block font-sans">
+                        <span className="text-[8px] font-black text-white/40 uppercase tracking-widest italic block">
                           Unit Active
                         </span>
-                        <span className="text-[11px] font-black text-orange-primary font-mono">
+                        <span className="text-[11px] font-black text-[#E8500A] font-mono">
                           ৳{activeUnitPrice.toLocaleString()} / pc
                         </span>
                       </div>
@@ -821,10 +824,10 @@ export function ProductDetailPage() {
                     <button
                       onClick={handleAddToCartClick}
                       className={cn(
-                        "py-4 w-full rounded-xl font-black text-[12px] uppercase tracking-widest italic transition-all shadow-xl flex items-center justify-center gap-2 font-sans",
+                        "py-4 w-full rounded-xl font-black text-[12px] uppercase tracking-widest italic transition-all shadow-xl flex items-center justify-center gap-2 cursor-pointer border-none",
                         product.moq && b2bQty < product.moq
-                          ? "bg-gray-700/50 text-white/40 border border-white/5 cursor-not-allowed"
-                          : "bg-[#FF5B00] text-white shadow-[#FF5B00]/20 hover:scale-[1.02] hover:brightness-110 active:scale-95",
+                          ? "bg-gray-700/50 text-white/40 cursor-not-allowed"
+                          : "bg-[#E8500A] text-white shadow-[#E8500A]/20 hover:scale-[1.02] hover:brightness-110 active:scale-95",
                       )}
                       disabled={product.moq && b2bQty < product.moq}
                     >
@@ -832,16 +835,16 @@ export function ProductDetailPage() {
                     </button>
                     <button
                       onClick={() => setIsQuoteModalOpen(true)}
-                      className="py-4 w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-xl font-black text-[12px] uppercase tracking-widest italic transition-all flex items-center justify-center gap-2 font-sans"
+                      className="py-4 w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-xl font-black text-[12px] uppercase tracking-widest italic transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       Request Business Quote
                     </button>
                   </div>
 
                   {/* Sourcing details */}
-                  <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-3 gap-4 text-left font-sans">
+                  <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-3 gap-4 text-left">
                     <div>
-                      <span className="text-[7.5px] font-black text-white/30 uppercase block font-sans">
+                      <span className="text-[7.5px] font-black text-white/30 uppercase block">
                         Invoicing
                       </span>
                       <span className="text-[9px] font-bold text-white/70">
@@ -849,15 +852,15 @@ export function ProductDetailPage() {
                       </span>
                     </div>
                     <div>
-                      <span className="text-[7.5px] font-black text-[#FFF]/30 uppercase block font-sans">
+                      <span className="text-[7.5px] font-black text-[#FFF]/30 uppercase block">
                         Sample Sourcing
                       </span>
-                      <span className="text-[9px] font-bold text-[#FF5B00]">
+                      <span className="text-[9px] font-bold text-[#E8500A]">
                         Samples Available
                       </span>
                     </div>
                     <div>
-                      <span className="text-[7.5px] font-black text-white/30 uppercase block font-sans">
+                      <span className="text-[7.5px] font-black text-white/30 uppercase block">
                         Audit Verification
                       </span>
                       <span className="text-[9px] font-bold text-white/70">
@@ -1355,120 +1358,15 @@ export function ProductDetailPage() {
                     ],
                   },
                 ].map((review, i) => (
-                  <div
+                  <PublicReviewCard
                     key={i}
-                    className="bg-white rounded-[32px] p-6 border border-gray-150/50 shadow-xl flex flex-col h-full gap-5"
-                  >
-                    {/* Header row */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl border-2 border-orange-primary/20 p-0.5 bg-white flex-shrink-0">
-                          <img
-                            src={review.avatar}
-                            className="w-full h-full rounded-xl object-cover"
-                            alt={review.name}
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="text-xs font-black text-navy uppercase tracking-tight italic">
-                              {review.name}
-                            </h4>
-                            <div className="bg-[#E6FBF0] text-[#059669] text-[7.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider h-4 inline-flex items-center gap-0.5">
-                              <CheckCircle2 size={8} /> VERIFIED
-                            </div>
-                          </div>
-                          <span className="text-[7.5px] font-black text-gray-400 tracking-wider mt-1 uppercase italic">
-                            {review.time}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end flex-shrink-0">
-                        <div className="flex gap-0.5 mb-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              size={9}
-                              className={cn(
-                                "fill-current",
-                                star <= Math.floor(Number(review.rating))
-                                  ? "text-orange-primary"
-                                  : "text-gray-100",
-                              )}
-                            />
-                          ))}
-                        </div>
-                        <div className="text-xs font-black text-navy italic tracking-tighter">
-                          {review.rating}
-                          <span className="text-gray-300 text-[10px] ml-0.5">
-                            / 5
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Images row */}
-                    <div className="flex gap-2">
-                      {review.images.map((img, idx) => (
-                        <div
-                          key={idx}
-                          className="w-14 h-14 rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50"
-                        >
-                          <img
-                            src={img}
-                            className="w-full h-full object-cover"
-                            alt="review upload"
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Content box */}
-                    <div className="bg-[#F8FAFC] rounded-[24px] p-4 relative min-h-[90px] flex items-center mb-auto">
-                      <MessageSquare
-                        size={24}
-                        className="absolute -top-2.5 -right-2 text-orange-primary/10 fill-current transform rotate-12"
-                      />
-                      <p className="text-[10px] text-navy font-bold leading-normal italic tracking-tight">
-                        "{review.content}"
-                      </p>
-                    </div>
-
-                    {/* Footer row */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
-                      <div>
-                        <span className="text-[7px] text-gray-400 font-bold uppercase tracking-widest block mb-0.5">
-                          PURCHASE DATE
-                        </span>
-                        <span className="text-[9px] font-black text-navy uppercase tracking-wider">
-                          {review.date}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() =>
-                            toast.success(
-                              "Thanks for voting this review as helpful!",
-                            )
-                          }
-                          className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-full hover:bg-gray-50 text-gray-500 hover:text-navy hover:border-navy transition-all cursor-pointer"
-                        >
-                          <ThumbsUp size={10} />
-                          <span className="text-[8px] font-black uppercase tracking-wider">
-                            HELPFUL ({review.helpful})
-                          </span>
-                        </button>
-                        <button
-                          onClick={() =>
-                            toast.success("Thanks for the feedback!")
-                          }
-                          className="w-7 h-7 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 transition-all cursor-pointer"
-                        >
-                          <ThumbsDown size={10} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                    review={review}
+                    onHelpfulClick={() =>
+                      toast.success(
+                        "Thanks for voting this review as helpful!",
+                      )
+                    }
+                  />
                 ))}
               </div>
 

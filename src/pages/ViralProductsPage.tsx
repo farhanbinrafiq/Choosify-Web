@@ -357,10 +357,10 @@ export function ViralProductsPage() {
           {/* ================================================= */}
           {/* A. LEFT SIDEBAR (STICKY) */}
           {/* ================================================= */}
-          <aside className="sticky top-44 lg:h-[calc(100vh-180px)] overflow-y-auto no-scrollbar pb-8 space-y-4">
+          <aside className="lg:sticky lg:top-44 lg:h-[calc(100vh-180px)] lg:overflow-y-auto overflow-visible no-scrollbar pb-8 space-y-4">
             
             {/* SECTION 1: TRENDING FILTERS */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 line-clamp-1">
                   <Flame size={14} className="text-orange-primary" /> Trending Filters
@@ -397,7 +397,7 @@ export function ViralProductsPage() {
             </div>
 
             {/* SECTION 2: CATEGORY FILTERS */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
                   Category Filters
@@ -428,7 +428,7 @@ export function ViralProductsPage() {
             </div>
 
             {/* SECTION 3: PRODUCT SOURCE */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
                   Product Source
@@ -461,7 +461,7 @@ export function ViralProductsPage() {
             </div>
 
             {/* SECTION 4: PRICE FILTER */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
                   Price Filter
@@ -561,7 +561,7 @@ export function ViralProductsPage() {
               </div>
 
               {filteredProducts.length === 0 ? (
-                <div className="text-center py-20 bg-white border border-gray-150 rounded-3xl p-8 max-w-lg mx-auto flex flex-col items-center gap-4">
+                <div className="text-center py-20 bg-white border border-gray-150 rounded-[5px] p-8 max-w-lg mx-auto flex flex-col items-center gap-4">
                   <AlertTriangle size={36} className="text-orange-primary stroke-1" />
                   <p className="text-[11px] font-black uppercase tracking-widest text-navy italic">No products matched active filters.</p>
                   <p className="text-[10px] text-gray-500 leading-relaxed font-bold max-w-sm">
@@ -591,10 +591,10 @@ export function ViralProductsPage() {
           {/* ================================================= */}
           {/* C. RIGHT SIDEBAR (STICKY) */}
           {/* ================================================= */}
-          <aside className="sticky top-44 lg:h-[calc(100vh-180px)] overflow-y-auto no-scrollbar pb-8 space-y-4">
+          <aside className="lg:sticky lg:top-44 lg:h-[calc(100vh-180px)] lg:overflow-y-auto overflow-visible no-scrollbar pb-8 space-y-4">
             
             {/* SECTION 1: VIRAL LEADERBOARD (Top 5 this week) */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
                   <Award size={15} className="text-amber-500" /> Viral Leaderboard
@@ -605,7 +605,7 @@ export function ViralProductsPage() {
                   <div 
                     key={`leaderboard-${item.id}-${idx}`} 
                     onClick={() => navigate(`/products/${item.id}`)}
-                    className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                    className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-[5px] p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
                   >
                     <span className="font-sans font-semibold text-sm text-gray-400 leading-none w-5">
                       {String(idx + 1).padStart(2, '0')}
@@ -627,7 +627,7 @@ export function ViralProductsPage() {
             </div>
 
             {/* SECTION 2: MOST LOVED (Products this month) */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
                 <h3 className="text.[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
                   <Heart size={14} className="text-rose-500 fill-rose-500" /> Most Loved Products
@@ -638,7 +638,7 @@ export function ViralProductsPage() {
                   <div 
                     key={`mostlived-${item.id}-${idx}`} 
                     onClick={() => navigate(`/products/${item.id}`)}
-                    className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                    className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-[5px] p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
                   >
                     <div className="w-9 h-9 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-[#e8edf2] p-0.5 flex items-center justify-center">
                       <img src={item.image} alt="" className="max-w-full max-h-full object-contain" />
@@ -662,13 +662,13 @@ export function ViralProductsPage() {
             </div>
 
             {/* SECTION 3: SPONSORED PRODUCT */}
-            <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
+            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
                <div className="relative z-10 w-full flex flex-col items-center">
                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1 w-full text-left">
                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Spotlight</h3>
                  </div>
                  
-                 <div onClick={() => navigate(`/products/${sponsoredProduct.id}`)} className="w-full aspect-square rounded-xl overflow-hidden mb-4 border border-[#e8edf2] shadow-inner bg-slate-50 relative shrink-0 p-4 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-[2s]">
+                 <div onClick={() => navigate(`/products/${sponsoredProduct.id}`)} className="w-full aspect-square rounded-[5px] overflow-hidden mb-4 border border-[#e8edf2] shadow-inner bg-slate-50 relative shrink-0 p-4 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-[2s]">
                    <img 
                      src={sponsoredProduct.image} 
                      alt={sponsoredProduct.title} 
@@ -693,7 +693,7 @@ export function ViralProductsPage() {
             </div>
 
             {/* SECTION 4: SUBMIT A PRODUCT */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left relative overflow-hidden">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-xl pointer-events-none" />
               
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
@@ -739,7 +739,7 @@ export function ViralProductsPage() {
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="bg-white rounded-3xl w-full max-w-lg p-6 relative z-50 shadow-3xl text-left border border-gray-100 overflow-hidden"
+              className="bg-white rounded-[5px] w-full max-w-lg p-6 relative z-50 shadow-3xl text-left border border-gray-100 overflow-hidden"
             >
               {/* Abs decoration blob */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-2xl pointer-events-none" />

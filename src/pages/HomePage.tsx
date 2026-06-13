@@ -94,9 +94,9 @@ export function HomePage() {
       for (const section of sections) {
         const el = document.getElementById(section.id);
         if (el) {
-          const top = el.offsetTop;
+          const top = el.getBoundingClientRect().top + window.pageYOffset;
           const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition <= top + height) {
+          if (scrollPosition >= top && scrollPosition < top + height) {
             currentSection = section.name;
           }
         }
@@ -460,9 +460,6 @@ export function HomePage() {
       </section>
 
 
-      {/* FULL WIDTH CAMPAIGN SECTION */}
-      <CampaignBannerCarousel />
-
       {/* SECTION 3 — MARQUEE BANNER */}
       <div className="relative z-20 bg-gradient-to-r from-[#E8500A] via-[#FF5B00] to-[#E8500A] text-white py-4.5 overflow-hidden border-y border-[#CF4400]/40 shadow-lg font-space text-[11.5px] font-black tracking-[0.2em] uppercase leading-none">
         <div className="flex w-max animate-marquee whitespace-nowrap gap-16">
@@ -471,6 +468,9 @@ export function HomePage() {
           <span>🛡️ 100% ORIGINAL PRODUCTS ONLY • VERIFIED SHOPS IN BANGLADESH • CHOOSE WISELY 🛡️</span>
         </div>
       </div>
+
+      {/* FULL WIDTH CAMPAIGN SECTION */}
+      <CampaignBannerCarousel />
 
       {/* GLOBAL STICKY NAVIGATION BAR */}
       <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-3.5">
@@ -1579,7 +1579,7 @@ export function HomePage() {
               </div>
 
               {/* FEED SECTION F — POPULAR CATEGORIES */}
-              <div id="section-categories" className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm">
+              <div id="section-categories" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 
                 {/* Section Header */}
                 <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-100">
@@ -1625,7 +1625,7 @@ export function HomePage() {
                           setActiveTab(cat.id);
                           toast.success(`Active Category: ${cat.id}`);
                         }}
-                        className="bg-white border border-[#e8edf2] rounded-xl p-4 flex flex-col items-start hover:border-gray-200/90 hover:scale-[1.01] transition-all duration-200 cursor-pointer group"
+                        className="bg-white border border-[#e8edf2] rounded-[5px] p-4 flex flex-col items-start hover:border-gray-200/90 hover:scale-[1.01] transition-all duration-200 cursor-pointer group"
                       >
                         {/* Perfect white circle around the icon styled like mockup */}
                         <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
@@ -1648,7 +1648,7 @@ export function HomePage() {
             </>
           ) : (
             /* NON-FEED CATEGORY DISPLAY GRID */
-            <div className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm min-h-[480px]">
+            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm min-h-[480px]">
               <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6 text-left">
                 <div>
                   <h3 className="font-semibold text-base uppercase text-[#1a1a2e] flex items-center gap-2 leading-none">
@@ -1685,8 +1685,8 @@ export function HomePage() {
           )}
 
           {/* FEED SECTION G — TRUST BADGES */}
-          <div id="section-trust" className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm animate-fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 rounded-xl border border-[#e8edf2] p-5 bg-[#EEF1F8]/10 shadow-none">
+          <div id="section-trust" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 rounded-[5px] border border-[#e8edf2] p-5 bg-[#EEF1F8]/10 shadow-none">
               
               <div className="text-center flex flex-col items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shrink-0 border border-[#E8500A]/5">
@@ -1736,7 +1736,7 @@ export function HomePage() {
         >
           
           {/* Card 1 — TRENDING DEALS */}
-          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-left">
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-left">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
               <h3 className="text-sm font-semibold tracking-tight text-[#1a1a2e]">
                 TRENDING <span className="text-[#E8500A]">DEALS</span>
@@ -1794,7 +1794,7 @@ export function HomePage() {
               ].map((item, idx) => (
                 <div 
                   key={idx}
-                  className="flex gap-3 bg-white hover:bg-gray-50/50 p-1.5 rounded-xl transition-all duration-200 group text-left"
+                  className="flex gap-3 bg-white hover:bg-gray-50/50 p-1.5 rounded-[5px] transition-all duration-200 group text-left"
                 >
                   <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-[#e8edf2] flex items-center justify-center bg-gray-50 relative">
                     <img 
@@ -1857,7 +1857,7 @@ export function HomePage() {
           </div>
 
           {/* Card 2 — TRENDING BRANDS */}
-          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-left">
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-left">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
               <h3 className="text-sm font-semibold tracking-tight text-[#1a1a2e]">
                 TRENDING <span className="text-[#E8500A]">BRANDS</span>
@@ -1918,7 +1918,7 @@ export function HomePage() {
                 <div 
                   key={idx} 
                   onClick={() => navigate('/guides')}
-                  className="flex gap-3 bg-white border border-[#e8edf2] rounded-xl p-2.5 hover:border-gray-200 transition-all duration-200 group cursor-pointer"
+                  className="flex gap-3 bg-white border border-[#e8edf2] rounded-[5px] p-2.5 hover:border-gray-200 transition-all duration-200 group cursor-pointer"
                 >
                   <div className="w-11 h-11 rounded-lg overflow-hidden shrink-0 border border-[#e8edf2] flex items-center justify-center bg-gray-50">
                     <img 
@@ -1964,7 +1964,7 @@ export function HomePage() {
           {/* Card — FOR BUSINESS & SELLERS (REPOSITIONED & EXACT DIMENSIONS) */}
           <div 
             id="section-sellers" 
-            className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
+            className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
             style={{ width: '282px', height: '464px' }}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1c1c3c]/5 rounded-full blur-2xl pointer-events-none" />
@@ -1983,7 +1983,7 @@ export function HomePage() {
               </p>
             </div>
 
-            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">Boost Sales Today</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px]">
                 Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
@@ -2003,7 +2003,7 @@ export function HomePage() {
           </div>
 
           {/* Card 3 — NEWSLETTER */}
-          <div className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm text-left">
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left">
             <div className="mb-4">
               <h3 className="text-[9px] font-bold tracking-widest text-[#1a1a2e]/40 uppercase mb-1">NEWS DISPATCH</h3>
               <p className="text-[11px] text-gray-500 leading-relaxed">

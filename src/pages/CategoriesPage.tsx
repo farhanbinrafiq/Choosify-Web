@@ -298,7 +298,7 @@ export function CategoriesPage() {
         <aside className="hidden lg:flex flex-col gap-4 w-[300px] flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pb-10 pr-2 no-scrollbar">
           {/* QUICK ACCESS CARD */}
           <div 
-            className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm w-full"
+            className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full"
           >
             <div className="flex items-center gap-1 pb-3 mb-4 border-b border-[#e8edf2] px-1">
               <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
@@ -398,7 +398,7 @@ export function CategoriesPage() {
           </div>
 
           {/* BRANDS YOU FOLLOW CARD */}
-          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm w-full">
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
               <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">BRANDS YOU FOLLOW</h3>
               <span className="px-2 py-0.5 bg-orange-primary/10 rounded-full text-[#E8500A] font-semibold text-[9px] tracking-wide uppercase">
@@ -449,7 +449,7 @@ export function CategoriesPage() {
                       layout="position"
                       onClick={() => handleCategoryClick(cat.name)}
                       className={cn(
-                        "bg-white border rounded-xl p-4 flex flex-col items-start transition-all duration-200 cursor-pointer group relative overflow-hidden w-full lg:w-[237.328px]",
+                        "bg-white border rounded-[5px] p-4 flex flex-col items-start transition-all duration-200 cursor-pointer group relative overflow-hidden w-full lg:w-[237.328px]",
                         isExpanded 
                           ? "border-[#E8500A] ring-4 ring-[#E8500A]/5 z-20 shadow-sm" 
                           : "border-[#e8edf2] hover:border-gray-200/90 hover:scale-[1.01]"
@@ -490,7 +490,7 @@ export function CategoriesPage() {
                           height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] },
                           opacity: { duration: 0.3 }
                         }}
-                        className="col-span-2 md:col-span-3 lg:col-span-full xl:col-span-full bg-white shadow-md rounded-2xl p-6 md:p-8 border border-[#e8edf2] overflow-hidden z-10 text-left"
+                        className="col-span-2 md:col-span-3 lg:col-span-full xl:col-span-full bg-white shadow-md rounded-[5px] p-6 md:p-8 border border-[#e8edf2] overflow-hidden z-10 text-left"
                       >
                         <motion.div 
                           initial={{ y: 20, opacity: 0 }}
@@ -534,7 +534,7 @@ export function CategoriesPage() {
                                   animate={{ opacity: 1, scale: 1 }}
                                   transition={{ delay: 0.1 + (j * 0.03), duration: 0.3 }}
                                   key={sub.name}
-                                  className="bg-white border border-[#e8edf2] rounded-xl p-4 flex flex-col items-start hover:border-gray-200/90 hover:scale-[1.01] transition-all duration-200 cursor-pointer group text-left"
+                                  className="bg-white border border-[#e8edf2] rounded-[5px] p-4 flex flex-col items-start hover:border-gray-200/90 hover:scale-[1.01] transition-all duration-200 cursor-pointer group text-left"
                                 >
                                   {/* Redesigned to use identical radius, borders, and rounded circular icons as popular categories */}
                                   <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
@@ -576,7 +576,7 @@ export function CategoriesPage() {
         <aside className="hidden lg:flex flex-col gap-4 w-[280px] flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pb-10 pr-2 no-scrollbar">
           <div 
             id="section-sellers" 
-            className="bg-white rounded-2xl border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
+            className="bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
             style={{ height: '464px' }}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
@@ -595,7 +595,7 @@ export function CategoriesPage() {
               </p>
             </div>
 
-            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                 Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
@@ -615,13 +615,13 @@ export function CategoriesPage() {
           </div>
 
           {/* Sponsored Ad Section */}
-          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
              <div className="relative z-10 flex flex-col">
                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
                   <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
                 </div>
                 
-                <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
+                <div className="w-full aspect-video rounded-[5px] overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
                    <img 
                       src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=350&fit=crop" 
                       alt="Sponsor AD" 

@@ -21,7 +21,7 @@ interface BrandOverviewSectionProps {
 
 export function BrandOverviewSection({ brandName, overviewData }: BrandOverviewSectionProps) {
   return (
-    <div id="brand-overview-section" className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36">
+    <div id="brand-overview-section" className="bg-white rounded-[5px] p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36">
       <div className="text-center mb-8 border-b border-gray-100 pb-5">
         <h3 className="text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-1">
           Brand Overview
@@ -33,7 +33,7 @@ export function BrandOverviewSection({ brandName, overviewData }: BrandOverviewS
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-left">
         {/* 1. Address & Links */}
-        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex flex-col justify-between group hover:shadow-md transition-shadow">
+        <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 flex flex-col justify-between group hover:shadow-md transition-shadow">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
@@ -59,7 +59,7 @@ export function BrandOverviewSection({ brandName, overviewData }: BrandOverviewS
         </div>
 
         {/* 2. Contact Information */}
-        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
@@ -75,7 +75,7 @@ export function BrandOverviewSection({ brandName, overviewData }: BrandOverviewS
         </div>
 
         {/* 3. Price Range & Audience */}
-        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
@@ -94,7 +94,7 @@ export function BrandOverviewSection({ brandName, overviewData }: BrandOverviewS
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
         {/* 4. Services & Specialties */}
-        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 hover:shadow-md transition-shadow">
           <div className="flex items-center gap-2.5 mb-4 border-b border-gray-200/50 pb-3">
             <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
               <CheckCircle2 size={16} fill="currentColor" className="text-[#E8500A] stroke-white" />
@@ -112,7 +112,7 @@ export function BrandOverviewSection({ brandName, overviewData }: BrandOverviewS
         </div>
 
         {/* 5. Best For #Tags */}
-        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 hover:shadow-md transition-shadow">
           <div className="flex items-center gap-2.5 mb-4 border-b border-gray-200/50 pb-3">
             <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
               <CheckCircle2 size={16} fill="currentColor" className="text-[#E8500A] stroke-white" />

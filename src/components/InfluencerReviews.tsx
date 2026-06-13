@@ -477,7 +477,7 @@ export function InfluencerReviews({
   return (
     <section 
       id="influencer-reviews-section" 
-      className="font-['DM_Sans',_sans-serif] hero-gradient text-[#F0F6FC] p-4 sm:p-6 md:p-8 rounded-3xl border border-[#21262D]/60 w-full max-w-[680px] mx-auto text-left flex flex-col justify-start shadow-xl my-6 relative overflow-hidden"
+      className="font-['DM_Sans',_sans-serif] hero-gradient text-[#F0F6FC] p-4 sm:p-6 md:p-8 rounded-[5px] border border-[#21262D]/60 w-full max-w-[680px] mx-auto text-left flex flex-col justify-start shadow-xl my-6 relative overflow-hidden"
     >
       {/* PART 1 — SECTION HEADER */}
       <div className="text-center mb-6 border-0 p-0 bg-transparent flex flex-col items-center">
@@ -519,7 +519,7 @@ export function InfluencerReviews({
       </div>
 
       {/* PART 2 — FEATURED VIDEO BLOCK */}
-      <div className="flex flex-col sm:flex-row items-stretch border border-[#21262D]/70 rounded-[12px] overflow-hidden bg-[#161B22] mb-6 shadow-md shadow-[#000]/10">
+      <div className="flex flex-col sm:flex-row items-stretch border border-[#21262D]/70 rounded-[5px] overflow-hidden bg-[#161B22] mb-6 shadow-md shadow-[#000]/10">
         
         {/* Left Side: 16:9 Aspect Video Embed / Placeholder */}
         <div className="w-full sm:w-[52%] relative bg-[#0D1117] aspect-[16/9] flex-shrink-0">
@@ -595,11 +595,11 @@ export function InfluencerReviews({
 
       {/* PART 3 — CARD GRID */}
       {filteredReviews.length === 0 ? (
-        <div className="w-full text-center py-10 bg-[#161B22] border border-[#21262D] rounded-[10px] text-gray-400">
+        <div className="w-full text-center py-10 bg-[#161B22] border border-[#21262D] rounded-[5px] text-gray-400">
           Creator content coming soon
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[1px] bg-[#21262D]/60 rounded-[10px] overflow-hidden border border-[#21262D]/60 shadow-inner">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[1px] bg-[#21262D]/60 rounded-[5px] overflow-hidden border border-[#21262D]/60 shadow-inner">
           {filteredReviews.map((review) => {
             const isPlaying = playingVideoId === review.id;
             const isPortrait = review.aspectRatio === 'portrait';
@@ -668,7 +668,7 @@ export function InfluencerReviews({
 
       {/* PART 4 — ACCORDION DROPDOWN SUBMISSION FORM FOR CUSTOM INFLUENCER REVIEWS */}
       {showAddForm && (
-        <div className="mt-5 p-5 bg-[#161B22] border border-[#21262D] rounded-[12px] anim-fade text-left space-y-4">
+        <div className="mt-5 p-5 bg-[#161B22] border border-[#21262D] rounded-[5px] anim-fade text-left space-y-4">
           <div className="flex items-center justify-between border-b border-[#21262D] pb-2.5">
             <h4 className="font-['DM_Serif_Display',_serif] text-lg text-[#F0F6FC] font-normal tracking-wide flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B35]" />
@@ -816,7 +816,7 @@ export function InfluencerReviews({
               document.getElementById('influencer-reviews-section')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }, 100);
           }}
-          className="flex items-center justify-center gap-2 w-full py-3.5 mt-5 border border-dashed border-[#21262D] rounded-[10px] bg-transparent hover:bg-[#161B22] text-[#8B949E] hover:text-[#F0F6FC] text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer select-none"
+          className="flex items-center justify-center gap-2 w-full py-3.5 mt-5 border border-dashed border-[#21262D] rounded-[5px] bg-transparent hover:bg-[#161B22] text-[#8B949E] hover:text-[#F0F6FC] text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer select-none"
         >
           <Plus size={14} className="text-[#8B949E]" />
           Add creator review

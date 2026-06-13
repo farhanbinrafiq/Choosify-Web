@@ -40,13 +40,14 @@ import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
+import { PublicReviewCard } from '../components/PublicReviewCard';
 import toast from 'react-hot-toast';
 
 // Hex Colors as per instruction
 const COLORS = {
   navy: '#0A0A1F',
-  orange: '#F96500',
-  green: '#07DD05',
+  orange: '#E8500A',
+  green: '#059669',
 };
 
 // --- SUB-COMPONENTS ---
@@ -55,18 +56,18 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
   <button
     onClick={onClick}
     className={cn(
-      "w-full flex items-center gap-4 px-6 py-4 transition-all relative group overflow-hidden border-none text-left bg-transparent cursor-pointer",
-      active ? "text-white" : "text-gray-400 hover:text-white"
+      "w-full flex items-center gap-4 px-10 py-4 transition-all relative group overflow-hidden border-none text-left bg-transparent cursor-pointer",
+      active ? "text-[#E8500A]" : "text-gray-500 hover:text-navy"
     )}
   >
     {active && (
       <motion.div 
         layoutId="active-sidebar"
-        className="absolute inset-0 bg-white/5 border-r-4 border-[#F96500]"
+        className="absolute inset-0 bg-[#E8500A]/5 border-l-4 border-[#E8500A]"
       />
     )}
-    <Icon size={20} className={cn("relative z-10", active ? "text-[#F96500]" : "group-hover:text-white")} />
-    <span className="text-[11px] font-black uppercase tracking-[0.2em] relative z-10 italic">{label}</span>
+    <Icon size={18} className={cn("relative z-10", active ? "text-[#E8500A]" : "text-gray-450 group-hover:text-navy")} />
+    <span className="text-[10px] font-black uppercase tracking-[0.2em] relative z-10 italic">{label}</span>
   </button>
 );
 
@@ -75,7 +76,7 @@ const TabItem = ({ label, active, onClick }: any) => (
     onClick={onClick}
     className={cn(
       "flex-shrink-0 px-6 py-4 text-[10px] font-black uppercase tracking-widest italic transition-all border-b-2 bg-transparent cursor-pointer",
-      active ? "border-[#F96500] text-white" : "border-transparent text-gray-400"
+      active ? "border-[#E8500A] text-navy" : "border-transparent text-gray-400 hover:text-navy"
     )}
   >
     {label}
@@ -85,13 +86,13 @@ const TabItem = ({ label, active, onClick }: any) => (
 const StatCard = ({ icon: Icon, label, value, color, onClick }: any) => (
   <div 
     onClick={onClick}
-    className="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-center gap-5 group hover:bg-white/10 transition-all cursor-pointer hover:border-white/20 select-none"
+    className="bg-white border border-[#e8edf2] rounded-[5px] p-6 flex items-center gap-5 group hover:border-[#E8500A]/30 transition-all cursor-pointer shadow-sm select-none"
   >
-    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg", color)}>
-      <Icon size={22} />
+    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md", color)}>
+      <Icon size={20} />
     </div>
     <div className="text-left">
-      <div className="text-2xl font-black text-white italic leading-none mb-1">{value}</div>
+      <div className="text-2xl font-black text-navy italic leading-none mb-1">{value}</div>
       <div className="text-[9px] font-black text-gray-500 uppercase tracking-widest leading-tight">{label}</div>
     </div>
   </div>
@@ -106,15 +107,15 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none mb-4">
-            Hi, <span className="text-[#F96500]">Mr. Farhan</span>
+          <h2 className="text-4xl font-black text-navy uppercase italic tracking-tighter leading-none mb-4">
+            Hi, <span className="text-[#E8500A]">Mr. Farhan</span>
           </h2>
           <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.3em] italic">Bangladesh's best curator since 2024</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex -space-x-3">
             {[1, 2, 3].map(i => (
-              <div key={i} className="w-8 h-8 rounded-full border-2 border-navy overflow-hidden bg-gray-800">
+              <div key={i} className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-gray-100 shadow-sm">
                 <img 
                   src={`https://i.pravatar.cc/150?u=${i + 10}`} 
                   onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${i}&background=random`; }}
@@ -124,7 +125,7 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
               </div>
             ))}
           </div>
-          <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">12 Active Experts Online</span>
+          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">12 Active Experts Online</span>
         </div>
       </div>
 
@@ -133,7 +134,7 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
           icon={Heart} 
           label="Saved Products" 
           value={savedProducts.length} 
-          color="bg-[#F96500]" 
+          color="bg-[#E8500A]" 
           onClick={() => onTabChange && onTabChange('saved-products')}
         />
         <StatCard 
@@ -154,7 +155,7 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
           icon={CheckCircle2} 
           label="Followed Brands" 
           value={followedBrands.length} 
-          color="bg-[#07DD05]" 
+          color="bg-[#059669]" 
           onClick={() => onTabChange && onTabChange('followed-brands')}
         />
       </div>
@@ -162,13 +163,13 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-8">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-black text-white italic uppercase flex items-center gap-3">
-              <Clock className="text-[#F96500]" size={20} /> Recently Viewed
+            <h3 className="text-xl font-black text-navy italic uppercase flex items-center gap-3">
+              <Clock className="text-[#E8500A]" size={20} /> Recently Viewed
             </h3>
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => onTabChange && onTabChange('recently-viewed')}
-                className="text-[10px] font-black text-[#F96500] uppercase tracking-widest hover:underline italic bg-transparent border-none cursor-pointer"
+                className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest hover:underline italic bg-transparent border-none cursor-pointer"
               >
                 See All
               </button>
@@ -184,11 +185,11 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
               ))}
             </div>
           ) : (
-            <div className="py-20 border border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center text-center bg-white/5 w-full">
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider italic">No recently viewed history</p>
+            <div className="py-20 border border-dashed border-gray-200 rounded-[5px] flex flex-col items-center justify-center text-center bg-white w-full shadow-sm">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider italic">No recently viewed history</p>
               <button 
                 onClick={() => onTabChange && onTabChange('recently-viewed')}
-                className="mt-4 text-[9px] font-black text-[#F96500] uppercase tracking-widest italic hover:underline"
+                className="mt-4 text-[9px] font-black text-[#E8500A] uppercase tracking-widest italic hover:underline"
               >
                 Learn More
               </button>
@@ -197,11 +198,11 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
         </div>
 
         <div className="space-y-8">
-           <h3 className="text-xl font-black text-white italic uppercase flex items-center gap-3">
-              <TrendingUp className="text-[#07DD05]" size={20} /> Today's Pick
+           <h3 className="text-xl font-black text-navy italic uppercase flex items-center gap-3">
+              <TrendingUp className="text-[#059669]" size={20} /> Today's Pick
             </h3>
-            <div className="bg-gradient-to-br from-[#F96500]/20 to-transparent border border-[#F96500]/30 rounded-3xl p-8 relative overflow-hidden group h-[400px] flex flex-col justify-between">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#F96500]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-8 relative overflow-hidden group h-[400px] flex flex-col justify-between shadow-sm">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#E8500A]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
               <img 
                 src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop" 
                 loading="lazy"
@@ -210,11 +211,11 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
                 alt="" 
               />
               <div className="mt-auto text-left">
-                <span className="text-[9px] font-black text-[#F96500] uppercase tracking-[0.4em] mb-2 block font-sans">Special Recommendation</span>
-                <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none mb-4 font-sans">Apex Premium Runner Elite X</h4>
+                <span className="text-[9px] font-black text-[#E8500A] uppercase tracking-[0.4em] mb-2 block font-sans">Special Recommendation</span>
+                <h4 className="text-2xl font-black text-navy uppercase italic tracking-tighter leading-none mb-4 font-sans">Apex Premium Runner Elite X</h4>
                 <div className="flex items-center justify-between">
-                  <span className="text-xl font-black text-white italic font-sans">BDT 4,500</span>
-                  <button className="w-10 h-10 rounded-full bg-white text-slate-800 flex items-center justify-center hover:bg-[#F96500] hover:text-white transition-all cursor-pointer border-none">
+                  <span className="text-xl font-black text-navy italic font-sans">BDT 4,500</span>
+                  <button className="w-10 h-10 rounded-full bg-gray-50 border border-gray-150 text-navy flex items-center justify-center hover:bg-[#E8500A] hover:text-white transition-all cursor-pointer border-none shadow-sm">
                     <ArrowLeft className="rotate-180" size={18} />
                   </button>
                 </div>
@@ -233,15 +234,15 @@ const SavedProductsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Saved <span className="text-[#F96500]">Vault</span> <span className="text-gray-500 text-2xl">({savedProducts.length})</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Vault</span> <span className="text-gray-400 text-2xl">({savedProducts.length})</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your curated list of premium desires</p>
         </div>
-        <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-full px-6 py-2">
+        <div className="flex items-center gap-4 bg-white border border-[#e8edf2] rounded-full px-6 py-2 shadow-sm">
            <Filter size={14} className="text-gray-400" />
-           <select className="bg-transparent text-white text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer border-none">
-              <option value="all" className="bg-[#0A0A1F]">All Categories</option>
-              <option value="tech" className="bg-[#0A0A1F]">Tech</option>
-              <option value="fashion" className="bg-[#0A0A1F]">Fashion</option>
+           <select className="bg-transparent text-navy text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer border-none">
+              <option value="all" className="bg-white">All Categories</option>
+              <option value="tech" className="bg-white">Tech</option>
+              <option value="fashion" className="bg-white">Fashion</option>
            </select>
         </div>
       </div>
@@ -262,12 +263,12 @@ const SavedProductsSection = () => {
         </div>
       ) : (
         <div className="py-32 flex flex-col items-center text-center">
-          <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/20 mb-8 scale-110">
+          <div className="w-24 h-24 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center text-gray-300 mb-8 scale-110 shadow-sm col-span-full">
             <ShoppingBag size={40} />
           </div>
-          <h3 className="text-xl font-black text-white italic uppercase tracking-widest mb-4">Vault is empty</h3>
+          <h3 className="text-xl font-black text-[#1a1a2e] italic uppercase tracking-widest mb-4">Vault is empty</h3>
           <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">Start exploring Choosify.bd and save products you love to your personal vault.</p>
-          <Link to="/products" className="px-12 py-4 bg-[#F96500] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-2xl shadow-[#F96500]/20 hover:scale-105 transition-all">Start Browsing</Link>
+          <Link to="/products" className="px-12 py-4 bg-[#E8500A] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-xl shadow-[#E8500A]/10 hover:scale-105 transition-all animate-none">Start Browsing</Link>
         </div>
       )}
     </div>
@@ -282,7 +283,7 @@ const SavedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Saved <span className="text-[#1B5CFF]">Brands</span> <span className="text-gray-500 text-2xl">({savedBrands.length})</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Brands</span> <span className="text-gray-450 text-2xl">({savedBrands.length})</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">☆ Bookmarked partners for later reference</p>
         </div>
       </div>
@@ -292,46 +293,46 @@ const SavedBrandsSection = () => {
           {savedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white/5 border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all text-center flex flex-col justify-between"
+              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
             >
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   removeSavedBrand(brand.id);
                 }}
-                className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer"
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer"
               >
                 <X size={16} />
               </button>
               
               <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-xl shadow-black/20 overflow-hidden">
+                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
                   {brand.logo && brand.logo.length > 2 ? (
                     <img src={brand.logo} className="w-full h-full object-contain" alt="" />
                   ) : (
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-lg font-black text-white uppercase italic mb-2 truncate group-hover:text-[#F96500] transition-colors">{brand.name}</h4>
+                <h4 className="text-lg font-black text-[#1a1a2e] uppercase italic mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#F96500] fill-current text-current" : "text-white/10"} />
+                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
                   ))}
                   <span className="text-[10px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-white/5 border border-white/10 hover:border-[#F96500]/50 hover:bg-[#F96500]/10 rounded-xl text-[9px] font-black text-white uppercase tracking-widest transition-all text-center">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center">
                 Visit Brand Hub
               </Link>
             </div>
           ))}
         </div>
       ) : (
-        <div className="py-32 flex flex-col items-center text-center opacity-60">
-          <Store size={64} className="mb-8 text-gray-500" />
-          <p className="text-[11px] font-black uppercase tracking-widest italic leading-relaxed">No Saved Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#F96500] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Browse All Brands</Link>
+        <div className="py-32 flex flex-col items-center text-center opacity-80">
+          <Store size={64} className="mb-8 text-gray-300" />
+          <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No Saved Brands yet</p>
+          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Browse All Brands</Link>
         </div>
       )}
     </div>
@@ -346,7 +347,7 @@ const LovedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Loved <span className="text-[#F96500]">Brands</span> <span className="text-gray-500 text-2xl">({lovedBrands.length})</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Loved <span className="text-[#E8500A]">Brands</span> <span className="text-gray-400 text-2xl">({lovedBrands.length})</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">♥ Brands you reacted to with love</p>
         </div>
       </div>
@@ -356,46 +357,46 @@ const LovedBrandsSection = () => {
           {lovedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white/5 border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all text-center flex flex-col justify-between"
+              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
             >
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleLoveBrand(brand);
                 }}
-                className="absolute top-4 right-4 text-rose-500 hover:text-gray-500 transition-colors bg-transparent border-none cursor-pointer"
+                className="absolute top-4 right-4 text-rose-550 hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer"
               >
                 <Heart size={16} className="fill-current text-rose-500" />
               </button>
               
               <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-xl shadow-black/20 overflow-hidden">
+                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
                   {brand.logo && brand.logo.length > 2 ? (
                     <img src={brand.logo} className="w-full h-full object-contain" alt="" />
                   ) : (
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-lg font-black text-white uppercase italic mb-2 truncate group-hover:text-[#F96500] transition-colors">{brand.name}</h4>
+                <h4 className="text-lg font-black text-[#1a1a2e] uppercase italic mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#F96500] fill-current text-current" : "text-white/10"} />
+                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
                   ))}
                   <span className="text-[10px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-white/5 border border-white/10 hover:border-[#F96500]/50 hover:bg-[#F96500]/10 rounded-xl text-[9px] font-black text-white uppercase tracking-widest transition-all text-center">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center">
                 Visit Brand Hub
               </Link>
             </div>
           ))}
         </div>
       ) : (
-        <div className="py-32 flex flex-col items-center text-center opacity-60">
+        <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Heart size={64} className="mb-8 text-rose-500" />
-          <p className="text-[11px] font-black uppercase tracking-widest italic leading-relaxed">No Loved Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#F96500] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore Brands</Link>
+          <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No Loved Brands yet</p>
+          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore Brands</Link>
         </div>
       )}
     </div>
@@ -410,7 +411,7 @@ const FollowedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Followed <span className="text-[#F96500]">Partners</span> <span className="text-gray-500 text-2xl">({followedBrands.length})</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Followed <span className="text-[#E8500A]">Partners</span> <span className="text-gray-400 text-2xl">({followedBrands.length})</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">⚡ Subscribed to receive updates and deals</p>
         </div>
       </div>
@@ -420,7 +421,7 @@ const FollowedBrandsSection = () => {
           {followedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white/5 border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all text-center flex flex-col justify-between"
+              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
             >
               <button 
                 onClick={(e) => {
@@ -433,34 +434,34 @@ const FollowedBrandsSection = () => {
               </button>
               
               <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-xl shadow-black/20 overflow-hidden">
+                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
                   {brand.logo && brand.logo.length > 2 ? (
                     <img src={brand.logo} className="w-full h-full object-contain" alt="" />
                   ) : (
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-lg font-black text-white uppercase italic mb-2 truncate group-hover:text-[#F96500] transition-colors">{brand.name}</h4>
+                <h4 className="text-lg font-black text-[#1a1a2e] uppercase italic mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#F96500] fill-current text-current" : "text-white/10"} />
+                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
                   ))}
                   <span className="text-[10px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-white/5 border border-white/10 hover:border-[#F96500]/50 hover:bg-[#F96500]/10 rounded-xl text-[9px] font-black text-white uppercase tracking-widest transition-all text-center justify-between flex items-center px-4">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/30 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center justify-between flex items-center px-4">
                 <span>View Updates</span>
-                <span className="bg-[#07DD05] text-[7px] text-[#0A0A1F] font-black px-1.5 py-0.5 rounded-full uppercase scale-90">Live</span>
+                <span className="bg-[#059669] text-[7px] text-white font-black px-1.5 py-0.5 rounded-full uppercase scale-90">Live</span>
               </Link>
             </div>
           ))}
         </div>
       ) : (
-        <div className="py-32 flex flex-col items-center text-center opacity-60">
-          <Store size={64} className="mb-8 text-gray-500" />
-          <p className="text-[11px] font-black uppercase tracking-widest italic leading-relaxed">No Followed Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#F96500] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore and Follow Brands</Link>
+        <div className="py-32 flex flex-col items-center text-center opacity-80">
+          <Store size={64} className="mb-8 text-gray-300" />
+          <p className="text-[11px] font-black text-[#1a1a2e ] uppercase tracking-widest italic leading-relaxed font-black mb-4">No Followed Brands yet</p>
+          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore and Follow Brands</Link>
         </div>
       )}
     </div>
@@ -479,7 +480,7 @@ const RecentlyViewedSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Recently <span className="text-[#F96500]">Viewed</span> <span className="text-gray-500 text-2xl">({recentlyViewed.length})</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Recently <span className="text-[#E8500A]">Viewed</span> <span className="text-gray-400 text-2xl">({recentlyViewed.length})</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">🕒 Products you recently browsed</p>
         </div>
         {recentlyViewed.length > 0 && (
@@ -501,11 +502,11 @@ const RecentlyViewedSection = () => {
           ))}
         </div>
       ) : (
-        <div className="py-32 flex flex-col items-center text-center opacity-60">
-          <Clock size={64} className="mb-8 text-[#F96500]" />
-          <p className="text-[11px] font-black uppercase tracking-widest italic leading-relaxed">No recently viewed products</p>
-          <p className="text-[10px] font-bold text-gray-500 uppercase mt-2 italic">Product views will automatically populate this section.</p>
-          <Link to="/products" className="mt-8 px-10 py-3 bg-[#F96500] text-[#0A0A1F] font-black uppercase tracking-widest italic shadow-xl">Go To Directory</Link>
+        <div className="py-32 flex flex-col items-center text-center opacity-80">
+          <Clock size={64} className="mb-8 text-[#E8500A]" />
+          <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No recently viewed products</p>
+          <p className="text-[10px] font-bold text-gray-405 uppercase mt-2 italic">Product views will automatically populate this section.</p>
+          <Link to="/products" className="mt-8 px-10 py-3 bg-[#E8500A] text-white font-black uppercase tracking-widest italic shadow-xl">Go To Directory</Link>
         </div>
       )}
     </div>
@@ -519,24 +520,24 @@ const CompareToolSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Compare <span className="text-[#07DD05]">Matrix</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Compare <span className="text-[#059669]">Matrix</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Side-by-side analysis for smart decisions</p>
         </div>
         <div className="flex items-center gap-4">
-           <button className="px-8 py-3 bg-white/5 border border-white/10 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white/10 flex items-center gap-2">
+           <button className="px-8 py-3 bg-white border border-gray-200 text-navy rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 flex items-center gap-2 cursor-pointer shadow-sm">
               <Send size={14} /> Share Link
            </button>
-           <Link to="/compare" className="px-8 py-3 bg-[#07DD05] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#07DD05]/20 hover:scale-105 active:scale-95 transition-all">Full View</Link>
+           <Link to="/compare" className="px-8 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#E8500A]/10 hover:scale-105 active:scale-95 transition-all animate-none">Full View</Link>
         </div>
       </div>
 
-      <div className="bg-[#050514]/50 border border-white/10 rounded-[24px] md:rounded-[32px] overflow-hidden">
+      <div className="bg-white border border-[#e8edf2] rounded-[5px] overflow-hidden shadow-sm">
         <div className="overflow-x-auto no-scrollbar">
           <div className="min-w-[800px]">
-            <div className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-white/5 border-b border-white/10">
-               <div className="p-8 flex flex-col justify-center bg-white/5">
-                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest italic mb-2">Active Slots</span>
-                  <h4 className="text-xl font-black text-white italic uppercase uppercase leading-none">{comparedProducts.length}/4 Models</h4>
+            <div className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-gray-150 border-b border-gray-150">
+               <div className="p-8 flex flex-col justify-center bg-gray-50/50">
+                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic mb-2">Active Slots</span>
+                  <h4 className="text-xl font-black text-navy italic uppercase leading-none">{comparedProducts.length}/4 Models</h4>
                </div>
                {[...comparedProducts, ...Array(4 - comparedProducts.length).fill(null)].slice(0, 3).map((p, i) => (
                  <div key={i} className="p-8 group relative min-h-[200px] flex flex-col items-center justify-center">
@@ -544,16 +545,16 @@ const CompareToolSection = () => {
                      <>
                        <button 
                          onClick={() => removeFromCompare(p.id)}
-                         className="absolute top-4 right-4 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                         className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all font-sans bg-transparent border-none cursor-pointer"
                        >
                          <X size={16} />
                        </button>
                        <img src={p.image} className="w-20 h-20 object-contain mb-6" alt="" />
-                       <h5 className="text-[11px] font-black text-white italic uppercase text-center line-clamp-1">{p.title}</h5>
-                       <span className="text-[10px] font-bold text-[#F96500] mt-1 italic">BDT {p.price}</span>
+                       <h5 className="text-[11px] font-black text-[#1a1a2e ] italic uppercase text-center line-clamp-1">{p.title}</h5>
+                       <span className="text-[10px] font-bold text-[#E8500A] mt-1 italic">BDT {p.price}</span>
                      </>
                    ) : (
-                     <button className="w-16 h-16 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center text-white/10 hover:border-white/20 hover:text-white/30 transition-all">
+                     <button className="w-16 h-16 rounded-full border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 hover:border-gray-400 hover:text-gray-500 transition-all bg-transparent cursor-pointer">
                         <Plus size={24} />
                      </button>
                    )}
@@ -562,21 +563,21 @@ const CompareToolSection = () => {
             </div>
             
             {/* Comparison Table (Simplified) */}
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-gray-150">
                 {[
                   { label: 'Rating', values: comparedProducts.map(p => p.rating + '/5.0') },
                   { label: 'Market Value', values: comparedProducts.map(() => 'Premium') },
-                  { label: 'In Stock', values: comparedProducts.map(() => 'Yes (Dhaka)'), color: 'text-[#07DD05]' },
-                  { label: 'Expert Score', values: comparedProducts.map(() => '92/100'), color: 'text-[#F96500]' }
+                  { label: 'In Stock', values: comparedProducts.map(() => 'Yes (Dhaka)'), color: 'text-[#059669]' },
+                  { label: 'Expert Score', values: comparedProducts.map(() => '92/100'), color: 'text-[#E8500A]' }
                 ].map((row, i) => (
-                  <div key={i} className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-white/5">
-                     <div className="p-6 bg-white/5 text-[10px] font-black text-gray-400 uppercase italic tracking-widest">{row.label}</div>
+                  <div key={i} className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-gray-150">
+                     <div className="p-6 bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase italic tracking-widest">{row.label}</div>
                      {row.values.map((val, vidx) => (
-                       <div key={vidx} className={cn("p-6 text-center text-xs font-bold italic", row.color || "text-white")}>{val}</div>
+                       <div key={vidx} className={cn("p-6 text-center text-xs font-bold italic", row.color || "text-navy")}>{val}</div>
                      ))}
                      {/* Empty slot fillers */}
                      {Array(3 - row.values.length).fill(null).map((_, fidx) => (
-                       <div key={`f-${fidx}`} className="p-6 text-center text-white/5">-</div>
+                       <div key={`f-${fidx}`} className="p-6 text-center text-gray-300">-</div>
                      ))}
                   </div>
                 ))}
@@ -600,17 +601,17 @@ const MessagesSection = () => {
   };
 
   return (
-    <div className="h-[600px] md:h-[700px] flex flex-col md:flex-row gap-px bg-white/5 border border-white/10 rounded-[24px] md:rounded-[32px] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-700">
+    <div className="h-[600px] md:h-[700px] flex flex-col md:flex-row gap-px bg-gray-100 border border-[#e8edf2] rounded-[5px] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-700 shadow-sm">
       {/* Inbox List */}
       <div className={cn(
-        "w-full md:w-[300px] lg:w-[350px] bg-[#050514] flex flex-col",
+        "w-full md:w-[300px] lg:w-[350px] bg-white flex flex-col border-r border-[#e8edf2]",
         activeChat !== null && "hidden md:flex"
       )}>
          <div className="p-6 md:p-8 border-b border-white/5">
-            <h2 className="text-lg md:text-xl font-black text-white italic uppercase tracking-tighter mb-4">Inbox</h2>
+            <h2 className="text-lg md:text-xl font-black text-navy italic uppercase tracking-tighter mb-4">Inbox</h2>
             <div className="relative">
                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-               <input className="w-full h-10 pl-10 pr-4 bg-white/5 rounded-xl text-[10px] font-bold text-white placeholder:text-gray-500 focus:outline-none" placeholder="Search chats..." />
+               <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/30 transition-all" placeholder="Search chats..." />
             </div>
          </div>
          <div className="flex-1 overflow-y-auto no-scrollbar">
@@ -618,18 +619,18 @@ const MessagesSection = () => {
               <button 
                 key={i} 
                 onClick={() => setActiveChat(i)}
-                className={cn("w-full p-6 flex gap-4 text-left border-b border-white/5 transition-all hover:bg-white/5", i === 1 && "bg-white/5 border-r-2 border-[#F96500]")}
+                className={cn("w-full p-6 flex gap-4 text-left border-b border-gray-100 transition-all hover:bg-gray-50 bg-transparent border-none cursor-pointer", i === 1 && "bg-gray-50/50 border-r-2 border-[#E8500A]")}
               >
                  <div className="relative">
                     <img src={`https://i.pravatar.cc/150?u=${i + 20}`} className="w-12 h-12 rounded-full object-cover" alt="" />
-                    {i === 1 && <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#07DD05] border-2 border-[#050514] rounded-full" />}
+                    {i === 1 && <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#059669] border-2 border-white rounded-full" />}
                  </div>
                  <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                       <span className="text-xs font-black text-white italic truncate">{i === 1 ? 'Farhan Rafiq (Admin)' : i === 2 ? 'Apex Official' : 'Dhanmondi Branch'}</span>
-                       <span className="text-[8px] font-bold text-gray-500">10:30 AM</span>
+                       <span className="text-xs font-black text-navy italic truncate">{i === 1 ? 'Farhan Rafiq (Admin)' : i === 2 ? 'Apex Official' : 'Dhanmondi Branch'}</span>
+                       <span className="text-[8px] font-bold text-gray-400">10:30 AM</span>
                     </div>
-                    <p className="text-[10px] text-gray-500 line-clamp-1 italic font-bold">Absolutely! We can ship the S24 Ultra...</p>
+                    <p className="text-[10px] text-gray-400 line-clamp-1 italic font-bold">Absolutely! We can ship the S24 Ultra...</p>
                  </div>
               </button>
             ))}
@@ -638,23 +639,23 @@ const MessagesSection = () => {
 
       {/* Chat Area */}
       <div className={cn(
-        "flex-1 flex flex-col bg-[#0A0A1F]/50",
+        "flex-1 flex flex-col bg-gray-50/30",
         activeChat === null && "hidden md:flex"
       )}>
-         <div className="p-4 md:p-6 border-b border-white/5 flex items-center justify-between bg-[#050514]/40">
+         <div className="p-4 md:p-6 border-b border-[#e8edf2] flex items-center justify-between bg-white">
             <div className="flex items-center gap-4">
-               <button onClick={() => setActiveChat(null)} className="md:hidden w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white">
+               <button onClick={() => setActiveChat(null)} className="md:hidden w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border-none cursor-pointer">
                   <ArrowLeft size={16} />
                </button>
                <img src="https://i.pravatar.cc/150?u=admin" className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" alt="" />
                <div>
-                  <h4 className="text-xs md:text-sm font-black text-white italic uppercase tracking-widest leading-none">Farhan Rafiq</h4>
-                  <span className="text-[8px] md:text-[9px] font-bold text-[#07DD05] uppercase italic font-black">Support Active</span>
+                  <h4 className="text-xs md:text-sm font-black text-navy italic uppercase tracking-widest leading-none">Farhan Rafiq</h4>
+                  <span className="text-[8px] md:text-[9px] font-bold text-[#059669] uppercase italic font-black">Support Active</span>
                </div>
             </div>
             <div className="flex items-center gap-2 md:gap-3">
-               <button className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors"><Bell size={14} /></button>
-               <button className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors"><MoreVertical size={14} /></button>
+               <button className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gray-50 border-none flex items-center justify-center text-gray-400 hover:text-navy transition-colors cursor-pointer"><Bell size={14} /></button>
+               <button className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gray-50 border-none flex items-center justify-center text-gray-400 hover:text-navy transition-colors cursor-pointer"><MoreVertical size={14} /></button>
             </div>
          </div>
 
@@ -663,27 +664,27 @@ const MessagesSection = () => {
               <div key={m.id} className={cn("flex flex-col max-w-[90%] md:max-w-[80%]", m.sender === 'user' ? "ml-auto items-end" : "mr-auto items-start")}>
                  <div className={cn(
                    "px-5 py-3 md:px-6 md:py-4 rounded-[16px] md:rounded-[20px] mb-2 text-[11px] md:text-xs font-bold leading-relaxed",
-                   m.sender === 'user' ? "bg-[#F96500] text-white rounded-tr-none shadow-xl shadow-[#F96500]/10 italic" : "bg-white/5 text-gray-300 rounded-tl-none border border-white/10"
+                   m.sender === 'user' ? "bg-[#E8500A] text-white rounded-tr-none shadow-md shadow-[#E8500A]/10 italic" : "bg-white text-navy rounded-tl-none border border-gray-200"
                  )}>
                     {m.text}
                  </div>
-                 <span className="text-[8px] font-black text-gray-500 uppercase italic px-2">{m.senderName || 'Farhan'} • {m.time}</span>
+                 <span className="text-[8px] font-black text-gray-400 uppercase italic px-2">{m.senderName || 'Farhan'} • {m.time}</span>
               </div>
             ))}
          </div>
 
-         <div className="p-6 md:p-8 bg-[#050514]/60 border-t border-white/5">
+         <div className="p-6 md:p-8 bg-white border-t border-[#e8edf2]">
             <div className="relative">
                <input 
                  value={inputText}
                  onChange={(e) => setInputText(e.target.value)}
                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                 className="w-full h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-white placeholder:text-gray-500 focus:outline-none focus:border-[#F96500]/50 transition-all" 
+                 className="w-full h-12 md:h-14 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/30 transition-all" 
                  placeholder="Type message..." 
                />
                <button 
                  onClick={handleSend}
-                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#F96500] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#F96500]/20"
+                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#E8500A] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#E8500A]/10 border-none cursor-pointer"
                >
                   <Send size={16} />
                </button>
@@ -705,12 +706,12 @@ const NotificationsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Notification <span className="text-[#7C3AED]">Center</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Notification <span className="text-[#E8500A]">Center</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Updates on your curated world</p>
         </div>
         <button 
           onClick={markAllAsRead}
-          className="text-[10px] font-black text-[#F96500] uppercase tracking-widest italic hover:underline"
+          className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic hover:underline border-none bg-transparent cursor-pointer"
         >
           Mark all as read
         </button>
@@ -722,30 +723,30 @@ const NotificationsSection = () => {
             <div 
               key={n.id} 
               className={cn(
-                "p-8 bg-white/5 border border-white/10 rounded-[24px] flex items-start gap-6 transition-all hover:bg-white/10 relative overflow-hidden group",
-                !n.read && "border-[#7C3AED]/30 bg-[#7C3AED]/5"
+                "p-8 bg-white border border-[#e8edf2] rounded-[5px] flex items-start gap-6 transition-all hover:bg-gray-50 relative overflow-hidden group shadow-sm",
+                !n.read && "border-[#E8500A]/30 bg-[#E8500A]/5"
               )}
             >
-              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#7C3AED]" />}
+              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#E8500A]" />}
               <div className={cn(
-                "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg",
-                n.type === 'price' ? "bg-[#07DD05]/10 text-[#07DD05]" : 
-                n.type === 'reply' ? "bg-[#F96500]/10 text-[#F96500]" : 
-                "bg-[#7C3AED]/10 text-[#7C3AED]"
+                "w-12 h-12 rounded-lg flex items-center justify-center shrink-0 shadow-sm",
+                n.type === 'price' ? "bg-[#059669]/10 text-[#059669]" : 
+                n.type === 'reply' ? "bg-[#E8500A]/10 text-[#E8500A]" : 
+                "bg-[#E8500A]/15 text-[#E8500A]"
               )}>
                 {n.type === 'price' ? <TrendingUp size={24} /> : n.type === 'reply' ? <MessageSquare size={24} /> : <Bell size={24} />}
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-lg font-black text-white uppercase italic tracking-tighter">{n.title}</h4>
+                  <h4 className="text-lg font-black text-navy uppercase italic tracking-tighter">{n.title}</h4>
                   <span className="text-[10px] font-black text-gray-500 uppercase">{n.time}</span>
                 </div>
-                <p className="text-gray-400 text-sm font-bold italic leading-relaxed">{n.message}</p>
+                <p className="text-gray-500 text-sm font-bold italic leading-relaxed">{n.message}</p>
               </div>
             </div>
           ))
         ) : (
-          <div className="py-32 flex flex-col items-center text-center opacity-40">
+          <div className="py-32 flex flex-col items-center text-center text-gray-400">
             <Bell size={64} className="mb-8" />
             <p className="text-[11px] font-black uppercase tracking-widest italic">No new notifications</p>
           </div>
@@ -770,12 +771,12 @@ const SettingsSection = () => {
     <div className="max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
        <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Profile <span className="text-[#F96500]">Master</span></h2>
+            <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Profile <span className="text-[#E8500A]">Master</span></h2>
             <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Configure your discovery experience</p>
           </div>
           <button 
             onClick={handleSave}
-            className="px-10 py-3 bg-[#F96500] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#F96500]/20 hover:scale-105 transition-all italic"
+            className="px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#E8500A]/10 hover:scale-105 transition-all italic border-none cursor-pointer"
           >
             Save Changes
           </button>
@@ -783,25 +784,25 @@ const SettingsSection = () => {
 
        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="space-y-8">
-             <div className="flex flex-col items-center p-8 bg-white/5 border border-white/10 rounded-3xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-b from-[#F96500]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+             <div className="flex flex-col items-center p-8 bg-white border border-[#e8edf2] rounded-[5px] relative overflow-hidden group shadow-sm">
+                <div className="absolute inset-0 bg-gradient-to-b from-[#E8500A]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative w-32 h-32 mb-6 cursor-pointer group/avatar">
-                   <img src="https://i.pravatar.cc/150?u=me" className="w-full h-full rounded-full object-cover border-4 border-[#F96500]/30 transition-all group-hover/avatar:border-white" alt="Profile" />
+                   <img src="https://i.pravatar.cc/150?u=me" className="w-full h-full rounded-full object-cover border-4 border-[#E8500A]/30 transition-all group-hover/avatar:border-navy" alt="Profile" />
                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
                       <Plus className="text-white" size={32} />
                    </div>
                 </div>
-                <h4 className="text-xl font-black text-white italic uppercase mb-1">{profile.name}</h4>
+                <h4 className="text-xl font-black text-navy italic uppercase mb-1">{profile.name}</h4>
                 <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator • ID: 89BD-001</p>
              </div>
 
              <div className="space-y-6">
-                <h3 className="text-xs font-black text-white/40 uppercase tracking-[0.3em] px-2 italic">Basic Intel</h3>
+                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Basic Intel</h3>
                 <div className="space-y-4">
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Full Display Name</label>
                       <input 
-                        className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-6 text-[11px] font-bold text-white focus:outline-none focus:border-[#F96500]/50" 
+                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
                         value={profile.name}
                         onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                       />
@@ -809,7 +810,7 @@ const SettingsSection = () => {
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Email Address</label>
                       <input 
-                        className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-6 text-[11px] font-bold text-white focus:outline-none focus:border-[#F96500]/50" 
+                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
                         value={profile.email}
                         onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                       />
@@ -817,7 +818,7 @@ const SettingsSection = () => {
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Location (City)</label>
                       <input 
-                        className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-6 text-[11px] font-bold text-white focus:outline-none focus:border-[#F96500]/50" 
+                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
                         value={profile.location}
                         onChange={(e) => setProfile({ ...profile, location: e.target.value })}
                       />
@@ -828,8 +829,8 @@ const SettingsSection = () => {
 
           <div className="space-y-8">
              <div className="space-y-6">
-                <h3 className="text-xs font-black text-white/40 uppercase tracking-[0.3em] px-2 italic">Notification Matrix</h3>
-                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-6">
+                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Notification Matrix</h3>
+                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-8 space-y-6 shadow-sm">
                    {[
                      { label: 'Sale Alerts', desc: 'When your saved product goes on flash sale', checked: true },
                      { label: 'Expert Tips', desc: 'Weekly curated guides for your categories', checked: true },
@@ -838,12 +839,12 @@ const SettingsSection = () => {
                    ].map((item, i) => (
                      <div key={i} className="flex items-center justify-between gap-6 group">
                         <div className="flex-1">
-                           <h5 className="text-[11px] font-black text-white uppercase italic tracking-tighter mb-1">{item.label}</h5>
+                           <h5 className="text-[11px] font-black text-navy uppercase italic tracking-tighter mb-1">{item.label}</h5>
                            <p className="text-[9px] font-bold text-gray-500 italic uppercase">{item.desc}</p>
                         </div>
                         <button className={cn(
                           "w-12 h-6 rounded-full transition-all relative p-1",
-                          item.checked ? "bg-[#07DD05]" : "bg-white/10"
+                          item.checked ? "bg-[#059669]" : "bg-gray-200"
                         )}>
                            <div className={cn("w-4 h-4 rounded-full bg-white transition-all shadow-md", item.checked ? "translate-x-6" : "translate-x-0")} />
                         </button>
@@ -853,11 +854,11 @@ const SettingsSection = () => {
              </div>
 
              <div className="space-y-6">
-                <h3 className="text-xs font-black text-white/40 uppercase tracking-[0.3em] px-2 italic">Security Zone</h3>
-                <button className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-white uppercase tracking-widest hover:bg-white/10 flex items-center justify-center gap-3">
-                   <ShieldCheck size={16} className="text-[#F96500]" /> Reset Multi-Factor Auth
+                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Security Zone</h3>
+                <button className="w-full py-4 bg-white border border-gray-200 rounded-lg text-[10px] font-black text-navy uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-3 cursor-pointer shadow-sm">
+                   <ShieldCheck size={16} className="text-[#E8500A]" /> Reset Multi-Factor Auth
                 </button>
-                <button className="w-full py-4 bg-red-500/5 border border-red-500/10 rounded-2xl text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
+                <button className="w-full py-4 bg-red-50 border border-red-100 rounded-lg text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all cursor-pointer">
                    Deactivate Curator Account
                 </button>
              </div>
@@ -1300,7 +1301,7 @@ export function DashboardPage() {
       case 'saved-recommendations': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
            <div>
-              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Saved <span className="text-[#F96500]">Guides</span></h2>
+              <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Guides</span></h2>
               <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Knowledge bookmarks for your next big buy</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
@@ -1315,36 +1316,35 @@ export function DashboardPage() {
       case 'notifications': return <NotificationsSection />;
       case 'my-reviews': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
-           <div>
-              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">My <span className="text-orange-primary">Reviews</span></h2>
-              <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your community contributions and feedback</p>
+            <div>
+               <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">My <span className="text-[#E8500A]">Reviews</span></h2>
+               <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your community contributions and feedback</p>
             </div>
             <div className="space-y-6">
-               {[1, 2].map(i => (
-                 <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row gap-8">
-                    <div className="w-24 h-24 rounded-2xl bg-white p-2 shrink-0">
-                       <img src={PRODUCTS[i === 1 ? 0 : 5].image} className="w-full h-full object-contain" alt="" />
-                    </div>
-                    <div className="flex-1">
-                       <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-lg font-black text-white uppercase italic truncate max-w-md">{PRODUCTS[i === 1 ? 0 : 5].title}</h4>
-                          <span className="text-[10px] font-black text-gray-500 uppercase">May {12 - i}, 2026</span>
-                       </div>
-                       <div className="flex items-center gap-1.5 mb-4">
-                          {[1, 2, 3, 4, 5].map(s => (
-                            <Star key={s} size={12} className={s <= (i === 1 ? 5 : 4) ? "text-[#F96500] fill-current" : "text-white/10"} />
-                          ))}
-                       </div>
-                       <p className="text-[13px] font-bold text-gray-300 italic italic leading-relaxed max-w-2xl px-4 border-l-2 border-white/10">
-                          {i === 1 ? "Amazing performance! The AI features are game-changing for my daily workflow. Battery life is also significantly better than predecessors." : "Very comfortable for daily runs, but size runs slightly small. I suggest buying one size up for the perfect fit."}
-                       </p>
-                       <div className="mt-6 flex items-center gap-6">
-                          <button className="text-[9px] font-black text-[#F96500] uppercase tracking-[0.2em] italic hover:underline">Edit Review</button>
-                          <button className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] italic hover:text-white">Delete</button>
-                       </div>
-                    </div>
-                 </div>
-               ))}
+               {[1, 2].map(i => {
+                 const review = {
+                   name: "You",
+                   dp: "https://i.pravatar.cc/150?u=farhan",
+                   date: `May ${12 - i}, 2026`,
+                   comment: i === 1 
+                     ? "Amazing performance! The AI features are game-changing for my daily workflow. Battery life is also significantly better than predecessors." 
+                     : "Very comfortable for daily runs, but size runs slightly small. I suggest buying one size up for the perfect fit.",
+                   rating: i === 1 ? 5 : 4,
+                   verified: true,
+                   productName: PRODUCTS[i === 1 ? 0 : 5].title,
+                   productImage: PRODUCTS[i === 1 ? 0 : 5].image
+                 };
+                 return (
+                   <PublicReviewCard
+                     key={i}
+                     review={review}
+                     isDark={false}
+                     showActions={true}
+                     onEditClick={() => toast.success("Preparing review edit editor...")}
+                     onDeleteClick={() => toast.success("Review deleted successfully.")}
+                   />
+                 );
+               })}
             </div>
         </div>
       );
@@ -1355,28 +1355,28 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0A0A1F] text-white">
+    <div className="flex flex-col min-h-screen bg-[#F8F9FA] text-[#1a1a2e]">
       {/* Mobile Top Header */}
-      <div className="lg:hidden p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0A0A1F] z-50">
-        <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white border-0 cursor-pointer">
+      <div className="lg:hidden p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-50">
+        <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border border-gray-200 cursor-pointer">
           <ArrowLeft size={20} />
         </button>
       </div>
 
       <div className="flex flex-1">
         {/* Sidebar Desktop */}
-        <aside className="hidden lg:flex w-[320px] flex-col border-r border-[#ffffff0d] bg-[#050514]/40 h-screen sticky top-0 overflow-y-auto no-scrollbar">
-          <div className="p-10 border-b border-[#ffffff0d]">
-            <Link to="/" className="flex flex-col items-start group mb-8">
+        <aside className="hidden lg:flex w-[320px] flex-col border-r border-white/5 bg-[#0B0C1E] text-white h-screen sticky top-0 overflow-y-auto no-scrollbar">
+          <div className="p-10 border-b border-white/5">
+            <Link to="/" className="flex flex-col items-start group mb-8 text-white">
               <div className="flex gap-1 mb-1">
-                <div className="w-4 h-4 rounded-full border-2 border-[#F96500] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-[#F96500] rounded-full" />
+                <div className="w-4 h-4 rounded-full border-2 border-[#E8500A] flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-[#E8500A] rounded-full" />
                 </div>
-                <div className="w-4 h-4 rounded-full border-2 border-[#F96500] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-[#F96500] rounded-full" />
+                <div className="w-4 h-4 rounded-full border-2 border-[#E8500A] flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-[#E8500A] rounded-full" />
                 </div>
               </div>
-              <span className="text-2xl font-black tracking-tight lowercase font-sans">choosify.bd</span>
+              <span className="text-2xl font-black tracking-tight lowercase font-sans text-white">choosify.bd</span>
               <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mt-1 italic">Dashboard v2.0</span>
             </Link>
           </div>
@@ -1429,7 +1429,7 @@ export function DashboardPage() {
               }}
               className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:bg-white/10 transition-all cursor-pointer"
             >
-               <LogOut size={16} className="text-[#F96500]" /> Curator Log Out
+               <LogOut size={16} className="text-[#E8500A]" /> Curator Log Out
             </button>
           </div>
         </aside>

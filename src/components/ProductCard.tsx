@@ -298,12 +298,12 @@ export function ProductCard({
     return (
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
-        className="bg-white rounded-xl p-5 md:p-6 h-full flex flex-col md:flex-row gap-6 relative overflow-hidden group border border-[#e8edf2] hover:border-[#E8500A]/30 transition-all duration-300 cursor-pointer"
+        className="bg-white rounded-[5px] p-5 md:p-6 h-full flex flex-col md:flex-row gap-6 relative overflow-hidden group border border-[#e8edf2] hover:border-[#E8500A]/30 transition-all duration-300 cursor-pointer"
       >
          {/* Background accent */}
          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-xl group-hover:scale-125 transition-transform duration-500" />
          
-         <div className="relative z-20 flex-shrink-0 w-full md:w-[65%] aspect-[16/10] md:h-full bg-gray-50 rounded-lg flex items-center justify-center p-6 overflow-hidden">
+         <div className="relative z-20 flex-shrink-0 w-full md:w-[45%] xl:w-[40%] aspect-[16/10] md:h-full bg-gray-50 rounded-[5px] flex items-center justify-center p-6 overflow-hidden">
             <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
                 <button 
                   onClick={toggleSave}
@@ -379,10 +379,10 @@ export function ProductCard({
     return (
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
-        className="bg-white rounded-xl p-3 flex flex-col border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer group relative h-full animate-in fade-in"
+        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer group relative h-full animate-in fade-in"
       >
         <div 
-          className="w-full aspect-square bg-gray-50 rounded-lg relative overflow-hidden flex items-center justify-center p-2.5 select-none shrink-0"
+          className="w-full aspect-square bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-2.5 select-none shrink-0"
           style={imageContainerStyle}
         >
             <div className="absolute top-2 left-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
@@ -463,8 +463,8 @@ export function ProductCard({
 
   if (variant === 'list') {
     return (
-      <div className="bg-white rounded-xl border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.005] transition-all duration-300 flex gap-5 p-4 group cursor-pointer text-left shadow-none" onClick={() => navigate(`/products/${product.id}`)}>
-        <div className="w-36 h-36 flex-shrink-0 bg-gray-50 rounded-lg relative overflow-hidden flex items-center justify-center p-3 select-none">
+      <div className="bg-white rounded-[5px] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.005] transition-all duration-300 flex gap-5 p-4 group cursor-pointer text-left shadow-none" onClick={() => navigate(`/products/${product.id}`)}>
+        <div className="w-36 h-36 flex-shrink-0 bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-3 select-none">
           <ProductCardImageCarousel 
             images={getProductCardImages(product)} 
             alt={product.title} 
@@ -544,17 +544,18 @@ export function ProductCard({
 
   return (
     <div 
-      className="bg-white rounded-xl p-2.5 shadow-none hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer shrink-0" 
+      className="bg-white rounded-[5px] p-2.5 shadow-none hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer shrink-0" 
       onClick={() => navigate(`/products/${product.id}`)}
       id={`product-${product.id}`}
       style={{
-        width: isGuideDetail ? '100%' : '174px',
-        height: isGuideDetail ? '385px' : '258.125px',
+        width: isGuideDetail ? '100%' : '100%',
+        maxWidth: isGuideDetail ? 'none' : '174px',
+        height: isGuideDetail ? '385px' : '258px', // Targeted standard height
         boxSizing: 'border-box'
       }}
     >
       <div className={cn(
-        "relative w-full bg-gray-50 overflow-hidden flex items-center justify-center rounded-lg shrink-0",
+        "relative w-full bg-gray-50 overflow-hidden flex items-center justify-center rounded-[5px] shrink-0",
         isGuideDetail ? "h-[135px] p-2.5" : "h-[105px] p-2"
       )}>
         <ProductCardImageCarousel 

@@ -403,7 +403,7 @@ export function BrandsPage() {
               <div className="flex-1 h-px bg-orange-primary/20" />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 justify-items-center justify-center w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-8 justify-items-center justify-center w-full">
               {[brands[0], brands[1], brands[2]].map((brand, i) => (
                 <div 
                   key={i} 
@@ -507,7 +507,7 @@ export function BrandsPage() {
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{letterBrands.length} Brands</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center justify-center w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-6 justify-items-center justify-center w-full">
                 {letterBrands.map(brand => (
                   <motion.div 
                     layout
@@ -625,7 +625,7 @@ export function BrandsPage() {
         {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}
         <aside className="hidden xl:flex flex-col gap-4 w-[280px] flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
           {/* TRENDING BRANDS SECTION */}
-          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm w-full text-left">
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full text-left">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
               <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
                 TRENDING BRANDS
@@ -643,7 +643,7 @@ export function BrandsPage() {
               ].map((item, idx) => (
                 <div 
                   key={idx} 
-                  className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                  className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-[5px] p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
                 >
                   <div className={cn("w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-transparent flex items-center justify-center text-white font-semibold text-xs shadow-sm", item.bg)}>
                     {item.logo}
@@ -668,13 +668,13 @@ export function BrandsPage() {
           </div>
 
           {/* SPONSOR AD IMAGE CARD */}
-          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
              <div className="relative z-10 flex flex-col">
                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
                   <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
                 </div>
                 
-                <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
+                <div className="w-full aspect-video rounded-[5px] overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
                    <img 
                       src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=620&h=350&fit=crop" 
                       alt="Sponsor AD" 

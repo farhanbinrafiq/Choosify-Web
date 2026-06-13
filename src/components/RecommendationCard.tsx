@@ -40,11 +40,11 @@ export function RecommendationCard(props: any) {
     return (
       <Link 
         to={`/guides/${guide.id}`} 
-        className="group cursor-pointer block bg-white rounded-xl border border-[#e8edf2] hover:border-orange-primary/30 transition-all duration-300 w-full relative p-3"
+        className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] hover:border-orange-primary/30 transition-all duration-300 w-full relative p-3"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="aspect-[16/9] md:aspect-[2.2/1] w-full relative overflow-hidden bg-slate-950 rounded-lg">
+        <div className="aspect-[16/9] md:aspect-[2.2/1] w-full relative overflow-hidden bg-slate-950 rounded-[5px]">
           {guide.videoUrl ? (
             <video
               ref={videoRef}
@@ -115,11 +115,11 @@ export function RecommendationCard(props: any) {
     return (
       <Link 
         to={`/guides/${guide.id}`} 
-        className="group cursor-pointer block bg-white rounded-xl border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 h-full relative p-3 max-w-[285px] sm:max-w-[320px] md:max-w-none mx-auto w-full"
+        className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 h-full relative p-3 max-w-[285px] sm:max-w-[320px] md:max-w-none mx-auto w-full"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="aspect-[9/16] w-full relative overflow-hidden bg-slate-950 rounded-lg">
+        <div className="aspect-[9/16] w-full relative overflow-hidden bg-slate-950 rounded-[5px]">
           {guide.videoUrl ? (
             <video
               ref={videoRef}
@@ -181,7 +181,7 @@ export function RecommendationCard(props: any) {
   return (
     <Link 
       to={`/guides/${guide.id}`} 
-      className="group cursor-pointer block bg-white rounded-xl overflow-hidden border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 flex flex-col h-full"
+      className="group cursor-pointer block bg-white rounded-[5px] overflow-hidden border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 flex flex-col h-full"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

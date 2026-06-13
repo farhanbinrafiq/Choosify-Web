@@ -202,9 +202,9 @@ export function GuideDetailPage() {
       for (const section of sections) {
         const el = document.getElementById(section.id);
         if (el) {
-          const top = el.offsetTop;
+          const top = el.getBoundingClientRect().top + window.pageYOffset;
           const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition <= top + height) {
+          if (scrollPosition >= top && scrollPosition < top + height) {
             currentSection = section.name;
           }
         }
@@ -216,7 +216,7 @@ export function GuideDetailPage() {
       for (let i = 0; i < displayProducts.length; i++) {
         const el = document.getElementById(`prod-sec-${i}`);
         if (el) {
-          const top = el.offsetTop;
+          const top = el.getBoundingClientRect().top + window.pageYOffset;
           if (window.scrollY + 250 >= top) {
             activeProd = i;
           }
@@ -283,66 +283,88 @@ export function GuideDetailPage() {
 
 
 
-      {/* Updated Hero Section */}
-      <div className="w-full hero-gradient py-12 px-6 relative overflow-hidden">
-        
-        <div className="max-w-7xl mx-auto">
-          {/* Main Container Wrapper */}
-          <div className="bg-[#1D1D2B]/50 backdrop-blur-xl rounded-[24px] border border-white/10 p-6 md:p-10 shadow-[0_40px_100px_rgba(0,0,0,0.4)] relative overflow-hidden">
+      {/* Theater Mode Media Area - Centered 1080px with deep black side letterboxing */}
+      <div className="w-full bg-[#000000] relative">
+         <RecommendationMediaGallery guide={guide} />
+      </div>
+
+      {/* Guide Information Panel - Placed completely below the theater media area */}
+      <div className="w-full bg-[#0B0C1E] py-12 px-6 border-b border-white/10 relative">
+         <div className="max-w-[1080px] mx-auto text-left">
             
-            {/* Title Header */}
-            <h1 className="text-2xl md:text-4xl font-black text-white uppercase italic tracking-tighter leading-none mb-8 text-center">
+            {/* Guide Title */}
+            <h1 className="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-tight mb-4 font-sans">
               {guide.title}
             </h1>
 
-            {/* Unified Media Gallery */}
-            <div className="w-full max-w-4xl mx-auto mb-8">
-               <RecommendationMediaGallery guide={guide} />
+            {/* Guide Description */}
+            <p className="text-white/70 text-sm md:text-base font-medium italic uppercase tracking-wider leading-relaxed mb-8 max-w-4xl font-sans">
+              {guide.excerpt || "An in-depth expert curation guiding your next big decision, backed by extensive testing and research."}
+            </p>
+
+            {/* Guide Statistics */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 bg-[#1D1D2B]/50 backdrop-blur-md rounded-2xl p-6 border border-white/10 mb-8">
+               <div className="flex flex-col text-left">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-1">Published Date</span>
+                  <span className="text-sm font-black text-white uppercase italic tracking-tighter">{guide.date}</span>
+               </div>
+               <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-1">Read Time</span>
+                  <span className="text-sm font-black text-white uppercase italic tracking-tighter">12 Minutes</span>
+               </div>
+               <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-1">Audience</span>
+                  <span className="text-sm font-black text-[#E8500A] uppercase italic tracking-tighter">ENTHUSIASTS</span>
+               </div>
+               <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-1">Last Updated</span>
+                  <span className="text-sm font-black text-white uppercase italic tracking-tighter">June 2026</span>
+               </div>
             </div>
 
-            {/* Content Divider */}
-            <div className="h-px bg-white/10 w-full mb-10" />
+            {/* Guide Actions */}
+            <div className="flex flex-wrap items-center gap-4 mb-8">
+               <button 
+                  onClick={() => {
+                     toast.success("Guide saved to your dashboard!");
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic cursor-pointer"
+               >
+                  <Bookmark size={14} className="text-[#E8500A]" />
+                  Save Guide
+               </button>
+               <button 
+                  onClick={() => {
+                     navigator.clipboard.writeText(window.location.href);
+                     toast.success("Share link copied to clipboard!");
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic border-none cursor-pointer"
+               >
+                  <Share2 size={14} />
+                  Share Guide
+               </button>
+            </div>
 
-            {/* Bottom Meta Info Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-8">
-               {/* Author Info */}
-               <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 rounded-full border-2 border-orange-primary p-0.5 shadow-[0_0_20px_rgba(255,92,56,0.2)]">
-                     <img src={`https://i.pravatar.cc/150?u=${guide.author}`} className="w-full h-full rounded-full object-cover" alt={guide.author} />
-                  </div>
-                  <div className="text-left">
-                     <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic block mb-1">Recommended By</span>
-                     <h4 className="text-lg font-black text-white uppercase italic leading-none">{guide.author}</h4>
-                     <div className="flex items-center gap-2 mt-2">
-                        <div className="flex items-center gap-0.5">
-                           {[1, 2, 3, 4, 5].map((star) => (
-                              <Star key={star} size={10} className={star <= 4 ? "text-orange-primary fill-current" : "text-white/20"} />
-                           ))}
-                        </div>
-                        <span className="text-[10px] font-black text-orange-primary uppercase tracking-widest italic ml-1 underline underline-offset-2">Pro Contributor</span>
+            {/* Reviewer Information */}
+            <div className="flex items-center gap-5 bg-[#1D1D2B]/30 backdrop-blur-md rounded-2xl p-6 border border-white/10 max-w-2xl">
+               <div className="w-14 h-14 rounded-full border-2 border-[#E8500A] p-0.5 shadow-[0_0_20px_rgba(232,80,10,0.2)] shrink-0">
+                  <img src={`https://i.pravatar.cc/150?u=${guide.author}`} className="w-full h-full rounded-full object-cover" alt={guide.author} />
+               </div>
+               <div className="text-left">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic block mb-1">Recommended By</span>
+                  <h4 className="text-base font-black text-white uppercase italic leading-none">{guide.author}</h4>
+                  <div className="flex items-center gap-2 mt-2">
+                     <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                           <Star key={star} size={10} className={star <= 4 ? "text-[#E8500A] fill-current" : "text-white/20"} />
+                        ))}
                      </div>
-                  </div>
-               </div>
-
-               {/* Meta Stats Group */}
-               <div className="flex flex-wrap items-center gap-12 lg:gap-20">
-                  <div className="flex flex-col text-left">
-                     <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-2">Published Date</span>
-                     <span className="text-[11px] font-black text-white uppercase italic tracking-tighter">{guide.date}</span>
-                  </div>
-                  <div className="flex flex-col text-left">
-                     <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-2">Read Time</span>
-                     <span className="text-[11px] font-black text-white uppercase italic tracking-tighter">12 Minutes</span>
-                  </div>
-                  <div className="flex flex-col text-left">
-                     <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-2">Audience</span>
-                     <span className="text-[11px] font-black text-white uppercase italic tracking-tighter">ENTHUSIASTS</span>
+                     <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic ml-1 underline underline-offset-2">Pro Contributor</span>
                   </div>
                </div>
             </div>
 
-          </div>
-        </div>
+         </div>
       </div>
 
 
