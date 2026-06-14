@@ -80,68 +80,66 @@ export function CampaignBannerCarousel() {
       onMouseEnter={() => setAutoplay(false)}
       onMouseLeave={() => setAutoplay(true)}
     >
-      <div className="relative w-full h-[190px] sm:h-[220px] md:h-[250px] rounded-3xl overflow-hidden border border-[#e8edf2] shadow-md bg-[#0b0c1e] text-white">
+      <div className="relative w-full h-[320px] sm:h-[260px] md:h-[280px] rounded-[5px] overflow-hidden border border-[#e8edf2] shadow-sm bg-white text-[#1a1a2e]">
         
         {/* Carousel slides with motion animation transition */}
         <AnimatePresence mode="wait">
           <motion.div
             key={currentCampaign.id}
-            initial={{ opacity: 0, x: 40 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
-            className="absolute inset-0 w-full h-full"
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            className="absolute inset-4 sm:inset-5 md:inset-6 flex flex-col sm:flex-row gap-5 md:gap-6"
           >
-            {/* Background Image with Overlay */}
-            <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${currentCampaign.image})` }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-[#030409]/95 via-[#05060f]/75 to-[#030409]/95" />
+            {/* LEFT SIDE: Campaign Image Area - fully visible and dominant (80% on desktop) */}
+            <div className="w-full sm:w-[70%] md:w-[75%] lg:w-[80%] h-[140px] sm:h-full flex items-center justify-center bg-gray-50 rounded-[5px] p-4 relative select-none border border-gray-100 overflow-hidden shrink-0">
+              <img 
+                src={currentCampaign.image} 
+                alt={currentCampaign.title} 
+                className="max-h-full max-w-full object-contain rounded-[5px] select-none"
+                referrerPolicy="no-referrer"
+              />
             </div>
 
-            {/* Campaign info */}
-            <div className="relative z-10 w-full h-full flex flex-col justify-center px-6 sm:px-12 md:px-16 py-4">
-              <div className="flex flex-col sm:flex-row-reverse sm:items-center sm:justify-between gap-4 md:gap-8 w-full">
-                
-                {/* RIGHT SIDE: Campaign Information Area */}
-                <div className="flex flex-col text-left items-start flex-1 order-1 sm:order-2">
-                  {currentCampaign.sponsorBadge && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E8500A]/90 backdrop-blur-md border border-[#FF5B00]/40 text-[8.5px] sm:text-[9.5px] font-black tracking-widest uppercase text-white shadow-sm mb-1.5 sm:mb-2.5">
-                      <Sparkles className="w-2.5 h-2.5" />
-                      {currentCampaign.sponsorBadge}
-                    </span>
-                  )}
+            {/* RIGHT SIDE: Campaign Content Panel (20% on desktop, styled like a compact native card body) */}
+            <div className="w-full sm:w-[30%] md:w-[25%] lg:w-[20%] h-auto sm:h-full flex flex-col justify-between py-1 relative text-left shrink-0">
+              <div className="flex flex-col items-start gap-1">
+                {currentCampaign.sponsorBadge && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[5px] bg-[#E8500A]/10 text-[#E8500A] text-[7.5px] sm:text-[8px] md:text-[9px] font-semibold tracking-wider uppercase border border-[#E8500A]/20">
+                    <Sparkles className="w-2.5 h-2.5 text-[#E8500A]" />
+                    {currentCampaign.sponsorBadge}
+                  </span>
+                )}
 
-                  {/* Title matches Choosify branding (Navy + Orange/White) */}
-                  <h2 className="text-base sm:text-2xl md:text-3xl font-black italic tracking-tighter uppercase mb-1 sm:mb-1.5 text-white leading-tight">
-                    {currentCampaign.title.split(' ').map((word, index) => {
-                      if (index % 2 === 1) {
-                        return <span key={index} className="text-[#FF5B00] ml-1.5">{word}</span>;
-                      }
-                      return <span key={index} className={index > 0 ? "ml-1.5" : ""}>{word}</span>;
-                    })}
-                  </h2>
+                {/* Alternating theme colored title */}
+                <h2 className="text-xs sm:text-[13px] md:text-sm font-bold uppercase text-[#1a1a2e] tracking-tight leading-snug line-clamp-2 mt-1.5">
+                  {currentCampaign.title.split(' ').map((word, index) => {
+                    if (index % 2 === 1) {
+                      return <span key={index} className="text-[#E8500A] ml-1">{word}</span>;
+                    }
+                    return <span key={index} className={index > 0 ? "ml-1" : ""}>{word}</span>;
+                  })}
+                </h2>
 
-                  {/* Supporting tagline */}
-                  <p className="text-[10px] sm:text-[11px] md:text-xs text-gray-300 font-medium mb-1 line-clamp-2 max-w-xl">
-                    {currentCampaign.tagline}
-                  </p>
-                </div>
+                {/* Supporting description/tagline */}
+                <p className="text-[9.5px] sm:text-[10px] text-gray-500 font-normal line-clamp-2 mt-1 leading-relaxed">
+                  {currentCampaign.tagline}
+                </p>
+              </div>
 
-                {/* LEFT SIDE: Primary Action Area */}
-                <div className="flex flex-col items-start gap-2 sm:gap-3 shrink-0 order-2 sm:order-1 sm:max-w-[45%]">
-                  {currentCampaign.countdownEnd && (
-                    <CampaignCountdown deadline={currentCampaign.countdownEnd} />
-                  )}
+              {/* Bottom line: Countdown & CTA explore button - stacked to fit 20% desktop column */}
+              <div className="flex flex-col gap-2 mt-auto pt-3 border-t border-gray-150">
+                {currentCampaign.countdownEnd ? (
+                  <CampaignCountdown deadline={currentCampaign.countdownEnd} />
+                ) : <div className="h-0" />}
 
-                  <div>
-                    <button
-                      onClick={handleCTAClick}
-                      className="px-5 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[8.5px] sm:text-[9.5px] font-black tracking-widest uppercase rounded-full shadow-lg border border-[#FF5B00]/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 cursor-pointer"
-                    >
-                      {currentCampaign.ctaText || 'EXPLORE COLLECTION'}
-                    </button>
-                  </div>
-                </div>
-
+                <button
+                  onClick={handleCTAClick}
+                  className="w-full py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[9.5px] font-semibold uppercase tracking-wider rounded-[5px] shadow-sm transition-all duration-300 cursor-pointer text-center"
+                >
+                  {currentCampaign.ctaText || 'EXPLORE BRAND'}
+                </button>
               </div>
             </div>
           </motion.div>
@@ -153,29 +151,29 @@ export function CampaignBannerCarousel() {
             {/* Prev button */}
             <button
               onClick={handlePrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-[#E8500A]/80 border border-white/10 hover:border-[#FF5B00]/50 flex items-center justify-center text-white transition-all cursor-pointer backdrop-blur-sm z-20 hover:scale-105 active:scale-95"
+              className="absolute left-1.5 sm:left-2.5 top-[60px] sm:top-1/2 -translate-y-1/2 w-8 h-8 rounded-[5px] bg-white/80 hover:bg-[#E8500A] border border-gray-150 hover:border-[#E8500A]/40 flex items-center justify-center text-gray-700 hover:text-white transition-all cursor-pointer backdrop-blur-sm z-20 hover:scale-105 active:scale-95 shadow-sm"
               aria-label="Previous Campaign"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
 
             {/* Next button */}
             <button
               onClick={handleNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-[#E8500A]/80 border border-white/10 hover:border-[#FF5B00]/50 flex items-center justify-center text-white transition-all cursor-pointer backdrop-blur-sm z-20 hover:scale-105 active:scale-95"
+              className="absolute right-1.5 sm:right-2.5 top-[60px] sm:top-1/2 -translate-y-1/2 w-8 h-8 rounded-[5px] bg-white/80 hover:bg-[#E8500A] border border-gray-150 hover:border-[#E8500A]/40 flex items-center justify-center text-gray-700 hover:text-white transition-all cursor-pointer backdrop-blur-sm z-20 hover:scale-105 active:scale-95 shadow-sm"
               aria-label="Next Campaign"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </button>
 
             {/* Pagination indicator dots */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+            <div className="absolute bottom-1 right-4 sm:bottom-4 sm:left-1/2 sm:-translate-x-1/2 flex items-center gap-1.5 z-20">
               {activeCampaigns.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleDotClick(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    idx === currentIndex ? 'w-6 bg-[#FF5B00] shadow-glow' : 'w-2 bg-white/40 hover:bg-white/60'
+                  className={`h-1 rounded-[5px] transition-all duration-300 ${
+                    idx === currentIndex ? 'w-6 bg-[#E8500A]' : 'w-2 bg-gray-300 hover:bg-gray-400'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
@@ -188,7 +186,7 @@ export function CampaignBannerCarousel() {
   );
 }
 
-// Sub-component for interactive ticking countdown
+// Sub-component for interactive ticking countdown (styled beautifully for light container)
 function CampaignCountdown({ deadline }: { deadline: string }) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false });
 
@@ -219,7 +217,7 @@ function CampaignCountdown({ deadline }: { deadline: string }) {
 
   if (timeLeft.expired) {
     return (
-      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-950/75 border border-red-500/25 text-[9px] font-bold text-red-400">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[5px] bg-red-50 border border-red-150 text-[8px] sm:text-[9px] font-bold text-red-500">
         Campaign Expired
       </span>
     );
@@ -228,10 +226,10 @@ function CampaignCountdown({ deadline }: { deadline: string }) {
   const pad = (num: number) => num.toString().padStart(2, '0');
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-[9px] font-black text-gray-200">
-      <Clock className="w-2.5 h-2.5 text-[#FF5B00]" />
-      <span>ENDS IN:</span>
-      <span className="font-mono text-[#FF5B00]">
+    <span className="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-1 rounded-[5px] bg-gray-50 border border-gray-150 text-[8px] sm:text-[9.5px] font-black text-gray-500 w-full">
+      <Clock className="w-2.5 h-2.5 text-[#E8500A]" />
+      <span className="hidden xs:inline text-gray-450">ENDS:</span>
+      <span className="font-mono text-[#E8500A] tracking-tight">
         {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}
         {pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}
       </span>

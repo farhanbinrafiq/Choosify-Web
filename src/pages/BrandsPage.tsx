@@ -1,9 +1,40 @@
 import React, { useState } from 'react';
-import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award } from 'lucide-react';
+import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { toast } from 'react-hot-toast';
+
+interface BrandDeal {
+  id: string;
+  name: string;
+  dealHighlight: string;
+  logo: string;
+  bgClass: string;
+}
+
+const BRAND_DEALS: BrandDeal[] = [
+  { id: 'aarong', name: "Aarong", dealHighlight: "Flat 15% OFF on Handicrafts", logo: "Aa", bgClass: "bg-orange-primary/95" },
+  { id: 'apex', name: "Apex", dealHighlight: "Buy 1 Get 1 Free on Select Shoes", logo: "A", bgClass: "bg-navy" },
+  { id: 'sailor', name: "Sailor", dealHighlight: "Flat 20% OFF on Casual Wear", logo: "S", bgClass: "bg-teal-700" },
+  { id: 'adidas', name: "Adidas", dealHighlight: "Extra 10% OFF on Sportswear", logo: "Ad", bgClass: "bg-[#1A1D4E]" },
+  { id: 'bay', name: "Bay Emporium", dealHighlight: "Up to 30% OFF on Leather Boots", logo: "B", bgClass: "bg-red-700" }
+];
+
+interface PromoCode {
+  brandId: string;
+  brandName: string;
+  code: string;
+  discount: string;
+}
+
+const PROMO_CODES: PromoCode[] = [
+  { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
+  { brandId: 'apex', brandName: "Apex", code: "APEXFOOT26", discount: "BDT 500 FLAT" },
+  { brandId: 'sailor', brandName: "Sailor", code: "SAILOREID", discount: "Flat 20% OFF" },
+  { brandId: 'adidas', brandName: "Adidas", code: "ADIEXTRA10", discount: "10% FLAT OFF" }
+];
 
 interface Brand {
   id: string;
@@ -442,59 +473,26 @@ export function BrandsPage() {
                   <div className="w-full h-[1px] bg-gray-150 my-4" />
 
                   <div className="grid grid-cols-3 gap-3">
-                    <div className={cn(
-                      "text-center py-2.5 rounded-xl border min-w-0 transition-all",
-                      i === 0 
-                        ? "bg-[#0A0B1A] border-[#FF6B35]/20 text-white shadow-sm" 
-                        : "bg-gray-50/50 border-gray-100/50"
-                    )}>
-                      <span className={cn(
-                        "text-[8px] font-black mb-1 uppercase tracking-tight block",
-                        i === 0 ? "text-gray-400 tracking-wider" : "text-navy opacity-40"
-                      )}>Best For</span>
-                      <span className={cn(
-                        "text-[9px] font-bold italic uppercase truncate px-1 block",
-                        i === 0 ? "text-[#FF8C66]" : "text-red-500"
-                      )}>{brand.bestFor}</span>
+                    <div className="text-center py-2.5 rounded-xl border border-gray-100/50 bg-gray-50/50 min-w-0 transition-all">
+                      <span className="text-[8px] font-black mb-1 uppercase tracking-tight block text-navy opacity-40">Best For</span>
+                      <span className="text-[9px] font-bold italic uppercase truncate px-1 block text-red-500">{brand.bestFor}</span>
                     </div>
-                    <div className={cn(
-                      "text-center py-2.5 rounded-xl border min-w-0 transition-all",
-                      i === 0 
-                        ? "bg-[#0A0B1A] border-[#FF6B35]/20 text-white shadow-sm" 
-                        : "bg-gray-50/50 border-gray-100/50"
-                    )}>
+                    <div className="text-center py-2.5 rounded-xl border border-gray-100/50 bg-gray-50/50 min-w-0 transition-all">
                       <div className="flex flex-col items-center">
-                        <span className={cn(
-                          "text-lg font-black leading-none mb-1 italic tracking-tighter",
-                          i === 0 ? "text-[#FF8C66]" : "text-[#6366f1]"
-                        )}>{brand.priceRange}</span>
-                        <span className={cn(
-                          "text-[7px] font-black uppercase tracking-widest",
-                          i === 0 ? "text-gray-400 opacity-80" : "text-gray-400 opacity-60"
-                        )}>Price</span>
+                        <span className="text-lg font-black leading-none mb-1 italic tracking-tighter text-[#6366f1]">{brand.priceRange}</span>
+                        <span className="text-[7px] font-black uppercase tracking-widest text-gray-400 opacity-60">Price</span>
                       </div>
                     </div>
-                    <div className={cn(
-                      "text-center py-2.5 rounded-xl border min-w-0 transition-all",
-                      i === 0 
-                        ? "bg-gradient-to-br from-[#FF6B35] to-[#0A0B1A] border-[#FF6B35]/30 text-white shadow-sm" 
-                        : "bg-[#E6F4EA]/80 border-green-100"
-                    )}>
-                      <span className={cn(
-                        "text-lg font-black leading-none mb-1 italic tracking-tighter block",
-                        i === 0 ? "text-white" : "text-[#10B981]"
-                      )}>{brand.recommended}</span>
-                      <span className={cn(
-                        "text-[7px] font-black uppercase tracking-widest block",
-                        i === 0 ? "text-orange-200/80" : "text-navy opacity-60"
-                      )}>Success</span>
+                    <div className="text-center py-2.5 rounded-xl border border-green-100 bg-[#E6F4EA]/80 min-w-0 transition-all">
+                      <span className="text-lg font-black leading-none mb-1 italic tracking-tighter block text-[#10B981]">{brand.recommended}</span>
+                      <span className="text-[7px] font-black uppercase tracking-widest block text-navy opacity-60">Success</span>
                     </div>
                   </div>
 
                   <div className="w-full h-[1px] bg-transparent my-1" />
 
                   <Link to={`/brands/${brand.id}`} className="w-full py-3 bg-navy text-white text-[9px] font-black uppercase rounded-lg shadow-md hover:bg-orange-primary active:scale-95 transition-all text-center tracking-widest italic flex items-center justify-center gap-2 group/btn z-10 shrink-0">
-                     Visit Brand Hub <ArrowRight size={14} className="-rotate-45 group-hover/btn:translate-x-1 transition-transform" />
+                     Visit Brand <ArrowRight size={14} className="-rotate-45 group-hover/btn:translate-x-1 transition-transform" />
                   </Link>
                 </div>
               ))}
@@ -570,8 +568,8 @@ export function BrandsPage() {
 
                     <div className="w-full h-[1px] bg-transparent my-1" />
 
-                    <Link to={`/brands/${brand.id}`} className="w-full py-2 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-orange-primary active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
-                      Visit Hub <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                    <Link to={`/brands/${brand.id}`} className="w-full py-2 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
+                      Visit Brand <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                   </motion.div>
                 ))}
@@ -624,46 +622,106 @@ export function BrandsPage() {
 
         {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}
         <aside className="hidden xl:flex flex-col gap-4 w-[280px] flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
-          {/* TRENDING BRANDS SECTION */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full text-left">
+          {/* FEATURED BRAND DEALS SECTION */}
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full text-left animate-fade-in">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
               <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
-                TRENDING BRANDS
+                Featured Brand Deals
+              </h3>
+              <Link 
+                to="/brand-deals" 
+                className="text-[10px] font-bold text-orange-primary hover:underline flex items-center gap-1"
+              >
+                See All →
+              </Link>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {BRAND_DEALS.length === 0 ? (
+                <div className="text-center py-6 border border-dashed border-gray-200 rounded-[5px]">
+                  <p className="text-xs text-gray-400 font-medium">Featured brand deals will appear here.</p>
+                </div>
+              ) : (
+                BRAND_DEALS.map((item) => (
+                  <Link 
+                    to={`/brands/${item.id}`}
+                    key={item.id} 
+                    className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-[5px] p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                  >
+                    <div className={cn("w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-transparent flex items-center justify-center text-white font-semibold text-xs shadow-sm", item.bgClass)}>
+                      {item.logo}
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
+                      <h4 className="font-sans text-xs font-semibold uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors truncate">
+                        {item.name}
+                      </h4>
+                      <p className="text-[9px] font-semibold text-gray-400 mt-0.5 truncate uppercase">
+                        {item.dealHighlight}
+                      </p>
+                    </div>
+                    <span className="text-[8px] font-bold text-[#E8500A] uppercase tracking-wider shrink-0 whitespace-nowrap group-hover:-translate-x-0.5 transition-transform">
+                      View Deal
+                    </span>
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* FEATURED PROMOCODES SECTION */}
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full text-left animate-fade-in">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
+                Featured Promocodes
               </h3>
             </div>
 
             <div className="flex flex-col gap-2.5">
-              {[
-                { name: "Aarong", desc: "Traditional Handcrafted Products", logo: "Aa", bg: "bg-orange-primary/95" },
-                { name: "Adidas", desc: "Premium Accessories & Sportwear", logo: "Ad", bg: "bg-navy" },
-                { name: "Coca-Cola", desc: "Global Beverage & Refreshments", logo: "Cc", bg: "bg-red-600" },
-                { name: "Starbucks", desc: "Premium Coffee & Brewing", logo: "Sb", bg: "bg-green-800" },
-                { name: "Yellow", desc: "Contemporary Lifestyle Clothing", logo: "Ye", bg: "bg-yellow-500" },
-                { name: "Bata", desc: "Global Footwear & Quality Leather", logo: "Ba", bg: "bg-red-700" }
-              ].map((item, idx) => (
-                <div 
-                  key={idx} 
-                  className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-[5px] p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
-                >
-                  <div className={cn("w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-transparent flex items-center justify-center text-white font-semibold text-xs shadow-sm", item.bg)}>
-                    {item.logo}
-                  </div>
-                  <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
-                    <h4 className="font-sans text-xs font-semibold uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors truncate">
-                      {item.name}
-                    </h4>
-                    <p className="text-[9px] font-semibold text-gray-400 mt-0.5 truncate uppercase">
-                      {item.desc}
-                    </p>
-                  </div>
+              {PROMO_CODES.length === 0 ? (
+                <div className="text-center py-6 border border-dashed border-gray-200 rounded-[5px]">
+                  <p className="text-xs text-gray-400 font-medium">No active promo codes available right now.</p>
                 </div>
-              ))}
-            </div>
-            
-            <div className="text-center mt-4">
-              <button className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-[#CF4400] transition-colors border-0 bg-transparent cursor-pointer">
-                Show All
-              </button>
+              ) : (
+                PROMO_CODES.map((item, idx) => (
+                  <Link 
+                    to={`/brands/${item.brandId}`}
+                    key={idx} 
+                    className="bg-white border border-[#e8edf2]/65 hover:border-[#E8500A]/15 rounded-[5px] p-2.5 hover:shadow-soft transition-all duration-300 group cursor-pointer flex flex-col gap-2 text-left"
+                  >
+                    {/* Header row with brand details */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <h4 className="font-sans text-xs font-semibold uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors truncate">
+                          {item.brandName}
+                        </h4>
+                        <span className="text-[9px] font-bold text-[#E8500A] uppercase tracking-wide">
+                          {item.discount}
+                        </span>
+                      </div>
+                      
+                      {/* Copy button */}
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault(); // prevent follow Link navigation
+                          e.stopPropagation(); // prevent card container click handler
+                          navigator.clipboard.writeText(item.code);
+                          toast.success(`Coupon code "${item.code}" copied to clipboard!`);
+                        }}
+                        className="px-2.5 py-1 bg-[#E8500A]/10 hover:bg-[#E8500A] text-[#E8500A] hover:text-white transition-all cursor-pointer rounded-[5px] text-[8px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0"
+                      >
+                        <Copy className="w-2.5 h-2.5" />
+                        Copy
+                      </button>
+                    </div>
+                    
+                    {/* Code display window */}
+                    <div className="bg-gray-50 border border-dashed border-[#e8edf2] rounded-[5px] px-2.5 py-1.5 flex items-center justify-between font-mono text-[9.5px] font-semibold text-gray-650 tracking-wider">
+                      <span>{item.code}</span>
+                      <span className="text-[7.5px] font-sans font-semibold text-gray-400 uppercase">ACTIVE</span>
+                    </div>
+                  </Link>
+                ))
+              )}
             </div>
           </div>
 

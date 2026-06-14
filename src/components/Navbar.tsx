@@ -134,7 +134,7 @@ export function Navbar() {
           <Link to="/guides" className={getLinkClass('/guides')}>Recommendations</Link>
           <Link to="/compare" className={getLinkClass('/compare')}>Compare</Link>
           <Link to="/deals" className={getLinkClass('/deals')}>Deals</Link>
-          <Link to="/viral-products" className={getLinkClass('/viral-products')}>Viral Products</Link>
+          <Link to="/customer-favorite" className={getLinkClass('/customer-favorite')}>Customer Favorite</Link>
         </div>
 
         {/* SEARCH BAR */}
@@ -394,8 +394,8 @@ export function Navbar() {
                   <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/deals')}>
                     <span className="italic">Flash Deals</span>
                   </Link>
-                  <Link to="/viral-products" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/viral-products')}>
-                    <span className="italic">Viral Products</span>
+                  <Link to="/customer-favorite" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/customer-favorite')}>
+                    <span className="italic">Customer Favorite</span>
                   </Link>
                   <Link to="/compare" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/compare')}>
                     <span className="italic">Compare Engine</span>

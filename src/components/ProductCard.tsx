@@ -637,14 +637,21 @@ export function ProductCard({
           })()}
         </div>
         
-        <div className="mt-auto pt-1 border-t border-gray-100 flex items-center justify-between gap-1">
+        <div className="mt-auto pt-1 border-t border-gray-100 flex items-center justify-between gap-1 w-full overflow-hidden">
           <div className="flex flex-col min-w-0">
              <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-0.5">
                {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
               </span>
-              <span className="text-[11px] font-mono font-semibold text-[#E8500A] leading-none whitespace-nowrap">
-                BDT {product.price.toLocaleString()}
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[11px] font-mono font-semibold text-[#E8500A] leading-none whitespace-nowrap">
+                  BDT {product.price.toLocaleString()}
+                </span>
+                {product.originalPrice && (
+                  <span className="text-[8px] font-mono text-gray-400 line-through leading-none">
+                    ৳{product.originalPrice}
+                  </span>
+                )}
+              </div>
           </div>
           
           <button 

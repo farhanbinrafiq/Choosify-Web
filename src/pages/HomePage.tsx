@@ -80,12 +80,12 @@ export function HomePage() {
   useEffect(() => {
     const handleScroll = () => {
       const sections = [
-        { id: 'section-popular-products', name: 'products' },
         { id: 'section-trending-brands', name: 'brands' },
-        { id: 'section-spotlight-brand', name: 'deals' },
+        { id: 'section-popular-products', name: 'products' },
+        { id: 'section-hot-deals', name: 'deals' },
         { id: 'section-recommendations', name: 'recommendations' },
-        { id: 'section-guides', name: 'guides' },
-        { id: 'section-viral-products', name: 'viral' }
+        { id: 'section-categories', name: 'categories' },
+        { id: 'section-customer-favorites', name: 'favorites' }
       ];
       
       const scrollPosition = window.scrollY + 220;
@@ -124,12 +124,12 @@ export function HomePage() {
         });
         
         const nameMap: { [key: string]: string } = {
-          'section-popular-products': 'products',
           'section-trending-brands': 'brands',
-          'section-spotlight-brand': 'deals',
+          'section-popular-products': 'products',
+          'section-hot-deals': 'deals',
           'section-recommendations': 'recommendations',
-          'section-guides': 'guides',
-          'section-viral-products': 'viral'
+          'section-categories': 'categories',
+          'section-customer-favorites': 'favorites'
         };
         if (nameMap[id]) {
           setActiveStickySection(nameMap[id]);
@@ -337,6 +337,128 @@ export function HomePage() {
 
   // Products filters based on context & states
   const rightProductsList = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
+
+  const sponsoredDeals = React.useMemo(() => {
+    const productsList = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
+    return productsList.filter((p: any) => {
+      // Check direct product flags
+      if (p.isSponsored || p.sponsored || p.sponsoredStatus || p.sponsoredFlag) return true;
+      
+      // Look up brand
+      const brand = allBrands?.find((b: any) => b.id === p.brandId || b.name?.toLowerCase() === p.brand?.toLowerCase());
+      if (brand && brand.sponsoredFlag) return true;
+      
+      // brandId or brand checks
+      if (p.brandId === 1 || p.brandId === 2 || p.brandId === 10) return true;
+      const bLower = p.brand?.toLowerCase();
+      if (bLower === 'samsung' || bLower === 'apple' || bLower === 'aarong') return true;
+      
+      return false;
+    });
+  }, [allProducts, allBrands]);
+
+  const styledSponsoredDeals = React.useMemo(() => {
+    return sponsoredDeals.map((p: any, idx: number) => {
+      let discountText = 'SPECIAL';
+      const cleanPrice = typeof p.price === 'string' ? parseFloat(p.price.replace(/,/g, '')) : p.price;
+      const originalPriceVal = p.originalPrice ? (typeof p.originalPrice === 'string' ? parseFloat(p.originalPrice.replace(/,/g, '')) : p.originalPrice) : null;
+      
+      if (originalPriceVal && originalPriceVal > cleanPrice) {
+        const pct = Math.round(((originalPriceVal - cleanPrice) / originalPriceVal) * 100);
+        discountText = `${pct}% OFF`;
+      } else {
+        const pct = 15 + ((idx * 7) % 21);
+        discountText = `${pct}% OFF`;
+      }
+      
+      return {
+        ...p,
+        discountText,
+        badgeClass: "bg-[#E8500A] text-white"
+      };
+    });
+  }, [sponsoredDeals]);
+
+  const sponsoredBrandsList = React.useMemo(() => {
+    const brandsList = allBrands && allBrands.length > 0 ? allBrands : [];
+    return brandsList.filter((b: any) => b.sponsoredFlag);
+  }, [allBrands]);
+
+  const viralProductsList = React.useMemo(() => {
+    return (allProducts && allProducts.length > 0 ? allProducts : PRODUCTS).map((p, idx) => {
+      // Define a stable viral tag sequence based on ID
+      let tag = '🔥 Viral';
+      let tagColor = 'bg-[#E8500A]';
+      let source = '⭐ Choosify Picks';
+      
+      const badgeType = idx % 5;
+      if (badgeType === 0) {
+        tag = '🔥 Viral';
+        tagColor = 'bg-[#E8500A]';
+        source = '⭐ Choosify Picks';
+      } else if (badgeType === 1) {
+        tag = '❤️ Customer Favorite';
+        tagColor = 'bg-rose-500';
+        source = '❤️ Customer Favorites';
+      } else if (badgeType === 2) {
+        tag = '⭐ Staff Pick';
+        tagColor = 'bg-amber-500';
+        source = '🏆 Editor Choice';
+      } else if (badgeType === 3) {
+        tag = '🏆 Editor Choice';
+        tagColor = 'bg-indigo-600';
+        source = '🏆 Editor Choice';
+      } else if (badgeType === 4) {
+        tag = '🚀 Trending';
+        tagColor = 'bg-blue-600';
+        source = '👥 Community Submitted';
+      }
+
+      return {
+        ...p,
+        tag,
+        tagColor,
+        source,
+        viralScore: 90 + (idx * 3) % 10,
+        viewsThisWeek: 450 + (idx * 112) % 1200,
+        heartsCount: 120 + (idx * 56) % 800
+      };
+    });
+  }, [allProducts]);
+
+  const featuredDeals = React.useMemo(() => {
+    return (allProducts && allProducts.length > 0 ? allProducts : PRODUCTS).map((p, idx) => {
+      // Create curated, realistic discounts and original prices
+      const discountPct = 15 + ((idx * 7) % 21); // 15% to 35% discount
+      const originalPriceVal = Math.round(p.price / (1 - discountPct / 100));
+      
+      let tag = '🔥 HOT DEAL';
+      let tagColor = 'bg-[#E8500A]';
+      const type = idx % 4;
+      if (type === 0) {
+        tag = '⚡ FLASH DEAL';
+        tagColor = 'bg-[#E8500A]';
+      } else if (type === 1) {
+        tag = '🏷️ LIMITED OFFER';
+        tagColor = 'bg-[#FF5B00]';
+      } else if (type === 2) {
+        tag = '🔥 MEGA SAVING';
+        tagColor = 'bg-rose-600';
+      } else {
+        tag = `${discountPct}% EXCLUSIVE`;
+        tagColor = 'bg-[#CF4400]';
+      }
+
+      return {
+        ...p,
+        originalPrice: originalPriceVal.toLocaleString(),
+        tag,
+        tagColor,
+        discountPercent: discountPct
+      };
+    }).slice(0, 8); // Curb at exactly 8 cards
+  }, [allProducts]);
+
   const filteredProducts = activeTab === 'FEED' 
     ? rightProductsList 
     : rightProductsList.filter((p: any) => p.category?.toLowerCase() === activeTab.toLowerCase());
@@ -455,10 +577,8 @@ export function HomePage() {
               </button>
             ))}
           </div>
-
         </div>
       </section>
-
 
       {/* SECTION 3 — MARQUEE BANNER */}
       <div className="relative z-20 bg-gradient-to-r from-[#E8500A] via-[#FF5B00] to-[#E8500A] text-white py-4.5 overflow-hidden border-y border-[#CF4400]/40 shadow-lg font-space text-[11.5px] font-black tracking-[0.2em] uppercase leading-none">
@@ -488,14 +608,14 @@ export function HomePage() {
                >
                   All
                </button>
-
+  
                {[
-                 { id: 'section-popular-products', name: 'products', label: 'Products', icon: <Package size={13} /> },
-                 { id: 'section-trending-brands', name: 'brands', label: 'Brands', icon: <Award size={13} /> },
-                 { id: 'section-spotlight-brand', name: 'deals', label: 'Deals', icon: <Zap size={13} /> },
+                 { id: 'section-trending-brands', name: 'brands', label: 'Trending Brands', icon: <Award size={13} /> },
+                 { id: 'section-popular-products', name: 'products', label: 'Popular Products', icon: <Package size={13} /> },
+                 { id: 'section-hot-deals', name: 'deals', label: 'Hot Deals', icon: <Zap size={13} /> },
                  { id: 'section-recommendations', name: 'recommendations', label: 'Recommendations', icon: <Sparkles size={13} /> },
-                 { id: 'section-guides', name: 'guides', label: 'Guides', icon: <Book size={13} /> },
-                 { id: 'section-viral-products', name: 'viral', label: 'Viral Products', icon: <Flame size={13} /> }
+                 { id: 'section-categories', name: 'categories', label: 'Popular Categories', icon: <ShoppingBag size={13} /> },
+                 { id: 'section-customer-favorites', name: 'favorites', label: 'Customer Favorites', icon: <Flame size={13} /> }
                ].map(item => (
                  <button 
                    key={item.id}
@@ -633,10 +753,9 @@ export function HomePage() {
                 </span>
               </Link>
 
-              {/* Viral Products Card */}
+              {/* Customer Favorites Card */}
               <Link 
-                id="section-viral-products"
-                to="/viral-products" 
+                to="/customer-favorite" 
                 className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
               >
                 <div className="flex items-center gap-4">
@@ -644,7 +763,7 @@ export function HomePage() {
                     <Flame className="w-5 h-5 text-[#E8500A]" />
                   </div>
                   <span className="text-[11px] font-semibold text-[#1a1a2e] uppercase">
-                    VIRAL PRODUCTS
+                    CUSTOMER FAVORITES
                   </span>
                 </div>
                 <span className="text-[11px] font-semibold text-[#E8500A] shrink-0">
@@ -897,262 +1016,34 @@ export function HomePage() {
                 </div>
               </div>
 
-              {/* FEED SECTION C — SPOTLIGHT BRAND (Sponsored) */}
-              <div id="section-spotlight-brand" className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#2E171C] to-[#1E1114] text-white p-5 md:p-6 border border-[#E8500A]/20 shadow-xl leading-relaxed mb-6">
+              {/* FEED SECTION C — FEATURED HOT DEALS */}
+              <div id="section-hot-deals" className="bg-[#FFFFFF] border-t-2 border-[#E8500A] rounded-2xl border border-[#e8edf2] p-5 shadow-sm text-left mb-6">
                 
-                {/* Embedded Sponsored Spotlight Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between pb-5 mb-5 border-b border-white/10 text-left gap-3 relative z-10">
+                {/* Section Header */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
                   <div className="text-left">
-                    <span className="text-[9px] font-mono font-black tracking-[0.25em] text-[#E8500A] uppercase block mb-1">SPONSORED PLATFORM SPOTLIGHT</span>
-                    <h2 className="font-space text-2xl font-black italic tracking-tight uppercase leading-none text-white">
-                      SPOTLIGHT <span className="text-[#E8500A]">BRAND</span>
-                    </h2>
-                    <p className="text-[11px] text-zinc-300 font-medium tracking-wide mt-1.5 text-left leading-none">
-                      Connect with millions of shoppers and boost your brand visibility today.
+                    <div className="flex items-center gap-1">
+                      <span className="text-base font-semibold text-[#1a1a2e]">Hot</span>
+                      <span className="text-base font-semibold text-[#E8500A]">Deals</span>
+                    </div>
+                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
+                      Best ongoing deals, discounts and limited-time offers.
                     </p>
-                  </div>
-                  <div className="flex shrink-0">
-                    <span className="border border-[#E8500A]/40 text-[#E8500A] bg-[#E8500A]/10 text-[9.5px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full leading-none font-mono">
-                      SPONSORED AD
-                    </span>
-                  </div>
-                </div>
-
-                {/* Spotlight Main Header */}
-                <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-5 items-center pb-5 border-b border-white/10 relative z-10">
-                  
-                  {/* Left Logo and View Brand link */}
-                  <div className="flex flex-col items-center gap-2 shrink-0">
-                    <div className="w-[100px] h-[100px] bg-[#1a1c3a] border border-[#2d2f5a] rounded-xl flex flex-col items-center justify-center p-3 relative group transition-transform duration-300 hover:scale-[1.02] shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
-                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#E8500A] text-white rounded-full flex items-center justify-center border-2 border-[#1a1c3a] shadow">
-                        <Check className="w-3 h-3 font-black stroke-[3]" />
-                      </span>
-                      <div className="text-center font-space font-black text-white text-xl uppercase leading-none italic tracking-tighter">
-                        sailor
-                        <div className="text-[7px] font-sans tracking-[0.2em] mt-1 uppercase font-medium text-gray-400">BY EPLLYION</div>
-                      </div>
-                    </div>
-                    <Link to="/brands/3" className="text-[10px] font-medium text-white/90 hover:text-[#E8500A] tracking-wider uppercase underline transition-colors">
-                      VIEW PROFILE
-                    </Link>
-                  </div>
-
-                  {/* Middle brand descriptive block */}
-                  <div className="flex flex-col gap-2 text-left md:pl-2">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="text-xl font-bold text-white uppercase italic">
-                        Sailor
-                      </h3>
-                      <span className="bg-[#00D03C] text-white text-[9.5px] font-semibold px-2 py-0.5 rounded uppercase tracking-wider leading-none font-mono">
-                        VERIFIED BRAND
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/70 font-medium tracking-wider uppercase leading-none">
-                        FASHION & CLOTHING
-                      </p>
-                    </div>
-                    
-                    <div className="flex flex-col gap-1.5 mt-1">
-                      <span className="text-[11px] text-white font-normal flex items-center gap-2 tracking-wide uppercase font-mono">
-                        <span className="text-rose-500 text-sm">❤️</span> 50,000 SHOPPERS LOVES THE BRANDS
-                      </span>
-                      <span className="text-[11px] text-white font-normal flex items-center gap-2 tracking-wide uppercase font-mono">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-[14px] h-[14px] text-[#00D03C]">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.94" />
-                        </svg>
-                        SCORE: 92/100
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Right Stats Block */}
-                  <div className="grid grid-cols-3 gap-4 bg-white/5 border border-white/10 rounded-xl p-3.5 mt-2 md:mt-0">
-                    <div className="flex flex-col text-left">
-                      <span className="text-[#00D03C] text-[10px] font-semibold tracking-wider uppercase font-mono leading-none">BEST FOR</span>
-                      <span className="text-white text-[11px] font-semibold uppercase tracking-wider mt-1 leading-none">HANDICRAFTS</span>
-                    </div>
-                    <div className="flex flex-col text-left border-l border-white/10 pl-4">
-                      <span className="text-[#00D03C] text-[10px] font-semibold tracking-wider uppercase font-mono leading-none">BDT 500</span>
-                      <span className="text-white text-[11px] font-semibold uppercase tracking-wider mt-1 leading-none">PRICE RANGE</span>
-                    </div>
-                    <div className="flex flex-col text-[#00D03C] text-left border-l border-white/10 pl-4">
-                      <span className="text-[#00D03C] text-[10.5px] font-black tracking-wider uppercase font-mono leading-none">95%</span>
-                      <span className="text-white text-[11px] font-semibold uppercase tracking-wider mt-1 leading-none">RECOMMENDED</span>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Sub-list of 4 spotlight products in pristine rollup cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-5 relative z-10 text-[#1a1a2e]">
-                  {[...sailorProductList, ...rightProductsList].slice(0, 4).map((product: any, idx) => {
-                    const mockImages = [
-                      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop",
-                      "https://images.unsplash.com/photo-1587314168485-3236d6710814?w=400&h=400&fit=crop",
-                      "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=400&fit=crop",
-                      "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&h=400&fit=crop"
-                    ];
-                    const pKey = `p${idx + 1}`;
-                    const pState = spotlightProductStates[pKey] || { likes: 12000, views: 1200, shares: 450, liked: false };
-                    
-                    return (
-                      <div 
-                        key={product.id || idx}
-                        onClick={() => {
-                          handleSpotlightProductReact(pKey, 'views');
-                          navigate(`/products/${product.id}`);
-                        }}
-                        className="bg-white border border-[#e8edf2] hover:border-[#E8500A]/30 rounded-xl p-3 shadow-md hover:scale-[1.01] transition-all duration-300 cursor-pointer flex flex-col gap-2.5 group relative"
-                      >
-                        {/* Sponsored Badge overlay */}
-                        <div className="absolute top-2 left-2 z-10">
-                          <span className="bg-orange-primary/15 text-[#E8500A] text-[7.5px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider leading-none">
-                            SPONSORED
-                          </span>
-                        </div>
-
-                        {/* Product Image */}
-                        <div className="w-full aspect-square bg-gray-50 rounded-lg overflow-hidden relative border border-gray-100 shrink-0">
-                          <img 
-                            src={product.image || mockImages[idx]} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                            alt={product.title || "Product"} 
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5 flex-1 text-left min-h-0">
-                          {/* Brand & Rating row */}
-                          <div className="flex items-center justify-between gap-1 w-full">
-                            <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider truncate max-w-[80px]">
-                              {product.brand || 'SAILOR'}
-                            </span>
-                            <div className="flex items-center gap-0.5 shrink-0 ml-auto bg-gray-50 px-1 py-0.5 rounded">
-                              <Star size={7.5} className="fill-orange-primary text-orange-primary" />
-                              <span className="text-[8px] font-semibold text-gray-500">{product.rating || '4.8'}</span>
-                            </div>
-                          </div>
-
-                          {/* Product Title */}
-                          <h4 className="text-[11px] font-medium text-[#1a1a2e] leading-snug line-clamp-2 h-[34px] group-hover:text-orange-primary transition-colors">
-                            {product.title}
-                          </h4>
-                          
-                          {/* Pricing and primary CTA row */}
-                          <div className="flex items-center justify-between gap-2 mt-auto pt-2 border-t border-gray-100 w-full select-none">
-                            <div className="flex flex-col text-left justify-center min-w-0">
-                              <span className="text-[11px] font-mono font-semibold text-[#E8500A] tracking-tight">
-                                BDT {(product.price || 1200).toLocaleString()}
-                              </span>
-                              {product.originalPrice && (
-                                <span className="text-[8px] font-mono text-gray-400 line-through mt-0.5">
-                                  ৳{product.originalPrice}
-                                </span>
-                              )}
-                            </div>
-                            
-                            <button 
-                              type="button" 
-                              onClick={(e) => { 
-                                e.stopPropagation(); 
-                                addToCart(product, 1); 
-                                toast.success(`Successfully added ${product.title} to your verification basket!`);
-                              }} 
-                              className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[8px] font-black rounded uppercase tracking-wider cursor-pointer transition-colors leading-none"
-                              aria-label="Add to cart"
-                            >
-                              ADD
-                            </button>
-                          </div>
-
-                          {/* Mini Reaction Toolbar for secondary social values */}
-                          <div className="flex items-center justify-between border-t border-gray-100 pt-2 mt-2 select-none">
-                            <div className="flex items-center gap-2 text-[10px] font-mono text-gray-400">
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSpotlightProductReact(pKey, 'likes');
-                                }}
-                                className={cn(
-                                  "flex items-center gap-0.5 transition-colors",
-                                  pState.liked ? "text-rose-500 font-semibold" : "hover:text-rose-500"
-                                )}
-                              >
-                                <Heart className={cn("w-3 h-3", pState.liked ? "fill-current text-rose-500" : "")} />
-                                <span>{pState.liked ? "12.1k" : "12k"}</span>
-                              </button>
-                              
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSpotlightProductReact(pKey, 'views');
-                                }}
-                                className="flex items-center gap-0.5 hover:text-[#E8500A]"
-                              >
-                                <Eye className="w-3 h-3" />
-                                <span>{(pState.views / 1000).toFixed(1)}k</span>
-                              </button>
-
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSpotlightProductReact(pKey, 'shares');
-                                }}
-                                className="flex items-center gap-0.5 hover:text-[#E8500A]"
-                              >
-                                <Share2 className="w-3 h-3" />
-                                <span>{pState.shares}</span>
-                              </button>
-                            </div>
-                          </div>
-
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Footer Reactions Toolbar & Browse Brand Link */}
-                <div className="flex items-center justify-between border-t border-white/10 pt-4 mt-5 pb-1">
-                  <div className="flex items-center gap-5 text-[11px] text-gray-300 font-mono select-none">
-                    
-                    {/* Main Container React Button */}
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleSpotlightAction('likes'); }}
-                      className={cn(
-                        "flex items-center gap-1.5 transition-all text-[11px] cursor-pointer transform active:scale-95",
-                        spotlightStates.liked ? "text-rose-500 font-semibold" : "hover:text-rose-455 text-gray-300"
-                      )}
-                    >
-                      <Heart className={cn("w-4 h-4", spotlightStates.liked ? "fill-current text-rose-500 scale-105" : "")} />
-                      <span>{spotlightStates.liked ? "12.1k" : "12k"}</span>
-                    </button>
-
-                    {/* Main Container Viewed Button */}
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleSpotlightAction('views'); }}
-                      className="flex items-center gap-1.5 hover:text-[#E8500A] text-gray-300 transition-colors cursor-pointer"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span>{(spotlightStates.views / 1000).toFixed(1)}k</span>
-                    </button>
-
-                    {/* Main Container Share Button */}
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleSpotlightAction('shares'); }}
-                      className="flex items-center gap-1.5 hover:text-[#E8500A] text-gray-300 transition-colors cursor-pointer"
-                    >
-                      <Share2 className="w-4 h-4" />
-                      <span>{spotlightStates.shares}</span>
-                    </button>
                   </div>
 
                   <Link 
-                    to="/brands/3" 
-                    className="text-[11px] font-medium text-white hover:text-[#E8500A] uppercase tracking-wider flex items-center gap-1 transition-colors"
+                    to="/deals" 
+                    className="inline-flex items-center gap-1.5 hover:bg-gray-50 text-[#E8500A] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider rounded-lg transition-all"
                   >
-                    BROWSE ALL FROM THIS BRAND
+                    View All Deals <ChevronRight size={14} />
                   </Link>
+                </div>
+
+                {/* Hot Deals Grid of featured Products */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left">
+                  {featuredDeals.map((product) => (
+                    <ProductCard key={product.id} product={product} variant="grid" />
+                  ))}
                 </div>
               </div>
 
@@ -1645,6 +1536,37 @@ export function HomePage() {
                   })}
                 </div>
               </div>
+
+              {/* FEED SECTION H — CUSTOMER FAVORITES */}
+              <div id="section-customer-favorites" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
+                {/* Section Title Header */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-4 mb-5 gap-3">
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-base font-bold text-[#1a1a2e] uppercase tracking-tight">Customer</span>
+                      <span className="text-base font-bold text-[#E8500A] uppercase tracking-tight">Favorites</span>
+                      <span className="bg-rose-100 text-rose-600 text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">Loved</span>
+                    </div>
+                    <p className="text-[11px] text-[#8a9bb0] mt-1 text-left">
+                      Trending products loved by Choosify editors and verified customers.
+                    </p>
+                  </div>
+
+                  <Link 
+                    to="/customer-favorite" 
+                    className="inline-flex items-center gap-1.5 hover:bg-gray-50 text-[#E8500A] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider rounded-lg transition-all"
+                  >
+                    View All Customer Favorites <ChevronRight size={14} />
+                  </Link>
+                </div>
+
+                {/* Customer Favorites Grid of featured Products with isGuideDetail={true} */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left">
+                  {viralProductsList.slice(0, 8).map((product) => (
+                    <ProductCard key={product.id} product={product} variant="grid" isGuideDetail={true} />
+                  ))}
+                </div>
+              </div>
             </>
           ) : (
             /* NON-FEED CATEGORY DISPLAY GRID */
@@ -1735,11 +1657,11 @@ export function HomePage() {
           style={{ paddingLeft: '0px', paddingBottom: '0px' }}
         >
           
-          {/* Card 1 — TRENDING DEALS */}
+          {/* Card 1 — Sponsored Deals */}
           <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-left">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
               <h3 className="text-sm font-semibold tracking-tight text-[#1a1a2e]">
-                TRENDING <span className="text-[#E8500A]">DEALS</span>
+                Sponsored <span className="text-[#E8500A]">Deals</span>
               </h3>
               <Link 
                 to="/deals" 
@@ -1750,117 +1672,76 @@ export function HomePage() {
             </div>
             
             <div className="flex flex-col gap-4">
-              {[
-                {
-                  id: 1,
-                  title: "Apex Shoes Running Shoes Apex Shoes Running.",
-                  img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=240&h=240&fit=crop",
-                  badge: "BEST VALUE",
-                  badgeClass: "bg-blue-600 text-white",
-                  price: "BDT 2,500"
-                },
-                {
-                  id: 2,
-                  title: "Apex Shoes Running Shoes Apex Shoes Running.",
-                  img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=240&h=240&fit=crop",
-                  badge: "HOT",
-                  badgeClass: "bg-rose-600 text-white",
-                  price: "BDT 2,500"
-                },
-                {
-                  id: 3,
-                  title: "Apex Shoes Running Shoes Apex Shoes Running.",
-                  img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=240&h=240&fit=crop",
-                  badge: "NEW",
-                  badgeClass: "bg-emerald-600 text-white",
-                  price: "BDT 2,500"
-                },
-                {
-                  id: 4,
-                  title: "Apex Shoes Running Shoes Apex Shoes Running.",
-                  img: "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=240&h=240&fit=crop",
-                  badge: "SALE",
-                  badgeClass: "bg-gray-900 text-white",
-                  price: "BDT 2,500"
-                },
-                {
-                  id: 5,
-                  title: "Apex Shoes Running Shoes Apex Shoes Running.",
-                  img: "https://images.unsplash.com/photo-1608248597481-496100c80836?w=240&h=240&fit=crop",
-                  badge: "SALE",
-                  badgeClass: "bg-gray-900 text-white",
-                  price: "BDT 2,500"
-                }
-              ].map((item, idx) => (
-                <div 
-                  key={idx}
-                  className="flex gap-3 bg-white hover:bg-gray-50/50 p-1.5 rounded-[5px] transition-all duration-200 group text-left"
-                >
-                  <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-[#e8edf2] flex items-center justify-center bg-gray-50 relative">
-                    <img 
-                      src={item.img} 
-                      alt={item.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toast.success('Added to saved items!');
-                      }}
-                      className="absolute top-1 left-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 cursor-pointer hover:scale-110 active:scale-90 transition-transform z-10"
-                    >
-                      <Bookmark className="w-3 h-3 text-[#E8500A]" />
-                    </div>
-                  </div>
-
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
-                    <div>
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="text-[8px] font-bold uppercase text-gray-400">APEX</span>
-                        <span className={cn("text-[7.2px] font-semibold uppercase px-1.5 py-0.5 rounded tracking-tight shrink-0", item.badgeClass)}>
-                          {item.badge}
-                        </span>
-                      </div>
-                      <h4 className="text-[11px] font-medium text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors line-clamp-1 leading-tight mt-1">
-                        {item.title}
-                      </h4>
-                    </div>
-                    
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-[11px] font-mono font-semibold text-[#E8500A]">
-                        {item.price}
-                      </span>
-                      <button 
-                        type="button" 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          addToCart({
-                            id: `apex-promo-${item.id}`,
-                            title: item.title,
-                            price: 2500,
-                            image: item.img,
-                            brand: 'APEX'
-                          }, 1); 
-                          toast.success(`Successfully added ${item.title} to your verification basket!`);
-                        }} 
-                        className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded text-[8px] uppercase tracking-wide cursor-pointer transition-colors"
-                        aria-label="Add to cart"
-                      >
-                        ADD TO BASKET
-                      </button>
-                    </div>
-                  </div>
+              {styledSponsoredDeals.length === 0 ? (
+                <div className="text-center py-6 border border-dashed border-gray-200 rounded-lg">
+                  <p className="text-xs text-gray-400 font-medium">Sponsored deals will appear here.</p>
                 </div>
-              ))}
+              ) : (
+                styledSponsoredDeals.slice(0, 5).map((item, idx) => (
+                  <div 
+                    key={item.id || idx}
+                    onClick={() => navigate(`/products/${item.id}`)}
+                    className="flex gap-3 bg-white hover:bg-gray-50/50 p-1.5 rounded-[5px] transition-all duration-200 group text-left cursor-pointer"
+                  >
+                    <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-[#e8edf2] flex items-center justify-center bg-gray-50 relative">
+                      <img 
+                        src={item.image} 
+                        alt={item.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast.success('Added to saved items!');
+                        }}
+                        className="absolute top-1 left-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 cursor-pointer hover:scale-110 active:scale-90 transition-transform z-10"
+                      >
+                        <Bookmark className="w-3 h-3 text-[#E8500A]" />
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
+                      <div>
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-[8px] font-bold uppercase text-gray-400">{item.brand}</span>
+                          <span className={cn("text-[7.2px] font-semibold uppercase px-1.5 py-0.5 rounded tracking-tight shrink-0", item.badgeClass)}>
+                            {item.discountText}
+                          </span>
+                        </div>
+                        <h4 className="text-[11px] font-medium text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors line-clamp-1 leading-tight mt-1">
+                          {item.title}
+                        </h4>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[11px] font-mono font-semibold text-[#E8500A]">
+                          BDT {typeof item.price === 'number' ? item.price.toLocaleString() : item.price}
+                        </span>
+                        <button 
+                          type="button" 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            navigate(`/products/${item.id}`);
+                          }} 
+                          className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded text-[8px] uppercase tracking-wide cursor-pointer transition-colors"
+                          aria-label="Shop now"
+                        >
+                          SHOP NOW
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
-          {/* Card 2 — TRENDING BRANDS */}
+          {/* Card 2 — Sponsored Brands */}
           <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-left">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
               <h3 className="text-sm font-semibold tracking-tight text-[#1a1a2e]">
-                TRENDING <span className="text-[#E8500A]">BRANDS</span>
+                Sponsored <span className="text-[#E8500A]">Brands</span>
               </h3>
               <Link 
                 to="/brands" 
@@ -1871,84 +1752,36 @@ export function HomePage() {
             </div>
 
             <div className="flex flex-col gap-3">
-              {[
-                {
-                  title: "TOP 10 SMARTPHONES TO BUY IN 2026",
-                  img: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=160&h=160&fit=crop",
-                  likes: "12k",
-                  views: "1.2k",
-                  shares: "450"
-                },
-                {
-                  title: "IS THE S24 ULTRA STILL WORTH IT IN LATE 2026?",
-                  img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=160&h=160&fit=crop",
-                  likes: "12k",
-                  views: "1.2k",
-                  shares: "450"
-                },
-                {
-                  title: "IS THE S24 ULTRA STILL WORTH IT IN LATE 2026?",
-                  img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=160&h=160&fit=crop",
-                  likes: "12k",
-                  views: "1.2k",
-                  shares: "450"
-                },
-                {
-                  title: "IS THE S24 ULTRA STILL WORTH IT IN LATE 2026?",
-                  img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=160&h=160&fit=crop",
-                  likes: "12k",
-                  views: "1.2k",
-                  shares: "450"
-                },
-                {
-                  title: "IS THE S24 ULTRA STILL WORTH IT IN LATE 2026?",
-                  img: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=160&h=160&fit=crop",
-                  likes: "12k",
-                  views: "1.2k",
-                  shares: "450"
-                },
-                {
-                  title: "IS THE S24 ULTRA STILL WORTH IT IN LATE 2026?",
-                  img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=160&h=160&fit=crop",
-                  likes: "12k",
-                  views: "1.2k",
-                  shares: "450"
-                }
-              ].map((item, idx) => (
-                <div 
-                  key={idx} 
-                  onClick={() => navigate('/guides')}
-                  className="flex gap-3 bg-white border border-[#e8edf2] rounded-[5px] p-2.5 hover:border-gray-200 transition-all duration-200 group cursor-pointer"
-                >
-                  <div className="w-11 h-11 rounded-lg overflow-hidden shrink-0 border border-[#e8edf2] flex items-center justify-center bg-gray-50">
-                    <img 
-                      src={item.img} 
-                      alt={item.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
-                    <h4 className="text-[11px] font-medium text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors line-clamp-1 leading-tight">
-                      {item.title}
-                    </h4>
-                    <div className="flex items-center gap-2.5 text-gray-400 font-mono text-[9px] mt-1">
-                      <div className="flex items-center gap-1">
-                        <Heart className="w-3 h-3 text-rose-500 fill-rose-50" />
-                        <span>{item.likes}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Eye className="w-3 h-3 text-gray-400" />
-                        <span>{item.views}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Share2 className="w-3 h-3 text-gray-400" />
-                        <span>{item.shares}</span>
+              {sponsoredBrandsList.length === 0 ? (
+                <div className="text-center py-6 border border-dashed border-gray-200 rounded-lg">
+                  <p className="text-xs text-gray-400 font-medium">Sponsored brands will appear here.</p>
+                </div>
+              ) : (
+                sponsoredBrandsList.map((brand: any, idx) => (
+                  <div 
+                    key={brand.id || idx} 
+                    onClick={() => navigate(`/brands/${brand.id}`)}
+                    className="flex gap-3 bg-white border border-[#e8edf2] rounded-[5px] p-2.5 hover:border-gray-200 transition-all duration-200 group cursor-pointer text-left animate-fade-in"
+                  >
+                    <div className="w-11 h-11 rounded-lg border border-[#e8edf2] flex items-center justify-center bg-[#E8500A]/5 text-[#E8500A] font-extrabold text-sm uppercase shrink-0">
+                      {brand.logo}
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
+                      <h4 className="text-[11px] font-semibold text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors line-clamp-1 leading-tight">
+                        {brand.name}
+                      </h4>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[9.5px] text-gray-400 font-normal truncate max-w-[110px]">
+                          {brand.category || 'Advertiser Brand'}
+                        </span>
+                        <span className="text-[9px] font-semibold text-[#E8500A] uppercase tracking-wider hover:text-[#CF4400] transition-colors whitespace-nowrap shrink-0 ml-auto">
+                          VIEW BRAND
+                        </span>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
 
             <div className="mt-4 pt-3 border-t border-gray-100">

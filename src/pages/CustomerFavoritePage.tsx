@@ -12,7 +12,7 @@ import { ProductCard } from '../components/ProductCard';
 import { CATEGORIES } from '../constants';
 import { toast } from 'react-hot-toast';
 
-export function ViralProductsPage() {
+export function CustomerFavoritePage() {
   const navigate = useNavigate();
   const { allProducts, allBrands, mode, addToCart } = useGlobalState();
 
@@ -220,7 +220,7 @@ export function ViralProductsPage() {
           <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-2 w-full">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">Viral Products</span>
+            <span className="text-white">Customer Favorite</span>
           </div>
 
           <div className="max-w-3xl text-center flex flex-col items-center">
@@ -228,7 +228,7 @@ export function ViralProductsPage() {
               CHOOSIFY CURATED
             </span>
             <h1 className="text-2xl md:text-3.5xl font-black text-white uppercase tracking-tighter italic mb-1.5 leading-none text-center">
-              Choosify & Customer Favorite Products
+              Customer Favorite Products
             </h1>
             <p className="text-gray-400 text-[11px] md:text-xs font-medium leading-relaxed mb-2.5 max-w-2xl text-center">
               Discover trending, community-recommended and editor-approved products loved by real customers. Verified pricing and seller transparency included.
@@ -301,7 +301,7 @@ export function ViralProductsPage() {
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search viral, customer-recommended products..." 
+                placeholder="Search customer-recommended products..." 
                 className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
               />
               <button 
@@ -505,7 +505,7 @@ export function ViralProductsPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-[#E8500A] text-lg font-space font-black animate-pulse">✦</span>
                   <h2 className="text-sm font-black text-navy uppercase tracking-widest italic">
-                    Spotlight Featured Viral Listings
+                    Spotlight Featured Customer Favorite Listings
                   </h2>
                 </div>
                 
@@ -596,8 +596,8 @@ export function ViralProductsPage() {
             {/* SECTION 1: VIRAL LEADERBOARD (Top 5 this week) */}
             <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
-                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
-                  <Award size={15} className="text-amber-500" /> Viral Leaderboard
+                <h3 className="text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none text-[11px] font-semibold">
+                  <Award size={15} className="text-amber-500" /> Customer Favorite Leaderboard
                 </h3>
               </div>
               <div className="space-y-2.5">
@@ -703,7 +703,7 @@ export function ViralProductsPage() {
               </div>
               
               <p className="text-[11px] text-gray-500 leading-relaxed font-semibold mb-4 px-1">
-                Sourced something viral on TikTok, Facebook groups or Instagram reels recently? Suggest it to our vetting desk today!
+                Sourced a trending product from TikTok, Facebook groups or Instagram reels recently? Suggest it to our vetting desk today!
               </p>
 
               <button 
@@ -848,7 +848,7 @@ export function ViralProductsPage() {
 
                 <div className="space-y-1.5 text-left">
                   <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
-                    Describe Why It Is Viral *
+                    Describe Why It Is Popular *
                   </label>
                   <textarea 
                     name="prodReason"
