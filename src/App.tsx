@@ -178,6 +178,8 @@ function AppContent() {
             <Route path="/compare" element={<PageWrapper><ComparePage /></PageWrapper>} />
             <Route path="/guides" element={<PageWrapper><GuidesPage /></PageWrapper>} />
             <Route path="/guides/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
+            <Route path="/recommendations" element={<PageWrapper><GuidesPage /></PageWrapper>} />
+            <Route path="/recommendations/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
             <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
             <Route path="/post-offer" element={<PageWrapper><PostOfferPage /></PageWrapper>} />

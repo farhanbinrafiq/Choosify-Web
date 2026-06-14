@@ -337,7 +337,7 @@ export function BrandsPage() {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-6 w-full pt-8 pb-16 flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative">
+      <div className="max-w-[1440px] mx-auto px-6 w-full pt-8 pb-16 flex flex-col lg:flex-row gap-6 lg:gap-8 xl:gap-10 2xl:gap-12 relative">
         {/* Sidebar Filters */}
         <aside className="w-full lg:w-64 flex-shrink-0 hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
           {/* Filter By Brand */}
@@ -434,67 +434,73 @@ export function BrandsPage() {
               <div className="flex-1 h-px bg-orange-primary/20" />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-8 justify-items-center justify-center w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
               {[brands[0], brands[1], brands[2]].map((brand, i) => (
-                <div 
-                  key={i} 
-                  className="bg-white rounded-xl p-6 border border-[#e8edf2] flex flex-col hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group overflow-hidden mx-auto justify-between shadow-xs"
-                  style={{ width: '100%', maxWidth: '350px', height: '350px' }}
+                <motion.div 
+                  layout
+                  key={brand.id} 
+                  className="bg-white rounded-xl p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
+                  style={{ width: '100%', maxWidth: '250px', height: '350px' }}
                 >
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/5 blur-3xl rounded-full" />
-                  
-                  {/* Horizontal Header Info */}
-                  <div className="flex gap-4 items-start relative z-10 text-left w-full">
-                    <div className="w-16 h-16 rounded-lg bg-gray-50 flex items-center justify-center p-2.5 flex-shrink-0 overflow-hidden border border-gray-100 shadow-xs">
+                  {brand.isHot && (
+                    <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">HOT</div>
+                  )}
+                  {brand.isFeatured && (
+                    <div className="absolute top-5 right-5 bg-orange-primary text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">FEATURED</div>
+                  )}
+
+                  {/* Horizontal Header System */}
+                  <div className="flex gap-3 items-start relative z-10 text-left w-full">
+                    <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-2 shadow-xs">
                       {brand.logo.length > 2 ? (
-                         <img src={brand.logo} className="w-full h-full object-contain relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
+                         <img src={brand.logo} className="w-full h-full object-contain p-2 relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
                       ) : (
-                         <span className="text-3xl font-black text-navy relative z-10">{brand.logo}</span>
+                        <span className="text-2xl font-black text-navy">{brand.logo}</span>
                       )}
                     </div>
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <h3 className="text-sm font-black text-navy leading-tight mb-0.5 italic tracking-tight uppercase truncate group-hover:text-orange-primary transition-colors">{brand.name}</h3>
-                      <p className="text-[10px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
-                      <div className="flex items-center gap-1.5">
+                    <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>
+                      <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
+                      <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
+                      <div className="flex items-center gap-1">
                         <div className="flex gap-0.5">
                           {[1, 2, 3, 4, 5].map(s => (
-                            <Star key={s} size={10} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(brand.rating) && "fill-gray-200 stroke-gray-200")} />
+                            <Star key={s} size={8} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(brand.rating) && "fill-gray-200 stroke-gray-200")} />
                           ))}
                         </div>
-                        <span className="text-[10px] font-black text-navy italic">{brand.rating}</span>
-                        <span className="text-[9px] font-bold text-gray-300">({brand.reviews})</span>
+                        <span className="text-[9px] font-black text-navy italic ml-0.5">{brand.rating}</span>
+                        <span className="text-[8px] font-bold text-gray-300 ml-0.5">({brand.reviews})</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Content Spacer */}
                   <div className="flex-1" />
-                  
-                  <div className="w-full h-[1px] bg-gray-150 my-4" />
 
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="text-center py-2.5 rounded-xl border border-gray-100/50 bg-gray-50/50 min-w-0 transition-all">
-                      <span className="text-[8px] font-black mb-1 uppercase tracking-tight block text-navy opacity-40">Best For</span>
-                      <span className="text-[9px] font-bold italic uppercase truncate px-1 block text-red-500">{brand.bestFor}</span>
+                  <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
+                      <span className="block text-[7px] font-black text-navy mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
+                      <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{brand.bestFor}</span>
                     </div>
-                    <div className="text-center py-2.5 rounded-xl border border-gray-100/50 bg-gray-50/50 min-w-0 transition-all">
+                    <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
                       <div className="flex flex-col items-center">
-                        <span className="text-lg font-black leading-none mb-1 italic tracking-tighter text-[#6366f1]">{brand.priceRange}</span>
-                        <span className="text-[7px] font-black uppercase tracking-widest text-gray-400 opacity-60">Price</span>
+                        <span className="text-base font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{brand.priceRange}</span>
+                        <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
                       </div>
                     </div>
-                    <div className="text-center py-2.5 rounded-xl border border-green-100 bg-[#E6F4EA]/80 min-w-0 transition-all">
-                      <span className="text-lg font-black leading-none mb-1 italic tracking-tighter block text-[#10B981]">{brand.recommended}</span>
-                      <span className="text-[7px] font-black uppercase tracking-widest block text-navy opacity-60">Success</span>
+                    <div className="text-center bg-[#E6F4EA]/80 py-1.5 rounded-lg border border-green-100 min-w-0">
+                      <span className="block text-base font-black text-[#10B981] leading-none mb-0.5 italic tracking-tighter">{brand.recommended}</span>
+                      <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60 font-medium">Success</span>
                     </div>
                   </div>
 
                   <div className="w-full h-[1px] bg-transparent my-1" />
 
-                  <Link to={`/brands/${brand.id}`} className="w-full py-3 bg-navy text-white text-[9px] font-black uppercase rounded-lg shadow-md hover:bg-orange-primary active:scale-95 transition-all text-center tracking-widest italic flex items-center justify-center gap-2 group/btn z-10 shrink-0">
-                     Visit Brand <ArrowRight size={14} className="-rotate-45 group-hover/btn:translate-x-1 transition-transform" />
+                  <Link to={`/brands/${brand.id}`} className="w-full py-2 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
+                    Visit Brand <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                   </Link>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -505,7 +511,7 @@ export function BrandsPage() {
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{letterBrands.length} Brands</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-6 justify-items-center justify-center w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
                 {letterBrands.map(brand => (
                   <motion.div 
                     layout

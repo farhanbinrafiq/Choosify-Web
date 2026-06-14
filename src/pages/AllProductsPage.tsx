@@ -7,6 +7,36 @@ import { ProductCard } from '../components/ProductCard';
 import { ProductCardSkeleton } from '../components/Skeleton';
 import { useGlobalState } from '../context/GlobalStateContext';
 
+const SPONSORED_RECOMMENDATIONS = [
+  {
+    id: 1,
+    title: 'Top 10 Smartphones to Buy in 2026',
+    author: 'Farhan Rafiq',
+    category: 'MOBILE',
+    readTime: '15 MIN READ',
+    image: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=400&h=300&fit=crop',
+    tagline: 'Titanium flagships to budget powerhouses'
+  },
+  {
+    id: 3,
+    title: 'Is S24 Ultra Still Worth It in Late 2026?',
+    author: 'Sarah Jenkins',
+    category: 'MOBILE',
+    readTime: '12 MIN VIDEO',
+    image: 'https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=400&h=300&fit=crop',
+    tagline: 'Revisiting the titanium giant after 6 months'
+  },
+  {
+    id: 5,
+    title: 'Morning Skincare Routine for Dry Skin',
+    author: 'Sarah Jenkins',
+    category: 'BEAUTY',
+    readTime: 'SHORTS',
+    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop',
+    tagline: 'Deep hydration & barrier repair routine'
+  }
+];
+
 export function AllProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchParams, setSearchParams] = useSearchParams();
@@ -568,6 +598,56 @@ export function AllProductsPage() {
                 >
                    Shop Now
                 </Link>
+             </div>
+          </div>
+
+          {/* Sponsored Recommendations Card */}
+          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-left relative overflow-hidden w-full flex flex-col">
+             <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
+                   👉 Sponsored Recommendations
+                </h3>
+                <Link 
+                   to="/recommendations" 
+                   className="text-[10px] font-bold text-orange-primary hover:underline flex items-center gap-1 shrink-0"
+                >
+                   See All →
+                </Link>
+             </div>
+
+             <div className="flex flex-col gap-3">
+                {SPONSORED_RECOMMENDATIONS.length === 0 ? (
+                   <div className="text-center py-6 border border-dashed border-gray-200 rounded-xl">
+                      <p className="text-xs text-gray-400 font-medium px-2">Sponsored recommendations will appear here.</p>
+                   </div>
+                ) : (
+                   SPONSORED_RECOMMENDATIONS.map((item) => (
+                      <Link 
+                         to={`/recommendations/${item.id}`}
+                         key={item.id} 
+                         className="flex items-start gap-3 bg-white border border-[#e8edf2]/60 rounded-xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                      >
+                         <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-gray-100 bg-gray-50 flex items-center justify-center relative">
+                            <img 
+                               src={item.image} 
+                               alt={item.title} 
+                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                               referrerPolicy="no-referrer"
+                            />
+                            <span className="absolute bottom-0 right-0 bg-[#E8500A]/90 text-white text-[6px] font-black px-1 py-0.5 rounded-tl-md tracking-wider">AD</span>
+                         </div>
+                         <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
+                            <span className="text-[7.5px] font-black text-[#E8500A] uppercase tracking-widest leading-none block mb-0.5">{item.category}</span>
+                            <h4 className="font-sans text-[11px] font-bold tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors line-clamp-2 leading-tight">
+                               {item.title}
+                            </h4>
+                            <p className="text-[8px] font-bold text-gray-450 truncate mt-0.5 uppercase tracking-wide">
+                               {item.readTime} · BY {item.author}
+                            </p>
+                          </div>
+                      </Link>
+                   ))
+                )}
              </div>
           </div>
         </aside>

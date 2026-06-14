@@ -293,7 +293,7 @@ export function CategoriesPage() {
       </div>
 
 
-      <div className="max-w-[1440px] mx-auto px-6 py-10 w-full flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative">
+      <div className="max-w-[1440px] mx-auto px-6 py-10 w-full flex flex-col lg:flex-row gap-6 lg:gap-8 xl:gap-10 2xl:gap-12 relative">
         {/* LEFT COLUMN: QUICK HIGHWAYS ASIDE COLUMN */}
         <aside className="hidden lg:flex flex-col gap-4 w-[300px] flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pb-10 pr-2 no-scrollbar">
           {/* QUICK ACCESS CARD */}
@@ -432,13 +432,13 @@ export function CategoriesPage() {
 
         <div id="categories-main-display" className="scroll-mt-36 flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
           {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[repeat(auto-fill,237.328px)] xl:grid-cols-[repeat(auto-fill,237.328px)] gap-4 justify-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center justify-center w-full">
               {Array.from({ length: 12 }).map((_, idx) => (
                 <CategoryCardSkeleton key={idx} />
               ))}
             </div>
           ) : (
-            <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[repeat(auto-fill,237.328px)] xl:grid-cols-[repeat(auto-fill,237.328px)] gap-4 justify-start">
+            <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center justify-center w-full">
               {categoriesList.map((cat, i) => {
                 const IconComponent = (LucideIcons as any)[cat.icon] || LucideIcons.Package;
                 const isExpanded = expandedCategory === cat.name;
@@ -490,7 +490,7 @@ export function CategoriesPage() {
                           height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] },
                           opacity: { duration: 0.3 }
                         }}
-                        className="col-span-2 md:col-span-3 lg:col-span-full xl:col-span-full bg-white shadow-md rounded-[5px] p-6 md:p-8 border border-[#e8edf2] overflow-hidden z-10 text-left"
+                        className="col-span-1 sm:col-span-2 lg:col-span-full xl:col-span-full bg-white shadow-md rounded-[5px] p-6 md:p-8 border border-[#e8edf2] overflow-hidden z-10 text-left"
                       >
                         <motion.div 
                           initial={{ y: 20, opacity: 0 }}
