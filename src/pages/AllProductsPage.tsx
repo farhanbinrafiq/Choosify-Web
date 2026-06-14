@@ -299,10 +299,10 @@ export function AllProductsPage() {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-6 w-full flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 py-8 relative">
+      <div className="max-w-[1440px] mx-auto px-6 w-full flex flex-col lg:flex-row gap-5 lg:gap-6 xl:gap-8 py-8 relative">
         
         {/* Sidebar Filters */}
-        <aside className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="w-full lg:w-56 xl:w-60 flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
           <div className="space-y-4">
             
             {/* Quick Search Widget */}
@@ -522,7 +522,7 @@ export function AllProductsPage() {
             <div className={cn(
               "mb-20",
               viewMode === 'grid' 
-                ? "grid grid-cols-[repeat(auto-fill,minmax(188px,1fr))] justify-items-center justify-center gap-5" 
+                ? "grid grid-cols-2 lg:grid-cols-4 justify-items-center justify-center gap-4 xl:gap-5" 
                 : "flex flex-col gap-6"
             )}>
               {Array.from({ length: 8 }).map((_, i) => (
@@ -540,7 +540,7 @@ export function AllProductsPage() {
             <div className={cn(
               "mb-20",
               viewMode === 'grid' 
-                ? "grid grid-cols-[repeat(auto-fill,minmax(188px,1fr))] justify-items-center justify-center gap-5" 
+                ? "grid grid-cols-2 lg:grid-cols-4 justify-items-center justify-center gap-4 xl:gap-5" 
                 : "flex flex-col gap-6"
             )}>
               {filteredProducts.map((product, i) => (
@@ -569,38 +569,7 @@ export function AllProductsPage() {
         </main>
 
         {/* RIGHT SIDEBAR WITH PREMIUM AARONG AD BANNER */}
-        <aside className="hidden lg:flex flex-col gap-4 w-60 xl:w-64 flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
-          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full flex flex-col items-center">
-             <div className="relative z-10 w-full flex flex-col">
-                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
-                </div>
-                
-                <div className="w-full aspect-[4/5] rounded-xl overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
-                   <img 
-                      src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500&auto=format&fit=crop&q=80" 
-                      alt="Aarong Heritage Model" 
-                      className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-[2s]"
-                      referrerPolicy="no-referrer"
-                   />
-                </div>
-                
-                <h4 className="font-sans text-xs font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">AARONG</h4>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Heritage Shopping Brand</p>
-                
-                <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-4 px-1 text-center">
-                   New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
-                </p>
-                
-                <Link 
-                  to="/brands"
-                  className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
-                >
-                   Shop Now
-                </Link>
-             </div>
-          </div>
-
+        <aside className="hidden lg:flex flex-col gap-4 w-52 xl:w-56 flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
           {/* Sponsored Recommendations Card */}
           <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-left relative overflow-hidden w-full flex flex-col">
              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
@@ -648,6 +617,37 @@ export function AllProductsPage() {
                       </Link>
                    ))
                 )}
+             </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full flex flex-col items-center">
+             <div className="relative z-10 w-full flex flex-col">
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
+                </div>
+                
+                <div className="w-full aspect-[4/5] rounded-xl overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
+                   <img 
+                      src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500&auto=format&fit=crop&q=80" 
+                      alt="Aarong Heritage Model" 
+                      className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-[2s]"
+                      referrerPolicy="no-referrer"
+                   />
+                </div>
+                
+                <h4 className="font-sans text-xs font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">AARONG</h4>
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Heritage Shopping Brand</p>
+                
+                <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-4 px-1 text-center">
+                   New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
+                </p>
+                
+                <Link 
+                  to="/brands"
+                  className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
+                >
+                   Shop Now
+                </Link>
              </div>
           </div>
         </aside>

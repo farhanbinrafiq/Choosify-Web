@@ -734,10 +734,10 @@ export function BrandDetailPage() {
       </div>
 
       {/* 4. Unified Scrollable Body Wrapper */}
-      <div className="max-w-[1440px] mx-auto px-6 py-10 w-full flex flex-col gap-16">
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-16">
          
          {/* EXCLUSIVE DEALS & PRODUCT CATALOG THREE COLUMN SPLIT GRID */}
-         <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_250px] xl:grid-cols-[300px_minmax(0,1fr)_280px] gap-8 xl:gap-12 items-start w-full relative">
+         <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
             
             {/* COLUMN 1: SIDEBAR FILTERS (from Brand Wise Products page) */}
             <aside className="w-full lg:sticky lg:top-36 lg:max-h-[calc(100vh-160px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
@@ -892,7 +892,7 @@ export function BrandDetailPage() {
                      </div>
                      
                      {finalDeals.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
                            {finalDeals.map((product: any, i: number) => (
                               <ProductCard key={product.id || i} product={product} variant="grid" />
                            ))}
@@ -919,7 +919,7 @@ export function BrandDetailPage() {
                      </div>
 
                      {filteredProducts.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
                            {filteredProducts.map((product: any, i: number) => (
                               <ProductCard key={product.id || i} product={product} variant="grid" />
                            ))}

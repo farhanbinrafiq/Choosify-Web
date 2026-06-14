@@ -351,8 +351,8 @@ export function CustomerFavoritePage() {
       {/* ================================================= */}
       {/* 4. MAIN THREE-COLUMN CONTAINER (Desktop 3-columns) */}
       {/* ================================================= */}
-      <div className="max-w-[1440px] mx-auto px-6 w-full py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_250px] xl:grid-cols-[290px_minmax(0,1fr)_290px] gap-6 xl:gap-8 items-start relative w-full">
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start relative w-full">
           
           {/* ================================================= */}
           {/* A. LEFT SIDEBAR (STICKY) */}
@@ -572,7 +572,7 @@ export function CustomerFavoritePage() {
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(188px,1fr))] justify-items-center justify-center gap-5">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center justify-center gap-5">
                   {filteredProducts.map((p, idx) => (
                     <div 
                       key={`viral-col-${p.id}-${idx}`} 

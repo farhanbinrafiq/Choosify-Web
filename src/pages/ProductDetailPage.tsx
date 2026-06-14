@@ -1008,11 +1008,11 @@ export function ProductDetailPage() {
       </div>
 
       {/* Main Content Area */}
-      <main id="all-section" className="bg-[#F8FAFC] py-10">
-        <div className="max-w-[1440px] mx-auto px-6 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full relative">
+      <main id="all-section" className="bg-[#F8FAFC] py-5">
+        <div className="max-w-[1440px] mx-auto px-4 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
             {/* Left Column Section (Column 1) */}
-            <div className="lg:col-span-3 space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+            <div className="space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
               {/* PRODUCT SPECIFICATIONS */}
               <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl overflow-hidden p-6 space-y-4 font-sans text-left">
                 <h3 className="text-xs font-black text-navy uppercase tracking-tight pb-2 border-b border-gray-50 flex items-center gap-2">
@@ -1064,7 +1064,7 @@ export function ProductDetailPage() {
               </div>
             </div>
             {/* Middle Column Section (Column 2) - Center Content */}
-            <div className="lg:col-span-6 space-y-8 min-w-0">
+            <div className="space-y-8 min-w-0">
               {/* INFLUENCER & CREATOR REVIEWS */}
               <div id="influencer-reviews-section" className="scroll-mt-36">
                 <WithInfluencerReviews brandName={brandName} />
@@ -1072,7 +1072,7 @@ export function ProductDetailPage() {
             </div>
 
             {/* Right Side Column (Column 3) */}
-            <div className="lg:col-span-3 space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+            <div className="space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
               {/* PRICE ACROSS STORES TABLE CARD */}
               <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl overflow-hidden font-sans text-left">
                 <div className="p-6 flex items-center justify-between border-b border-gray-50">

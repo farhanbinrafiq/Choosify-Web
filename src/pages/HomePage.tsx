@@ -335,6 +335,11 @@ export function HomePage() {
   const rightBrandsList = allBrands && allBrands.length > 0 ? allBrands : BRANDS;
   const popularBrands = rightBrandsList.slice(0, 6);
 
+  // Spotlight Brands list (6-10 maximum, let's select 8)
+  const spotlightBrands = React.useMemo(() => {
+    return rightBrandsList.filter((b: any) => b.ratings >= 4.7 || b.featuredFlag || b.sponsoredFlag).slice(0, 8);
+  }, [rightBrandsList]);
+
   // Products filters based on context & states
   const rightProductsList = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
 
@@ -1009,10 +1014,225 @@ export function HomePage() {
                 </div>
 
                 {/* Popular Product list in visual cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {rightProductsList.slice(0, 4).map((p) => (
                     <ProductCard key={p.id} product={p} variant="compact" />
                   ))}
+                </div>
+              </div>
+
+              {/* SPOTLIGHT BRANDS SECTION */}
+              <div 
+                id="section-spotlight-brands" 
+                className="p-6 md:p-8 shadow-xl text-left relative overflow-hidden"
+                style={{ borderRadius: '16px', backgroundColor: '#1C1410' }}
+              >
+                {/* 1. HEADER */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-[#F97316] uppercase tracking-[0.25em]">Sponsored Brand</span>
+                      <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-[#F97316]/90 border border-[#F97316]/30 uppercase bg-[#F97316]/10 rounded-full">AD</span>
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-black text-white mt-1 italic tracking-tight">SPOTLIGHT BRAND</h2>
+                    <p className="text-xs text-gray-400 mt-1">Discover curated exclusive collections directly from official certified channels.</p>
+                  </div>
+                  <div>
+                    <span className="rounded-full px-2.5 py-1 text-[10px] font-extrabold tracking-wider bg-white/5 text-gray-300 border border-white/10 uppercase">
+                      Sponsored AD
+                    </span>
+                  </div>
+                </div>
+
+                <div className="h-[1px] my-5" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }} />
+
+                {/* 2. BRAND IDENTITY ROW */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-white/5 rounded-xl p-4.5 border border-white/5">
+                  {/* Zone A: Logo block */}
+                  <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/brands/3')}>
+                    <div className="relative w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md border-2 border-[#F97316]/50 transition-transform hover:scale-105">
+                      <span className="text-[#1C1410] font-black text-2xl tracking-tighter">S</span>
+                      <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm">
+                        <svg className="w-4 h-4 text-[#22C55E]" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                        </svg>
+                      </span>
+                    </div>
+                    <div className="text-left">
+                      <span className="text-[10px] font-extrabold text-[#F97316] uppercase tracking-widest block mb-0.5">ESTABLISHED BRAND</span>
+                      <span className="text-[11px] font-bold text-gray-400 hover:text-white transition-colors">VIEW PROFILE ➔</span>
+                    </div>
+                  </div>
+
+                  {/* Zone B: Brand identity info */}
+                  <div className="text-left md:border-l md:border-white/10 md:pl-6">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-xl font-bold text-white tracking-tight">Sailor</h3>
+                      <span className="bg-[#22C55E]/15 text-[#22C55E] text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-[#22C55E]/20">
+                        VERIFIED STORE
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-400 capitalize">Category: Fashion & Lifestyle</p>
+                    <div className="flex items-center gap-2 mt-2 text-xs font-bold text-gray-300">
+                      <span className="text-amber-400">4.8 ★★★★★</span>
+                      <span className="text-white/40">•</span>
+                      <span>450+ Products</span>
+                      <span className="text-white/40">•</span>
+                      <span>12K Followers</span>
+                    </div>
+                  </div>
+
+                  {/* Zone C: Metrics block */}
+                  <div className="flex flex-wrap md:flex-col lg:flex-row gap-2 justify-start md:justify-end md:border-l md:border-white/10 md:pl-6 w-full">
+                    <span className="px-3 py-1.5 text-xs text-white/95 rounded-[5px] font-bold transition-all hover:bg-white/10 text-center" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                      🛡️ 100% Authentic
+                    </span>
+                    <span className="px-3 py-1.5 text-xs text-white/95 rounded-[5px] font-bold transition-all hover:bg-white/10 text-center" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                      ✨ Official Store Deal
+                    </span>
+                    <span className="px-3 py-1.5 text-xs text-white/95 rounded-[5px] font-bold transition-all hover:bg-white/10 text-center" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                      ⚡ Express Delivery
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3. PRODUCT GRID */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                  {sailorProductList.map((product: any, idx: number) => {
+                    const pKey = `p${idx + 1}`;
+                    const pReact = spotlightProductStates[pKey] || { likes: 12000, views: 1200, shares: 450, liked: false };
+                    
+                    return (
+                      <div 
+                        key={product.id}
+                        className="bg-white rounded-xl p-3 border border-white/10 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group cursor-pointer text-left relative overflow-hidden"
+                        onClick={() => navigate(`/products/${product.id}`)}
+                      >
+                        {/* Sponsored Badge overlay */}
+                        <div className="absolute top-2 left-2 z-10 bg-black/70 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full">
+                          SPONSORED
+                        </div>
+                        
+                        {/* Image block (clean aspect-square) */}
+                        <div className="w-full aspect-square rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center relative mb-3">
+                          <img 
+                            src={product.image || 'https://images.unsplash.com/photo-1445205170230-053b830c6050?w=400&fit=crop'} 
+                            referrerPolicy="no-referrer"
+                            alt={product.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+
+                        {/* Brand line & Rating */}
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[9px] font-black tracking-wider uppercase text-gray-400">
+                            {product.brand || 'SAILOR OFFICIAL'}
+                          </span>
+                          <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-bold">
+                            <span>{product.rating || 4.8}</span>
+                            <span>★</span>
+                          </div>
+                        </div>
+
+                        {/* Product title */}
+                        <h4 className="text-xs font-bold text-[#1a1a2e] mb-2 truncate group-hover:text-[#F97316] transition-colors">
+                          {product.title || product.name}
+                        </h4>
+
+                        {/* Price & CTA Button */}
+                        <div className="flex items-center justify-between pb-2 border-b border-gray-100 min-h-[32px]">
+                          <div className="text-left">
+                            <span className="text-[10px] text-gray-400 block -mb-0.5">EXCLUSIVE DEAL</span>
+                            <span className="text-sm font-black text-[#1a1a2e]">
+                              ৳ {product.price || '1,850'}
+                            </span>
+                          </div>
+                          <button 
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/products/${product.id}`);
+                            }}
+                            className="px-2.5 py-1 text-[10px] font-black uppercase text-white rounded-[5px] transition-all bg-[#F97316] hover:bg-[#E8500A] active:scale-95 shadow-sm"
+                          >
+                            GET DEAL
+                          </button>
+                        </div>
+
+                        {/* Interactive Engagement Stats */}
+                        <div className="flex items-center justify-between pt-2 text-[10px] text-gray-500" onClick={(e) => e.stopPropagation()}>
+                          <button 
+                            type="button"
+                            onClick={() => handleSpotlightProductReact(pKey, 'likes')}
+                            className={`flex items-center gap-1 hover:text-red-500 transition-colors ${pReact.liked ? 'text-red-500 font-extrabold' : 'font-medium'}`}
+                          >
+                            <span>❤️</span>
+                            <span>{pReact.likes.toLocaleString()}</span>
+                          </button>
+                          
+                          <button 
+                            type="button"
+                            onClick={() => handleSpotlightProductReact(pKey, 'views')}
+                            className="flex items-center gap-1 hover:text-blue-500 transition-colors font-medium text-gray-400"
+                          >
+                            <span>👁️</span>
+                            <span>{pReact.views.toLocaleString()}</span>
+                          </button>
+
+                          <button 
+                            type="button"
+                            onClick={() => handleSpotlightProductReact(pKey, 'shares')}
+                            className="flex items-center gap-1 hover:text-[#F97316] transition-colors font-medium text-gray-400"
+                          >
+                            <span>🔗</span>
+                            <span>{pReact.shares.toLocaleString()}</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* 4. FOOTER */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-5 border-t border-white/10">
+                  <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-gray-400">
+                    <span className="text-[10px] tracking-widest text-[#F97316] uppercase shrink-0">Brand Campaign Stats:</span>
+                    <button 
+                      type="button"
+                      onClick={() => handleSpotlightAction('likes')}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded bg-white/5 border border-white/10 hover:bg-white/10 transition-colors ${spotlightStates.liked ? 'text-red-400 border-red-500/30' : 'text-gray-300'}`}
+                    >
+                      <span>❤️ Loved:</span>
+                      <span>{spotlightStates.likes.toLocaleString()}</span>
+                    </button>
+                    
+                    <button 
+                      type="button"
+                      onClick={() => handleSpotlightAction('views')}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 transition-colors"
+                    >
+                      <span>👁️ Views:</span>
+                      <span>{spotlightStates.views.toLocaleString()}</span>
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={() => handleSpotlightAction('shares')}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 transition-colors"
+                    >
+                      <span>🔗 Copy Link:</span>
+                      <span>{spotlightStates.shares.toLocaleString()}</span>
+                    </button>
+                  </div>
+
+                  <div>
+                    <Link 
+                      to="/brands/3" 
+                      className="inline-flex items-center gap-1.5 text-xs font-black tracking-widest text-[#F97316] hover:text-[#F97316]/85 hover:underline uppercase transition-all duration-300"
+                    >
+                      Browse All From Sailor Store ➔
+                    </Link>
+                  </div>
                 </div>
               </div>
 
@@ -1040,7 +1260,7 @@ export function HomePage() {
                 </div>
 
                 {/* Hot Deals Grid of featured Products */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left">
                   {featuredDeals.map((product) => (
                     <ProductCard key={product.id} product={product} variant="grid" />
                   ))}
@@ -1561,7 +1781,7 @@ export function HomePage() {
                 </div>
 
                 {/* Customer Favorites Grid of featured Products with isGuideDetail={true} */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left">
                   {viralProductsList.slice(0, 8).map((product) => (
                     <ProductCard key={product.id} product={product} variant="grid" isGuideDetail={true} />
                   ))}
