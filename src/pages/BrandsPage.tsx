@@ -337,9 +337,9 @@ export function BrandsPage() {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-6 w-full pt-8 pb-16 flex flex-col lg:flex-row gap-6 lg:gap-8 xl:gap-10 2xl:gap-12 relative">
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
         {/* Sidebar Filters */}
-        <aside className="w-full lg:w-64 flex-shrink-0 hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           {/* Filter By Brand */}
           <div className="bg-white rounded-2xl p-4.5 shadow-sm border border-[#e8edf2] text-left">
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
@@ -415,7 +415,7 @@ export function BrandsPage() {
         </aside>
 
         {/* Main Content Area */}
-        <main id="brands-main-display" className="scroll-mt-36 flex-1 space-y-12 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+        <main id="brands-main-display" className="scroll-mt-36 min-w-0 pb-10 space-y-12">
           {/* Choosify Recommends Section */}
           <div className="mb-12">
             <div className="flex items-center gap-4 mb-8 overflow-hidden">
@@ -627,7 +627,7 @@ export function BrandsPage() {
         </main>
 
         {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}
-        <aside className="hidden xl:flex flex-col gap-4 w-[280px] flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           {/* FEATURED BRAND DEALS SECTION */}
           <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full text-left animate-fade-in">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">

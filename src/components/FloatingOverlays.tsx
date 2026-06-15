@@ -12,7 +12,7 @@ import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 export function FloatingOverlays() {
   const navigate = useNavigate();
   const { mode, retailCart, wholesaleCart, removeFromCart, updateCartQuantity } = useGlobalState();
-  const { threads, threadMessages, addThreadMessage } = useDashboard();
+  const { threads, threadMessages, addThreadMessage, markAllAsRead, setThreads } = useDashboard();
 
   // Active floating panel state: null | 'cart' | 'inbox'
   const [activePanel, setActivePanel] = useState<'cart' | 'inbox' | null>(null);
@@ -291,12 +291,31 @@ export function FloatingOverlays() {
                       <h3 className="text-sm font-black uppercase italic tracking-wider">Merchant Chats</h3>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => setActivePanel(null)}
-                    className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all"
-                  >
-                    <X size={16} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {(() => {
+                      const hasUnread = threads.some(t => t.unread);
+                      return (
+                        <button
+                          onClick={markAllAsRead}
+                          disabled={!hasUnread}
+                          className={`text-[9px] font-black uppercase tracking-widest transition-all px-2.5 py-1 rounded-lg border
+                            ${hasUnread
+                              ? 'text-orange-primary hover:text-white bg-orange-primary/10 hover:bg-orange-primary/25 border-orange-primary/20 cursor-pointer'
+                              : 'text-gray-600 bg-white/[0.01] border-white/5 cursor-not-allowed'
+                            }`}
+                          title={hasUnread ? "Mark All as Read" : "All messages are already read"}
+                        >
+                          {hasUnread ? "Mark All Read" : "All Read"}
+                        </button>
+                      );
+                    })()}
+                    <button 
+                      onClick={() => setActivePanel(null)}
+                      className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Threads list */}
@@ -308,7 +327,12 @@ export function FloatingOverlays() {
                     threads.map((t) => (
                       <button
                         key={t.id}
-                        onClick={() => setActiveThreadId(t.id)}
+                        onClick={() => {
+                          setActiveThreadId(t.id);
+                          if (t.unread) {
+                            setThreads(prev => prev.map(thread => thread.id === t.id ? { ...thread, unread: false } : thread));
+                          }
+                        }}
                         className="w-full text-left p-3.5 rounded-2xl border border-white/5 hover:border-white/10 bg-white/[0.01] hover:bg-white/[0.03] flex gap-3.5 items-center transition-all relative group"
                       >
                         <div className="relative shrink-0">

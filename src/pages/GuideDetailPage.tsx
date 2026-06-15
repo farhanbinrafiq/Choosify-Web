@@ -53,6 +53,7 @@ import { ProductCard } from "../components/ProductCard";
 import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
 import toast from "react-hot-toast";
+import { FollowButton } from "../components/FollowButton";
 
 const evaluations = evaluationsData as EvaluationData[];
 
@@ -359,23 +360,49 @@ export function GuideDetailPage() {
       </div>
 
       {/* Guide Information Panel - Placed completely below the theater media area */}
-      <div className="w-full bg-[#0B0C1E] py-12 px-6 border-b border-white/10 relative">
-        <div className="max-w-[1080px] mx-auto text-left">
+      <div className="w-full bg-[#0B0C1E] py-14 px-6 border-b border-white/15 relative overflow-hidden">
+        {/* Layer 1 Base & Multi-layered Ambient Light Glows */}
+        {/* Top-Right Ambient Orange Glow */}
+        <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-br from-[#F97316]/30 to-transparent rounded-full blur-[140px] -translate-y-1/3 translate-x-1/4 pointer-events-none mix-blend-plus-lighter opacity-90" />
+        
+        {/* Mid-Center Warm Atmospheric Lighting Orb */}
+        <div className="absolute top-1/2 left-2/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.22),transparent_70%)] pointer-events-none mix-blend-color-dodge" />
+        
+        {/* Bottom-Left Soft Glow */}
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#F97316]/18 to-transparent rounded-full blur-[120px] translate-y-1/4 -translate-x-1/4 pointer-events-none mix-blend-screen opacity-80" />
+
+        {/* Deep Premium Royal/Navy backplate layer */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_10%,_rgba(6,7,20,0.85)_60%,_#02020a_100%)] pointer-events-none" />
+
+        {/* Layer 2: Glass Panel Reflection Design & Specs */}
+        {/* Elegant Translucent Angled Specular Sheen (mimics high-end glass physics) */}
+        <div className="absolute inset-0 transform -skew-y-12 bg-gradient-to-r from-transparent via-white/[0.035] to-transparent pointer-events-none" />
+        
+        {/* Solid Glass Highlight Trim Base */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.06] to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.08),transparent_50%)] pointer-events-none" />
+        {/* Subtle Fluid Double-Border Sheen Bottom Light for Glass Depth */}
+        <span className="absolute bottom-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent pointer-events-none" />
+        
+        {/* Premium Warm Glass Edge Border (Top border light) */}
+        <span className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#F97316]/60 to-transparent pointer-events-none shadow-[0_1px_5px_rgba(249,115,22,0.3)]" />
+
+        <div className="max-w-[1080px] mx-auto text-left relative z-10">
           {/* Guide Title */}
-          <h1 className="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-tight mb-4 font-sans">
+          <h1 className="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-tight mb-4 font-sans drop-shadow-xl">
             {guide.title}
           </h1>
 
           {/* Guide Description */}
-          <p className="text-white/70 text-sm md:text-base font-medium italic uppercase tracking-wider leading-relaxed mb-8 max-w-4xl font-sans">
+          <p className="text-white/85 text-sm md:text-base font-medium italic uppercase tracking-wider leading-relaxed mb-8 max-w-4xl font-sans text-shadow">
             {guide.excerpt ||
               "An in-depth expert curation guiding your next big decision, backed by extensive testing and research."}
           </p>
 
-          {/* Guide Statistics */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 bg-[#1D1D2B]/50 backdrop-blur-md rounded-2xl p-6 border border-white/10 mb-8">
+          {/* Guide Statistics — Framed in fully frosted glass */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 bg-white/[0.035] backdrop-blur-xl rounded-[5px] p-6 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] mb-8">
             <div className="flex flex-col text-left">
-              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-1">
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
                 Published Date
               </span>
               <span className="text-sm font-black text-white uppercase italic tracking-tighter">
@@ -383,7 +410,7 @@ export function GuideDetailPage() {
               </span>
             </div>
             <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-1">
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
                 Read Time
               </span>
               <span className="text-sm font-black text-white uppercase italic tracking-tighter">
@@ -391,15 +418,15 @@ export function GuideDetailPage() {
               </span>
             </div>
             <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-1">
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
                 Audience
               </span>
-              <span className="text-sm font-black text-[#E8500A] uppercase italic tracking-tighter">
+              <span className="text-sm font-black text-[#F97316] uppercase italic tracking-tighter">
                 ENTHUSIASTS
               </span>
             </div>
             <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-1">
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
                 Last Updated
               </span>
               <span className="text-sm font-black text-white uppercase italic tracking-tighter">
@@ -414,9 +441,9 @@ export function GuideDetailPage() {
               onClick={() => {
                 toast.success("Guide saved to your dashboard!");
               }}
-              className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic cursor-pointer"
+              className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/15 border border-white/15 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic cursor-pointer shadow-lg backdrop-blur-md"
             >
-              <Bookmark size={14} className="text-[#E8500A]" />
+              <Bookmark size={14} className="text-[#F97316]" />
               Save Guide
             </button>
             <button
@@ -424,16 +451,16 @@ export function GuideDetailPage() {
                 navigator.clipboard.writeText(window.location.href);
                 toast.success("Share link copied to clipboard!");
               }}
-              className="flex items-center gap-2 px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic border-none cursor-pointer"
+              className="flex items-center gap-2 px-6 py-3 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic border-none cursor-pointer shadow-lg hover:scale-102 active:scale-98"
             >
               <Share2 size={14} />
               Share Guide
             </button>
           </div>
 
-          {/* Reviewer Information */}
-          <div className="flex items-center gap-5 bg-[#1D1D2B]/30 backdrop-blur-md rounded-2xl p-6 border border-white/10 max-w-2xl">
-            <div className="w-14 h-14 rounded-full border-2 border-[#E8500A] p-0.5 shadow-[0_0_20px_rgba(232,80,10,0.2)] shrink-0">
+          {/* Reviewer Information — Framed in elegant frosted glass */}
+          <div className="flex items-center gap-5 bg-white/[0.025] backdrop-blur-xl rounded-[5px] p-6 border border-white/10 max-w-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+            <div className="w-14 h-14 rounded-full border-2 border-[#F97316] p-0.5 shadow-[0_0_20px_rgba(249,115,22,0.3)] shrink-0">
               <img
                 src={`https://i.pravatar.cc/150?u=${guide.author}`}
                 className="w-full h-full rounded-full object-cover"
@@ -599,7 +626,7 @@ export function GuideDetailPage() {
         <div className="max-w-[1440px] mx-auto px-4 py-5 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
             {/* LEFT SIDEBAR */}
-            <aside className="hidden lg:flex flex-col gap-6 sticky top-[160px] h-[calc(100vh-180px)] overflow-y-auto no-scrollbar pb-10 flex-shrink-0">
+            <aside className="hidden lg:flex flex-col gap-6 lg:sticky lg:top-[160px] pb-10 flex-shrink-0">
               {/* SECTION 1: WHAT IS DISCUSSED */}
               <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left">
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
@@ -1043,7 +1070,7 @@ export function GuideDetailPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Best for */}
-                  <div className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm">
+                  <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
                     <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
                       <Check size={12} className="text-emerald-500" /> BEST FOR
                     </span>
@@ -1065,7 +1092,7 @@ export function GuideDetailPage() {
                   </div>
 
                   {/* Not For */}
-                  <div className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm">
+                  <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
                     <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
                       <X size={12} className="text-red-500" /> NOT FOR
                     </span>
@@ -1087,7 +1114,7 @@ export function GuideDetailPage() {
                   </div>
 
                   {/* What we like */}
-                  <div className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm">
+                  <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
                     <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
                       <Star size={12} className="text-blue-500" /> WHAT WE LIKE
                     </span>
@@ -1109,7 +1136,7 @@ export function GuideDetailPage() {
                   </div>
 
                   {/* What to consider */}
-                  <div className="bg-white rounded-2xl border border-gray-100 p-5 text-left shadow-sm">
+                  <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
                     <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
                       <Info size={12} className="text-[#E8500A]" /> WHAT TO
                       CONSIDER
@@ -1134,7 +1161,7 @@ export function GuideDetailPage() {
               </div>
 
               {/* GENERAL SCORING DETAILS BLOCK */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm text-left">
+              <div className="bg-white border border-gray-100 rounded-[5px] p-6 shadow-sm text-left">
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 last:border-0 text-left">
                   <h3 className="text-xl font-black text-navy uppercase italic tracking-tighter leading-none">
                     Detail Evaluation
@@ -1204,7 +1231,7 @@ export function GuideDetailPage() {
                     Final direct expert conclusion
                   </p>
                 </div>
-                <div className="hero-gradient text-white rounded-2xl p-6 text-left shadow-sm border border-white/5 relative overflow-hidden">
+                <div className="hero-gradient text-white rounded-[5px] p-6 text-left shadow-sm border border-white/5 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-full bg-[#E8500A]/10 blur-xl pointer-events-none" />
                   <p className="text-[13px] font-black uppercase tracking-wider italic text-[#FF5C38] mb-1 leading-none">
                     The Verdict
@@ -1282,11 +1309,11 @@ export function GuideDetailPage() {
             </main>
 
             {/* RIGHT SIDEBAR */}
-            <aside className="hidden lg:flex flex-col gap-6 sticky top-[160px] max-h-[calc(100vh-180px)] overflow-y-auto no-scrollbar pb-10 flex-shrink-0">
+            <aside className="hidden lg:flex flex-col gap-6 lg:sticky lg:top-[160px] pb-10 flex-shrink-0">
               {/* SECTION 1: REVIEWER PROFILE */}
               <div
                 id="reviewer-profile"
-                className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm flex flex-col items-center text-center scroll-mt-36"
+                className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm flex flex-col items-center text-center scroll-mt-36"
               >
                 <div className="w-20 h-20 rounded-full border-2 border-orange-primary/20 p-0.5 mb-4 shrink-0">
                   <img
@@ -1340,13 +1367,16 @@ export function GuideDetailPage() {
                   )}
                 </div>
 
-                <button className="w-full py-3 bg-[#1A1D4E] text-white hover:bg-[#E8500A] text-[10px] font-black uppercase tracking-widest italic rounded-xl active:scale-95 transition-all cursor-pointer shadow-sm border-0 font-bold">
-                  Follow {creator.name.split(" ")[0]}
-                </button>
+                <FollowButton
+                  id={`creator-${creator.name}`}
+                  name={creator.name}
+                  type="creator"
+                  className="w-full py-3 rounded-xl border border-[#e8edf2] text-[10px]"
+                />
               </div>
 
               {/* SECTION 2: REVIEW CREDIBILITY */}
-              <div className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm text-left">
+              <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
                 <h5 className="text-[10px] font-black text-navy uppercase tracking-widest mb-3 italic font-space">
                   REVIEW CREDIBILITY
                 </h5>
@@ -1383,7 +1413,7 @@ export function GuideDetailPage() {
               </div>
 
               {/* SECTION 3: QUICK TIP */}
-              <div className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm text-left">
+              <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2 font-space">
                   QUICK TIP
                 </span>
@@ -1394,7 +1424,7 @@ export function GuideDetailPage() {
               </div>
 
               {/* SECTION 4: RELATED GUIDES */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm text-left">
+              <div className="bg-white border border-gray-100 rounded-[5px] p-4 shadow-sm text-left">
                 <h5 className="text-[10px] font-black text-navy uppercase tracking-widest mb-3 italic font-space">
                   RELATED GUIDES
                 </h5>
@@ -1431,7 +1461,7 @@ export function GuideDetailPage() {
               {(guide.id === 1 ||
                 (guide as any).isSponsored ||
                 (dynamicData as any).isSponsoredContent) && (
-                <div className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden">
+                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden">
                   <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4 font-mono">
                     SPONSORED
                   </span>
@@ -1514,7 +1544,7 @@ export function GuideDetailPage() {
                 <Link
                   key={i}
                   to={`/guides/${g.id}`}
-                  className="group cursor-pointer block bg-[#FDFDFD] rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-500 shadow-xl shadow-gray-100/50"
+                  className="group cursor-pointer block bg-[#FDFDFD] rounded-[5px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-500 shadow-xl shadow-gray-100/50"
                 >
                   <div className="aspect-[16/10] overflow-hidden relative font-bold">
                     <img

@@ -8,6 +8,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { SignInModal } from './SignInModal';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { useDashboard } from '../context/DashboardContext';
 import { CartDrawer } from './CartDrawer';
 import { cn } from '../lib/utils';
 import toast from 'react-hot-toast';
@@ -23,6 +24,9 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn } = useGlobalState();
+  const { threads } = useDashboard();
+
+  const unreadMsgCount = threads.filter(t => t.unread).length;
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +53,7 @@ export function Navbar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/products?q=${encodeURIComponent(searchQuery)}`);
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -190,7 +194,11 @@ export function Navbar() {
               title="Secure Support Chats"
             >
               <MessageSquare size={19} className="text-orange-primary animate-pulse" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 text-black text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">2</span>
+              {unreadMsgCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 text-black text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">
+                  {unreadMsgCount}
+                </span>
+              )}
             </button>
           </div>
 

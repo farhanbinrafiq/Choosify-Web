@@ -5,14 +5,14 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { 
   Search, ArrowLeft, Send, Bell, MoreVertical, ShieldAlert, CheckCircle, 
-  Package, Truck, Clock, MessageSquare, ExternalLink, Settings, LayoutDashboard, Heart 
+  Package, Truck, Clock, MessageSquare, ExternalLink, Settings, LayoutDashboard, Heart, CheckSquare
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function MessagesPage() {
   const { threadId } = useParams<{ threadId?: string }>();
   const navigate = useNavigate();
-  const { threads, threadMessages, addThreadMessage, createNewThread } = useDashboard();
+  const { threads, threadMessages, addThreadMessage, createNewThread, markAllAsRead, setThreads } = useDashboard();
   const { orders } = useGlobalState();
   const [inputText, setInputText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,6 +20,16 @@ export function MessagesPage() {
   // Active thread selection
   const activeThreadId = threadId || (threads.length > 0 ? threads[0].id : null);
   const activeThread = threads.find(t => t.id === activeThreadId);
+
+  // Auto-mark active thread as read
+  useEffect(() => {
+    if (activeThreadId) {
+      const active = threads.find(t => t.id === activeThreadId);
+      if (active && active.unread) {
+        setThreads(prev => prev.map(t => t.id === activeThreadId ? { ...t, unread: false } : t));
+      }
+    }
+  }, [activeThreadId, threads, setThreads]);
 
   // Filter threads by search query
   const filteredThreads = threads.filter(t => 
@@ -111,6 +121,29 @@ export function MessagesPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {(() => {
+            const hasUnread = threads.some(t => t.unread);
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  if (hasUnread) {
+                    markAllAsRead();
+                    toast.success('All Support Chats marked as read!');
+                  }
+                }}
+                disabled={!hasUnread}
+                className={`px-4 py-2 border rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all italic flex items-center gap-1.5
+                  ${hasUnread 
+                    ? 'bg-white/5 hover:bg-white/10 border-white/10 text-white cursor-pointer' 
+                    : 'bg-white/[0.02] border-white/5 text-gray-500 cursor-not-allowed'}`}
+                title={hasUnread ? "Mark All as Read" : "All messages are already read"}
+              >
+                <CheckSquare size={12} className={hasUnread ? 'text-[#F96550]' : 'text-gray-600'} />
+                Mark All as Read
+              </button>
+            );
+          })()}
           <Link 
             to="/dashboard"
             state={{ activeTab: 'overview' }}

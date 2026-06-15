@@ -15,7 +15,7 @@ export function PostOfferPage() {
             </div>
          </div>
 
-         <div className="bg-white rounded-[10px] p-12 shadow-2xl space-y-16">
+         <div className="bg-white rounded-[5px] p-12 shadow-2xl space-y-16">
             <section className="space-y-8">
                <h3 className="text-xl font-black text-navy uppercase tracking-tighter italic border-b-2 border-orange-primary/10 pb-4">Section 1 — Basic Information</h3>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

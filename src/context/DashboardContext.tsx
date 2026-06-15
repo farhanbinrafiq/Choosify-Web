@@ -78,6 +78,7 @@ interface DashboardContextType {
   addMessage: (text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator') => void;
   addThreadMessage: (threadId: string, text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', senderName?: string) => void;
   createNewThread: (id: string, title: string, avatar: string, type: 'retail' | 'wholesale' | 'general', lastMessage: string, orderRef?: string) => void;
+  markAllAsRead: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -387,6 +388,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const markAllAsRead = () => {
+    setThreads(prev => prev.map(t => ({ ...t, unread: false })));
+  };
+
   return (
     <DashboardContext.Provider value={{
       savedProducts, setSavedProducts,
@@ -414,7 +419,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       removeFromCompare,
       addMessage,
       addThreadMessage,
-      createNewThread
+      createNewThread,
+      markAllAsRead
     }}>
       {children}
     </DashboardContext.Provider>

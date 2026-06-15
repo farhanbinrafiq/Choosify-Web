@@ -73,7 +73,7 @@ export function CustomerOrdersPage() {
       {/* Orders container */}
       <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-10 flex-1">
         {orders.length === 0 ? (
-          <div className="bg-white/5 border border-white/10 rounded-[32px] p-16 text-center max-w-xl mx-auto space-y-6">
+          <div className="bg-white/5 border border-white/10 rounded-[5px] p-16 text-center max-w-xl mx-auto space-y-6">
             <div className="w-20 h-20 bg-white/5 rounded-full border border-white/10 flex items-center justify-center text-white/20 mx-auto scale-110">
               <Package size={32} />
             </div>
@@ -103,7 +103,7 @@ export function CustomerOrdersPage() {
                 const totalItemCount = order.subOrders.reduce((acc, sub) => acc + sub.items.reduce((sum, item) => sum + item.quantity, 0), 0);
 
                 return (
-                  <div key={order.orderId} className="bg-[#050514]/65 border border-white/10 rounded-[32px] p-6 md:p-8 space-y-6 relative overflow-hidden group">
+                  <div key={order.orderId} className="bg-[#050514]/65 border border-white/10 rounded-[5px] p-6 md:p-8 space-y-6 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.01] rounded-full blur-2xl" />
                     
                     {/* Upper order header */}
@@ -137,7 +137,7 @@ export function CustomerOrdersPage() {
                       {order.subOrders.map((sub: any, sIdx: number) => {
                         const subTotal = sub.items.reduce((sum: number, it: any) => sum + ((it.price ?? 0) * (it.quantity ?? 0)), 0);
                         return (
-                          <div key={sIdx} className="bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-2xl p-5 md:p-6 transition-colors flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                          <div key={sIdx} className="bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-[5px] p-5 md:p-6 transition-colors flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             
                             {/* Product and Seller detail */}
                             <div className="flex-1 space-y-4">

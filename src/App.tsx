@@ -26,6 +26,7 @@ const GuideProductsPage = lazy(() => import('./pages/GuideProductsPage').then(m 
 const LoginSignUpPage = lazy(() => import('./pages/LoginSignUpPage').then(m => ({ default: m.LoginSignUpPage })));
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
 const CustomerFavoritePage = lazy(() => import('./pages/CustomerFavoritePage').then(m => ({ default: m.CustomerFavoritePage })));
+const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const BrandDealsPage = lazy(() => import('./pages/BrandDealsPage').then(m => ({ default: m.BrandDealsPage })));
@@ -184,6 +185,7 @@ function AppContent() {
             <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
             <Route path="/post-offer" element={<PageWrapper><PostOfferPage /></PageWrapper>} />
             <Route path="/customer-favorite" element={<PageWrapper><CustomerFavoritePage /></PageWrapper>} />
+            <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
             <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
             <Route path="/checkout" element={<PageWrapper><CheckoutPage /></PageWrapper>} />

@@ -10,6 +10,7 @@ import { ReportModal } from '../components/ReportModal';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
 import { BrandOverviewSection } from '../components/BrandOverviewSection';
+import { FollowButton } from '../components/FollowButton';
 
 interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
@@ -468,6 +469,7 @@ export function BrandDetailPage() {
 
                     {/* Action buttons */}
                     <div className="flex flex-wrap gap-3.5 justify-center lg:justify-start text-white w-full">
+                       {/*
                        <button 
                          onClick={() => setIsLoved(!isLoved)}
                          className={cn(
@@ -495,6 +497,27 @@ export function BrandDetailPage() {
                        >
                           {isFollowed ? "Following" : "Follow the Brand"}
                        </button>
+
+                       <button 
+                       */}
+                       <button 
+                         onClick={() => setIsLoved(!isLoved)}
+                         className={cn(
+                           "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
+                           isLoved 
+                             ? "bg-white text-[#E8500A] border-white shadow-white/5" 
+                             : "bg-[#E8500A] text-white border-[#E8500A]/30 hover:bg-[#ff5d14]"
+                         )}
+                       >
+                          <Heart size={14} className={cn("transition-colors", isLoved && "fill-current text-[#E8500A]")} />
+                          {isLoved ? "Loved" : "Love Brand"}
+                       </button>
+
+                       <FollowButton 
+                         id={String(brand.id)}
+                         name={brand.name}
+                         type="brand"
+                         className="px-6 md:px-8 py-3.5 md:py-4.5 rounded-full"                       />
 
                        <button 
                          onClick={() => scrollToSection('public-reviews-section')}
@@ -740,12 +763,12 @@ export function BrandDetailPage() {
          <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
             
             {/* COLUMN 1: SIDEBAR FILTERS (from Brand Wise Products page) */}
-            <aside className="w-full lg:sticky lg:top-36 lg:max-h-[calc(100vh-160px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+            <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
                <div className="flex flex-col gap-6">
                   
                   {/* Active Selection Chips */}
                   {activeChips.length > 0 && (
-                     <div className="bg-white rounded-2xl p-4.5 shadow-sm border border-[#e8edf2] text-left">
+                     <div className="bg-white rounded-[5px] p-4.5 shadow-sm border border-[#e8edf2] text-left">
                         <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-4 flex items-center justify-between">
                            Selection
                            <button onClick={clearAllFilters} className="text-[#E8500A] cursor-pointer hover:underline text-[9px] font-black uppercase">Clear</button>
@@ -796,7 +819,7 @@ export function BrandDetailPage() {
                   </div>
 
                   {/* Filter By Category list */}
-                  <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm relative overflow-hidden text-left">
+                  <div className="bg-white rounded-[5px] p-6 border border-gray-100 shadow-sm relative overflow-hidden text-left">
                      <div className="absolute top-0 right-0 w-2.5 h-full bg-[#E8500A]/5" />
                      <div className="flex items-center justify-between mb-4">
                         <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">By Category</h3>
@@ -826,7 +849,7 @@ export function BrandDetailPage() {
                   </div>
 
                   {/* Filter By Popular Product Type tags */}
-                  <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm text-left">
+                  <div className="bg-white rounded-[5px] p-6 border border-gray-100 shadow-sm text-left">
                      <div className="flex items-center justify-between mb-4">
                         <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Product Type</h3>
                         <button onClick={() => setSelectedProductTypes([])} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Reset</button>
@@ -853,7 +876,7 @@ export function BrandDetailPage() {
                   </div>
 
                   {/* Price limit selection */}
-                  <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm text-left">
+                  <div className="bg-white rounded-[5px] p-6 border border-gray-100 shadow-sm text-left">
                      <div className="flex items-center justify-between mb-4">
                         <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Price Limit</h3>
                         <button onClick={() => setSelectedPriceLimit(100000)} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Clear</button>
@@ -881,7 +904,7 @@ export function BrandDetailPage() {
             </aside>
 
             {/* COLUMN 2: EXCLUSIVE DEALS & PRODUCTS CATALOG (Center scroll) */}
-            <main className="flex-1 min-w-0 flex flex-col gap-12">
+            <main className="scroll-mt-36 min-w-0 pb-10 flex flex-col gap-12">
                
                {/* A. DEALS SECTION */}
                {(activeFilter === 'Full Experience' || activeFilter === 'Exclusive Deals Only') && (
@@ -951,11 +974,11 @@ export function BrandDetailPage() {
             </main>
 
             {/* COLUMN 3: PROMO CODES & ADS (Right column) */}
-            <aside className="w-full lg:sticky lg:top-36 lg:max-h-[calc(100vh-160px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+            <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
                <div className="flex flex-col gap-6">
 
                   {/* Promo Coupons Cards list */}
-                  <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
                      <div className="flex justify-between items-center pb-3 mb-4 border-b border-[#e8edf2] px-0.5 text-left">
                         <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5">
                            <span className="w-1.5 h-3 bg-[#E8500A] rounded-full inline-block" />
@@ -970,7 +993,7 @@ export function BrandDetailPage() {
                            { title: "Eid Celebration Offer", discount: "BDT 1,000 FLAT", code: "EID26", expiry: "Minimum purchase BDT 4,000" },
                            { title: "Limited VIP Discount", discount: "20% FLAT OFF", code: `${brand.name.toUpperCase()}20`, expiry: "For New Registries" }
                         ].map((promo, idx) => (
-                           <div key={idx} className="bg-white border border-[#e8edf2] p-3.5 rounded-xl flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all">
+                           <div key={idx} className="bg-white border border-[#e8edf2] p-3.5 rounded-[5px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all">
                               <div className="w-7 h-7 rounded-lg bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
                                  <Gift size={14} />
                               </div>
@@ -995,7 +1018,7 @@ export function BrandDetailPage() {
                   </div>
 
                   {/* Sponsored Ad space block */}
-                  <div className="bg-white border border-[#e8edf2] rounded-2xl p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden">
+                  <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden">
                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
                      <div className="relative z-10 text-center">
                         <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4">
@@ -1030,7 +1053,7 @@ export function BrandDetailPage() {
          </div>
 
          {/* FULL WIDTH PUBLIC REVIEWS SECTION */}
-         <div id="public-reviews-section" className="scroll-mt-36 w-full bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
+         <div id="public-reviews-section" className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80">
             <div className="text-center mb-8 border-b border-gray-100 pb-5">
                <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
                   Public Reviews
@@ -1089,7 +1112,7 @@ export function BrandDetailPage() {
          <BrandOverviewSection brandName={brand.name} overviewData={overviewData} />
 
          {/* TRUST STATEMENT BACKGROUND BANNER */}
-         <div className="w-full hero-gradient rounded-[32px] p-8 md:p-12 text-center text-white relative overflow-hidden shadow-lg border border-white/5">
+         <div className="w-full hero-gradient rounded-[5px] p-8 md:p-12 text-center text-white relative overflow-hidden shadow-lg border border-white/5">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-primary/10 blur-[120px] rounded-full pointer-events-none" />
             <div className="relative z-10 space-y-4">
                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto text-[#4DBC15] border border-white/10">
@@ -1103,7 +1126,7 @@ export function BrandDetailPage() {
          </div>
 
          {/* Similar Brands Comparison Table */}
-         <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100/80">
+         <div className="bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80">
             <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-8 text-center italic">
                Similar Brands Comparison
             </h3>

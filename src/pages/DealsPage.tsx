@@ -233,10 +233,10 @@ export function DealsPage() {
 
 
         {/* Master Flex Column Structure below sticky bar */}
-        <div className="max-w-[1440px] mx-auto py-12 px-6 w-full flex flex-col lg:flex-row gap-8 lg:gap-12 xl:gap-16 2xl:gap-24 relative items-start">
+        <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
           
           {/* LEFT SIDEBAR: CATEGORIES CARD */}
-          <aside className="w-full lg:w-64 xl:w-72 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar shrink-0">
+          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
             <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4">
               <div className="flex flex-col gap-1">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2">
@@ -296,7 +296,7 @@ export function DealsPage() {
           </aside>
 
           {/* LEFT MAIN AREA */}
-          <div className="flex-1 min-w-0 w-full flex flex-col gap-16 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+          <div className="scroll-mt-36 min-w-0 pb-10 flex flex-col gap-16">
             
             {/* Featured Deals Showcase Grid */}
             <section className="w-full">
@@ -389,7 +389,7 @@ export function DealsPage() {
           </div>
 
           {/* RIGHT SIDEBAR COLUMN */}
-          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar flex-shrink-0 w-[280px]">
+          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
              {/* Redesigned For Business & Sellers Card */}
              <div 
                id="section-sellers-deals" 

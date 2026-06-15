@@ -615,9 +615,9 @@ export function GuidesPage() {
         </div>
       </div>
 
-      <main className="max-w-[1440px] mx-auto px-6 w-full py-20 flex flex-col lg:flex-row gap-10 lg:gap-12 xl:gap-16 2xl:gap-24 relative z-10">
+      <main className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
          {/* Left Sidebar Navigation */}
-         <aside className="w-full lg:w-64 xl:w-72 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar hidden lg:block shrink-0">
+         <aside className="hidden lg:flex flex-col gap-3 lg:sticky lg:top-24 pb-0 flex-shrink-0">
             <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm flex flex-col gap-3">
               <div className="flex items-center justify-between pb-3 mb-1 border-b border-[#e8edf2] px-1">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
@@ -672,7 +672,7 @@ export function GuidesPage() {
             </div>
          </aside>
 
-         <div id="guides-main-display" className="scroll-mt-36 flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+         <div id="guides-main-display" className="scroll-mt-36 min-w-0 pb-10">
             {isLoading ? (
                <div className="flex flex-col gap-12">
                   <div className="mb-16">
@@ -762,7 +762,7 @@ export function GuidesPage() {
          </div>
 
          {/* Right Sidebar Widgets */}
-         <aside className="w-full lg:w-[320px] space-y-4 shrink-0 relative z-10 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar hidden lg:block">
+         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in">
             {/* Newsletter Widget */}
             <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left">
                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">

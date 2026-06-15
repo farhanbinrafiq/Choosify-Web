@@ -317,7 +317,7 @@ export function HomePage() {
       return;
     }
     toast.success(`Scouting verified stores for: "${searchQuery}"`);
-    navigate(`/products?q=${encodeURIComponent(searchQuery)}`);
+    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
   // Newsletter subscription
@@ -645,7 +645,7 @@ export function HomePage() {
         
         {/* LEFT STICKY SIDEBAR */}
         <aside 
-          className="hidden lg:flex flex-col gap-3 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-0 flex-shrink-0"
+          className="hidden lg:flex flex-col gap-3 lg:sticky lg:top-24 pb-0 flex-shrink-0"
           style={{ paddingLeft: '0px', paddingRight: '0px', paddingBottom: '0px' }}
         >
           
@@ -1873,7 +1873,7 @@ export function HomePage() {
 
         {/* RIGHT SIDEBAR */}
         <aside 
-          className="hidden lg:flex flex-col gap-5 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto no-scrollbar mr-0 pl-[2px] pb-0 w-full max-w-[260px] xl:max-w-[310px] flex-shrink-0 animate-fade-in"
+          className="hidden lg:flex flex-col gap-5 lg:sticky lg:top-24 mr-0 pl-[2px] pb-0 w-full max-w-[260px] xl:max-w-[310px] flex-shrink-0 animate-fade-in"
           style={{ paddingLeft: '0px', paddingBottom: '0px' }}
         >
           
@@ -1945,9 +1945,9 @@ export function HomePage() {
                             navigate(`/products/${item.id}`);
                           }} 
                           className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded text-[8px] uppercase tracking-wide cursor-pointer transition-colors"
-                          aria-label="Shop now"
+                          aria-label="Add to cart"
                         >
-                          SHOP NOW
+                          Add to cart
                         </button>
                       </div>
                     </div>

@@ -293,9 +293,9 @@ export function CategoriesPage() {
       </div>
 
 
-      <div className="max-w-[1440px] mx-auto px-6 py-10 w-full flex flex-col lg:flex-row gap-6 lg:gap-8 xl:gap-10 2xl:gap-12 relative">
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
         {/* LEFT COLUMN: QUICK HIGHWAYS ASIDE COLUMN */}
-        <aside className="hidden lg:flex flex-col gap-4 w-[300px] flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0">
           {/* QUICK ACCESS CARD */}
           <div 
             className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full"
@@ -430,7 +430,7 @@ export function CategoriesPage() {
           </div>
         </aside>
 
-        <div id="categories-main-display" className="scroll-mt-36 flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+        <div id="categories-main-display" className="scroll-mt-36 min-w-0 pb-10">
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center justify-center w-full">
               {Array.from({ length: 12 }).map((_, idx) => (
@@ -573,7 +573,7 @@ export function CategoriesPage() {
         </div>
 
         {/* RIGHT COLUMN: FOR BUSINESS & SELLERS CARD & SPONSORED AD */}
-        <aside className="hidden lg:flex flex-col gap-4 w-[280px] flex-shrink-0 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           <div 
             id="section-sellers" 
             className="bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 

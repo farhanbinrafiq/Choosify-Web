@@ -131,7 +131,7 @@ export function CompareEngine() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                {selectedProducts.map((p, idx) => (
                   <div key={idx} className="relative">
-                     <div className="bg-[#0A0A26] border border-white/5 rounded-2xl p-6 text-left group hover:border-[#FF7A00]/30 transition-all shadow-2xl flex flex-col justify-between h-48">
+                     <div className="bg-[#0A0A26] border border-white/5 rounded-[5px] p-6 text-left group hover:border-[#FF7A00]/30 transition-all shadow-2xl flex flex-col justify-between h-48">
                         {p.isWinner && (
                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#FF7A00] text-white text-[8px] font-black px-4 py-1 rounded-full uppercase tracking-widest z-20 shadow-xl">
                               Winner
@@ -154,7 +154,7 @@ export function CompareEngine() {
                ))}
                
                {/* Empty Slot */}
-               <div className="bg-transparent border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center p-6 group cursor-pointer hover:border-white/20 transition-all h-48">
+               <div className="bg-transparent border-2 border-dashed border-white/10 rounded-[5px] flex flex-col items-center justify-center p-6 group cursor-pointer hover:border-white/20 transition-all h-48">
                   <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-white/10 group-hover:text-white transition-all mb-4">
                      <Plus size={24} />
                   </div>
@@ -309,7 +309,7 @@ export function CompareEngine() {
             <div className="bg-[#FAF9F5] p-10 border-t border-gray-100">
                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                   {selectedProducts.map((p, idx) => (
-                     <div key={idx} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-none relative pt-12">
+                     <div key={idx} className="bg-white rounded-[5px] p-8 border border-gray-100 shadow-none relative pt-12">
                         <div className="absolute top-0 right-8 -translate-y-1/2">
                            <div className="w-10 h-10 rounded-full bg-[#FAF9F5] border border-gray-100 flex items-center justify-center text-orange-primary shadow-none">
                               <MessageSquare size={16} />
@@ -344,7 +344,7 @@ export function CompareEngine() {
                       For performance and long-term value, <span className="text-white">Sailor Ultra Cotton Pro</span> offers premium quality at a competitive rating.
                    </p>
                 </div>
-                <div className="w-full md:w-auto bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col items-center">
+                <div className="w-full md:w-auto bg-white/5 border border-white/10 rounded-[5px] p-6 md:p-8 flex flex-col items-center">
                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic mb-2">Final Recommendation</span>
                    <span className="text-2xl md:text-3xl font-black text-[#FF7A00] italic leading-none mb-6">SAILOR PRO</span>
                    <button className="w-full md:w-auto bg-[#059669] text-white px-10 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest italic shadow-2xl shadow-[#059669]/30 hover:scale-105 active:scale-95 transition-all">

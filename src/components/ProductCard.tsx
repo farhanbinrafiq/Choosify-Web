@@ -367,7 +367,7 @@ export function ProductCard({
                  onClick={(e) => { e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); } else { const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); } }} 
                  className="px-4 py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white rounded text-[10px] font-semibold uppercase tracking-wider cursor-pointer transition-colors shrink-0"
                >
-                  {isGuideDetail ? 'SHOP NOW' : (mode === 'retail' ? 'Add To Basket' : `Bulk Add (${product.moq || 10})`)}
+                  {isGuideDetail ? 'Shop Now' : 'Add to cart'}
                </button>
             </div>
          </div>
@@ -448,12 +448,12 @@ export function ProductCard({
                  e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
                  const qty = mode === 'retail' ? 1 : (product.moq || 10); 
                  addToCart(product, qty); 
-                 toast.success(`Successfully added ${product.title} to your verification basket!`);
+                 toast.success(`Successfully added ${product.title} to your cart!`);
                }} 
                className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[8px] font-semibold rounded uppercase tracking-wide cursor-pointer transition-colors"
                aria-label="Add to cart"
              >
-               {isGuideDetail ? 'SHOP NOW' : 'ADD'}
+               {isGuideDetail ? 'Shop Now' : 'Add to cart'}
              </button>
           </div>
         </div>
@@ -530,11 +530,11 @@ export function ProductCard({
                 e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
                 const qty = mode === 'retail' ? 1 : (product.moq || 10);
                 addToCart(product, qty);
-                toast.success(`Successfully added ${product.title} to your verification basket!`);
+                toast.success(`Successfully added ${product.title} to your cart!`);
               }}
               className="px-3 py-1.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[9px] font-semibold rounded uppercase tracking-wider transition-colors"
             >
-              {isGuideDetail ? 'SHOP NOW' : (mode === 'retail' ? 'add to basket' : `BULK ADD (${product.moq || 10})`)}
+              {isGuideDetail ? 'Shop Now' : 'Add to cart'}
             </button>
           </div>
         </div>
@@ -660,11 +660,11 @@ export function ProductCard({
               e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
               const qty = mode === 'retail' ? 1 : (product.moq || 10);
               addToCart(product, qty);
-              toast.success(`Successfully added ${product.title} to your verification basket!`);
+              toast.success(`Successfully added ${product.title} to your cart!`);
             }}
             className="px-2 py-0.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[7.5px] font-semibold rounded uppercase tracking-wider transition-colors shrink-0 leading-none h-6 flex items-center"
           >
-             {isGuideDetail ? 'SHOP NOW' : 'ADD'}
+             {isGuideDetail ? 'Shop Now' : 'Add to cart'}
           </button>
         </div>
       </div>

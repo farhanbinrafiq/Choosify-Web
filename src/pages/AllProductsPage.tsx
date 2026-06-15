@@ -299,10 +299,10 @@ export function AllProductsPage() {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-6 w-full flex flex-col lg:flex-row gap-5 lg:gap-6 xl:gap-8 py-8 relative">
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
         
         {/* Sidebar Filters */}
-        <aside className="w-full lg:w-56 xl:w-60 flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           <div className="space-y-4">
             
             {/* Quick Search Widget */}
@@ -453,7 +453,7 @@ export function AllProductsPage() {
         </aside>
 
         {/* Main Content Area */}
-        <main id="all-products-display" className="scroll-mt-36 flex-1 min-w-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2">
+        <main id="all-products-display" className="scroll-mt-36 min-w-0 pb-10">
           {/* Top Bar / Sorting */}
           <div className="flex flex-col gap-6 mb-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -569,7 +569,7 @@ export function AllProductsPage() {
         </main>
 
         {/* RIGHT SIDEBAR WITH PREMIUM AARONG AD BANNER */}
-        <aside className="hidden lg:flex flex-col gap-4 w-52 xl:w-56 flex-shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           {/* Sponsored Recommendations Card */}
           <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-left relative overflow-hidden w-full flex flex-col">
              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">

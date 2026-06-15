@@ -30,7 +30,35 @@ export function CustomerFavoritePage() {
   
   // Submit modal state
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  const [customSubmittedProducts, setCustomSubmittedProducts] = useState<any[]>([]);
+  
+  // Custom submitted products database with 1 pre-seeded pending item
+  const [customSubmittedProducts, setCustomSubmittedProducts] = useState<any[]>([
+    {
+      id: 99001,
+      title: "Handcrafted Premium Jamdani Silk Panjabi",
+      brand: "Dhaka Heritage Weaves",
+      category: "Fashion & Lifestyle",
+      description: "Sourced from a viral Facebook Live group highlighting local weavers. BSTI certified quality and verified hand-loom craft.",
+      price: 6500,
+      originalPrice: 8500,
+      discount: "23% OFF",
+      image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&h=400&fit=crop",
+      mode_type: "retail",
+      status: "pending", // pending / approved / rejected
+      submittedAt: "2 mins ago",
+      productType: "deal",
+      promoCode: "JAMDANI25",
+      validUntil: "2026-06-30",
+      socialProof: "Viral Live feed with over 45k comments & pre-orders"
+    }
+  ]);
+
+  // Dynamic Form Field States
+  const [productType, setProductType] = useState<'standard' | 'deal' | 'creator'>('standard');
+  const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string>('');
+  const [uploadedFilePreview, setUploadedFilePreview] = useState<string>('');
 
   // Category mapping helper
   const mapTabToCategory = (tab: string) => {
@@ -49,7 +77,7 @@ export function CustomerFavoritePage() {
 
   // We tag standard products dynamically with Viral badges
   const viralProductsList = useMemo(() => {
-    return allProducts.map((p, idx) => {
+    const standardTagged = allProducts.map((p, idx) => {
       // Define a stable viral tag sequence based on ID
       let tag = '🔥 Viral';
       let tagColor = 'bg-[#E8500A]';
@@ -88,7 +116,23 @@ export function CustomerFavoritePage() {
         heartsCount: 120 + (idx * 56) % 800
       };
     });
-  }, [allProducts]);
+
+    const approvedSubmissions = customSubmittedProducts
+      .filter((p: any) => p.status === 'approved')
+      .map((p: any) => {
+        return {
+          ...p,
+          viralScore: p.viralScore || 95,
+          viewsThisWeek: p.viewsThisWeek || 680,
+          heartsCount: p.heartsCount || 220,
+          tag: p.tag || '👥 Approved Trend',
+          tagColor: p.tagColor || 'bg-emerald-600',
+          source: p.source || '👥 Community Submitted'
+        };
+      });
+
+    return [...approvedSubmissions, ...standardTagged];
+  }, [allProducts, customSubmittedProducts]);
 
   // CATEGORY STICKY BAR LIST ITEMS (Dynamically constructed from existing category database)
   const navigationItems = useMemo(() => {
@@ -357,7 +401,7 @@ export function CustomerFavoritePage() {
           {/* ================================================= */}
           {/* A. LEFT SIDEBAR (STICKY) */}
           {/* ================================================= */}
-          <aside className="lg:sticky lg:top-44 lg:h-[calc(100vh-180px)] lg:overflow-y-auto overflow-visible no-scrollbar pb-8 space-y-4">
+          <aside className="lg:sticky lg:top-44 overflow-visible pb-8 space-y-4">
             
             {/* SECTION 1: TRENDING FILTERS */}
             <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
@@ -499,7 +543,144 @@ export function CustomerFavoritePage() {
           {/* ================================================= */}
           <main className="flex-1 space-y-10 min-w-0">
             
-            {/* SECTION A: FEATURED VIRAL PRODUCTS (Large cards - Top 5) */}
+            {/* INLINE MODERATION DASHBOARD */}
+            <div className="bg-[#0d0e25] text-white rounded-[5px] p-5 shadow-lg border border-white/5 animate-fade-in text-left relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-xl pointer-events-none" />
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/5 pb-4 mb-4">
+                <div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="bg-[#E8500A]/20 text-[#E8500A] text-[9.5px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded font-mono border border-[#E8500A]/30">
+                      ADMIN PORTAL
+                    </span>
+                    <h2 className="text-sm font-bold uppercase tracking-tight italic">
+                      Choosify Community Sourcing Desk
+                    </h2>
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    Review and approve submitted items from TikTok, Facebook Live, and local boutiques. Approvable catalog items render live instantly!
+                  </p>
+                </div>
+                <div className="bg-white/5 px-3 py-1.5 rounded border border-white/10 text-[9px] font-mono whitespace-nowrap text-right shrink-0">
+                  <p className="text-white/60">QUEUE: <span className="text-[#E8500A] font-bold">{customSubmittedProducts.filter((p: any) => p.status === 'pending').length} PENDING</span></p>
+                </div>
+              </div>
+
+              {customSubmittedProducts.length === 0 ? (
+                <div className="py-6 text-center text-gray-500 text-[10px] font-semibold uppercase tracking-widest font-mono">
+                  Verification desk queue is currently empty. Submit a product to initiate review!
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {customSubmittedProducts.map((p: any) => {
+                    const isPending = p.status === 'pending';
+                    const isApproved = p.status === 'approved';
+                    const isRejected = p.status === 'rejected';
+
+                    return (
+                      <div 
+                        key={`mod-${p.id}`} 
+                        className={cn(
+                          "p-3 rounded-[5px] border transition-all text-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4",
+                          isPending ? "bg-white/5 border-white/5" : "",
+                          isApproved ? "bg-emerald-950/20 border-emerald-950/40 text-emerald-200" : "",
+                          isRejected ? "bg-rose-950/20 border-rose-950/40 text-gray-400" : ""
+                        )}
+                      >
+                        <div className="flex items-start gap-3 min-w-0 flex-1">
+                          {/* Mini Thumbnail */}
+                          <div className="w-12 h-12 bg-white/5 rounded-[5px] border border-white/10 p-1 flex items-center justify-center shrink-0 overflow-hidden bg-white">
+                            <img src={p.image} alt="" className="max-w-full max-h-full object-contain" />
+                          </div>
+                          
+                          {/* Info Column */}
+                          <div className="min-w-0 flex-1 leading-tight text-left">
+                            <div className="flex items-center gap-2 flex-wrap mb-1 leading-none">
+                              <span className="text-[10px] font-bold text-[#E8500A] uppercase leading-none">{p.brand}</span>
+                              <span className="text-[8px] bg-white/5 border border-white/10 text-gray-400 px-1.5 py-0.5 rounded uppercase font-mono leading-none">
+                                {p.category}
+                              </span>
+                              {p.productType && (
+                                <span className="text-[7.5px] bg-[#E8500A]/10 text-orange-primary px-1.5 py-0.5 rounded uppercase font-mono border border-orange-primary/10 leading-none">
+                                  ⚡ {p.productType.toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                            
+                            <h4 className={cn("text-xs font-semibold leading-tight mb-1", isPending ? "text-white" : "")}>{p.title}</h4>
+                            <p className="text-[10px] text-gray-400 line-clamp-1 italic">
+                              "{p.description}"
+                            </p>
+
+                            {/* Additional Dynamic specs / meta */}
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-[8.5px] text-gray-500 font-mono">
+                              <span>BDT {p.price?.toLocaleString()}</span>
+                              {p.discount && <span className="text-rose-400 font-semibold">{p.discount}</span>}
+                              {p.socialProof && <span className="text-blue-400">{p.socialProof}</span>}
+                              {p.promoCode && <span className="text-amber-400 font-bold">🎫 {p.promoCode}</span>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions Col */}
+                        <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end border-t md:border-t-0 border-white/5 pt-2 md:pt-0">
+                          {isPending ? (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setCustomSubmittedProducts(prev => 
+                                    prev.map(item => item.id === p.id ? { ...item, status: 'approved' } : item)
+                                  );
+                                  toast.success(`"${p.title}" verified and published to live catalog!`);
+                                }}
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[9px] font-black uppercase tracking-wider transition-colors cursor-pointer border-0 shadow-sm"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setCustomSubmittedProducts(prev => 
+                                    prev.map(item => item.id === p.id ? { ...item, status: 'rejected' } : item)
+                                  );
+                                  toast.error(`"${p.title}" rejected and cataloged into review archives.`);
+                                }}
+                                className="px-3 py-1.5 bg-white/5 hover:bg-rose-500/10 hover:text-rose-500 rounded text-[9px] font-black text-gray-400 uppercase tracking-wider transition-colors cursor-pointer border border-white/10"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          ) : (
+                            <div className="flex items-center gap-1.5 text-[8.5px] font-black uppercase tracking-wider font-mono">
+                              {isApproved ? (
+                                <span className="text-emerald-400 flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
+                                  ✔️ Published Live
+                                </span>
+                              ) : (
+                                <span className="text-rose-400 flex items-center gap-1 bg-rose-500/10 px-2 py-1 rounded border border-rose-500/20">
+                                  ❌ Rejected
+                                </span>
+                              )}
+                              <button
+                                onClick={() => {
+                                  setCustomSubmittedProducts(prev => 
+                                    prev.map(item => item.id === p.id ? { ...item, status: 'pending' } : item)
+                                  );
+                                }}
+                                className="px-1.5 py-1 bg-white/5 hover:bg-white/15 text-white rounded text-[8px] font-semibold border-0 transition-colors cursor-pointer"
+                              >
+                                Reset
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* SECTION A: FEATURED VIRAL PRODUCTS (Grid Layout - Top 5) */}
             {activeTab === 'All Products' && !searchQuery && featuredViralProducts.length > 0 && (
               <section className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -509,24 +690,14 @@ export function CustomerFavoritePage() {
                   </h2>
                 </div>
                 
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center justify-center gap-5">
                   {featuredViralProducts.map((p, idx) => (
-                    <motion.div
+                    <ProductCard
                       key={`featured-viral-${p.id}-${idx}`}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="relative"
-                    >
-                      {/* Standard Product Card with variant="featured" overlayed */}
-                      <ProductCard product={p} variant="featured" />
-                      
-                      {/* Top Absolute Placement Badge */}
-                      <div className="absolute top-4 right-4 z-20 flex gap-2">
-                        <span className="px-3 py-1 bg-navy text-white text-[8px] font-black uppercase tracking-widest rounded-full border border-white/10 shadow-lg shrink-0">
-                          🔥 SCORE: {p.viralScore}/100
-                        </span>
-                      </div>
-                    </motion.div>
+                      product={p}
+                      variant="grid"
+                      isGuideDetail={true}
+                    />
                   ))}
                 </div>
               </section>
@@ -574,13 +745,12 @@ export function CustomerFavoritePage() {
               ) : (
                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center justify-center gap-5">
                   {filteredProducts.map((p, idx) => (
-                    <div 
+                    <ProductCard 
                       key={`viral-col-${p.id}-${idx}`} 
-                      className="relative hover:translate-y-[-2px] transition-transform duration-300"
-                    >
-                      {/* Standard Product Card */}
-                      <ProductCard product={p} variant="grid" />
-                    </div>
+                      product={p} 
+                      variant="grid" 
+                      isGuideDetail={true}
+                    />
                   ))}
                 </div>
               )}
@@ -591,7 +761,7 @@ export function CustomerFavoritePage() {
           {/* ================================================= */}
           {/* C. RIGHT SIDEBAR (STICKY) */}
           {/* ================================================= */}
-          <aside className="lg:sticky lg:top-44 lg:h-[calc(100vh-180px)] lg:overflow-y-auto overflow-visible no-scrollbar pb-8 space-y-4">
+          <aside className="lg:sticky lg:top-44 overflow-visible pb-8 space-y-4">
             
             {/* SECTION 1: VIRAL LEADERBOARD (Top 5 this week) */}
             <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
@@ -724,13 +894,19 @@ export function CustomerFavoritePage() {
       {/* ================================================= */}
       <AnimatePresence>
         {isSubmitModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
             {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsSubmitModalOpen(false)}
+              onClick={() => {
+                setIsSubmitModalOpen(false);
+                setIsSubmitSuccess(false);
+                setUploadedFileName('');
+                setUploadedFilePreview('');
+                setProductType('standard');
+              }}
               className="fixed inset-0 bg-black/60 backdrop-blur-xs"
             />
             
@@ -739,150 +915,437 @@ export function CustomerFavoritePage() {
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="bg-white rounded-[5px] w-full max-w-lg p-6 relative z-50 shadow-3xl text-left border border-gray-100 overflow-hidden"
+              className="bg-white rounded-[5px] w-full max-w-lg p-6 relative z-50 shadow-3xl text-left border border-gray-100 overflow-hidden my-8"
             >
               {/* Abs decoration blob */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-2xl pointer-events-none" />
               
-              <div className="flex items-center justify-between border-b pb-4 mb-5">
+              <div className="flex items-center justify-between border-b pb-4 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-orange-primary/10 border border-orange-primary/20 flex items-center justify-center text-xs leading-none">👥</span>
                   <h3 className="text-xs font-black uppercase tracking-widest text-[#1a1a2e] italic">Community Submission Desk</h3>
                 </div>
                 <button 
-                  onClick={() => setIsSubmitModalOpen(false)}
+                  onClick={() => {
+                    setIsSubmitModalOpen(false);
+                    setIsSubmitSuccess(false);
+                    setUploadedFileName('');
+                    setUploadedFilePreview('');
+                    setProductType('standard');
+                  }}
                   className="p-1.5 hover:bg-gray-100 rounded-full transition-colors border-0 bg-transparent text-gray-400 hover:text-navy cursor-pointer"
                 >
                   <X size={16} />
                 </button>
               </div>
 
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const form = e.currentTarget;
-                const fd = new FormData(form);
-                const title = fd.get('prodTitle') as string;
-                const brand = fd.get('prodBrand') as string;
-                const category = fd.get('prodCategory') as string;
-                const reason = fd.get('prodReason') as string;
-
-                if (!title || !brand || !reason) {
-                  toast.error('Please input mandatory product values!');
-                  return;
-                }
-
-                // Append local mocked product state
-                const customItem = {
-                  id: Date.now(),
-                  title,
-                  brand,
-                  category,
-                  description: reason,
-                  price: 2500,
-                  image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-                  mode_type: mode,
-                  codSupport: true,
-                  quotationSupport: false,
-                  stock: 0,
-                  tag: '🚀 Submitting'
-                };
-                
-                toast.success(`"${title}" submitted successfully for Review! Waiting for BSTI moderation.`);
-                setCustomSubmittedProducts(prev => [customItem, ...prev]);
-                setIsSubmitModalOpen(false);
-              }} className="space-y-4">
-                
-                <div className="space-y-1.5 text-left">
-                  <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
-                    Product Title *
-                  </label>
-                  <input 
-                    type="text" 
-                    name="prodTitle"
-                    required
-                    placeholder="e.g. Vintage Leather Messenger Bag" 
-                    className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
-                  />
+              {isSubmitSuccess ? (
+                /* Success screen */
+                <div className="py-6 text-center space-y-4 animate-scale-up">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-xl font-bold animate-pulse">
+                    ✓
+                  </div>
+                  <h3 className="font-bold text-base text-[#1a1a2e] uppercase tracking-wide">
+                    Listing Successfully Sourced!
+                  </h3>
+                  <p className="text-xs text-gray-500 leading-relaxed max-w-sm mx-auto font-medium">
+                    Your suggested product was successfully added to local moderations. You can find it in the <span className="font-bold text-[#E8500A]">"Choosify Community Sourcing Desk"</span> on this page. Approving it will launch it live instantly!
+                  </p>
+                  <div className="flex justify-center gap-3 pt-4">
+                    <button
+                      onClick={() => {
+                        setIsSubmitSuccess(false);
+                        setUploadedFileName('');
+                        setUploadedFilePreview('');
+                      }}
+                      className="px-4 py-2 border rounded-xl hover:bg-gray-50 text-[10px] font-bold uppercase tracking-wider italic cursor-pointer bg-white"
+                    >
+                      Suggest Another
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsSubmitModalOpen(false);
+                        setIsSubmitSuccess(false);
+                        setUploadedFileName('');
+                        setUploadedFilePreview('');
+                        setProductType('standard');
+                      }}
+                      className="px-5 py-2 bg-orange-primary hover:bg-[#ff5a0c] text-white rounded-xl text-[10px] font-bold uppercase tracking-wider italic cursor-pointer shadow-md shadow-orange-primary/10 border-0"
+                    >
+                      Browse Catalog
+                    </button>
+                  </div>
                 </div>
+              ) : (
+                /* Interactive dynamic form */
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const fd = new FormData(form);
+                  const title = fd.get('prodTitle') as string;
+                  const brand = fd.get('prodBrand') as string;
+                  const category = fd.get('prodCategory') as string;
+                  const desc = fd.get('prodReason') as string;
 
-                <div className="grid grid-cols-2 gap-4">
+                  if (!title || !desc) {
+                    toast.error('Mandatory fields are missing!');
+                    return;
+                  }
+
+                  // Fallback images based on category
+                  const getFallbackImage = (cat: string) => {
+                    const c = cat.toLowerCase();
+                    if (c.includes('phone') || c.includes('gadget') || c.includes('tech')) return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400';
+                    if (c.includes('jewel') || c.includes('access')) return 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400';
+                    if (c.includes('fashion') || c.includes('clothing') || c.includes('wear')) return 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400';
+                    if (c.includes('home') || c.includes('living')) return 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=400';
+                    return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400';
+                  };
+
+                  let priceVal = 1200;
+                  let originalPriceVal = null;
+                  let discountPill = null;
+                  let promoPill = null;
+                  let dateVal = null;
+                  let metricVal = null;
+
+                  if (productType === 'standard') {
+                    const rawPrice = fd.get('prodPrice') as string;
+                    priceVal = rawPrice ? parseFloat(rawPrice) : 1500;
+                  } else if (productType === 'deal') {
+                    const rawOrigPrice = fd.get('prodOrigPrice') as string;
+                    const discountPercent = fd.get('prodDiscount') as string;
+                    originalPriceVal = rawOrigPrice ? parseFloat(rawOrigPrice) : 3000;
+                    const discDouble = discountPercent ? parseFloat(discountPercent) : 10;
+                    priceVal = originalPriceVal * (1 - discDouble / 100);
+                    discountPill = `${discDouble}% OFF`;
+                    promoPill = (fd.get('prodPromo') as string) || null;
+                    dateVal = (fd.get('prodValidity') as string) || null;
+                  } else if (productType === 'creator') {
+                    metricVal = (fd.get('prodMetrics') as string) || "1M+ Views";
+                  }
+
+                  const customItem = {
+                    id: Date.now(),
+                    title,
+                    brand: brand || (productType === 'creator' ? (fd.get('prodCreator') as string) || "Creator Showcase" : "Local Verified Sourced"),
+                    category,
+                    description: desc,
+                    price: priceVal,
+                    originalPrice: originalPriceVal,
+                    discount: discountPill,
+                    image: uploadedFilePreview || getFallbackImage(category),
+                    mode_type: mode,
+                    status: "pending",
+                    submittedAt: "Just now",
+                    productType,
+                    promoCode: promoPill,
+                    validUntil: dateVal,
+                    socialProof: metricVal
+                  };
+
+                  setCustomSubmittedProducts(prev => [customItem, ...prev]);
+                  setIsSubmitSuccess(true);
+                  toast.success(`"${title}" registered in pending verification list!`);
+                }} className="space-y-4">
+                  
+                  {/* Category Type selector tabs */}
                   <div className="space-y-1.5 text-left">
                     <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
-                      Brand Name *
+                      Submission Product Type
                     </label>
-                    <input 
-                      type="text" 
-                      name="prodBrand"
+                    <div className="grid grid-cols-3 gap-2 p-1 bg-gray-50 rounded-xl border border-gray-150">
+                      {[
+                        { id: 'standard', label: 'Standard Item', icon: '🎁' },
+                        { id: 'deal', label: 'Deal / Offer', icon: '🏷️' },
+                        { id: 'creator', label: 'Creator Trend', icon: '📱' }
+                      ].map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => setProductType(t.id as any)}
+                          className={cn(
+                            "py-2 rounded-lg text-[9.5px] font-bold uppercase transition-all flex items-center justify-center gap-1.5 border-0 cursor-pointer",
+                            productType === t.id 
+                              ? "bg-navy text-white shadow-sm" 
+                              : "text-gray-400 hover:text-navy hover:bg-gray-100"
+                          )}
+                        >
+                          <span>{t.icon}</span>
+                          <span>{t.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* FIELD SET 1 (Mandatory core attributes) */}
+                  <div className="space-y-4">
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                        Product Title / Trend Title *
+                      </label>
+                      <input 
+                        type="text" 
+                        name="prodTitle"
+                        required
+                        placeholder={productType === 'creator' ? "e.g. Viral Velvet Ribbed Hair Clips combo" : "e.g. Vintage Leather Messenger Bag"} 
+                        className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {productType !== 'creator' ? (
+                        <div className="space-y-1.5 text-left">
+                          <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                            Brand Name *
+                          </label>
+                          <input 
+                            type="text" 
+                            name="prodBrand"
+                            required
+                            placeholder="e.g. Apex, Huawei, local boutique" 
+                            className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5 text-left">
+                          <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                            Creator Name (Optional)
+                          </label>
+                          <input 
+                            type="text" 
+                            name="prodCreator"
+                            placeholder="e.g. Rafsan, Mumtahan, TikToker" 
+                            className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                          />
+                        </div>
+                      )}
+
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                          Primary Category
+                        </label>
+                        <select 
+                          name="prodCategory"
+                          className="w-full h-11 px-3 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                        >
+                          <option value="Fashion & Lifestyle">Fashion & Lifestyle</option>
+                          <option value="Jewelry & Accessories">Jewelry & Accessories</option>
+                          <option value="Mobile & Phones">Mobile & Phones</option>
+                          <option value="Tech & Electronics">Tech & Electronics</option>
+                          <option value="Home & Living">Home & Living</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* FIELD SET 2 (Dynamic fields based on type) */}
+                  {productType === 'standard' && (
+                    <div className="space-y-1.5 text-left animate-fade-in">
+                      <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                        Market Sourcing Price (BDT) *
+                      </label>
+                      <input 
+                        type="number" 
+                        name="prodPrice"
+                        required
+                        placeholder="e.g. 2450" 
+                        className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                      />
+                    </div>
+                  )}
+
+                  {productType === 'deal' && (
+                    <div className="grid grid-cols-2 gap-4 animate-fade-in">
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                          Original Price (BDT) *
+                        </label>
+                        <input 
+                          type="number" 
+                          name="prodOrigPrice"
+                          required
+                          placeholder="e.g. 5000" 
+                          className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                        />
+                      </div>
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                          Discount Percentage (%) *
+                        </label>
+                        <input 
+                          type="number" 
+                          name="prodDiscount"
+                          required
+                          max="99"
+                          min="1"
+                          placeholder="e.g. 25" 
+                          className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                        />
+                      </div>
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                          Promo Code (Optional)
+                        </label>
+                        <input 
+                          type="text" 
+                          name="prodPromo"
+                          placeholder="e.g. EXTRA20" 
+                          className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                        />
+                      </div>
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                          Offer Validity Date *
+                        </label>
+                        <input 
+                          type="date" 
+                          name="prodValidity"
+                          required
+                          className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {productType === 'creator' && (
+                    <div className="grid grid-cols-2 gap-4 animate-fade-in">
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                          Social Proof Link / Reference *
+                        </label>
+                        <input 
+                          type="url" 
+                          name="prodSourceLink"
+                          required
+                          placeholder="e.g. Facebook Reel / TikTok link" 
+                          className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                        />
+                      </div>
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                          Engagement Metrics Summary *
+                        </label>
+                        <input 
+                          type="text" 
+                          name="prodMetrics"
+                          required
+                          placeholder="e.g. 50k views / 12k likes" 
+                          className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Drag-and-drop Image Upload block */}
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                      {productType === 'creator' ? 'Media Upload (Reel / Photo) *' : 'Product Photo/Preview *'}
+                    </label>
+                    <div 
+                      onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                      onDragLeave={() => setDragActive(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragActive(false);
+                        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                          const file = e.dataTransfer.files[0];
+                          setUploadedFileName(file.name);
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setUploadedFilePreview(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className={cn(
+                        "border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-colors h-28 relative overflow-hidden",
+                        dragActive ? "border-[#E8500A] bg-orange-primary/5" : "border-gray-200 bg-gray-50 hover:bg-gray-100/50"
+                      )}
+                    >
+                      <input 
+                        type="file" 
+                        accept="image/*,video/*" 
+                        id="file-upload"
+                        className="hidden" 
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+                            setUploadedFileName(file.name);
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setUploadedFilePreview(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label htmlFor="file-upload" className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                        {uploadedFilePreview ? (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/5 z-0">
+                            <img src={uploadedFilePreview} alt="Preview" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-2">
+                              <p className="text-[10px] font-bold truncate max-w-[150px]">{uploadedFileName}</p>
+                              <p className="text-[8px] opacity-75">Click or drag to replace</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="text-lg mb-1 leading-none">📂</span>
+                            <p className="text-[10px] font-bold text-navy leading-tight">Drag and drop file here, or click to browse</p>
+                            <p className="text-[8px] text-gray-400 mt-0.5 uppercase tracking-wider font-mono">Supports JPG, PNG (Max 5MB)</p>
+                          </>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Description / Sourcing reason */}
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
+                      Describe Sourcing Authenticity & Scent *
+                    </label>
+                    <textarea 
+                      name="prodReason"
                       required
-                      placeholder="e.g. Apex, Samsung, Local Craft" 
-                      className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
+                      placeholder="e.g. Highlight store location, live order proofs, or reasons why this selection meets Choosify standards." 
+                      rows={3}
+                      className="w-full p-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors resize-none"
                     />
                   </div>
-                  <div className="space-y-1.5 text-left">
-                    <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
-                      Main Category
-                    </label>
-                    <select 
-                      name="prodCategory"
-                      className="w-full h-11 px-3 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
-                    >
-                      <option value="Fashion & Lifestyle">Fashion & Lifestyle</option>
-                      <option value="Jewelry & Accessories">Jewelry & Accessories</option>
-                      <option value="Mobile & Phones">Mobile & Phones</option>
-                      <option value="Tech & Electronics">Tech & Electronics</option>
-                      <option value="Home & Living">Home & Living</option>
-                    </select>
+
+                  <div className="bg-gray-50/50 p-3.5 rounded-xl border border-dashed flex gap-3 text-gray-500 leading-normal">
+                    <Info size={16} className="text-orange-primary shrink-0 mt-0.5" />
+                    <p className="text-[9.5px] font-semibold leading-relaxed">
+                      Sourced items are added directly to the local Sourcing Desk at the top of the page. You can review, approve, and launch them instantly!
+                    </p>
                   </div>
-                </div>
 
-                <div className="space-y-1.5 text-left">
-                  <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
-                    Social Sourcing Link / Reference
-                  </label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. https://facebook.com/groups/... or TikTok video url" 
-                    className="w-full h-11 px-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors"
-                  />
-                </div>
+                  {/* Dialog Controls */}
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        setIsSubmitModalOpen(false);
+                        setIsSubmitSuccess(false);
+                        setUploadedFileName('');
+                        setUploadedFilePreview('');
+                        setProductType('standard');
+                      }}
+                      className="px-5 py-2.5 rounded-xl border hover:bg-gray-50 text-[10px] font-black uppercase tracking-wider italic cursor-pointer bg-white"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="px-6 py-2.5 bg-orange-primary hover:bg-[#ff5a0c] text-white rounded-xl text-[10px] font-black uppercase tracking-wider italic cursor-pointer shadow-lg shadow-orange-primary/20 border-0 flex items-center gap-1.5"
+                    >
+                      Submit Sourcing <Send size={11} className="stroke-[3px]" />
+                    </button>
+                  </div>
 
-                <div className="space-y-1.5 text-left">
-                  <label className="text-[9px] font-black text-navy uppercase tracking-widest block font-sans">
-                    Describe Why It Is Popular *
-                  </label>
-                  <textarea 
-                    name="prodReason"
-                    required
-                    placeholder="Provide description. E.g. TikTok video has 1.2M views, massive pre-order queues on Dhaka groups." 
-                    rows={3}
-                    className="w-full p-4 rounded-xl border border-gray-150 text-xs focus:outline-none focus:border-orange-primary bg-gray-50 focus:bg-white transition-colors resize-none"
-                  />
-                </div>
-
-                <div className="bg-gray-50/50 p-3.5 rounded-xl border border-dashed flex gap-3 text-gray-500 leading-normal">
-                  <Info size={16} className="text-orange-primary shrink-0 mt-0.5" />
-                  <p className="text-[9.5px] font-semibold leading-relaxed">
-                    User submitted products are queued directly to local admins. Sourcing validations require authentic reference links or store catalogs. They will not reflect live instantly.
-                  </p>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-2">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsSubmitModalOpen(false)}
-                    className="px-5 py-2.5 rounded-xl border hover:bg-gray-50 text-[10px] font-black uppercase tracking-wider italic cursor-pointer bg-white"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="px-6 py-2.5 bg-orange-primary hover:bg-[#ff5a0c] text-white rounded-xl text-[10px] font-black uppercase tracking-wider italic cursor-pointer shadow-lg shadow-orange-primary/20 border-0 flex items-center gap-1.5"
-                  >
-                    Submit Sourcing <Send size={11} className="stroke-[3px]" />
-                  </button>
-                </div>
-
-              </form>
+                </form>
+              )}
             </motion.div>
           </div>
         )}

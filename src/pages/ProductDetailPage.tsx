@@ -45,6 +45,7 @@ import { toast } from "react-hot-toast";
 import { ProductMediaGallery } from "../components/ProductMediaGallery";
 import { InfluencerReviews } from "../components/InfluencerReviews";
 import { PublicReviewCard } from "../components/PublicReviewCard";
+import { FollowButton } from "../components/FollowButton";
 
 function WithInfluencerReviews({ brandName }: { brandName: string }) {
   const featuredReview = {
@@ -1012,9 +1013,9 @@ export function ProductDetailPage() {
         <div className="max-w-[1440px] mx-auto px-4 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
             {/* Left Column Section (Column 1) */}
-            <div className="space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+            <div className="space-y-8 lg:sticky lg:top-24 pb-10 pr-2">
               {/* PRODUCT SPECIFICATIONS */}
-              <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl overflow-hidden p-6 space-y-4 font-sans text-left">
+              <div className="bg-white rounded-[5px] border border-gray-100 shadow-xl overflow-hidden p-6 space-y-4 font-sans text-left">
                 <h3 className="text-xs font-black text-navy uppercase tracking-tight pb-2 border-b border-gray-50 flex items-center gap-2">
                   <span className="w-1 h-3.5 bg-[#E8500A] rounded-full inline-block" />
                   Specifications
@@ -1072,9 +1073,9 @@ export function ProductDetailPage() {
             </div>
 
             {/* Right Side Column (Column 3) */}
-            <div className="space-y-8 lg:sticky lg:top-24 lg:h-[calc(100vh-120px)] lg:overflow-y-auto pb-10 pr-2 no-scrollbar">
+            <div className="space-y-8 lg:sticky lg:top-24 pb-10 pr-2">
               {/* PRICE ACROSS STORES TABLE CARD */}
-              <div className="bg-white rounded-[24px] border border-gray-100 shadow-xl overflow-hidden font-sans text-left">
+              <div className="bg-white rounded-[5px] border border-gray-100 shadow-xl overflow-hidden font-sans text-left">
                 <div className="p-6 flex items-center justify-between border-b border-gray-50">
                   <h3 className="text-xs font-black text-navy uppercase tracking-tight flex items-center gap-2">
                     <span className="w-1 h-3.5 bg-[#E8500A] rounded-full inline-block" />
@@ -1155,7 +1156,7 @@ export function ProductDetailPage() {
               </div>
 
               {/* BRAND PROFILE CARD - ONLY ONE AT RIGHT SIDEBAR */}
-              <div className="bg-white rounded-[24px] overflow-hidden shadow-xl border border-gray-100 group text-left">
+              <div className="bg-white rounded-[5px] overflow-hidden shadow-xl border border-gray-100 group text-left">
                 <div className="p-6 flex flex-col items-center text-center hero-gradient text-white">
                   <div className="relative mb-4 mt-2">
                     <div className="w-20 h-20 rounded-2xl bg-black flex items-center justify-center p-2.5 shadow-lg scale-100 group-hover:scale-105 transition-transform duration-500">
@@ -1195,12 +1196,12 @@ export function ProductDetailPage() {
                       MESSAGE TO ORDER
                     </button>
 
-                    <button
-                      onClick={handleLoveBrand}
-                      className="w-full py-3.5 rounded-xl border border-white/20 hover:bg-white/10 text-white/90 text-[9.5px] font-black uppercase tracking-widest transition-all leading-none cursor-pointer"
-                    >
-                      FOLLOW THE BRAND
-                    </button>
+                    <FollowButton
+                      id={String(brandId)}
+                      name={brandName}
+                      type="brand"
+                      className="w-full py-3.5 rounded-xl border border-white/20 text-[9.5px]"
+                    />
 
                     <Link
                       to={`/brands/${brandId}`}
@@ -1256,7 +1257,7 @@ export function ProductDetailPage() {
               </div>
 
               {/* PHYSICAL STORES */}
-              <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-xl space-y-4 text-left">
+              <div className="bg-white rounded-[5px] p-6 border border-gray-100 shadow-xl space-y-4 text-left">
                 <h3 className="text-xs font-black text-navy uppercase tracking-tight pb-2 border-b border-gray-50 flex items-center gap-2">
                   <span className="w-1 h-3.5 bg-[#E8500A] rounded-full inline-block" />
                   PHYSICAL <span className="text-orange-primary">STORES</span>
@@ -1284,7 +1285,7 @@ export function ProductDetailPage() {
               </div>
 
               {/* SPONSORED ADVERTISEMENT */}
-              <div className="bg-[#1A1D4E] text-white rounded-[24px] p-6 relative overflow-hidden text-left shadow-xl border border-white/5 font-sans">
+              <div className="bg-[#1A1D4E] text-white rounded-[5px] p-6 relative overflow-hidden text-left shadow-xl border border-white/5 font-sans">
                 {/* Orange glowing bubble */}
                 <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/20 blur-2xl rounded-full translate-x-1/4 -translate-y-1/4" />
 
@@ -1317,7 +1318,7 @@ export function ProductDetailPage() {
             {/* PUBLIC REVIEWS (ID: 'public-reviews-section') */}
             <div
               id="public-reviews-section"
-              className="scroll-mt-36 bg-white rounded-[40px] p-8 border border-gray-100/85 shadow-2xl shadow-gray-100/40 space-y-8 font-sans text-left w-full"
+              className="scroll-mt-36 bg-white rounded-[5px] p-8 border border-gray-100/85 shadow-2xl shadow-gray-100/40 space-y-8 font-sans text-left w-full"
             >
               <div className="text-center flex flex-col items-center">
                 <h3 className="text-3xl font-black italic tracking-tighter uppercase text-navy">
@@ -1386,7 +1387,7 @@ export function ProductDetailPage() {
             {/* PRODUCT OVERVIEW (ID: 'product-overview-section') */}
             <div
               id="product-overview-section"
-              className="scroll-mt-36 bg-white rounded-[32px] p-8 border border-gray-100/80 shadow-xl space-y-8 text-left font-sans w-full"
+              className="scroll-mt-36 bg-white rounded-[5px] p-8 border border-gray-100/80 shadow-xl space-y-8 text-left font-sans w-full"
             >
               <div>
                 <h3 className="text-2xl font-black italic tracking-tighter uppercase text-navy">
@@ -1399,7 +1400,7 @@ export function ProductDetailPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Quality & Materials */}
-                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-3">
+                <div className="bg-gray-50 rounded-[5px] p-5 border border-gray-100 flex flex-col gap-3">
                   <div className="flex items-center gap-2.5 text-xs font-black text-navy uppercase tracking-wide">
                     <div className="p-1.5 bg-orange-primary/10 rounded-lg text-orange-primary">
                       <Tag size={16} />
@@ -1415,7 +1416,7 @@ export function ProductDetailPage() {
                 </div>
 
                 {/* Features & Benefits */}
-                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-3">
+                <div className="bg-gray-50 rounded-[5px] p-5 border border-gray-100 flex flex-col gap-3">
                   <div className="flex items-center gap-2.5 text-xs font-black text-navy uppercase tracking-wide">
                     <div className="p-1.5 bg-orange-primary/10 rounded-lg text-orange-primary">
                       <Award size={16} />
@@ -1433,7 +1434,7 @@ export function ProductDetailPage() {
                 </div>
 
                 {/* Audience & Use Cases */}
-                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-3">
+                <div className="bg-gray-50 rounded-[5px] p-5 border border-gray-100 flex flex-col gap-3">
                   <div className="flex items-center gap-2.5 text-xs font-black text-navy uppercase tracking-wide">
                     <div className="p-1.5 bg-orange-primary/10 rounded-lg text-orange-primary">
                       <Users size={16} />
@@ -1453,7 +1454,7 @@ export function ProductDetailPage() {
                 </div>
 
                 {/* Customer Support & Assurance */}
-                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-3">
+                <div className="bg-gray-50 rounded-[5px] p-5 border border-gray-100 flex flex-col gap-3">
                   <div className="flex items-center gap-2.5 text-xs font-black text-navy uppercase tracking-wide">
                     <div className="p-1.5 bg-orange-primary/10 rounded-lg text-orange-primary">
                       <ShieldCheck size={16} />

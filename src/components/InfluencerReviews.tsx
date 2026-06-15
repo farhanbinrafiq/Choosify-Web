@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Eye, ThumbsUp, Clock, Youtube, Instagram, Facebook, Video, Plus, X, HelpCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useGlobalState } from '../context/GlobalStateContext';
 
 // Custom Minimal SVG for TikTok to pair perfectly with Lucide outline style
 function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -59,6 +60,7 @@ export interface InfluencerReviewsProps {
   brandName?: string;
   featuredReview?: InfluencerFeaturedReview;
   reviews?: InfluencerReviewCard[];
+  allowAdd?: boolean;
 }
 
 // Converts standard video links into embeddable iframe-safe URLs
@@ -313,7 +315,11 @@ export function InfluencerReviews({
   brandName,
   featuredReview,
   reviews,
+  allowAdd = false,
 }: InfluencerReviewsProps) {
+  const { currentUser } = useGlobalState();
+  const canAddCreatorReview = allowAdd && currentUser?.role === 'admin';
+
   // Gracefully filter/merge external properties avoiding TS typing errors
   const baseReviews = reviews && reviews.length > 0 ? reviews.map((r, i) => {
     const defaultCard = curatedReviews[i % curatedReviews.length];
@@ -667,7 +673,7 @@ export function InfluencerReviews({
       )}
 
       {/* PART 4 — ACCORDION DROPDOWN SUBMISSION FORM FOR CUSTOM INFLUENCER REVIEWS */}
-      {showAddForm && (
+      {canAddCreatorReview && showAddForm && (
         <div className="mt-5 p-5 bg-[#161B22] border border-[#21262D] rounded-[5px] anim-fade text-left space-y-4">
           <div className="flex items-center justify-between border-b border-[#21262D] pb-2.5">
             <h4 className="font-['DM_Serif_Display',_serif] text-lg text-[#F0F6FC] font-normal tracking-wide flex items-center gap-1.5">
@@ -807,7 +813,7 @@ export function InfluencerReviews({
       )}
 
       {/* PART 5 — TRIGGER BUTTON to match mock design */}
-      {!showAddForm && (
+      {canAddCreatorReview && !showAddForm && (
         <button 
           onClick={() => {
             setShowAddForm(true);
