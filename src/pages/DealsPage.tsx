@@ -327,7 +327,7 @@ export function DealsPage() {
                  </div>
                  
                  {/* Small Cards Row */}
-                 <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 w-full justify-items-center">
+                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
                     {(filteredProducts.length > 1 ? filteredProducts : PRODUCTS).slice(1, 5).map((product) => (
                        <div key={product.id} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
                          <ProductCard 
@@ -351,7 +351,7 @@ export function DealsPage() {
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic px-2 border-l-4 border-orange-primary">Browse All Handpicked Offers</p>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
                 {(filteredProducts.length > 0 ? filteredProducts : PRODUCTS).slice(0, 12).map((product, idx) => (
                   <div key={`${product.id}-${idx}`} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
                     <ProductCard 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers, ImageOff, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers, ImageOff, Plus, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useDashboard } from '../context/DashboardContext';
@@ -356,18 +356,20 @@ export function ProductCard({
                <StockProgress sm />
             </div>
             
-            <div className="flex items-end justify-between gap-4 pt-4 border-t border-gray-150">
-               <div className="flex flex-col gap-1 text-left">
-                  <span className="text-[9px] font-medium text-gray-400 uppercase tracking-widest leading-none">SPECIAL VALUE</span>
-                  <span className="text-2xl font-semibold text-[#E8500A] leading-none">BDT {product.price}</span>
+            <div className="flex items-end justify-between gap-4 pt-4 border-t border-gray-150 select-none shrink-0 w-full">
+               <div className="flex flex-col text-left min-w-0">
+                  <span className="text-[9px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">SPECIAL VALUE</span>
+                  <span className="text-2xl font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">BDT {product.price}</span>
                </div>
                
                <button 
                  type="button" 
                  onClick={(e) => { e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); } else { const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); } }} 
-                 className="hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center text-center px-5 py-2.5 rounded-full shadow-md text-[10px] md:text-[11px] font-black uppercase tracking-wider italic hover:scale-[1.03] active:scale-95"
+                 className="w-10 h-10 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+                 aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
+                 title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
                >
-                 {isGuideDetail ? 'Shop Now' : 'Add to Cart'}
+                 {isGuideDetail ? <ArrowRight size={16} className="stroke-[2.5]" /> : <ShoppingCart size={16} className="stroke-[2.5]" />}
                </button>
             </div>
          </div>
@@ -436,34 +438,35 @@ export function ProductCard({
             </h4>
           </div>
           
-          <div className="mt-auto pt-2 border-t border-gray-100 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
-             <div className="flex flex-col text-left min-w-0 gap-0.5">
-                <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-0.5">
+                    <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
+             <div className="flex flex-col text-left min-w-0">
+                <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">
                   {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
                 </span>
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex flex-col text-left justify-center">
                   <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">BDT {product.price.toLocaleString()}</span>
                   {product.originalPrice ? (
-                    <span className="text-[8px] font-mono text-gray-400 line-through leading-none whitespace-nowrap">৳{product.originalPrice}</span>
+                    <span className="text-[8px] font-mono text-gray-400 line-through leading-none mt-0.5 whitespace-nowrap">৳{product.originalPrice}</span>
                   ) : (
-                    <span className="text-[8px] font-mono text-transparent select-none leading-none whitespace-nowrap">Placeholder</span>
+                    <span className="text-[8px] font-mono text-transparent select-none leading-none mt-0.5 whitespace-nowrap">Placeholder</span>
                   )}
                 </div>
              </div>
              
              <button 
-               type="button" 
-               onClick={(e) => { 
-                 e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
-                 const qty = mode === 'retail' ? 1 : (product.moq || 10); 
-                 addToCart(product, qty); 
-                 toast.success(`Successfully added ${product.title} to your cart!`);
-               }} 
-               className="hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center text-center px-4 py-2 rounded-full shadow-sm text-[9px] font-black uppercase tracking-wider italic hover:scale-[1.03] active:scale-95 leading-none w-full lg:w-auto mt-1 lg:mt-0"
-               aria-label="Add to cart"
+                type="button" 
+                onClick={(e) => { 
+                  e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
+                  const qty = mode === 'retail' ? 1 : (product.moq || 10); 
+                  addToCart(product, qty); 
+                  toast.success(`Successfully added ${product.title} to your cart!`);
+                }} 
+                className="w-8 h-8 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+                aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
+                title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
              >
-               {isGuideDetail ? 'Shop Now' : 'Add to Cart'}
-              </button>
+                {isGuideDetail ? <ArrowRight size={13} className="stroke-[2.5]" /> : <ShoppingCart size={13} className="stroke-[2.5]" />}
+               </button>
           </div>
         </div>
       </div>
@@ -526,11 +529,11 @@ export function ProductCard({
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-auto gap-4 pt-3.5 border-t border-gray-100">
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-semibold text-[#E8500A] font-mono">BDT {product.price.toLocaleString()}</span>
+                    <div className="flex items-center justify-between mt-auto gap-4 pt-3.5 border-t border-gray-100">
+            <div className="flex flex-col text-left">
+              <span className="text-lg font-bold text-[#E8500A] font-mono leading-none">BDT {product.price.toLocaleString()}</span>
               {product.originalPrice && (
-                <span className="text-[11px] text-gray-300 line-through font-mono">BDT {product.originalPrice}</span>
+                <span className="text-[11px] text-gray-300 line-through font-mono mt-0.5 leading-none">BDT {product.originalPrice}</span>
               )}
             </div>
             <button 
@@ -541,9 +544,11 @@ export function ProductCard({
                 addToCart(product, qty);
                 toast.success(`Successfully added ${product.title} to your cart!`);
               }}
-              className="hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center text-center px-4 py-2 rounded-full shadow-sm text-[10px] font-black uppercase tracking-wider italic hover:scale-[1.03] active:scale-95 leading-none"
+              className="w-10 h-10 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+              aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
+              title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
             >
-              {isGuideDetail ? 'Shop Now' : 'Add to Cart'}
+              {isGuideDetail ? <ArrowRight size={16} className="stroke-[2.5]" /> : <ShoppingCart size={16} className="stroke-[2.5]" />}
             </button>
           </div>
         </div>
@@ -646,18 +651,22 @@ export function ProductCard({
           })()}
         </div>
         
-        <div className="mt-auto pt-2 border-t border-gray-100 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
-          <div className="flex flex-col text-left min-w-0 gap-0.5">
-             <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-0.5">
+                <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
+          <div className="flex flex-col text-left min-w-0">
+             <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">
                {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
               </span>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] sm:text-[11px] font-mono font-semibold text-[#E8500A] leading-none whitespace-nowrap">
+              <div className="flex flex-col text-left justify-center">
+                <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">
                   BDT {product.price.toLocaleString()}
                 </span>
-                {product.originalPrice && (
-                  <span className="text-[8px] font-mono text-gray-400 line-through leading-none">
+                {product.originalPrice ? (
+                  <span className="text-[8px] font-mono text-gray-400 line-through leading-none mt-0.5 whitespace-nowrap">
                     ৳{product.originalPrice}
+                  </span>
+                ) : (
+                  <span className="text-[8px] font-mono text-transparent select-none leading-none mt-0.5 whitespace-nowrap">
+                    Placeholder
                   </span>
                 )}
               </div>
@@ -671,9 +680,11 @@ export function ProductCard({
               addToCart(product, qty);
               toast.success(`Successfully added ${product.title} to your cart!`);
             }}
-            className="hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center text-center px-4 py-2 rounded-full shadow-sm text-[9px] font-black uppercase tracking-wider italic hover:scale-[1.03] active:scale-95 leading-none w-full lg:w-auto mt-1 lg:mt-0"
+            className="w-8 h-8 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+            aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
+            title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
           >
-             {isGuideDetail ? 'Shop Now' : 'Add to Cart'}
+             {isGuideDetail ? <ArrowRight size={13} className="stroke-[2.5]" /> : <ShoppingCart size={13} className="stroke-[2.5]" />}
           </button>
         </div>
       </div>
