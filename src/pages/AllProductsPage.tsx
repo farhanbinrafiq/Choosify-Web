@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Calculator, Layers, Award, Flame, Clock, Sparkles } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Calculator, Layers, Award, Flame, Clock, Sparkles, ArrowRight } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
@@ -549,22 +549,33 @@ export function AllProductsPage() {
             </div>
           )}
 
-          {/* Static Pagination (Styled Perfectly matching template) */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-gray-100">
-            <div className="flex items-center gap-4 bg-white px-8 py-3 rounded-full border border-gray-150 shadow-sm overflow-x-auto no-scrollbar max-w-full">
-              <button className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-navy transition-colors whitespace-nowrap">
-                <ChevronDown size={14} className="rotate-90" /> Previous
+          {/* Static Pagination (Styled Perfectly matching global canonical standard) */}
+          <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
+            <div className="flex items-center gap-3">
+              <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
+                <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
               </button>
-              <div className="flex items-center gap-4">
-                <button className="w-8 h-8 rounded-full text-xs font-black bg-orange-primary text-white shadow-lg flex-shrink-0 flex items-center justify-center">1</button>
-              </div>
-              <button className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-navy transition-colors whitespace-nowrap">
-                Next <ChevronDown size={14} className="-rotate-90" />
+              {[1, 2, 3, '...', 12].map((page, i) => (
+                <button 
+                  key={i} 
+                  className={cn(
+                    "w-12 h-12 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
+                    page === 1 
+                    ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
+                    : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
+                  )}
+                >
+                  {page}
+                </button>
+              ))}
+              <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
-            <div className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
+            
+            <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">
               Showing <span className="text-navy">{filteredProducts.length}</span> Of <span className="text-navy">{filteredProducts.length}</span> Results
-            </div>
+            </p>
           </div>
         </main>
 

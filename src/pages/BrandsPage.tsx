@@ -56,6 +56,7 @@ export function BrandsPage() {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Brands');
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const brands: Brand[] = [
     {
@@ -290,86 +291,43 @@ export function BrandsPage() {
         </div>
       </div>
 
-      {/* Sticky Alphabet Filter Bar */}
-      <div className="sticky top-[230px] z-30 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm py-4">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between gap-6 overflow-x-auto no-scrollbar">
-            <div className="flex items-center gap-1">
+
+
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
+        {/* Sidebar Filters */}
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
+          {/* Alphabet Index Filter Card */}
+          <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4 text-left font-sans animate-fade-in">
+            <div className="flex flex-col gap-1">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2 leading-none">
+                FILTER BY <span className="text-orange-primary font-bold">INITIAL</span>
+              </h3>
+              <div className="w-full h-px bg-gray-105" />
+            </div>
+
+            <div className="grid grid-cols-4 gap-1.5">
               <button 
                 onClick={() => setSelectedLetter(null)}
                 className={cn(
-                  "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg flex-shrink-0",
-                  selectedLetter === null ? "bg-orange-primary text-white shadow-orange-primary/20" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                  "col-span-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
+                  selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                 )}
               >
                 All Brands
               </button>
-              <div className="w-px h-6 bg-gray-100 mx-2 flex-shrink-0" />
               {letters.map((letter) => (
                 <button 
                   key={letter} 
                   onClick={() => setSelectedLetter(letter)}
                   className={cn(
-                    "w-8 h-8 rounded-xl text-[10px] font-black transition-all flex items-center justify-center flex-shrink-0 uppercase",
-                    selectedLetter === letter ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/20" : "text-gray-400 hover:text-navy hover:bg-gray-50"
+                    "h-8 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                    selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
                   )}
                 >
                   {letter}
                 </button>
               ))}
-              <button className="w-8 h-8 rounded-xl text-[10px] font-black text-gray-400 hover:text-navy hover:bg-gray-50 flex items-center justify-center flex-shrink-0 transition-all uppercase">#</button>
             </div>
-            <div className="flex items-center gap-6 whitespace-nowrap">
-              {(selectedLetter || searchQuery) && (
-                <button 
-                  onClick={() => {setSelectedLetter(null); setSearchQuery('');}}
-                  className="text-[10px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-2 transition-all"
-                >
-                  Clear Selection
-                </button>
-              )}
-              <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                Direct Brand Jump
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
-        {/* Sidebar Filters */}
-        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-          {/* Filter By Brand */}
-          <div className="bg-white rounded-2xl p-4.5 shadow-sm border border-[#e8edf2] text-left">
-            <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">FILTER BY BRAND TYPE</h3>
-              <button className="text-[9px] font-semibold text-orange-primary uppercase hover:underline">Clear all</button>
-            </div>
-            <div className="space-y-3">
-              {[
-                { name: 'Apex', checked: true },
-                { name: 'Gadget & Gear', checked: false },
-                { name: 'Nike', checked: false },
-                { name: 'Adidas', checked: true },
-                { name: 'Bay', checked: false },
-                { name: 'Dhaka Boot Barn', checked: false },
-                { name: 'Estilo', checked: false },
-                { name: 'Arlin Shoes', checked: false },
-                { name: 'Eco & Para', checked: false },
-                { name: 'Masco', checked: false }
-              ].map(item => (
-                <label key={item.name} className="flex items-center gap-3 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    defaultChecked={item.checked}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary accent-orange-primary cursor-pointer" 
-                  />
-                  <span className="text-xs font-semibold text-gray-500 group-hover:text-navy transition-colors">{item.name}</span>
-                </label>
-              ))}
-            </div>
-            <button className="mt-4 text-[10px] font-semibold text-orange-primary uppercase hover:underline text-left">Show All Filters</button>
           </div>
 
           {/* BUSINESS SELLERS INFO CARD */}
@@ -415,7 +373,86 @@ export function BrandsPage() {
         </aside>
 
         {/* Main Content Area */}
-        <main id="brands-main-display" className="scroll-mt-36 min-w-0 pb-10 space-y-12">
+        <main id="brands-main-display" className="scroll-mt-36 min-w-0 pb-10 space-y-6">
+          {/* Header info bar (Unified with Brand Deals layout cohesion) */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8edf2] font-sans">
+            <div>
+              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] italic leading-none">
+                OUR PARTNERS • BRAND DIRECTORY
+              </h3>
+              <h2 className="text-xl font-black text-[#1A1D4E] italic uppercase tracking-tighter mt-2 leading-none">
+                {activeTab === 'All Brands' ? 'ALL BRANDS' : activeTab.toUpperCase()}
+                {selectedLetter && ` • STARTING WITH "${selectedLetter}"`}
+                {searchQuery && ` • SEARCH: "${searchQuery.toUpperCase()}"`}
+                <span className="text-orange-primary"> ({filteredBrands.length} FOUND)</span>
+              </h2>
+            </div>
+            
+            {(selectedLetter || searchQuery || activeTab !== 'All Brands') && (
+              <button 
+                onClick={() => {setSelectedLetter(null); setSearchQuery(''); setActiveTab('All Brands');}}
+                className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#e8edf2] px-3.5 py-2 rounded-[5px] shadow-sm self-start sm:self-auto hover:text-[#CF4400] cursor-pointer"
+              >
+                Reset All Filters
+              </button>
+            )}
+          </div>
+
+          {/* Tablet/Mobile Collapsible A-Z Filter Card */}
+          <div className="lg:hidden bg-white rounded-[5px] p-4 border border-[#e8edf2] shadow-sm mb-6 font-sans">
+            <div 
+              className="flex items-center justify-between cursor-pointer" 
+              onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5 leading-none">
+                  <Filter size={11} className="text-[#E8500A]" />
+                  FILTER BY INITIAL:
+                </span>
+                <span className="px-2 py-0.5 bg-[#E8500A]/10 text-[#E8500A] text-[9px] font-black uppercase rounded-[3px] leading-none">
+                  {selectedLetter === null ? 'All' : selectedLetter}
+                </span>
+              </div>
+              <span className="text-[9.5px] font-black text-[#E8500A] uppercase tracking-widest">
+                {isMobileFilterOpen ? 'Hide' : 'Show A-Z'}
+              </span>
+            </div>
+            
+            {isMobileFilterOpen && (
+              <div className="mt-4 pt-4 border-t border-gray-100/80">
+                <div className="grid grid-cols-6 sm:grid-cols-9 gap-1.5">
+                  <button 
+                    onClick={() => {
+                      setSelectedLetter(null);
+                      setIsMobileFilterOpen(false);
+                    }}
+                    className={cn(
+                      "col-span-6 sm:col-span-9 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
+                      selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                    )}
+                  >
+                    All Brands
+                  </button>
+                  {letters.map((letter) => (
+                    <button 
+                      key={letter} 
+                      onClick={() => {
+                        setSelectedLetter(letter);
+                        setIsMobileFilterOpen(false);
+                      }}
+                      className={cn(
+                        "h-8 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                        selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
+                      )}
+                    >
+                      {letter}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Choosify Recommends Section */}
           <div className="mb-12">
             <div className="flex items-center gap-4 mb-8 overflow-hidden">
@@ -583,32 +620,33 @@ export function BrandsPage() {
             </div>
           ))}
 
-          {/* New Redesigned Pagination */}
-          <div className="mt-16 bg-white rounded-full px-8 py-5 flex items-center justify-between shadow-soft border border-gray-50 flex-wrap gap-6">
-            <div className="flex items-center gap-10">
-               <button className="flex items-center gap-2 text-xs font-black text-orange-primary uppercase tracking-widest group">
-                  <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
-                  Previous
-               </button>
-               <div className="flex items-center gap-2">
-                  <button className="w-8 h-8 rounded-full text-xs font-bold text-gray-400 hover:bg-gray-50">1</button>
-                  <button className="w-8 h-8 rounded-full text-xs font-bold text-gray-400 hover:bg-gray-50">2</button>
-                  <button className="w-10 h-10 rounded-full text-xs font-black bg-orange-primary text-white shadow-lg shadow-orange-primary/30 scale-110">3</button>
-                  <button className="w-8 h-8 rounded-full text-xs font-bold text-gray-400 hover:bg-gray-50">5</button>
-                  <button className="w-8 h-8 rounded-full text-xs font-bold text-gray-400 hover:bg-gray-50">6</button>
-                  <button className="w-8 h-8 rounded-full text-xs font-bold text-gray-400 hover:bg-gray-50">7</button>
-                  <button className="w-8 h-8 rounded-full text-xs font-bold text-gray-400 hover:bg-gray-50">8</button>
-                  <span className="text-xs text-gray-300 font-bold px-1">....</span>
-                  <button className="w-8 h-8 rounded-full text-xs font-bold text-gray-400 hover:bg-gray-50">32</button>
-               </div>
-               <button className="flex items-center gap-2 text-xs font-black text-orange-primary uppercase tracking-widest group">
-                  Next 
-                  <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-               </button>
+          {/* Standard Redesigned Pagination matching global standard */}
+          <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
+            <div className="flex items-center gap-3">
+              <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
+                <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
+              </button>
+              {[1, 2, 3, '...', 12].map((page, i) => (
+                <button 
+                  key={i} 
+                  className={cn(
+                    "w-12 h-12 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
+                    page === 1 
+                    ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
+                    : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
+                  )}
+                >
+                  {page}
+                </button>
+              ))}
+              <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
-            <div className="text-[11px] font-black text-navy uppercase tracking-widest opacity-80">
-               Showing 100 Of 150 Results
-            </div>
+            
+            <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">
+              Showing 100 Of 150 Results
+            </p>
           </div>
 
           {Object.keys(groupedBrands).length === 0 && (

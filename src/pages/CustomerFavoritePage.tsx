@@ -14,7 +14,7 @@ import { toast } from 'react-hot-toast';
 
 export function CustomerFavoritePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, mode, addToCart } = useGlobalState();
+  const { allProducts, allBrands, mode, addToCart, isLoggedIn, setIsLoggedIn } = useGlobalState();
 
   // Scroll to top on mount
   useEffect(() => {
@@ -543,143 +543,6 @@ export function CustomerFavoritePage() {
           {/* ================================================= */}
           <main className="flex-1 space-y-10 min-w-0">
             
-            {/* INLINE MODERATION DASHBOARD */}
-            <div className="bg-[#0d0e25] text-white rounded-[5px] p-5 shadow-lg border border-white/5 animate-fade-in text-left relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-xl pointer-events-none" />
-              
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/5 pb-4 mb-4">
-                <div>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="bg-[#E8500A]/20 text-[#E8500A] text-[9.5px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded font-mono border border-[#E8500A]/30">
-                      ADMIN PORTAL
-                    </span>
-                    <h2 className="text-sm font-bold uppercase tracking-tight italic">
-                      Choosify Community Sourcing Desk
-                    </h2>
-                  </div>
-                  <p className="text-[10px] text-gray-400 mt-1">
-                    Review and approve submitted items from TikTok, Facebook Live, and local boutiques. Approvable catalog items render live instantly!
-                  </p>
-                </div>
-                <div className="bg-white/5 px-3 py-1.5 rounded border border-white/10 text-[9px] font-mono whitespace-nowrap text-right shrink-0">
-                  <p className="text-white/60">QUEUE: <span className="text-[#E8500A] font-bold">{customSubmittedProducts.filter((p: any) => p.status === 'pending').length} PENDING</span></p>
-                </div>
-              </div>
-
-              {customSubmittedProducts.length === 0 ? (
-                <div className="py-6 text-center text-gray-500 text-[10px] font-semibold uppercase tracking-widest font-mono">
-                  Verification desk queue is currently empty. Submit a product to initiate review!
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {customSubmittedProducts.map((p: any) => {
-                    const isPending = p.status === 'pending';
-                    const isApproved = p.status === 'approved';
-                    const isRejected = p.status === 'rejected';
-
-                    return (
-                      <div 
-                        key={`mod-${p.id}`} 
-                        className={cn(
-                          "p-3 rounded-[5px] border transition-all text-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4",
-                          isPending ? "bg-white/5 border-white/5" : "",
-                          isApproved ? "bg-emerald-950/20 border-emerald-950/40 text-emerald-200" : "",
-                          isRejected ? "bg-rose-950/20 border-rose-950/40 text-gray-400" : ""
-                        )}
-                      >
-                        <div className="flex items-start gap-3 min-w-0 flex-1">
-                          {/* Mini Thumbnail */}
-                          <div className="w-12 h-12 bg-white/5 rounded-[5px] border border-white/10 p-1 flex items-center justify-center shrink-0 overflow-hidden bg-white">
-                            <img src={p.image} alt="" className="max-w-full max-h-full object-contain" />
-                          </div>
-                          
-                          {/* Info Column */}
-                          <div className="min-w-0 flex-1 leading-tight text-left">
-                            <div className="flex items-center gap-2 flex-wrap mb-1 leading-none">
-                              <span className="text-[10px] font-bold text-[#E8500A] uppercase leading-none">{p.brand}</span>
-                              <span className="text-[8px] bg-white/5 border border-white/10 text-gray-400 px-1.5 py-0.5 rounded uppercase font-mono leading-none">
-                                {p.category}
-                              </span>
-                              {p.productType && (
-                                <span className="text-[7.5px] bg-[#E8500A]/10 text-orange-primary px-1.5 py-0.5 rounded uppercase font-mono border border-orange-primary/10 leading-none">
-                                  ⚡ {p.productType.toUpperCase()}
-                                </span>
-                              )}
-                            </div>
-                            
-                            <h4 className={cn("text-xs font-semibold leading-tight mb-1", isPending ? "text-white" : "")}>{p.title}</h4>
-                            <p className="text-[10px] text-gray-400 line-clamp-1 italic">
-                              "{p.description}"
-                            </p>
-
-                            {/* Additional Dynamic specs / meta */}
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-[8.5px] text-gray-500 font-mono">
-                              <span>BDT {p.price?.toLocaleString()}</span>
-                              {p.discount && <span className="text-rose-400 font-semibold">{p.discount}</span>}
-                              {p.socialProof && <span className="text-blue-400">{p.socialProof}</span>}
-                              {p.promoCode && <span className="text-amber-400 font-bold">🎫 {p.promoCode}</span>}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Actions Col */}
-                        <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end border-t md:border-t-0 border-white/5 pt-2 md:pt-0">
-                          {isPending ? (
-                            <>
-                              <button
-                                onClick={() => {
-                                  setCustomSubmittedProducts(prev => 
-                                    prev.map(item => item.id === p.id ? { ...item, status: 'approved' } : item)
-                                  );
-                                  toast.success(`"${p.title}" verified and published to live catalog!`);
-                                }}
-                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[9px] font-black uppercase tracking-wider transition-colors cursor-pointer border-0 shadow-sm"
-                              >
-                                Approve
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setCustomSubmittedProducts(prev => 
-                                    prev.map(item => item.id === p.id ? { ...item, status: 'rejected' } : item)
-                                  );
-                                  toast.error(`"${p.title}" rejected and cataloged into review archives.`);
-                                }}
-                                className="px-3 py-1.5 bg-white/5 hover:bg-rose-500/10 hover:text-rose-500 rounded text-[9px] font-black text-gray-400 uppercase tracking-wider transition-colors cursor-pointer border border-white/10"
-                              >
-                                Reject
-                              </button>
-                            </>
-                          ) : (
-                            <div className="flex items-center gap-1.5 text-[8.5px] font-black uppercase tracking-wider font-mono">
-                              {isApproved ? (
-                                <span className="text-emerald-400 flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
-                                  ✔️ Published Live
-                                </span>
-                              ) : (
-                                <span className="text-rose-400 flex items-center gap-1 bg-rose-500/10 px-2 py-1 rounded border border-rose-500/20">
-                                  ❌ Rejected
-                                </span>
-                              )}
-                              <button
-                                onClick={() => {
-                                  setCustomSubmittedProducts(prev => 
-                                    prev.map(item => item.id === p.id ? { ...item, status: 'pending' } : item)
-                                  );
-                                }}
-                                className="px-1.5 py-1 bg-white/5 hover:bg-white/15 text-white rounded text-[8px] font-semibold border-0 transition-colors cursor-pointer"
-                              >
-                                Reset
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
             {/* SECTION A: FEATURED VIRAL PRODUCTS (Grid Layout - Top 5) */}
             {activeTab === 'All Products' && !searchQuery && featuredViralProducts.length > 0 && (
               <section className="space-y-4">
@@ -939,7 +802,42 @@ export function CustomerFavoritePage() {
                 </button>
               </div>
 
-              {isSubmitSuccess ? (
+              {!isLoggedIn ? (
+                /* Guest prompt screen */
+                <div className="py-6 text-center space-y-4 animate-scale-up">
+                  <div className="w-12 h-12 rounded-full bg-orange-primary/10 text-orange-primary flex items-center justify-center mx-auto text-xl font-bold">
+                    🔑
+                  </div>
+                  <h3 className="font-bold text-base text-[#1a1a2e] uppercase tracking-wide">
+                    Login Required
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto font-medium">
+                    Please log in to submit a product to Customer Favorites.
+                  </p>
+                  <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4 max-w-xs mx-auto">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsLoggedIn(true);
+                        toast.success("Successfully logged in!");
+                      }}
+                      className="w-full sm:w-1/2 px-4 py-2.5 bg-orange-primary hover:bg-[#ff5a0c] text-white rounded-xl text-[10px] font-bold uppercase tracking-wider italic cursor-pointer shadow-md shadow-orange-primary/10 border-0"
+                    >
+                      Login
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSubmitModalOpen(false);
+                        navigate('/login');
+                      }}
+                      className="w-full sm:w-1/2 px-4 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 text-[10px] font-bold uppercase tracking-wider italic cursor-pointer bg-white text-slate-700"
+                    >
+                      Create Account
+                    </button>
+                  </div>
+                </div>
+              ) : isSubmitSuccess ? (
                 /* Success screen */
                 <div className="py-6 text-center space-y-4 animate-scale-up">
                   <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-xl font-bold animate-pulse">
@@ -949,7 +847,7 @@ export function CustomerFavoritePage() {
                     Listing Successfully Sourced!
                   </h3>
                   <p className="text-xs text-gray-500 leading-relaxed max-w-sm mx-auto font-medium">
-                    Your suggested product was successfully added to local moderations. You can find it in the <span className="font-bold text-[#E8500A]">"Choosify Community Sourcing Desk"</span> on this page. Approving it will launch it live instantly!
+                    Your suggested product was successfully submitted for vetting. Our editor desk will review and verify your request within 24 hours!
                   </p>
                   <div className="flex justify-center gap-3 pt-4">
                     <button

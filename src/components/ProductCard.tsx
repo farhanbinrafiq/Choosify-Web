@@ -365,9 +365,9 @@ export function ProductCard({
                <button 
                  type="button" 
                  onClick={(e) => { e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); } else { const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); } }} 
-                 className="px-4 py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white rounded text-[10px] font-semibold uppercase tracking-wider cursor-pointer transition-colors shrink-0"
+                 className="hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center text-center px-5 py-2.5 rounded-full shadow-md text-[10px] md:text-[11px] font-black uppercase tracking-wider italic hover:scale-[1.03] active:scale-95"
                >
-                  {isGuideDetail ? 'Shop Now' : 'Add to cart'}
+                 {isGuideDetail ? 'Shop Now' : 'Add to Cart'}
                </button>
             </div>
          </div>
@@ -379,10 +379,10 @@ export function ProductCard({
     return (
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
-        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer group relative h-full animate-in fade-in"
+        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer group relative w-full min-h-[270px] h-full box-border animate-in fade-in"
       >
         <div 
-          className="w-full aspect-square bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-2.5 select-none shrink-0"
+          className="w-full h-[140px] bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-2 select-none shrink-0"
           style={imageContainerStyle}
         >
             <div className="absolute top-2 left-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
@@ -409,37 +409,46 @@ export function ProductCard({
             <ProductCardImageCarousel 
               images={getProductCardImages(product)} 
               alt={product.title} 
-              containerClassName="absolute inset-0 p-2.5"
+              containerClassName="absolute inset-0 p-2"
             />
         </div>
         
-        <div className="flex flex-col gap-1.5 pt-2 flex-1 text-left min-h-0">
-          <div className="flex items-center justify-between gap-1 w-full">
-            <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider truncate max-w-[80px]">{brandName}</span>
-            <div className="flex items-center gap-0.5 shrink-0 ml-auto bg-gray-50 px-1 py-0.5 rounded">
-              <Star size={7.5} className="fill-orange-primary text-orange-primary" />
-              <span className="text-[8px] font-semibold text-gray-500">4.8</span>
+        <div className="flex flex-col pt-2 flex-grow min-h-0 text-left justify-between select-none">
+          <div className="flex flex-col gap-1 w-full">
+            <div className="flex items-center justify-between gap-1 w-full leading-none">
+              <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider truncate max-w-[80px]">{brandName}</span>
+              <div className="flex items-center gap-0.5 shrink-0 ml-auto bg-gray-50 px-1 py-0.5 rounded leading-none">
+                <Star size={7} className="fill-orange-primary text-orange-primary" />
+                <span className="text-[8.5px] font-semibold text-gray-500">4.8</span>
+              </div>
             </div>
+            
+            {mode === 'wholesale' && (
+              <div className="flex flex-wrap gap-1 mt-0.5">
+                <span className="bg-orange-primary/10 text-[#E8500A] text-[6.5px] font-semibold px-1 rounded uppercase tracking-wider leading-none">
+                  Wholesale Approved
+                </span>
+              </div>
+            )}
+
+            <h4 className="text-[11px] font-semibold text-[#1a1a2e] leading-snug line-clamp-1 group-hover:text-orange-primary transition-colors min-h-[14px] truncate leading-none mt-1">
+              {product.title}
+            </h4>
           </div>
           
-          {mode === 'wholesale' && (
-            <div className="flex flex-wrap gap-1">
-              <span className="bg-orange-primary/10 text-[#E8500A] text-[6.5px] font-semibold px-1 rounded uppercase tracking-wider">
-                Wholesale Approved
-              </span>
-            </div>
-          )}
-
-          <h4 className="text-[11px] font-medium text-[#1a1a2e] leading-snug line-clamp-1 group-hover:text-orange-primary transition-colors mb-1">
-            {product.title}
-          </h4>
-          
-          <div className="flex items-center justify-between gap-2 mt-auto pt-2 border-t border-gray-100 w-full select-none">
-             <div className="flex flex-col text-left justify-center min-w-0">
-                <span className="text-xs font-mono font-semibold text-[#E8500A]">BDT {product.price.toLocaleString()}</span>
-                {product.originalPrice && (
-                  <span className="text-[8px] font-mono text-gray-400 line-through mt-0.5">৳{product.originalPrice}</span>
-                )}
+          <div className="mt-auto pt-2 border-t border-gray-100 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
+             <div className="flex flex-col text-left min-w-0 gap-0.5">
+                <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-0.5">
+                  {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
+                </span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">BDT {product.price.toLocaleString()}</span>
+                  {product.originalPrice ? (
+                    <span className="text-[8px] font-mono text-gray-400 line-through leading-none whitespace-nowrap">৳{product.originalPrice}</span>
+                  ) : (
+                    <span className="text-[8px] font-mono text-transparent select-none leading-none whitespace-nowrap">Placeholder</span>
+                  )}
+                </div>
              </div>
              
              <button 
@@ -450,11 +459,11 @@ export function ProductCard({
                  addToCart(product, qty); 
                  toast.success(`Successfully added ${product.title} to your cart!`);
                }} 
-               className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[8px] font-semibold rounded uppercase tracking-wide cursor-pointer transition-colors"
+               className="hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center text-center px-4 py-2 rounded-full shadow-sm text-[9px] font-black uppercase tracking-wider italic hover:scale-[1.03] active:scale-95 leading-none w-full lg:w-auto mt-1 lg:mt-0"
                aria-label="Add to cart"
              >
-               {isGuideDetail ? 'Shop Now' : 'Add to cart'}
-             </button>
+               {isGuideDetail ? 'Shop Now' : 'Add to Cart'}
+              </button>
           </div>
         </div>
       </div>
@@ -532,9 +541,9 @@ export function ProductCard({
                 addToCart(product, qty);
                 toast.success(`Successfully added ${product.title} to your cart!`);
               }}
-              className="px-3 py-1.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[9px] font-semibold rounded uppercase tracking-wider transition-colors"
+              className="hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center text-center px-4 py-2 rounded-full shadow-sm text-[10px] font-black uppercase tracking-wider italic hover:scale-[1.03] active:scale-95 leading-none"
             >
-              {isGuideDetail ? 'Shop Now' : 'Add to cart'}
+              {isGuideDetail ? 'Shop Now' : 'Add to Cart'}
             </button>
           </div>
         </div>
@@ -544,13 +553,13 @@ export function ProductCard({
 
   return (
     <div 
-      className="bg-white rounded-[5px] p-2.5 shadow-none hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer shrink-0" 
+      className={cn(
+        "bg-white rounded-[5px] p-2.5 shadow-none hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer shrink-0 w-full",
+        isGuideDetail ? "min-h-[385px] h-full" : "min-h-[268px] h-full"
+      )}
       onClick={() => navigate(`/products/${product.id}`)}
       id={`product-${product.id}`}
       style={{
-        width: isGuideDetail ? '100%' : '100%',
-        maxWidth: isGuideDetail ? 'none' : '174px',
-        height: isGuideDetail ? '385px' : '258px', // Targeted standard height
         boxSizing: 'border-box'
       }}
     >
@@ -637,13 +646,13 @@ export function ProductCard({
           })()}
         </div>
         
-        <div className="mt-auto pt-1 border-t border-gray-100 flex items-center justify-between gap-1 w-full overflow-hidden">
-          <div className="flex flex-col min-w-0">
+        <div className="mt-auto pt-2 border-t border-gray-100 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
+          <div className="flex flex-col text-left min-w-0 gap-0.5">
              <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-0.5">
                {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
               </span>
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] font-mono font-semibold text-[#E8500A] leading-none whitespace-nowrap">
+                <span className="text-[10px] sm:text-[11px] font-mono font-semibold text-[#E8500A] leading-none whitespace-nowrap">
                   BDT {product.price.toLocaleString()}
                 </span>
                 {product.originalPrice && (
@@ -662,9 +671,9 @@ export function ProductCard({
               addToCart(product, qty);
               toast.success(`Successfully added ${product.title} to your cart!`);
             }}
-            className="px-2 py-0.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[7.5px] font-semibold rounded uppercase tracking-wider transition-colors shrink-0 leading-none h-6 flex items-center"
+            className="hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center text-center px-4 py-2 rounded-full shadow-sm text-[9px] font-black uppercase tracking-wider italic hover:scale-[1.03] active:scale-95 leading-none w-full lg:w-auto mt-1 lg:mt-0"
           >
-             {isGuideDetail ? 'Shop Now' : 'Add to cart'}
+             {isGuideDetail ? 'Shop Now' : 'Add to Cart'}
           </button>
         </div>
       </div>

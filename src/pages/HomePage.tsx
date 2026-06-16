@@ -12,6 +12,7 @@ import {
 import { ProductCard } from '../components/ProductCard';
 import { CampaignBannerCarousel } from '../components/CampaignBannerCarousel';
 import { PRODUCTS, BRANDS, BLOGS } from '../constants';
+import { FeaturedCard, ReelCard, HorizontalMediaCard } from './GuidesPage';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import toast from 'react-hot-toast';
@@ -76,6 +77,44 @@ export function HomePage() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [showAllFollowed, setShowAllFollowed] = useState(false);
   const [activeStickySection, setActiveStickySection] = useState('all');
+
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [dragStartX, setDragStartX] = useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        setCarouselIndex((prev) => (prev + 1) % CAROUSEL_BRANDS.length);
+      } else {
+        setCarouselIndex((prev) => (prev - 1 + CAROUSEL_BRANDS.length) % CAROUSEL_BRANDS.length);
+      }
+    }
+    setTouchStartX(null);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setDragStartX(e.clientX);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (dragStartX === null) return;
+    const diff = dragStartX - e.clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        setCarouselIndex((prev) => (prev + 1) % CAROUSEL_BRANDS.length);
+      } else {
+        setCarouselIndex((prev) => (prev - 1 + CAROUSEL_BRANDS.length) % CAROUSEL_BRANDS.length);
+      }
+    }
+    setDragStartX(null);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -641,7 +680,8 @@ export function HomePage() {
       </div>
 
       {/* SECTION 4 — THREE COLUMN GRID */}
-      <main className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
+      <main className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-6 relative">
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
         
         {/* LEFT STICKY SIDEBAR */}
         <aside 
@@ -866,7 +906,14 @@ export function HomePage() {
                 </div>
 
                 {/* Interactive Brands sliding carousel */}
-                <div className="flex items-center justify-center gap-3 md:gap-4 overflow-hidden" style={{ height: '458.656px' }}>
+                <div 
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                  onMouseDown={handleMouseDown}
+                  onMouseUp={handleMouseUp}
+                  className="flex items-center justify-center gap-3 md:gap-4 overflow-hidden select-none active:cursor-grabbing" 
+                  style={{ height: '458.656px' }}
+                >
                   {CAROUSEL_BRANDS.map((brand, i) => {
                     const isActive = i === carouselIndex;
                     
@@ -1281,124 +1328,8 @@ export function HomePage() {
                 </div>
 
                 {/* Main Featured Buying Guide banner blog layout */}
-                <div className="border border-[#e8edf2] rounded-xl overflow-hidden shadow-sm hover:border-gray-200/80 transition-all duration-300 mb-6 bg-white flex flex-col group">
-                  <div 
-                    onClick={() => {
-                      handleRecView('featured');
-                      navigate(`/guides/${featuredBlog.id}`);
-                    }}
-                    className="aspect-[1.9/1] w-full bg-slate-950 relative overflow-hidden cursor-pointer"
-                  >
-                    <img 
-                      src="https://images.unsplash.com/photo-1531538606174-0f90ff5dce83?w=1200&h=675&fit=crop" 
-                      className="w-full h-full object-cover opacity-85 group-hover:scale-[1.02] transition-transform duration-700" 
-                      alt="Featured recommendation" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/25 pointer-events-none" />
-                    
-                    {/* Top-Left Featured Badge */}
-                    <span className="absolute top-4 left-4 inline-flex items-center gap-1 px-2 py-1 bg-[#E8500A] text-white text-[9px] font-semibold uppercase tracking-wider rounded shadow pointer-events-none">
-                      ★ FEATURED
-                    </span>
-
-                    {/* Top-Right YouTube Badge */}
-                    <div className="absolute top-4 right-4 flex flex-col items-center">
-                      <div className="w-8 h-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-[#E8500A] transition-colors shadow">
-                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                          <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.516 0-9.387.507A3.003 3.003 0 0 0 .503 6.163C0 8.044 0 12 0 12s0 3.956.503 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.507 9.387.507 9.387.507s7.517 0 9.387-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.956 24 12 24 12s0-3.956-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
-                      </div>
-                      <span className="text-[7.5px] font-medium text-white tracking-wider uppercase mt-0.5">Youtube</span>
-                    </div>
-
-                    {/* Large Red Circular Play Button Center Override */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-14 h-14 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow scale-100 group-hover:scale-105 transition-transform duration-300 border border-white/10">
-                        <Play className="w-6 h-6 fill-current ml-1 text-white" />
-                      </div>
-                    </div>
-
-                    {/* Lower Image Info text overlays */}
-                    <div className="absolute bottom-4 left-4 pr-24 text-left pointer-events-none">
-                      <h3 className="text-lg font-bold text-white uppercase tracking-tight leading-tight mb-1">
-                        TOP 10 SMARTPHONES TO BUY IN 2026
-                      </h3>
-                      <p className="text-[10px] text-white/70 font-normal line-clamp-1 italic max-w-2xl">
-                        Top 10 Smartphones to Buy in 2026. Find the best phone deals...
-                      </p>
-                    </div>
-
-                    {/* Length Ticker pill of video element */}
-                    <span className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md text-white text-[9px] font-mono px-2 py-0.5 rounded">
-                      8:10
-                    </span>
-                  </div>
-
-                  {/* Featured Card lower body block */}
-                  <div className="p-5 text-left bg-white">
-                    <h4 
-                      onClick={() => {
-                        handleRecView('featured');
-                        navigate(`/guides/${featuredBlog.id}`);
-                      }}
-                      className="text-base font-semibold uppercase text-[#1a1a2e] leading-snug hover:text-[#E8500A] transition-colors cursor-pointer mb-2"
-                    >
-                      TOP 10 SMARTPHONES TO BUY IN 2026
-                    </h4>
-                    <p className="text-xs text-[#6B7280] leading-relaxed mb-4">
-                      Top 10 Smartphones to Buy in 2026. Find the best phone deals. Complete shopping guidelines containing direct warranty verifications and merchant scoring formulas based on real user trials.
-                    </p>
-
-                    {/* Active dynamic interactive toolbar aligned to template */}
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-auto">
-                      <div className="flex items-center gap-5 text-[10.5px] text-gray-400 font-mono select-none">
-                        
-                        {/* React/Love Button */}
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleRecLike('featured'); }}
-                          className={cn(
-                            "flex items-center gap-1.5 transition-all duration-250 cursor-pointer",
-                            recommendationStates.featured.liked ? "text-rose-500 font-semibold" : "hover:text-[#E8500A]"
-                          )}
-                        >
-                          <Heart className={cn("w-4 h-4", recommendationStates.featured.liked ? "fill-current text-rose-500 scale-105" : "")} /> 
-                          <span>{recommendationStates.featured.liked ? "12.1k" : "12k"}</span>
-                        </button>
-
-                        {/* Viewed Button */}
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleRecView('featured'); }}
-                          className="flex items-center gap-1.5 hover:text-[#E8500A] transition-colors cursor-pointer"
-                        >
-                          <Eye className="w-4 h-4" /> 
-                          <span>{(recommendationStates.featured.views / 1000).toFixed(1)}k</span>
-                        </button>
-
-                        {/* Share Button */}
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleRecShare('featured'); }}
-                          className="flex items-center gap-1.5 hover:text-[#E8500A] text-gray-500 transition-colors cursor-pointer"
-                        >
-                          <Share2 className="w-4.5 h-4.5" /> 
-                          <span>{recommendationStates.featured.shares}</span>
-                        </button>
-                      </div>
-
-                      {/* Bookmark Icon Button on far-right */}
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleRecBookmark('featured'); }}
-                        className={cn(
-                          "w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all hover:shadow-sm cursor-pointer",
-                          recommendationStates.featured.bookmarked ? "border-[#E8500A]/30 bg-[#FFF0E8]/40" : "hover:border-gray-200"
-                        )}
-                      >
-                        <Bookmark className={cn(
-                          "w-4 h-4 transition-colors duration-200", 
-                          recommendationStates.featured.bookmarked ? "fill-[#E8500A] text-[#E8505A]" : "text-gray-400"
-                        )} />
-                      </button>
-                    </div>
-                  </div>
+                <div className="mb-6">
+                  <FeaturedCard guide={BLOGS[0]} />
                 </div>
 
                 {/* Sub Guides Grid matching elements visually */}
@@ -1407,275 +1338,9 @@ export function HomePage() {
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
                   style={{ paddingTop: '0px', paddingBottom: '0px' }}
                 >
-                  
-                  {/* CARD 1: Reels Card 1 (Vertical Aspect Video) */}
-                  <div className="bg-white border border-[#e8edf2] rounded-xl overflow-hidden shadow-sm hover:scale-[1.01] transition-all duration-350 flex flex-col group">
-                    <div 
-                      onClick={() => handleRecView('card1')}
-                      className="relative h-[240px] bg-slate-950 overflow-hidden cursor-pointer"
-                    >
-                      <img 
-                        src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=1000&fit=crop" 
-                        className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" 
-                        alt="Reel 1 Bottle" 
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 pointer-events-none" />
-                      
-                      {/* Top-Left Reel Badge */}
-                      <span className="absolute top-3 left-3 inline-flex items-center px-2 py-0.5 bg-white text-black text-[8.5px] font-semibold uppercase tracking-wider rounded border border-gray-100">
-                        REEL
-                      </span>
-
-                      {/* Top-Right Instagram Badge */}
-                      <div className="absolute top-3 right-3 flex flex-col items-center">
-                        <div className="w-7 h-7 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-white">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-white">
-                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                          </svg>
-                        </div>
-                      </div>
-
-                      {/* Small Center Play Button */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-9 h-9 bg-red-600 rounded-full flex items-center justify-center shadow">
-                          <Play className="w-4 h-4 fill-current ml-0.5 text-white" />
-                        </div>
-                      </div>
-
-                      {/* Bottom title overlays on image */}
-                      <div className="absolute bottom-3 left-3 pr-12 text-left pointer-events-none">
-                        <h4 className="text-sm font-semibold text-white tracking-tight leading-tight">
-                          TOP 10 SMARTPHONES TO BUY IN 2026
-                        </h4>
-                      </div>
-
-                      {/* Video length badge inside image */}
-                      <span className="absolute bottom-3 right-3 bg-black/75 backdrop-blur-md text-white text-[8px] font-mono px-1.5 py-0.5 rounded">
-                        8:10
-                      </span>
-                    </div>
-
-                    {/* Card Footer bar actions */}
-                    <div className="p-3 bg-white border-t border-gray-100 flex items-center justify-between text-left">
-                      <div className="flex items-center gap-3 text-[10px] font-mono text-gray-400 select-none">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleRecLike('card1'); }}
-                          className={cn(
-                            "flex items-center gap-1 shrink-0 transition-colors cursor-pointer",
-                            recommendationStates.card1.liked ? "text-rose-500 font-semibold" : "hover:text-[#E8500A]"
-                          )}
-                        >
-                          <Heart className={cn("w-3.5 h-3.5", recommendationStates.card1.liked ? "fill-current text-rose-500" : "")} />
-                          <span>{recommendationStates.card1.liked ? "12.1k" : "12k"}</span>
-                        </button>
-
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleRecView('card1'); }}
-                          className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>1.2k</span>
-                        </button>
-
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleRecShare('card1'); }}
-                          className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
-                        >
-                          <Share2 className="w-3.5 h-3.5" />
-                          <span>{recommendationStates.card1.shares}</span>
-                        </button>
-                      </div>
-
-                      {/* Bookmark Button */}
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleRecBookmark('card1'); }}
-                        className={cn(
-                          "w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all hover:shadow cursor-pointer",
-                          recommendationStates.card1.bookmarked ? "bg-[#FFF0E8]/40 border-[#E8500A]/30 text-[#E8500A]" : "hover:border-gray-200"
-                        )}
-                      >
-                        <Bookmark className={cn("w-3.5 h-3.5", recommendationStates.card1.bookmarked ? "fill-[#E8505A] text-[#E8505A]" : "text-gray-400")} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* CARD 2: Blog Text Card 2 (Wide Landscape image & Body) */}
-                  <div className="bg-white border border-[#e8edf2] rounded-xl overflow-hidden shadow-sm hover:scale-[1.01] transition-all duration-350 flex flex-col group text-left">
-                    <div 
-                      onClick={() => handleRecView('card2')}
-                      className="relative h-28 bg-slate-900 overflow-hidden cursor-pointer"
-                    >
-                      <img 
-                        src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&h=500&fit=crop" 
-                        className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700" 
-                        alt="Blog Dress" 
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
-                      
-                      {/* Top-Left Read Time Badge */}
-                      <span className="absolute top-3 left-3 inline-flex items-center px-2 py-0.5 bg-white text-black text-[8.5px] font-semibold uppercase tracking-wider rounded border border-gray-100 font-mono">
-                        8 MIN READ
-                      </span>
-
-                      {/* Top-Right Blog badge */}
-                      <div className="absolute top-3 right-3 flex flex-col items-center">
-                        <div className="w-7 h-7 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-white">
-                          <PenTool className="w-3.5 h-3.5 text-white" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Card Content body with heading and excerpt */}
-                    <div className="p-3 flex-1 flex flex-col justify-between">
-                      <div className="mb-2">
-                        <h4 className="text-xs font-semibold uppercase text-[#1a1a2e] group-hover:text-[#E8500A] leading-snug mb-1 transition-colors line-clamp-2">
-                          TOP 10 SMARTPHONES TO BUY IN 2026
-                        </h4>
-                        <p className="text-[11px] text-gray-450 line-clamp-2 leading-relaxed">
-                          Top 10 Smartphones to Buy in 2026. Find the best phone deals...
-                        </p>
-                      </div>
-
-                      {/* Card actions row */}
-                      <div className="border-t border-gray-100 pt-3 mt-auto flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-[10px] font-mono text-gray-400 select-none">
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleRecLike('card2'); }}
-                            className={cn(
-                              "flex items-center gap-1 transition-colors cursor-pointer",
-                              recommendationStates.card2.liked ? "text-rose-500 font-semibold" : "hover:text-[#E8500A]"
-                            )}
-                          >
-                            <Heart className={cn("w-3.5 h-3.5", recommendationStates.card2.liked ? "fill-current text-rose-500" : "")} />
-                            <span>{recommendationStates.card2.liked ? "12.1k" : "12k"}</span>
-                          </button>
-
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleRecView('card2'); }}
-                            className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>1.2k</span>
-                          </button>
-
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleRecShare('card2'); }}
-                            className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
-                          >
-                            <Share2 className="w-3.5 h-3.5" />
-                            <span>{recommendationStates.card2.shares}</span>
-                          </button>
-                        </div>
-
-                        {/* Bookmark Button */}
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleRecBookmark('card2'); }}
-                          className={cn(
-                            "w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all hover:shadow cursor-pointer",
-                            recommendationStates.card2.bookmarked ? "bg-[#FFF0E8]/40 border-[#E8500A]/30 text-[#E8500A]" : "hover:border-gray-200"
-                          )}
-                        >
-                          <Bookmark className={cn("w-3.5 h-3.5", recommendationStates.card2.bookmarked ? "fill-[#E8500A] text-[#E8500A]" : "text-gray-400")} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CARD 3: Reels Card 3 (Vertical Aspect Video) */}
-                  <div className="bg-white border border-[#e8edf2] rounded-xl overflow-hidden shadow-sm hover:scale-[1.01] transition-all duration-350 flex flex-col group">
-                    <div 
-                      onClick={() => handleRecView('card3')}
-                      className="relative h-[240px] bg-slate-950 overflow-hidden cursor-pointer"
-                    >
-                      <img 
-                        src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=1000&fit=crop" 
-                        className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" 
-                        alt="Reel 3 Bottle duplicated" 
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 pointer-events-none" />
-                      
-                      {/* Top-Left Reel Badge */}
-                      <span className="absolute top-3 left-3 inline-flex items-center px-2 py-0.5 bg-white text-black text-[8.5px] font-semibold uppercase tracking-wider rounded border border-gray-100">
-                        REEL
-                      </span>
-
-                      {/* Top-Right Instagram Badge */}
-                      <div className="absolute top-3 right-3 flex flex-col items-center">
-                        <div className="w-7 h-7 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center text-white">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-white">
-                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                          </svg>
-                        </div>
-                      </div>
-
-                      {/* Small Center Play Button */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-9 h-9 bg-red-600 rounded-full flex items-center justify-center shadow">
-                          <Play className="w-4 h-4 fill-current ml-0.5 text-white" />
-                        </div>
-                      </div>
-
-                      {/* Bottom title overlays on image */}
-                      <div className="absolute bottom-3 left-3 pr-12 text-left pointer-events-none">
-                        <h4 className="text-sm font-semibold text-white tracking-tight leading-tight">
-                          TOP 10 SMARTPHONES TO BUY IN 2026
-                        </h4>
-                      </div>
-
-                      {/* Video length badge inside image */}
-                      <span className="absolute bottom-3 right-3 bg-black/75 backdrop-blur-md text-white text-[8px] font-mono px-1.5 py-0.5 rounded">
-                        8:10
-                      </span>
-                    </div>
-
-                    {/* Card Footer bar actions */}
-                    <div className="p-3 bg-white border-t border-gray-100 flex items-center justify-between text-left">
-                      <div className="flex items-center gap-3 text-[10px] font-mono text-gray-400 select-none">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleRecLike('card3'); }}
-                          className={cn(
-                            "flex items-center gap-1 shrink-0 transition-colors cursor-pointer",
-                            recommendationStates.card3.liked ? "text-rose-500 font-semibold" : "hover:text-[#E8500A]"
-                          )}
-                        >
-                          <Heart className={cn("w-3.5 h-3.5", recommendationStates.card3.liked ? "fill-current text-rose-500" : "")} />
-                          <span>{recommendationStates.card3.liked ? "12.1k" : "12k"}</span>
-                        </button>
-
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleRecView('card3'); }}
-                          className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>1.2k</span>
-                        </button>
-
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleRecShare('card3'); }}
-                          className="flex items-center gap-1 hover:text-[#E8500A] transition-colors cursor-pointer"
-                        >
-                          <Share2 className="w-3.5 h-3.5" />
-                          <span>{recommendationStates.card3.shares}</span>
-                        </button>
-                      </div>
-
-                      {/* Bookmark Button */}
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleRecBookmark('card3'); }}
-                        className={cn(
-                          "w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center bg-white transition-all hover:shadow cursor-pointer",
-                          recommendationStates.card3.bookmarked ? "bg-[#FFF0E8]/40 border-[#E8500A]/30 text-[#E8500A]" : "hover:border-gray-200"
-                        )}
-                      >
-                        <Bookmark className={cn("w-3.5 h-3.5", recommendationStates.card3.bookmarked ? "fill-[#E8505A] text-[#E8505A]" : "text-gray-400")} />
-                      </button>
-                    </div>
-                  </div>
-
+                  <ReelCard guide={BLOGS[1]} />
+                  <HorizontalMediaCard guide={BLOGS[2]} badgeType="youtube" />
+                  <HorizontalMediaCard guide={BLOGS[3]} badgeType="blog" />
                 </div>
 
                 {/* Explore all Recommendations bottom action button */}
@@ -1825,49 +1490,6 @@ export function HomePage() {
               )}
             </div>
           )}
-
-          {/* FEED SECTION G — TRUST BADGES */}
-          <div id="section-trust" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm animate-fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 rounded-[5px] border border-[#e8edf2] p-5 bg-[#EEF1F8]/10 shadow-none">
-              
-              <div className="text-center flex flex-col items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shrink-0 border border-[#E8500A]/5">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-[#1a1a2e] uppercase tracking-wide mb-1 leading-none">CONSUMER ADVOCACY</h4>
-                  <p className="text-[10.5px] text-gray-500 leading-relaxed max-w-xs mx-auto">
-                    Choosify lists merchant networks complying strictly with independent shopper audits. Our sole intention is safety-oriented purchasing.
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-center flex flex-col items-center gap-3 border-t md:border-t-0 md:border-x border-[#CFD4E6]/40 pt-5 md:pt-0">
-                <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shrink-0 border border-[#E8500A]/5">
-                  <DollarSign className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-[#1a1a2e] uppercase tracking-wide mb-1 leading-none">NO PAID PROMOTION</h4>
-                  <p className="text-[10.5px] text-gray-500 leading-relaxed max-w-xs mx-auto">
-                    We refuse merchant sponsorship commissions directly. Brands appear based purely on inventory availability and client satisfaction ratings.
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-center flex flex-col items-center gap-3 border-t md:border-t-0 pt-5 md:pt-0">
-                <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shrink-0 border border-[#E8500A]/5">
-                  <Star className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-[#1a1a2e] uppercase tracking-wide mb-1 leading-none">CURATED EXCELLENCE</h4>
-                  <p className="text-[10.5px] text-gray-500 leading-relaxed max-w-xs mx-auto">
-                    All listed retail lots feature solid distributor warranties and standard brand authenticity stamps, guaranteed.
-                  </p>
-                </div>
-              </div>
-
-            </div>
-          </div>
 
         </section>
 
@@ -2085,7 +1707,52 @@ export function HomePage() {
 
         </aside>
 
-      </main>
+      </div> {/* Closes three-column grid */}
+
+      {/* FEED SECTION G — TRUST BADGES */}
+      <div id="section-trust" className="mt-10 bg-white rounded-[5px] border border-[#e8edf2] p-6 md:p-8 shadow-sm animate-fade-in w-full text-left font-sans">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+          
+          <div className="text-center flex flex-col items-center gap-3.5">
+            <div className="w-11 h-11 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shrink-0 border border-[#E8500A]/5">
+              <ShieldCheck className="w-5.5 h-5.5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-[#1a1a2e] uppercase tracking-wide mb-1 leading-none">CONSUMER ADVOCACY</h4>
+              <p className="text-[10.5px] text-gray-500 leading-relaxed max-w-xs mx-auto">
+                Choosify lists merchant networks complying strictly with independent shopper audits. Our sole intention is safety-oriented purchasing.
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center flex flex-col items-center gap-3.5 border-t md:border-t-0 md:border-x border-[#e8edf2] pt-5 md:pt-0 px-4">
+            <div className="w-11 h-11 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shrink-0 border border-[#E8500A]/5">
+              <DollarSign className="w-5.5 h-5.5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-[#1a1a2e] uppercase tracking-wide mb-1 leading-none">NO PAID PROMOTION</h4>
+              <p className="text-[10.5px] text-gray-500 leading-relaxed max-w-xs mx-auto">
+                We refuse merchant sponsorship commissions directly. Brands appear based purely on inventory availability and client satisfaction ratings.
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center flex flex-col items-center gap-3.5 border-t md:border-t-0 pt-5 md:pt-0">
+            <div className="w-11 h-11 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E54D00] shrink-0 border border-[#E8500A]/5">
+              <Star className="w-5.5 h-5.5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-[#1a1a2e] uppercase tracking-wide mb-1 leading-none">CURATED EXCELLENCE</h4>
+              <p className="text-[10.5px] text-gray-500 leading-relaxed max-w-xs mx-auto">
+                All listed retail lots feature solid distributor warranties and standard brand authenticity stamps, guaranteed.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
 
     </div>
   );

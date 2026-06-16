@@ -116,7 +116,7 @@ export function ProductDetailPage() {
   }, []);
 
   const { allProducts, allBrands, addToCart, mode } = useGlobalState();
-  const { addRecentlyViewed } = useDashboard();
+  const { addRecentlyViewed, createNewThread, addThreadMessage } = useDashboard();
   const product: any =
     allProducts.find((p: any) => p.id === Number(id)) ||
     allProducts.find((p: any) => p.id === Number(id) + 1000) ||
@@ -198,6 +198,14 @@ export function ProductDetailPage() {
   const [selectedRam, setSelectedRam] = useState<string>("");
   const [selectedStorage, setSelectedStorage] = useState<string>("");
   const [isSizeChartOpen, setIsSizeChartOpen] = useState<boolean>(false);
+
+  // Message to Order Flow States
+  const [showOrderConfig, setShowOrderConfig] = useState(false);
+  const [orderQty, setOrderQty] = useState(1);
+  const [orderColor, setOrderColor] = useState("");
+  const [orderSize, setOrderSize] = useState("");
+  const [orderNotes, setOrderNotes] = useState("");
+  const [showOrderConfirm, setShowOrderConfirm] = useState(false);
 
   // Sync state options when product changes
   React.useEffect(() => {
@@ -424,9 +432,58 @@ export function ProductDetailPage() {
   };
 
   const handleMessageOrder = () => {
-    toast.success(
-      `Inbound chat connected. Messaging support desk for ${product.brand} ${product.title}...`,
+    setOrderQty(product?.moq || 1);
+    setOrderColor(selectedColor || (product?.colors && product.colors[0]) || "Sunset Orange");
+    setOrderSize(selectedSize || selectedRam || selectedStorage || (product?.sizes && product.sizes[0]) || "Standard");
+    setOrderNotes("");
+    setShowOrderConfig(true);
+  };
+
+  const handleConfirmAndSend = () => {
+    const threadId = `thread-brand-${brandId}`;
+    const orderRef = `CHOOSIFY-${Math.floor(1000000 + Math.random() * 9000000)}`;
+    const structuredMsg = `🛒 SPECIAL INBOUND ORDER:
+📦 Item: ${product.title}
+🏢 Brand: ${brandName} (ID: ${brandId})
+🎨 Options:
+  • Color: ${orderColor}
+  • Variant: ${orderSize}
+🔢 Quantity: ${orderQty}
+💵 Total Value: BDT ${(orderQty * product.price).toLocaleString()}
+📝 Custom Memo: ${orderNotes || "No notes."}
+Ref Link: /products/${product.id}
+
+Hello, I'd like to purchase this product config! Please approve shipping.`;
+
+    const sellerResponse = `💬 SELLER ACCEPTANCE AUTO-CONFIRMATION:
+🟢 Your order request has been APPROVED by the automatic gateway!
+📋 Tracking reference: #${orderRef}
+🚚 Dispatch logistics team will contact you shortly to coordinate receipt.`;
+
+    // 1. Create message thread
+    createNewThread(
+      threadId,
+      brandName,
+      brandObj?.logo || "https://i.pravatar.cc/150?u=brand",
+      mode === "wholesale" ? "wholesale" : "retail",
+      structuredMsg,
+      orderRef
     );
+
+    // 2. Add structural msg
+    addThreadMessage(threadId, structuredMsg, "user", "Me");
+
+    // 3. Add Seller response message
+    setTimeout(() => {
+      addThreadMessage(threadId, sellerResponse, "seller", brandName);
+    }, 450);
+
+    // Show toast and close
+    toast.success("Order request dispatched! Syncing to messaging workspace.");
+    setShowOrderConfirm(false);
+    
+    // Redirect to Messages thread
+    navigate(`/messages/${threadId}`);
   };
 
   const handleLoveClicked = () => {
@@ -669,7 +726,7 @@ export function ProductDetailPage() {
 
               {/* Commercial Primary Buttons aligned horizontally */}
               {mode === "retail" ? (
-                <div className="flex flex-col gap-3 w-full max-w-lg pt-4 px-4 sm:px-0 box-border">
+                <div className="flex flex-row flex-wrap items-center gap-3 w-full pt-4 px-4 sm:px-0 box-border text-left">
                   <button
                     onClick={() => {
                       addToCart(product, 1);
@@ -677,28 +734,15 @@ export function ProductDetailPage() {
                         `Added ${product.title} to your Retail Cart!`,
                       );
                     }}
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #E8500A 0%, #FF9E2C 100%)",
-                    }}
-                    className="w-full flex items-center justify-center px-5 py-3.5 rounded-[10px] font-bold text-[15px] text-white border-none tracking-wide cursor-pointer transition-all hover:scale-[1.01] active:scale-95 shadow-md shadow-[#E8500A]/15"
+                    className="px-6 py-3 rounded-full bg-[#E8500A] text-white text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all transform hover:scale-[1.03] active:scale-95 italic border border-[#E8500A]/30 hover:bg-[#ff5d14] cursor-pointer shadow-md shadow-orange-500/10"
                   >
                     ADD TO CART
                   </button>
                   <Link
                     to={`/brands/${brandId}`}
-                    className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-[10px] font-semibold text-[15px] bg-white border-[1.5px] border-[#0F172A] text-[#0F172A] cursor-pointer transition-all hover:scale-[1.01] active:scale-95"
+                    className="px-6 py-3 rounded-full bg-white text-[#1A1D4E] hover:bg-gray-50 text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all transform hover:scale-[1.03] active:scale-95 italic border border-[#e8edf2] cursor-pointer shadow-sm"
                   >
-                    VISIT OFFICIAL STORE{" "}
-                    <span
-                      className="w-[28px] h-[28px] rounded-full text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #E8500A 0%, #FF9E2C 100%)",
-                      }}
-                    >
-                      ➔
-                    </span>
+                    VISIT OFFICIAL STORE
                   </Link>
                 </div>
               ) : (
@@ -825,18 +869,18 @@ export function ProductDetailPage() {
                     <button
                       onClick={handleAddToCartClick}
                       className={cn(
-                        "py-4 w-full rounded-xl font-black text-[12px] uppercase tracking-widest italic transition-all shadow-xl flex items-center justify-center gap-2 cursor-pointer border-none",
+                        "py-3 w-full rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-wider italic transition-all flex items-center justify-center gap-2 cursor-pointer border-none transform hover:scale-[1.03] active:scale-95",
                         product.moq && b2bQty < product.moq
                           ? "bg-gray-700/50 text-white/40 cursor-not-allowed"
-                          : "bg-[#E8500A] text-white shadow-[#E8500A]/20 hover:scale-[1.02] hover:brightness-110 active:scale-95",
+                          : "bg-[#E8500A] text-white shadow-[#E8500A]/20 hover:brightness-110",
                       )}
                       disabled={product.moq && b2bQty < product.moq}
                     >
-                      <ShoppingBag size={15} /> Add to B2B Cart
+                      <ShoppingBag size={14} /> Add to B2B Cart
                     </button>
                     <button
                       onClick={() => setIsQuoteModalOpen(true)}
-                      className="py-4 w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-xl font-black text-[12px] uppercase tracking-widest italic transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="py-3 w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-wider italic transition-all flex items-center justify-center gap-2 cursor-pointer transform hover:scale-[1.03] active:scale-95"
                     >
                       Request Business Quote
                     </button>
@@ -1191,7 +1235,7 @@ export function ProductDetailPage() {
                   <div className="space-y-2.5 w-full">
                     <button
                       onClick={handleMessageOrder}
-                      className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[9.5px] font-black uppercase tracking-wider transform active:scale-98 transition-all inline-flex items-center justify-center gap-1.5 leading-none cursor-pointer"
+                      className="w-full py-3 ml-0 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[10px] md:text-[11px] font-black uppercase tracking-wider transform hover:scale-[1.03] active:scale-95 italic transition-all inline-flex items-center justify-center gap-1.5 leading-none cursor-pointer border-none"
                     >
                       MESSAGE TO ORDER
                     </button>
@@ -1200,12 +1244,12 @@ export function ProductDetailPage() {
                       id={String(brandId)}
                       name={brandName}
                       type="brand"
-                      className="w-full py-3.5 rounded-xl border border-white/20 text-[9.5px]"
+                      className="w-full py-3 rounded-full border border-white/20 text-[10px] md:text-[11px] font-black uppercase tracking-wider italic hover:scale-[1.03] active:scale-95 cursor-pointer bg-transparent"
                     />
 
                     <Link
                       to={`/brands/${brandId}`}
-                      className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#FF6B35] to-[#E8500A] text-white text-[9.5px] font-black uppercase tracking-wider hover:brightness-110 transition-all inline-block leading-none mt-2 text-center"
+                      className="w-full py-3 rounded-full bg-gradient-to-r from-[#FF6B35] to-[#E8500A] text-white text-[10px] md:text-[11px] font-black uppercase tracking-wider hover:brightness-110 transition-all inline-block leading-none mt-2 text-center italic hover:scale-[1.03] active:scale-95"
                     >
                       VIEW BRAND PROFILE
                     </Link>
@@ -1633,6 +1677,247 @@ export function ProductDetailPage() {
             </motion.div>
           </div>
         )}
+        {/* STEP 1: Message to Order - Option Configuration Popup */}
+        {showOrderConfig && (
+          <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#0D0E25] border border-white/10 rounded-2xl p-6 max-w-md w-full relative text-left"
+            >
+              <button
+                onClick={() => setShowOrderConfig(false)}
+                className="absolute top-4 right-4 text-white/50 hover:text-white cursor-pointer bg-transparent border-none"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
+                  <MessageCircle size={16} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                    Message to Order
+                  </h3>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono">
+                    Step 1: Configure Sourcing Parameters
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {/* Product Meta */}
+                <div className="flex items-center gap-3 bg-white/5 rounded-xl p-3 border border-white/5">
+                  <img
+                    src={product.image || product.thumbnail || PLACEHOLDER_IMAGE}
+                    alt={product.title}
+                    className="w-12 h-12 rounded-[5px] object-cover shrink-0"
+                  />
+                  <div>
+                    <h4 className="text-xs font-bold text-white leading-tight truncate max-w-[220px]">
+                      {product.title}
+                    </h4>
+                    <p className="text-[10px] text-[#E8500A] font-bold mt-0.5 font-mono">
+                      BDT {product.price.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Color Selection */}
+                {product.colors && product.colors.length > 0 && (
+                  <div>
+                    <label className="block text-[8px] font-black uppercase tracking-widest text-[#FFF]/40 mb-1.5">
+                      Select Color
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {product.colors.map((color: string) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setOrderColor(color)}
+                          className={cn(
+                            "px-3.5 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all",
+                            orderColor === color
+                              ? "bg-[#E8500A] text-white italic shadow-md shadow-orange-500/10 border-none"
+                              : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 cursor-pointer"
+                          )}
+                        >
+                          {color}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sizes/Options Selection */}
+                {product.sizes && product.sizes.length > 0 && (
+                  <div>
+                    <label className="block text-[8px] font-black uppercase tracking-widest text-[#FFF]/40 mb-1.5">
+                      Select Size/Option
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {product.sizes.map((size: string) => (
+                        <button
+                          key={size}
+                          type="button"
+                          onClick={() => setOrderSize(size)}
+                          className={cn(
+                            "px-3.5 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all",
+                            orderSize === size
+                              ? "bg-[#E8500A] text-white italic shadow-md shadow-orange-500/10 border-none"
+                              : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 cursor-pointer"
+                          )}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Quantity input */}
+                <div>
+                  <label className="block text-[8px] font-black uppercase tracking-widest text-[#FFF]/40 mb-1.5">
+                    Order Quantity (MOQ: {product.moq || 1})
+                  </label>
+                  <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-2 w-max">
+                    <button
+                      type="button"
+                      onClick={() => setOrderQty(Math.max(product.moq || 1, orderQty - 1))}
+                      className="text-white/60 hover:text-white font-black text-sm p-1 cursor-pointer bg-transparent border-none"
+                    >
+                      -
+                    </button>
+                    <span className="text-white font-mono font-bold text-xs w-10 text-center">
+                      {orderQty}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setOrderQty(orderQty + 1)}
+                      className="text-white/60 hover:text-white font-black text-sm p-1 cursor-pointer bg-transparent border-none"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Special Memo */}
+                <div>
+                  <label className="block text-[8px] font-black uppercase tracking-widest text-[#FFF]/40 mb-1.5">
+                    Additional Notes / Custom Sourcing Memo
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="e.g. Please expedite custom retail tag attachment or ship with cardboard protection boxes..."
+                    value={orderNotes}
+                    onChange={(e) => setOrderNotes(e.target.value)}
+                    className="w-full bg-[#050514] border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-orange-primary transition-colors resize-none"
+                  />
+                </div>
+
+                {/* Action CTA row */}
+                <div className="flex gap-3 pt-3">
+                  <button
+                    onClick={() => setShowOrderConfig(false)}
+                    className="flex-1 py-3 text-center border border-white/10 rounded-full hover:bg-white/5 transition-all text-[10px] md:text-[11px] font-black uppercase tracking-wider italic text-white cursor-pointer bg-transparent"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowOrderConfig(false);
+                      setShowOrderConfirm(true);
+                    }}
+                    className="flex-1 py-3 bg-[#E8500A] text-white rounded-full hover:bg-orange-600 transition-all text-[10px] md:text-[11px] font-black uppercase tracking-wider italic shadow-md shadow-orange-500/10 cursor-pointer border-none"
+                  >
+                    Confirm Params
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* STEP 2: Pre-filled Confirmation Message and Chat Initiation */}
+        {showOrderConfirm && (
+          <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#0D0E25] border border-white/10 rounded-2xl p-6 max-w-md w-full relative text-left"
+            >
+              <button
+                onClick={() => setShowOrderConfirm(false)}
+                className="absolute top-4 right-4 text-white/50 hover:text-white cursor-pointer bg-transparent border-none"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                  <CheckCircle2 size={16} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                    Confirm Broadcast Order
+                  </h3>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono">
+                    Step 2: Auto-send Structured Brief
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {/* Structured Overview Block */}
+                <div className="bg-[#050514] border border-white/5 rounded-xl p-4 text-left">
+                  <span className="text-[7.5px] font-black text-[#E8500A] uppercase tracking-widest block mb-2 italic">
+                    CONFIRM LIVE MESSAGE SUMMARY
+                  </span>
+                  
+                  <div className="space-y-1.5 text-xs text-white/80 font-mono">
+                    <p><span className="text-white/40 font-sans font-bold">Product:</span> {product.title}</p>
+                    <p><span className="text-white/40 font-sans font-bold">Brand Partner:</span> {brandName}</p>
+                    <p><span className="text-white/40 font-sans font-bold">Configuration:</span> {orderColor} / {orderSize}</p>
+                    <p><span className="text-white/40 font-sans font-bold">Quantity:</span> {orderQty} units</p>
+                    <p><span className="text-white/40 font-sans font-bold">Total Estimate:</span> BDT {(orderQty * product.price).toLocaleString()}</p>
+                    <p><span className="text-white/40 font-sans font-bold">Note Memo:</span> <span className="italic">"{orderNotes || 'None'}"</span></p>
+                  </div>
+                </div>
+
+                {/* Help tip */}
+                <div className="flex gap-2 items-start bg-blue-500/5 text-blue-400 p-3 rounded-xl border border-blue-500/10 text-[10px] leading-relaxed">
+                  <Info size={12} className="shrink-0 mt-0.5" />
+                  <p>
+                    Confirming this order request will create a new direct thread with the brand, send this order brief, and auto-confirm acceptance references from the merchant!
+                  </p>
+                </div>
+
+                {/* CTA actions */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => {
+                      setShowOrderConfirm(false);
+                      setShowOrderConfig(true);
+                    }}
+                    className="flex-1 py-3 text-center border border-white/10 rounded-full hover:bg-white/5 transition-all text-[10px] md:text-[11px] font-black uppercase tracking-wider italic text-white cursor-pointer bg-transparent"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={handleConfirmAndSend}
+                    className="flex-1 py-3 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 transition-all text-[10px] md:text-[11px] font-black uppercase tracking-wider italic shadow-md shadow-emerald-500/10 cursor-pointer border-none"
+                  >
+                    Send & Start Chat
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
       </AnimatePresence>
     </div>
   );

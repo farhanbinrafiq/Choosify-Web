@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Youtube, Star, ChevronDown, CheckCircle2, Bookmark, ChevronLeft, ChevronRight, Zap, TrendingUp, HelpCircle, AlertCircle, Share2, MessageCircle, BarChart3, Users, Play, Smartphone, Gift, Shirt, Info, Package, DollarSign, ShieldCheck, ThumbsUp, Heart, X } from 'lucide-react';
+import { Search, Youtube, Star, ChevronDown, CheckCircle2, Bookmark, ChevronLeft, ChevronRight, Zap, TrendingUp, HelpCircle, AlertCircle, Share2, MessageCircle, BarChart3, Users, Play, Smartphone, Gift, Shirt, Info, Package, DollarSign, ShieldCheck, ThumbsUp, Heart, X, ArrowRight } from 'lucide-react';
 import { BRANDS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { motion, AnimatePresence } from 'motion/react';
@@ -954,20 +954,32 @@ export function BrandDetailPage() {
                         </div>
                      )}
 
-                     {/* Pagination footer (from Brand Wise Products page) */}
-                     <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-8 mt-12 text-left">
-                        <div className="flex items-center gap-4 bg-white px-6 py-2 rounded-full border border-gray-100 shadow-sm overflow-x-auto no-scrollbar max-w-full">
-                           <button className="text-[10px] font-black text-gray-300 uppercase tracking-widest cursor-default">Prev</button>
-                           <div className="flex items-center gap-3">
-                              {[1, 2, 3, "...", 15].map((p, idx) => (
-                                 <button key={idx} className={cn("w-8 h-8 rounded-full text-xs font-black flex items-center justify-center cursor-pointer hover:bg-gray-50", p === 1 ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 scale-105" : "text-gray-400")}>{p}</button>
-                              ))}
-                           </div>
-                           <button onClick={() => toast.success('Loading Page 2...')} className="text-[10px] font-black text-[#1A1D4E] hover:text-[#E8500A] uppercase tracking-widest cursor-pointer">Next</button>
+                     {/* Pagination footer (from Brand Wise Products page - standardized to global canonical style) */}
+                     <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
+                        <div className="flex items-center gap-3">
+                           <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
+                              <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
+                           </button>
+                           {[1, 2, 3, "...", 15].map((p, idx) => (
+                              <button 
+                                key={idx} 
+                                className={cn(
+                                  "w-12 h-12 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
+                                  p === 1 
+                                  ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
+                                  : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
+                                )}
+                              >
+                                {p}
+                              </button>
+                           ))}
+                           <button onClick={() => toast.success('Loading Page 2...')} className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
+                              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                           </button>
                         </div>
-                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-100 px-5 py-2.5 rounded-full">
-                           Authorized Distribution
-                        </span>
+                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">
+                           Authorized Distribution • Showing {filteredProducts.length} items
+                        </p>
                      </div>
                   </div>
                )}

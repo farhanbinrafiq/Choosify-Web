@@ -8,7 +8,7 @@ import { RecommendationCard } from '../components/RecommendationCard';
 import { RecommendationCardSkeleton } from '../components/Skeleton';
 
 // Sub-component for Featured Story (Segment 1 of reference image)
-function FeaturedCard({ guide }: { guide: any }) {
+export function FeaturedCard({ guide }: { guide: any }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -136,7 +136,7 @@ function FeaturedCard({ guide }: { guide: any }) {
 }
 
 // Sub-component for Reel Story (Segment 2 of reference image)
-function ReelCard({ guide }: { guide: any }) {
+export function ReelCard({ guide }: { guide: any }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -261,7 +261,7 @@ function ReelCard({ guide }: { guide: any }) {
 }
 
 // Sub-component for Horizontal Media Story (Segment 3 of reference image)
-function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeType: 'youtube' | 'blog' }) {
+export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeType: 'youtube' | 'blog' }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -734,25 +734,25 @@ export function GuidesPage() {
              )}
              
              {/* Pagination Component */}
-            <div className="mt-24 pt-16 border-t border-gray-100 flex flex-col items-center gap-10">
+             <div className="mt-24 pt-16 border-t border-gray-100 flex flex-col items-center gap-10">
                <div className="flex items-center gap-3">
-                  <button className="w-12 h-12 rounded-[20px] flex items-center justify-center bg-white border border-gray-100 text-navy hover:bg-orange-primary hover:text-white hover:border-orange-primary transition-all shadow-lg group">
+                  <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
                      <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
                   </button>
                   {[1, 2, 3, '...', 12].map((page, i) => (
                     <button 
                       key={i} 
                       className={cn(
-                        "w-12 h-12 rounded-[20px] flex items-center justify-center text-[11px] font-black transition-all italic",
+                        "w-12 h-12 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
                         page === 1 
-                        ? "bg-orange-primary text-white shadow-xl shadow-orange-primary/30" 
-                        : "bg-white border border-gray-100 text-navy hover:border-orange-primary hover:text-orange-primary shadow-sm"
+                        ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
+                        : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
                       )}
                     >
                       {page}
                     </button>
                   ))}
-                  <button className="w-12 h-12 rounded-[20px] flex items-center justify-center bg-white border border-gray-100 text-navy hover:bg-orange-primary hover:text-white hover:border-orange-primary transition-all shadow-lg group">
+                  <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                </div>

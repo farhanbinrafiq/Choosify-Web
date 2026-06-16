@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ShoppingBag, ShieldCheck, Tag, Zap, Star } from 'lucide-react';
+import { ArrowRight, ShoppingBag, ShieldCheck, Tag, Zap, Star, Search, Shirt, Sparkles, AlertCircle } from 'lucide-react';
 import { BRANDS } from '../constants';
 import { cn } from '../lib/utils';
 
@@ -8,13 +8,44 @@ export function BrandDealsPage() {
   const navigate = useNavigate();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('All');
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
+  // Brand and deals filtering logic based on letter, category tab, and search query
   const filteredBrands = BRANDS.filter(brand => {
-    const matchesLetter = selectedLetter === null || brand.name.startsWith(selectedLetter);
-    return matchesLetter;
+    // 1. Alphabet Letter Initial
+    const matchesLetter = selectedLetter === null || brand.name.toUpperCase().startsWith(selectedLetter);
+
+    // 2. Category Tab Filter
+    let matchesCategory = true;
+    if (activeTab === 'Tech') {
+      matchesCategory = brand.category === 'Tech' || brand.category === 'Electronics';
+    } else if (activeTab === 'Fashion') {
+      matchesCategory = brand.category === 'Fashion' || brand.category === 'Sports';
+    } else if (activeTab === 'Beauty') {
+      matchesCategory = brand.category === 'Beauty';
+    } else if (activeTab === 'Ethnic') {
+      matchesCategory = brand.category === 'Ethnic';
+    }
+
+    // 3. Search Query Filter (Page-level Scoped)
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch = !q || 
+      brand.name.toLowerCase().includes(q) || 
+      brand.category.toLowerCase().includes(q) ||
+      `special exclusive limited discount offer save ${brand.name}`.toLowerCase().includes(q);
+
+    return matchesLetter && matchesCategory && matchesSearch;
   });
+
+  const tabs = [
+    { id: 'All', label: "All Offers", icon: <ShoppingBag size={13} /> },
+    { id: 'Tech', label: "Tech & Electronics", icon: <Zap size={13} /> },
+    { id: 'Fashion', label: "Fashion & Apparel", icon: <Shirt size={13} /> },
+    { id: 'Beauty', label: "Health & Beauty", icon: <Sparkles size={13} /> },
+    { id: 'Ethnic', label: "Heritage & Ethnic", icon: <Star size={13} /> }
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
@@ -24,8 +55,8 @@ export function BrandDealsPage() {
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10">
-          <div className="bg-orange-primary text-white text-[11px] font-black px-8 py-2.5 rounded-full mb-8 uppercase tracking-[0.2em] shadow-xl shadow-orange-primary/30 italic">
+        <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10 font-sans">
+          <div className="bg-orange-primary text-white text-[11px] font-black px-8 py-2.5 rounded-[5px] mb-8 uppercase tracking-[0.2em] shadow-xl shadow-orange-primary/30 italic">
             EXCLUSIVE PARTNER OFFERS
           </div>
           
@@ -39,116 +70,278 @@ export function BrandDealsPage() {
         </div>
       </div>
 
-      {/* Sticky Alphabet Filter Bar */}
-      <div className="sticky top-[64px] z-30 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm py-4">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between gap-6 overflow-x-auto no-scrollbar">
-            <div className="flex items-center gap-1">
-              <button 
-                onClick={() => setSelectedLetter(null)}
-                className={cn(
-                  "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg flex-shrink-0",
-                  selectedLetter === null ? "bg-orange-primary text-white shadow-orange-primary/20" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                )}
-              >
-                All Brands
-              </button>
-              <div className="w-px h-6 bg-gray-100 mx-2 flex-shrink-0" />
-              {letters.map((letter) => (
-                <button 
-                  key={letter} 
-                  onClick={() => setSelectedLetter(letter)}
-                  className={cn(
-                    "w-8 h-8 rounded-xl text-[10px] font-black transition-all flex items-center justify-center flex-shrink-0 uppercase",
-                    selectedLetter === letter ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/20" : "text-gray-400 hover:text-navy hover:bg-gray-50"
-                  )}
-                >
-                  {letter}
-                </button>
-              ))}
-              <button className="w-8 h-8 rounded-xl text-[10px] font-black text-gray-400 hover:text-navy hover:bg-gray-50 flex items-center justify-center flex-shrink-0 transition-all uppercase">#</button>
-            </div>
-            <div className="flex items-center gap-6 whitespace-nowrap">
-              {(selectedLetter || searchQuery) && (
-                <button 
-                  onClick={() => {setSelectedLetter(null); setSearchQuery('');}}
-                  className="text-[10px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-2 transition-all"
-                >
-                  Clear Selection
-                </button>
-              )}
-              <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                Direct Brand Jump
+      {/* GLOBAL STICKY NAVIGATION SYSTEM (MASTER REFERENCE COHESION) */}
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4 transition-all duration-300 font-sans">
+        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
+          
+          {/* 1. Page-Scoped Search Bar */}
+          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
+            <div className="flex items-center bg-white rounded-full">
+              <div className="pl-4 text-[#E8500A] shrink-0">
+                <Search className="w-4 h-4" />
               </div>
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search brand deals, promo codes or specific brands..." 
+                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
+              />
+              <button 
+                onClick={() => setSearchQuery(searchQuery)}
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+              >
+                Search
+              </button>
             </div>
           </div>
+
+          {/* 2. Category Tabs */}
+          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
+            {tabs.map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  const el = document.getElementById("brand-deals-main");
+                  if (el) {
+                    const offset = 220; // safe header + sticky offset
+                    const elementPosition = el.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: 'smooth'
+                    });
+                  }
+                }}
+                className={cn(
+                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
+                  activeTab === tab.id
+                    ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
+                    : "bg-white border-gray-250 text-gray-400 hover:text-navy hover:bg-gray-50/80"
+                )}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-16 w-full">
-        <div className="flex flex-col gap-16">
-          {/* Grouped by Brand */}
-          {filteredBrands.map((brand, idx) => (
-            <div key={brand.id} className="animate-in fade-in slide-in-from-bottom-5 duration-700" style={{ animationDelay: `${idx * 100}ms` }}>
-              <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-white shadow-lg flex items-center justify-center text-navy font-black text-xl border border-gray-100">
-                    {brand.logo}
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-black text-navy italic uppercase tracking-tighter">{brand.name} Deals</h2>
-                    <div className="flex items-center gap-2">
-                       <ShieldCheck size={12} className="text-green-accent" />
-                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">Authorized Partner Offers</span>
-                    </div>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => navigate(`/brands/${brand.id}/products`)}
-                  className="hidden sm:flex items-center gap-2 text-orange-primary font-black uppercase text-[10px] tracking-widest hover:gap-3 transition-all"
-                >
-                  View Brand Store <ArrowRight size={14} />
-                </button>
+      {/* CORE THREE-COLUMN SYSTEM LAYOUT INTEGRATION */}
+      <div className="w-full bg-[#F3F9FF]/30 min-h-screen py-8">
+        <div id="brand-deals-main" className="scroll-mt-36 max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start relative">
+          
+          {/* A. LEFT COLUMN - ALPHABET INSTANT NAV FILTER */}
+          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in font-sans">
+            {/* Alphabet index filter card */}
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2">
+                  FILTER BY <span className="text-orange-primary font-bold">INITIAL</span>
+                </h3>
+                <div className="w-full h-px bg-gray-105" />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {[1, 2, 3, 4].map((deal) => (
-                  <div 
-                    key={deal} 
-                    onClick={() => navigate(`/brands/${brand.id}/products`)}
-                    className="bg-white rounded-[32px] p-10 flex flex-col items-center text-center gap-10 hover:shadow-[0_40px_100px_rgba(0,0,0,0.1)] transition-all cursor-pointer border border-gray-100 group relative overflow-hidden shadow-2xl shadow-gray-200/40"
+              <div className="grid grid-cols-4 gap-1.5">
+                <button 
+                  onClick={() => setSelectedLetter(null)}
+                  className={cn(
+                    "col-span-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-widest transition-all text-center",
+                    selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                  )}
+                >
+                  All Brands
+                </button>
+                {letters.map((letter) => (
+                  <button 
+                    key={letter} 
+                    onClick={() => setSelectedLetter(letter)}
+                    className={cn(
+                      "h-8 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase",
+                      selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
+                    )}
                   >
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:scale-150 transition-transform duration-700" />
-                    
-                    <div className="w-28 h-28 rounded-full bg-[#F8FAFC] flex items-center justify-center text-navy font-black text-4xl shadow-[inset_0_2px_10px_rgba(0,0,0,0.05)] border border-white group-hover:scale-110 transition-transform duration-500 relative z-10">
-                      {brand.logo}
-                    </div>
-                    
-                    <div className="flex flex-col items-center gap-3 relative z-10">
-                      <h4 className="text-2xl font-black text-navy group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter leading-tight line-clamp-1">{brand.name} {deal === 1 ? 'Special' : deal === 2 ? 'Exclusive' : 'Limited'}</h4>
-                      <div className="px-6 py-2 bg-orange-primary text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-lg shadow-orange-primary/20 group-hover:scale-110 transition-transform">
-                        Up to {idx % 2 === 0 ? '40%' : '50%'} OFF
-                      </div>
-                    </div>
-
-                    <div className="w-full h-px bg-gray-50 relative z-10" />
-
-                    <div className="flex items-center gap-3 text-[11px] font-black text-navy uppercase tracking-widest italic group-hover:text-orange-primary transition-colors relative z-10">
-                      Grab This Deal <ArrowRight size={18} className="-rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                    </div>
-                  </div>
+                    {letter}
+                  </button>
                 ))}
               </div>
             </div>
-          ))}
+
+            {/* Platform Compliance Verified badge card */}
+            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-left">
+              <h4 className="text-[11px] font-bold text-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <ShieldCheck size={14} className="text-green-500 shrink-0" />
+                Verified Sourcing
+              </h4>
+              <p className="text-[10px] text-gray-400 leading-relaxed font-semibold">
+                Each listed discount slot is cross-verified against official brand inventories. No mock promotions, no user redirection loops, 100% direct checkouts.
+              </p>
+            </div>
+          </aside>
+
+          {/* B. MIDDLE COLUMN - BRAND WISE LISTINGS */}
+          <main className="min-w-0 space-y-8 font-sans">
+            
+            {/* Header info bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8edf2]">
+              <div>
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] italic">
+                  OFFICIAL STORES • ACTIVE COUPONS
+                </h3>
+                <h2 className="text-xl font-black text-navy italic uppercase tracking-tighter mt-1">
+                  {activeTab === 'All' ? 'ALL BRANDS' : `${activeTab.toUpperCase()} EXTRA`} 
+                  {searchQuery && ` SEARCH: "${searchQuery.toUpperCase()}"`}
+                  <span className="text-orange-primary"> ({filteredBrands.length} FOUND)</span>
+                </h2>
+              </div>
+              
+              {(selectedLetter || searchQuery || activeTab !== 'All') && (
+                <button 
+                  onClick={() => {setSelectedLetter(null); setSearchQuery(''); setActiveTab('All');}}
+                  className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#e8edf2] px-3.5 py-2 rounded-[5px] shadow-sm self-start sm:self-auto hover:text-[#CF4400]"
+                >
+                  Reset All Filters
+                </button>
+              )}
+            </div>
+
+            {/* Brands listing block */}
+            <div className="flex flex-col gap-14">
+              {filteredBrands.length > 0 ? (
+                filteredBrands.map((brand, idx) => (
+                  <div key={brand.id} className="animate-in fade-in slide-in-from-bottom-5 duration-700" style={{ animationDelay: `${idx * 50}ms` }}>
+                    {/* Brand header */}
+                    <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-150">
+                      <div className="flex items-center gap-4.5">
+                        <div className="w-11 h-11 rounded-[5px] bg-white shadow-sm flex items-center justify-center text-navy font-black text-lg border border-gray-150">
+                          {brand.logo}
+                        </div>
+                        <div>
+                          <h2 className="text-lg font-black text-[#1A1D4E] uppercase tracking-tight">{brand.name} Deals</h2>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                             <ShieldCheck size={11} className="text-green-500" />
+                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider italic">Authorized Partner Offer</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => navigate(`/brands/${brand.id}/products`)}
+                        className="flex items-center gap-1.5 text-orange-primary font-black uppercase text-[10px] tracking-widest hover:gap-2.5 transition-all bg-white border border-[#e8edf2] px-3 py-1.5 rounded-[5px] shadow-xs hover:border-orange-primary/30"
+                      >
+                        Brand Store <ArrowRight size={11} />
+                      </button>
+                    </div>
+
+                    {/* Standardized cards grid inside main layout */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-stretch">
+                      {[1, 2, 3].map((deal) => (
+                        <div 
+                          key={deal} 
+                          onClick={() => navigate(`/brands/${brand.id}/products`)}
+                          className="bg-white rounded-[5px] p-6 flex flex-col items-center text-center gap-6 hover:shadow-lg hover:border-orange-primary/20 transition-all cursor-pointer border border-[#e8edf2] group relative overflow-hidden shadow-sm"
+                        >
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-125 transition-transform duration-700" />
+                          
+                          <div className="w-16 h-16 rounded-full bg-[#F8FAFC] flex items-center justify-center text-[#1a1a2e] font-black text-2xl shadow-[inset_0_1px_4px_rgba(0,0,0,0.05)] border border-gray-100 group-hover:scale-105 transition-transform duration-500 relative z-10 shrink-0">
+                            {brand.logo}
+                          </div>
+                          
+                          <div className="flex flex-col items-center gap-2 relative z-10 w-full">
+                            <h4 className="text-sm font-bold text-navy group-hover:text-orange-primary transition-colors uppercase tracking-tight leading-snug line-clamp-1 w-full">
+                              {brand.name} {deal === 1 ? 'Special' : deal === 2 ? 'Exclusive' : 'Limited'}
+                            </h4>
+                            <div className="px-4 py-1.5 bg-orange-primary text-white rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm shadow-orange-primary/10 group-hover:scale-105 transition-transform inline-block">
+                              Up to {idx % 2 === 0 ? '40%' : '50%'} OFF
+                            </div>
+                          </div>
+
+                          <div className="w-full h-px bg-gray-50 relative z-10" />
+
+                          <div className="flex items-center gap-2 text-[10px] font-black text-navy uppercase tracking-widest italic group-hover:text-orange-primary transition-colors relative z-10">
+                            Grab This Offer <ArrowRight size={13} className="-rotate-45 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-12 text-center flex flex-col items-center gap-4">
+                  <AlertCircle size={32} className="text-gray-300 animate-pulse" />
+                  <h3 className="text-base font-black text-navy uppercase tracking-tight">No Brand Deals Found</h3>
+                  <p className="text-xs text-gray-400 font-semibold max-w-sm">No partners match your selected criteria. Try resetting the search input or alphabet letter filter.</p>
+                  <button 
+                    onClick={() => {setSelectedLetter(null); setSearchQuery(''); setActiveTab('All');}}
+                    className="px-5 py-2.5 bg-orange-primary hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-[5px] transition-all italic shadow-md"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              )}
+            </div>
+          </main>
+
+          {/* C. RIGHT COLUMN - OFFERS PROMOTIONS SIDEBAR */}
+          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in font-sans">
+            
+            {/* Promo spotlight card */}
+            <div className="bg-gradient-to-br from-[#0A0A1F] to-[#16163F] text-white rounded-[5px] border border-[#ff5b00]/10 p-5 shadow-lg relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
+              <div className="absolute top-0 right-0 w-28 h-28 bg-[#FF5B00]/10 rounded-full blur-2xl pointer-events-none" />
+              
+              <div>
+                <span className="px-2.5 py-1 rounded-[5px] bg-[#FF5B00] text-white text-[8.5px] font-black uppercase tracking-widest italic leading-none">
+                  SPOTLIGHT DEAL
+                </span>
+                <h3 className="font-sans text-lg font-black italic uppercase tracking-tight text-white leading-snug mt-4">
+                  EXCLUSIVE S26 <span className="text-[#FF5B00]">BUNDLE PACKS</span>
+                </h3>
+                <p className="text-[11px] text-white/50 font-semibold mt-2 leading-relaxed">
+                  Unlock dynamic distributor pricing structures on Samsung Mobile nodes and premium accessories under distributor backing.
+                </p>
+              </div>
+              
+              <button 
+                onClick={() => navigate('/brands/1/products')}
+                className="w-full py-3 bg-[#FF5B00] hover:bg-[#E8500A] text-white font-black rounded-[5px] text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all mt-4 italic shadow-md shadow-orange-primary/10"
+              >
+                Explore S26 Deals <ArrowRight size={13} />
+              </button>
+            </div>
+
+            {/* Offline Sourcing Request */}
+            <div className="bg-white rounded-[5px] p-5 shadow-sm border border-[#e8edf2] text-left flex flex-col justify-between" style={{ height: '240px' }}>
+              <div>
+                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                  PARTNER SOLUTIONS
+                </span>
+                <h4 className="text-xs font-semibold text-navy uppercase tracking-wide leading-none mt-2">
+                  REQUEST COUPE TAGS
+                </h4>
+                <p className="text-[10px] text-gray-400 leading-relaxed font-semibold mt-2.5">
+                  Are you managing a distribution node or seeking bulk slot discounts? Request verified platform onboarding tags seamlessly.
+                </p>
+              </div>
+              
+              <button 
+                onClick={() => navigate('/post-offer')}
+                className="w-full py-3 bg-white border-2 border-gray-150 hover:border-navy text-navy font-black rounded-[5px] text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all italic"
+              >
+                Submit Partnership Query
+              </button>
+            </div>
+
+          </aside>
+
         </div>
-      </main>
+      </div>
 
       {/* CTA Section */}
       <section className="py-20 bg-navy px-4 md:px-8 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,91,0,0.1),transparent_70%)]" />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+        <div className="max-w-4xl mx-auto text-center relative z-10 font-sans">
           <h2 className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-8 leading-tight">
             NOT FINDING YOUR <span className="text-orange-primary">FAVORITE BRAND?</span>
           </h2>
@@ -156,10 +349,10 @@ export function BrandDealsPage() {
             Suggest a brand or request an offer. We'll verify and bring it to you.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <button className="w-full sm:w-auto px-12 py-5 bg-white text-navy font-black text-[11px] uppercase tracking-widest italic rounded-full hover:bg-orange-primary hover:text-white transition-all shadow-2xl">
+            <button className="w-full sm:w-auto px-12 py-5 bg-white text-navy font-black text-[11px] uppercase tracking-widest italic rounded-[5px] hover:bg-orange-primary hover:text-white transition-all shadow-2xl">
               Request A Brand
             </button>
-            <button className="w-full sm:w-auto px-12 py-5 bg-navy border-2 border-white/20 text-white font-black text-[11px] uppercase tracking-widest italic rounded-full hover:border-white transition-all">
+            <button className="w-full sm:w-auto px-12 py-5 bg-navy border-2 border-white/20 text-white font-black text-[11px] uppercase tracking-widest italic rounded-[5px] hover:border-white transition-all">
               Notify Me Of New Deals
             </button>
           </div>

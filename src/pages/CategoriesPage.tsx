@@ -155,6 +155,19 @@ export function CategoriesPage() {
     { name: 'Education & Learning', icon: 'BookOpen', count: 120, color: 'from-indigo-600 to-blue-700', subcategories: [] },
   ];
 
+  // Dynamic filter supporting the page search system
+  const filteredCategoriesList = React.useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) {
+      return categoriesList;
+    }
+    return categoriesList.filter(cat => {
+      const nameMatch = cat.name.toLowerCase().includes(q);
+      const subcategoryMatch = cat.subcategories?.some(sub => sub.name.toLowerCase().includes(q)) || false;
+      return nameMatch || subcategoryMatch;
+    });
+  }, [searchQuery, categoriesList]);
+
   const handleCategoryClick = (catName: string) => {
     setExpandedCategory(expandedCategory === catName ? null : catName);
   };
@@ -439,7 +452,7 @@ export function CategoriesPage() {
             </div>
           ) : (
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center justify-center w-full">
-              {categoriesList.map((cat, i) => {
+              {filteredCategoriesList.map((cat, i) => {
                 const IconComponent = (LucideIcons as any)[cat.icon] || LucideIcons.Package;
                 const isExpanded = expandedCategory === cat.name;
                 

@@ -327,9 +327,9 @@ export function DealsPage() {
                  </div>
                  
                  {/* Small Cards Row */}
-                 <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full justify-items-center">
-                    {(filteredProducts.length > 1 ? filteredProducts : PRODUCTS).slice(1, 5).map((product, index) => (
-                       <div key={product.id} className="w-full max-w-[300px] flex flex-col">
+                 <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 w-full justify-items-center">
+                    {(filteredProducts.length > 1 ? filteredProducts : PRODUCTS).slice(1, 5).map((product) => (
+                       <div key={product.id} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
                          <ProductCard 
                            product={{
                              ...product,
@@ -337,7 +337,6 @@ export function DealsPage() {
                              tagColor: "bg-[#E98B8B]",
                            }} 
                            variant="compact"
-                           showCountdown={index < 3}
                          />
                        </div>
                     ))}
@@ -352,9 +351,9 @@ export function DealsPage() {
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic px-2 border-l-4 border-orange-primary">Browse All Handpicked Offers</p>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-y-10 gap-x-6 w-full place-items-center">
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
                 {(filteredProducts.length > 0 ? filteredProducts : PRODUCTS).slice(0, 12).map((product, idx) => (
-                  <div key={`${product.id}-${idx}`} className="w-full max-w-[300px] flex flex-col">
+                  <div key={`${product.id}-${idx}`} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
                     <ProductCard 
                       product={{
                         ...product,
@@ -362,27 +361,37 @@ export function DealsPage() {
                         tagColor: idx % 3 === 0 ? "bg-[#E93B3B]" : idx % 3 === 1 ? "bg-[#E98B8B]" : "bg-[#7CD93B]",
                       }} 
                       variant="compact"
-                      showCountdown={idx < 4}
                     />
                   </div>
                 ))}
               </div>
 
-              <div className="mt-16 flex flex-col items-center gap-6">
-                 <div className="flex gap-2">
-                    {[1, 2, 3, '...', 12].map((p, i) => (
-                      <button 
-                        key={i} 
-                        className={cn(
-                          "w-12 h-12 rounded-xl flex items-center justify-center font-black text-[11px] uppercase italic transition-all",
-                          p === 1 ? "bg-navy text-white shadow-xl" : "bg-white text-navy border border-gray-100 hover:bg-gray-50"
-                        )}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                 </div>
-                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] italic">Showing {Math.min(12, filteredProducts.length)} of {filteredProducts.length} deals available today</p>
+              <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
+                <div className="flex items-center gap-3">
+                  <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
+                    <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
+                  </button>
+                  {[1, 2, 3, '...', 12].map((p, i) => (
+                    <button 
+                      key={i} 
+                      className={cn(
+                        "w-12 h-12 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
+                        p === 1 
+                        ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
+                        : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
+                      )}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                  <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+                
+                <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">
+                  Showing {Math.min(12, filteredProducts.length)} of {filteredProducts.length} deals available today
+                </p>
               </div>
             </section>
 
