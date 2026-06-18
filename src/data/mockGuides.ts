@@ -2,6 +2,7 @@ import { DynamicGuideData } from '../types/guide';
 
 export const CREATOR_MAP = {
   farhan: {
+    id: 'creator-farhan',
     name: 'Farhan Bin Rafiq',
     avatar: 'https://i.pravatar.cc/300?u=farhan',
     bio: 'Senior Tech Analyst & Digital Product Researcher with 10+ years of experience in the Bangladesh market.',
@@ -14,6 +15,7 @@ export const CREATOR_MAP = {
     quickTip: 'Always check for official warranty stickers when buying premium electronics in Bangladesh.'
   },
   sarah: {
+    id: 'creator-sarah',
     name: 'Sarah Jenkins',
     avatar: 'https://i.pravatar.cc/300?u=sarah',
     bio: 'Fashion Curator & Retail Analyst specializing in contemporary garments, material longevity, and Dhaka street style.',
@@ -26,6 +28,7 @@ export const CREATOR_MAP = {
     quickTip: 'Always wash delicate block prints in cold water to preserve dye vibrancy and prevent premature shrinkage.'
   },
   imtiaz: {
+    id: 'creator-imtiaz',
     name: 'Imtiaz Ahmed',
     avatar: 'https://i.pravatar.cc/300?u=imtiaz',
     bio: 'Interior Designer and Home Solutions Specialist with a passion for energy-efficient appliances and cozy layouts.',

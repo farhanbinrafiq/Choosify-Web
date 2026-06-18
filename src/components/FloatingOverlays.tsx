@@ -8,10 +8,11 @@ import {
 import { useGlobalState, CartItem } from '../context/GlobalStateContext';
 import { useDashboard, MessageThread, ThreadMessage } from '../context/DashboardContext';
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
+import { cn } from '../lib/utils';
 
 export function FloatingOverlays() {
   const navigate = useNavigate();
-  const { mode, retailCart, wholesaleCart, removeFromCart, updateCartQuantity } = useGlobalState();
+  const { mode, retailCart, wholesaleCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo } = useGlobalState();
   const { threads, threadMessages, addThreadMessage, markAllAsRead, setThreads } = useDashboard();
 
   // Active floating panel state: null | 'cart' | 'inbox'
@@ -558,6 +559,62 @@ export function FloatingOverlays() {
 
         </div>
       )}
+
+      {/* CINEMATIC VIDEO PLAYER OVERLAY FOR EMBEDDED-ONLY CONTENT */}
+      <AnimatePresence>
+        {activeVideo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4 md:p-8"
+            onClick={closeVideo}
+          >
+            {/* Modal Box */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 350 }}
+              className={cn(
+                "w-full bg-slate-950 rounded-2xl md:rounded-3xl border border-white/10 shadow-[0_24px_50px_rgba(0,0,0,0.8)] overflow-hidden relative flex flex-col mb-16 lg:mb-0",
+                activeVideo.isVertical ? "max-w-[360px] aspect-[9/16]" : "max-w-4xl aspect-video"
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header Info */}
+              <div className="absolute top-0 inset-x-0 p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-20 flex items-center justify-between text-white">
+                <div className="flex flex-col text-left pr-6">
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#E8500A] mb-0.5">
+                    {activeVideo.isVertical ? "Short / Reel Playback" : "YouTube Video Playback"}
+                  </span>
+                  <h3 className="text-xs md:text-sm font-extrabold tracking-tight truncate max-w-[240px] md:max-w-[600px] italic">
+                    {activeVideo.title}
+                  </h3>
+                </div>
+                
+                <button
+                  onClick={closeVideo}
+                  className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/15 hover:border-white/20 transition-all text-white shrink-0"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Video Element */}
+              <div className="w-full h-full relative group flex items-center justify-center bg-[#050615]">
+                <video
+                  src={activeVideo.url && activeVideo.url !== '#' ? activeVideo.url : "https://assets.mixkit.co/videos/preview/mixkit-young-man-wearing-virtual-reality-glasses-4384-large.mp4"}
+                  className="w-full h-full object-contain"
+                  autoPlay
+                  controls
+                  playsInline
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

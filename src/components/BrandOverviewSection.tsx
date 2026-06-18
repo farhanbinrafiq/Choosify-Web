@@ -1,5 +1,6 @@
 import React from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Users, HelpCircle, ShieldCheck } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 interface OverviewData {
   address: string;
@@ -17,9 +18,10 @@ interface OverviewData {
 interface BrandOverviewSectionProps {
   brandName: string;
   overviewData: OverviewData;
+  claimStatus?: 'community' | 'pending' | 'verified';
 }
 
-export function BrandOverviewSection({ brandName, overviewData }: BrandOverviewSectionProps) {
+export function BrandOverviewSection({ brandName, overviewData, claimStatus }: BrandOverviewSectionProps) {
   return (
     <div id="brand-overview-section" className="bg-white rounded-[5px] p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36">
       <div className="text-center mb-8 border-b border-gray-100 pb-5">
@@ -128,6 +130,54 @@ export function BrandOverviewSection({ brandName, overviewData }: BrandOverviewS
           </div>
         </div>
       </div>
+
+      {/* BRAND PROFILE CLAIMING EXPERIENCE BLOCKS */}
+      {claimStatus === 'community' && (
+        <div className="mt-8 bg-gray-50 border border-dashed border-gray-200 rounded-[5px] p-6 text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
+          <div className="flex items-center gap-2 bg-[#FFF0E8]/80 px-3 py-1 rounded-full border border-[#E8500A]/10">
+            <span className="text-[#E8500A] text-xs font-bold font-mono">ℹ</span>
+            <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-wider">Community Profile State</span>
+          </div>
+          <p className="text-xs font-bold text-gray-500 leading-relaxed italic max-w-lg">
+            This brand profile contains publicly available information curated by Choosify. This profile has not yet been claimed by an authorized brand representative.
+          </p>
+          
+          <button 
+            type="button"
+            onClick={() => {
+              toast.success("Ownership claim application received for " + brandName + "! Our merchant onboarding team will perform necessary verifications relative to this brand representative request and notify you shortly.", { duration: 5000 });
+            }}
+            className="bg-[#E8500A] hover:bg-[#ff5d14] text-white py-3.5 px-8 rounded-full uppercase italic text-[11px] font-black tracking-widest transition-all transform hover:scale-[1.03] active:scale-95 shadow-md shadow-orange-primary/10 select-none border border-transparent cursor-pointer"
+          >
+            Claim Brand Ownership
+          </button>
+          
+          <div className="bg-white border border-[#e8edf2] rounded-[5px] p-5 text-left w-full mt-2 shadow-sm">
+            <h4 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest mb-3.5 border-b border-gray-100 pb-2 flex items-center gap-1.5">
+              <span className="text-[#E8500A]">✦</span> Claim ownership to:
+            </h4>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[10px] text-gray-600 font-bold uppercase tracking-wider">
+              <li className="flex items-center gap-2"><span className="text-green-500 text-sm font-black">✓</span> Add products</li>
+              <li className="flex items-center gap-2"><span className="text-green-500 text-sm font-black">✓</span> Launch promotions</li>
+              <li className="flex items-center gap-2"><span className="text-green-500 text-sm font-black">✓</span> Manage coupons</li>
+              <li className="flex items-center gap-2"><span className="text-green-500 text-sm font-black">✓</span> Collaborate with creators</li>
+              <li className="flex items-center gap-2 sm:col-span-2"><span className="text-green-500 text-sm font-black">✓</span> Access business insights</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {claimStatus === 'pending' && (
+        <div className="mt-8 bg-gray-50 border border-dashed border-gray-200 rounded-[5px] p-6 text-center max-w-2xl mx-auto flex flex-col items-center gap-3">
+          <div className="flex items-center gap-2 bg-amber-50 px-3 py-1 rounded-full border border-amber-300">
+            <span className="text-amber-500 text-xs animate-pulse">●</span>
+            <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Ownership Verification Pending</span>
+          </div>
+          <p className="text-xs font-bold text-gray-500 leading-relaxed italic max-w-lg">
+            A brand ownership claim application has been received for {brandName} and is currently undergoing premium administrative review. No public actions are pending.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

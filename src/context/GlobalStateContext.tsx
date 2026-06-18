@@ -52,6 +52,15 @@ export interface GlobalStateContextType {
   rfqs: B2BRfq[];
   submitRfq: (rfq: Omit<B2BRfq, 'id' | 'date' | 'status'>) => void;
   acceptQuotation: (rfqId: string) => void;
+  activeVideo: { url: string; title: string; isVertical?: boolean } | null;
+  openVideo: (url: string, title: string, isVertical?: boolean) => void;
+  closeVideo: () => void;
+  brandClaimStatuses: Record<string, 'verified' | 'pending' | 'community'>;
+  getBrandClaimStatus: (brandNameOrId: string | number) => 'verified' | 'pending' | 'community';
+  updateBrandClaimStatus: (brandNameOrId: string | number, status: 'verified' | 'pending' | 'community') => void;
+  creatorClaimStatuses: Record<string, 'verified' | 'pending' | 'community'>;
+  getCreatorClaimStatus: (creatorIdOrName: string) => 'verified' | 'pending' | 'community';
+  updateCreatorClaimStatus: (creatorIdOrName: string, status: 'verified' | 'pending' | 'community') => void;
 }
 
 const DEFAULT_USER: User = {
@@ -217,6 +226,126 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     localStorage.setItem('choosify_is_logged_in', String(val));
   };
 
+  const [brandClaimStatuses, setBrandClaimStatuses] = useState<Record<string, 'verified' | 'pending' | 'community'>>(() => {
+    const saved = localStorage.getItem('choosify_brand_claims_store');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // ignore
+      }
+    }
+    return {
+      'samsung': 'verified',
+      'apple': 'verified',
+      'apex': 'verified',
+      'bata': 'verified',
+      'aarong': 'verified',
+      'sony': 'community',
+      'sailor': 'community',
+      'yellow': 'community',
+      'pickaboo': 'community',
+      'ecstasy': 'community',
+      'richman': 'pending',
+      'star tech': 'pending',
+      'star-tech': 'pending',
+      'la reve': 'pending',
+      'lotto': 'pending',
+      'perfume world': 'pending',
+      '1': 'verified',
+      '2': 'verified',
+      '3': 'verified',
+      '4': 'verified',
+      '5': 'community',
+      '6': 'pending',
+      '7': 'pending',
+      '8': 'pending',
+      '9': 'community',
+      '10': 'verified',
+      '11': 'community',
+      '12': 'community',
+      '13': 'community',
+      '14': 'pending',
+      '15': 'pending'
+    };
+  });
+
+  const [creatorClaimStatuses, setCreatorClaimStatuses] = useState<Record<string, 'verified' | 'pending' | 'community'>>(() => {
+    const saved = localStorage.getItem('choosify_creator_claims_store');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // ignore
+      }
+    }
+    return {
+      'creator-farhan': 'verified',
+      'creator-sarah': 'verified',
+      'creator-mily': 'pending',
+      'farhan bin rafiq': 'verified',
+      'sarah jenkins': 'verified',
+      'mily chowdhury': 'pending'
+    };
+  });
+
+  const getBrandClaimStatus = (brandNameOrId: string | number): 'verified' | 'pending' | 'community' => {
+    const key = String(brandNameOrId).toLowerCase().trim();
+    if (brandClaimStatuses[key]) {
+      return brandClaimStatuses[key];
+    }
+    if (key.includes('aarong') || key.includes('samsung') || key.includes('apple') || key.includes('apex') || key.includes('bata')) {
+      return 'verified';
+    }
+    if (key.includes('richman') || key.includes('star tech') || key.includes('star-tech') || key.includes('reve') || key.includes('lotto') || key.includes('perfume')) {
+      return 'pending';
+    }
+    return 'community';
+  };
+
+  const updateBrandClaimStatus = (brandNameOrId: string | number, status: 'verified' | 'pending' | 'community') => {
+    setBrandClaimStatuses(prev => {
+      const key = String(brandNameOrId).toLowerCase().trim();
+      const updated = { ...prev, [key]: status };
+      const foundBrand = BRANDS.find(b => String(b.id) === key || b.name.toLowerCase().trim() === key);
+      if (foundBrand) {
+        updated[String(foundBrand.id)] = status;
+        updated[foundBrand.name.toLowerCase().trim()] = status;
+      }
+      localStorage.setItem('choosify_brand_claims_store', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const getCreatorClaimStatus = (creatorIdOrName: string): 'verified' | 'pending' | 'community' => {
+    const key = String(creatorIdOrName).toLowerCase().trim();
+    if (creatorClaimStatuses[key]) {
+      return creatorClaimStatuses[key];
+    }
+    if (key.includes('farhan') || key.includes('sarah')) {
+      return 'verified';
+    }
+    if (key.includes('mily')) {
+      return 'pending';
+    }
+    return 'community';
+  };
+
+  const updateCreatorClaimStatus = (creatorIdOrName: string, status: 'verified' | 'pending' | 'community') => {
+    setCreatorClaimStatuses(prev => {
+      const key = String(creatorIdOrName).toLowerCase().trim();
+      const updated = { ...prev, [key]: status };
+      localStorage.setItem('choosify_creator_claims_store', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  useEffect(() => {
+    console.log("--- Brand Claim Global Status Store Update ---");
+    console.log("Brand: Sony | Status:", getBrandClaimStatus('Sony'), "| Source: Global Claim Status Store");
+    console.log("Brand: Samsung | Status:", getBrandClaimStatus('Samsung'), "| Source: Global Claim Status Store");
+  }, [brandClaimStatuses]);
+
   const [rfqs, setRfqs] = useState<B2BRfq[]>(() => {
     const saved = localStorage.getItem('choosify_b2b_rfqs');
     return saved ? JSON.parse(saved) : INITIAL_RFQS;
@@ -292,18 +421,22 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   }, [orders]);
 
   // Combine static brands with schema rules
-  const allBrands: Brand[] = BRANDS.map(b => ({
-    id: b.id,
-    name: b.name,
-    logo: b.logo,
-    verifiedStatus: b.id <= 4 || b.id === 10,
-    followers: Math.floor(b.products * 12.3),
-    ratings: b.rating,
-    sponsoredFlag: b.id === 1 || b.id === 2 || b.id === 10,
-    featuredFlag: b.id === 3 || b.id === 11,
-    wholesaleSupport: b.id !== 9, // Everything except Pickaboo aggregates wholesale
-    category: b.category
-  }));
+  const allBrands: Brand[] = BRANDS.map(b => {
+    const status = getBrandClaimStatus(b.id);
+    return {
+      id: b.id,
+      name: b.name,
+      logo: b.logo,
+      verifiedStatus: status === 'verified',
+      followers: Math.floor(b.products * 12.3),
+      ratings: b.rating,
+      sponsoredFlag: b.id === 1 || b.id === 2 || b.id === 10,
+      featuredFlag: b.id === 3 || b.id === 11,
+      wholesaleSupport: b.id !== 9, // Everything except Pickaboo aggregates wholesale
+      category: b.category,
+      claimStatus: status
+    };
+  });
 
   // Map products statically into retail catalog and wholesale catalog
   // Map products statically into retail catalog and wholesale catalog
@@ -751,6 +884,16 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   // Filter products by active mode to ensure data separation
   const allProducts = mappedProducts.filter(p => p.mode_type === mode);
 
+  const [activeVideo, setActiveVideo] = useState<{ url: string; title: string; isVertical?: boolean } | null>(null);
+
+  const openVideo = (url: string, title: string, isVertical?: boolean) => {
+    setActiveVideo({ url, title, isVertical });
+  };
+
+  const closeVideo = () => {
+    setActiveVideo(null);
+  };
+
   return (
     <GlobalStateContext.Provider value={{
       mode,
@@ -777,7 +920,16 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       allProducts,
       rfqs,
       submitRfq,
-      acceptQuotation
+      acceptQuotation,
+      activeVideo,
+      openVideo,
+      closeVideo,
+      brandClaimStatuses,
+      getBrandClaimStatus,
+      updateBrandClaimStatus,
+      creatorClaimStatuses,
+      getCreatorClaimStatus,
+      updateCreatorClaimStatus
     }}>
       {children}
     </GlobalStateContext.Provider>

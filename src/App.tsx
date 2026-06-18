@@ -27,6 +27,8 @@ const LoginSignUpPage = lazy(() => import('./pages/LoginSignUpPage').then(m => (
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
 const CustomerFavoritePage = lazy(() => import('./pages/CustomerFavoritePage').then(m => ({ default: m.CustomerFavoritePage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
+const CreatorsPage = lazy(() => import('./pages/CreatorsPage').then(m => ({ default: m.CreatorsPage })));
+const CreatorProfilePage = lazy(() => import('./pages/CreatorProfilePage').then(m => ({ default: m.CreatorProfilePage })));
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const BrandDealsPage = lazy(() => import('./pages/BrandDealsPage').then(m => ({ default: m.BrandDealsPage })));
@@ -40,14 +42,10 @@ const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ defa
 const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-// Lazy load CashBook pages
-const CashBookHome = lazy(() => import('./pages/cashbook/CashBookHome').then(m => ({ default: m.CashBookHome })));
-const CashBookDetail = lazy(() => import('./pages/cashbook/CashBookDetail').then(m => ({ default: m.CashBookDetail })));
-const CashBookReports = lazy(() => import('./pages/cashbook/CashBookReports').then(m => ({ default: m.CashBookReports })));
 
 
 
-// Shell for all 13 screens overview
+// Shell for all 15 screens overview
 function Overview() {
   const screens = [
     { title: "01. Homepage", id: "screen-1", content: <HomePage /> },
@@ -63,6 +61,8 @@ function Overview() {
     { title: "12. Login / Sign Up", id: "screen-12", content: <LoginSignUpPage /> },
     { title: "13. Post Your Offer", id: "screen-13", content: <PostOfferPage /> },
     { title: "14. Brand Wise Deals", id: "screen-14", content: <BrandDealsPage /> },
+    { title: "15. Creators Directory", id: "screen-15", content: <CreatorsPage /> },
+    { title: "16. Creator Profile", id: "screen-16", content: <CreatorProfilePage /> },
   ];
 
   return (
@@ -186,6 +186,8 @@ function AppContent() {
             <Route path="/post-offer" element={<PageWrapper><PostOfferPage /></PageWrapper>} />
             <Route path="/customer-favorite" element={<PageWrapper><CustomerFavoritePage /></PageWrapper>} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
+            <Route path="/creators" element={<PageWrapper><CreatorsPage /></PageWrapper>} />
+            <Route path="/creators/:id" element={<PageWrapper><CreatorProfilePage /></PageWrapper>} />
             <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
             <Route path="/checkout" element={<PageWrapper><CheckoutPage /></PageWrapper>} />
@@ -194,9 +196,7 @@ function AppContent() {
             <Route path="/seller/orders" element={<PageWrapper><SellerIncomingOrdersPage /></PageWrapper>} />
             <Route path="/seller/orders/:id" element={<PageWrapper><SellerOrderDetailsPage /></PageWrapper>} />
             <Route path="/dashboard" element={<PageWrapper><DashboardPage /></PageWrapper>} />
-            <Route path="/cashbook" element={<PageWrapper><CashBookHome /></PageWrapper>} />
-            <Route path="/cashbook/:bookId" element={<PageWrapper><CashBookDetail /></PageWrapper>} />
-            <Route path="/cashbook/:bookId/reports" element={<PageWrapper><CashBookReports /></PageWrapper>} />
+            <Route path="/cashbook*" element={<Navigate to="/" replace />} />
             <Route path="/messages" element={<PageWrapper><MessagesPage /></PageWrapper>} />
             <Route path="/messages/:threadId" element={<PageWrapper><MessagesPage /></PageWrapper>} />
             <Route path="/profile/orders" element={<PageWrapper><CustomerOrdersPage /></PageWrapper>} />

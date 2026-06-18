@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, ShoppingBag, User, PlusCircle, ChevronRight, Bell, Bookmark, LogIn, 
   LayoutDashboard, Heart, MessageSquare, Settings, Briefcase, Package, ShieldCheck, 
-  FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X, Book
+  FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { SignInModal } from './SignInModal';
@@ -63,7 +63,6 @@ export function Navbar() {
     { label: 'Messages', path: '/messages', icon: MessageSquare },
     { label: 'Saved Products', path: '/dashboard', tab: 'saved-products', icon: Heart },
     { label: 'Notifications', path: '/dashboard', tab: 'notifications', icon: Bell },
-    { label: 'My Cashbook', path: '/cashbook', icon: Book, dividerAbove: true },
     { label: 'Settings', path: '/dashboard', tab: 'settings', icon: Settings },
   ];
 
@@ -72,7 +71,7 @@ export function Navbar() {
       ? location.pathname === '/' 
       : location.pathname.startsWith(path);
     return cn(
-      "transition-colors hover:text-orange-primary",
+      "transition-colors hover:text-orange-primary whitespace-nowrap",
       isActive ? "text-orange-primary font-black" : "text-gray-300"
     );
   };
@@ -91,10 +90,10 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="w-full text-white h-20 flex items-center px-4 md:px-8 z-50 sticky top-0 border-b shadow-2xl backdrop-blur-md transition-all duration-300 bg-[#0A0A1F]/90 border-white/5" id="main-navbar">
+      <nav className="w-full text-white h-20 flex items-center px-3 lg:px-4 xl:px-8 z-50 sticky top-0 border-b shadow-2xl backdrop-blur-md transition-all duration-300 bg-[#0A0A1F]/90 border-white/5" id="main-navbar">
         
         {/* LOGO SECTOR */}
-        <div className="flex items-center gap-3 mr-4 md:mr-8 scale-110">
+        <div className="flex items-center gap-3 mr-2 lg:mr-3 xl:mr-8 scale-110 shrink-0">
           <Link to="/" className="flex flex-col items-center group" aria-label="Choosify Home">
             <svg 
               id="Layer_1" 
@@ -130,7 +129,7 @@ export function Navbar() {
         </div>
 
         {/* Retail Mode general navigation links */}
-        <div className="hidden lg:flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest mr-auto text-gray-300 border-r border-white/5 pr-6">
+        <div className="hidden lg:flex items-center flex-nowrap gap-2 xl:gap-4 2xl:gap-6 text-[10px] font-bold uppercase tracking-wider xl:tracking-widest mr-auto text-gray-300 border-r border-transparent xl:border-white/5 pr-3 xl:pr-6 shrink-0">
           <Link to="/" className={getLinkClass('/')}>Home</Link>
           <Link to="/categories" className={getLinkClass('/categories')}>Categories</Link>
           <Link to="/products" className={getLinkClass('/products')}>Products</Link>
@@ -139,6 +138,7 @@ export function Navbar() {
           <Link to="/compare" className={getLinkClass('/compare')}>Compare</Link>
           <Link to="/deals" className={getLinkClass('/deals')}>Deals</Link>
           <Link to="/customer-favorite" className={getLinkClass('/customer-favorite')}>Customer Favorite</Link>
+          <Link to="/creators" className={getLinkClass('/creators')}>Creators</Link>
         </div>
 
         {/* SEARCH BAR */}
@@ -159,10 +159,10 @@ export function Navbar() {
         </div>
 
         {/* ACTIONS & MESSAGES */}
-        <div className="flex items-center gap-5 ml-auto nav-actions">
+        <div className="flex items-center gap-3 xl:gap-5 ml-auto nav-actions shrink-0">
           
           {/* CART SECTIONS DEPENDENT ON STATE */}
-          <div className="hidden sm:flex items-center gap-4 border-r border-[#ffffff1a] pr-5">
+          <div className="hidden sm:flex items-center gap-3 xl:gap-4 border-r border-[#ffffff1a] pr-3 xl:pr-5">
             <button 
               type="button"
               onClick={() => {
@@ -410,6 +410,9 @@ export function Navbar() {
                   </Link>
                   <Link to="/categories" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/categories')}>
                     <span className="italic">All Categories</span>
+                  </Link>
+                  <Link to="/creators" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/creators')}>
+                    <span className="italic">Creators</span>
                   </Link>
                   
                   <div className="h-px bg-white/10 my-1" />

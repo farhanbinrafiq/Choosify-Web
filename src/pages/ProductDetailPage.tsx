@@ -248,6 +248,86 @@ export function ProductDetailPage() {
     });
   };
 
+  const getBoxContents = () => {
+    if (!product) return [];
+    
+    const title = (product.title || "").toLowerCase();
+    const category = (product.category || "").toLowerCase();
+
+    // Smartphone matching
+    if (
+      category.includes("phone") || 
+      category.includes("mobile") || 
+      title.includes("galaxy") || 
+      title.includes("iphone") || 
+      title.includes("redmi") || 
+      title.includes("pixel") || 
+      title.includes("poco") || 
+      title.includes("realme") || 
+      title.includes("smartphone")
+    ) {
+      return ["Device", "Charger", "USB Cable", "SIM Ejector Tool", "User Guide"];
+    }
+
+    // Laptop matching
+    if (
+      category.includes("laptop") || 
+      category.includes("computer") || 
+      title.includes("macbook") || 
+      title.includes("zenbook") || 
+      title.includes("laptop")
+    ) {
+      return ["Laptop", "Power Adapter", "Charging Cable", "Documentation"];
+    }
+
+    // Eyewear matching
+    if (
+      category.includes("eyewear") || 
+      category.includes("glasses") || 
+      title.includes("sunglasses") || 
+      title.includes("eyewear")
+    ) {
+      return ["Eyewear", "Protective Case", "Cleaning Cloth", "Warranty Card"];
+    }
+
+    // Clothing / Apparel matching
+    if (
+      category.includes("fashion") || 
+      category.includes("lifestyle") || 
+      category.includes("clothing") || 
+      category.includes("apparel") || 
+      title.includes("saree") || 
+      title.includes("panjabi") || 
+      title.includes("polo") || 
+      title.includes("shirt") || 
+      title.includes("apparel") || 
+      title.includes("runner") || 
+      title.includes("shoe")
+    ) {
+      if (title.includes("saree")) {
+        return ["Saree", "Shopping Bag", "Care Instructions"];
+      }
+      return ["Product Unit", "Shopping Bag", "Care Instructions"];
+    }
+
+    // Beauty Products matching
+    if (
+      category.includes("beauty") || 
+      category.includes("skin") || 
+      category.includes("makeup") || 
+      category.includes("cosmetics") || 
+      title.includes("perfume") || 
+      title.includes("serum") || 
+      title.includes("fragrance")
+    ) {
+      return ["Product Unit", "Protective Packaging", "User Instructions"];
+    }
+
+    return [];
+  };
+
+  const boxContents = getBoxContents();
+
   const selectedVariant = getSelectedVariant();
 
   // Reset active image index to 0 when variant changes
@@ -1106,6 +1186,36 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* BOX CONTENT SECTION */}
+              <div className="bg-white rounded-[5px] border border-gray-100 shadow-xl overflow-hidden p-6 space-y-4 font-sans text-left">
+                <h3 className="text-xs font-black text-navy uppercase tracking-tight pb-2 border-b border-gray-50 flex items-center gap-2">
+                  <span className="w-1 h-3.5 bg-[#E8500A] rounded-full inline-block" />
+                  Box Content
+                </h3>
+                {boxContents && boxContents.length > 0 ? (
+                  <div className="divide-y divide-gray-150 text-[11px] font-bold">
+                    {boxContents.map((item, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "flex items-center gap-2.5 py-3 px-3",
+                          i % 2 !== 0 ? "bg-gray-50/50" : "bg-white",
+                        )}
+                      >
+                        <span className="text-emerald-500 font-black text-xs shrink-0 select-none">✓</span>
+                        <span className="text-navy font-black text-[11px] uppercase tracking-wide">
+                          {item}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-gray-50/50 rounded-[5px] border border-dashed border-gray-200 text-center text-gray-400 font-bold text-[10px] uppercase tracking-wider leading-relaxed">
+                    No box content information has been provided by the seller.
+                  </div>
+                )}
               </div>
             </div>
             {/* Middle Column Section (Column 2) - Center Content */}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Youtube, Star, ChevronDown, CheckCircle2, Bookmark, ChevronLeft, ChevronRight, Zap, TrendingUp, HelpCircle, AlertCircle, Share2, MessageCircle, BarChart3, Users, Play, Smartphone, Gift, Shirt, Info, Package, DollarSign, ShieldCheck, ThumbsUp, Heart, X, ArrowRight } from 'lucide-react';
+import { Search, Youtube, Star, ChevronDown, CheckCircle2, Bookmark, ChevronLeft, ChevronRight, Zap, TrendingUp, HelpCircle, AlertCircle, Share2, MessageCircle, BarChart3, Users, Play, Smartphone, Gift, Shirt, Info, Package, DollarSign, ShieldCheck, ThumbsUp, Heart, X, ArrowRight, Lock, Sparkles, Clock } from 'lucide-react';
 import { BRANDS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { motion, AnimatePresence } from 'motion/react';
@@ -11,6 +11,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
 import { BrandOverviewSection } from '../components/BrandOverviewSection';
 import { FollowButton } from '../components/FollowButton';
+import { ClaimProfileModal } from '../components/ClaimProfileModal';
 
 interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
@@ -96,11 +97,12 @@ function WithInfluencerReviews({ brandName, brandLogo }: { brandName: string; br
 export function BrandDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { allBrands, allProducts } = useGlobalState();
+  const { allBrands, allProducts, getBrandClaimStatus, updateBrandClaimStatus, brandClaimStatuses } = useGlobalState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isLoved, setIsLoved] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
   // Filter States (from Brand Products page)
   const [activeFilter, setActiveFilter] = useState('Full Experience'); // Show Component View Selector
@@ -118,7 +120,24 @@ export function BrandDetailPage() {
   }, []);
 
   // Dynamically resolve brand or fallback to Sailor/fashion-oriented layout
-  const brand = allBrands.find(b => String(b.id) === id) || allBrands.find(b => b.name === 'Sailor') || allBrands[2];
+  const brand = allBrands.find(b => 
+    String(b.id) === id || 
+    b.name.toLowerCase().replace(/\s+/g, '-') === String(id).toLowerCase() || 
+    b.name.toLowerCase() === String(id).toLowerCase()
+  ) || allBrands.find(b => b.name === 'Sailor') || allBrands[2];
+
+  const [localClaimStatus, setLocalClaimStatus] = useState<'verified' | 'pending' | 'community'>(() => getBrandClaimStatus(brand.id));
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter, searchFilter, selectedCategories, selectedProductTypes, selectedPriceLimit]);
+
+  useEffect(() => {
+    setLocalClaimStatus(getBrandClaimStatus(brand.id));
+  }, [brand, brandClaimStatuses]);
   
   // Resolve products listed under this brand
   const brandNameLower = brand.name.toLowerCase();
@@ -167,6 +186,9 @@ export function BrandDetailPage() {
     }
     return true;
   });
+
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const paginatedProducts = filteredProducts.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage);
 
   // Extract deals (with specific tags or Sale flags)
   const filteredDeals = filteredProducts.filter((p: any) => 
@@ -432,18 +454,34 @@ export function BrandDetailPage() {
                  <div className="w-full flex-1 flex flex-col items-center lg:items-start gap-6">
                     <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white relative shrink-0 mx-auto lg:mx-0">
                        {renderBrandLogo(brand)}
-                       <div className="absolute -top-1.5 -right-1.5 w-7 h-7 bg-[#E8500A] rounded-full flex items-center justify-center text-white border-2 border-[#10133A] shadow-lg">
-                          <CheckCircle2 size={13} fill="currentColor" className="text-white stroke-[#E8500A]" />
-                       </div>
+                       {localClaimStatus === 'verified' && (
+                          <div className="absolute -top-1.5 -right-1.5 w-7 h-7 bg-[#E8500A] rounded-full flex items-center justify-center text-white border-2 border-[#10133A] shadow-lg">
+                             <CheckCircle2 size={13} fill="currentColor" className="text-white stroke-[#E8500A]" />
+                          </div>
+                       )}
                     </div>
 
                     <div className="w-full flex-1 flex flex-col items-center lg:items-start">
                        <div className="flex flex-col sm:flex-row items-center gap-3 mb-2 flex-wrap justify-center lg:justify-start">
                           <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none text-center lg:text-left">{brand.name}</h1>
-                          <div className="bg-[#4DBC15] px-3 py-1 rounded-full flex items-center gap-2 shadow-md">
-                             <ShieldCheck size={11} className="text-white" />
-                             <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">Verified Brand</span>
-                          </div>
+                          {localClaimStatus === 'verified' && (
+                             <div className="bg-[#4DBC15] px-3 py-1 rounded-full flex items-center gap-2 shadow-md">
+                                <ShieldCheck size={11} className="text-white" />
+                                <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">Verified Brand Owner</span>
+                             </div>
+                          )}
+                          {localClaimStatus === 'pending' && (
+                             <div className="bg-amber-500/80 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2 shadow-md border border-white/10">
+                                <HelpCircle size={11} className="text-white" />
+                                <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">Ownership Verification Pending</span>
+                             </div>
+                          )}
+                          {localClaimStatus === 'community' && (
+                             <div className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2 shadow-sm border border-white/5">
+                                <Users size={11} className="text-white/70" />
+                                <span className="text-[9px] font-black text-white/90 uppercase tracking-widest italic whitespace-nowrap">Community Brand Profile</span>
+                             </div>
+                          )}
                        </div>
                        
                        <p className="text-[10px] md:text-[11px] font-extrabold text-[#E8500A]/90 uppercase tracking-[0.2em] mb-3 text-center lg:text-left">
@@ -518,6 +556,29 @@ export function BrandDetailPage() {
                          name={brand.name}
                          type="brand"
                          className="px-6 md:px-8 py-3.5 md:py-4.5 rounded-full"                       />
+
+                        {localClaimStatus === 'community' && (
+                           <button 
+                             onClick={() => {
+                                setIsClaimModalOpen(true); return;
+                                setTimeout(() => {
+                                   updateBrandClaimStatus(brand.id, 'pending');
+                                   toast.success("Claim submitted successfully! Status changed to Pending Review.", { duration: 5000 });
+                                }, 1500);
+                             }}
+                             className="text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer bg-white text-navy border-white hover:bg-gray-100 flex items-center gap-1.5"
+                           >
+                              <ShieldCheck size={14} className="shrink-0" />
+                              <span>Claim Ownership</span>
+                           </button>
+                        )}
+
+                        {localClaimStatus === 'pending' && (
+                           <div className="text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-md bg-amber-500 text-white border border-amber-500/35 italic flex items-center gap-1.5 select-none hover:cursor-default">
+                              <Clock size={14} className="shrink-0" />
+                              <span>Verification Pending</span>
+                           </div>
+                        )}
 
                        <button 
                          onClick={() => scrollToSection('public-reviews-section')}
@@ -906,6 +967,77 @@ export function BrandDetailPage() {
             {/* COLUMN 2: EXCLUSIVE DEALS & PRODUCTS CATALOG (Center scroll) */}
             <main className="scroll-mt-36 min-w-0 pb-10 flex flex-col gap-12">
                
+               {/* Brand Claim Acquisition Card (Part 6) */}
+               {(localClaimStatus === 'community' || localClaimStatus === 'pending') && (
+                  <div className="bg-gradient-to-r from-[#FFF0E8]/50 to-[#FFE5D9]/30 border-2 border-[#FFE5D9] rounded-2xl p-6 md:p-8 shadow-xs flex flex-col md:flex-row items-center gap-6 text-left animate-fade-in relative overflow-hidden mb-6">
+                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/5 blur-xl rounded-full" />
+                     <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center shrink-0 font-bold text-[#E8500A]">
+                        <ShieldCheck className="w-6 h-6 text-[#E8500A]" />
+                     </div>
+                     <div className="flex-1 space-y-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-[#FFF0E8] text-[#E8500A] border border-[#FFE5D9]">
+                           {localClaimStatus === 'pending' ? 'Verification Pending Review' : 'Claim Acquisition Panel'}
+                        </span>
+                        <h4 className="text-sm font-black text-navy uppercase tracking-tight leading-none mb-1 font-space">
+                           {localClaimStatus === 'pending' ? 'Ownership Claim Under Active Review' : 'Are you an authorized representative of this brand?'}
+                        </h4>
+                        <p className="text-xs text-gray-600 font-semibold leading-relaxed">
+                           {localClaimStatus === 'pending' 
+                             ? 'Our moderators are actively processing your submitted credentials relative to this brand representative request. Complete access will be unlocked shortly.'
+                             : 'This community brand profile contains curated information from public web indexes. Claim ownership to configure your premium merchant storefront, sync inventory, and unlock the seller suite.'}
+                        </p>
+                        
+                        {/* Benefits Grid */}
+                        <div className="pt-2">
+                           <p className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest mb-2 font-mono">Claim ownership to:</p>
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-700 font-bold text-left">
+                              <div className="flex items-center gap-1.5">
+                                 <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
+                                 <span>Add products</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                 <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
+                                 <span>Launch promotions</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                 <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
+                                 <span>Publish coupons</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                 <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
+                                 <span>Collaborate with creators</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 sm:col-span-2">
+                                 <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
+                                 <span>Access business insights & store diagnostics</span>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div className="shrink-0 w-full md:w-auto self-stretch flex items-center justify-center">
+                        {localClaimStatus === 'community' ? (
+                          <button 
+                             onClick={() => {
+                                toast.loading("Initiating secure brand ownership verification link...", { duration: 1500 });
+                                setTimeout(() => {
+                                   updateBrandClaimStatus(brand.id, 'pending');
+                                   toast.success("Verification link generated! Ready for credential matching review.");
+                                }, 1500);
+                             }}
+                             className="w-full md:w-auto px-6 py-4 bg-[#E8500A] hover:bg-[#ff5d14] text-white font-black uppercase text-[10px] tracking-widest italic rounded-full shadow-lg hover:shadow-[#E8500A]/30 active:scale-95 transition-all text-center cursor-pointer border-none"
+                          >
+                             Claim Ownership
+                          </button>
+                        ) : (
+                          <div className="px-5 py-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex flex-col items-center gap-1 text-center shrink-0">
+                            <span className="text-[8px] font-black text-amber-700 uppercase tracking-wider">● Verification Active</span>
+                            <span className="text-[10px] font-black text-navy uppercase italic">Under Review</span>
+                          </div>
+                        )}
+                     </div>
+                  </div>
+               )}
+               
                {/* A. DEALS SECTION */}
                {(activeFilter === 'Full Experience' || activeFilter === 'Exclusive Deals Only') && (
                   <div id="deals-section" className="scroll-mt-36">
@@ -914,7 +1046,36 @@ export function BrandDetailPage() {
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">Deals found matching current selections</p>
                      </div>
                      
-                     {finalDeals.length > 0 ? (
+                     {localClaimStatus !== 'verified' ? (
+                        <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-10">
+                           <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                              <Lock className="w-5 h-5" />
+                           </div>
+                           <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight">Active Exclusive Deals Locked</h3>
+                           <p className="text-xs text-gray-500 font-bold max-w-sm">
+                              Merchant-published coupons, flash discounts, and promotional banners are locked until ownership is verified.
+                           </p>
+                           {localClaimStatus === 'community' && (
+                              <button 
+                                onClick={() => {
+                                   toast.loading("Initiating secure brand verification link...", { duration: 1500 });
+                                   setTimeout(() => {
+                                      updateBrandClaimStatus(brand.id, 'pending');
+                                      toast.success("Verification submission parsed! Your status is now Pending Review.");
+                                   }, 1500);
+                                }}
+                                className="bg-[#E8500A] hover:bg-[#ff5d14] text-white py-2 px-6 rounded-full text-[10px] font-black uppercase tracking-wider italic mt-2 cursor-pointer transition-all border-none"
+                              >
+                                Claim Brand Ownership
+                              </button>
+                           )}
+                           {localClaimStatus === 'pending' && (
+                              <div className="text-[10px] font-black text-amber-600 uppercase italic tracking-widest mt-2">
+                                 Ownership Verification Under Review
+                              </div>
+                           )}
+                        </div>
+                     ) : finalDeals.length > 0 ? (
                         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
                            {finalDeals.map((product: any, i: number) => (
                               <ProductCard key={product.id || i} product={product} variant="grid" />
@@ -941,9 +1102,38 @@ export function BrandDetailPage() {
                         </span>
                      </div>
 
-                     {filteredProducts.length > 0 ? (
+                     {localClaimStatus !== 'verified' ? (
+                        <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-12">
+                           <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                              <Lock className="w-5 h-5" />
+                           </div>
+                           <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight">Authorized Product Catalog Locked</h3>
+                           <p className="text-xs text-gray-500 font-bold max-w-sm">
+                              The full catalog, price list sync, inventory metrics, and product grids are locked. Currently unclaimed profiles are restricted from showing merchant content.
+                           </p>
+                           {localClaimStatus === 'community' && (
+                              <button 
+                                onClick={() => {
+                                   toast.loading("Initiating secure brand verification link...", { duration: 1500 });
+                                   setTimeout(() => {
+                                      updateBrandClaimStatus(brand.id, 'pending');
+                                      toast.success("Verification submission parsed! Your status is now Pending Review.");
+                                   }, 1500);
+                                }}
+                                className="bg-[#E8500A] hover:bg-[#ff5d14] text-white py-2 px-6 rounded-full text-[10px] font-black uppercase tracking-wider italic mt-2 cursor-pointer transition-all border-none"
+                              >
+                                Claim Brand Ownership
+                              </button>
+                           )}
+                           {localClaimStatus === 'pending' && (
+                              <div className="text-[10px] font-black text-amber-600 uppercase italic tracking-widest mt-2">
+                                 Verification Pending Review
+                              </div>
+                           )}
+                        </div>
+                     ) : filteredProducts.length > 0 ? (
                         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
-                           {filteredProducts.map((product: any, i: number) => (
+                           {paginatedProducts.map((product: any, i: number) => (
                               <ProductCard key={product.id || i} product={product} variant="grid" />
                            ))}
                         </div>
@@ -955,17 +1145,23 @@ export function BrandDetailPage() {
                      )}
 
                      {/* Pagination footer (from Brand Wise Products page - standardized to global canonical style) */}
-                     <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
+                     {localClaimStatus === 'verified' && totalPages > 1 && (
+                         <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
                         <div className="flex items-center gap-3">
-                           <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
-                              <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
-                           </button>
-                           {[1, 2, 3, "...", 15].map((p, idx) => (
-                              <button 
-                                key={idx} 
-                                className={cn(
+                           <button 
+                              disabled={currentPage === 1}
+                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                              className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] disabled:opacity-45 disabled:hover:bg-white disabled:hover:text-navy disabled:hover:border-[#e8edf2] transition-all shadow-none group cursor-pointer"
+                            >
+                               <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
+                            </button>
+                           {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((p) => (
+                               <button
+                                 key={p}
+                                 onClick={() => setCurrentPage(p)}
+                                 className={cn(
                                   "w-12 h-12 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
-                                  p === 1 
+                                  p === currentPage 
                                   ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
                                   : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
                                 )}
@@ -973,14 +1169,19 @@ export function BrandDetailPage() {
                                 {p}
                               </button>
                            ))}
-                           <button onClick={() => toast.success('Loading Page 2...')} className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
-                              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                           </button>
+                           <button 
+                              disabled={currentPage === totalPages}
+                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                              className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] disabled:opacity-45 disabled:hover:bg-white disabled:hover:text-navy disabled:hover:border-[#e8edf2] transition-all shadow-none group cursor-pointer"
+                            >
+                               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            </button>
                         </div>
                         <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">
-                           Authorized Distribution • Showing {filteredProducts.length} items
+                           Authorized Distribution • Showing {paginatedProducts.length} of {filteredProducts.length} items (Page {currentPage} of {totalPages})
                         </p>
                      </div>
+                      )}
                   </div>
                )}
             </main>
@@ -990,6 +1191,7 @@ export function BrandDetailPage() {
                <div className="flex flex-col gap-6">
 
                   {/* Promo Coupons Cards list */}
+                  {localClaimStatus === 'verified' && (
                   <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
                      <div className="flex justify-between items-center pb-3 mb-4 border-b border-[#e8edf2] px-0.5 text-left">
                         <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5">
@@ -999,7 +1201,8 @@ export function BrandDetailPage() {
                         <span className="text-[9px] font-semibold text-[#8a9bb0]">3 Verified</span>
                      </div>
 
-                     <div className="space-y-4 text-left">
+                      
+                         <div className="space-y-4 text-left">
                         {[
                            { title: "First Order Gift", discount: "BDT 500 FLAT", code: `${brand.name.toUpperCase()}500`, expiry: "Valid till June 30" },
                            { title: "Eid Celebration Offer", discount: "BDT 1,000 FLAT", code: "EID26", expiry: "Minimum purchase BDT 4,000" },
@@ -1028,6 +1231,38 @@ export function BrandDetailPage() {
                         ))}
                      </div>
                   </div>
+                  )}
+
+                  {localClaimStatus !== 'verified' && (
+                     <div className="bg-white rounded-[5px] p-6 border border-[#e8edf2] shadow-sm text-center flex flex-col items-center justify-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                           <Lock size={16} />
+                        </div>
+                        <h4 className="text-[11px] font-black text-navy uppercase tracking-tight">Promo Codes Locked</h4>
+                        <p className="text-[10px] text-gray-500 font-bold leading-normal">
+                           Official merchant promotions and exclusive coupons are hidden for unclaimed brand profiles.
+                        </p>
+                        {localClaimStatus === 'community' && (
+                           <button 
+                             onClick={() => {
+                                toast.loading("Initiating secure brand verification link...", { duration: 1500 });
+                                setTimeout(() => {
+                                   updateBrandClaimStatus(brand.id, 'pending');
+                                   toast.success("Verification submission parsed! Ready for credential matching review.");
+                                }, 1500);
+                             }}
+                             className="text-[9px] bg-[#E8500A] hover:bg-[#ff5d14] text-white py-2 px-5 rounded-full font-black uppercase tracking-wider italic mt-1 cursor-pointer border-none shadow-md"
+                           >
+                             Claim Brand
+                           </button>
+                        )}
+                        {localClaimStatus === 'pending' && (
+                           <div className="text-[9px] font-black text-amber-600 uppercase italic tracking-widest mt-1">
+                              Verification Under Review
+                           </div>
+                        )}
+                     </div>
+                  )}
 
                   {/* Sponsored Ad space block */}
                   <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden">
@@ -1061,7 +1296,19 @@ export function BrandDetailPage() {
 
          {/* FULL WIDTH INFLUENCER REVIEWS SECTION */}
          <div id="influencer-reviews-section" className="scroll-mt-36 w-full">
-            <WithInfluencerReviews brandName={brand.name} brandLogo={brand.logo} />
+            {localClaimStatus !== 'verified' ? (
+                <div className="bg-white rounded-[5px] p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-sm border border-gray-100/80 py-12">
+                   <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                      <Lock className="w-5 h-5" />
+                   </div>
+                   <h3 className="text-sm font-black text-navy uppercase tracking-tight">Creator Collaborations & Reviews Locked</h3>
+                   <p className="text-xs text-gray-500 font-bold max-w-sm mb-1">
+                      Professional influencer reviews, creator campaign collaborations, and brand ambassadorship metrics are locked until ownership is verified.
+                   </p>
+                </div>
+             ) : (
+                <WithInfluencerReviews brandName={brand.name} brandLogo={brand.logo} />
+             )}
          </div>
 
          {/* FULL WIDTH PUBLIC REVIEWS SECTION */}
@@ -1121,7 +1368,7 @@ export function BrandDetailPage() {
          </div>
 
          {/* FULL WIDTH BRAND OVERVIEW SECTION */}
-         <BrandOverviewSection brandName={brand.name} overviewData={overviewData} />
+         <BrandOverviewSection brandName={brand.name} overviewData={overviewData} claimStatus={brand.claimStatus} />
 
          {/* TRUST STATEMENT BACKGROUND BANNER */}
          <div className="w-full hero-gradient rounded-[5px] p-8 md:p-12 text-center text-white relative overflow-hidden shadow-lg border border-white/5">
@@ -1202,6 +1449,17 @@ export function BrandDetailPage() {
         type="brand"
         targetId={String(brand.id)}
         targetName={brand.name}
+      />
+
+      <ClaimProfileModal
+        isOpen={isClaimModalOpen}
+        onClose={() => setIsClaimModalOpen(false)}
+        targetType="brand"
+        targetId={brand.id}
+        targetName={brand.name}
+        onClaimSubmitted={() => {
+          setLocalClaimStatus('pending');
+        }}
       />
 
     </div>

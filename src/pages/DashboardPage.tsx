@@ -1273,7 +1273,6 @@ export function DashboardPage() {
     { id: 'saved-recommendations', label: 'Saved Guides', icon: Bookmark },
     { id: 'my-comparisons', label: `My Comparisons (${comparedProducts.length})`, icon: Layers },
     { id: 'admin-campaigns', label: `Campaigns Manager (Admin) (${campaigns?.length || 0})`, icon: Sparkles },
-    { id: 'cashbook', label: 'CashBook Ledger', icon: BookOpen, href: '/cashbook' },
     { id: 'messages', label: `Messages (${messages.length})`, icon: MessageSquare },
     { id: 'notifications', label: `Notifications (${notifications.filter(n => !n.read).length})`, icon: Bell },
     { id: 'my-reviews', label: 'My Reviews', icon: Star },
@@ -1281,7 +1280,7 @@ export function DashboardPage() {
   ];
 
   const controlItems = menuItems.filter(item => 
-    ['overview', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations', 'my-comparisons', 'admin-campaigns', 'cashbook'].includes(item.id)
+    ['overview', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations', 'my-comparisons', 'admin-campaigns'].includes(item.id)
   );
 
   const accountItems = menuItems.filter(item => 

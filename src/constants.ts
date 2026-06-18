@@ -164,6 +164,10 @@ export const BRANDS = [
   { id: 9, name: 'Pickaboo', logo: 'P', products: 540, rating: 4.7, category: 'Tech' },
   { id: 10, name: 'Aarong', logo: 'Aa', products: 1200, rating: 4.9, category: 'Ethnic' },
   { id: 11, name: 'Yellow', logo: 'Y', products: 800, rating: 4.8, category: 'Fashion' },
+  { id: 12, name: 'Sailor', logo: 'Sa', products: 640, rating: 4.8, category: 'Fashion' },
+  { id: 13, name: 'Ecstasy', logo: 'Ec', products: 210, rating: 4.4, category: 'Fashion' },
+  { id: 14, name: 'Richman', logo: 'R', products: 310, rating: 4.6, category: 'Fashion' },
+  { id: 15, name: 'Star Tech', logo: 'ST', products: 1950, rating: 4.8, category: 'Tech' },
 ];
 
 export const BLOGS = [

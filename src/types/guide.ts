@@ -1,6 +1,7 @@
 export type GuideMode = 'direct' | 'roundup';
 
 export interface CreatorData {
+  id?: string;
   name: string;
   avatar: string;
   bio: string;

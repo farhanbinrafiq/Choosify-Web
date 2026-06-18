@@ -762,6 +762,15 @@ export function SearchPage() {
                             <span><strong>Expert Tip:</strong> {inf.quickTip}</span>
                           </div>
                         )}
+
+                        <div className="mt-3 flex justify-end">
+                          <Link 
+                            to={inf.id === 'inf-1' ? '/creators/creator-farhan' : inf.id === 'inf-2' ? '/creators/creator-sarah' : inf.id === 'inf-3' ? '/creators/creator-imtiaz' : '/creators'}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-orange-primary/10 hover:bg-orange-primary text-[#E8500A] hover:text-white text-[9px] font-black uppercase tracking-widest transition-all duration-300 cursor-pointer"
+                          >
+                            Send Direct Brief <ChevronRight size={10} className="stroke-[2.5]" />
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   ))}

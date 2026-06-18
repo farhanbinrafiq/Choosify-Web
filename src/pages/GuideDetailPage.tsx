@@ -1305,6 +1305,79 @@ export function GuideDetailPage() {
                     </button>
                   </div>
                 )}
+
+                {/* SECTION: REVIEWER PROFILE (Mobile/Tablet Viewports) */}
+                <div
+                  id="reviewer-profile"
+                  className="lg:hidden bg-white border border-[#e8edf2] rounded-[5px] p-6 shadow-sm flex flex-col items-center text-center scroll-mt-36 mt-12 animate-in fade-in duration-300"
+                >
+                  <div className="w-20 h-20 rounded-full border-2 border-orange-primary/20 p-0.5 mb-4 shrink-0">
+                    <img
+                      src={creator.avatar}
+                      className="w-full h-full object-cover rounded-full"
+                      alt={creator.name}
+                    />
+                  </div>
+
+                  <h4 className="text-base font-black text-navy italic tracking-tighter uppercase mb-1 leading-none">
+                    {creator.name}
+                  </h4>
+                  <span className="text-[8px] font-black text-orange-primary uppercase tracking-widest italic bg-orange-primary/5 px-2.5 py-1 rounded border border-orange-primary/10 mb-4">
+                    {creator.verifiedStatus}
+                  </span>
+
+                  <p className="text-[11px] font-bold text-gray-500 italic mb-4 leading-relaxed max-w-md">
+                    {creator.bio}
+                  </p>
+
+                  <div className="flex gap-3 justify-center mb-5 shrink-0">
+                    {creator.socials.facebook && (
+                      <a
+                        href={creator.socials.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                      >
+                        <Facebook size={12} />
+                      </a>
+                    )}
+                    {creator.socials.twitter && (
+                      <a
+                        href={creator.socials.twitter}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-8 h-8 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center hover:bg-sky-500 hover:text-white transition-all shadow-sm"
+                      >
+                        <Twitter size={12} />
+                      </a>
+                    )}
+                    {creator.socials.youtube && (
+                      <a
+                        href={creator.socials.youtube}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                      >
+                        <Youtube size={12} />
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2.5 w-full max-w-xs">
+                    <FollowButton
+                      id={`creator-${creator.name}`}
+                      name={creator.name}
+                      type="creator"
+                      className="flex-1 py-3 rounded-xl border border-[#e8edf2] text-[10px]"
+                    />
+                    <Link
+                      to={`/creators/${creator.id || 'creator-farhan'}`}
+                      className="flex-1 py-3 rounded-xl bg-[#E8500A] hover:bg-[#CF4400] text-center text-white text-[10px] font-black uppercase tracking-wider transition-all duration-300 transform hover:scale-[1.03] active:scale-95 border border-transparent cursor-pointer inline-flex items-center justify-center select-none shadow-md italic shadow-orange-primary/10"
+                    >
+                      Visit Profile
+                    </Link>
+                  </div>
+                </div>
               </div>
             </main>
 
@@ -1312,7 +1385,7 @@ export function GuideDetailPage() {
             <aside className="hidden lg:flex flex-col gap-6 lg:sticky lg:top-[160px] pb-10 flex-shrink-0">
               {/* SECTION 1: REVIEWER PROFILE */}
               <div
-                id="reviewer-profile"
+                id="reviewer-profile-desktop"
                 className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm flex flex-col items-center text-center scroll-mt-36"
               >
                 <div className="w-20 h-20 rounded-full border-2 border-orange-primary/20 p-0.5 mb-4 shrink-0">
@@ -1367,12 +1440,20 @@ export function GuideDetailPage() {
                   )}
                 </div>
 
-                <FollowButton
-                  id={`creator-${creator.name}`}
-                  name={creator.name}
-                  type="creator"
-                  className="w-full py-3 rounded-xl border border-[#e8edf2] text-[10px]"
-                />
+                <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-2.5 w-full mt-2">
+                  <FollowButton
+                    id={`creator-${creator.name}`}
+                    name={creator.name}
+                    type="creator"
+                    className="flex-1 py-3 rounded-xl border border-[#e8edf2] text-[10px]"
+                  />
+                  <Link
+                    to={`/creators/${creator.id || 'creator-farhan'}`}
+                    className="flex-1 py-3 rounded-xl bg-[#E8500A] hover:bg-[#CF4400] text-center text-white text-[10px] font-black uppercase tracking-wider transition-all duration-300 transform hover:scale-[1.03] active:scale-95 border border-transparent cursor-pointer inline-flex items-center justify-center select-none shadow-md italic shadow-orange-primary/10"
+                  >
+                    Visit Profile
+                  </Link>
+                </div>
               </div>
 
               {/* SECTION 2: REVIEW CREDIBILITY */}

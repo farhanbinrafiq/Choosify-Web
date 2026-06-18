@@ -55,6 +55,7 @@ export interface Brand {
   featuredFlag: boolean;
   wholesaleSupport: boolean;
   category?: string;
+  claimStatus?: 'community' | 'pending' | 'verified';
 }
 
 export type ProductModeType = 'retail' | 'wholesale';
