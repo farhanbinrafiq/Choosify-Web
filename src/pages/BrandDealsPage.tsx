@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ShoppingBag, ShieldCheck, Tag, Zap, Star, Search, Shirt, Sparkles, AlertCircle } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowRight, ShoppingBag, ShieldCheck, Tag, Zap, Star, Search, Shirt, Sparkles, AlertCircle, ChevronRight } from 'lucide-react';
 import { BRANDS } from '../constants';
 import { cn } from '../lib/utils';
 
@@ -50,23 +50,34 @@ export function BrandDealsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
       {/* Hero Section */}
-      <div className="w-full bg-[#0A0A1F] py-16 px-4 md:px-8 relative overflow-hidden">
+      <div className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10 font-sans">
-          <div className="bg-orange-primary text-white text-[11px] font-black px-8 py-2.5 rounded-[5px] mb-8 uppercase tracking-[0.2em] shadow-xl shadow-orange-primary/30 italic">
-            EXCLUSIVE PARTNER OFFERS
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[130px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in font-sans">
+          <div className="w-full flex flex-col justify-center">
+            {/* Breadcrumbs */}
+            <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 w-full">
+              <Link to="/" className="hover:text-white transition-colors">Home</Link>
+              <ChevronRight size={10} className="text-white/20" />
+              <span className="text-white">Brand Deals</span>
+            </div>
+
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              <div className="bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-full mb-1 uppercase tracking-[0.2em] shadow-md shadow-orange-primary/30 italic inline-block w-fit">
+                EXCLUSIVE PARTNER OFFERS
+              </div>
+              
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter mb-1 leading-none text-center">
+                BRAND WISE <span className="text-orange-primary">DEALS</span>
+              </h1>
+            </div>
+
+            <p className="text-white/60 text-[9px] lg:text-[11px] max-w-2xl font-bold uppercase tracking-[0.15em] italic leading-relaxed mx-auto">
+              Directly sourced offers from official brand outlets and authorized retailers.
+            </p>
           </div>
-          
-          <h1 className="text-4xl md:text-6xl lg:text-[80px] font-black text-white italic uppercase tracking-tighter mb-8 leading-none">
-            BRAND WISE <span className="text-orange-primary">DEALS</span>
-          </h1>
-          
-          <p className="text-white/60 text-sm md:text-lg max-w-2xl font-bold uppercase tracking-[0.2em] italic leading-relaxed">
-            Directly sourced offers from official brand outlets and authorized retailers.
-          </p>
         </div>
       </div>
 

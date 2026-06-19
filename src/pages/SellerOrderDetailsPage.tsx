@@ -23,18 +23,18 @@ export function SellerOrderDetailsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* Header Panel */}
-      <div className="bg-[#050514] text-white pt-12 pb-16 px-4 md:px-8 border-b border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
+      <div className="w-full bg-[#050514] text-white relative overflow-hidden shrink-0 border-b border-white/5">
+        <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
+          <div className="flex flex-col justify-center">
             <button 
               onClick={() => navigate('/seller/orders')} 
-              className="group text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1.5 mb-2"
+              className="group text-[10px] font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1.5 mb-1 cursor-pointer"
             >
               <ArrowLeft size={12} className="group-hover:-translate-x-1 transition-transform" />
               Return to Factory Queue / Ledger
             </button>
-            <h1 className="text-3xl font-black uppercase tracking-tighter italic">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tighter italic leading-none">
               Commercial <span className="text-[#F96500]">Invoice</span> Statement
             </h1>
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
@@ -44,9 +44,9 @@ export function SellerOrderDetailsPage() {
 
           <button 
             onClick={handlePrint}
-            className="bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9.5px] font-black uppercase tracking-widest px-5 py-3 rounded-xl transition-all italic flex items-center gap-2"
+            className="bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[8px] font-black uppercase tracking-widest px-4 py-2 rounded-full transition-all italic flex items-center gap-1.5 cursor-pointer"
           >
-            <Printer size={12} className="text-[#F96500] shrink-0 animate-pulse" />
+            <Printer size={11} className="text-[#F96500] shrink-0 animate-pulse" />
             Print Waybill
           </button>
         </div>
@@ -54,7 +54,7 @@ export function SellerOrderDetailsPage() {
 
       {/* Invoice Staging Block */}
       <div className="max-w-4xl mx-auto w-full px-4 py-12 flex-1">
-        <div className="bg-white border border-gray-100 rounded-[32px] p-8 md:p-12 shadow-sm space-y-10">
+        <div className="bg-white border border-gray-100 rounded-[5px] p-8 md:p-12 shadow-sm space-y-10">
           {/* Top Invoice Header Grid */}
           <div className="flex flex-col md:flex-row justify-between gap-8 border-b pb-8">
             <div className="space-y-3">
@@ -87,7 +87,7 @@ export function SellerOrderDetailsPage() {
           {/* Products Table */}
           <div className="space-y-4">
             <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block leading-none">Invoice Products Staged details</span>
-            <div className="border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100 shadow-inner">
+            <div className="border border-gray-100 rounded-[5px] overflow-hidden divide-y divide-gray-100 shadow-inner">
               <div className="bg-[#F8FAFC] px-6 py-3.5 grid grid-cols-4 text-[9px] font-black text-navy uppercase tracking-widest italic">
                 <div className="col-span-2">Staged Inventory Description</div>
                 <div className="text-center">Units lot Qty</div>
@@ -105,7 +105,7 @@ export function SellerOrderDetailsPage() {
           </div>
 
           {/* Settle summary calculations */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 border border-gray-100 rounded-2xl bg-[#F8FAFC] gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 border border-gray-100 rounded-[5px] bg-[#F8FAFC] gap-4">
             <div>
               <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Payment Settle method:</span>
               <span className="text-xs font-black text-navy uppercase italic">
@@ -124,7 +124,7 @@ export function SellerOrderDetailsPage() {
 
           {/* Help visual coordination card wrapper and buyer-seller chat trigger */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-8">
-            <div className="p-5 border border-gray-100 rounded-2xl flex gap-3.5 items-center">
+            <div className="p-5 border border-gray-100 rounded-[5px] flex gap-3.5 items-center">
               <ShieldCheck size={28} className="text-green-600 shrink-0" />
               <div className="space-y-0.5">
                 <h4 className="text-[10px] font-black uppercase text-navy italic leading-none">Double Escrow Guaranteed</h4>
@@ -139,7 +139,7 @@ export function SellerOrderDetailsPage() {
                 navigate('/dashboard');
                 toast.success('Channel active! Redirected to coordination feed logs.');
               }}
-              className="p-5 border border-dashed border-[#F96500]/30 hover:bg-[#F96500]/5 hover:border-[#F96500] rounded-2xl flex gap-3.5 items-center justify-between text-left group transition-all"
+              className="p-5 border border-dashed border-[#F96500]/30 hover:bg-[#F96500]/5 hover:border-[#F96500] rounded-[5px] flex gap-3.5 items-center justify-between text-left group transition-all"
             >
               <div className="flex gap-3.5 items-center">
                 <MessageSquare size={28} className="text-[#F96500] shrink-0" />

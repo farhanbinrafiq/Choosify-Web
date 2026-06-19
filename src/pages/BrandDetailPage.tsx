@@ -969,7 +969,7 @@ export function BrandDetailPage() {
                
                {/* Brand Claim Acquisition Card (Part 6) */}
                {(localClaimStatus === 'community' || localClaimStatus === 'pending') && (
-                  <div className="bg-gradient-to-r from-[#FFF0E8]/50 to-[#FFE5D9]/30 border-2 border-[#FFE5D9] rounded-2xl p-6 md:p-8 shadow-xs flex flex-col md:flex-row items-center gap-6 text-left animate-fade-in relative overflow-hidden mb-6">
+                  <div className="bg-gradient-to-r from-[#FFF0E8]/50 to-[#FFE5D9]/30 border-2 border-[#FFE5D9] rounded-[5px] p-6 md:p-8 shadow-xs flex flex-col md:flex-row items-center gap-6 text-left animate-fade-in relative overflow-hidden mb-6">
                      <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/5 blur-xl rounded-full" />
                      <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center shrink-0 font-bold text-[#E8500A]">
                         <ShieldCheck className="w-6 h-6 text-[#E8500A]" />
@@ -1029,7 +1029,7 @@ export function BrandDetailPage() {
                              Claim Ownership
                           </button>
                         ) : (
-                          <div className="px-5 py-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex flex-col items-center gap-1 text-center shrink-0">
+                          <div className="px-5 py-3.5 bg-amber-500/10 border border-amber-500/30 rounded-[5px] flex flex-col items-center gap-1 text-center shrink-0">
                             <span className="text-[8px] font-black text-amber-700 uppercase tracking-wider">● Verification Active</span>
                             <span className="text-[10px] font-black text-navy uppercase italic">Under Review</span>
                           </div>
@@ -1390,7 +1390,7 @@ export function BrandDetailPage() {
                Similar Brands Comparison
             </h3>
 
-            <div className="overflow-x-auto no-scrollbar rounded-2xl border border-gray-100">
+            <div className="overflow-x-auto no-scrollbar rounded-[5px] border border-gray-100">
                <table className="w-full text-left border-collapse">
                   <thead>
                      <tr className="bg-gray-50 border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-wider italic">

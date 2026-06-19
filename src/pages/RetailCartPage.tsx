@@ -74,27 +74,29 @@ export function RetailCartPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* Hero Header */}
-      <div className="w-full bg-[#0A0B1E] pt-12 pb-16 px-4 md:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex items-center gap-2 text-gray-400 text-[10px] font-black uppercase tracking-widest mb-4">
-            <Link to="/" className="hover:text-white transition-all">Home</Link>
-            <ChevronRight size={10} />
-            <span className="text-orange-primary">Shopping Cart</span>
+      <div className="w-full bg-[#0A0B1E] relative overflow-hidden shrink-0 border-b border-white/5">
+        <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-2 text-gray-400 text-[9px] font-black uppercase tracking-widest mb-1 pointer-events-none">
+              <Link to="/" className="hover:text-white transition-all pointer-events-auto">Home</Link>
+              <ChevronRight size={10} />
+              <span className="text-orange-primary">Shopping Cart</span>
+            </div>
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white uppercase tracking-tighter italic mb-1 leading-none">
+              Retail Shopping <span className="text-orange-primary">Cart</span>
+            </h1>
+            <p className="text-gray-400 text-[10px] font-medium leading-none mt-1">
+              Manage your retail items, compute grouped seller-level delivery, and checkout securely.
+            </p>
           </div>
-          <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic mb-2">
-            Retail Shopping <span className="text-orange-primary">Cart</span>
-          </h1>
-          <p className="text-gray-400 text-sm font-medium">
-            Manage your retail items, compute grouped seller-level delivery, and checkout securely.
-          </p>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-12 flex-1">
         {retailCart.length === 0 ? (
-          <div className="bg-white border border-gray-100 rounded-[32px] p-16 text-center shadow-sm max-w-2xl mx-auto flex flex-col items-center gap-6">
+          <div className="bg-white border border-gray-100 rounded-[5px] p-16 text-center shadow-sm max-w-2xl mx-auto flex flex-col items-center gap-6">
             <div className="w-24 h-24 bg-orange-primary/5 rounded-full flex items-center justify-center text-orange-primary">
               <ShoppingBag size={40} className="animate-bounce" />
             </div>
@@ -118,7 +120,7 @@ export function RetailCartPage() {
                 const sellerSubtotal = calculateSellerSubtotal(items);
 
                 return (
-                  <div key={sellerId} className="bg-white border border-gray-100 rounded-[24px] overflow-hidden shadow-sm transition-all hover:shadow-md">
+                  <div key={sellerId} className="bg-white border border-gray-100 rounded-[5px] overflow-hidden shadow-sm transition-all hover:shadow-md">
                     {/* Seller Header Section */}
                     <div className="bg-navy/5 border-b border-gray-100 px-6 py-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -312,7 +314,7 @@ export function RetailCartPage() {
               </div>
 
               {/* Secure Trust Badge */}
-              <div className="bg-navy p-6 rounded-[24px] text-white flex gap-4 items-center">
+              <div className="bg-navy p-6 rounded-[5px] text-white flex gap-4 items-center">
                 <ShieldCheck size={32} className="text-orange-primary shrink-0" />
                 <div>
                   <h4 className="text-[10px] font-black uppercase tracking-widest italic leading-none mb-1">Shoosify.bd Secure Guaranteed</h4>

@@ -982,7 +982,7 @@ const AdminCampaignsSection = () => {
               const isFuture = c.startDate && new Date(c.startDate) > new Date();
               
               return (
-                <div key={c.id} className="bg-white/5 border border-white/10 rounded-[24px] p-6 flex flex-col justify-between relative overflow-hidden group">
+                <div key={c.id} className="bg-white/5 border border-white/10 rounded-[5px] p-6 flex flex-col justify-between relative overflow-hidden group">
                   <div className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none" style={{ backgroundImage: `url(${c.image})` }} />
                   
                   <div className="relative z-10 flex flex-col gap-3">
@@ -1053,7 +1053,7 @@ const AdminCampaignsSection = () => {
             <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Configure promotional parameters for Choosify home delivery shield</p>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 space-y-6">
+          <div className="bg-white/5 border border-white/10 rounded-[5px] p-8 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div className="space-y-2">
@@ -1263,7 +1263,7 @@ export function DashboardPage() {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
   };
 
-  const menuItems = [
+  const menuItems: Array<{ id: string; label: string; icon: any; href?: string }> = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'saved-products', label: `Saved Products (${savedProducts.length})`, icon: Heart },
     { id: 'saved-brands', label: `Saved Brands (${savedBrands.length})`, icon: Store },

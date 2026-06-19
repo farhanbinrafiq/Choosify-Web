@@ -43,17 +43,17 @@ export function CustomerOrdersPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#0A0A1F] text-white">
       {/* Visual Workspace Hero */}
-      <div className="w-full bg-[#050514] pt-12 pb-16 px-6 md:px-12 border-b border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <Link to="/dashboard" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1.5">
+      <div className="w-full bg-[#050514] relative overflow-hidden shrink-0 border-b border-white/5">
+        <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
+          <div className="flex flex-col justify-center">
+            <Link to="/dashboard" className="text-[10px] font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1.5 mb-1">
               <ArrowLeft size={12} /> Return to Profile Dashboard
             </Link>
-            <h1 className="text-3xl font-black uppercase tracking-tighter italic">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tighter italic leading-none">
               My Staged <span className="text-orange-primary font-serif">Orders</span>
             </h1>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest leading-none">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none mt-1">
               Historic and active purchases routed through secure cargo terminals
             </p>
           </div>
@@ -61,9 +61,9 @@ export function CustomerOrdersPage() {
           <div className="flex items-center gap-2">
             <Link 
               to="/messages"
-              className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9.5px] px-5 py-3 rounded-xl transition-all italic flex items-center gap-2"
+              className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[8px] px-4 py-2 rounded-full transition-all italic flex items-center gap-1.5"
             >
-              <MessageSquare size={13} className="text-orange-primary" />
+              <MessageSquare size={11} className="text-orange-primary" />
               Active Chat Support
             </Link>
           </div>

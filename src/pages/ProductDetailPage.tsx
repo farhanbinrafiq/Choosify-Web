@@ -827,7 +827,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 </div>
               ) : (
                 /* B2B Wholesale channels calculator inside the dark theme wrapper as well! */
-                <div className="w-full max-w-2xl bg-white/5 border border-white/10 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm text-left">
+                <div className="w-full max-w-2xl bg-white/5 border border-white/10 rounded-[5px] p-6 relative overflow-hidden backdrop-blur-sm text-left">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#E8500A]/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl" />
 
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-white/10">

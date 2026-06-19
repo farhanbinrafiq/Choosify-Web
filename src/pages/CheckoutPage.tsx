@@ -231,7 +231,7 @@ ORDER STATUS: PENDING_CONFIRMATION
           </div>
           <div className="flex gap-4 items-center">
             {sourceMode === 'wholesale' && (
-              <div className="bg-[#F96500]/10 border border-[#F96500]/30 px-5 py-3 rounded-2xl">
+              <div className="bg-[#F96500]/10 border border-[#F96500]/30 px-5 py-3 rounded-[5px]">
                 <span className="text-[8px] font-black text-white uppercase tracking-widest block mb-0.5 leading-none">Registered License ID</span>
                 <span className="text-xs font-black text-[#F96500] italic font-mono uppercase">{tradeLicense}</span>
               </div>
@@ -244,7 +244,7 @@ ORDER STATUS: PENDING_CONFIRMATION
         {/* Input Forms */}
         <div className="lg:col-span-2 space-y-8">
           {/* Shipping Credentials */}
-          <div className="bg-white border border-gray-100 rounded-[28px] p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-gray-100 rounded-[5px] p-8 shadow-sm space-y-6">
             <h2 className="text-base font-black text-navy uppercase italic tracking-widest border-b pb-4 flex items-center gap-2">
               <MapPin size={16} className="text-orange-primary" />
               Recipient Cargo Address
@@ -319,7 +319,7 @@ ORDER STATUS: PENDING_CONFIRMATION
           </div>
 
           {/* Grouped Lots Packages Visualizer */}
-          <div className="bg-white border border-gray-100 rounded-[28px] p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-gray-100 rounded-[5px] p-8 shadow-sm space-y-6">
             <h2 className="text-base font-black text-navy uppercase italic tracking-widest border-b pb-4 flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <Truck size={16} className="text-orange-primary" />
@@ -335,7 +335,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                 const items = groupedCart[sellerId];
                 const sellerName = items[0].product.brand || 'Regional Seller';
                 return (
-                  <div key={sellerId} className="border border-gray-100 rounded-2xl p-6 bg-[#F8FAFC]/50">
+                  <div key={sellerId} className="border border-gray-100 rounded-[5px] p-6 bg-[#F8FAFC]/50">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-black text-white italic uppercase tracking-wider bg-navy px-2 py-1 rounded">
@@ -365,7 +365,7 @@ ORDER STATUS: PENDING_CONFIRMATION
 
         {/* Action summaries */}
         <div className="space-y-6">
-          <div className="bg-white border border-gray-100 rounded-[28px] p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-gray-100 rounded-[5px] p-8 shadow-sm space-y-6">
             <h3 className="text-lg font-black text-navy uppercase italic tracking-tighter border-b pb-4">Staging Settlement</h3>
 
             {/* Payment selection */}
@@ -376,7 +376,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                 onClick={() => setPaymentMethod('cod')}
                 disabled={!isCODEligible}
                 className={cn(
-                  "w-full p-4 rounded-2xl border text-left flex gap-4 items-start transition-all",
+                  "w-full p-4 rounded-[5px] border text-left flex gap-4 items-start transition-all",
                   paymentMethod === 'cod' 
                     ? "border-[#F96500] bg-[#F96500]/5" 
                     : "border-gray-100 bg-white hover:bg-gray-50",
@@ -395,7 +395,7 @@ ORDER STATUS: PENDING_CONFIRMATION
               <button
                 onClick={() => setPaymentMethod('credit')}
                 className={cn(
-                  "w-full p-4 rounded-2xl border text-left flex gap-4 items-start transition-all",
+                  "w-full p-4 rounded-[5px] border text-left flex gap-4 items-start transition-all",
                   paymentMethod === 'credit' 
                     ? "border-[#F96500] bg-[#F96500]/5" 
                     : "border-gray-100 bg-white hover:bg-gray-50"
@@ -440,7 +440,7 @@ ORDER STATUS: PENDING_CONFIRMATION
           </div>
 
           {/* Guaranteed security escrow */}
-          <div className="bg-navy p-6 rounded-[24px] text-white flex gap-4 items-center">
+          <div className="bg-navy p-6 rounded-[5px] text-white flex gap-4 items-center">
             <ShieldCheck size={32} className="text-orange-primary shrink-0" />
             <div>
               <h4 className="text-[10px] font-black uppercase tracking-widest italic leading-none mb-1">Double Shield Protection</h4>

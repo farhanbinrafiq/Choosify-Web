@@ -82,68 +82,70 @@ export function DealsPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section - Standardized Centered Alignment */}
-      <div className="w-full bg-[#0A0A1F] py-5 md:py-6 px-6 relative overflow-hidden flex flex-col items-center justify-center">
+      <div className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
         {/* Background Gradients matching other directory pages */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         
-        <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full">
-          {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-2 w-full">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">Deals & Promotions</span>
-          </div>
-
-          <div className="bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-full mb-1.5 uppercase tracking-[0.2em] shadow-md shadow-orange-primary/30 italic inline-block w-fit">
-            FLASH SALE EVENT
-          </div>
-          
-          <h1 className="text-2xl md:text-3.5xl font-black text-white italic uppercase tracking-tighter mb-1.5 leading-none text-center">
-            HOTTEST <span className="text-orange-primary">DEALS</span> TODAY
-          </h1>
-
-          <p className="text-gray-400 text-[11px] md:text-xs font-medium leading-relaxed mb-2.5 max-w-2xl text-center">
-            Discover verified limited-time promotions, exclusive seller invoice discounts, and real-time flash sales happening right now across Bangladesh.
-          </p>
-
-          {/* Statistics/Timer Row - Centered inside Hero container */}
-          <div className="flex flex-row items-center justify-center gap-4 md:gap-6 w-full mt-1">
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[12px] py-1.5 px-3 flex items-center gap-3 shadow-lg shrink-0">
-              <div className="flex flex-col items-center gap-0.5 shrink-0">
-                <Zap size={10} className="text-orange-primary fill-orange-primary" />
-                <span className="text-[7px] font-black text-orange-primary uppercase tracking-[0.15em] italic">ENDS IN</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                {[
-                  { val: '10', label: 'HRS' },
-                  { val: '10', label: 'MIN' },
-                  { val: '10', label: 'SEC' }
-                ].map((t, i, arr) => (
-                  <React.Fragment key={i}>
-                    <div className="flex flex-col items-center gap-0.5">
-                      <div className="w-8 h-8 bg-[#000A24] border border-white/15 rounded-md flex items-center justify-center shadow-inner group transition-all hover:border-orange-primary/30">
-                        <span className="text-xs font-black text-white font-mono leading-none tracking-tighter">{t.val}</span>
-                      </div>
-                      <span className="text-[6.5px] font-black text-gray-400 tracking-[0.1em] uppercase italic">{t.label}</span>
-                    </div>
-                    {i < arr.length - 1 && (
-                      <div className="text-white/40 font-black text-xs pb-2">:</div>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
+        <div className="max-w-[1914px] mx-auto w-full h-[140px] md:h-[155px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
+          <div className="w-full flex flex-col justify-center">
+            {/* Breadcrumbs */}
+            <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 w-full">
+              <Link to="/" className="hover:text-white transition-colors">Home</Link>
+              <ChevronRight size={10} className="text-white/20" />
+              <span className="text-white">Deals & Promotions</span>
             </div>
 
-            <button 
-              onClick={() => navigate('/post-offer')}
-              className="group flex items-center gap-2 px-4 py-2.5 bg-white rounded-full transition-all hover:scale-105 hover:shadow-lg active:scale-95 text-navy cursor-pointer"
-            >
-              <div className="w-6 h-6 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
-                <ExternalLink size={11} />
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              <div className="bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-full mb-1 uppercase tracking-[0.2em] shadow-md shadow-orange-primary/30 italic inline-block w-fit">
+                FLASH SALE EVENT
               </div>
-              <span className="text-[8.5px] font-black text-navy uppercase tracking-[0.12em] italic">Post Your Deals</span>
-            </button>
+              
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter mb-1 leading-none text-center">
+                HOTTEST <span className="text-orange-primary">DEALS</span> TODAY
+              </h1>
+            </div>
+
+            <p className="text-gray-400 text-[9px] lg:text-[11px] font-medium leading-normal mb-1.5 max-w-2xl text-center mx-auto">
+              Discover verified limited-time promotions, exclusive seller invoice discounts, and real-time flash sales happening right now across Bangladesh.
+            </p>
+
+            {/* Statistics/Timer Row - Centered inside Hero container */}
+            <div className="flex flex-row items-center justify-center gap-4 md:gap-6 w-full mt-0.5">
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[12px] py-1 px-2.5 flex items-center gap-3.5 shadow-lg shrink-0">
+                <div className="flex items-center gap-1.5">
+                  <Zap size={10} className="text-orange-primary fill-orange-primary animate-pulse" />
+                  <span className="text-[7px] font-black text-orange-primary uppercase tracking-[0.15em] italic">ENDS IN</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {[
+                    { val: '10', label: 'HRS' },
+                    { val: '10', label: 'MIN' },
+                    { val: '10', label: 'SEC' }
+                  ].map((t, i, arr) => (
+                    <React.Fragment key={i}>
+                      <div className="flex flex-row items-baseline gap-0.5">
+                        <span className="text-xs font-black text-white font-mono leading-none tracking-tighter">{t.val}</span>
+                        <span className="text-[6px] font-black text-gray-400 tracking-[0.05em] uppercase italic">{t.label}</span>
+                      </div>
+                      {i < arr.length - 1 && (
+                        <div className="text-white/40 font-black text-xs pb-0.5">:</div>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+
+              <button 
+                onClick={() => navigate('/post-offer')}
+                className="group flex items-center gap-1.5 px-3 py-1 bg-white rounded-full transition-all hover:scale-105 hover:shadow-md active:scale-95 text-navy cursor-pointer"
+              >
+                <div className="w-4 h-4 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
+                  <ExternalLink size={8} />
+                </div>
+                <span className="text-[8px] font-black text-navy uppercase tracking-[0.12em] italic">Post Your Deals</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

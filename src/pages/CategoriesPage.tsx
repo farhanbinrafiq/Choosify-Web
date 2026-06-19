@@ -174,68 +174,70 @@ export function CategoriesPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
-      <div className="w-full bg-[#0A0A1F] px-6 py-5 md:py-6 relative overflow-hidden flex items-center justify-center">
+      <div className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         
-        <div className="max-w-7xl mx-auto text-center relative z-10 w-full">
-          {mode === 'wholesale' ? (
-            <h1 className="text-[22px] md:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
-              <span className="text-white not-italic">B2B Product Category</span> <span className="text-[#FF5B00] not-italic">HUB</span>
-            </h1>
-          ) : (
-            <h1 className="text-[22px] md:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
-              <span className="text-white not-italic">EXPLORATION</span> <span className="text-orange-primary not-italic">HUB</span>
-            </h1>
-          )}
- 
-          {/* Product Name Marquee */}
-          <div className="w-full overflow-hidden mb-2 py-1 border-y border-white/5 relative">
-            <motion.div 
-               animate={{ x: [0, -1500] }}
-               transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-               className="flex whitespace-nowrap gap-8"
-            >
-               {[
-                 'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
-                 '4K Drone', 'Mechanical Keyboard', 'DSLR Camera', 'Portable Speaker', 
-                 'Fitness Tracker', 'Power Bank'
-               ].map((name, i) => (
-                 <span 
-                   key={i} 
-                   className={cn(
-                     "text-xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
-                     "text-white/10",
-                     "hover:text-orange-primary hover:scale-110"
-                   )}
-                 >
-                    {name}
-                 </span>
-               ))}
-               {/* Loop Duplicate */}
-               {[
-                 'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
-                 '4K Drone', 'Mechanical Keyboard', 'DSLR Camera', 'Portable Speaker', 
-                 'Fitness Tracker', 'Power Bank'
-               ].map((name, i) => (
-                 <span 
-                   key={`dup-${i}`} 
-                   className={cn(
-                     "text-xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
-                     "text-white/10",
-                     "hover:text-orange-primary hover:scale-110"
-                   )}
-                 >
-                    {name}
-                 </span>
-               ))}
-            </motion.div>
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[130px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
+          <div className="w-full flex flex-col justify-center">
+            {mode === 'wholesale' ? (
+              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
+                <span className="text-white not-italic">B2B Product Category</span> <span className="text-[#FF5B00] not-italic">HUB</span>
+              </h1>
+            ) : (
+              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
+                <span className="text-white not-italic">EXPLORATION</span> <span className="text-orange-primary not-italic">HUB</span>
+              </h1>
+            )}
+   
+            {/* Product Name Marquee */}
+            <div className="w-full overflow-hidden mb-1.5 py-0.5 border-y border-white/5 relative">
+              <motion.div 
+                 animate={{ x: [0, -1500] }}
+                 transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+                 className="flex whitespace-nowrap gap-8"
+              >
+                 {[
+                   'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
+                   '4K Drone', 'Mechanical Keyboard', 'DSLR Camera', 'Portable Speaker', 
+                   'Fitness Tracker', 'Power Bank'
+                 ].map((name, i) => (
+                   <span 
+                     key={i} 
+                     className={cn(
+                       "text-base lg:text-xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
+                       "text-white/10",
+                       "hover:text-orange-primary hover:scale-110"
+                     )}
+                   >
+                      {name}
+                   </span>
+                 ))}
+                 {/* Loop Duplicate */}
+                 {[
+                   'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
+                   '4K Drone', 'Mechanical Keyboard', 'DSLR Camera', 'Portable Speaker', 
+                   'Fitness Tracker', 'Power Bank'
+                 ].map((name, i) => (
+                   <span 
+                     key={`dup-${i}`} 
+                     className={cn(
+                       "text-base lg:text-xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
+                       "text-white/10",
+                       "hover:text-orange-primary hover:scale-110"
+                     )}
+                   >
+                      {name}
+                   </span>
+                 ))}
+              </motion.div>
+            </div>
+   
+            <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8px] lg:text-[9.5px] mb-0 uppercase tracking-[0.2em] opacity-80 leading-normal">
+              DISCOVER PREMIUM PRODUCTS, OFFICIAL STORES, AND BEST DEALS ACROSS BANGLADESH.
+            </p>
           </div>
- 
-          <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8px] md:text-[9.5px] mb-0.5 uppercase tracking-[0.2em] opacity-80 leading-relaxed">
-            DISCOVER PREMIUM PRODUCTS, OFFICIAL STORES, AND BEST DEALS ACROSS BANGLADESH.
-          </p>
         </div>
       </div>
 
@@ -321,15 +323,14 @@ export function CategoriesPage() {
             <div className="space-y-3.5 text-left">
               {[
                 { 
-                  to: '/products', 
+                  to: '/', 
                   icon: (
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
-                      <path d="M12 4.5L6.5 12.5H17.5L12 4.5Z" fill="#FF5B00" />
-                      <rect x="6" y="14" width="5.5" height="5.5" rx="0.5" fill="#FF5B00" />
-                      <circle cx="15.5" cy="16.7" r="2.8" fill="#FF5B00" />
+                      <path d="M3 10.5L12 3L21 10.5V20C21 20.5 20.5 21 20 21H15V14H9V21H4C3.5 21 3 20.5 3 20V10.5Z" stroke="#FF5B00" strokeWidth="2.2" strokeLinejoin="round" fill="none" />
                     </svg>
                   ), 
-                  label: 'ALL PRODUCT' 
+                  label: 'HOME',
+                  count: '100+'
                 },
                 { 
                   to: '/categories', 
@@ -341,7 +342,20 @@ export function CategoriesPage() {
                       <rect x="13" y="13" width="6" height="6" rx="1.5" fill="#FF5B00" />
                     </svg>
                   ), 
-                  label: 'CATEGORIES' 
+                  label: 'CATEGORIES',
+                  count: '12'
+                },
+                { 
+                  to: '/products', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <path d="M12 4.5L6.5 12.5H17.5L12 4.5Z" fill="#FF5B00" />
+                      <rect x="6" y="14" width="5.5" height="5.5" rx="0.5" fill="#FF5B00" />
+                      <circle cx="15.5" cy="16.7" r="2.8" fill="#FF5B00" />
+                    </svg>
+                  ), 
+                  label: 'PRODUCTS',
+                  count: '550'
                 },
                 { 
                   to: '/brands', 
@@ -353,7 +367,8 @@ export function CategoriesPage() {
                       <circle cx="15.5" cy="12" r="1.2" fill="#000435" />
                     </svg>
                   ), 
-                  label: 'ALL BRANDS' 
+                  label: 'BRANDS',
+                  count: '48'
                 },
                 { 
                   to: '/guides', 
@@ -366,7 +381,8 @@ export function CategoriesPage() {
                       <path d="M10 17L9 20H15L14 17" stroke="#FF5B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   ), 
-                  label: 'RECOMMENDATIONS' 
+                  label: 'RECOMMENDATIONS',
+                  count: '35'
                 },
                 { 
                   to: '/compare', 
@@ -380,7 +396,8 @@ export function CategoriesPage() {
                       <path d="M9.5 14.5L11.5 16.5L9.5 18.5" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                     </svg>
                   ), 
-                  label: 'COMPARE' 
+                  label: 'COMPARE',
+                  count: 'Active'
                 },
                 { 
                   to: '/deals', 
@@ -390,13 +407,35 @@ export function CategoriesPage() {
                       <circle cx="15.5" cy="8.5" r="1.5" fill="white" />
                     </svg>
                   ), 
-                  label: 'DEALS' 
+                  label: 'DEALS',
+                  count: 'Hot'
+                },
+                { 
+                  to: '/customer-favorite', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z" stroke="#FF5B00" strokeWidth="2.2" fill="#FF5B00" />
+                    </svg>
+                  ), 
+                  label: 'CUSTOMER FAVORITE',
+                  count: 'Saved'
+                },
+                { 
+                  to: '/creators', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <path d="M17 21V19C17 17.9 16.1 17 15 17H9C7.9 17 7 17.9 7 19V21" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      <circle cx="12" cy="11" r="4" stroke="#FF5B00" strokeWidth="2.2" fill="none" />
+                    </svg>
+                  ), 
+                  label: 'CREATORS',
+                  count: '75'
                 },
               ].map((link, lidx) => (
                 <Link 
                   key={lidx} 
                   to={link.to} 
-                  className="flex items-center justify-between py-1 group transition-all duration-300"
+                  className="flex items-center justify-between py-1 group transition-all duration-300 pointer-events-auto"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full border border-[#e8edf2] flex items-center justify-center bg-white shadow-inner group-hover:scale-105 group-hover:border-orange-primary/20 transition-all duration-300 shrink-0">
@@ -404,7 +443,7 @@ export function CategoriesPage() {
                     </div>
                     <span className="font-sans text-xs text-navy uppercase tracking-wide group-hover:text-orange-primary transition-colors duration-300 font-semibold">{link.label}</span>
                   </div>
-                  <span className="px-2.5 py-0.5 bg-[#D6E1EC]/30 text-navy/70 text-[9px] font-mono font-semibold rounded-full leading-none">550</span>
+                  <span className="px-2.5 py-0.5 bg-[#D6E1EC]/30 text-navy/70 text-[9px] font-mono font-semibold rounded-full leading-none">{link.count}</span>
                 </Link>
               ))}
             </div>

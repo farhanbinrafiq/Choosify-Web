@@ -126,45 +126,47 @@ export function CreatorsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
       {/* Hero Section */}
-      <div className="w-full bg-[#0A0A1F] px-4 md:px-8 py-5 md:py-6 relative overflow-hidden flex items-center justify-center">
+      <div className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         
-        <div className="max-w-7xl mx-auto text-center relative z-10 w-full animate-fade-in">
-          {mode === 'wholesale' ? (
-            <h1 className="text-[22px] md:text-[28px] font-black italic uppercase tracking-tighter mb-1.5 leading-none">
-              <span className="text-[#FF5B00]">B2B CREATORS</span> <span className="text-white">DIRECTORY</span>
-            </h1>
-          ) : (
-            <h1 className="text-[22px] md:text-[28px] font-black italic uppercase tracking-tighter mb-1.5 leading-none">
-              <span className="text-orange-primary">CREATORS</span> <span className="text-white">DIRECTORY</span>
-            </h1>
-          )}
-          
-          {/* Text-only Carousel (PRD Requirement) */}
-          <div className="w-full overflow-hidden mb-2 py-1 border-y border-white/5 relative">
-            <motion.div 
-               animate={{ x: [0, -1000] }}
-               transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-               className="flex whitespace-nowrap gap-8"
-            >
-               {['Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha', 'Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha'].map((name, i) => (
-                 <span key={i} className="text-xl font-black text-white/5 italic uppercase tracking-tighter hover:text-orange-primary transition-all cursor-default">
-                    {name}
-                 </span>
-               ))}
-               {['Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha', 'Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha'].map((name, i) => (
-                 <span key={i} className="text-xl font-black text-white/5 italic uppercase tracking-tighter hover:text-orange-primary transition-all cursor-default">
-                    {name}
-                 </span>
-               ))}
-            </motion.div>
-          </div>
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[130px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
+          <div className="w-full flex flex-col justify-center">
+            {mode === 'wholesale' ? (
+              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
+                <span className="text-[#FF5B00]">B2B CREATORS</span> <span className="text-white">DIRECTORY</span>
+              </h1>
+            ) : (
+              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
+                <span className="text-orange-primary">CREATORS</span> <span className="text-white">DIRECTORY</span>
+              </h1>
+            )}
+            
+            {/* Text-only Carousel (PRD Requirement) */}
+            <div className="w-full overflow-hidden mb-1.5 py-0.5 border-y border-white/5 relative">
+              <motion.div 
+                 animate={{ x: [0, -1000] }}
+                 transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+                 className="flex whitespace-nowrap gap-8"
+              >
+                 {['Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha', 'Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha'].map((name, i) => (
+                   <span key={i} className="text-base lg:text-xl font-black text-white/5 italic uppercase tracking-tighter hover:text-orange-primary transition-all cursor-default">
+                      {name}
+                   </span>
+                 ))}
+                 {['Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha', 'Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha'].map((name, i) => (
+                   <span key={i} className="text-base lg:text-xl font-black text-white/5 italic uppercase tracking-tighter hover:text-orange-primary transition-all cursor-default">
+                      {name}
+                   </span>
+                 ))}
+              </motion.div>
+            </div>
 
-          <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8.5px] md:text-[9.5px] mb-1 uppercase tracking-wide opacity-80">
-            Discover verified local experts & digital curators in Bangladesh. Send structured briefs directly—no platform middleman.
-          </p>
+            <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8px] lg:text-[9.5px] mb-0 uppercase tracking-wide opacity-80 leading-tight">
+              Discover verified local experts & digital curators in Bangladesh. Send structured briefs directly—no platform middleman.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -274,7 +276,7 @@ export function CreatorsPage() {
           {/* BUSINESS SELLERS INFO CARD */}
           <div 
             id="section-sellers-brands" 
-            className="w-full bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
+            className="w-full bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
             style={{ height: '464px' }}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
@@ -293,7 +295,7 @@ export function CreatorsPage() {
               </p>
             </div>
 
-            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">POST CAMPAIGN BRIEFS</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                 Submit campaign details to top ranking tech, fashion, lifestyle, and financial content creators.
@@ -417,7 +419,7 @@ export function CreatorsPage() {
                 <motion.div 
                   layout
                   key={creator.id} 
-                  className="bg-white rounded-xl p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
+                  className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
                   style={{ width: '100%', maxWidth: '250px', height: '350px' }}
                 >
                   {creator.isHot && (
@@ -503,7 +505,7 @@ export function CreatorsPage() {
                   <motion.div 
                     layout
                     key={creator.id} 
-                    className="bg-white rounded-xl p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
+                    className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
                     style={{ width: '100%', maxWidth: '250px', height: '350px' }}
                   >
                     {creator.isHot && (

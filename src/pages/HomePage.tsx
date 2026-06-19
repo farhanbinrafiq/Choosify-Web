@@ -6,7 +6,7 @@ import {
   Play, ShieldCheck, DollarSign, Star, AlertCircle, PenTool, Award as Trophy,
   Shirt, Smartphone, Gem, Gamepad2, Monitor, Utensils, Cpu, Tv, Home, Baby,
   Palette, Luggage,
-  Flame, Sparkles, Send, Users, ShieldAlert, BadgeCheck, Zap, Clock, Book,
+  Flame, Sparkles, Send, Users, ShieldAlert, BadgeCheck, Zap, Clock,
   Gift, Package
 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
@@ -697,7 +697,7 @@ export function HomePage() {
 
             <div className="space-y-3">
               {/* Profile Card */}
-              <div className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center gap-4.5 shadow-sm">
+              <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4 flex items-center gap-4.5 shadow-sm">
                 <img 
                   src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop" 
                   className="w-10 h-10 rounded-full border border-gray-100 object-cover shrink-0 shadow-sm" 
@@ -711,7 +711,7 @@ export function HomePage() {
               {/* My Orders Card */}
               <Link 
                 to="/dashboard" 
-                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
+                className="bg-white rounded-[5px] border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
@@ -729,7 +729,7 @@ export function HomePage() {
               {/* Messages Card */}
               <Link 
                 to="/messages" 
-                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
+                className="bg-white rounded-[5px] border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
@@ -747,7 +747,7 @@ export function HomePage() {
               {/* Saved Items Card */}
               <Link 
                 to="/dashboard" 
-                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
+                className="bg-white rounded-[5px] border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
@@ -765,7 +765,7 @@ export function HomePage() {
               {/* Recently Viewed Card */}
               <Link 
                 to="/dashboard" 
-                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
+                className="bg-white rounded-[5px] border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
@@ -779,70 +779,149 @@ export function HomePage() {
                   15
                 </span>
               </Link>
-
-              {/* My Cashbook Card */}
-              <Link 
-                to="/cashbook" 
-                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
-                    <Book className="w-5 h-5 text-[#E8500A]" />
-                  </div>
-                  <span className="text-[11px] font-semibold text-[#1a1a2e] uppercase">
-                    MY CASHBOOK
-                  </span>
-                </div>
-                <span className="text-[11px] font-semibold text-[#E8500A] shrink-0">
-                  NEW
-                </span>
-              </Link>
-
-              {/* Customer Favorites Card */}
-              <Link 
-                to="/customer-favorite" 
-                className="bg-white rounded-xl border border-[#e8edf2] p-4 flex items-center justify-between shadow-sm hover:border-[#E8500A]/25 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-inner shrink-0 leading-none">
-                    <Flame className="w-5 h-5 text-[#E8500A]" />
-                  </div>
-                  <span className="text-[11px] font-semibold text-[#1a1a2e] uppercase">
-                    CUSTOMER FAVORITES
-                  </span>
-                </div>
-                <span className="text-[11px] font-semibold text-[#E8500A] shrink-0">
-                  HOT
-                </span>
-              </Link>
             </div>
           </div>
 
           {/* QUICK ACCESS */}
-          <div className="bg-white rounded-xl border border-[#e8edf2] p-4 shadow-sm">
-            <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase mb-3 text-left">QUICK HIGHWAYS</h3>
-            <div className="space-y-1 text-xs text-[#1A1D4E] text-left">
+          <div 
+            className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full"
+          >
+            <div className="flex items-center gap-1 pb-3 mb-4 border-b border-[#e8edf2] px-1">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider text-left">
+                QUICK ACCESS
+              </h3>
+            </div>
+            <div className="space-y-3.5 text-left">
               {[
-                { to: '/products', icon: <Award className="w-4 h-4 text-[#E8500A]" />, label: 'ALL PRODUCTS' },
-                { to: '/brands', icon: <Trophy className="w-4 h-4 text-[#E8500A]" />, label: 'ALL BRANDS' },
-                { to: '/guides', icon: <MessageSquare className="w-4 h-4 text-[#E8500A]" />, label: 'RECOMMENDATIONS' },
-                { to: '/compare', icon: <Award className="w-4 h-4 text-[#E8500A]" />, label: 'COMPARE PORTAL' },
-                { to: '/deals', icon: <Award className="w-4 h-4 text-[#E8500A]" />, label: 'LIVE DEALS' },
+                { 
+                  to: '/', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <path d="M3 10.5L12 3L21 10.5V20C21 20.5 20.5 21 20 21H15V14H9V21H4C3.5 21 3 20.5 3 20V10.5Z" stroke="#FF5B00" strokeWidth="2.2" strokeLinejoin="round" fill="none" />
+                    </svg>
+                  ), 
+                  label: 'HOME',
+                  count: '100+'
+                },
+                { 
+                  to: '/categories', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <rect x="5" y="5" width="6" height="6" rx="1.5" fill="#FF5B00" />
+                      <rect x="13" y="5" width="6" height="6" rx="1.5" fill="#FF5B00" />
+                      <rect x="5" y="13" width="6" height="6" rx="1.5" fill="#FF5B00" />
+                      <rect x="13" y="13" width="6" height="6" rx="1.5" fill="#FF5B00" />
+                    </svg>
+                  ), 
+                  label: 'CATEGORIES',
+                  count: '12'
+                },
+                { 
+                  to: '/products', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <path d="M12 4.5L6.5 12.5H17.5L12 4.5Z" fill="#FF5B00" />
+                      <rect x="6" y="14" width="5.5" height="5.5" rx="0.5" fill="#FF5B00" />
+                      <circle cx="15.5" cy="16.7" r="2.8" fill="#FF5B00" />
+                    </svg>
+                  ), 
+                  label: 'PRODUCTS',
+                  count: '550'
+                },
+                { 
+                  to: '/brands', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <circle cx="8.5" cy="12" r="4.2" stroke="#FF5B00" strokeWidth="2.5" fill="none" />
+                      <circle cx="8.5" cy="12" r="1.2" fill="#000435" />
+                      <circle cx="15.5" cy="12" r="4.2" stroke="#FF5B00" strokeWidth="2.5" fill="none" />
+                      <circle cx="15.5" cy="12" r="1.2" fill="#000435" />
+                    </svg>
+                  ), 
+                  label: 'BRANDS',
+                  count: '48'
+                },
+                { 
+                  to: '/guides', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <rect x="4" y="6" width="16" height="11" rx="1.5" stroke="#FF5B00" strokeWidth="2.2" fill="none" />
+                      <line x1="4" y1="11.5" x2="20" y2="11.5" stroke="#FF5B00" strokeWidth="2" />
+                      <line x1="12" y1="6" x2="12" y2="17" stroke="#FF5B00" strokeWidth="2" />
+                      <rect x="6" y="8" width="4" height="2" fill="#FF5B00" rx="0.5" />
+                      <path d="M10 17L9 20H15L14 17" stroke="#FF5B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ), 
+                  label: 'RECOMMENDATIONS',
+                  count: '35'
+                },
+                { 
+                  to: '/compare', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <rect x="5.5" y="5.5" width="5.5" height="5.5" rx="1.2" fill="#FF5B00" />
+                      <circle cx="16.5" cy="16.5" r="3" fill="#FF5B00" />
+                      <path d="M16.5 11.5V7.5H12.5" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      <path d="M14.5 9.5L12.5 7.5L14.5 5.5" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      <path d="M7.5 12.5V16.5H11.5" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      <path d="M9.5 14.5L11.5 16.5L9.5 18.5" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                    </svg>
+                  ), 
+                  label: 'COMPARE',
+                  count: 'Active'
+                },
+                { 
+                  to: '/deals', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <path d="M12.5 4.5H18.5C19.1 4.5 19.5 4.9 19.5 5.5V11.5C19.5 11.8 19.4 12.0 19.2 12.2L11.7 19.7C11.3 20.1 10.7 20.1 10.3 19.7L5.3 14.7C4.9 14.3 4.9 13.7 5.3 13.3L12.8 5.8C13.0 5.6 13.2 5.5 13.5 5.5" stroke="#FF5B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="#FF5B00" />
+                      <circle cx="15.5" cy="8.5" r="1.5" fill="white" />
+                    </svg>
+                  ), 
+                  label: 'DEALS',
+                  count: 'Hot'
+                },
+                { 
+                  to: '/customer-favorite', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z" stroke="#FF5B00" strokeWidth="2.2" fill="#FF5B00" />
+                    </svg>
+                  ), 
+                  label: 'CUSTOMER FAVORITE',
+                  count: 'Saved'
+                },
+                { 
+                  to: '/creators', 
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
+                      <path d="M17 21V19C17 17.9 16.1 17 15 17H9C7.9 17 7 17.9 7 19V21" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      <circle cx="12" cy="11" r="4" stroke="#FF5B00" strokeWidth="2.2" fill="none" />
+                    </svg>
+                  ), 
+                  label: 'CREATORS',
+                  count: '75'
+                },
               ].map((link, lidx) => (
                 <Link 
                   key={lidx} 
                   to={link.to} 
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#FFF0E8] hover:text-[#CF4400] border border-transparent hover:border-[#E8500A]/10 transition-all duration-200"
+                  className="flex items-center justify-between py-1 group transition-all duration-300 pointer-events-auto"
                 >
-                  {link.icon}
-                  <span className="font-medium text-[12px]">{link.label}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full border border-[#e8edf2] flex items-center justify-center bg-white shadow-inner group-hover:scale-105 group-hover:border-orange-primary/20 transition-all duration-300 shrink-0">
+                      {link.icon}
+                    </div>
+                    <span className="font-sans text-xs text-navy uppercase tracking-wide group-hover:text-orange-primary transition-colors duration-300 font-semibold">{link.label}</span>
+                  </div>
+                  <span className="px-2.5 py-0.5 bg-[#D6E1EC]/30 text-navy/70 text-[9px] font-mono font-semibold rounded-full leading-none">{link.count}</span>
                 </Link>
               ))}
             </div>
           </div>
 
           {/* BRANDS FOLLOWED */}
-          <div className="bg-white rounded-xl border border-[#e8edf2] p-4 shadow-sm">
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[11px] font-semibold text-[#1a1a2e] uppercase text-left">Brands You Follow</h3>
               <span className="text-[10px] font-medium text-[#E8500A] uppercase tracking-wider bg-[#FFF0E8] px-2.5 py-0.5 rounded-full leading-none">{initialFollowedBrands.length} Active</span>
@@ -889,7 +968,7 @@ export function HomePage() {
           {activeTab === 'FEED' ? (
             <>
               {/* FEED SECTION A — TRENDING BRANDS */}
-              <div id="section-trending-brands" className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm">
+              <div id="section-trending-brands" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
                   <div className="text-left">
                     <div className="flex items-center gap-1">
@@ -940,7 +1019,7 @@ export function HomePage() {
                         }}
                         style={{ height: '458.656px' }}
                         className={cn(
-                          "relative w-full rounded-[22px] overflow-hidden cursor-pointer group select-none border border-gray-100",
+                          "relative w-full rounded-[5px] overflow-hidden cursor-pointer group select-none border border-gray-100",
                           !isActive && "hidden md:block" // Hide side cards on mobile to focus on active
                         )}
                       >
@@ -1044,7 +1123,7 @@ export function HomePage() {
               </div>
 
               {/* FEED SECTION B — POPULAR PRODUCTS */}
-              <div id="section-popular-products" className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm">
+              <div id="section-popular-products" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
                   <div className="text-left">
                     <div className="flex items-center gap-1">
@@ -1072,7 +1151,7 @@ export function HomePage() {
               <div 
                 id="section-spotlight-brands" 
                 className="p-6 md:p-8 shadow-xl text-left relative overflow-hidden"
-                style={{ borderRadius: '16px', backgroundColor: '#1C1410' }}
+                style={{ borderRadius: '5px', backgroundColor: '#1C1410' }}
               >
                 {/* 1. HEADER */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -1094,7 +1173,7 @@ export function HomePage() {
                 <div className="h-[1px] my-5" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }} />
 
                 {/* 2. BRAND IDENTITY ROW */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-white/5 rounded-xl p-4.5 border border-white/5">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-white/5 rounded-[5px] p-4.5 border border-white/5">
                   {/* Zone A: Logo block */}
                   <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/brands/3')}>
                     <div className="relative w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md border-2 border-[#F97316]/50 transition-transform hover:scale-105">
@@ -1152,7 +1231,7 @@ export function HomePage() {
                     return (
                       <div 
                         key={product.id}
-                        className="bg-white rounded-xl p-3 border border-white/10 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group cursor-pointer text-left relative overflow-hidden"
+                        className="bg-white rounded-[5px] p-3 border border-white/10 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group cursor-pointer text-left relative overflow-hidden"
                         onClick={() => navigate(`/products/${product.id}`)}
                       >
                         {/* Sponsored Badge overlay */}
@@ -1284,7 +1363,7 @@ export function HomePage() {
               </div>
 
               {/* FEED SECTION C — FEATURED HOT DEALS */}
-              <div id="section-hot-deals" className="bg-[#FFFFFF] border-t-2 border-[#E8500A] rounded-2xl border border-[#e8edf2] p-5 shadow-sm text-left mb-6">
+              <div id="section-hot-deals" className="bg-[#FFFFFF] border-t-2 border-[#E8500A] rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left mb-6">
                 
                 {/* Section Header */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
@@ -1315,7 +1394,7 @@ export function HomePage() {
               </div>
 
               {/* FEED SECTION E — FEATURED RECOMMENDATIONS */}
-              <div id="section-recommendations" className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm">
+              <div id="section-recommendations" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 
                 {/* Section Header */}
                 <div className="text-left mb-6">
@@ -1564,12 +1643,15 @@ export function HomePage() {
                           type="button" 
                           onClick={(e) => { 
                             e.stopPropagation(); 
-                            navigate(`/products/${item.id}`);
+                            const qty = 1;
+                            addToCart(item, qty);
+                            toast.success(`Successfully added ${item.title} to your cart!`);
                           }} 
-                          className="px-2 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded text-[8px] uppercase tracking-wide cursor-pointer transition-colors"
+                          className="w-8 h-8 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
                           aria-label="Add to cart"
+                          title="Add to cart"
                         >
-                          Add to cart
+                          <ShoppingCart size={13} className="stroke-[2.5]" />
                         </button>
                       </div>
                     </div>

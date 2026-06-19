@@ -57,7 +57,7 @@ export function Navbar() {
     }
   };
 
-  const dashboardMiniMenu = [
+  const dashboardMiniMenu: Array<{ label: string; path: string; icon: any; tab?: string; dividerAbove?: boolean }> = [
     { label: 'My Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'My Orders', path: '/profile/orders', icon: Package },
     { label: 'Messages', path: '/messages', icon: MessageSquare },

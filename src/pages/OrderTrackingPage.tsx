@@ -64,33 +64,33 @@ export function OrderTrackingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* Header Panel */}
-      <div className="bg-[#0A0B1E] text-white pt-12 pb-16 px-4 md:px-8 border-b border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-1 text-[10px] text-gray-500 uppercase tracking-widest font-black italic mb-2">
+      <div className="w-full bg-[#0A0B1E] text-white relative overflow-hidden shrink-0 border-b border-white/5">
+        <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-1 text-[9px] text-gray-500 uppercase tracking-widest font-black italic mb-1">
               <Link to="/" className="hover:text-white transition-colors">Home</Link>
               <ChevronRight size={10} />
               <span>Logistics Delivery</span>
             </div>
-            <h1 className="text-3xl font-black uppercase tracking-tighter italic">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tighter italic leading-none">
               Freight Staging &amp; <span className="text-orange-primary">Tracking</span>
             </h1>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
               National courier network staging checkpoint client
             </p>
           </div>
 
           <div className="flex gap-2 shrink-0">
             <input 
-              className="bg-white/5 border border-white/10 rounded-xl h-11 px-4 text-xs font-black uppercase text-white placeholder:text-gray-500 tracking-wider focus:outline-none focus:border-orange-primary"
+              className="bg-white/5 border border-white/10 rounded-full h-8 px-4 text-[10px] font-black uppercase text-white placeholder:text-gray-500 tracking-wider focus:outline-none focus:border-orange-primary"
               placeholder="Enter ORD-XXXXX ID"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
             />
             <button 
               onClick={handleSearchOrder}
-              className="bg-orange-primary hover:bg-white hover:text-navy text-white text-[10px] font-black uppercase tracking-widest px-6 rounded-xl transition-all h-11 italic"
+              className="bg-orange-primary hover:bg-white hover:text-navy text-white text-[9px] font-black uppercase tracking-widest px-4 rounded-full transition-all h-8 italic cursor-pointer"
             >
               Search
             </button>
@@ -101,7 +101,7 @@ export function OrderTrackingPage() {
       {/* Main Track Grid */}
       <div className="max-w-4xl mx-auto w-full px-4 py-12 flex-1">
         {!order ? (
-          <div className="bg-white border border-gray-100 rounded-[32px] p-16 text-center shadow-sm max-w-xl mx-auto space-y-6">
+          <div className="bg-white border border-gray-100 rounded-[5px] p-16 text-center shadow-sm max-w-xl mx-auto space-y-6">
             <div className="w-16 h-16 bg-orange-primary/5 rounded-full flex items-center justify-center text-orange-primary mx-auto">
               <Package size={32} />
             </div>
@@ -115,7 +115,7 @@ export function OrderTrackingPage() {
         ) : (
           <div className="space-y-8">
             {/* Simulation controls to help satisfy multi-status routing */}
-            <div className="bg-navy p-5 rounded-2xl text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="bg-navy p-5 rounded-[5px] text-white flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <Clock size={20} className="text-orange-primary shrink-0 animate-spin" />
                 <div>
@@ -134,7 +134,7 @@ export function OrderTrackingPage() {
             </div>
 
             {/* Tracker Step Status Bar */}
-            <div className="bg-white border border-gray-100 rounded-[32px] p-8 md:p-10 shadow-sm space-y-8">
+            <div className="bg-white border border-gray-100 rounded-[5px] p-8 md:p-10 shadow-sm space-y-8">
               <div className="flex justify-between items-center border-b pb-4">
                 <div>
                   <span className="text-[8.5px] font-black tracking-widest text-[#050514] uppercase">TICKET NUMBER REFERENCE:</span>
@@ -219,11 +219,11 @@ export function OrderTrackingPage() {
             </div>
 
             {/* Consignment sub package list */}
-            <div className="bg-white border border-gray-100 rounded-[32px] p-8 md:p-10 shadow-sm space-y-6">
+            <div className="bg-white border border-gray-100 rounded-[5px] p-8 md:p-10 shadow-sm space-y-6">
               <h3 className="text-sm font-black text-navy uppercase italic tracking-widest border-b pb-4">Consignments Freight Splits</h3>
               <div className="space-y-4">
                 {order.subOrders.map((sub: any, idx: number) => (
-                  <div key={idx} className="p-5 border border-gray-100 rounded-2xl bg-gray-50/50 flex flex-col sm:flex-row justify-between gap-4">
+                  <div key={idx} className="p-5 border border-gray-100 rounded-[5px] bg-gray-50/50 flex flex-col sm:flex-row justify-between gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Truck size={14} className="text-[#F96500]" />

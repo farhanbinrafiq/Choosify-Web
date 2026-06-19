@@ -764,7 +764,7 @@ export function CreatorProfilePage() {
                   </div>
 
                   {/* POST OFFER BRIEFING AD */}
-                  <div className="bg-[#0A0A1F] text-white rounded-2xl p-5 border border-white/5 relative overflow-hidden flex flex-col justify-between h-96 relative">
+                  <div className="bg-[#0A0A1F] text-white rounded-[5px] p-5 border border-white/5 relative overflow-hidden flex flex-col justify-between h-96 relative">
                      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/10 rounded-full blur-2xl pointer-events-none" />
                      
                      <div className="flex flex-col items-start relative z-10">
@@ -821,7 +821,7 @@ export function CreatorProfilePage() {
                       {filteredVideos.map(video => {
                         const isGuide = !!video.associatedGuideId;
                         const cardContent = (
-                          <div className="bg-white border border-[#e8edf2] rounded-2xl overflow-hidden group hover:border-[#E8500A]/35 transition-all shadow-sm relative h-full flex flex-col">
+                          <div className="bg-white border border-[#e8edf2] rounded-[5px] overflow-hidden group hover:border-[#E8500A]/35 transition-all shadow-sm relative h-full flex flex-col">
                             <div className="relative aspect-video bg-black overflow-hidden select-none">
                               <img 
                                 src={video.thumbnail} 
@@ -876,7 +876,7 @@ export function CreatorProfilePage() {
                       })}
                     </div>
                   ) : (
-                     <div className="py-12 bg-white rounded-2xl border border-[#e8edf2] text-center text-gray-500 text-xs font-black uppercase tracking-wider">
+                     <div className="py-12 bg-white rounded-[5px] border border-[#e8edf2] text-center text-gray-500 text-xs font-black uppercase tracking-wider">
                         No videos matched search phrase.
                      </div>
                   )}
@@ -896,7 +896,7 @@ export function CreatorProfilePage() {
                       {filteredReels.map(reel => {
                         const isGuide = !!reel.associatedGuideId;
                         const cardContent = (
-                          <div className="bg-white border border-[#e8edf2] rounded-2xl overflow-hidden group hover:border-[#E8500A]/35 transition-all shadow-sm relative h-full flex flex-col">
+                          <div className="bg-white border border-[#e8edf2] rounded-[5px] overflow-hidden group hover:border-[#E8500A]/35 transition-all shadow-sm relative h-full flex flex-col">
                             <div className="relative aspect-[9/16] bg-black overflow-hidden select-none">
                               <img 
                                 src={reel.thumbnail} 
@@ -955,7 +955,7 @@ export function CreatorProfilePage() {
                       })}
                     </div>
                   ) : (
-                    <div className="py-12 bg-white rounded-2xl border border-[#e8edf2] text-center text-gray-500 text-xs font-black uppercase tracking-wider">
+                    <div className="py-12 bg-white rounded-[5px] border border-[#e8edf2] text-center text-gray-500 text-xs font-black uppercase tracking-wider">
                        No shorts/reels matched search phrase.
                     </div>
                   )}
@@ -975,7 +975,7 @@ export function CreatorProfilePage() {
                       {filteredBlogs.map(blog => {
                         const isGuide = !!blog.associatedGuideId;
                         return (
-                          <div key={blog.id} className="bg-white border border-[#e8edf2] rounded-2xl p-5 hover:border-orange-primary/10 transition-colors flex flex-col md:flex-row gap-6 shadow-sm relative overflow-hidden">
+                          <div key={blog.id} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 hover:border-orange-primary/10 transition-colors flex flex-col md:flex-row gap-6 shadow-sm relative overflow-hidden">
                             {/* Visual Indicator Badge */}
                             <div className="absolute top-4 right-4 z-10">
                               {isGuide ? (
@@ -990,7 +990,7 @@ export function CreatorProfilePage() {
                             </div>
 
                             {blog.thumbnail && (
-                              <div className="w-full md:w-48 h-32 rounded-xl overflow-hidden shrink-0 bg-gray-55 relative object-cover">
+                              <div className="w-full md:w-48 h-32 rounded-[5px] overflow-hidden shrink-0 bg-gray-55 relative object-cover">
                                 <img 
                                   src={blog.thumbnail} 
                                   alt={blog.title} 
@@ -1040,7 +1040,7 @@ export function CreatorProfilePage() {
                       })}
                     </div>
                   ) : (
-                    <div className="py-12 bg-white rounded-2xl border border-[#e8edf2] text-center text-gray-500 text-xs font-black uppercase tracking-wider">
+                    <div className="py-12 bg-white rounded-[5px] border border-[#e8edf2] text-center text-gray-500 text-xs font-black uppercase tracking-wider">
                        No insights matched search phrase.
                     </div>
                   )}
@@ -1059,7 +1059,7 @@ export function CreatorProfilePage() {
                   <p className="text-[11px] text-gray-400 font-semibold leading-relaxed">
                      Verified digital advocate highlighting niche specialties, custom content metrics, and strategic target alignment.
                   </p>
-                  <div className="p-3 bg-gray-50/50 rounded-xl border border-[#e8edf2]/80 flex flex-col gap-1.5 font-mono text-[9.5px]">
+                  <div className="p-3 bg-gray-50/50 rounded-[5px] border border-[#e8edf2]/80 flex flex-col gap-1.5 font-mono text-[9.5px]">
                      <div className="flex items-center justify-between text-[#1A1D4E]">
                         <span>Campaign Response:</span>
                         <span className="font-extrabold text-orange-primary">~24 HOURS</span>
@@ -1246,7 +1246,7 @@ export function CreatorProfilePage() {
 
             {/* Dynamic Claiming Experience Integration */}
             {localClaimStatus === 'community' && (
-               <div className="mt-8 p-6 bg-gradient-to-r from-orange-55 to-amber-50 rounded-xl border-2 border-orange-200 shadow-xs flex flex-col md:flex-row items-center gap-6 animate-fade-in text-left">
+               <div className="mt-8 p-6 bg-gradient-to-r from-orange-55 to-amber-50 rounded-[5px] border-2 border-orange-200 shadow-xs flex flex-col md:flex-row items-center gap-6 animate-fade-in text-left">
                   <div className="w-12 h-12 rounded-full bg-orange-primary/10 flex items-center justify-center shrink-0 font-bold text-orange-primary">
                      <Sparkles className="w-5 h-5 text-orange-primary" />
                   </div>
@@ -1303,7 +1303,7 @@ export function CreatorProfilePage() {
             )}
 
             {localClaimStatus === 'pending' && (
-               <div className="mt-8 p-6 bg-amber-50 rounded-xl border-2 border-amber-200 shadow-xs flex items-center gap-4 animate-fade-in text-left">
+               <div className="mt-8 p-6 bg-amber-50 rounded-[5px] border-2 border-amber-200 shadow-xs flex items-center gap-4 animate-fade-in text-left">
                   <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
                      <Clock className="w-5 h-5 text-amber-700 animate-pulse" />
                   </div>

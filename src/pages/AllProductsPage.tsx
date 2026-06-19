@@ -190,49 +190,51 @@ export function AllProductsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
-       {/* Header / Hero Section (Locked Visual Design) */}
-      <div className="w-full bg-[#0A0B1E] pt-4 pb-5 px-4 md:px-8 relative overflow-hidden">
+       {/* Header / Hero Section (Unified Design System) */}
+      <div className="w-full bg-[#0A0B1E] relative overflow-hidden shrink-0 border-b border-white/5">
         {mode === 'wholesale' ? (
           <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
         )}
-        <div className="max-w-4xl mx-auto relative z-10 flex flex-col items-center justify-center text-center">
-          {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-2 w-full">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">Products</span>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">{mode === 'retail' ? 'Retail Lineup' : 'B2B Slabs'}</span>
-          </div>
-
-          <h1 className="text-2xl md:text-3.5xl font-black text-white italic uppercase tracking-tighter mb-1.5 leading-none text-center">
-            {mode === 'retail' ? 'All Retail Products' : 'B2B Wholesale Catalog'}
-          </h1>
-
-          {mode === 'wholesale' && (
-            <div className="inline-block bg-gradient-to-r from-orange-primary/20 via-orange-deep/10 to-transparent border-l-4 border-orange-primary px-3 py-1 mb-1.5 rounded-r-lg">
-              <p className="text-orange-primary text-[8px] font-black uppercase tracking-widest italic leading-none">
-                Wholesale Bulk Products & Suppliers
-              </p>
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[130px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
+          <div className="w-full flex flex-col justify-center">
+            {/* Breadcrumbs */}
+            <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 w-full">
+              <Link to="/" className="hover:text-white transition-colors">Home</Link>
+              <ChevronRight size={10} className="text-white/20" />
+              <span className="text-white">Products</span>
+              <ChevronRight size={10} className="text-white/20" />
+              <span className="text-white">{mode === 'retail' ? 'Retail Lineup' : 'B2B Slabs'}</span>
             </div>
-          )}
 
-          <p className="text-gray-400 text-[11px] md:text-xs font-medium leading-relaxed mb-2.5 max-w-2xl text-center">
-            {mode === 'retail' 
-              ? 'Discover & Compare standard retail items with Cash on Delivery support.' 
-              : 'Direct brand inventory sourcing with customized quantity slabs & volume pricing.'}
-          </p>
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter mb-1 leading-none text-center">
+              {mode === 'retail' ? 'All Retail Products' : 'B2B Wholesale Catalog'}
+            </h1>
 
-          <div className="text-orange-primary font-black text-[10px] uppercase tracking-widest shrink-0 bg-white/5 border border-white/10 backdrop-blur-md px-4 py-1.5 rounded-full italic mb-1">
-            {filteredProducts.length} Listings Found
+            {mode === 'wholesale' && (
+              <div className="inline-block bg-gradient-to-r from-orange-primary/20 via-orange-deep/10 to-transparent border-l-4 border-orange-primary px-3 py-0.5 mb-1 rounded-r-lg w-fit mx-auto">
+                <p className="text-orange-primary text-[8px] font-black uppercase tracking-widest italic leading-none">
+                  Wholesale Bulk Products & Suppliers
+                </p>
+              </div>
+            )}
+
+            <p className="text-gray-400 text-[9px] lg:text-[11px] font-medium leading-normal mb-1.5 max-w-2xl text-center mx-auto">
+              {mode === 'retail' 
+                ? 'Discover & Compare standard retail items with Cash on Delivery support.' 
+                : 'Direct brand inventory sourcing with customized quantity slabs & volume pricing.'}
+            </p>
+
+            <div className="text-orange-primary font-black text-[8px] lg:text-[9.5px] uppercase tracking-widest shrink-0 bg-white/5 border border-white/10 backdrop-blur-md px-3 py-1 rounded-full italic mx-auto w-fit">
+              {filteredProducts.length} Listings Found
+            </div>
           </div>
         </div>
       </div>
 
       {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
+      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-[#E8EDF2] shadow-sm py-4 transition-all duration-300">
         <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
           
           {/* 1. Search Bar inside Sticky Container */}
@@ -326,7 +328,7 @@ export function AllProductsPage() {
 
             {/* B2B Enforced MOQ Filters (Only shown in B2B Mode) */}
             {mode === 'wholesale' && (
-              <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm space-y-4 relative overflow-hidden">
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4 relative overflow-hidden">
                 <div className="flex items-center gap-1.5 pb-3 border-b border-[#e8edf2]">
                   <Calculator size={14} className="text-orange-primary" />
                   <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Wholesale Spec Filters</h3>
@@ -381,7 +383,7 @@ export function AllProductsPage() {
             )}
 
             {/* Category Filter Group */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Filter By Product</h3>
                 {selectedCategory && (
@@ -411,7 +413,7 @@ export function AllProductsPage() {
             </div>
 
             {/* Brand Filter Group */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Filter By Brand</h3>
                 {selectedBrand && (
@@ -582,7 +584,7 @@ export function AllProductsPage() {
         {/* RIGHT SIDEBAR WITH PREMIUM AARONG AD BANNER */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           {/* Sponsored Recommendations Card */}
-          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-left relative overflow-hidden w-full flex flex-col">
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-left relative overflow-hidden w-full flex flex-col">
              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
                    👉 Sponsored Recommendations
@@ -597,7 +599,7 @@ export function AllProductsPage() {
 
              <div className="flex flex-col gap-3">
                 {SPONSORED_RECOMMENDATIONS.length === 0 ? (
-                   <div className="text-center py-6 border border-dashed border-gray-200 rounded-xl">
+                   <div className="text-center py-6 border border-dashed border-gray-200 rounded-[5px]">
                       <p className="text-xs text-gray-400 font-medium px-2">Sponsored recommendations will appear here.</p>
                    </div>
                 ) : (
@@ -605,7 +607,7 @@ export function AllProductsPage() {
                       <Link 
                          to={`/recommendations/${item.id}`}
                          key={item.id} 
-                         className="flex items-start gap-3 bg-white border border-[#e8edf2]/60 rounded-xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                         className="flex items-start gap-3 bg-white border border-[#e8edf2]/60 rounded-[5px] p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
                       >
                          <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-gray-100 bg-gray-50 flex items-center justify-center relative">
                             <img 
@@ -631,7 +633,7 @@ export function AllProductsPage() {
              </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full flex flex-col items-center">
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full flex flex-col items-center">
              <div className="relative z-10 w-full flex flex-col">
                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
                   <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>

@@ -45,7 +45,7 @@ export function OrderSuccessPage() {
       {/* Main detailed blocks */}
       <div className="max-w-4xl mx-auto w-full px-4 py-12 -mt-12 relative z-20 space-y-8">
         {/* Split invoices card */}
-        <div className="bg-white border border-gray-100 rounded-[32px] p-8 md:p-10 shadow-xl shadow-navy/5 space-y-8">
+        <div className="bg-white border border-gray-100 rounded-[5px] p-8 md:p-10 shadow-xl shadow-navy/5 space-y-8">
           <div>
             <h3 className="text-sm font-black text-navy uppercase italic tracking-widest border-b pb-4 mb-6">
               Corporate Bill of Lading &amp; Split Invoices
@@ -53,7 +53,7 @@ export function OrderSuccessPage() {
 
             <div className="space-y-4">
               {order.subOrders.map((sub: any, idx: number) => (
-                <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 border border-gray-100 rounded-2xl bg-gray-50/50 hover:bg-gray-50 transition-colors gap-4">
+                <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 border border-gray-100 rounded-[5px] bg-gray-50/50 hover:bg-gray-50 transition-colors gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1.5">
                       <span className="text-[10px] bg-navy text-white font-black uppercase tracking-widest px-2 py-0.5 rounded italic">
@@ -86,7 +86,7 @@ export function OrderSuccessPage() {
           </div>
 
           {/* Settle summary */}
-          <div className="bg-navy p-6 rounded-2xl text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="bg-navy p-6 rounded-[5px] text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <span className="text-[8px] font-black text-orange-primary uppercase tracking-widest block mb-1">Total Settlement Amount</span>
               <p className="text-2xl font-black font-sans text-white italic leading-none">৳{order.overallTotal.toLocaleString()}</p>
@@ -105,7 +105,7 @@ export function OrderSuccessPage() {
         {/* Action routing cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Conversational coordinator card */}
-          <div className="bg-white border border-gray-100 rounded-[28px] p-8 shadow-sm space-y-4 flex flex-col justify-between">
+          <div className="bg-white border border-gray-100 rounded-[5px] p-8 shadow-sm space-y-4 flex flex-col justify-between">
             <div className="space-y-2">
               <div className="w-12 h-12 rounded-2xl bg-orange-primary/5 flex items-center justify-center text-orange-primary">
                 <MessageSquare size={24} />
@@ -126,7 +126,7 @@ export function OrderSuccessPage() {
           </div>
 
           {/* Tracker tool card */}
-          <div className="bg-white border border-gray-100 rounded-[28px] p-8 shadow-sm space-y-4 flex flex-col justify-between">
+          <div className="bg-white border border-gray-100 rounded-[5px] p-8 shadow-sm space-y-4 flex flex-col justify-between">
             <div className="space-y-2">
               <div className="w-12 h-12 rounded-2xl bg-[#050514]/5 flex items-center justify-center text-navy">
                 <ShoppingBag size={24} />

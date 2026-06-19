@@ -46,26 +46,26 @@ export function SellerIncomingOrdersPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* Merchant Header */}
-      <div className="w-full bg-[#050514] text-white pt-12 pb-16 px-4 md:px-8 border-b border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <Link to="/dashboard" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1">
+      <div className="w-full bg-[#050514] text-white relative overflow-hidden shrink-0 border-b border-white/5">
+        <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
+          <div className="flex flex-col justify-center">
+            <Link to="/dashboard" className="text-[10px] font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1 mb-1">
               <ArrowLeft size={12} /> Return to Personal Dashboard
             </Link>
-            <h1 className="text-3xl font-black uppercase tracking-tighter italic">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tighter italic leading-none">
               Merchant Supply <span className="text-orange-primary font-serif">HQ</span>
             </h1>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest leading-none">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none mt-1">
               Incoming Staged Orders &amp; factory logistics Router
             </p>
           </div>
 
           <button 
             onClick={refreshOrders}
-            className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9.5px] px-5 py-3 rounded-xl transition-all italic flex items-center gap-2"
+            className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[8px] px-4 py-2 rounded-full transition-all italic flex items-center gap-1.5 cursor-pointer"
           >
-            <RefreshCw size={12} className="text-orange-primary shrink-0" />
+            <RefreshCw size={11} className="text-orange-primary shrink-0" />
             Sync Ledger
           </button>
         </div>
@@ -73,7 +73,7 @@ export function SellerIncomingOrdersPage() {
 
       {/* Profile Selector */}
       <div className="max-w-7xl mx-auto w-full px-4 md:px-8 pt-8">
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-white border border-gray-100 rounded-[5px] p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-[#F96500]/5 border border-[#F96500]/35 flex items-center justify-center text-[#F96500]">
               <Store size={18} />
@@ -104,7 +104,7 @@ export function SellerIncomingOrdersPage() {
       {/* Orders List Content */}
       <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-10 flex-1">
         {sellerSubOrders.length === 0 ? (
-          <div className="bg-white border border-gray-100 rounded-[32px] p-16 text-center max-w-xl mx-auto shadow-sm space-y-4">
+          <div className="bg-white border border-gray-100 rounded-[5px] p-16 text-center max-w-xl mx-auto shadow-sm space-y-4">
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mx-auto">
               <Package size={28} />
             </div>
@@ -128,7 +128,7 @@ export function SellerIncomingOrdersPage() {
                 const subTotal = sub.items.reduce((acc: number, x: any) => acc + (x.price * x.quantity), 0);
 
                 return (
-                  <div key={idx} className="bg-white border border-gray-100 rounded-[24px] p-6 md:p-8 hover:shadow-md transition-shadow grid grid-cols-1 lg:grid-cols-4 gap-6 items-center">
+                  <div key={idx} className="bg-white border border-gray-100 rounded-[5px] p-6 md:p-8 hover:shadow-md transition-shadow grid grid-cols-1 lg:grid-cols-4 gap-6 items-center">
                     {/* Lot Details */}
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 mb-1.5">

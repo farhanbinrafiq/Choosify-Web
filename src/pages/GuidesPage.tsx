@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets, Bookmark, Eye, Share2, Play, Instagram, ChevronRight, Award, Flame, Zap, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BLOGS } from '../constants';
+import { CREATORS } from '../data/creators';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { RecommendationCard } from '../components/RecommendationCard';
@@ -31,7 +32,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
   return (
     <Link
       to={`/guides/${guide.id}`}
-      className="group cursor-pointer block bg-white rounded-2xl border border-[#e8edf2] p-5 relative overflow-hidden shadow-none hover:border-orange-primary/30 transition-all duration-300 w-full"
+      className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden shadow-none hover:border-orange-primary/30 transition-all duration-300 w-full"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -159,7 +160,7 @@ export function ReelCard({ guide }: { guide: any }) {
   return (
     <Link
       to={`/guides/${guide.id}`}
-      className="group cursor-pointer block bg-white rounded-2xl border border-[#e8edf2] p-4 relative overflow-hidden shadow-none hover:border-orange-primary/30 transition-all duration-300 w-full"
+      className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] p-4 relative overflow-hidden shadow-none hover:border-orange-primary/30 transition-all duration-350 w-full"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -288,7 +289,7 @@ export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeTyp
   return (
     <Link
       to={`/guides/${guide.id}`}
-      className="group cursor-pointer block bg-white rounded-2xl border border-[#e8edf2] p-4 relative overflow-hidden shadow-none hover:border-orange-primary/30 transition-all duration-300 w-full"
+      className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] p-4 relative overflow-hidden shadow-none hover:border-orange-primary/30 transition-all duration-350 w-full"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -486,31 +487,34 @@ export function GuidesPage() {
   return (
     <div id="guides-root" className="flex flex-col min-h-screen bg-[#FDFDFD]">
       {/* Hero Section - Standardized Centered Alignment */}
-      <div id="guides-hero" className="w-full bg-[#0A0A1F] py-5 md:py-6 px-6 relative overflow-hidden flex flex-col items-center justify-center">
+      <div id="guides-hero" className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         
-        <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full mb-1">
-          {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-2 w-full">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">Guides & Recommendations</span>
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
+          <div className="w-full flex flex-col justify-center">
+            {/* Breadcrumbs */}
+            <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 w-full">
+              <Link to="/" className="hover:text-white transition-colors">Home</Link>
+              <ChevronRight size={10} className="text-white/20" />
+              <span className="text-white">Guides & Recommendations</span>
+            </div>
+
+            <div className="flex items-center justify-center gap-3.5 flex-wrap">
+              <h1 id="hero-title" className="text-xl md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter mb-1 leading-none text-center">
+                RECOMMENDATIONS
+              </h1>
+              {/* Action Button Centered underneath */}
+              <button className="h-6 px-4 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-black rounded-full shadow-md flex items-center gap-1.5 whitespace-nowrap uppercase tracking-widest text-[8px] italic hover:scale-105 active:scale-95 transition-all text-center shrink-0 cursor-pointer">
+                 <LucidePenTool size={9} className="text-[#FF5B00]" /> Post Recommendation
+              </button>
+            </div>
+
+            <p className="text-gray-400 text-[9px] lg:text-[11px] font-medium leading-normal mb-1.5 max-w-2xl text-center mx-auto">
+              Discover expert guides, buying advice, and the latest tech recommendations curated by real shoppers.
+            </p>
           </div>
-
-          <h1 id="hero-title" className="text-2xl md:text-3.5xl font-black text-white italic uppercase tracking-tighter mb-1.5 leading-none text-center">
-            RECOMMENDATIONS
-          </h1>
-
-          <p className="text-gray-400 text-[11px] md:text-xs font-medium leading-relaxed mb-2 max-w-2xl text-center">
-            Discover expert guides, buying advice, and the latest tech recommendations curated by real shoppers.
-          </p>
-   
-          {/* Action Button Centered underneath */}
-          <button className="h-8 px-5 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-black rounded-full shadow-md flex items-center gap-2 whitespace-nowrap uppercase tracking-widest text-[8px] italic hover:scale-105 active:scale-95 transition-all text-center shrink-0 cursor-pointer mb-1">
-             <LucidePenTool size={11} className="text-[#FF5B00]" /> Post Recommendation
-          </button>
         </div>
   
           {/* Article Titles Marquee */}
@@ -618,7 +622,7 @@ export function GuidesPage() {
       <main className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
          {/* Left Sidebar Navigation */}
          <aside className="hidden lg:flex flex-col gap-3 lg:sticky lg:top-24 pb-0 flex-shrink-0">
-            <div className="bg-white rounded-2xl border border-[#e8edf2] p-4.5 shadow-sm flex flex-col gap-3">
+            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm flex flex-col gap-3">
               <div className="flex items-center justify-between pb-3 mb-1 border-b border-[#e8edf2] px-1">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
                   Categories List
@@ -668,6 +672,54 @@ export function GuidesPage() {
                     </button>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* CREATORS YOU FOLLOW */}
+            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4 shadow-sm flex flex-col">
+              <div className="flex items-center justify-between mb-3 border-b border-[#e8edf2] pb-2 px-0.5">
+                <h3 className="text-[11px] font-semibold text-[#1a1a2e] uppercase text-left">Creators You Follow</h3>
+                <span className="text-[10px] font-medium text-[#E8500A] uppercase tracking-wider bg-[#FFF0E8] px-2.5 py-0.5 rounded-full leading-none">3 Active</span>
+              </div>
+              
+              <div className="space-y-2">
+                {CREATORS.slice(0, 3).map((c, i) => (
+                  <Link 
+                    key={i} 
+                    to={`/creators/${c.id}`}
+                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all duration-300 cursor-pointer text-left block"
+                  >
+                    <img 
+                      src={c.avatar} 
+                      alt={c.name}
+                      className="w-9 h-9 rounded-full object-cover shadow border-2 border-white outline outline-1 outline-gray-200 shrink-0"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <p className="text-[12px] font-medium text-[#1A1D4E] truncate leading-tight uppercase">{c.name}</p>
+                        {c.score > 90 && (
+                          <span className="text-[#E8500A] shrink-0" title="Verified Creator">
+                            <Award size={12} className="fill-current text-[#E8500A]" />
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-gray-400 font-normal truncate mt-0.5">{c.bestFor} • {c.handle}</p>
+                    </div>
+                    <span className="px-2 py-0.5 bg-orange-primary/10 text-orange-primary font-black uppercase text-[8px] rounded-[3px] shrink-0">
+                      Following
+                    </span>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mt-3 pt-3 border-t border-gray-100 text-center">
+                <Link 
+                  to="/creators" 
+                  className="text-[10px] font-bold text-[#E8500A] hover:text-[#CF4400] uppercase tracking-widest inline-flex items-center gap-1.5 leading-none transition-colors"
+                >
+                  View All <ChevronRight size={12} />
+                </Link>
               </div>
             </div>
          </aside>
@@ -764,7 +816,7 @@ export function GuidesPage() {
          {/* Right Sidebar Widgets */}
          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in">
             {/* Newsletter Widget */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Newsletter</h3>
                </div>
@@ -783,7 +835,7 @@ export function GuidesPage() {
             </div>
 
             {/* Popular Topics Widget */}
-            <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left">
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Popular Topics</h3>
                </div>
@@ -822,7 +874,7 @@ export function GuidesPage() {
                </button>
             </div>
 
-            <div className="bg-[#1a1c3c] rounded-2xl p-6 shadow-sm border border-navy/10 text-white relative overflow-hidden text-left">
+            <div className="bg-[#1a1c3c] rounded-[5px] p-6 shadow-sm border border-navy/10 text-white relative overflow-hidden text-left">
                <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12"><Search size={120} /></div>
                <h4 className="text-sm font-semibold mb-2 uppercase tracking-wide">Need Customer Help?</h4>
                <p className="text-white/60 text-xs font-medium leading-relaxed mb-4">Ask our AI Shopping Assistant for a personalized recommendation based on your budget & lifestyle.</p>

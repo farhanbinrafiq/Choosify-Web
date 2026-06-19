@@ -628,7 +628,7 @@ export function GuideDetailPage() {
             {/* LEFT SIDEBAR */}
             <aside className="hidden lg:flex flex-col gap-6 lg:sticky lg:top-[160px] pb-10 flex-shrink-0">
               {/* SECTION 1: WHAT IS DISCUSSED */}
-              <div className="bg-white rounded-2xl p-4.5 border border-[#e8edf2] shadow-sm text-left">
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
                   <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
                     <span className="w-1.5 h-3 bg-[#E8500A] rounded-full inline-block" />
@@ -683,7 +683,7 @@ export function GuideDetailPage() {
               </div>
 
               {/* SECTION 2: HOW THIS REVIEW WAS MADE */}
-              <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-left">
+              <div className="bg-white rounded-[5px] p-4 border border-gray-100 shadow-sm text-left">
                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">
                   HOW THIS REVIEW WAS MADE
                 </h4>
@@ -722,7 +722,7 @@ export function GuideDetailPage() {
               </div>
 
               {/* SECTION 3: WAS THIS HELPFUL? */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm text-center">
+              <div className="bg-white rounded-[5px] border border-gray-100 p-4 shadow-sm text-center">
                 <h4 className="text-[10px] font-black text-navy uppercase tracking-widest mb-3 italic">
                   WAS THIS HELPFUL?
                 </h4>

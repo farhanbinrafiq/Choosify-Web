@@ -27,30 +27,33 @@ export function GuideProductsPage() {
   return (
     <div className="bg-white min-h-screen pb-32">
       {/* Header Section */}
-      <div className="hero-gradient py-20 px-6 overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2" />
-        <div className="max-w-7xl mx-auto relative z-10">
-          <Link 
-            to={`/guides/${id}`}
-            className="flex items-center gap-3 text-[10px] font-black text-white/40 hover:text-white uppercase tracking-[0.3em] italic mb-12 transition-colors group"
-          >
-            <ArrowLeft size={16} className="group-hover:-translate-x-2 transition-transform" />
-            Back to Guide
-          </Link>
-          
-          <div className="max-w-4xl">
-            <div className="bg-orange-primary text-white text-[10px] font-black px-6 py-2 rounded-xl mb-8 uppercase tracking-[0.3em] italic w-fit">
-              RECOMMENDED PRODUCTS
+      <div className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
+        <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
+          <div className="flex items-center gap-6">
+            <Link 
+              to={`/guides/${id}`}
+              className="flex items-center gap-2 text-[10px] font-black text-white/40 hover:text-white uppercase tracking-[0.2em] italic transition-colors group"
+            >
+              <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+              Back
+            </Link>
+            
+            <div className="flex items-center gap-3">
+              <div className="bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em] italic shadow-md">
+                RECOMMENDED PRODUCTS
+              </div>
+              <h1 className="text-sm md:text-md lg:text-lg font-black text-white italic tracking-tighter uppercase leading-none">
+                Selected for <span className="text-orange-primary">"{guide.title}"</span>
+              </h1>
             </div>
-            <h1 className="text-4xl md:text-7xl font-black text-white italic tracking-tighter leading-[0.85] uppercase">
-              Products specifically selected for <span className="text-orange-primary">"{guide.title}"</span>
-            </h1>
           </div>
         </div>
       </div>
 
       {/* Products Grid */}
-      <div className="max-w-7xl mx-auto px-6 -mt-10 relative z-20">
+      <div className="max-w-[1440px] mx-auto px-6 mt-8 relative z-20">
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
           {guideProducts.map(product => (
             <ProductCard key={product.id} product={product} variant="grid" />
