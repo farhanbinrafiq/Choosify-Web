@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { ProductCard } from '../components/ProductCard';
-import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ExternalLink, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle } from 'lucide-react';
+import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ExternalLink, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle, ShieldCheck } from 'lucide-react';
 import { PRODUCTS, BRANDS } from '../constants';
 import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
 export function DealsPage() {
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState('Fashion');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Deals');
+  const [dealType, setDealType] = useState<'all' | 'retail' | 'wholesale'>('all');
+  const [minDiscount, setMinDiscount] = useState<number>(0);
 
   // ScrollSpy Active section detection for DealsPage major sections
   React.useEffect(() => {
@@ -56,6 +58,23 @@ export function DealsPage() {
       result = result.filter(p => p.id % 4 === 1);
     }
 
+    if (selectedCategory) {
+      result = result.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase());
+    }
+
+    if (dealType === 'retail') {
+      result = result.filter(p => (p as any).mode_type === 'retail');
+    } else if (dealType === 'wholesale') {
+      result = result.filter(p => (p as any).mode_type === 'wholesale');
+    }
+
+    if (minDiscount > 0) {
+      result = result.filter(p => {
+        const pct = (p.id % 4) * 15 + 10;
+        return pct >= minDiscount;
+      });
+    }
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(p => 
@@ -66,7 +85,7 @@ export function DealsPage() {
       );
     }
     return result;
-  }, [searchQuery, activeTab]);
+  }, [searchQuery, activeTab, selectedCategory, dealType, minDiscount]);
 
   const categoriesList = [
     { name: 'Fashion', icon: <Shirt size={16} className="stroke-[2.5]" />, count: 550 },
@@ -233,72 +252,212 @@ export function DealsPage() {
 
       <main className="w-full bg-[#F3F9FF]/30 min-h-screen">
 
+        {/* FEATURED DEALS REPOSITIONED HORIZONTAL FILTERS BAR */}
+        <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
+          <div className="max-w-[1440px] mx-auto px-6 w-full">
+            <div className="flex flex-col gap-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Deals Filtering</span>
+                {(selectedCategory || dealType !== 'all' || minDiscount > 0 || searchQuery || activeTab !== 'All Deals') && (
+                  <button 
+                    onClick={() => {
+                      setSelectedCategory(null);
+                      setDealType('all');
+                      setMinDiscount(0);
+                      setSearchQuery('');
+                      setActiveTab('All Deals');
+                    }}
+                    className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-650 transition-colors cursor-pointer"
+                  >
+                    Reset All Filters
+                  </button>
+                )}
+              </div>
+              
+              {/* Horizontal Scrolling wrapper for filters */}
+              <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
+                
+                {/* Category Filter Group */}
+                <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left min-w-[220px] flex-1">
+                  <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
+                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Categories</h3>
+                    {selectedCategory && (
+                      <span 
+                        onClick={() => setSelectedCategory(null)}
+                        className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-150 transition-colors"
+                      >
+                        Clear
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-1.5 max-h-32 overflow-y-auto no-scrollbar">
+                    {categoriesList.map((cat, i) => {
+                      const isActive = selectedCategory === cat.name;
+                      return (
+                        <button 
+                          key={i} 
+                          onClick={() => setSelectedCategory(isActive ? null : cat.name)}
+                          className={cn(
+                            "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
+                            isActive ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
+                          )}
+                        >
+                          <span className="truncate">{cat.name}</span>
+                          <span className="text-[9px] font-semibold text-navy bg-[#D6E1EC]/20 px-2 py-0.5 rounded-full font-mono">{cat.count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Deal Type Filter Panel */}
+                <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left min-w-[200px]">
+                  <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
+                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Deal Channel</h3>
+                    {dealType !== 'all' && (
+                      <span 
+                        onClick={() => setDealType('all')}
+                        className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-155 transition-colors"
+                      >
+                        Clear
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    {[
+                      { value: 'all', label: 'All Channels' },
+                      { value: 'retail', label: 'Retail Sales' },
+                      { value: 'wholesale', label: 'Wholesale Only' }
+                    ].map((item) => (
+                      <button 
+                        key={item.value} 
+                        onClick={() => setDealType(item.value as any)}
+                        className={cn(
+                          "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
+                          dealType === item.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
+                        )}
+                      >
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Min Discount Slider */}
+                <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left min-w-[240px]">
+                  <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
+                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Minimum Savings</h3>
+                    {minDiscount > 0 && (
+                      <span 
+                        onClick={() => setMinDiscount(0)}
+                        className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-155 transition-colors"
+                      >
+                        Clear
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-2.5 pb-1">
+                    <div className="flex justify-between items-center text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                      <span>Discount:</span>
+                      <span className="text-orange-primary font-mono font-black">{minDiscount}% Off & Up</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="70" 
+                      step="10"
+                      value={minDiscount} 
+                      onChange={(e) => setMinDiscount(Number(e.target.value))}
+                      className="w-full accent-orange-primary bg-[#D6E1EC]/20 h-1.5 rounded-lg cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[8px] text-gray-400 font-bold">
+                      <span>Any</span>
+                      <span>20%</span>
+                      <span>45%</span>
+                      <span>70%+</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Master Flex Column Structure below sticky bar */}
         <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
           
-          {/* LEFT SIDEBAR: CATEGORIES CARD */}
-          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2">
-                  <span className="text-orange-primary">CATA</span>GORIES
-                </h3>
-                <div className="w-full h-px bg-gray-100" />
-              </div>
+          {/* Left Sidebar */}
+          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+             {/* Redesigned For Business & Sellers Card */}
+             <div 
+               id="section-sellers-deals-left" 
+               className="bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
+               style={{ height: '410px' }}
+             >
+               <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
+               
+               <div className="flex flex-col items-center">
+                 <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-3 border border-[#E8500A]/5 shrink-0 shadow-sm">
+                   <Star className="w-4 h-4 fill-current" />
+                 </div>
+                 
+                 <h3 className="font-sans text-sm font-semibold uppercase tracking-tight text-[#1A1D4E] leading-snug">
+                   For Business <span className="text-[#E8500A]">& Sellers</span>
+                 </h3>
+                 
+                 <p className="text-[11px] text-gray-400 font-semibold mt-2 px-1 leading-relaxed max-w-[220px]">
+                   Unlock exclusive tools, secure verified merchant badges, and scale your reach.
+                 </p>
+               </div>
 
-              <div className="flex flex-col gap-1.5">
-                {categoriesList.map((cat, i) => {
-                  const isActive = activeCategory === cat.name;
-                  return (
-                    <button 
-                      key={i}
-                      onClick={() => setActiveCategory(cat.name)}
-                      className={cn(
-                        "flex items-center gap-4 py-2 bg-transparent rounded-xl w-full text-left group transition-all duration-300",
-                        isActive 
-                        ? "bg-orange-primary/[0.04] ring-1 ring-orange-primary/10" 
-                        : "hover:bg-slate-50/80"
-                      )}
-                    >
-                      {/* Circle Icon Container */}
-                      <span className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-300 flex-shrink-0 relative",
-                        isActive
-                        ? "bg-gradient-to-r from-[#FF5B00] to-[#E8500A] text-white border-orange-primary shadow-sm"
-                        : "bg-white text-orange-primary border-gray-100 shadow-inner group-hover:scale-110 group-hover:border-orange-primary/20"
-                      )}>
-                        {cat.icon}
-                      </span>
+               <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+                 <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
+                 <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
+                   Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
+                 </p>
+                 
+                 <button 
+                   type="button"
+                   onClick={() => navigate('/post-offer')}
+                   className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
+                 >
+                   POST OFFER <ArrowRight className="w-3.5 h-3.5" />
+                 </button>
+               </div>
 
-                      {/* Content Label */}
-                      <span className="flex-1 min-w-0">
-                        <span className={cn(
-                          "text-[11px] font-semibold uppercase tracking-wider transition-colors duration-300 truncate block",
-                          isActive ? "text-orange-primary" : "text-navy group-hover:text-orange-primary"
-                        )}>
-                          {cat.name}
-                        </span>
-                      </span>
-
-                      {/* Count Badge */}
-                      <span className={cn(
-                        "px-2.5 py-0.5 rounded-full text-[9px] font-mono font-semibold shrink-0 transition-colors duration-300",
-                        isActive
-                        ? "bg-orange-primary text-white shadow-sm"
-                        : "bg-[#EAEFF4] text-navy/70"
-                      )}>
-                        {cat.count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+               <div className="flex items-center justify-center gap-1.5 text-[8.5px] font-semibold text-[#8a9bb0] uppercase font-mono tracking-widest shrink-0">
+                 <Star className="w-3.5 h-3.5 text-[#E8500A] fill-current" /> 100k+ shopper log Daily
+               </div>
+             </div>
           </aside>
 
           {/* LEFT MAIN AREA */}
-          <div className="scroll-mt-36 min-w-0 pb-10 flex flex-col gap-16">
+          <div className="scroll-mt-36 min-w-0 pb-10 flex flex-col gap-10">
+            
+            {/* Active Filter Chips */}
+            {(selectedCategory || dealType !== 'all' || minDiscount > 0) && (
+              <div className="flex flex-wrap items-center gap-3">
+                {selectedCategory && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                    Category: {selectedCategory} 
+                    <XCircle size={12} className="text-orange-primary cursor-pointer" onClick={() => setSelectedCategory(null)} />
+                  </div>
+                )}
+                {dealType !== 'all' && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                    Type: {dealType === 'retail' ? 'Retail' : 'Wholesale'} 
+                    <XCircle size={12} className="text-orange-primary cursor-pointer" onClick={() => setDealType('all')} />
+                  </div>
+                )}
+                {minDiscount > 0 && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-[#1a1c4b] uppercase tracking-widest shadow-sm">
+                    Savings: {minDiscount}%+ 
+                    <XCircle size={12} className="text-orange-primary cursor-pointer" onClick={() => setMinDiscount(0)} />
+                  </div>
+                )}
+              </div>
+            )}
             
             {/* Featured Deals Showcase Grid */}
             <section className="w-full">
@@ -401,46 +560,15 @@ export function DealsPage() {
 
           {/* RIGHT SIDEBAR COLUMN */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-             {/* Redesigned For Business & Sellers Card */}
-             <div 
-               id="section-sellers-deals" 
-               className="bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
-               style={{ height: '464px' }}
-             >
-               <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
-               
-               <div className="flex flex-col items-center">
-                 <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-3 border border-[#E8500A]/5 shrink-0 shadow-sm">
-                   <Star className="w-4 h-4 fill-current" />
-                 </div>
-                 
-                 <h3 className="font-sans text-sm font-semibold uppercase tracking-tight text-[#1A1D4E] leading-snug">
-                   For Business <span className="text-[#E8500A]">& Sellers</span>
-                 </h3>
-                 
-                 <p className="text-[11px] text-gray-400 font-semibold mt-2 px-1 leading-relaxed max-w-[220px]">
-                   Unlock exclusive tools, secure verified merchant badges, and scale your authentic local reach.
-                 </p>
-               </div>
-
-               <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
-                 <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
-                 <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
-                   Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
-                 </p>
-                 
-                 <button 
-                   type="button"
-                   onClick={() => navigate('/post-offer')}
-                   className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
-                 >
-                   POST OFFER <ArrowRight className="w-3.5 h-3.5" />
-                 </button>
-               </div>
-
-               <div className="flex items-center justify-center gap-1.5 text-[8.5px] font-semibold text-[#8a9bb0] uppercase font-mono tracking-widest shrink-0">
-                 <Star className="w-3.5 h-3.5 text-[#E8500A] fill-current" /> 100k+ shopper log Daily
-               </div>
+             {/* Sourcing Badge card to fill the right sidebar slot beautifully */}
+             <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left font-sans">
+                <h4 className="text-[11px] font-black text-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                   <ShieldCheck size={14} className="text-green-500 shrink-0" />
+                   Verified Sourcing
+                </h4>
+                <p className="text-[10px] text-gray-400 leading-relaxed font-semibold">
+                   Each listed bargain point is validated against native brand catalogs. Rest assured, checkout is immediate, safe, and transparent.
+                </p>
              </div>
           </aside>
 

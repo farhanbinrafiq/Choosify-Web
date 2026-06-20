@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy } from 'lucide-react';
+import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -57,6 +57,9 @@ export function BrandsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Brands');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'unverified'>('all');
+  const [popularityFilter, setPopularityFilter] = useState<'all' | 'hot' | 'featured' | 'top-rated'>('all');
 
   const brands: Brand[] = [
     {
@@ -214,6 +217,18 @@ export function BrandsPage() {
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
+  const dynamicCategories = React.useMemo(() => {
+    const counts: { [name: string]: number } = {};
+    brands.forEach(b => {
+      const cat = b.category || 'Other';
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, count]) => ({
+      name,
+      count
+    }));
+  }, [brands]);
+
   // Core reactive filtering logic for brand listing
   const filteredBrands = React.useMemo(() => {
     let result = [...brands];
@@ -245,8 +260,29 @@ export function BrandsPage() {
       result = result.filter(b => b.name.toUpperCase().startsWith(selectedLetter));
     }
 
+    // 4. Filter by Category
+    if (selectedCategory) {
+      result = result.filter(b => b.category?.toLowerCase() === selectedCategory.toLowerCase());
+    }
+
+    // 5. Filter by Verification Status
+    if (verificationFilter === 'verified') {
+      result = result.filter(b => getBrandClaimStatus(b.id) === 'verified');
+    } else if (verificationFilter === 'unverified') {
+      result = result.filter(b => getBrandClaimStatus(b.id) !== 'verified');
+    }
+
+    // 6. Filter by Popularity Status
+    if (popularityFilter === 'hot') {
+      result = result.filter(b => b.isHot);
+    } else if (popularityFilter === 'featured') {
+      result = result.filter(b => b.isFeatured);
+    } else if (popularityFilter === 'top-rated') {
+      result = result.filter(b => b.rating >= 4.8);
+    }
+
     return result;
-  }, [searchQuery, selectedLetter, activeTab]);
+  }, [brands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus]);
 
   const groupedBrands = letters.reduce((acc, letter) => {
     const filtered = filteredBrands.filter(b => b.name.toUpperCase().startsWith(letter));
@@ -369,50 +405,177 @@ export function BrandsPage() {
         </div>
       </div>
 
-
-
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
-        {/* Sidebar Filters */}
-        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-          {/* Alphabet Index Filter Card */}
-          <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4 text-left font-sans animate-fade-in">
-            <div className="flex flex-col gap-1">
-              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2 leading-none">
-                FILTER BY <span className="text-orange-primary font-bold">INITIAL</span>
-              </h3>
-              <div className="w-full h-px bg-gray-105" />
-            </div>
-
-            <div className="grid grid-cols-4 gap-1.5">
-              <button 
-                onClick={() => setSelectedLetter(null)}
-                className={cn(
-                  "col-span-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
-                  selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                )}
-              >
-                All Brands
-              </button>
-              {letters.map((letter) => (
+      {/* GLOBAL HORIZONTAL FILTERS BAR */}
+      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
+        <div className="max-w-[1440px] mx-auto px-6 w-full">
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Brands Filtering</span>
+              {(selectedLetter || searchQuery || activeTab !== 'All Brands' || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (
                 <button 
-                  key={letter} 
-                  onClick={() => setSelectedLetter(letter)}
-                  className={cn(
-                    "h-8 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
-                    selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
-                  )}
+                  onClick={() => {
+                    setSelectedLetter(null); 
+                    setSearchQuery(''); 
+                    setActiveTab('All Brands');
+                    setSelectedCategory(null);
+                    setVerificationFilter('all');
+                    setPopularityFilter('all');
+                  }}
+                  className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-600 transition-colors cursor-pointer"
                 >
-                  {letter}
+                  Reset All Filters
                 </button>
-              ))}
+              )}
+            </div>
+            
+            {/* Horizontal Scrolling wrapper for filters */}
+            <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
+              
+              {/* Alphabet Index Filter Card */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4 text-left font-sans animate-fade-in min-w-[280px] flex-1">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2 leading-none">
+                    Filter By <span className="text-orange-primary font-bold">Initial</span>
+                  </h3>
+                  <div className="w-full h-px bg-gray-155" />
+                </div>
+
+                <div className="grid grid-cols-6 gap-1 max-h-32 overflow-y-auto no-scrollbar">
+                  <button 
+                    onClick={() => setSelectedLetter(null)}
+                    className={cn(
+                      "col-span-6 py-1.5 rounded-[5px] text-[9px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
+                      selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                    )}
+                  >
+                    All Brands
+                  </button>
+                  {letters.map((letter) => (
+                    <button 
+                      key={letter} 
+                      onClick={() => setSelectedLetter(letter)}
+                      className={cn(
+                        "h-6 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                        selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
+                      )}
+                    >
+                      {letter}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category Filter Group */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[220px] flex-1">
+                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Category</h3>
+                  {selectedCategory && (
+                    <span 
+                      onClick={() => setSelectedCategory(null)}
+                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
+                    >
+                      Clear
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1.5 max-h-32 overflow-y-auto no-scrollbar">
+                  {dynamicCategories.map((cat, i) => (
+                    <button 
+                      key={cat.name} 
+                      onClick={() => setSelectedCategory(selectedCategory === cat.name ? null : cat.name)}
+                      className={cn(
+                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
+                        selectedCategory === cat.name ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
+                      )}
+                    >
+                      <span className="truncate">{cat.name}</span>
+                      <span className="text-[9px] font-semibold text-navy bg-[#D6E1EC]/20 px-2 py-0.5 rounded-full font-mono">{cat.count}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Verification Status Filter */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[200px]">
+                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Verification</h3>
+                  {verificationFilter !== 'all' && (
+                    <span 
+                      onClick={() => setVerificationFilter('all')}
+                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
+                    >
+                      Clear
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {[
+                    { value: 'all', label: 'All Brands' },
+                    { value: 'verified', label: '✓ Verified Claims' },
+                    { value: 'unverified', label: 'Unverified Channels' }
+                  ].map((item) => (
+                    <button 
+                      key={item.value} 
+                      onClick={() => setVerificationFilter(item.value as any)}
+                      className={cn(
+                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
+                        verificationFilter === item.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
+                      )}
+                    >
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Popularity Filter */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[200px]">
+                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Popularity</h3>
+                  {popularityFilter !== 'all' && (
+                    <span 
+                      onClick={() => setPopularityFilter('all')}
+                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-650 transition-colors"
+                    >
+                      Clear
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {[
+                    { value: 'all', label: 'All Tiers' },
+                    { value: 'hot', label: '🔥 Hot Brands' },
+                    { value: 'featured', label: '⭐ Featured Only' },
+                    { value: 'top-rated', label: '✨ Top Rated (4.8+)' }
+                  ].map((item) => (
+                    <button 
+                      key={item.value} 
+                      onClick={() => setPopularityFilter(item.value as any)}
+                      className={cn(
+                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
+                        popularityFilter === item.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
+                      )}
+                    >
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
             </div>
           </div>
+        </div>
+      </div>
 
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
+        
+        {/* Left Sidebar */}
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
           {/* BUSINESS SELLERS INFO CARD */}
           <div 
             id="section-sellers-brands" 
             className="w-full bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
-            style={{ height: '464px' }}
+            style={{ height: '410px' }}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
             
@@ -426,12 +589,12 @@ export function BrandsPage() {
               </h3>
               
               <p className="text-[11px] text-gray-400 font-semibold mt-2 px-1 leading-relaxed max-w-[220px]">
-                Unlock exclusive tools, secure verified merchant badges, and scale your authentic local reach.
+                Unlock exclusive tools, secure verified merchant badges, and scale your reach.
               </p>
             </div>
 
             <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
-              <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
+              <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                 Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
               </p>
@@ -447,6 +610,31 @@ export function BrandsPage() {
             <div className="flex items-center justify-center gap-1 text-[8.5px] font-semibold text-gray-400 uppercase font-mono tracking-widest shrink-0">
               <Users className="w-3.5 h-3.5 text-gray-400" /> 100k+ shopper log Daily
             </div>
+          </div>
+
+          {/* SPONSOR AD IMAGE CARD */}
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
+             <div className="relative z-10 flex flex-col">
+                <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#e8edf2] px-1">
+                  <h3 className="text-[10px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
+                </div>
+                
+                <div className="w-full aspect-video rounded-[5px] overflow-hidden mb-3 border border-[#e8edf2] shadow-inner shrink-0">
+                   <img 
+                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=620&h=350&fit=crop" 
+                      alt="Sponsor AD" 
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
+                      referrerPolicy="no-referrer"
+                   />
+                </div>
+                
+                <h4 className="font-sans text-[11.5px] font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">AARONG HERITAGE</h4>
+                <p className="text-[9.5px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Traditional Handcrafted Brand</p>
+                
+                <button className="w-full py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0">
+                   Shop Now
+                </button>
+             </div>
           </div>
         </aside>
 
@@ -466,15 +654,52 @@ export function BrandsPage() {
               </h2>
             </div>
             
-            {(selectedLetter || searchQuery || activeTab !== 'All Brands') && (
+            {(selectedLetter || searchQuery || activeTab !== 'All Brands' || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (
               <button 
-                onClick={() => {setSelectedLetter(null); setSearchQuery(''); setActiveTab('All Brands');}}
+                onClick={() => {
+                  setSelectedLetter(null); 
+                  setSearchQuery(''); 
+                  setActiveTab('All Brands');
+                  setSelectedCategory(null);
+                  setVerificationFilter('all');
+                  setPopularityFilter('all');
+                }}
                 className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#e8edf2] px-3.5 py-2 rounded-[5px] shadow-sm self-start sm:self-auto hover:text-[#CF4400] cursor-pointer"
               >
                 Reset All Filters
               </button>
             )}
           </div>
+
+          {/* Active Filter Chips */}
+          {(selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all' || selectedLetter) && (
+            <div className="flex flex-wrap items-center gap-3">
+              {selectedLetter && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                  Letter: {selectedLetter} 
+                  <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setSelectedLetter(null)} />
+                </div>
+              )}
+              {selectedCategory && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                  Category: {selectedCategory} 
+                  <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setSelectedCategory(null)} />
+                </div>
+              )}
+              {verificationFilter !== 'all' && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                  Verification: {verificationFilter === 'verified' ? 'Verified' : 'Unverified'} 
+                  <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setVerificationFilter('all')} />
+                </div>
+              )}
+              {popularityFilter !== 'all' && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                  Popularity: {popularityFilter.toUpperCase()} 
+                  <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setPopularityFilter('all')} />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Tablet/Mobile Collapsible A-Z Filter Card */}
           <div className="lg:hidden bg-white rounded-[5px] p-4 border border-[#e8edf2] shadow-sm mb-6 font-sans">
@@ -869,35 +1094,7 @@ export function BrandsPage() {
             </div>
           </div>
 
-          {/* SPONSOR AD IMAGE CARD */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
-             <div className="relative z-10 flex flex-col">
-                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
-                </div>
-                
-                <div className="w-full aspect-video rounded-[5px] overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
-                   <img 
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=620&h=350&fit=crop" 
-                      alt="Sponsor AD" 
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
-                      referrerPolicy="no-referrer"
-                   />
-                </div>
-                
-                <h4 className="font-sans text-xs font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">AARONG HERITAGE</h4>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Traditional Handcrafted Brand</p>
-                
-                <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-4 px-1 text-center">
-                   New Collection Available. Free Delivery overall Dhaka on purchase above BDT 1,500.
-                </p>
-                
-                <button className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0">
-                   Shop Now
-                </button>
-             </div>
-          </div>
-        </aside>
+         </aside>
       </div>
     </div>
   );

@@ -393,149 +393,253 @@ export function CustomerFavoritePage() {
       </div>
 
       {/* ================================================= */}
+      {/* GLOBAL HORIZONTAL FILTERS BAR (directly below sticky nav) */}
+      {/* ================================================= */}
+      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
+        <div className="max-w-[1440px] mx-auto px-6 w-full">
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Customer Favorites Filter Suite</span>
+              {(trendingFilter !== 'All' || selectedSource || priceRange) && (
+                <button 
+                  onClick={() => {
+                    setTrendingFilter('All');
+                    setSelectedSource(null);
+                    setPriceRange(null);
+                  }}
+                  className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-655 transition-colors cursor-pointer"
+                >
+                  Reset All Filters
+                </button>
+              )}
+            </div>
+
+            {/* Horizontal Scrolling wrapper for filters */}
+            <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
+
+              {/* SECTION 1: TRENDING FILTERS */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left flex-1 min-w-[240px]">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e8edf2]">
+                  <h3 className="text-[11px] font-bold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5">
+                    <Flame size={14} className="text-orange-primary shrink-0" /> Trending Sweeps
+                  </h3>
+                  {trendingFilter !== 'All' && (
+                    <span 
+                      onClick={() => setTrendingFilter('All')}
+                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-155"
+                    >
+                      Clear
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1 max-h-36 overflow-y-auto no-scrollbar">
+                  {[
+                    '🔥 Trending Today',
+                    '🔥 Trending This Week',
+                    '🔥 Trending This Month',
+                    '❤️ Most Loved',
+                    '🛒 Most Purchased',
+                    '⭐ Staff Picks',
+                    '🚀 Rising Products'
+                  ].map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => {
+                        setTrendingFilter(filter);
+                        toast.success(`Active trending sweep: ${filter}`);
+                      }}
+                      className={cn(
+                        "w-full px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between",
+                        trendingFilter === filter 
+                          ? "bg-orange-primary/10 text-[#E8500A] font-semibold" 
+                          : "text-gray-500 hover:text-navy hover:bg-gray-50"
+                      )}
+                    >
+                      <span>{filter}</span>
+                      {trendingFilter === filter && <Check size={11} className="text-orange-primary stroke-[3px]" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* SECTION 2: CATEGORIES ACCORDION / BUTTON QUICK GRIDS */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left flex-1 min-w-[245px]">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e8edf2]">
+                  <h3 className="text-[11px] font-bold text-[#8a9bb0] uppercase tracking-wider">
+                    Categories
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto no-scrollbar">
+                  {CATEGORIES.slice(0, 8).map((cat) => {
+                    const isCuratedCat = activeTab !== 'All Products' && mapTabToCategory(activeTab)?.includes(cat.name);
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          setActiveTab(cat.name === 'Fashion & Lifestyle' ? 'Clothing' : cat.name === 'Jewelry & Accessories' ? 'Jewelry' : cat.name === 'Mobile & Phones' ? 'Gadgets' : 'All Products');
+                        }}
+                        className={cn(
+                          "p-1.5 rounded border text-[9px] font-semibold uppercase text-center flex flex-col items-center justify-center gap-1 transition-colors border-[#e8edf2]",
+                          isCuratedCat
+                            ? "border-[#E8500A] bg-orange-primary/5 text-orange-primary"
+                            : "border-gray-100 hover:border-gray-250 text-navy"
+                        )}
+                      >
+                        <span className="font-semibold truncate w-full text-center">{cat.name.split(' ')[0]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* SECTION 3: PRODUCT SOURCE */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left min-w-[200px]">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e8edf2]">
+                  <h3 className="text-[11px] font-bold text-[#8a9bb0] uppercase tracking-wider">
+                    Source
+                  </h3>
+                  {selectedSource && (
+                    <span 
+                      onClick={() => setSelectedSource(null)}
+                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-155"
+                    >
+                      Clear
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  {[
+                    '⭐ Choosify Picks',
+                    '❤️ Customer Favorites',
+                    '👥 Community Submitted',
+                    '🏆 Editor Choice'
+                  ].map((src) => (
+                    <button
+                      key={src}
+                      onClick={() => {
+                        setSelectedSource(selectedSource === src ? null : src);
+                      }}
+                      className={cn(
+                        "w-full px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between",
+                        selectedSource === src 
+                          ? "bg-[#E8500A] text-white font-semibold shadow-sm" 
+                          : "text-gray-500 hover:text-navy hover:bg-gray-50"
+                      )}
+                    >
+                      <span className="truncate">{src}</span>
+                      {selectedSource === src && <Check size={11} className="text-orange-primary stroke-[3px]" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* SECTION 4: PRICE FILTER */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left min-w-[210px] flex-1">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e8edf2]">
+                  <h3 className="text-[11px] font-bold text-[#8a9bb0] uppercase tracking-wider">
+                    Price Range
+                  </h3>
+                  {priceRange && (
+                    <span 
+                      onClick={() => setPriceRange(null)}
+                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-155"
+                    >
+                      Clear
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 gap-1 max-h-36 overflow-y-auto no-scrollbar">
+                  {[
+                    { label: 'Under BDT 1,000', value: 'under-1000' },
+                    { label: 'BDT 1,000–5,000', value: '1000-5000' },
+                    { label: 'BDT 5,000–10,000', value: '5000-10000' },
+                    { label: 'BDT 10,000–25,000', value: '10000-25000' },
+                    { label: 'BDT 25,000+', value: '25000-plus' }
+                  ].map((priceItem) => (
+                    <button
+                      key={priceItem.value}
+                      onClick={() => setPriceRange(priceRange === priceItem.value ? null : priceItem.value)}
+                      className={cn(
+                        "w-full px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between border border-[#e8edf2]",
+                        priceRange === priceItem.value 
+                          ? "border-[#E8500A] bg-orange-primary/5 text-orange-primary font-semibold" 
+                          : "border-gray-50 text-gray-500 hover:text-navy hover:border-gray-150"
+                      )}
+                    >
+                      <span>{priceItem.label}</span>
+                      {priceRange === priceItem.value && <div className="w-1.5 h-1.5 bg-orange-primary rounded-full" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ================================================= */}
       {/* 4. MAIN THREE-COLUMN CONTAINER (Desktop 3-columns) */}
       {/* ================================================= */}
       <div className="max-w-[1440px] mx-auto px-4 py-5 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start relative w-full">
-          
+
           {/* ================================================= */}
           {/* A. LEFT SIDEBAR (STICKY) */}
           {/* ================================================= */}
-          <aside className="lg:sticky lg:top-44 overflow-visible pb-8 space-y-4">
-            
-            {/* SECTION 1: TRENDING FILTERS */}
-            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
-                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 line-clamp-1">
-                  <Flame size={14} className="text-orange-primary" /> Trending Filters
-                </h3>
-              </div>
-              <div className="space-y-1 text-left">
-                {[
-                  '🔥 Trending Today',
-                  '🔥 Trending This Week',
-                  '🔥 Trending This Month',
-                  '❤️ Most Loved',
-                  '🛒 Most Purchased',
-                  '⭐ Staff Picks',
-                  '🚀 Rising Products'
-                ].map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => {
-                      setTrendingFilter(filter);
-                      toast.success(`Active trending sweep: ${filter}`);
-                    }}
-                    className={cn(
-                      "w-full px-2.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between",
-                      trendingFilter === filter 
-                        ? "bg-orange-primary/10 text-[#E8500A] font-semibold" 
-                        : "text-gray-500 hover:text-navy hover:bg-gray-50"
-                    )}
-                  >
-                    <span>{filter}</span>
-                    {trendingFilter === filter && <Check size={11} className="text-orange-primary stroke-[3px]" />}
-                  </button>
-                ))}
-              </div>
+          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-44 pb-8 space-y-4">
+            {/* SECTION 3: SPONSORED PRODUCT */}
+            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
+               <div className="relative z-10 w-full flex flex-col items-center">
+                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1 w-full text-left">
+                   <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Spotlight</h3>
+                 </div>
+                 
+                 <div onClick={() => navigate(`/products/${sponsoredProduct.id}`)} className="w-full aspect-square rounded-[5px] overflow-hidden mb-4 border border-[#e8edf2] shadow-inner bg-slate-50 relative shrink-0 p-4 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-[2s]">
+                   <img 
+                     src={sponsoredProduct.image} 
+                     alt={sponsoredProduct.title} 
+                     className="max-w-full max-h-full object-contain"
+                   />
+                 </div>
+                 
+                 <h4 className="font-sans text-xs font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">{sponsoredProduct.brand}</h4>
+                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3 line-clamp-1">{sponsoredProduct.title}</p>
+                 
+                 <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-4 px-1 text-center">
+                   Premium durability backed by verified seller warrants. Instant Dhaka delivery options available.
+                 </p>
+                 
+                 <button 
+                   onClick={() => navigate(`/products/${sponsoredProduct.id}`)}
+                   className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
+                 >
+                   Inquire Deal Spec
+                 </button>
+               </div>
             </div>
 
-            {/* SECTION 2: CATEGORY FILTERS */}
-            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
-                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
-                  Category Filters
+            {/* SECTION 4: SUBMIT A PRODUCT */}
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-xl pointer-events-none" />
+              
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
+                  👥 Submit A Product
                 </h3>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-left">
-                {CATEGORIES.slice(0, 8).map((cat) => {
-                  const isCuratedCat = activeTab !== 'All Products' && mapTabToCategory(activeTab)?.includes(cat.name);
-                  return (
-                    <button
-                      key={cat.id}
-                      onClick={() => {
-                        setActiveTab(cat.name === 'Fashion & Lifestyle' ? 'Clothing' : cat.name === 'Jewelry & Accessories' ? 'Jewelry' : cat.name === 'Mobile & Phones' ? 'Gadgets' : 'All Products');
-                        window.scrollTo({ top: 320, behavior: 'smooth' });
-                      }}
-                      className={cn(
-                        "p-2 rounded-lg border text-[10px] font-semibold uppercase text-center flex flex-col items-center justify-center gap-1 transition-colors border-[#e8edf2]",
-                        isCuratedCat
-                          ? "border-[#E8500A] bg-orange-primary/5 text-orange-primary"
-                          : "border-gray-100 hover:border-gray-250 text-navy"
-                      )}
-                    >
-                      <span className="font-semibold line-clamp-1">{cat.name.split(' ')[0]}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+              
+              <p className="text-[11px] text-gray-500 leading-relaxed font-semibold mb-4 px-1">
+                Sourced a trending product from TikTok, Facebook groups or Instagram reels recently? Suggest it to our vetting desk today!
+              </p>
 
-            {/* SECTION 3: PRODUCT SOURCE */}
-            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
-                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
-                  Product Source
-                </h3>
-              </div>
-              <div className="space-y-1 text-left">
-                {[
-                  '⭐ Choosify Picks',
-                  '❤️ Customer Favorites',
-                  '👥 Community Submitted',
-                  '🏆 Editor Choice'
-                ].map((src) => (
-                  <button
-                    key={src}
-                    onClick={() => {
-                      setSelectedSource(selectedSource === src ? null : src);
-                    }}
-                    className={cn(
-                      "w-full px-2.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between",
-                      selectedSource === src 
-                        ? "bg-navy text-white font-semibold" 
-                        : "text-gray-500 hover:text-navy hover:bg-gray-50"
-                    )}
-                  >
-                    <span>{src}</span>
-                    {selectedSource === src && <Check size={11} className="text-orange-primary stroke-[3px]" />}
-                  </button>
-                ))}
-              </div>
+              <button 
+                onClick={() => setIsSubmitModalOpen(true)}
+                className="w-full py-2.5 bg-[#050514] hover:bg-[#E8500A] text-white rounded-lg text-[10px] font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer border-0 shadow-sm"
+              >
+                <span>Submit Product</span> <Plus size={12} className="stroke-[3px]" />
+              </button>
             </div>
-
-            {/* SECTION 4: PRICE FILTER */}
-            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
-                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
-                  Price Filter
-                </h3>
-              </div>
-              <div className="space-y-1.5 text-left">
-                {[
-                  { label: 'Under BDT 1,000', value: 'under-1000' },
-                  { label: 'BDT 1,000–5,000', value: '1000-5000' },
-                  { label: 'BDT 5,000–10,000', value: '5000-10000' },
-                  { label: 'BDT 10,000–25,000', value: '10000-25000' },
-                  { label: 'BDT 25,000+', value: '25000-plus' }
-                ].map((priceItem) => (
-                  <button
-                    key={priceItem.value}
-                    onClick={() => setPriceRange(priceRange === priceItem.value ? null : priceItem.value)}
-                    className={cn(
-                      "w-full px-2.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between border border-[#e8edf2]",
-                      priceRange === priceItem.value 
-                        ? "border-[#E8500A] bg-orange-primary/5 text-orange-primary font-semibold" 
-                        : "border-gray-50 text-gray-500 hover:text-navy hover:border-gray-150"
-                    )}
-                  >
-                    <span>{priceItem.label}</span>
-                    {priceRange === priceItem.value && <div className="w-1.5 h-1.5 bg-orange-primary rounded-full" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-
           </aside>
 
           {/* ================================================= */}
@@ -593,6 +697,30 @@ export function CustomerFavoritePage() {
                   </button>
                 )}
               </div>
+
+              {/* Active Filter Chips */}
+              {(trendingFilter !== '🔥 Trending Today' || selectedSource || priceRange) && (
+                <div className="flex flex-wrap items-center gap-2 mb-4 mt-1">
+                  {trendingFilter !== '🔥 Trending Today' && (
+                    <div className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#e8edf2] rounded-[5px] text-[9px] font-black text-navy uppercase tracking-wider shadow-xs">
+                      Trend: {trendingFilter.replace('🔥 ', '')} 
+                      <span className="text-orange-primary cursor-pointer font-extrabold ml-1 scale-110" onClick={() => setTrendingFilter('🔥 Trending Today')}>×</span>
+                    </div>
+                  )}
+                  {selectedSource && (
+                    <div className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#e8edf2] rounded-[5px] text-[9px] font-black text-navy uppercase tracking-wider shadow-xs">
+                      Source: {selectedSource.replace('⭐ ', '').replace('❤️ ', '').replace('👥 ', '').replace('🏆 ', '')} 
+                      <span className="text-orange-primary cursor-pointer font-extrabold ml-1 scale-110" onClick={() => setSelectedSource(null)}>×</span>
+                    </div>
+                  )}
+                  {priceRange && (
+                    <div className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#e8edf2] rounded-[5px] text-[9px] font-black text-navy uppercase tracking-wider shadow-xs">
+                      Price: {priceRange === 'under-1000' ? '<1,000 BDT' : priceRange === '1000-5000' ? '1,000-5,000 BDT' : priceRange === '5000-10000' ? '5,000-10,000 BDT' : priceRange === '10000-25000' ? '10,000-25,000 BDT' : '25,000+ BDT'} 
+                      <span className="text-orange-primary cursor-pointer font-extrabold ml-1 scale-110" onClick={() => setPriceRange(null)}>×</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-20 bg-white border border-gray-150 rounded-[5px] p-8 max-w-lg mx-auto flex flex-col items-center gap-4">
@@ -692,59 +820,6 @@ export function CustomerFavoritePage() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* SECTION 3: SPONSORED PRODUCT */}
-            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
-               <div className="relative z-10 w-full flex flex-col items-center">
-                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1 w-full text-left">
-                   <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Spotlight</h3>
-                 </div>
-                 
-                 <div onClick={() => navigate(`/products/${sponsoredProduct.id}`)} className="w-full aspect-square rounded-[5px] overflow-hidden mb-4 border border-[#e8edf2] shadow-inner bg-slate-50 relative shrink-0 p-4 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-[2s]">
-                   <img 
-                     src={sponsoredProduct.image} 
-                     alt={sponsoredProduct.title} 
-                     className="max-w-full max-h-full object-contain"
-                   />
-                 </div>
-                 
-                 <h4 className="font-sans text-xs font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">{sponsoredProduct.brand}</h4>
-                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3 line-clamp-1">{sponsoredProduct.title}</p>
-                 
-                 <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-4 px-1 text-center">
-                   Premium durability backed by verified seller warrants. Instant Dhaka delivery options available.
-                 </p>
-                 
-                 <button 
-                   onClick={() => navigate(`/products/${sponsoredProduct.id}`)}
-                   className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
-                 >
-                   Inquire Deal Spec
-                 </button>
-               </div>
-            </div>
-
-            {/* SECTION 4: SUBMIT A PRODUCT */}
-            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-xl pointer-events-none" />
-              
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
-                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
-                  👥 Submit A Product
-                </h3>
-              </div>
-              
-              <p className="text-[11px] text-gray-500 leading-relaxed font-semibold mb-4 px-1">
-                Sourced a trending product from TikTok, Facebook groups or Instagram reels recently? Suggest it to our vetting desk today!
-              </p>
-
-              <button 
-                onClick={() => setIsSubmitModalOpen(true)}
-                className="w-full py-2.5 bg-[#050514] hover:bg-[#E8500A] text-white rounded-lg text-[10px] font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer border-0 shadow-sm"
-              >
-                <span>Submit Product</span> <Plus size={12} className="stroke-[3px]" />
-              </button>
             </div>
 
           </aside>

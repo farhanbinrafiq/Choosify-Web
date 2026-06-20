@@ -619,61 +619,83 @@ export function GuidesPage() {
         </div>
       </div>
 
+      {/* GLOBAL HORIZONTAL FILTERS BAR */}
+      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
+        <div className="max-w-[1440px] mx-auto px-6 w-full">
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Guides & Stories Filter Suite</span>
+              {activeCategory && activeCategory !== 'Fashion' && (
+                <button 
+                  onClick={() => setActiveCategory('Fashion')}
+                  className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-155 transition-colors cursor-pointer"
+                >
+                  Reset Active Category
+                </button>
+              )}
+            </div>
+
+            {/* Scrolling Categories List Slider */}
+            <div className="flex flex-row items-center gap-3 overflow-x-auto no-scrollbar py-1">
+              {categoriesList.map((cat) => {
+                const isActive = activeCategory === cat.name;
+                return (
+                  <button 
+                    key={cat.name} 
+                    onClick={() => setActiveCategory(cat.name)}
+                    className={cn(
+                      "flex items-center gap-2.5 py-1.5 px-3.5 rounded-full transition-all duration-300 border font-sans shrink-0 cursor-pointer",
+                      isActive 
+                        ? "bg-orange-primary/10 text-[#E8500A] border-orange-primary/25 font-bold" 
+                        : "bg-white border-[#e8edf2] text-navy hover:bg-gray-50/80"
+                    )}
+                  >
+                    <span className="shrink-0">{cat.icon}</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-wider">{cat.name}</span>
+                    <span className={cn(
+                      "px-1.5 py-0.5 text-[8.5px] font-mono rounded-full leading-none shrink-0",
+                      isActive ? "bg-orange-primary text-white" : "bg-gray-100 text-gray-500"
+                    )}>{cat.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <main className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
          {/* Left Sidebar Navigation */}
-         <aside className="hidden lg:flex flex-col gap-3 lg:sticky lg:top-24 pb-0 flex-shrink-0">
-            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm flex flex-col gap-3">
-              <div className="flex items-center justify-between pb-3 mb-1 border-b border-[#e8edf2] px-1">
-                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
-                  Categories List
-                </h3>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                {categoriesList.map((cat) => {
-                  const isActive = activeCategory === cat.name;
-                  return (
-                    <button 
-                      key={cat.name} 
-                      onClick={() => setActiveCategory(cat.name)}
-                      className={cn(
-                        "flex items-center gap-3 py-2 px-2.5 rounded-xl w-full text-left group transition-all duration-300",
-                        isActive 
-                        ? "bg-orange-primary/5 ring-1 ring-orange-primary/10" 
-                        : "hover:bg-slate-50/80"
-                      )}
-                    >
-                      <span className={cn(
-                        "w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-300 flex-shrink-0 relative text-xs",
-                        isActive
-                        ? "bg-[#E8500A] text-white border-[#E8500A] shadow-sm"
-                        : "bg-white text-navy border-gray-100 shadow-sm group-hover:scale-105 group-hover:border-orange-primary/20"
-                      )}>
-                        {cat.icon}
-                      </span>
-
-                      <span className="flex-1 min-w-0">
-                        <span className={cn(
-                          "text-xs font-semibold uppercase tracking-wide transition-colors duration-300 truncate block",
-                          isActive ? "text-[#E8500A]" : "text-navy group-hover:text-[#E8500A]"
-                        )}>
-                          {cat.name}
-                        </span>
-                      </span>
-
-                      <span className={cn(
-                        "px-2.5 py-0.5 text-[9px] font-mono font-semibold rounded-full leading-none transition-colors duration-300 shrink-0",
-                        isActive 
-                        ? "bg-orange-primary text-white" 
-                        : "bg-[#D6E1EC]/30 text-navy/70"
-                      )}>
-                        {cat.count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+            {/* Newsletter Widget */}
+            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
+               <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Newsletter</h3>
+               </div>
+               
+               <p className="text-navy text-[11px] font-semibold leading-relaxed mb-4">Get the latest industry style fresh look straight to your inbox.</p>
+               <div className="space-y-3">
+                  <input 
+                     type="email" 
+                     placeholder="Enter your email address..." 
+                     className="w-full bg-white border border-[#e8edf2] rounded-lg py-2 px-3 h-9 text-xs font-semibold text-navy outline-none placeholder:text-gray-300 shadow-inner" 
+                  />
+                  <button className="w-full py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider transition-colors border-0 cursor-pointer shadow-sm">
+                     Subscribe Now
+                  </button>
+               </div>
             </div>
+
+            {/* Need Customer Help? Widget */}
+            <div className="bg-[#1a1c3c] rounded-[5px] p-5.5 shadow-sm border border-navy/10 text-white relative overflow-hidden text-left">
+               <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12"><Search size={100} /></div>
+               <h4 className="text-[12px] font-bold mb-2 uppercase tracking-wide">Need Customer Help?</h4>
+               <p className="text-white/60 text-[11px] font-medium leading-relaxed mb-4">Ask our AI Shopping Assistant for a personalized recommendation based on your budget & lifestyle.</p>
+               <button className="w-full py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer border-0 shadow-sm">
+                 Start AI Chat
+               </button>
+            </div>
+
 
             {/* CREATORS YOU FOLLOW */}
             <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4 shadow-sm flex flex-col">
@@ -815,25 +837,6 @@ export function GuidesPage() {
 
          {/* Right Sidebar Widgets */}
          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in">
-            {/* Newsletter Widget */}
-            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
-               <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
-                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Newsletter</h3>
-               </div>
-               
-               <p className="text-navy text-xs font-semibold leading-relaxed mb-4">Get the latest industry style fresh look straight to your inbox.</p>
-               <div className="space-y-3">
-                  <input 
-                     type="email" 
-                     placeholder="Enter your email address..." 
-                     className="w-full bg-white border border-[#e8edf2] rounded-lg py-2 px-4 h-10 text-xs font-semibold text-navy outline-none placeholder:text-gray-300 shadow-inner" 
-                  />
-                  <button className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider transition-colors border-0 cursor-pointer shadow-sm">
-                     Subscribe Now
-                  </button>
-               </div>
-            </div>
-
             {/* Popular Topics Widget */}
             <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
@@ -871,15 +874,6 @@ export function GuidesPage() {
                </div>
                <button className="w-full mt-4 py-2 bg-slate-50 border border-[#e8edf2] text-gray-400 rounded-lg text-[10px] font-semibold uppercase tracking-wider hover:bg-slate-100 hover:text-navy transition-colors cursor-pointer border-0">
                   LOAD MORE
-               </button>
-            </div>
-
-            <div className="bg-[#1a1c3c] rounded-[5px] p-6 shadow-sm border border-navy/10 text-white relative overflow-hidden text-left">
-               <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12"><Search size={120} /></div>
-               <h4 className="text-sm font-semibold mb-2 uppercase tracking-wide">Need Customer Help?</h4>
-               <p className="text-white/60 text-xs font-medium leading-relaxed mb-4">Ask our AI Shopping Assistant for a personalized recommendation based on your budget & lifestyle.</p>
-               <button className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer border-0 shadow-sm">
-                 Start AI Chat
                </button>
             </div>
          </aside>

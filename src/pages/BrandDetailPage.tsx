@@ -817,150 +817,219 @@ export function BrandDetailPage() {
          </div>
       </div>
 
+      {/* GLOBAL HORIZONTAL FILTERS BAR */}
+      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
+        <div className="max-w-[1440px] mx-auto px-6 w-full opacity-100">
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Brand Catalogue Filters</span>
+              {activeChips.length > 0 && (
+                <button 
+                  onClick={clearAllFilters}
+                  className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-650 transition-colors cursor-pointer"
+                >
+                  Clear All Filters
+                </button>
+              )}
+            </div>
+            
+            {/* Horizontal Scrolling wrapper for filters */}
+            <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
+              {/* Active Selection Chips inside filters bar */}
+              {activeChips.length > 0 && (
+                 <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 min-w-[200px] text-left">
+                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2]">Active Selection</h3>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                       {activeChips.map((chip, i) => (
+                         <div 
+                           key={i} 
+                           className="flex items-center gap-1.5 px-2 bg-gray-50 border border-[#e8edf2] rounded text-[10px] font-semibold text-gray-600 uppercase tracking-wide hover:bg-gray-100 transition-all cursor-pointer"
+                           onClick={() => {
+                             if (chip.type === 'search') { setSearchFilter(''); setCurrentSearchInput(''); }
+                             else if (chip.type === 'category') handleCategoryToggle(chip.label);
+                             else if (chip.type === 'type') handleProductTypeToggle(chip.label);
+                             else if (chip.type === 'price') setSelectedPriceLimit(100000);
+                           }}
+                         >
+                           <span>{chip.label}</span>
+                           <X size={10} className="text-[#E8500A]" />
+                         </div>
+                       ))}
+                    </div>
+                 </div>
+              )}
+
+              {/* Category Filter */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-gray-100 shadow-sm relative overflow-hidden text-left min-w-[220px] flex-1">
+                 <div className="absolute top-0 right-0 w-2 h-full bg-[#E8500A]/5" />
+                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-50">
+                    <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">By Category</h3>
+                    <button onClick={() => setSelectedCategories([])} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Reset</button>
+                 </div>
+                 <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1 no-scrollbar pt-1">
+                   {finalCategoriesList.map((cat, i) => {
+                     const isChecked = selectedCategories.includes(cat.name);
+                     return (
+                       <label key={i} className="flex items-center justify-between group cursor-pointer select-none">
+                         <div className="flex items-center gap-2">
+                            <input 
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => handleCategoryToggle(cat.name)}
+                              className="rounded border-gray-200 text-[#E8500A] focus:ring-[#E8500A] w-3 h-3 cursor-pointer"
+                            />
+                            <span className={cn("text-[11px] font-bold transition-colors uppercase tracking-wide", isChecked ? "text-[#1A1D4E]" : "text-gray-400 group-hover:text-navy")}>
+                              {cat.name}
+                            </span>
+                         </div>
+                         <span className="text-[9px] font-mono text-gray-300 font-bold">({cat.count})</span>
+                       </label>
+                     );
+                   })}
+                 </div>
+              </div>
+
+              {/* Product Type Filter */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-gray-100 shadow-sm text-left min-w-[220px] flex-1">
+                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-50">
+                    <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Product Type</h3>
+                    <button onClick={() => setSelectedProductTypes([])} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Reset</button>
+                 </div>
+                 <div className="flex flex-wrap gap-1.5 pt-1 max-h-32 overflow-y-auto no-scrollbar">
+                   {productTypes.slice(0, 10).map((type, i) => {
+                     const isSelected = selectedProductTypes.includes(type);
+                     return (
+                       <button 
+                         key={i} 
+                         onClick={() => handleProductTypeToggle(type)}
+                         className={cn(
+                           "px-2.5 py-1 rounded text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer", 
+                           isSelected 
+                             ? "bg-[#E8500A] text-white shadow-sm" 
+                             : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                         )}
+                       >
+                          {type}
+                       </button>
+                     );
+                   })}
+                 </div>
+              </div>
+
+              {/* Price Limit Filter */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-gray-100 shadow-sm text-left min-w-[200px]">
+                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-50">
+                    <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Price Limit</h3>
+                    <button onClick={() => setSelectedPriceLimit(100000)} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Clear</button>
+                 </div>
+                 <div className="space-y-3 pt-1">
+                    <input 
+                      type="range" 
+                      min="500" 
+                      max="100000" 
+                      step="500"
+                      value={selectedPriceLimit}
+                      onChange={(e) => setSelectedPriceLimit(parseInt(e.target.value))}
+                      className="w-full accent-[#E8500A] cursor-ew-resize"
+                    />
+                    <div className="flex items-center justify-between text-[11px] font-bold text-[#1A1D4E]">
+                       <span>৳500</span>
+                       <span className="bg-[#FFF0E8] text-[#E8500A] font-extrabold px-3 py-1 rounded text-[9px]">
+                          Max: ৳{selectedPriceLimit.toLocaleString()}
+                       </span>
+                    </div>
+                 </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 4. Unified Scrollable Body Wrapper */}
       <div className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-16">
          
          {/* EXCLUSIVE DEALS & PRODUCT CATALOG THREE COLUMN SPLIT GRID */}
          <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
             
-            {/* COLUMN 1: SIDEBAR FILTERS (from Brand Wise Products page) */}
-            <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-               <div className="flex flex-col gap-6">
+            {/* COLUMN 1: LEFT COLUMN */}
+            <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+               {/* Brand Statistics & Quick Actions Card */}
+               <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-[#1A1D4E] flex flex-col gap-4 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-xl pointer-events-none" />
                   
-                  {/* Active Selection Chips */}
-                  {activeChips.length > 0 && (
-                     <div className="bg-white rounded-[5px] p-4.5 shadow-sm border border-[#e8edf2] text-left">
-                        <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-4 flex items-center justify-between">
-                           Selection
-                           <button onClick={clearAllFilters} className="text-[#E8500A] cursor-pointer hover:underline text-[9px] font-black uppercase">Clear</button>
-                        </h3>
-                        <div className="flex flex-wrap gap-1.5">
-                           {activeChips.map((chip, i) => (
-                             <div 
-                               key={i} 
-                               className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-[#e8edf2] rounded-lg text-[10px] font-semibold text-gray-600 uppercase tracking-wide hover:bg-gray-100 transition-all cursor-pointer"
-                               onClick={() => {
-                                 if (chip.type === 'search') { setSearchFilter(''); setCurrentSearchInput(''); }
-                                 else if (chip.type === 'category') handleCategoryToggle(chip.label);
-                                 else if (chip.type === 'type') handleProductTypeToggle(chip.label);
-                                 else if (chip.type === 'price') setSelectedPriceLimit(100000);
-                               }}
-                             >
-                               <span>{chip.label}</span>
-                               <X size={10} className="text-[#E8500A]" />
-                             </div>
-                           ))}
-                        </div>
-                     </div>
-                  )}
+                  <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
+                     <h3 className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-wider">Brand Information</h3>
+                     <span className="text-[9px] font-bold text-[#E8500A] uppercase tracking-widest italic">{brand.category || 'Fashion'}</span>
+                  </div>
 
-                  {/* Filter by Product Name Search box */}
-                  <div className="flex flex-col gap-2 text-left">
-                     <span className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Filter By Product Name</span>
-                     <div className="flex gap-2">
-                        <div className="relative flex-1">
-                           <input 
-                              type="text" 
-                              placeholder="Search brand products..." 
-                              value={currentSearchInput}
-                              onChange={(e) => setCurrentSearchInput(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') setSearchFilter(currentSearchInput);
-                              }}
-                              className="w-full h-11 px-4 bg-white rounded-xl text-xs font-bold border border-gray-100 focus:outline-none focus:border-[#E8500A] shadow-sm text-left" 
-                           />
-                        </div>
-                        <button 
-                          onClick={() => setSearchFilter(currentSearchInput)}
-                          className="h-11 px-4 bg-[#E8500A] text-white rounded-xl font-black text-[10px] uppercase tracking-widest cursor-pointer transition-colors"
-                        >
-                           Search
-                        </button>
+                  <div className="space-y-3">
+                     <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-400 font-semibold uppercase text-[10px]">Verify State</span>
+                        <span className={cn(
+                          "font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded",
+                          localClaimStatus === 'verified' ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                        )}>
+                           {localClaimStatus}
+                        </span>
+                     </div>
+                     <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-400 font-semibold uppercase text-[10px]">Catalog Nodes</span>
+                        <span className="font-extrabold text-[#1A1D4E]">{totalProductsFound} items</span>
+                     </div>
+                     <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-400 font-semibold uppercase text-[10px]">Rating Score</span>
+                        <span className="font-extrabold text-green-accent flex items-center gap-1">
+                           <Star size={10} className="fill-current text-[#E8500A]" /> 92/100
+                        </span>
+                     </div>
+                     <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-400 font-semibold uppercase text-[10px]">Follower Base</span>
+                        <span className="font-extrabold text-[#1A1D4E]">50,052</span>
                      </div>
                   </div>
 
-                  {/* Filter By Category list */}
-                  <div className="bg-white rounded-[5px] p-6 border border-gray-100 shadow-sm relative overflow-hidden text-left">
-                     <div className="absolute top-0 right-0 w-2.5 h-full bg-[#E8500A]/5" />
-                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">By Category</h3>
-                        <button onClick={() => setSelectedCategories([])} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Reset</button>
-                     </div>
-                     <div className="space-y-2.5 max-h-[180px] overflow-y-auto pr-1 no-scrollbar">
-                       {finalCategoriesList.map((cat, i) => {
-                         const isChecked = selectedCategories.includes(cat.name);
-                         return (
-                           <label key={i} className="flex items-center justify-between group cursor-pointer select-none">
-                             <div className="flex items-center gap-2.5">
-                                <input 
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => handleCategoryToggle(cat.name)}
-                                  className="rounded border-gray-200 text-[#E8500A] focus:ring-[#E8500A] w-3.5 h-3.5 cursor-pointer"
-                                />
-                                <span className={cn("text-[11px] font-bold transition-colors uppercase tracking-wide", isChecked ? "text-[#1A1D4E]" : "text-gray-400 group-hover:text-navy")}>
-                                  {cat.name}
-                                </span>
-                             </div>
-                             <span className="text-[9px] font-mono text-gray-300 font-bold">({cat.count})</span>
-                           </label>
-                         );
-                       })}
-                     </div>
+                  <div className="pt-3 border-t border-[#e8edf2] flex flex-col gap-2">
+                     <button 
+                       onClick={() => {
+                          navigator.clipboard.writeText(window.location.href);
+                          toast.success("Page link copied to clipboard!");
+                       }}
+                       className="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-[#1A1D4E] font-semibold rounded-[5px] text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border-0 cursor-pointer"
+                     >
+                        <Share2 size={12} className="text-[#E8500A]" /> Share brand
+                     </button>
                   </div>
+               </div>
 
-                  {/* Filter By Popular Product Type tags */}
-                  <div className="bg-white rounded-[5px] p-6 border border-gray-100 shadow-sm text-left">
-                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Product Type</h3>
-                        <button onClick={() => setSelectedProductTypes([])} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Reset</button>
+               {/* Sponsored Ad space block (Relocated here) */}
+               <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden flex flex-col items-center">
+                  <div className="relative z-10 text-center w-full flex flex-col items-center">
+                     <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#e8edf2] w-full px-1">
+                       <h3 className="text-[10px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
                      </div>
-                     <div className="flex flex-wrap gap-1.5">
-                       {productTypes.slice(0, 10).map((type, i) => {
-                         const isSelected = selectedProductTypes.includes(type);
-                         return (
-                           <button 
-                             key={i} 
-                             onClick={() => handleProductTypeToggle(type)}
-                             className={cn(
-                               "px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer", 
-                               isSelected 
-                                 ? "bg-[#E8500A] text-white shadow-sm" 
-                                 : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                             )}
-                           >
-                              {type}
-                           </button>
-                         );
-                       })}
-                     </div>
-                  </div>
-
-                  {/* Price limit selection */}
-                  <div className="bg-white rounded-[5px] p-6 border border-gray-100 shadow-sm text-left">
-                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Price Limit</h3>
-                        <button onClick={() => setSelectedPriceLimit(100000)} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Clear</button>
-                     </div>
-                     <div className="space-y-4">
-                        <input 
-                          type="range" 
-                          min="500" 
-                          max="100000" 
-                          step="500"
-                          value={selectedPriceLimit}
-                          onChange={(e) => setSelectedPriceLimit(parseInt(e.target.value))}
-                          className="w-full accent-[#E8500A] cursor-ew-resize"
+                     <div className="w-full aspect-[4/5] rounded-[5px] overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
+                        <img 
+                           src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&h=625&fit=crop" 
+                           alt="Sponsor AD" 
+                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
+                           referrerPolicy="no-referrer"
                         />
-                        <div className="flex items-center justify-between text-xs font-bold text-[#1A1D4E]">
-                           <span>৳500</span>
-                           <span className="bg-[#FFF0E8] text-[#E8500A] font-extrabold px-3 py-1 rounded-full text-[10px]">
-                              Max: ৳{selectedPriceLimit.toLocaleString()}
-                           </span>
-                        </div>
                      </div>
+                     <h4 className="font-sans text-[11.5px] font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">AARONG HERITAGE</h4>
+                     <p className="text-[9.5px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Traditional Handcrafted Brand</p>
+                     
+                     <p className="text-[10px] text-gray-500 font-medium leading-relaxed mb-4 px-1 text-center font-sans">
+                        New Collection Available. Free Delivery overall Dhaka on purchase above BDT 1,500.
+                     </p>
+                     
+                     <Link 
+                       to="/brands"
+                       className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0 text-center select-none"
+                     >
+                        Shop Now
+                     </Link>
                   </div>
-
                </div>
             </aside>
 
@@ -1264,30 +1333,16 @@ export function BrandDetailPage() {
                      </div>
                   )}
 
-                  {/* Sponsored Ad space block */}
-                  <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden">
-                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
-                     <div className="relative z-10 text-center">
-                        <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4">
-                           Sponsored Ad
-                        </span>
-                        <div className="w-full aspect-square rounded-2xl overflow-hidden mb-5 border border-white/10 shadow-lg">
-                           <img 
-                              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop" 
-                              alt="Sponsor AD" 
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
-                           />
-                        </div>
-                        <h4 className="font-serif text-base font-bold tracking-widest uppercase mb-1">AARONG</h4>
-                        <p className="text-[9px] font-black text-white/50 tracking-wider uppercase mb-3">Heritage Shopping Brand</p>
-                        <p className="text-[10px] text-white/70 font-medium leading-relaxed mb-5 px-1 uppercase">
-                           New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
-                        </p>
-                        <button className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-full shadow-lg hover:shadow-[#E8500A]/20 transition-all cursor-pointer">
-                           Shop Now
-                        </button>
-                     </div>
-                  </div>
+                   {/* Platform Compliance Verified Sourcing badge card */}
+                   <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left font-sans">
+                      <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                         <ShieldCheck size={14} className="text-green-500 shrink-0" />
+                         Verified Sourcing
+                      </h4>
+                      <p className="text-[10px] text-gray-400 leading-relaxed font-semibold">
+                         Each listed bargain point is validated against native brand catalogs. Rest assured, checkout is immediate, safe, and transparent.
+                      </p>
+                   </div>
 
                </div>
             </aside>

@@ -9,35 +9,59 @@ export function BrandDealsPage() {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'unverified'>('all');
+  const [popularityFilter, setPopularityFilter] = useState<'all' | 'high' | 'normal'>('all');
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   // Brand and deals filtering logic based on letter, category tab, and search query
-  const filteredBrands = BRANDS.filter(brand => {
-    // 1. Alphabet Letter Initial
-    const matchesLetter = selectedLetter === null || brand.name.toUpperCase().startsWith(selectedLetter);
+  const filteredBrands = React.useMemo(() => {
+    return BRANDS.filter(brand => {
+      // 1. Alphabet Letter Initial
+      const matchesLetter = selectedLetter === null || brand.name.toUpperCase().startsWith(selectedLetter);
 
-    // 2. Category Tab Filter
-    let matchesCategory = true;
-    if (activeTab === 'Tech') {
-      matchesCategory = brand.category === 'Tech' || brand.category === 'Electronics';
-    } else if (activeTab === 'Fashion') {
-      matchesCategory = brand.category === 'Fashion' || brand.category === 'Sports';
-    } else if (activeTab === 'Beauty') {
-      matchesCategory = brand.category === 'Beauty';
-    } else if (activeTab === 'Ethnic') {
-      matchesCategory = brand.category === 'Ethnic';
-    }
+      // 2. Category Tab Filter
+      let matchesCategoryTab = true;
+      if (activeTab === 'Tech') {
+        matchesCategoryTab = brand.category === 'Tech' || brand.category === 'Electronics';
+      } else if (activeTab === 'Fashion') {
+        matchesCategoryTab = brand.category === 'Fashion' || brand.category === 'Sports';
+      } else if (activeTab === 'Beauty') {
+        matchesCategoryTab = brand.category === 'Beauty';
+      } else if (activeTab === 'Ethnic') {
+        matchesCategoryTab = brand.category === 'Ethnic';
+      }
 
-    // 3. Search Query Filter (Page-level Scoped)
-    const q = searchQuery.toLowerCase().trim();
-    const matchesSearch = !q || 
-      brand.name.toLowerCase().includes(q) || 
-      brand.category.toLowerCase().includes(q) ||
-      `special exclusive limited discount offer save ${brand.name}`.toLowerCase().includes(q);
+      // 3. Category Dropdown Filter
+      const matchesCategoryDropdown = !selectedCategory || brand.category?.toLowerCase() === selectedCategory.toLowerCase();
 
-    return matchesLetter && matchesCategory && matchesSearch;
-  });
+      // 4. Verification Check
+      let matchesVerification = true;
+      if (verificationFilter === 'verified') {
+        matchesVerification = brand.id % 2 === 0;
+      } else if (verificationFilter === 'unverified') {
+        matchesVerification = brand.id % 2 !== 0;
+      }
+
+      // 5. Popularity Check
+      let matchesPopularity = true;
+      if (popularityFilter === 'high') {
+        matchesPopularity = brand.rating >= 4.7;
+      } else if (popularityFilter === 'normal') {
+        matchesPopularity = brand.rating < 4.7;
+      }
+
+      // 6. Search Query Filter (Page-level Scoped)
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch = !q || 
+        brand.name.toLowerCase().includes(q) || 
+        brand.category.toLowerCase().includes(q) ||
+        `special exclusive limited discount offer save ${brand.name}`.toLowerCase().includes(q);
+
+      return matchesLetter && matchesCategoryTab && matchesCategoryDropdown && matchesVerification && matchesPopularity && matchesSearch;
+    });
+  }, [selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, searchQuery]);
 
   const tabs = [
     { id: 'All', label: "All Offers", icon: <ShoppingBag size={13} /> },
@@ -141,48 +165,201 @@ export function BrandDealsPage() {
         </div>
       </div>
 
+      {/* GLOBAL HORIZONTAL FILTERS BAR */}
+      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
+        <div className="max-w-[1440px] mx-auto px-6 w-full">
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Brand Deals Filters</span>
+              {(selectedLetter || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all' || searchQuery || activeTab !== 'All') && (
+                <button 
+                  onClick={() => {
+                    setSelectedLetter(null);
+                    setSelectedCategory(null);
+                    setVerificationFilter('all');
+                    setPopularityFilter('all');
+                    setSearchQuery('');
+                    setActiveTab('All');
+                  }}
+                  className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-650 transition-colors cursor-pointer"
+                >
+                  Reset All Filters
+                </button>
+              )}
+            </div>
+            
+            {/* Horizontal Scrolling wrapper for filters */}
+            <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
+              
+              {/* Alphabet Index Filter Card */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4 text-left font-sans animate-fade-in min-w-[280px] flex-1">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2 leading-none">
+                    Filter By <span className="text-orange-primary font-bold">Initial</span>
+                  </h3>
+                  <div className="w-full h-px bg-gray-155" />
+                </div>
+
+                <div className="grid grid-cols-6 gap-1 max-h-32 overflow-y-auto no-scrollbar">
+                  <button 
+                    onClick={() => setSelectedLetter(null)}
+                    className={cn(
+                      "col-span-6 py-1.5 rounded-[5px] text-[9px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
+                      selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                    )}
+                  >
+                    All Brands
+                  </button>
+                  {letters.map((letter) => (
+                    <button 
+                      key={letter} 
+                      onClick={() => setSelectedLetter(letter)}
+                      className={cn(
+                        "h-6 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                        selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
+                      )}
+                    >
+                      {letter}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category Filter Group */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[220px] flex-1">
+                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Categories</h3>
+                  {selectedCategory && (
+                    <span 
+                      onClick={() => setSelectedCategory(null)}
+                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
+                    >
+                      Clear
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {['Electronics', 'Tech', 'Fashion', 'Beauty', 'Sports', 'Ethnic'].map((cat) => {
+                    const isActive = selectedCategory === cat;
+                    return (
+                      <button 
+                        key={cat} 
+                        onClick={() => setSelectedCategory(isActive ? null : cat)}
+                        className={cn(
+                          "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
+                          isActive ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
+                        )}
+                      >
+                        <span>{cat}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Verification status */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[200px]">
+                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Verification</h3>
+                  {verificationFilter !== 'all' && (
+                    <span 
+                      onClick={() => setVerificationFilter('all')}
+                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-650 transition-colors"
+                    >
+                      Clear
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {[
+                    { value: 'all', label: 'All Brands' },
+                    { value: 'verified', label: 'Verified Partners' },
+                    { value: 'unverified', label: 'Standard Outlets' }
+                  ].map((item) => (
+                    <button 
+                      key={item.value} 
+                      onClick={() => setVerificationFilter(item.value as any)}
+                      className={cn(
+                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
+                        verificationFilter === item.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
+                      )}
+                    >
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Popularity option card */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[200px]">
+                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Popularity</h3>
+                  {popularityFilter !== 'all' && (
+                    <span 
+                      onClick={() => setPopularityFilter('all')}
+                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-650 transition-colors"
+                    >
+                      Clear
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {[
+                    { value: 'all', label: 'All Popularity' },
+                    { value: 'high', label: 'Top-Rated (4.7+)' },
+                    { value: 'normal', label: 'Regular' }
+                  ].map((item) => (
+                    <button 
+                      key={item.value} 
+                      onClick={() => setPopularityFilter(item.value as any)}
+                      className={cn(
+                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
+                        popularityFilter === item.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
+                      )}
+                    >
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* CORE THREE-COLUMN SYSTEM LAYOUT INTEGRATION */}
       <div className="w-full bg-[#F3F9FF]/30 min-h-screen py-8">
         <div id="brand-deals-main" className="scroll-mt-36 max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start relative">
           
-          {/* A. LEFT COLUMN - ALPHABET INSTANT NAV FILTER */}
-          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in font-sans">
-            {/* Alphabet index filter card */}
-            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2">
-                  FILTER BY <span className="text-orange-primary font-bold">INITIAL</span>
+          {/* Left Sidebar */}
+          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+            {/* Promo spotlight card */}
+            <div className="bg-gradient-to-br from-[#0A0A1F] to-[#16163F] text-white rounded-[5px] border border-[#ff5b00]/10 p-5 shadow-lg relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
+              <div className="absolute top-0 right-0 w-28 h-28 bg-[#FF5B00]/10 rounded-full blur-2xl pointer-events-none" />
+              
+              <div>
+                <span className="px-2.5 py-1 rounded-[5px] bg-[#FF5B00] text-white text-[8.5px] font-black uppercase tracking-widest italic leading-none">
+                  SPOTLIGHT DEAL
+                </span>
+                <h3 className="font-sans text-lg font-black italic uppercase tracking-tight text-white leading-snug mt-4">
+                  EXCLUSIVE S26 <span className="text-[#FF5B00]">BUNDLE PACKS</span>
                 </h3>
-                <div className="w-full h-px bg-gray-105" />
+                <p className="text-[11px] text-white/50 font-semibold mt-2 leading-relaxed">
+                  Unlock dynamic distributor pricing structures on Samsung Mobile nodes and premium accessories under distributor backing.
+                </p>
               </div>
-
-              <div className="grid grid-cols-4 gap-1.5">
-                <button 
-                  onClick={() => setSelectedLetter(null)}
-                  className={cn(
-                    "col-span-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-widest transition-all text-center",
-                    selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                  )}
-                >
-                  All Brands
-                </button>
-                {letters.map((letter) => (
-                  <button 
-                    key={letter} 
-                    onClick={() => setSelectedLetter(letter)}
-                    className={cn(
-                      "h-8 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase",
-                      selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
-                    )}
-                  >
-                    {letter}
-                  </button>
-                ))}
-              </div>
+              
+              <button 
+                onClick={() => navigate('/brands/1/products')}
+                className="w-full py-3 bg-[#FF5B00] hover:bg-[#E8500A] text-white font-black rounded-[5px] text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all mt-4 italic shadow-md shadow-orange-primary/10 cursor-pointer border-0"
+              >
+                Explore S26 Deals <ArrowRight size={13} />
+              </button>
             </div>
 
             {/* Platform Compliance Verified badge card */}
-            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-left">
+            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-left font-sans">
               <h4 className="text-[11px] font-bold text-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <ShieldCheck size={14} className="text-green-500 shrink-0" />
                 Verified Sourcing
@@ -209,15 +386,52 @@ export function BrandDealsPage() {
                 </h2>
               </div>
               
-              {(selectedLetter || searchQuery || activeTab !== 'All') && (
+              {(selectedLetter || searchQuery || activeTab !== 'All' || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (
                 <button 
-                  onClick={() => {setSelectedLetter(null); setSearchQuery(''); setActiveTab('All');}}
+                  onClick={() => {
+                    setSelectedLetter(null); 
+                    setSearchQuery(''); 
+                    setActiveTab('All');
+                    setSelectedCategory(null);
+                    setVerificationFilter('all');
+                    setPopularityFilter('all');
+                  }}
                   className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#e8edf2] px-3.5 py-2 rounded-[5px] shadow-sm self-start sm:self-auto hover:text-[#CF4400]"
                 >
                   Reset All Filters
                 </button>
               )}
             </div>
+
+            {/* Active Filter Chips */}
+            {(selectedLetter || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (
+              <div className="flex flex-wrap items-center gap-3">
+                {selectedLetter && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                    Letter: {selectedLetter} 
+                    <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setSelectedLetter(null)}>×</span>
+                  </div>
+                )}
+                {selectedCategory && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                    Category: {selectedCategory} 
+                    <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setSelectedCategory(null)}>×</span>
+                  </div>
+                )}
+                {verificationFilter !== 'all' && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                    Verification: {verificationFilter === 'verified' ? 'Verified' : 'Standard'} 
+                    <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setVerificationFilter('all')}>×</span>
+                  </div>
+                )}
+                {popularityFilter !== 'all' && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                    Popularity: {popularityFilter === 'high' ? 'Top-Rated' : 'Regular'} 
+                    <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setPopularityFilter('all')}>×</span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Brands listing block */}
             <div className="flex flex-col gap-14">
@@ -298,30 +512,6 @@ export function BrandDealsPage() {
           {/* C. RIGHT COLUMN - OFFERS PROMOTIONS SIDEBAR */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in font-sans">
             
-            {/* Promo spotlight card */}
-            <div className="bg-gradient-to-br from-[#0A0A1F] to-[#16163F] text-white rounded-[5px] border border-[#ff5b00]/10 p-5 shadow-lg relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
-              <div className="absolute top-0 right-0 w-28 h-28 bg-[#FF5B00]/10 rounded-full blur-2xl pointer-events-none" />
-              
-              <div>
-                <span className="px-2.5 py-1 rounded-[5px] bg-[#FF5B00] text-white text-[8.5px] font-black uppercase tracking-widest italic leading-none">
-                  SPOTLIGHT DEAL
-                </span>
-                <h3 className="font-sans text-lg font-black italic uppercase tracking-tight text-white leading-snug mt-4">
-                  EXCLUSIVE S26 <span className="text-[#FF5B00]">BUNDLE PACKS</span>
-                </h3>
-                <p className="text-[11px] text-white/50 font-semibold mt-2 leading-relaxed">
-                  Unlock dynamic distributor pricing structures on Samsung Mobile nodes and premium accessories under distributor backing.
-                </p>
-              </div>
-              
-              <button 
-                onClick={() => navigate('/brands/1/products')}
-                className="w-full py-3 bg-[#FF5B00] hover:bg-[#E8500A] text-white font-black rounded-[5px] text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all mt-4 italic shadow-md shadow-orange-primary/10"
-              >
-                Explore S26 Deals <ArrowRight size={13} />
-              </button>
-            </div>
-
             {/* Offline Sourcing Request */}
             <div className="bg-white rounded-[5px] p-5 shadow-sm border border-[#e8edf2] text-left flex flex-col justify-between" style={{ height: '240px' }}>
               <div>
@@ -338,7 +528,7 @@ export function BrandDealsPage() {
               
               <button 
                 onClick={() => navigate('/post-offer')}
-                className="w-full py-3 bg-white border-2 border-gray-150 hover:border-navy text-navy font-black rounded-[5px] text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all italic"
+                className="w-full py-3 bg-white border-2 border-gray-150 hover:border-navy text-navy font-black rounded-[5px] text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all italic cursor-pointer"
               >
                 Submit Partnership Query
               </button>

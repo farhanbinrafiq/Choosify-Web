@@ -84,6 +84,7 @@ export interface Product {
   description: string;
   category?: string;
   variants?: any[];
+  rating?: number;
 }
 
 export interface SubOrderItem {
