@@ -3,6 +3,7 @@ import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRig
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { QuickAccessCard } from '../components/QuickAccessCard';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
@@ -478,6 +479,8 @@ export function BrandsPage() {
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
           
+          <QuickAccessCard />
+
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
           <div id="brands-sidebar-filters" className="transition-all duration-300 rounded-[5px]">
             <FullSidebarFilterPanel

@@ -5,6 +5,7 @@ import { BLOGS } from '../constants';
 import { CREATORS } from '../data/creators';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
+import { QuickAccessCard } from '../components/QuickAccessCard';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { RecommendationCardSkeleton } from '../components/Skeleton';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
@@ -1357,6 +1358,7 @@ export function GuidesPage() {
       <main className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
          {/* Left Sidebar Navigation - migrated to Full Filter Panel */}
          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+            <QuickAccessCard />
             <div id="guides-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
               {renderFilterPanel()}
             </div>

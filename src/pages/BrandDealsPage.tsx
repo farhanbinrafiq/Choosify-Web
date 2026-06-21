@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, ShieldCheck, Tag, Zap, Star, Search, Shirt, Sparkles, AlertCircle, ChevronRight } from 'lucide-react';
 import { BRANDS } from '../constants';
 import { cn } from '../lib/utils';
+import { QuickAccessCard } from '../components/QuickAccessCard';
 
 export function BrandDealsPage() {
   const navigate = useNavigate();
@@ -334,6 +335,7 @@ export function BrandDealsPage() {
           
           {/* Left Sidebar */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+            <QuickAccessCard />
             {/* Promo spotlight card */}
             <div className="bg-gradient-to-br from-[#0A0A1F] to-[#16163F] text-white rounded-[5px] border border-[#ff5b00]/10 p-5 shadow-lg relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
               <div className="absolute top-0 right-0 w-28 h-28 bg-[#FF5B00]/10 rounded-full blur-2xl pointer-events-none" />

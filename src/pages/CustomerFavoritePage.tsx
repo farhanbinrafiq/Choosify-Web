@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { QuickAccessCard } from '../components/QuickAccessCard';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
@@ -778,6 +779,8 @@ export function CustomerFavoritePage() {
           {/* A. LEFT SIDEBAR (STICKY) */}
           {/* ================================================= */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-8 space-y-4 text-left animate-fade-in flex-shrink-0">
+             
+             <QuickAccessCard />
             
             {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
             <div id="favorites-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Calculator, Layers, Award, Flame, Clock, Sparkles, ArrowRight } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { QuickAccessCard } from '../components/QuickAccessCard';
 import { motion } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
 import { ProductCardSkeleton } from '../components/Skeleton';
@@ -451,6 +452,8 @@ export function AllProductsPage() {
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
           
+          <QuickAccessCard />
+
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
           <div id="global-sidebar-filters" className="transition-all duration-300 rounded-[5px]">
             <FullSidebarFilterPanel

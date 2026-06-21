@@ -4,6 +4,7 @@ import { BRANDS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { QuickAccessCard } from '../components/QuickAccessCard';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { useCarousel } from '../hooks/useCarousel';
 import { ReportModal } from '../components/ReportModal';
@@ -1103,6 +1104,7 @@ export function BrandDetailPage() {
             
             {/* COLUMN 1: LEFT COLUMN */}
             <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+               <QuickAccessCard />
                <div id="brand-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
                   <FullSidebarFilterPanel
                     title="Filter Catalog"
