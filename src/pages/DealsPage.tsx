@@ -4,6 +4,7 @@ import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ExternalLink, ChevronDow
 import { PRODUCTS, BRANDS } from '../constants';
 import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
 
 export function DealsPage() {
   const navigate = useNavigate();
@@ -12,6 +13,33 @@ export function DealsPage() {
   const [activeTab, setActiveTab] = useState('All Deals');
   const [dealType, setDealType] = useState<'all' | 'retail' | 'wholesale'>('all');
   const [minDiscount, setMinDiscount] = useState<number>(0);
+
+  // Restore state from sessionStorage on mount
+  React.useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('choosify_deals_filters');
+      if (saved) {
+        const filters = JSON.parse(saved);
+        if (filters.selectedCategory) setSelectedCategory(filters.selectedCategory);
+        if (filters.dealType) setDealType(filters.dealType);
+        if (filters.minDiscount !== undefined) setMinDiscount(filters.minDiscount);
+        if (filters.activeTab) setActiveTab(filters.activeTab);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  // Save state on updates
+  React.useEffect(() => {
+    const filters = {
+      selectedCategory,
+      dealType,
+      minDiscount,
+      activeTab
+    };
+    sessionStorage.setItem('choosify_deals_filters', JSON.stringify(filters));
+  }, [selectedCategory, dealType, minDiscount, activeTab]);
 
   // ScrollSpy Active section detection for DealsPage major sections
   React.useEffect(() => {
@@ -252,143 +280,128 @@ export function DealsPage() {
 
       <main className="w-full bg-[#F3F9FF]/30 min-h-screen">
 
-        {/* FEATURED DEALS REPOSITIONED HORIZONTAL FILTERS BAR */}
-        <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
-          <div className="max-w-[1440px] mx-auto px-6 w-full">
-            <div className="flex flex-col gap-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Deals Filtering</span>
-                {(selectedCategory || dealType !== 'all' || minDiscount > 0 || searchQuery || activeTab !== 'All Deals') && (
-                  <button 
-                    onClick={() => {
-                      setSelectedCategory(null);
-                      setDealType('all');
-                      setMinDiscount(0);
-                      setSearchQuery('');
-                      setActiveTab('All Deals');
-                    }}
-                    className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-650 transition-colors cursor-pointer"
-                  >
-                    Reset All Filters
-                  </button>
-                )}
-              </div>
-              
-              {/* Horizontal Scrolling wrapper for filters */}
-              <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
-                
-                {/* Category Filter Group */}
-                <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left min-w-[220px] flex-1">
-                  <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
-                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Categories</h3>
-                    {selectedCategory && (
-                      <span 
-                        onClick={() => setSelectedCategory(null)}
-                        className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-150 transition-colors"
-                      >
-                        Clear
-                      </span>
-                    )}
-                  </div>
-                  <div className="space-y-1.5 max-h-32 overflow-y-auto no-scrollbar">
-                    {categoriesList.map((cat, i) => {
-                      const isActive = selectedCategory === cat.name;
-                      return (
-                        <button 
-                          key={i} 
-                          onClick={() => setSelectedCategory(isActive ? null : cat.name)}
-                          className={cn(
-                            "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                            isActive ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                          )}
-                        >
-                          <span className="truncate">{cat.name}</span>
-                          <span className="text-[9px] font-semibold text-navy bg-[#D6E1EC]/20 px-2 py-0.5 rounded-full font-mono">{cat.count}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+        {/* LAYER 1: QUICK FILTER BAR */}
+        <QuickFilterBar
+          title="Deals Quick Specs"
+          onOpenFullFilters={() => {
+            const el = document.getElementById("deals-sidebar-filters");
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              el.classList.add("ring-2", "ring-orange-primary/50");
+              setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
+            }
+          }}
+          filters={[
+            { id: 'all-retail', label: 'Retail Only', active: dealType === 'retail', onClick: () => setDealType(dealType === 'retail' ? 'all' : 'retail') },
+            { id: 'all-wholesale', label: 'Wholesale Only', active: dealType === 'wholesale', onClick: () => setDealType(dealType === 'wholesale' ? 'all' : 'wholesale') },
+            { id: 'savings-20', label: '🔥 20%+ Off', active: minDiscount === 20, onClick: () => setMinDiscount(minDiscount === 20 ? 0 : 20) },
+            { id: 'savings-45', label: '💥 45%+ Off', active: minDiscount === 45, onClick: () => setMinDiscount(minDiscount === 45 ? 0 : 45) }
+          ]}
+        />
 
-                {/* Deal Type Filter Panel */}
-                <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left min-w-[200px]">
-                  <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
-                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Deal Channel</h3>
-                    {dealType !== 'all' && (
-                      <span 
-                        onClick={() => setDealType('all')}
-                        className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-155 transition-colors"
-                      >
-                        Clear
-                      </span>
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    {[
-                      { value: 'all', label: 'All Channels' },
-                      { value: 'retail', label: 'Retail Sales' },
-                      { value: 'wholesale', label: 'Wholesale Only' }
-                    ].map((item) => (
-                      <button 
-                        key={item.value} 
-                        onClick={() => setDealType(item.value as any)}
-                        className={cn(
-                          "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                          dealType === item.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                        )}
-                      >
-                        <span>{item.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Min Discount Slider */}
-                <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left min-w-[240px]">
-                  <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
-                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Minimum Savings</h3>
-                    {minDiscount > 0 && (
-                      <span 
-                        onClick={() => setMinDiscount(0)}
-                        className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-155 transition-colors"
-                      >
-                        Clear
-                      </span>
-                    )}
-                  </div>
-                  <div className="space-y-2.5 pb-1">
-                    <div className="flex justify-between items-center text-[10px] font-semibold uppercase tracking-wider text-gray-400">
-                      <span>Discount:</span>
-                      <span className="text-orange-primary font-mono font-black">{minDiscount}% Off & Up</span>
-                    </div>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="70" 
-                      step="10"
-                      value={minDiscount} 
-                      onChange={(e) => setMinDiscount(Number(e.target.value))}
-                      className="w-full accent-orange-primary bg-[#D6E1EC]/20 h-1.5 rounded-lg cursor-pointer"
-                    />
-                    <div className="flex justify-between text-[8px] text-gray-400 font-bold">
-                      <span>Any</span>
-                      <span>20%</span>
-                      <span>45%</span>
-                      <span>70%+</span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* ACTIVE FILTER CHIPS ROW */}
+        <ActiveFilterChips
+          chips={[
+            selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+            dealType !== 'all' ? { id: 'deal_channel', label: `Channel: ${dealType}`, onRemove: () => setDealType('all') } : null,
+            minDiscount > 0 ? { id: 'discount_range', label: `Savings: ${minDiscount}%+`, onRemove: () => setMinDiscount(0) } : null
+          ].filter(Boolean) as any[]}
+          onClearAll={() => {
+            setSelectedCategory(null);
+            setDealType('all');
+            setMinDiscount(0);
+            setSearchQuery('');
+            setActiveTab('All Deals');
+          }}
+        />
 
         {/* Master Flex Column Structure below sticky bar */}
         <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
           
           {/* Left Sidebar */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+             
+             {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
+             <div id="deals-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
+               <FullSidebarFilterPanel
+                 title="Filter Deals"
+                 onReset={() => {
+                   setSelectedCategory(null);
+                   setDealType('all');
+                   setMinDiscount(0);
+                   setSearchQuery('');
+                   setActiveTab('All Deals');
+                 }}
+                 advancedSection={
+                   <UniversalFilterRenderer
+                     profile={{
+                       entity: 'deals',
+                       filters: [
+                         {
+                           id: 'discount_range2',
+                           name: 'Minimum Discount',
+                           type: 'single_select',
+                           options: [
+                             { value: 'all', label: 'Any Savings' },
+                             { value: '10', label: '10% Savings & Up' },
+                             { value: '25', label: '25% Savings & Up' },
+                             { value: '40', label: '40% Savings & Up' },
+                             { value: '60', label: '60% Savings & Up' }
+                           ]
+                         }
+                       ]
+                     }}
+                     activeFilters={{
+                       discount_range2: minDiscount === 0 ? 'all' : minDiscount.toString()
+                     }}
+                     onFilterChange={(filterId, value) => {
+                       if (filterId === 'discount_range2') {
+                         setMinDiscount(value === 'all' || !value ? 0 : Number(value));
+                       }
+                     }}
+                   />
+                 }
+               >
+                 <UniversalFilterRenderer
+                   profile={{
+                     entity: 'deals',
+                     filters: [
+                       {
+                         id: 'category',
+                         name: 'Product Categories',
+                         type: 'single_select',
+                         options: [
+                           { value: 'all', label: 'All Categories' },
+                           ...categoriesList.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
+                         ]
+                       },
+                       {
+                         id: 'deal_channel',
+                         name: 'Sellers Channels',
+                         type: 'single_select',
+                         options: [
+                           { value: 'all', label: 'All Channels' },
+                           { value: 'retail', label: 'Retail Sales' },
+                           { value: 'wholesale', label: 'Wholesale Only' }
+                         ]
+                       }
+                     ]
+                   }}
+                   activeFilters={{
+                     category: selectedCategory || 'all',
+                     deal_channel: dealType
+                   }}
+                   onFilterChange={(filterId, value) => {
+                     if (filterId === 'category') {
+                       setSelectedCategory(value === 'all' || !value ? null : value);
+                     } else if (filterId === 'deal_channel') {
+                       setDealType(value || 'all');
+                     }
+                   }}
+                 />
+               </FullSidebarFilterPanel>
+             </div>
+
              {/* Redesigned For Business & Sellers Card */}
              <div 
                id="section-sellers-deals-left" 
@@ -434,30 +447,6 @@ export function DealsPage() {
 
           {/* LEFT MAIN AREA */}
           <div className="scroll-mt-36 min-w-0 pb-10 flex flex-col gap-10">
-            
-            {/* Active Filter Chips */}
-            {(selectedCategory || dealType !== 'all' || minDiscount > 0) && (
-              <div className="flex flex-wrap items-center gap-3">
-                {selectedCategory && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
-                    Category: {selectedCategory} 
-                    <XCircle size={12} className="text-orange-primary cursor-pointer" onClick={() => setSelectedCategory(null)} />
-                  </div>
-                )}
-                {dealType !== 'all' && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
-                    Type: {dealType === 'retail' ? 'Retail' : 'Wholesale'} 
-                    <XCircle size={12} className="text-orange-primary cursor-pointer" onClick={() => setDealType('all')} />
-                  </div>
-                )}
-                {minDiscount > 0 && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-[#1a1c4b] uppercase tracking-widest shadow-sm">
-                    Savings: {minDiscount}%+ 
-                    <XCircle size={12} className="text-orange-primary cursor-pointer" onClick={() => setMinDiscount(0)} />
-                  </div>
-                )}
-              </div>
-            )}
             
             {/* Featured Deals Showcase Grid */}
             <section className="w-full">

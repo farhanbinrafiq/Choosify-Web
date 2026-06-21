@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, Youtube, Star, ChevronDown, CheckCircle2, Bookmark, ChevronLeft, ChevronRight, Zap, TrendingUp, HelpCircle, AlertCircle, Share2, MessageCircle, BarChart3, Users, Play, Smartphone, Gift, Shirt, Info, Package, DollarSign, ShieldCheck, ThumbsUp, Heart, X, ArrowRight, Lock, Sparkles, Clock } from 'lucide-react';
 import { BRANDS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
@@ -12,6 +12,7 @@ import { toast } from 'react-hot-toast';
 import { BrandOverviewSection } from '../components/BrandOverviewSection';
 import { FollowButton } from '../components/FollowButton';
 import { ClaimProfileModal } from '../components/ClaimProfileModal';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, FilterProfile, CategorySmartFilters } from '../components/FilterEngine';
 
 interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
@@ -108,10 +109,41 @@ export function BrandDetailPage() {
   const [activeFilter, setActiveFilter] = useState('Full Experience'); // Show Component View Selector
   const [searchFilter, setSearchFilter] = useState('');
   const [currentSearchInput, setCurrentSearchInput] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>([]);
-  const [selectedPriceLimit, setSelectedPriceLimit] = useState<number>(100000);
   const [activeSection, setActiveSection] = useState('all');
+
+  // New Filter V2 States
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [priceRangeV2, setPriceRangeV2] = useState<[number, number | null]>([0, null]);
+  const [customPriceInputs, setCustomPriceInputs] = useState({ min: '', max: '' });
+  const [availabilityFilter, setAvailabilityFilter] = useState<string | null>(null);
+  const [ratingFilter, setRatingFilter] = useState<string | null>(null);
+  const [votesFilter, setVotesFilter] = useState<string | null>(null);
+  const [warrantyFilter, setWarrantyFilter] = useState<string | null>(null);
+  const [deliveryFilter, setDeliveryFilter] = useState<string | null>(null);
+
+  // Deal filters
+  const [discountFilter, setDiscountFilter] = useState<string | null>(null);
+  const [couponFilter, setCouponFilter] = useState<string | null>(null);
+  const [expiryFilter, setExpiryFilter] = useState<string | null>(null);
+
+  // Brand filters
+  const [productLineFilter, setProductLineFilter] = useState<string | null>(null);
+  const [featuredCollectionFilter, setFeaturedCollectionFilter] = useState<string | null>(null);
+  const [officialStoreFilter, setOfficialStoreFilter] = useState<string | null>(null);
+  const [countryFilter, setCountryFilter] = useState<string | null>(null);
+
+  // Quick action filters managed at core
+  const [dealsOnlyFilter, setDealsOnlyFilter] = useState(false);
+  const [couponsOnlyFilter, setCouponsOnlyFilter] = useState(false);
+  const [verifiedOnlyFilter, setVerifiedOnlyFilter] = useState(false);
+  const [inStockOnlyFilter, setInStockOnlyFilter] = useState(false);
+  const [featuredOnlyFilter, setFeaturedOnlyFilter] = useState(false);
+
+  // Sort State
+  const [sortOption, setSortOption] = useState<string>('default');
+
+  // Smart filters specs State
+  const [smartSpecs, setSmartSpecs] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -133,7 +165,13 @@ export function BrandDetailPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeFilter, searchFilter, selectedCategories, selectedProductTypes, selectedPriceLimit]);
+  }, [
+    activeFilter, searchFilter, selectedCategory, priceRangeV2, availabilityFilter,
+    ratingFilter, votesFilter, warrantyFilter, deliveryFilter, discountFilter,
+    couponFilter, expiryFilter, productLineFilter, featuredCollectionFilter,
+    officialStoreFilter, countryFilter, dealsOnlyFilter, couponsOnlyFilter,
+    verifiedOnlyFilter, inStockOnlyFilter, featuredOnlyFilter, smartSpecs
+  ]);
 
   useEffect(() => {
     setLocalClaimStatus(getBrandClaimStatus(brand.id));
@@ -159,74 +197,200 @@ export function BrandDetailPage() {
   ];
   const finalCategoriesList = dynamicCategories.length > 0 ? dynamicCategories : defaultCats;
 
-  const productTypes = [
-    "Drives", "Flash", "Ram", "Batteries", "SSD", "Keyboard", "Monitors", "Mouse", "Cases", "Fans", "Software", "CPU"
-  ];
-
-  // Filters Engine Implementation
-  const filteredProducts = brandProducts.filter((p: any) => {
-    // 1. Search Box
-    if (searchFilter && !p.title.toLowerCase().includes(searchFilter.toLowerCase())) {
-      return false;
-    }
-    // 2. Categories
-    if (selectedCategories.length > 0) {
-      if (!p.category || !selectedCategories.includes(p.category)) {
+  // Filters Engine Implementation V2
+  const filteredProducts = useMemo(() => {
+    return brandProducts.filter((p: any) => {
+      // 1. Search Box
+      if (searchFilter && !p.title.toLowerCase().includes(searchFilter.toLowerCase())) {
         return false;
       }
-    }
-    // 3. Price Limit
-    if (p.price) {
+
+      // 2. Category
+      if (selectedCategory && p.category !== selectedCategory) {
+        return false;
+      }
+
+      // 3. Price Scope (V2 Range)
       const priceNum = typeof p.price === 'number' 
         ? p.price 
         : parseInt(String(p.price).replace(/[^0-9]/g, '')) || 0;
-      if (priceNum > selectedPriceLimit) {
+      if (priceNum < priceRangeV2[0]) {
         return false;
       }
-    }
-    return true;
-  });
+      if (priceRangeV2[1] !== null && priceNum > priceRangeV2[1]) {
+        return false;
+      }
 
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-  const paginatedProducts = filteredProducts.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage);
+      // 4. Availability
+      if (availabilityFilter === 'in-stock' && p.inStock === false) return false;
+      if (availabilityFilter === 'out-of-stock' && p.inStock !== false) return false;
+      if (inStockOnlyFilter && p.inStock === false) return false;
+
+      // 5. Avg Rating
+      const ratingVal = p.rating || 4.2;
+      if (ratingFilter && ratingFilter !== 'all') {
+        if (ratingVal < parseFloat(ratingFilter)) return false;
+      }
+
+      // 6. Votes / Reviews
+      const reviewVal = p.reviews || 0;
+      if (votesFilter && votesFilter !== 'all') {
+        if (reviewVal < parseInt(votesFilter)) return false;
+      }
+
+      // 7. Warranty Filter (mock check)
+      if (warrantyFilter) {
+        const mappedWarranty = (p.id % 3 === 0) ? 'standard' : (p.id % 3 === 1) ? 'extended' : 'none';
+        if (mappedWarranty !== warrantyFilter) return false;
+      }
+
+      // 8. Delivery Filter
+      if (deliveryFilter) {
+        let mappedDelivery = 'paid';
+        if (p.id % 3 === 0) mappedDelivery = 'free';
+        else if (p.id % 3 === 1) mappedDelivery = 'express';
+        if (mappedDelivery !== deliveryFilter) return false;
+      }
+
+      // 9. Discount Filter (min discount %)
+      const discPercent = p.discount || (p.originalPrice ? Math.round(((parseInt(String(p.originalPrice).replace(/[^0-9]/g, '')) - priceNum) / parseInt(String(p.originalPrice).replace(/[^0-9]/g, ''))) * 100) : 0);
+      if (discountFilter) {
+        if (discPercent < parseInt(discountFilter)) return false;
+      }
+
+      // 10. Coupon Available Filter
+      if (couponFilter === 'yes' && p.id % 2 !== 0) return false;
+      if (couponFilter === 'no' && p.id % 2 === 0) return false;
+
+      // 11. Expiry Filter
+      if (expiryFilter === 'active' && p.id % 6 === 5) return false;
+      if (expiryFilter === 'expired' && p.id % 6 !== 5) return false;
+
+      // 12. Country of Origin
+      if (countryFilter) {
+        const mappedOrigin = (p.id % 4 === 0) ? 'Bangladesh' : (p.id % 4 === 1) ? 'China' : (p.id % 4 === 2) ? 'Vietnam' : 'India';
+        if (mappedOrigin !== countryFilter) return false;
+      }
+
+      // 13. Brand Product Line / Featured Collections
+      if (productLineFilter) {
+        const mappedLine = (p.id % 3 === 0) ? 'premium' : (p.id % 3 === 1) ? 'standard' : 'budget';
+        if (mappedLine !== productLineFilter) return false;
+      }
+      if (featuredCollectionFilter) {
+        const mappedColl = (p.id % 3 === 0) ? 'summer' : (p.id % 3 === 1) ? 'winter' : 'festive';
+        if (mappedColl !== featuredCollectionFilter) return false;
+      }
+      if (officialStoreFilter === 'yes' && p.id % 3 === 2) return false;
+      if (officialStoreFilter === 'no' && p.id % 3 !== 2) return false;
+
+      // Quick Toolbar triggers
+      if (dealsOnlyFilter && !p.discount && !p.originalPrice && p.tag !== 'SALE') return false;
+      if (couponsOnlyFilter && p.id % 2 !== 0) return false;
+      if (verifiedOnlyFilter && localClaimStatus !== 'verified') return false;
+      if (featuredOnlyFilter && !p.tag) return false;
+
+      // 14. Smart Specs (Category smart filters)
+      for (const [specKey, specVal] of Object.entries(smartSpecs)) {
+        if (specVal) {
+          const valHash = ((p.id || 0) + specKey.length) % 3;
+          if (specKey === 'size') {
+            const sizeVal = (p.id % 3 === 0) ? 'm' : (p.id % 3 === 1) ? 'l' : 'xl';
+            if (sizeVal !== specVal) return false;
+          } else if (specKey === 'gender') {
+            const genderVal = (p.id % 3 === 0) ? 'men' : (p.id % 3 === 1) ? 'women' : 'unisex';
+            if (genderVal !== specVal) return false;
+          } else if (specKey === 'ram') {
+            const ramVal = (p.id % 3 === 0) ? '8gb' : (p.id % 3 === 1) ? '12gb' : '16gb';
+            if (ramVal !== specVal) return false;
+          } else if (specKey === 'storage') {
+            const storageVal = (p.id % 3 === 0) ? '128gb' : (p.id % 3 === 1) ? '256gb' : '512gb';
+            if (storageVal !== specVal) return false;
+          } else if (specKey === 'battery') {
+            const battVal = (p.id % 3 === 0) ? '4500-5000' : '5000plus';
+            if (battVal !== specVal) return false;
+          } else {
+            if (valHash !== 0) return false;
+          }
+        }
+      }
+
+      return true;
+    });
+  }, [brandProducts, searchFilter, selectedCategory, priceRangeV2, availabilityFilter, ratingFilter, votesFilter, warrantyFilter, deliveryFilter, discountFilter, couponFilter, expiryFilter, productLineFilter, featuredCollectionFilter, officialStoreFilter, countryFilter, dealsOnlyFilter, couponsOnlyFilter, verifiedOnlyFilter, inStockOnlyFilter, featuredOnlyFilter, smartSpecs, localClaimStatus]);
+
+  // Dynamic Sorting Engine
+  const sortedProducts = useMemo(() => {
+    const list = [...filteredProducts] as any[];
+    if (sortOption === 'price-asc') {
+      return list.sort((a, b) => {
+        const prA = typeof a.price === 'number' ? a.price : parseInt(String(a.price).replace(/[^0-9]/g, '')) || 0;
+        const prB = typeof b.price === 'number' ? b.price : parseInt(String(b.price).replace(/[^0-9]/g, '')) || 0;
+        return prA - prB;
+      });
+    }
+    if (sortOption === 'price-desc') {
+      return list.sort((a, b) => {
+        const prA = typeof a.price === 'number' ? a.price : parseInt(String(a.price).replace(/[^0-9]/g, '')) || 0;
+        const prB = typeof b.price === 'number' ? b.price : parseInt(String(b.price).replace(/[^0-9]/g, '')) || 0;
+        return prB - prA;
+      });
+    }
+    if (sortOption === 'rating-desc') {
+      return list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+    if (sortOption === 'discount-desc') {
+      return list.sort((a, b) => {
+        const discA = a.discount || 0;
+        const discB = b.discount || 0;
+        return discB - discA;
+      });
+    }
+    return list;
+  }, [filteredProducts, sortOption]);
+
+  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
+  const paginatedProducts = sortedProducts.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage);
 
   // Extract deals (with specific tags or Sale flags)
-  const filteredDeals = filteredProducts.filter((p: any) => 
+  const filteredDeals = sortedProducts.filter((p: any) => 
     p.tag === 'SALE' || p.tag === 'HOT' || p.tag === 'NEW' || p.discount
   );
   // Guarantee always active deals fallback
-  const finalDeals = filteredDeals.length > 0 ? filteredDeals : filteredProducts.slice(0, 3);
+  const finalDeals = filteredDeals.length > 0 ? filteredDeals : sortedProducts.slice(0, 3);
   
   // Counts
   const totalDealsFound = finalDeals.length;
-  const totalProductsFound = filteredProducts.length || brandProducts.length;
-
-  const handleCategoryToggle = (catName: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(catName) ? prev.filter(c => c !== catName) : [...prev, catName]
-    );
-  };
-
-  const handleProductTypeToggle = (type: string) => {
-    setSelectedProductTypes(prev => 
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-    );
-  };
+  const totalProductsFound = sortedProducts.length || brandProducts.length;
 
   const clearAllFilters = () => {
+    setSelectedCategory(null);
+    setPriceRangeV2([0, null]);
+    setCustomPriceInputs({ min: '', max: '' });
+    setAvailabilityFilter(null);
+    setRatingFilter(null);
+    setVotesFilter(null);
+    setWarrantyFilter(null);
+    setDeliveryFilter(null);
+    setDiscountFilter(null);
+    setCouponFilter(null);
+    setExpiryFilter(null);
+    setProductLineFilter(null);
+    setFeaturedCollectionFilter(null);
+    setOfficialStoreFilter(null);
+    setCountryFilter(null);
+    setDealsOnlyFilter(false);
+    setCouponsOnlyFilter(false);
+    setVerifiedOnlyFilter(false);
+    setInStockOnlyFilter(false);
+    setFeaturedOnlyFilter(false);
+    setSortOption('default');
+    setSmartSpecs({});
     setSearchFilter('');
     setCurrentSearchInput('');
-    setSelectedCategories([]);
-    setSelectedProductTypes([]);
-    setSelectedPriceLimit(100000);
-    setActiveFilter('Full Experience');
   };
 
-  const activeChips = [];
-  if (searchFilter) activeChips.push({ type: 'search', label: `Search: ${searchFilter}` });
-  selectedCategories.forEach(cat => activeChips.push({ type: 'category', label: cat }));
-  selectedProductTypes.forEach(type => activeChips.push({ type: 'type', label: type }));
-  if (selectedPriceLimit < 100000) activeChips.push({ type: 'price', label: `Under ৳${selectedPriceLimit.toLocaleString()}` });
+
 
   // ScrollSpy Active Section Detection
   useEffect(() => {
@@ -814,137 +978,122 @@ export function BrandDetailPage() {
                  </button>
                ))}
             </div>
-         </div>
-      </div>
-
-      {/* GLOBAL HORIZONTAL FILTERS BAR */}
-      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
-        <div className="max-w-[1440px] mx-auto px-6 w-full opacity-100">
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Brand Catalogue Filters</span>
-              {activeChips.length > 0 && (
-                <button 
-                  onClick={clearAllFilters}
-                  className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-650 transition-colors cursor-pointer"
-                >
-                  Clear All Filters
-                </button>
-              )}
-            </div>
-            
-            {/* Horizontal Scrolling wrapper for filters */}
-            <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
-              {/* Active Selection Chips inside filters bar */}
-              {activeChips.length > 0 && (
-                 <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 min-w-[200px] text-left">
-                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2]">Active Selection</h3>
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                       {activeChips.map((chip, i) => (
-                         <div 
-                           key={i} 
-                           className="flex items-center gap-1.5 px-2 bg-gray-50 border border-[#e8edf2] rounded text-[10px] font-semibold text-gray-600 uppercase tracking-wide hover:bg-gray-100 transition-all cursor-pointer"
-                           onClick={() => {
-                             if (chip.type === 'search') { setSearchFilter(''); setCurrentSearchInput(''); }
-                             else if (chip.type === 'category') handleCategoryToggle(chip.label);
-                             else if (chip.type === 'type') handleProductTypeToggle(chip.label);
-                             else if (chip.type === 'price') setSelectedPriceLimit(100000);
-                           }}
-                         >
-                           <span>{chip.label}</span>
-                           <X size={10} className="text-[#E8500A]" />
-                         </div>
-                       ))}
-                    </div>
-                 </div>
-              )}
-
-              {/* Category Filter */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-gray-100 shadow-sm relative overflow-hidden text-left min-w-[220px] flex-1">
-                 <div className="absolute top-0 right-0 w-2 h-full bg-[#E8500A]/5" />
-                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-50">
-                    <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">By Category</h3>
-                    <button onClick={() => setSelectedCategories([])} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Reset</button>
-                 </div>
-                 <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1 no-scrollbar pt-1">
-                   {finalCategoriesList.map((cat, i) => {
-                     const isChecked = selectedCategories.includes(cat.name);
-                     return (
-                       <label key={i} className="flex items-center justify-between group cursor-pointer select-none">
-                         <div className="flex items-center gap-2">
-                            <input 
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => handleCategoryToggle(cat.name)}
-                              className="rounded border-gray-200 text-[#E8500A] focus:ring-[#E8500A] w-3 h-3 cursor-pointer"
-                            />
-                            <span className={cn("text-[11px] font-bold transition-colors uppercase tracking-wide", isChecked ? "text-[#1A1D4E]" : "text-gray-400 group-hover:text-navy")}>
-                              {cat.name}
-                            </span>
-                         </div>
-                         <span className="text-[9px] font-mono text-gray-300 font-bold">({cat.count})</span>
-                       </label>
-                     );
-                   })}
-                 </div>
-              </div>
-
-              {/* Product Type Filter */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-gray-100 shadow-sm text-left min-w-[220px] flex-1">
-                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-50">
-                    <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Product Type</h3>
-                    <button onClick={() => setSelectedProductTypes([])} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Reset</button>
-                 </div>
-                 <div className="flex flex-wrap gap-1.5 pt-1 max-h-32 overflow-y-auto no-scrollbar">
-                   {productTypes.slice(0, 10).map((type, i) => {
-                     const isSelected = selectedProductTypes.includes(type);
-                     return (
-                       <button 
-                         key={i} 
-                         onClick={() => handleProductTypeToggle(type)}
-                         className={cn(
-                           "px-2.5 py-1 rounded text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer", 
-                           isSelected 
-                             ? "bg-[#E8500A] text-white shadow-sm" 
-                             : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                         )}
-                       >
-                          {type}
-                       </button>
-                     );
-                   })}
-                 </div>
-              </div>
-
-              {/* Price Limit Filter */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-gray-100 shadow-sm text-left min-w-[200px]">
-                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-50">
-                    <h3 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest">Price Limit</h3>
-                    <button onClick={() => setSelectedPriceLimit(100000)} className="text-[9px] font-black text-[#E8500A] uppercase cursor-pointer hover:underline">Clear</button>
-                 </div>
-                 <div className="space-y-3 pt-1">
-                    <input 
-                      type="range" 
-                      min="500" 
-                      max="100000" 
-                      step="500"
-                      value={selectedPriceLimit}
-                      onChange={(e) => setSelectedPriceLimit(parseInt(e.target.value))}
-                      className="w-full accent-[#E8500A] cursor-ew-resize"
-                    />
-                    <div className="flex items-center justify-between text-[11px] font-bold text-[#1A1D4E]">
-                       <span>৳500</span>
-                       <span className="bg-[#FFF0E8] text-[#E8500A] font-extrabold px-3 py-1 rounded text-[9px]">
-                          Max: ৳{selectedPriceLimit.toLocaleString()}
-                       </span>
-                    </div>
-                 </div>
-              </div>
-
-            </div>
           </div>
-        </div>
-      </div>
+       </div>
+
+      {/* QUICK FILTER BAR & ACTIVE FILTER CHIPS (V2 Architecture) */}
+      <QuickFilterBar
+        title="Brand Catalog Quick Specs"
+        onOpenFullFilters={() => {
+          const el = document.getElementById("brand-sidebar-filters");
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add("ring-2", "ring-orange-primary/50");
+            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
+          }
+        }}
+        filters={[
+          {
+            id: 'all-products',
+            label: 'All Products',
+            active: !dealsOnlyFilter && !couponsOnlyFilter && !verifiedOnlyFilter && !inStockOnlyFilter && !featuredOnlyFilter,
+            onClick: () => {
+              setDealsOnlyFilter(false);
+              setCouponsOnlyFilter(false);
+              setVerifiedOnlyFilter(false);
+              setInStockOnlyFilter(false);
+              setFeaturedOnlyFilter(false);
+            }
+          },
+          {
+            id: 'deals-only',
+            label: 'Deals',
+            active: dealsOnlyFilter,
+            onClick: () => setDealsOnlyFilter(!dealsOnlyFilter)
+          },
+          {
+            id: 'coupons-only',
+            label: 'Coupons Available',
+            active: couponsOnlyFilter,
+            onClick: () => setCouponsOnlyFilter(!couponsOnlyFilter)
+          },
+          {
+            id: 'verified',
+            label: 'Verified Store',
+            active: verifiedOnlyFilter,
+            onClick: () => setVerifiedOnlyFilter(!verifiedOnlyFilter)
+          },
+          {
+            id: 'in-stock',
+            label: 'In Stock',
+            active: inStockOnlyFilter,
+            onClick: () => setInStockOnlyFilter(!inStockOnlyFilter)
+          },
+          {
+            id: 'featured',
+            label: 'Featured',
+            active: featuredOnlyFilter,
+            onClick: () => setFeaturedOnlyFilter(!featuredOnlyFilter)
+          },
+          {
+            id: 'sort',
+            label: sortOption === 'default' ? 'Sort Selection' : `Sort: ${
+              sortOption === 'price-asc' ? '৳ Low to High' :
+              sortOption === 'price-desc' ? '৳ High to Low' :
+              sortOption === 'rating-desc' ? 'Top Rating' : 'Best Discount'
+            }`,
+            active: sortOption !== 'default',
+            onClick: () => {
+              // Cycle through sort options
+              setSortOption(prev => {
+                if (prev === 'default') return 'price-asc';
+                if (prev === 'price-asc') return 'price-desc';
+                if (prev === 'price-desc') return 'rating-desc';
+                if (prev === 'rating-desc') return 'discount-desc';
+                return 'default';
+              });
+            }
+          }
+        ]}
+      />
+
+      {/* ACTIVE FILTER CHIPS ROW */}
+      <ActiveFilterChips
+        chips={[
+          selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+          (priceRangeV2[0] > 0 || priceRangeV2[1] !== null) ? {
+            id: 'price',
+            label: `Price: ৳${priceRangeV2[0].toLocaleString()}–${priceRangeV2[1] !== null ? `৳${priceRangeV2[1].toLocaleString()}` : 'Max'}`,
+            onRemove: () => {
+              setCustomPriceInputs({ min: '', max: '' });
+              setPriceRangeV2([0, null]);
+            }
+          } : null,
+          availabilityFilter ? { id: 'availability', label: `Stock: ${availabilityFilter}`, onRemove: () => setAvailabilityFilter(null) } : null,
+          ratingFilter ? { id: 'rating', label: `Min Rating: ${ratingFilter}★`, onRemove: () => setRatingFilter(null) } : null,
+          votesFilter ? { id: 'votes', label: `Min Votes: ${votesFilter}♥`, onRemove: () => setVotesFilter(null) } : null,
+          warrantyFilter ? { id: 'warranty', label: `Warranty: ${warrantyFilter}`, onRemove: () => setWarrantyFilter(null) } : null,
+          deliveryFilter ? { id: 'delivery', label: `Delivery: ${deliveryFilter}`, onRemove: () => setDeliveryFilter(null) } : null,
+          discountFilter ? { id: 'discount', label: `Min Discount: ${discountFilter}%`, onRemove: () => setDiscountFilter(null) } : null,
+          couponFilter ? { id: 'coupon', label: `Coupons: ${couponFilter}`, onRemove: () => setCouponFilter(null) } : null,
+          expiryFilter ? { id: 'expiry', label: `Expiry: ${expiryFilter}`, onRemove: () => setExpiryFilter(null) } : null,
+          productLineFilter ? { id: 'product_line', label: `Line: ${productLineFilter}`, onRemove: () => setProductLineFilter(null) } : null,
+          featuredCollectionFilter ? { id: 'featured_collection', label: `Collection: ${featuredCollectionFilter}`, onRemove: () => setFeaturedCollectionFilter(null) } : null,
+          officialStoreFilter ? { id: 'official_store', label: `Official: ${officialStoreFilter}`, onRemove: () => setOfficialStoreFilter(null) } : null,
+          countryFilter ? { id: 'country', label: `Origin: ${countryFilter}`, onRemove: () => setCountryFilter(null) } : null,
+          dealsOnlyFilter ? { id: 'deals_only', label: 'Deals Only', onRemove: () => setDealsOnlyFilter(false) } : null,
+          couponsOnlyFilter ? { id: 'coupons_only', label: 'Coupons Only', onRemove: () => setCouponsOnlyFilter(false) } : null,
+          verifiedOnlyFilter ? { id: 'verified_only', label: 'Verified Only', onRemove: () => setVerifiedOnlyFilter(false) } : null,
+          inStockOnlyFilter ? { id: 'instock_only', label: 'In Stock Only', onRemove: () => setInStockOnlyFilter(false) } : null,
+          featuredOnlyFilter ? { id: 'featured_only', label: 'Featured Only', onRemove: () => setFeaturedOnlyFilter(false) } : null,
+          ...Object.entries(smartSpecs).map(([key, val]) => val ? {
+            id: `smart-${key}`,
+            label: `${key.toUpperCase()}: ${val}`,
+            onRemove: () => setSmartSpecs(prev => ({ ...prev, [key]: null as any }))
+          } : null)
+        ].filter(Boolean) as any[]}
+        onClearAll={clearAllFilters}
+      />
 
       {/* 4. Unified Scrollable Body Wrapper */}
       <div className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-16">
@@ -954,82 +1103,225 @@ export function BrandDetailPage() {
             
             {/* COLUMN 1: LEFT COLUMN */}
             <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
-               {/* Brand Statistics & Quick Actions Card */}
-               <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-[#1A1D4E] flex flex-col gap-4 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-xl pointer-events-none" />
-                  
-                  <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
-                     <h3 className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-wider">Brand Information</h3>
-                     <span className="text-[9px] font-bold text-[#E8500A] uppercase tracking-widest italic">{brand.category || 'Fashion'}</span>
-                  </div>
-
-                  <div className="space-y-3">
-                     <div className="flex justify-between items-center text-xs">
-                        <span className="text-gray-400 font-semibold uppercase text-[10px]">Verify State</span>
-                        <span className={cn(
-                          "font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded",
-                          localClaimStatus === 'verified' ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                        )}>
-                           {localClaimStatus}
-                        </span>
-                     </div>
-                     <div className="flex justify-between items-center text-xs">
-                        <span className="text-gray-400 font-semibold uppercase text-[10px]">Catalog Nodes</span>
-                        <span className="font-extrabold text-[#1A1D4E]">{totalProductsFound} items</span>
-                     </div>
-                     <div className="flex justify-between items-center text-xs">
-                        <span className="text-gray-400 font-semibold uppercase text-[10px]">Rating Score</span>
-                        <span className="font-extrabold text-green-accent flex items-center gap-1">
-                           <Star size={10} className="fill-current text-[#E8500A]" /> 92/100
-                        </span>
-                     </div>
-                     <div className="flex justify-between items-center text-xs">
-                        <span className="text-gray-400 font-semibold uppercase text-[10px]">Follower Base</span>
-                        <span className="font-extrabold text-[#1A1D4E]">50,052</span>
-                     </div>
-                  </div>
-
-                  <div className="pt-3 border-t border-[#e8edf2] flex flex-col gap-2">
-                     <button 
-                       onClick={() => {
-                          navigator.clipboard.writeText(window.location.href);
-                          toast.success("Page link copied to clipboard!");
-                       }}
-                       className="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-[#1A1D4E] font-semibold rounded-[5px] text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border-0 cursor-pointer"
-                     >
-                        <Share2 size={12} className="text-[#E8500A]" /> Share brand
-                     </button>
-                  </div>
-               </div>
-
-               {/* Sponsored Ad space block (Relocated here) */}
-               <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden flex flex-col items-center">
-                  <div className="relative z-10 text-center w-full flex flex-col items-center">
-                     <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#e8edf2] w-full px-1">
-                       <h3 className="text-[10px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
-                     </div>
-                     <div className="w-full aspect-[4/5] rounded-[5px] overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
-                        <img 
-                           src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&h=625&fit=crop" 
-                           alt="Sponsor AD" 
-                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
-                           referrerPolicy="no-referrer"
+               <div id="brand-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
+                  <FullSidebarFilterPanel
+                    title="Filter Catalog"
+                    onReset={clearAllFilters}
+                    advancedSection={
+                      <div className="flex flex-col gap-4">
+                        {/* Dynamic Smart Filters depending on the brand category */}
+                        <CategorySmartFilters
+                          category={brand.category || 'Fashion & Clothing'}
+                          activeSpecs={smartSpecs}
+                          onSpecChange={(specKey, val) => {
+                            setSmartSpecs(prev => ({ ...prev, [specKey]: val || '' }));
+                          }}
                         />
-                     </div>
-                     <h4 className="font-sans text-[11.5px] font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">AARONG HERITAGE</h4>
-                     <p className="text-[9.5px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Traditional Handcrafted Brand</p>
-                     
-                     <p className="text-[10px] text-gray-500 font-medium leading-relaxed mb-4 px-1 text-center font-sans">
-                        New Collection Available. Free Delivery overall Dhaka on purchase above BDT 1,500.
-                     </p>
-                     
-                     <Link 
-                       to="/brands"
-                       className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0 text-center select-none"
-                     >
-                        Shop Now
-                     </Link>
-                  </div>
+
+                        {/* Rendering Advanced Deal and Brand filters */}
+                        <UniversalFilterRenderer
+                          profile={{
+                            entity: 'products',
+                            filters: [
+                              {
+                                id: 'warranty',
+                                name: 'Warranty Scope',
+                                type: 'single_select',
+                                options: [
+                                  { value: 'all', label: 'Any Warranty' },
+                                  { value: 'standard', label: 'Standard Brand Warranty' },
+                                  { value: 'extended', label: 'Extended Merchant Warranty' },
+                                  { value: 'none', label: 'No Warranty' }
+                                ]
+                              },
+                              {
+                                id: 'delivery',
+                                name: 'Delivery Channel',
+                                type: 'single_select',
+                                options: [
+                                  { value: 'all', label: 'All Delivery options' },
+                                  { value: 'free', label: 'Free Delivery' },
+                                  { value: 'paid', label: 'Standard Delivery' },
+                                  { value: 'express', label: 'Express (Dhaka Metro)' }
+                                ]
+                              },
+                              {
+                                id: 'discount',
+                                name: 'Minimum Discount',
+                                type: 'single_select',
+                                options: [
+                                  { value: 'all', label: 'Any Discount' },
+                                  { value: '10', label: '10% Off or More' },
+                                  { value: '25', label: '25% Off or More' },
+                                  { value: '55', label: '55% Off or More' }
+                                ]
+                              },
+                              {
+                                id: 'coupon',
+                                name: 'Coupon Available',
+                                type: 'single_select',
+                                options: [
+                                  { value: 'all', label: 'Display All' },
+                                  { value: 'yes', label: 'Coupons Available' },
+                                  { value: 'no', label: 'No Coupons' }
+                                ]
+                              },
+                              {
+                                id: 'expiry',
+                                name: 'Deal Expiry Status',
+                                type: 'single_select',
+                                options: [
+                                  { value: 'all', label: 'All Statuses' },
+                                  { value: 'active', label: 'Active Deals Only' },
+                                  { value: 'expired', label: 'Expired Deals' }
+                                ]
+                              },
+                              {
+                                id: 'product_line',
+                                name: 'Product Line Type',
+                                type: 'single_select',
+                                options: [
+                                  { value: 'all', label: 'All Lines' },
+                                  { value: 'premium', label: 'Premium Class' },
+                                  { value: 'standard', label: 'Standard Class' },
+                                  { value: 'budget', label: 'Budget/Crucial' }
+                                ]
+                              },
+                              {
+                                id: 'featured_collection',
+                                name: 'Featured Collections',
+                                type: 'single_select',
+                                options: [
+                                  { value: 'all', label: 'All Collections' },
+                                  { value: 'summer', label: 'Summer Air' },
+                                  { value: 'winter', label: 'Winter Cozy' },
+                                  { value: 'festive', label: 'Festive / Eid Special' }
+                                ]
+                              },
+                              {
+                                id: 'official_store',
+                                name: 'Official Outlet Sourced',
+                                type: 'single_select',
+                                options: [
+                                  { value: 'all', label: 'All Stores' },
+                                  { value: 'yes', label: 'Official Store Only' },
+                                  { value: 'no', label: 'Third-party Retailer' }
+                                ]
+                              },
+                              {
+                                id: 'country',
+                                name: 'Country of Origin',
+                                type: 'single_select',
+                                options: [
+                                  { value: 'all', label: 'All Countries' },
+                                  { value: 'Bangladesh', label: 'Bangladesh' },
+                                  { value: 'China', label: 'China' },
+                                  { value: 'Vietnam', label: 'Vietnam' },
+                                  { value: 'India', label: 'India' }
+                                ]
+                              }
+                            ]
+                          }}
+                          activeFilters={{
+                            warranty: warrantyFilter,
+                            delivery: deliveryFilter,
+                            discount: discountFilter,
+                            coupon: couponFilter,
+                            expiry: expiryFilter,
+                            product_line: productLineFilter,
+                            featured_collection: featuredCollectionFilter,
+                            official_store: officialStoreFilter,
+                            country: countryFilter
+                          }}
+                          onFilterChange={(filterId, val) => {
+                            const cleanVal = val === 'all' ? null : val;
+                            if (filterId === 'warranty') setWarrantyFilter(cleanVal);
+                            if (filterId === 'delivery') setDeliveryFilter(cleanVal);
+                            if (filterId === 'discount') setDiscountFilter(cleanVal);
+                            if (filterId === 'coupon') setCouponFilter(cleanVal);
+                            if (filterId === 'expiry') setExpiryFilter(cleanVal);
+                            if (filterId === 'product_line') setProductLineFilter(cleanVal);
+                            if (filterId === 'featured_collection') setFeaturedCollectionFilter(cleanVal);
+                            if (filterId === 'official_store') setOfficialStoreFilter(cleanVal);
+                            if (filterId === 'country') setCountryFilter(cleanVal);
+                          }}
+                        />
+                      </div>
+                    }
+                  >
+                     <UniversalFilterRenderer
+                       profile={{
+                         entity: 'products',
+                         filters: [
+                           {
+                             id: 'price_custom',
+                             name: 'Price Scope (BDT)',
+                             type: 'price_custom',
+                           },
+                           {
+                             id: 'category',
+                             name: 'Categories',
+                             type: 'single_select',
+                             options: [
+                               { value: 'all', label: 'All Categories' },
+                               ...finalCategoriesList.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
+                             ]
+                           },
+                           {
+                             id: 'availability',
+                             name: 'Availability',
+                             type: 'single_select',
+                             options: [
+                               { value: 'all', label: 'All Items' },
+                               { value: 'in-stock', label: 'In Stock' },
+                               { value: 'out-of-stock', label: 'Out of Stock' }
+                             ]
+                           },
+                           {
+                             id: 'rating',
+                             name: 'Average Rating',
+                             type: 'single_select',
+                             options: [
+                               { value: 'all', label: 'All Ratings' },
+                               { value: '4.8', label: '4.8★ & Up' },
+                               { value: '4.5', label: '4.5★ & Up' },
+                               { value: '4.0', label: '4.0★ & Up' }
+                             ]
+                           },
+                           {
+                             id: 'votes',
+                             name: 'Audience Votes',
+                             type: 'single_select',
+                             options: [
+                               { value: 'all', label: 'Any Vote Count' },
+                               { value: '500', label: '500+ Votes' },
+                               { value: '300', label: '300+ Votes' },
+                               { value: '100', label: '100+ Votes' }
+                             ]
+                           }
+                         ]
+                       }}
+                       activeFilters={{
+                         price_custom: true,
+                         category: selectedCategory,
+                         availability: availabilityFilter,
+                         rating: ratingFilter,
+                         votes: votesFilter
+                       }}
+                       onFilterChange={(filterId, val) => {
+                         const cleanVal = val === 'all' ? null : val;
+                         if (filterId === 'category') setSelectedCategory(cleanVal);
+                         if (filterId === 'availability') setAvailabilityFilter(cleanVal);
+                         if (filterId === 'rating') setRatingFilter(cleanVal);
+                         if (filterId === 'votes') setVotesFilter(cleanVal);
+                       }}
+                       customPriceInputs={customPriceInputs}
+                       setCustomPriceInputs={setCustomPriceInputs}
+                       onCustomPriceApply={(min, max) => {
+                         setPriceRangeV2([min, max]);
+                       }}
+                     />
+                  </FullSidebarFilterPanel>
                </div>
             </aside>
 

@@ -11,10 +11,123 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
 import { CATEGORIES } from '../constants';
 import { toast } from 'react-hot-toast';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, FilterProfile } from '../components/FilterEngine';
+
+const FAVORITES_PAGE_FILTER_PROFILE: FilterProfile = {
+  entity: 'products',
+  filters: [
+    {
+      id: 'price_custom',
+      name: 'Price Range (BDT)',
+      type: 'price_custom'
+    },
+    {
+      id: 'category',
+      name: 'Category List',
+      type: 'single_select',
+      options: [
+        { value: 'all', label: 'All Categories' },
+        { value: 'Mobile & Phones', label: 'Mobiles & Phones' },
+        { value: 'Tech & Electronics', label: 'Tech & Electronics' },
+        { value: 'Jewelry & Accessories', label: 'Jewelry & Accessories' },
+        { value: 'Fashion & Lifestyle', label: 'Fashion & Lifestyle' },
+        { value: 'Beauty', label: 'Beauty & Skincare' },
+        { value: 'Home & Living', label: 'Home & Living' }
+      ]
+    },
+    {
+      id: 'brand',
+      name: 'Brands',
+      type: 'single_select',
+      options: [
+        { value: 'all', label: 'All Brands' },
+        { value: 'Sony', label: 'Sony' },
+        { value: 'Samsung', label: 'Samsung' },
+        { value: 'Bata', label: 'Bata' },
+        { value: 'Apex', label: 'Apex' },
+        { value: 'Aarong', label: 'Aarong' },
+        { value: 'Sailor', label: 'Sailor' }
+      ]
+    },
+    {
+      id: 'rating',
+      name: 'Customer Rating',
+      type: 'single_select',
+      options: [
+        { value: 'all', label: 'All Ratings' },
+        { value: '4.8', label: '4.8 Stars & Up' },
+        { value: '4.5', label: '4.5 Stars & Up' },
+        { value: '4.0', label: '4.0 Stars & Up' }
+      ]
+    },
+    {
+      id: 'votes',
+      name: 'Votes (Most Loved)',
+      type: 'single_select',
+      options: [
+        { value: 'all', label: 'Any Vote Count' },
+        { value: '500', label: '500+ Saved Votes' },
+        { value: '300', label: '300+ Saved Votes' },
+        { value: '100', label: '100+ Saved Votes' }
+      ]
+    },
+    {
+      id: 'availability',
+      name: 'Stock Status',
+      type: 'single_select',
+      options: [
+        { value: 'all', label: 'All Items' },
+        { value: 'in-stock', label: 'In Stock Only' },
+        { value: 'out-of-stock', label: 'Out of Stock' }
+      ]
+    },
+    {
+      id: 'verified',
+      name: 'Verified Seller Status',
+      type: 'single_select',
+      options: [
+        { value: 'all', label: 'All Statuses' },
+        { value: 'verified', label: 'Verified Seller Only' },
+        { value: 'community', label: 'Community Vetted Only' }
+      ]
+    },
+    {
+      id: 'delivery',
+      name: 'Delivery Channel',
+      type: 'single_select',
+      options: [
+        { value: 'all', label: 'All Deliveries' },
+        { value: 'free', label: 'Free Delivery Only' },
+        { value: 'express', label: 'Express Dhaka Delivery' }
+      ]
+    },
+    {
+      id: 'discount',
+      name: 'Super Savings',
+      type: 'single_select',
+      options: [
+        { value: 'all', label: 'Any Discount' },
+        { value: '10', label: '10% OFF & Up' },
+        { value: '25', label: '25% OFF & Up' },
+        { value: '40', label: '40% OFF & Up' }
+      ]
+    },
+    {
+      id: 'country',
+      name: 'Manufacturer Country',
+      type: 'single_select',
+      options: [
+        { value: 'all', label: 'All Origins' },
+        { value: 'local', label: 'Made in Bangladesh 🇧🇩' },
+        { value: 'imported', label: 'International Imported 🌐' }
+      ]
+    }
+  ]
+};
 
 export function CustomerFavoritePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, mode, addToCart, isLoggedIn, setIsLoggedIn } = useGlobalState();
+  const { allProducts, allBrands, mode, addToCart, isLoggedIn, setIsLoggedIn, getBrandClaimStatus } = useGlobalState();
 
   // Scroll to top on mount
   useEffect(() => {
@@ -24,9 +137,72 @@ export function CustomerFavoritePage() {
   // PAGE STATES
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Products'); // Sticky categories
-  const [trendingFilter, setTrendingFilter] = useState('🔥 Trending Today'); // Left sidebar Section 1
-  const [selectedSource, setSelectedSource] = useState<string | null>(null); // Left sidebar Section 3
-  const [priceRange, setPriceRange] = useState<string | null>(null); // Left sidebar Section 4
+  const [trendingFilter, setTrendingFilter] = useState('🔥 Trending Today'); // Keep for backward compatibility or quick filter sync
+
+  // NEW V2 STATE VARIABLES
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [customPriceInputs, setCustomPriceInputs] = useState<{ min: string; max: string }>({ min: '', max: '' });
+  const [priceRangeV2, setPriceRangeV2] = useState<[number, number | null]>([0, null]);
+  const [ratingFilter, setRatingFilter] = useState<string | null>(null);
+  const [votesFilter, setVotesFilter] = useState<string | null>(null);
+  const [availabilityFilter, setAvailabilityFilter] = useState<string | null>(null);
+  const [verifiedBrandFilter, setVerifiedBrandFilter] = useState<string | null>(null);
+  const [deliveryFilter, setDeliveryFilter] = useState<string | null>(null);
+  const [discountFilter, setDiscountFilter] = useState<string | null>(null);
+  const [countryFilter, setCountryFilter] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState<string>('default'); // default, rating-desc, price-asc, price-desc, views-desc
+
+  // Restore state from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('choosify_favorites_filters');
+      if (saved) {
+        const filters = JSON.parse(saved);
+        if (filters.selectedCategory) setSelectedCategory(filters.selectedCategory);
+        if (filters.selectedBrand) setSelectedBrand(filters.selectedBrand);
+        if (filters.customPriceInputs) setCustomPriceInputs(filters.customPriceInputs);
+        if (filters.priceRangeV2) setPriceRangeV2(filters.priceRangeV2);
+        if (filters.ratingFilter) setRatingFilter(filters.ratingFilter);
+        if (filters.votesFilter) setVotesFilter(filters.votesFilter);
+        if (filters.availabilityFilter) setAvailabilityFilter(filters.availabilityFilter);
+        if (filters.verifiedBrandFilter) setVerifiedBrandFilter(filters.verifiedBrandFilter);
+        if (filters.deliveryFilter) setDeliveryFilter(filters.deliveryFilter);
+        if (filters.discountFilter) setDiscountFilter(filters.discountFilter);
+        if (filters.countryFilter) setCountryFilter(filters.countryFilter);
+        if (filters.trendingFilter) setTrendingFilter(filters.trendingFilter);
+        if (filters.sortOption) setSortOption(filters.sortOption);
+        if (filters.activeTab) setActiveTab(filters.activeTab);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  // Save state on updates
+  useEffect(() => {
+    const filters = {
+      selectedCategory,
+      selectedBrand,
+      customPriceInputs,
+      priceRangeV2,
+      ratingFilter,
+      votesFilter,
+      availabilityFilter,
+      verifiedBrandFilter,
+      deliveryFilter,
+      discountFilter,
+      countryFilter,
+      trendingFilter,
+      sortOption,
+      activeTab
+    };
+    sessionStorage.setItem('choosify_favorites_filters', JSON.stringify(filters));
+  }, [
+    selectedCategory, selectedBrand, customPriceInputs, priceRangeV2, 
+    ratingFilter, votesFilter, availabilityFilter, verifiedBrandFilter, 
+    deliveryFilter, discountFilter, countryFilter, trendingFilter, sortOption, activeTab
+  ]);
   
   // Submit modal state
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -171,11 +347,11 @@ export function CustomerFavoritePage() {
     return viralProductsList.find(p => p.id === 2 || p.id === 1002) || viralProductsList[0];
   }, [viralProductsList]);
 
-  // CORE FILTER ENGINE: CENTRES MAIN LIST ITEMS
+  // CORE FILTER ENGINE: CENTRES MAIN LIST ITEMS IN V2 ARCHITECTURE
   const filteredProducts = useMemo(() => {
     let result = [...viralProductsList];
 
-    // 1. Sticky Category Tab Filtration
+    // 1. Sticky Category Tab Filtration (syncing with top navigation)
     const targetCategories = mapTabToCategory(activeTab);
     if (targetCategories) {
       result = result.filter(p => p.category && targetCategories.includes(p.category));
@@ -199,7 +375,7 @@ export function CustomerFavoritePage() {
       }
     }
 
-    // 2. Search Query filter
+    // 2. Search Query filter (matches original query)
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(p => 
@@ -209,38 +385,129 @@ export function CustomerFavoritePage() {
       );
     }
 
-    // 3. Left Sidebar Section 1 (Trending speed filters)
+    // 3. Category V2 Filter
+    if (selectedCategory) {
+      result = result.filter(p => p.category === selectedCategory);
+    }
+
+    // 4. Brand V2 Filter
+    if (selectedBrand) {
+      result = result.filter(p => p.brand?.toLowerCase() === selectedBrand.toLowerCase());
+    }
+
+    // 5. Custom Price V2 Filter
+    if (priceRangeV2[0] > 0 || priceRangeV2[1] !== null) {
+      const [min, max] = priceRangeV2;
+      result = result.filter(p => {
+        const val = p.price;
+        if (val < min) return false;
+        if (max !== null && val > max) return false;
+        return true;
+      });
+    }
+
+    // 6. Rating V2 Filter (rating score minimum)
+    if (ratingFilter) {
+      const minRate = parseFloat(ratingFilter);
+      result = result.filter(p => {
+        const rate = p.rating || 4.5; // fallback
+        return rate >= minRate;
+      });
+    }
+
+    // 7. Votes V2 Filter (heartsCount minimum)
+    if (votesFilter) {
+      const minVotes = parseInt(votesFilter, 10);
+      result = result.filter(p => p.heartsCount >= minVotes);
+    }
+
+    // 8. Availability V2 Filter
+    if (availabilityFilter) {
+      if (availabilityFilter === 'in-stock') {
+        result = result.filter(p => p.inStock !== false && p.id % 12 !== 0); // dynamic simulation/checking
+      } else if (availabilityFilter === 'out-of-stock') {
+        result = result.filter(p => p.inStock === false || p.id % 12 === 0);
+      }
+    }
+
+    // 9. Verified Seller Filter (checks brand claims status or verified tag)
+    if (verifiedBrandFilter) {
+      result = result.filter(p => {
+        const status = getBrandClaimStatus(p.brand);
+        if (verifiedBrandFilter === 'verified') return status === 'verified';
+        if (verifiedBrandFilter === 'community') return status === 'community' || status === 'pending';
+        return true;
+      });
+    }
+
+    // 10. Delivery Channel V2 Filter
+    if (deliveryFilter) {
+      if (deliveryFilter === 'free') {
+        result = result.filter(p => p.id % 3 === 0); // simulated free shipping
+      } else if (deliveryFilter === 'express') {
+        result = result.filter(p => p.id % 5 === 0); // simulated express shipping
+      }
+    }
+
+    // 11. Discount V2 Filter
+    if (discountFilter) {
+      const minDisc = parseInt(discountFilter, 10);
+      result = result.filter(p => {
+        // extract discount percentage from discount string e.g. "23% OFF"
+        const pctStr = (p.discount || '0%').replace(/[^0-9]/g, '');
+        const pct = parseInt(pctStr, 10) || 0;
+        return pct >= minDisc;
+      });
+    }
+
+    // 12. Country V2 Filter
+    if (countryFilter) {
+      if (countryFilter === 'local') {
+        const localBrands = ['aarong', 'sailor', 'dhaka heritage weaves', 'bata bangladesh', 'apex'];
+        result = result.filter(p => {
+          const br = (p.brand || '').toLowerCase();
+          return localBrands.some(lb => br.includes(lb)) || p.id % 2 === 0;
+        });
+      } else if (countryFilter === 'imported') {
+        const localBrands = ['aarong', 'sailor', 'dhaka heritage weaves', 'bata bangladesh', 'apex'];
+        result = result.filter(p => {
+          const br = (p.brand || '').toLowerCase();
+          return !localBrands.some(lb => br.includes(lb)) && p.id % 2 !== 0;
+        });
+      }
+    }
+
+    // 13. Dynamic Trending and Quick Sweeps Filter (Trending today, Trending this week, Rising, Most Loved, Staff Picks, etc.)
     if (trendingFilter === '❤️ Most Loved') {
       result.sort((a, b) => b.heartsCount - a.heartsCount);
     } else if (trendingFilter === '🚀 Rising Products') {
       result.sort((a, b) => b.viewsThisWeek - a.viewsThisWeek);
     } else if (trendingFilter === '🛒 Most Purchased') {
-      // Shuffled premium values
       result.sort((a, b) => b.id - a.id);
     } else if (trendingFilter === '⭐ Staff Picks') {
       result = result.filter(p => p.tag === '⭐ Staff Pick');
+    } else {
+      // Default trending sorting
+      result.sort((a, b) => b.viralScore - a.viralScore);
     }
 
-    // 4. Left Sidebar Section 3 (Product Source Filter)
-    if (selectedSource) {
-      result = result.filter(p => p.source === selectedSource);
-    }
-
-    // 5. Left Sidebar Section 4 (Price limits)
-    if (priceRange) {
-      result = result.filter(p => {
-        const pVal = p.price;
-        if (priceRange === 'under-1000') return pVal < 1000;
-        if (priceRange === '1000-5000') return pVal >= 1000 && pVal <= 5000;
-        if (priceRange === '5000-10000') return pVal >= 5000 && pVal <= 10000;
-        if (priceRange === '10000-25000') return pVal >= 10000 && pVal <= 25000;
-        if (priceRange === '25000-plus') return pVal >= 25000;
-        return true;
-      });
+    // 14. Sort Options (V2 specification)
+    if (sortOption === 'rating-desc') {
+      result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortOption === 'price-asc') {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortOption === 'price-desc') {
+      result.sort((a, b) => b.price - a.price);
+    } else if (sortOption === 'views-desc') {
+      result.sort((a, b) => b.viewsThisWeek - a.viewsThisWeek);
     }
 
     return result;
-  }, [viralProductsList, activeTab, searchQuery, trendingFilter, selectedSource, priceRange]);
+  }, [
+    viralProductsList, activeTab, searchQuery, selectedCategory, selectedBrand, 
+    priceRangeV2, ratingFilter, votesFilter, availabilityFilter, verifiedBrandFilter, 
+    deliveryFilter, discountFilter, countryFilter, trendingFilter, sortOption, getBrandClaimStatus
+  ]);
 
   // FEATURED: Top 3 items based on views count in filtered list (using `ProductCard` with variant="featured")
   const featuredViralProducts = useMemo(() => {
@@ -393,190 +660,113 @@ export function CustomerFavoritePage() {
       </div>
 
       {/* ================================================= */}
-      {/* GLOBAL HORIZONTAL FILTERS BAR (directly below sticky nav) */}
+      {/* LAYER 1: QUICK FILTER BAR */}
       {/* ================================================= */}
-      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
-        <div className="max-w-[1440px] mx-auto px-6 w-full">
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Customer Favorites Filter Suite</span>
-              {(trendingFilter !== 'All' || selectedSource || priceRange) && (
-                <button 
-                  onClick={() => {
-                    setTrendingFilter('All');
-                    setSelectedSource(null);
-                    setPriceRange(null);
-                  }}
-                  className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-655 transition-colors cursor-pointer"
-                >
-                  Reset All Filters
-                </button>
-              )}
-            </div>
+      <QuickFilterBar
+        title="Favorites Quick Specs"
+        onOpenFullFilters={() => {
+          const el = document.getElementById("favorites-sidebar-filters");
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add("ring-2", "ring-orange-primary/50");
+            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
+          }
+        }}
+        filters={[
+          {
+            id: 'trending-today',
+            label: '🔥 Trending Today',
+            active: trendingFilter === '🔥 Trending Today',
+            onClick: () => setTrendingFilter(trendingFilter === '🔥 Trending Today' ? 'All' : '🔥 Trending Today')
+          },
+          {
+            id: 'most-loved',
+            label: '❤️ Most Loved',
+            active: trendingFilter === '❤️ Most Loved',
+            onClick: () => setTrendingFilter(trendingFilter === '❤️ Most Loved' ? 'All' : '❤️ Most Loved')
+          },
+          {
+            id: 'highest-rated',
+            label: '⭐ Highest Rated (4.8+)',
+            active: ratingFilter === '4.8',
+            onClick: () => setRatingFilter(ratingFilter === '4.8' ? null : '4.8')
+          },
+          {
+            id: 'recently-added',
+            label: '⏰ Recently Added',
+            active: sortOption === 'views-desc',
+            onClick: () => setSortOption(sortOption === 'views-desc' ? 'default' : 'views-desc')
+          },
+          {
+            id: 'verified-brands',
+            label: '✓ Verified Brands',
+            active: verifiedBrandFilter === 'verified',
+            onClick: () => setVerifiedBrandFilter(verifiedBrandFilter === 'verified' ? null : 'verified')
+          },
+          {
+            id: 'shop-now',
+            label: '🛒 Shop Now (In Stock)',
+            active: availabilityFilter === 'in-stock',
+            onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? null : 'in-stock')
+          },
+          {
+            id: 'cycle-sort',
+            label: sortOption === 'default' ? 'Sort' : `Sort: ${sortOption === 'price-asc' ? '৳ Low' : sortOption === 'price-desc' ? '৳ High' : sortOption === 'rating-desc' ? 'Rating' : 'Views'}`,
+            active: sortOption !== 'default',
+            onClick: () => {
+              const next: Record<string, string> = {
+                'default': 'price-asc',
+                'price-asc': 'price-desc',
+                'price-desc': 'rating-desc',
+                'rating-desc': 'default'
+              };
+              setSortOption(next[sortOption] || 'default');
+            }
+          }
+        ]}
+      />
 
-            {/* Horizontal Scrolling wrapper for filters */}
-            <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
-
-              {/* SECTION 1: TRENDING FILTERS */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left flex-1 min-w-[240px]">
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e8edf2]">
-                  <h3 className="text-[11px] font-bold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5">
-                    <Flame size={14} className="text-orange-primary shrink-0" /> Trending Sweeps
-                  </h3>
-                  {trendingFilter !== 'All' && (
-                    <span 
-                      onClick={() => setTrendingFilter('All')}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-155"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1 max-h-36 overflow-y-auto no-scrollbar">
-                  {[
-                    '🔥 Trending Today',
-                    '🔥 Trending This Week',
-                    '🔥 Trending This Month',
-                    '❤️ Most Loved',
-                    '🛒 Most Purchased',
-                    '⭐ Staff Picks',
-                    '🚀 Rising Products'
-                  ].map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => {
-                        setTrendingFilter(filter);
-                        toast.success(`Active trending sweep: ${filter}`);
-                      }}
-                      className={cn(
-                        "w-full px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between",
-                        trendingFilter === filter 
-                          ? "bg-orange-primary/10 text-[#E8500A] font-semibold" 
-                          : "text-gray-500 hover:text-navy hover:bg-gray-50"
-                      )}
-                    >
-                      <span>{filter}</span>
-                      {trendingFilter === filter && <Check size={11} className="text-orange-primary stroke-[3px]" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* SECTION 2: CATEGORIES ACCORDION / BUTTON QUICK GRIDS */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left flex-1 min-w-[245px]">
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e8edf2]">
-                  <h3 className="text-[11px] font-bold text-[#8a9bb0] uppercase tracking-wider">
-                    Categories
-                  </h3>
-                </div>
-                <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto no-scrollbar">
-                  {CATEGORIES.slice(0, 8).map((cat) => {
-                    const isCuratedCat = activeTab !== 'All Products' && mapTabToCategory(activeTab)?.includes(cat.name);
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => {
-                          setActiveTab(cat.name === 'Fashion & Lifestyle' ? 'Clothing' : cat.name === 'Jewelry & Accessories' ? 'Jewelry' : cat.name === 'Mobile & Phones' ? 'Gadgets' : 'All Products');
-                        }}
-                        className={cn(
-                          "p-1.5 rounded border text-[9px] font-semibold uppercase text-center flex flex-col items-center justify-center gap-1 transition-colors border-[#e8edf2]",
-                          isCuratedCat
-                            ? "border-[#E8500A] bg-orange-primary/5 text-orange-primary"
-                            : "border-gray-100 hover:border-gray-250 text-navy"
-                        )}
-                      >
-                        <span className="font-semibold truncate w-full text-center">{cat.name.split(' ')[0]}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* SECTION 3: PRODUCT SOURCE */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left min-w-[200px]">
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e8edf2]">
-                  <h3 className="text-[11px] font-bold text-[#8a9bb0] uppercase tracking-wider">
-                    Source
-                  </h3>
-                  {selectedSource && (
-                    <span 
-                      onClick={() => setSelectedSource(null)}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-155"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  {[
-                    '⭐ Choosify Picks',
-                    '❤️ Customer Favorites',
-                    '👥 Community Submitted',
-                    '🏆 Editor Choice'
-                  ].map((src) => (
-                    <button
-                      key={src}
-                      onClick={() => {
-                        setSelectedSource(selectedSource === src ? null : src);
-                      }}
-                      className={cn(
-                        "w-full px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between",
-                        selectedSource === src 
-                          ? "bg-[#E8500A] text-white font-semibold shadow-sm" 
-                          : "text-gray-500 hover:text-navy hover:bg-gray-50"
-                      )}
-                    >
-                      <span className="truncate">{src}</span>
-                      {selectedSource === src && <Check size={11} className="text-orange-primary stroke-[3px]" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* SECTION 4: PRICE FILTER */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left min-w-[210px] flex-1">
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#e8edf2]">
-                  <h3 className="text-[11px] font-bold text-[#8a9bb0] uppercase tracking-wider">
-                    Price Range
-                  </h3>
-                  {priceRange && (
-                    <span 
-                      onClick={() => setPriceRange(null)}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-155"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 gap-1 max-h-36 overflow-y-auto no-scrollbar">
-                  {[
-                    { label: 'Under BDT 1,000', value: 'under-1000' },
-                    { label: 'BDT 1,000–5,000', value: '1000-5000' },
-                    { label: 'BDT 5,000–10,000', value: '5000-10000' },
-                    { label: 'BDT 10,000–25,000', value: '10000-25000' },
-                    { label: 'BDT 25,000+', value: '25000-plus' }
-                  ].map((priceItem) => (
-                    <button
-                      key={priceItem.value}
-                      onClick={() => setPriceRange(priceRange === priceItem.value ? null : priceItem.value)}
-                      className={cn(
-                        "w-full px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wide text-left transition-all flex items-center justify-between border border-[#e8edf2]",
-                        priceRange === priceItem.value 
-                          ? "border-[#E8500A] bg-orange-primary/5 text-orange-primary font-semibold" 
-                          : "border-gray-50 text-gray-500 hover:text-navy hover:border-gray-150"
-                      )}
-                    >
-                      <span>{priceItem.label}</span>
-                      {priceRange === priceItem.value && <div className="w-1.5 h-1.5 bg-orange-primary rounded-full" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ACTIVE FILTER CHIPS ROW */}
+      <ActiveFilterChips
+        chips={[
+          selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+          selectedBrand ? { id: 'brand', label: `Brand: ${selectedBrand}`, onRemove: () => setSelectedBrand(null) } : null,
+          (priceRangeV2[0] > 0 || priceRangeV2[1] !== null) ? {
+            id: 'price',
+            label: `Price: ৳${priceRangeV2[0]}–${priceRangeV2[1] !== null ? `৳${priceRangeV2[1]}` : 'Max'}`,
+            onRemove: () => {
+              setCustomPriceInputs({ min: '', max: '' });
+              setPriceRangeV2([0, null]);
+            }
+          } : null,
+          ratingFilter ? { id: 'rating', label: `Min Rating: ${ratingFilter}★`, onRemove: () => setRatingFilter(null) } : null,
+          votesFilter ? { id: 'votes', label: `Min Votes: ${votesFilter}♥`, onRemove: () => setVotesFilter(null) } : null,
+          availabilityFilter ? { id: 'availability', label: `Stock: ${availabilityFilter}`, onRemove: () => setAvailabilityFilter(null) } : null,
+          verifiedBrandFilter ? { id: 'verified', label: `Seller verification: ${verifiedBrandFilter}`, onRemove: () => setVerifiedBrandFilter(null) } : null,
+          deliveryFilter ? { id: 'delivery', label: `Delivery: ${deliveryFilter}`, onRemove: () => setDeliveryFilter(null) } : null,
+          discountFilter ? { id: 'discount', label: `Min Discount: ${discountFilter}%`, onRemove: () => setDiscountFilter(null) } : null,
+          countryFilter ? { id: 'country', label: `Origin: ${countryFilter}`, onRemove: () => setCountryFilter(null) } : null,
+          (trendingFilter !== '🔥 Trending Today' && trendingFilter !== 'All') ? { id: 'trending', label: `Trend: ${trendingFilter}`, onRemove: () => setTrendingFilter('🔥 Trending Today') } : null,
+          sortOption !== 'default' ? { id: 'sort', label: `Sorted: ${sortOption}`, onRemove: () => setSortOption('default') } : null
+        ].filter(Boolean) as any[]}
+        onClearAll={() => {
+          setSelectedCategory(null);
+          setSelectedBrand(null);
+          setCustomPriceInputs({ min: '', max: '' });
+          setPriceRangeV2([0, null]);
+          setRatingFilter(null);
+          setVotesFilter(null);
+          setAvailabilityFilter(null);
+          setVerifiedBrandFilter(null);
+          setDeliveryFilter(null);
+          setDiscountFilter(null);
+          setCountryFilter(null);
+          setTrendingFilter('🔥 Trending Today');
+          setSortOption('default');
+          setSearchQuery('');
+          setActiveTab('All Products');
+        }}
+      />
 
       {/* ================================================= */}
       {/* 4. MAIN THREE-COLUMN CONTAINER (Desktop 3-columns) */}
@@ -587,7 +777,77 @@ export function CustomerFavoritePage() {
           {/* ================================================= */}
           {/* A. LEFT SIDEBAR (STICKY) */}
           {/* ================================================= */}
-          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-44 pb-8 space-y-4">
+          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-8 space-y-4 text-left animate-fade-in flex-shrink-0">
+            
+            {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
+            <div id="favorites-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
+              <FullSidebarFilterPanel
+                title="Filter Favorites"
+                onReset={() => {
+                  setSelectedCategory(null);
+                  setSelectedBrand(null);
+                  setCustomPriceInputs({ min: '', max: '' });
+                  setPriceRangeV2([0, null]);
+                  setRatingFilter(null);
+                  setVotesFilter(null);
+                  setAvailabilityFilter(null);
+                  setVerifiedBrandFilter(null);
+                  setDeliveryFilter(null);
+                  setDiscountFilter(null);
+                  setCountryFilter(null);
+                  setTrendingFilter('🔥 Trending Today');
+                  setSortOption('default');
+                }}
+                advancedSection={
+                  <UniversalFilterRenderer
+                    profile={{
+                      entity: 'products',
+                      filters: FAVORITES_PAGE_FILTER_PROFILE.filters.slice(5) // Availability, Verified Seller, Delivery, Discount, Country
+                    }}
+                    activeFilters={{
+                      availability: availabilityFilter,
+                      verified: verifiedBrandFilter,
+                      delivery: deliveryFilter,
+                      discount: discountFilter,
+                      country: countryFilter
+                    }}
+                    onFilterChange={(filterId, value) => {
+                      if (filterId === 'availability') setAvailabilityFilter(value === 'all' ? null : value);
+                      if (filterId === 'verified') setVerifiedBrandFilter(value === 'all' ? null : value);
+                      if (filterId === 'delivery') setDeliveryFilter(value === 'all' ? null : value);
+                      if (filterId === 'discount') setDiscountFilter(value === 'all' ? null : value);
+                      if (filterId === 'country') setCountryFilter(value === 'all' ? null : value);
+                    }}
+                  />
+                }
+              >
+                <UniversalFilterRenderer
+                  profile={{
+                    entity: 'products',
+                    filters: FAVORITES_PAGE_FILTER_PROFILE.filters.slice(0, 5) // Price Scope, Categories, Brands, Customer Rating, Votes
+                  }}
+                  activeFilters={{
+                    price_custom: true, // Custom priced elements
+                    category: selectedCategory,
+                    brand: selectedBrand,
+                    rating: ratingFilter,
+                    votes: votesFilter
+                  }}
+                  onFilterChange={(filterId, value) => {
+                    if (filterId === 'category') setSelectedCategory(value === 'all' ? null : value);
+                    if (filterId === 'brand') setSelectedBrand(value === 'all' ? null : value);
+                    if (filterId === 'rating') setRatingFilter(value === 'all' ? null : value);
+                    if (filterId === 'votes') setVotesFilter(value === 'all' ? null : value);
+                  }}
+                  customPriceInputs={customPriceInputs}
+                  setCustomPriceInputs={setCustomPriceInputs}
+                  onCustomPriceApply={(min, max) => {
+                    setPriceRangeV2([min, max]);
+                  }}
+                />
+              </FullSidebarFilterPanel>
+            </div>
+
             {/* SECTION 3: SPONSORED PRODUCT */}
             <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
                <div className="relative z-10 w-full flex flex-col items-center">
@@ -681,12 +941,22 @@ export function CustomerFavoritePage() {
                 </div>
                 
                 {/* Active selectors clearing */}
-                {(trendingFilter !== '🔥 Trending Today' || selectedSource || priceRange || searchQuery) && (
+                {(selectedCategory || selectedBrand || priceRangeV2[0] > 0 || priceRangeV2[1] !== null || ratingFilter || votesFilter || availabilityFilter || verifiedBrandFilter || deliveryFilter || discountFilter || countryFilter || trendingFilter !== '🔥 Trending Today' || searchQuery) && (
                   <button 
                     onClick={() => {
+                      setSelectedCategory(null);
+                      setSelectedBrand(null);
+                      setCustomPriceInputs({ min: '', max: '' });
+                      setPriceRangeV2([0, null]);
+                      setRatingFilter(null);
+                      setVotesFilter(null);
+                      setAvailabilityFilter(null);
+                      setVerifiedBrandFilter(null);
+                      setDeliveryFilter(null);
+                      setDiscountFilter(null);
+                      setCountryFilter(null);
                       setTrendingFilter('🔥 Trending Today');
-                      setSelectedSource(null);
-                      setPriceRange(null);
+                      setSortOption('default');
                       setSearchQuery('');
                       setActiveTab('All Products');
                       toast.success('Sweeps reset to normal listing queues!');
@@ -698,38 +968,33 @@ export function CustomerFavoritePage() {
                 )}
               </div>
 
-              {/* Active Filter Chips */}
-              {(trendingFilter !== '🔥 Trending Today' || selectedSource || priceRange) && (
-                <div className="flex flex-wrap items-center gap-2 mb-4 mt-1">
-                  {trendingFilter !== '🔥 Trending Today' && (
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#e8edf2] rounded-[5px] text-[9px] font-black text-navy uppercase tracking-wider shadow-xs">
-                      Trend: {trendingFilter.replace('🔥 ', '')} 
-                      <span className="text-orange-primary cursor-pointer font-extrabold ml-1 scale-110" onClick={() => setTrendingFilter('🔥 Trending Today')}>×</span>
-                    </div>
-                  )}
-                  {selectedSource && (
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#e8edf2] rounded-[5px] text-[9px] font-black text-navy uppercase tracking-wider shadow-xs">
-                      Source: {selectedSource.replace('⭐ ', '').replace('❤️ ', '').replace('👥 ', '').replace('🏆 ', '')} 
-                      <span className="text-orange-primary cursor-pointer font-extrabold ml-1 scale-110" onClick={() => setSelectedSource(null)}>×</span>
-                    </div>
-                  )}
-                  {priceRange && (
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#e8edf2] rounded-[5px] text-[9px] font-black text-navy uppercase tracking-wider shadow-xs">
-                      Price: {priceRange === 'under-1000' ? '<1,000 BDT' : priceRange === '1000-5000' ? '1,000-5,000 BDT' : priceRange === '5000-10000' ? '5,000-10,000 BDT' : priceRange === '10000-25000' ? '10,000-25,000 BDT' : '25,000+ BDT'} 
-                      <span className="text-orange-primary cursor-pointer font-extrabold ml-1 scale-110" onClick={() => setPriceRange(null)}>×</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-20 bg-white border border-gray-150 rounded-[5px] p-8 max-w-lg mx-auto flex flex-col items-center gap-4">
                   <AlertTriangle size={36} className="text-orange-primary stroke-1" />
                   <p className="text-[11px] font-black uppercase tracking-widest text-navy italic">No products matched active filters.</p>
                   <p className="text-[10px] text-gray-500 leading-relaxed font-bold max-w-sm">
-                    Try reset your sidebar pricing metrics, community tags or searching query to inspect normal listings.
+                    Try resetting your sidebar pricing metrics, community tags or search query to inspect normal listings.
                   </p>
-                  <button onClick={() => { setTrendingFilter('🔥 Trending Today'); setSelectedSource(null); setPriceRange(null); setSearchQuery(''); setActiveTab('All Products'); }} className="px-5 py-2 rounded-full bg-orange-primary text-white text-[9.5px] font-black uppercase tracking-wider italic">
+                  <button 
+                    onClick={() => {
+                      setSelectedCategory(null);
+                      setSelectedBrand(null);
+                      setCustomPriceInputs({ min: '', max: '' });
+                      setPriceRangeV2([0, null]);
+                      setRatingFilter(null);
+                      setVotesFilter(null);
+                      setAvailabilityFilter(null);
+                      setVerifiedBrandFilter(null);
+                      setDeliveryFilter(null);
+                      setDiscountFilter(null);
+                      setCountryFilter(null);
+                      setTrendingFilter('🔥 Trending Today');
+                      setSortOption('default');
+                      setSearchQuery('');
+                      setActiveTab('All Products');
+                    }}
+                    className="px-5 py-2 rounded-full bg-orange-primary text-white text-[9.5px] font-black uppercase tracking-wider italic cursor-pointer"
+                  >
                     Load Catalog
                   </button>
                 </div>

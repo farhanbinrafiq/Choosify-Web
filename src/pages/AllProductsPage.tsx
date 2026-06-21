@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
 import { ProductCardSkeleton } from '../components/Skeleton';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel } from '../components/FilterEngine';
 
 const SPONSORED_RECOMMENDATIONS = [
   {
@@ -63,7 +64,54 @@ export function AllProductsPage() {
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'in-stock' | 'out-of-stock'>('all');
   const [retailPriceLimit, setRetailPriceLimit] = useState<number>(30000);
+  const [minPrice, setMinPrice] = useState<string>('');
+  const [maxPrice, setMaxPrice] = useState<string>('');
+  const [priceError, setPriceError] = useState<string>('');
   const [sortOption, setSortOption] = useState<'popular' | 'price-asc' | 'price-desc' | 'moq-asc'>('popular');
+  const [activeSpecs, setActiveSpecs] = useState<Record<string, string>>({});
+
+  // Restore state from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('choosify_products_filters');
+      if (saved) {
+        const filters = JSON.parse(saved);
+        if (filters.selectedCategory) setSelectedCategory(filters.selectedCategory);
+        if (filters.selectedBrand) setSelectedBrand(filters.selectedBrand);
+        if (filters.moqFilter) setMoqFilter(filters.moqFilter);
+        if (filters.priceTierSlab) setPriceTierSlab(filters.priceTierSlab);
+        if (filters.ratingFilter) setRatingFilter(filters.ratingFilter);
+        if (filters.availabilityFilter) setAvailabilityFilter(filters.availabilityFilter);
+        if (filters.retailPriceLimit) setRetailPriceLimit(filters.retailPriceLimit);
+        if (filters.minPrice) setMinPrice(filters.minPrice);
+        if (filters.maxPrice) setMaxPrice(filters.maxPrice);
+        if (filters.sortOption) setSortOption(filters.sortOption);
+        if (filters.activeTab) setActiveTab(filters.activeTab);
+        if (filters.activeSpecs) setActiveSpecs(filters.activeSpecs);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  // Save to sessionStorage on updates
+  useEffect(() => {
+    const filters = {
+      selectedCategory,
+      selectedBrand,
+      moqFilter,
+      priceTierSlab,
+      ratingFilter,
+      availabilityFilter,
+      retailPriceLimit,
+      minPrice,
+      maxPrice,
+      sortOption,
+      activeTab,
+      activeSpecs
+    };
+    sessionStorage.setItem('choosify_products_filters', JSON.stringify(filters));
+  }, [selectedCategory, selectedBrand, moqFilter, priceTierSlab, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs]);
 
   // Sync internal state with URL query parameters initially and on changes
   useEffect(() => {
@@ -171,8 +219,14 @@ export function AllProductsPage() {
         result = result.filter(p => p.price <= priceTierSlab);
       }
     } else {
-      if (retailPriceLimit < 30000) {
-        result = result.filter(p => p.price <= retailPriceLimit);
+      const minVal = minPrice !== '' ? parseFloat(minPrice) : 0;
+      const maxVal = maxPrice !== '' ? parseFloat(maxPrice) : Infinity;
+      if (minVal > 0 || maxVal < Infinity) {
+        result = result.filter(p => p.price >= minVal && p.price <= maxVal);
+      } else {
+        if (retailPriceLimit < 30000) {
+          result = result.filter(p => p.price <= retailPriceLimit);
+        }
       }
     }
 
@@ -188,6 +242,26 @@ export function AllProductsPage() {
       result = result.filter(p => (p.stock || 0) === 0);
     }
 
+    // Filter by category smart custom specifications
+    if (Object.keys(activeSpecs).length > 0) {
+      result = result.filter(p => {
+        return Object.entries(activeSpecs).every(([key, value]) => {
+          if (!value) return true;
+          const text = `${p.title} ${p.category || ''} ${(p as any).tagline || ''} ${p.description || ''}`.toLowerCase();
+          if (key === 'ram') return text.includes(value.toLowerCase());
+          if (key === 'storage') return text.includes(value.toLowerCase());
+          if (key === 'processor') return text.includes(value.toLowerCase());
+          if (key === 'battery') return text.includes(value.replace('-', '').toLowerCase()) || text.includes('battery');
+          if (key === 'size') return p.title.toLowerCase().includes(` ${value.toLowerCase()} `) || text.includes(`size ${value.toLowerCase()}`) || text.includes(value.toLowerCase());
+          if (key === 'gender') return text.includes(value.toLowerCase());
+          if (key === 'season') return text.includes(value.toLowerCase());
+          if (key === 'frame_shape') return text.includes(value.toLowerCase());
+          if (key === 'lens_type') return text.includes(value.toLowerCase());
+          return true;
+        });
+      });
+    }
+
     // 6. Sorting logic
     if (sortOption === 'price-asc') {
       result.sort((a, b) => a.price - b.price);
@@ -198,7 +272,7 @@ export function AllProductsPage() {
     }
 
     return result;
-  }, [allProducts, searchParams, selectedCategory, selectedBrand, mode, moqFilter, priceTierSlab, ratingFilter, availabilityFilter, retailPriceLimit, sortOption, activeTab]);
+  }, [allProducts, searchParams, selectedCategory, selectedBrand, mode, moqFilter, priceTierSlab, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs]);
 
   const handleResetFilters = () => {
     setSelectedCategory(null);
@@ -208,7 +282,11 @@ export function AllProductsPage() {
     setRatingFilter(null);
     setAvailabilityFilter('all');
     setRetailPriceLimit(30000);
+    setMinPrice('');
+    setMaxPrice('');
+    setPriceError('');
     setSidebarSearch('');
+    setActiveSpecs({});
     setSearchParams(new URLSearchParams());
   };
 
@@ -325,237 +403,188 @@ export function AllProductsPage() {
         </div>
       </div>
 
-      {/* GLOBAL HORIZONTAL FILTERS BAR */}
-      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
-        <div className="max-w-[1440px] mx-auto px-6 w-full">
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Filters & Specifications</span>
-              <button 
-                onClick={handleResetFilters}
-                className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-600 transition-colors cursor-pointer"
-              >
-                Reset All Filters
-              </button>
-            </div>
-            
-            {/* Horizontal Scrolling wrapper for filters */}
-            <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
-              
-              {/* B2B Enforced MOQ Filters (Only shown in B2B Mode) */}
-              {mode === 'wholesale' && (
-                <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4 relative overflow-hidden min-w-[240px] flex-1 flex-shrink-0">
-                  <div className="flex items-center gap-1.5 pb-3 border-b border-[#e8edf2]">
-                    <Calculator size={14} className="text-orange-primary" />
-                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Wholesale Specs</h3>
-                  </div>
-                  
-                  {/* MOQ Input/Slider */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-semibold uppercase tracking-wider text-gray-400">
-                      <span>Vendor Max MOQ:</span>
-                      <span className="text-navy bg-[#D6E1EC]/30 px-2 py-0.5 rounded font-mono text-[10px] font-semibold">{moqFilter === 0 ? 'Any MOQ' : `${moqFilter} Pcs`}</span>
-                    </div>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="150" 
-                      step="10"
-                      value={moqFilter} 
-                      onChange={(e) => setMoqFilter(Number(e.target.value))}
-                      className="w-full accent-orange-primary bg-[#D6E1EC]/20 h-1 rounded-lg cursor-pointer"
-                    />
-                  </div>
+      {/* LAYER 1: QUICK FILTER BAR */}
+      <QuickFilterBar
+        title="Products Quick Specs"
+        onOpenFullFilters={() => {
+          const el = document.getElementById("global-sidebar-filters");
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add("ring-2", "ring-orange-primary/50");
+            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
+          }
+        }}
+        filters={[
+          { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
+          { id: 'trending', label: '🔥 Trending', active: activeTab === 'Trending', onClick: () => setActiveTab(activeTab === 'Trending' ? 'All Products' : 'Trending') },
+          { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'Top Rated', onClick: () => setActiveTab(activeTab === 'Top Rated' ? 'All Products' : 'Top Rated') },
+          ...(mode === 'wholesale'
+            ? [
+                { id: 'moq-low', label: 'Low MOQ (≤50)', active: moqFilter === 50, onClick: () => setMoqFilter(moqFilter === 50 ? 0 : 50) },
+                { id: 'slab-low', label: 'Under ৳5k', active: priceTierSlab === 5000, onClick: () => setPriceTierSlab(priceTierSlab === 5000 ? 100000 : 5000) }
+              ]
+            : [
+                { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
+              ]
+          )
+        ]}
+      />
 
-                  {/* Slabs Maximum Price Target selector */}
-                  <div className="space-y-2 pt-3 border-t border-[#e8edf2]">
-                    <div className="flex justify-between items-center text-[10px] font-semibold uppercase tracking-wider text-gray-400">
-                      <span>Wholesale Unit Cap:</span>
-                      <span className="text-orange-primary font-mono font-semibold">৳{priceTierSlab.toLocaleString()}</span>
-                    </div>
-                    <input 
-                      type="range" 
-                      min="100" 
-                      max="15000" 
-                      step="500"
-                      value={priceTierSlab} 
-                      onChange={(e) => setPriceTierSlab(Number(e.target.value))}
-                      className="w-full accent-orange-primary bg-[#D6E1EC]/20 h-1 rounded-lg cursor-pointer"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Price Range Filter (Retail Mode) */}
-              {mode === 'retail' && (
-                <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4 min-w-[240px] flex-1 flex-shrink-0">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#e8edf2] px-0.5">
-                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Price Range</h3>
-                    {retailPriceLimit < 30000 && (
-                      <span 
-                        onClick={() => setRetailPriceLimit(30000)}
-                        className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
-                      >
-                        Clear
-                      </span>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-semibold uppercase tracking-wider text-gray-400">
-                      <span>Max Price:</span>
-                      <span className="text-orange-primary font-mono font-semibold">৳{retailPriceLimit.toLocaleString()}</span>
-                    </div>
-                    <input 
-                      type="range" 
-                      min="50" 
-                      max="30000" 
-                      step="100"
-                      value={retailPriceLimit} 
-                      onChange={(e) => setRetailPriceLimit(Number(e.target.value))}
-                      className="w-full accent-orange-primary bg-[#D6E1EC]/20 h-1 rounded-lg cursor-pointer"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Category Filter Group */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm min-w-[220px] flex-1 flex-shrink-0">
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">By Category</h3>
-                  {selectedCategory && (
-                    <span 
-                      onClick={() => setSelectedCategory(null)}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5 max-h-32 overflow-y-auto no-scrollbar pt-1">
-                  {dynamicCategories.map((cat, i) => (
-                    <button 
-                      key={i} 
-                      onClick={() => setSelectedCategory(selectedCategory === cat.name ? null : cat.name)}
-                      className={cn(
-                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                        cat.checked ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                      )}
-                    >
-                      <span className="truncate">{cat.name}</span>
-                      <span className="text-[9px] font-semibold text-navy bg-[#D6E1EC]/20 px-2 py-0.5 rounded-full font-mono">{cat.count}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Brand Filter Group */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm min-w-[220px] flex-1 flex-shrink-0">
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">By Brand</h3>
-                  {selectedBrand && (
-                    <span 
-                      onClick={() => setSelectedBrand(null)}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5 max-h-32 overflow-y-auto no-scrollbar pt-1">
-                  {dynamicBrands.map((b, i) => (
-                    <button 
-                      key={i} 
-                      onClick={() => setSelectedBrand(selectedBrand === b.name ? null : b.name)}
-                      className={cn(
-                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                        b.checked ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                      )}
-                    >
-                      <span className="truncate">{b.name}</span>
-                      <span className="text-[9px] font-semibold text-navy bg-[#D6E1EC]/20 px-2 py-0.5 rounded-full font-mono">{b.count}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Rating Filter Group */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm min-w-[200px] flex-shrink-0">
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Rating</h3>
-                  {ratingFilter !== null && (
-                    <span 
-                      onClick={() => setRatingFilter(null)}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1 pt-1">
-                  {[5, 4, 3].map((stars) => (
-                    <button 
-                      key={stars}
-                      onClick={() => setRatingFilter(ratingFilter === stars ? null : stars)}
-                      className={cn(
-                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                        ratingFilter === stars ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                      )}
-                    >
-                      <div className="flex items-center gap-1">
-                        <span className="flex items-center text-amber-500 gap-0.5">
-                          {Array.from({ length: 5 }).map((_, idx) => (
-                            <Star key={idx} size={11} fill={idx < stars ? "currentColor" : "none"} className="stroke-[2.5]" />
-                          ))}
-                        </span>
-                        <span className="ml-1 text-[11px]">{stars === 5 ? '5.0' : `${stars}.0+`}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Availability Filter Group */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm min-w-[180px] flex-shrink-0">
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Availability</h3>
-                  {availabilityFilter !== 'all' && (
-                    <span 
-                      onClick={() => setAvailabilityFilter('all')}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1 pt-1">
-                  {[
-                    { value: 'all', label: 'All Listings' },
-                    { value: 'in-stock', label: 'In Stock Only' },
-                    { value: 'out-of-stock', label: 'Out of Stock' }
-                  ].map((opt) => (
-                    <button 
-                      key={opt.value}
-                      onClick={() => setAvailabilityFilter(opt.value as any)}
-                      className={cn(
-                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                        availabilityFilter === opt.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                      )}
-                    >
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ACTIVE FILTER CHIPS ROW */}
+      <ActiveFilterChips
+        chips={[
+          selectedCategory ? { id: 'category', label: `Cat: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+          selectedBrand ? { id: 'brand', label: `Brand: ${selectedBrand}`, onRemove: () => setSelectedBrand(null) } : null,
+          ratingFilter ? { id: 'rating', label: `Rating: ${ratingFilter}★ +`, onRemove: () => setRatingFilter(null) } : null,
+          availabilityFilter !== 'all' ? { id: 'availability', label: `Status: ${availabilityFilter}`, onRemove: () => setAvailabilityFilter('all') } : null,
+          (minPrice || maxPrice) ? { id: 'price', label: `Price: ৳${minPrice || '0'} - ${maxPrice || 'Any'}`, onRemove: () => { setMinPrice(''); setMaxPrice(''); } } : null,
+          ...Object.entries(activeSpecs).map(([key, value]) => {
+            if (!value) return null;
+            return { id: `spec-${key}`, label: `${key.toUpperCase()}: ${value}`, onRemove: () => setActiveSpecs(prev => ({ ...prev, [key]: '' })) };
+          })
+        ].filter(Boolean) as any[]}
+        onClearAll={handleResetFilters}
+      />
 
       <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+          
+          {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
+          <div id="global-sidebar-filters" className="transition-all duration-300 rounded-[5px]">
+            <FullSidebarFilterPanel
+              title="Filter Catalog"
+              onReset={handleResetFilters}
+              advancedSection={
+                <div className="flex flex-col gap-4">
+                  <UniversalFilterRenderer
+                    profile={{
+                      entity: 'products',
+                      filters: [
+                        {
+                          id: 'rating',
+                          name: 'Rating Score',
+                          type: 'single_select',
+                          options: [
+                            { value: 'all', label: 'All Ratings' },
+                            { value: '4.8', label: '4.8★ & Up' },
+                            { value: '4.5', label: '4.5★ & Up' },
+                            { value: '4.0', label: '4.0★ & Up' }
+                          ]
+                        },
+                        {
+                          id: 'availability',
+                          name: 'Availability',
+                          type: 'single_select',
+                          options: [
+                            { value: 'all', label: 'All Items' },
+                            { value: 'in-stock', label: 'In Stock Only' },
+                            { value: 'out-of-stock', label: 'Out of Stock' }
+                          ]
+                        }
+                      ]
+                    }}
+                    activeFilters={{
+                      rating: ratingFilter ? ratingFilter.toString() : 'all',
+                      availability: availabilityFilter
+                    }}
+                    onFilterChange={(filterId, value) => {
+                      if (filterId === 'rating') {
+                        setRatingFilter(value === 'all' || !value ? null : parseFloat(value));
+                      } else if (filterId === 'availability') {
+                        setAvailabilityFilter(value || 'all');
+                      }
+                    }}
+                  />
+
+                  {mode === 'wholesale' && (
+                    <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4">
+                      <div className="flex items-center gap-1.5 pb-2 border-b border-[#e8edf2]">
+                        <Calculator size={14} className="text-[#E8500A]" />
+                        <h3 className="text-[11px] font-black uppercase text-[#8a9bb0]">Wholesale Specs</h3>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center text-[10px] font-semibold uppercase text-gray-400">
+                          <span>Max MOQ:</span>
+                          <span className="text-navy bg-gray-100 px-2 py-0.5 rounded font-mono text-[10px]">{moqFilter === 0 ? 'Any MOQ' : `${moqFilter} Pcs`}</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="150" 
+                          step="10"
+                          value={moqFilter} 
+                          onChange={(e) => setMoqFilter(Number(e.target.value))}
+                          className="w-full h-1 accent-orange-primary cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <CategorySmartFilters
+                    category={selectedCategory}
+                    activeSpecs={activeSpecs}
+                    onSpecChange={(key, value) => {
+                      setActiveSpecs(prev => ({ ...prev, [key]: value || '' }));
+                    }}
+                  />
+                </div>
+              }
+            >
+              <UniversalFilterRenderer
+                profile={{
+                  entity: 'products',
+                  filters: [
+                    {
+                      id: 'category',
+                      name: 'Categories',
+                      type: 'single_select',
+                      options: [
+                        { value: 'all', label: 'All Categories' },
+                        ...dynamicCategories.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
+                      ]
+                    },
+                    {
+                      id: 'brand',
+                      name: 'Featured Brands',
+                      type: 'single_select',
+                      options: [
+                        { value: 'all', label: 'All Brands' },
+                        ...dynamicBrands.map(b => ({ value: b.name, label: b.name, count: b.count }))
+                      ]
+                    },
+                    {
+                      id: 'price_custom',
+                      name: 'Price Target (BDT)',
+                      type: 'price_custom'
+                    }
+                  ]
+                }}
+                activeFilters={{
+                  category: selectedCategory || 'all',
+                  brand: selectedBrand || 'all'
+                }}
+                customPriceInputs={{ min: minPrice, max: maxPrice }}
+                setCustomPriceInputs={(inputs) => {
+                  setMinPrice(inputs.min);
+                  setMaxPrice(inputs.max);
+                }}
+                onCustomPriceApply={(min, max) => {
+                  setMinPrice(min > 0 ? min.toString() : '');
+                  setMaxPrice(max !== null ? max.toString() : '');
+                }}
+                onFilterChange={(filterId, value) => {
+                  if (filterId === 'category') {
+                    setSelectedCategory(value === 'all' || !value ? null : value);
+                  } else if (filterId === 'brand') {
+                    setSelectedBrand(value === 'all' || !value ? null : value);
+                  }
+                }}
+              />
+            </FullSidebarFilterPanel>
+          </div>
+
           {/* Sponsored Ad */}
           <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full flex flex-col items-center">
              <div className="relative z-10 w-full flex flex-col">

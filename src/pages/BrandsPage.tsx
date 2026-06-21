@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
 
 interface BrandDeal {
   id: string;
@@ -60,6 +61,35 @@ export function BrandsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [popularityFilter, setPopularityFilter] = useState<'all' | 'hot' | 'featured' | 'top-rated'>('all');
+
+  // Restore state from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('choosify_brands_filters');
+      if (saved) {
+        const filters = JSON.parse(saved);
+        if (filters.selectedCategory) setSelectedCategory(filters.selectedCategory);
+        if (filters.selectedLetter) setSelectedLetter(filters.selectedLetter);
+        if (filters.verificationFilter) setVerificationFilter(filters.verificationFilter);
+        if (filters.popularityFilter) setPopularityFilter(filters.popularityFilter);
+        if (filters.activeTab) setActiveTab(filters.activeTab);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  // Save state on updates
+  useEffect(() => {
+    const filters = {
+      selectedCategory,
+      selectedLetter,
+      verificationFilter,
+      popularityFilter,
+      activeTab
+    };
+    sessionStorage.setItem('choosify_brands_filters', JSON.stringify(filters));
+  }, [selectedCategory, selectedLetter, verificationFilter, popularityFilter, activeTab]);
 
   const brands: Brand[] = [
     {
@@ -405,172 +435,146 @@ export function BrandsPage() {
         </div>
       </div>
 
-      {/* GLOBAL HORIZONTAL FILTERS BAR */}
-      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
-        <div className="max-w-[1440px] mx-auto px-6 w-full">
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Brands Filtering</span>
-              {(selectedLetter || searchQuery || activeTab !== 'All Brands' || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (
-                <button 
-                  onClick={() => {
-                    setSelectedLetter(null); 
-                    setSearchQuery(''); 
-                    setActiveTab('All Brands');
-                    setSelectedCategory(null);
-                    setVerificationFilter('all');
-                    setPopularityFilter('all');
-                  }}
-                  className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-600 transition-colors cursor-pointer"
-                >
-                  Reset All Filters
-                </button>
-              )}
-            </div>
-            
-            {/* Horizontal Scrolling wrapper for filters */}
-            <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
-              
-              {/* Alphabet Index Filter Card */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4 text-left font-sans animate-fade-in min-w-[280px] flex-1">
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2 leading-none">
-                    Filter By <span className="text-orange-primary font-bold">Initial</span>
-                  </h3>
-                  <div className="w-full h-px bg-gray-155" />
-                </div>
+       {/* LAYER 1: QUICK FILTER BAR */}
+      <QuickFilterBar
+        title="Brands Quick Specs"
+        onOpenFullFilters={() => {
+          const el = document.getElementById("brands-sidebar-filters");
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add("ring-2", "ring-orange-primary/50");
+            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
+          }
+        }}
+        filters={[
+          { id: 'verified', label: '✓ Verified Claims', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
+          { id: 'hot', label: '🔥 Hot Brands', active: popularityFilter === 'hot', onClick: () => setPopularityFilter(popularityFilter === 'hot' ? 'all' : 'hot') },
+          { id: 'top-rated', label: '⭐ Top Rated', active: popularityFilter === 'top-rated', onClick: () => setPopularityFilter(popularityFilter === 'top-rated' ? 'all' : 'top-rated') },
+          { id: 'fashion', label: '👗 Fashion Brands', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
+          { id: 'tech', label: '💻 Tech Devices', active: selectedCategory === 'Tech', onClick: () => setSelectedCategory(selectedCategory === 'Tech' ? null : 'Tech') }
+        ]}
+      />
 
-                <div className="grid grid-cols-6 gap-1 max-h-32 overflow-y-auto no-scrollbar">
-                  <button 
-                    onClick={() => setSelectedLetter(null)}
-                    className={cn(
-                      "col-span-6 py-1.5 rounded-[5px] text-[9px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
-                      selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                    )}
-                  >
-                    All Brands
-                  </button>
-                  {letters.map((letter) => (
-                    <button 
-                      key={letter} 
-                      onClick={() => setSelectedLetter(letter)}
-                      className={cn(
-                        "h-6 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
-                        selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
-                      )}
-                    >
-                      {letter}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Category Filter Group */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[220px] flex-1">
-                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Category</h3>
-                  {selectedCategory && (
-                    <span 
-                      onClick={() => setSelectedCategory(null)}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5 max-h-32 overflow-y-auto no-scrollbar">
-                  {dynamicCategories.map((cat, i) => (
-                    <button 
-                      key={cat.name} 
-                      onClick={() => setSelectedCategory(selectedCategory === cat.name ? null : cat.name)}
-                      className={cn(
-                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                        selectedCategory === cat.name ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                      )}
-                    >
-                      <span className="truncate">{cat.name}</span>
-                      <span className="text-[9px] font-semibold text-navy bg-[#D6E1EC]/20 px-2 py-0.5 rounded-full font-mono">{cat.count}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Verification Status Filter */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[200px]">
-                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Verification</h3>
-                  {verificationFilter !== 'all' && (
-                    <span 
-                      onClick={() => setVerificationFilter('all')}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  {[
-                    { value: 'all', label: 'All Brands' },
-                    { value: 'verified', label: '✓ Verified Claims' },
-                    { value: 'unverified', label: 'Unverified Channels' }
-                  ].map((item) => (
-                    <button 
-                      key={item.value} 
-                      onClick={() => setVerificationFilter(item.value as any)}
-                      className={cn(
-                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                        verificationFilter === item.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                      )}
-                    >
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Popularity Filter */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[200px]">
-                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Popularity</h3>
-                  {popularityFilter !== 'all' && (
-                    <span 
-                      onClick={() => setPopularityFilter('all')}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-650 transition-colors"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  {[
-                    { value: 'all', label: 'All Tiers' },
-                    { value: 'hot', label: '🔥 Hot Brands' },
-                    { value: 'featured', label: '⭐ Featured Only' },
-                    { value: 'top-rated', label: '✨ Top Rated (4.8+)' }
-                  ].map((item) => (
-                    <button 
-                      key={item.value} 
-                      onClick={() => setPopularityFilter(item.value as any)}
-                      className={cn(
-                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                        popularityFilter === item.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                      )}
-                    >
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ACTIVE FILTER CHIPS ROW */}
+      <ActiveFilterChips
+        chips={[
+          selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+          selectedLetter ? { id: 'letter', label: `Starts with: ${selectedLetter}`, onRemove: () => setSelectedLetter(null) } : null,
+          verificationFilter !== 'all' ? { id: 'verification', label: `Verification: ${verificationFilter}`, onRemove: () => setVerificationFilter('all') } : null,
+          popularityFilter !== 'all' ? { id: 'popularity', label: `Status: ${popularityFilter}`, onRemove: () => setPopularityFilter('all') } : null
+        ].filter(Boolean) as any[]}
+        onClearAll={() => {
+          setSelectedLetter(null); 
+          setSearchQuery(''); 
+          setActiveTab('All Brands');
+          setSelectedCategory(null);
+          setVerificationFilter('all');
+          setPopularityFilter('all');
+        }}
+      />
 
       <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+          
+          {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
+          <div id="brands-sidebar-filters" className="transition-all duration-300 rounded-[5px]">
+            <FullSidebarFilterPanel
+              title="Filter Brands"
+              onReset={() => {
+                setSelectedLetter(null); 
+                setSearchQuery(''); 
+                setActiveTab('All Brands');
+                setSelectedCategory(null);
+                setVerificationFilter('all');
+                setPopularityFilter('all');
+              }}
+              advancedSection={
+                <div className="flex flex-col gap-4">
+                  {/* Initial Index selection A-Z */}
+                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-2">
+                    <h3 className="text-[11px] font-black text-[#8a9bb0] uppercase tracking-wider mb-2">Alpha search (A-Z)</h3>
+                    <div className="grid grid-cols-5 gap-1.5 max-h-32 overflow-y-auto no-scrollbar">
+                      <button 
+                        onClick={() => setSelectedLetter(null)}
+                        className={cn(
+                          "col-span-5 py-1.5 rounded-[5px] text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
+                          selectedLetter === null ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                        )}
+                      >
+                        All Initials
+                      </button>
+                      {letters.map((letter) => (
+                        <button 
+                          key={letter} 
+                          onClick={() => setSelectedLetter(letter)}
+                          className={cn(
+                            "h-5.5 rounded-[5px] text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                            selectedLetter === letter ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                          )}
+                        >
+                          {letter}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              }
+            >
+              <UniversalFilterRenderer
+                profile={{
+                  entity: 'brands',
+                  filters: [
+                    {
+                      id: 'category',
+                      name: 'Category Hub',
+                      type: 'single_select',
+                      options: [
+                        { value: 'all', label: 'All Categories' },
+                        ...dynamicCategories.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
+                      ]
+                    },
+                    {
+                      id: 'verification',
+                      name: 'Verification Channel',
+                      type: 'single_select',
+                      options: [
+                        { value: 'all', label: 'All Claim Statuses' },
+                        { value: 'verified', label: 'Verified Claims Only' },
+                        { value: 'unverified', label: 'Unverified Channels' }
+                      ]
+                    },
+                    {
+                      id: 'popularity',
+                      name: 'Popularity Tier',
+                      type: 'single_select',
+                      options: [
+                        { value: 'all', label: 'All Tiers' },
+                        { value: 'hot', label: '🔥 Hot Brands' },
+                        { value: 'featured', label: '⭐ Featured' },
+                        { value: 'top-rated', label: '✨ Top Rated (4.8+)' }
+                      ]
+                    }
+                  ]
+                }}
+                activeFilters={{
+                  category: selectedCategory || 'all',
+                  verification: verificationFilter,
+                  popularity: popularityFilter
+                }}
+                onFilterChange={(filterId, value) => {
+                  if (filterId === 'category') {
+                    setSelectedCategory(value === 'all' || !value ? null : value);
+                  } else if (filterId === 'verification') {
+                    setVerificationFilter(value as any);
+                  } else if (filterId === 'popularity') {
+                    setPopularityFilter(value as any);
+                  }
+                }}
+              />
+            </FullSidebarFilterPanel>
+          </div>
           {/* BUSINESS SELLERS INFO CARD */}
           <div 
             id="section-sellers-brands" 

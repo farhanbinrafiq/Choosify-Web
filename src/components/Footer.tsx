@@ -37,39 +37,48 @@ export function Footer() {
           <div className="md:col-span-5 lg:col-span-6 flex flex-col justify-start">
             
             {/* Tagline (no logo in this area) */}
-            <p className="text-white/65 text-[14px] leading-relaxed max-w-[280px] mb-8 font-normal">
+            <p className="text-white/65 text-[14px] leading-relaxed max-w-[280px] mb-8 font-normal text-center md:text-left mx-auto md:mx-0">
               Bangladesh's Smartest Product Discovery Platform. Find The Best Brand, Compare Price, And Shop With Confidence
             </p>
 
+            {/* Connect With Us Section */}
+            <h4 className="text-white font-semibold uppercase tracking-[0.1em] text-[13px] mb-[20px] text-center md:text-left">
+              Connect With Us
+            </h4>
+
             {/* Social icons row */}
-            <div className="flex items-center gap-6 flex-wrap">
+            <div className="flex items-center justify-center md:justify-start gap-6 flex-wrap">
               
               {/* Facebook */}
               <div className="flex flex-col items-center gap-2 group cursor-pointer">
                 <a 
-                  href="https://facebook.com" 
+                  href="https://www.facebook.com/choosify.bd" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-white/30 transition-all duration-300 active:scale-95"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  aria-label="Visit Choosify on Facebook"
+                  title="Visit Choosify on Facebook"
                 >
                   <Facebook size={20} />
                 </a>
-                <span className="text-[14px] text-white/50 group-hover:text-white font-normal transition-colors">
-                  Facebok
+                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                  Facebook
                 </span>
               </div>
 
               {/* Instagram */}
               <div className="flex flex-col items-center gap-2 group cursor-pointer">
                 <a 
-                  href="https://instagram.com" 
+                  href="https://www.instagram.com/choosify.bd/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-white/30 transition-all duration-300 active:scale-95"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  aria-label="Visit Choosify on Instagram"
+                  title="Visit Choosify on Instagram"
                 >
                   <Instagram size={20} />
                 </a>
-                <span className="text-[14px] text-white/50 group-hover:text-white font-normal transition-colors">
+                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
                   Instagram
                 </span>
               </div>
@@ -77,30 +86,34 @@ export function Footer() {
               {/* TikTok */}
               <div className="flex flex-col items-center gap-2 group cursor-pointer">
                 <a 
-                  href="https://tiktok.com" 
+                  href="https://www.tiktok.com/@choosify5" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-white/30 transition-all duration-300 active:scale-95"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  aria-label="Visit Choosify on TikTok"
+                  title="Visit Choosify on TikTok"
                 >
                   <TikTokIcon size={20} />
                 </a>
-                <span className="text-[14px] text-white/50 group-hover:text-white font-normal transition-colors">
-                  Tik-Tok
+                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                  TikTok
                 </span>
               </div>
 
               {/* YouTube */}
               <div className="flex flex-col items-center gap-2 group cursor-pointer">
                 <a 
-                  href="https://youtube.com" 
+                  href="https://www.youtube.com/@choosifybd" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-white/30 transition-all duration-300 active:scale-95"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  aria-label="Visit Choosify on YouTube"
+                  title="Visit Choosify on YouTube"
                 >
                   <Youtube size={20} />
                 </a>
-                <span className="text-[14px] text-white/50 group-hover:text-white font-normal transition-colors">
-                  Youtube
+                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                  YouTube
                 </span>
               </div>
 

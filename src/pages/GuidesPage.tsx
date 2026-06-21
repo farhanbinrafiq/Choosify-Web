@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets, Bookmark, Eye, Share2, Play, Instagram, ChevronRight, Award, Flame, Zap, Star } from 'lucide-react';
+import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets, Bookmark, Eye, Share2, Play, Instagram, ChevronRight, Award, Flame, Zap, Star, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BLOGS } from '../constants';
 import { CREATORS } from '../data/creators';
@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { RecommendationCardSkeleton } from '../components/Skeleton';
+import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
 
 // Sub-component for Featured Story (Segment 1 of reference image)
 export function FeaturedCard({ guide }: { guide: any }) {
@@ -413,18 +414,181 @@ export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeTyp
 
 export function GuidesPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('Fashion');
   const [activeTab, setActiveTab] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
-  // Trigger simulated loading effect on category change
+  // Filter conditions
+  const [selectedContentType, setSelectedContentType] = useState<string | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
+
+  const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
+  const [selectedVerifiedCreator, setSelectedVerifiedCreator] = useState<boolean | null>(null);
+  const [selectedFollowers, setSelectedFollowers] = useState<string | null>(null);
+  const [selectedEngagementRate, setSelectedEngagementRate] = useState<string | null>(null);
+
+  const [selectedSponsored, setSelectedSponsored] = useState<boolean | null>(null);
+  const [selectedOfficialCampaign, setSelectedOfficialCampaign] = useState<boolean | null>(null);
+
+  const [isTrending, setIsTrending] = useState<boolean | null>(null);
+  const [isNew, setIsNew] = useState<boolean | null>(null);
+  const [isPopular, setIsPopular] = useState<boolean | null>(null);
+  const [isEditorsPick, setIsEditorsPick] = useState<boolean | null>(null);
+
+  const [productCategory, setProductCategory] = useState<string | null>(null);
+  const [productPriceRange, setProductPriceRange] = useState<string | null>(null);
+  const [productAvailability, setProductAvailability] = useState<string | null>(null);
+
+  const [selectedReadingTime, setSelectedReadingTime] = useState<string | null>(null);
+  const [selectedViews, setSelectedViews] = useState<string | null>(null);
+  const [selectedUploadDate, setSelectedUploadDate] = useState<string | null>(null);
+  const [selectedMusic, setSelectedMusic] = useState<string | null>(null);
+
+  const [sortOption, setSortOption] = useState<string>('default');
+
+  // Trigger simulated loading effect on any filter change
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 600);
+    }, 400);
     return () => clearTimeout(timer);
-  }, [activeCategory, searchQuery]);
+  }, [
+    selectedContentType, selectedPlatform, selectedCategory, selectedLanguage,
+    selectedDuration, selectedCreator, selectedAuthor, selectedVerifiedCreator,
+    selectedFollowers, selectedEngagementRate, selectedTopic, selectedSponsored,
+    selectedOfficialCampaign, isTrending, isNew, isPopular, isEditorsPick,
+    productCategory, productPriceRange, productAvailability, selectedReadingTime,
+    selectedViews, selectedUploadDate, selectedMusic, sortOption, searchQuery, activeTab
+  ]);
+
+  const contentTypeOptions = [
+    { value: 'video', label: 'Video Catalog' },
+    { value: 'article', label: 'Written Articles' },
+    { value: 'reels', label: 'Reels / TikTok' },
+    { value: 'shorts', label: 'Short-form Stories' }
+  ];
+
+  const platformOptions = [
+    { value: 'youtube', label: 'YouTube Video' },
+    { value: 'instagram', label: 'Instagram Reels' },
+    { value: 'blog', label: 'Written Blogs' }
+  ];
+
+  const categoryOptions = [
+    { value: 'Fashion', label: 'Fashion Channel' },
+    { value: 'Gadgest', label: 'Gadg & Mobiles' },
+    { value: 'Perfume', label: 'Perfumes Fragrances' },
+    { value: 'Electronics', label: 'Electronics TV' },
+    { value: 'Travel', label: 'Travel Adventure' },
+    { value: 'Education', label: 'Education Advice' },
+    { value: 'Parenting', label: 'Parenting Guides' },
+    { value: 'Kids', label: 'Kids Children' },
+    { value: 'Cars / Bike', label: 'Cars Motoring' }
+  ];
+
+  const videoDurationOptions = [
+    { value: 'short', label: 'Under 10 mins' },
+    { value: 'long', label: 'Over 10 mins' }
+  ];
+
+  const reelsDurationOptions = [
+    { value: 'under30s', label: 'Under 30s' },
+    { value: 'over30s', label: '30s - 90s' }
+  ];
+
+  const readTimeOptions = [
+    { value: 'short', label: 'Under 10 mins' },
+    { value: 'long', label: 'Over 10 mins' }
+  ];
+
+  const creatorOptions = [
+    { value: 'Farhan Rafiq', label: 'Farhan Rafiq' },
+    { value: 'Sarah Jenkins', label: 'Sarah Jenkins' },
+    { value: 'Imtiaz Ahmed', label: 'Imtiaz Ahmed' }
+  ];
+
+  const topicOptions = [
+    { value: 'buying-guide', label: 'Buying Guide' },
+    { value: 'review', label: 'Product Review' },
+    { value: 'tips', label: 'Tips & Advice' },
+    { value: 'unboxing', label: 'Unboxing' }
+  ];
+
+  const languageOptions = [
+    { value: 'bangla', label: 'Bangla (Local)' },
+    { value: 'english', label: 'English (Global)' }
+  ];
+
+  const followerOptions = [
+    { value: 'all', label: 'All Audiences' },
+    { value: '10k', label: '10K+ Followers' },
+    { value: '100k', label: '100K+ Followers' },
+    { value: '1m', label: '1M+ Followers' }
+  ];
+
+  const engagementOptions = [
+    { value: 'all', label: 'Any Engagement' },
+    { value: 'high', label: 'Top Tier (4.8+)' }
+  ];
+
+  const viewsOptions = [
+    { value: 'under100k', label: 'Under 100K Views' },
+    { value: 'over100k', label: '100K - 1M Views' },
+    { value: 'millions', label: '1M+ Views' }
+  ];
+
+  const uploadDateOptions = [
+    { value: 'today', label: 'Uploaded Today' },
+    { value: 'week', label: 'This Week' },
+    { value: 'month', label: 'This Month' }
+  ];
+
+  const publishDateOptions = [
+    { value: 'today', label: 'Published Today' },
+    { value: 'week', label: 'This Week' },
+    { value: 'month', label: 'This Month' }
+  ];
+
+  const musicOptions = [
+    { value: 'trending', label: 'Trending Track Only' },
+    { value: 'original', label: 'Original Audio Only' }
+  ];
+
+  const handleClearAllFilters = () => {
+    setSelectedContentType(null);
+    setSelectedPlatform(null);
+    setSelectedCategory(null);
+    setSelectedLanguage(null);
+    setSelectedDuration(null);
+    setSelectedCreator(null);
+    setSelectedAuthor(null);
+    setSelectedVerifiedCreator(null);
+    setSelectedFollowers(null);
+    setSelectedEngagementRate(null);
+    setSelectedTopic(null);
+    setSelectedSponsored(null);
+    setSelectedOfficialCampaign(null);
+    setIsTrending(null);
+    setIsNew(null);
+    setIsPopular(null);
+    setIsEditorsPick(null);
+    setProductCategory(null);
+    setProductPriceRange(null);
+    setProductAvailability(null);
+    setSelectedReadingTime(null);
+    setSelectedViews(null);
+    setSelectedUploadDate(null);
+    setSelectedMusic(null);
+    setSortOption('default');
+    setSearchQuery('');
+    setActiveTab('All');
+  };
 
   const categoriesList = [
     { name: 'Fashion', icon: <Shirt size={16} className="stroke-[2.5]" />, count: 550 },
@@ -455,6 +619,7 @@ export function GuidesPage() {
   const getFilteredBlogs = () => {
     let result = [...BLOGS];
 
+    // Filter by Top Sticky Tabs (activeTab)
     if (activeTab === 'Featured') {
       result = result.filter(blog => blog.id === 1 || blog.id === 2);
     } else if (activeTab === 'Editors Choice') {
@@ -470,19 +635,533 @@ export function GuidesPage() {
       result = result.filter(blog => blog.id % 4 === 1);
     }
 
+    // Filter by searchQuery
     const q = searchQuery.toLowerCase().trim();
-    if (!q) {
-      return result;
+    if (q) {
+      result = result.filter(blog => {
+        const titleMatches = blog.title.toLowerCase().includes(q);
+        const excerptMatches = blog.excerpt?.toLowerCase().includes(q) || false;
+        const categoryMatches = blog.category?.toLowerCase().includes(q) || false;
+        const authorMatches = blog.author?.toLowerCase().includes(q) || false;
+        return titleMatches || excerptMatches || categoryMatches || authorMatches;
+      });
     }
-    return result.filter(blog => {
-      const titleMatches = blog.title.toLowerCase().includes(q);
-      const excerptMatches = blog.excerpt?.toLowerCase().includes(q) || false;
-      const categoryMatches = blog.category?.toLowerCase().includes(q) || false;
-      return titleMatches || excerptMatches || categoryMatches;
-    });
+
+    // Filter by Content Type / Platform (V2 Filters)
+    if (selectedContentType === 'video') {
+      result = result.filter(blog => blog.type === 'video');
+    } else if (selectedContentType === 'article') {
+      result = result.filter(blog => blog.type === 'article');
+    } else if (selectedContentType === 'shorts') {
+      result = result.filter(blog => blog.type === 'shorts');
+    } else if (selectedContentType === 'reels') {
+      result = result.filter(blog => blog.type === 'reels');
+    }
+
+    if (selectedPlatform === 'youtube') {
+      result = result.filter(blog => blog.type === 'video');
+    } else if (selectedPlatform === 'instagram') {
+      result = result.filter(blog => blog.type === 'reels' || blog.type === 'shorts');
+    } else if (selectedPlatform === 'blog') {
+      result = result.filter(blog => blog.type === 'article');
+    }
+
+    // Filter by Category
+    if (selectedCategory) {
+      const normCat = selectedCategory.toLowerCase();
+      result = result.filter(blog => {
+        const blogCat = (blog.category || '').toLowerCase();
+        if (normCat.includes('gadg') || normCat.includes('mobile')) {
+          return blogCat === 'mobile' || blogCat === 'gaming';
+        }
+        if (normCat.includes('fashion') || normCat.includes('perfume')) {
+          return blogCat === 'fashion' || blogCat === 'beauty';
+        }
+        return blogCat === normCat;
+      });
+    }
+
+    // Filter by Creator / Author
+    if (selectedCreator) {
+      result = result.filter(blog => blog.author === selectedCreator);
+    }
+    if (selectedAuthor) {
+      result = result.filter(blog => blog.author === selectedAuthor);
+    }
+
+    // Filter by Verified Creator
+    if (selectedVerifiedCreator === true) {
+      result = result.filter(blog => {
+        return blog.author.includes('Farhan') || blog.author.includes('Sarah');
+      });
+    }
+
+    // Filter by Trending, Editors Pick, Popular, New
+    if (isTrending === true) {
+      result = result.filter(blog => {
+        const viewsStr = blog.views || '';
+        return viewsStr.includes('M') || parseInt(viewsStr) > 500;
+      });
+    }
+    if (isNew === true) {
+      result = result.filter(blog => blog.id % 2 !== 0);
+    }
+    if (isEditorsPick === true) {
+      result = result.filter(blog => blog.id % 2 === 0);
+    }
+    if (isPopular === true) {
+      result = result.filter(blog => blog.views.includes('M'));
+    }
+
+    // Reading time (Blogs specific)
+    if (selectedReadingTime) {
+      if (selectedReadingTime === 'short') {
+        result = result.filter(blog => {
+          const m = parseInt((blog.readTime || '').replace(/[^0-9]/g, '')) || 5;
+          return m < 10;
+        });
+      } else if (selectedReadingTime === 'long') {
+        result = result.filter(blog => {
+          const m = parseInt((blog.readTime || '').replace(/[^0-9]/g, '')) || 5;
+          return m >= 10;
+        });
+      }
+    }
+
+    // Video Duration (YouTube specific)
+    if (selectedDuration) {
+      if (selectedDuration === 'short') {
+        result = result.filter(blog => {
+          const parts = (blog.duration || '').split(':');
+          const mins = parseInt(parts[0]) || 0;
+          return mins < 10;
+        });
+      } else if (selectedDuration === 'long') {
+        result = result.filter(blog => {
+          const parts = (blog.duration || '').split(':');
+          const mins = parseInt(parts[0]) || 0;
+          return mins >= 10;
+        });
+      }
+    }
+
+    // Product specification filter
+    if (productCategory) {
+      if (productCategory === 'smartphones') {
+        result = result.filter(blog => blog.category === 'MOBILE');
+      } else if (productCategory === 'shoes') {
+        result = result.filter(blog => blog.category === 'FASHION');
+      } else if (productCategory === 'gaming') {
+        result = result.filter(blog => blog.category === 'GAMING');
+      } else if (productCategory === 'coffee') {
+        result = result.filter(blog => blog.category === 'HOME');
+      } else if (productCategory === 'skincare') {
+        result = result.filter(blog => blog.category === 'BEAUTY');
+      }
+    }
+
+    if (productPriceRange) {
+      if (productPriceRange === 'under1k') {
+        result = result.filter(blog => blog.id % 2 === 0);
+      } else if (productPriceRange === '1k-5k') {
+        result = result.filter(blog => blog.id % 2 !== 0);
+      }
+    }
+
+    // Dynamic sorting
+    if (sortOption === 'views') {
+      result = result.sort((a, b) => {
+        const getVVal = (v: string) => {
+          if (v.endsWith('M')) return parseFloat(v) * 1000000;
+          if (v.endsWith('K')) return parseFloat(v) * 1000;
+          return parseFloat(v) || 0;
+        };
+        return getVVal(b.views) - getVVal(a.views);
+      });
+    } else if (sortOption === 'shares') {
+      result = result.sort((a, b) => {
+        const getSVal = (s: string) => {
+          if (s.endsWith('M')) return parseFloat(s) * 1000000;
+          if (s.endsWith('K')) return parseFloat(s) * 1000;
+          return parseFloat(s) || 0;
+        };
+        return getSVal(b.shares) - getSVal(a.shares);
+      });
+    } else if (sortOption === 'newest') {
+      result = result.sort((a, b) => b.id - a.id);
+    }
+
+    return result;
   };
 
   const filteredBlogs = getFilteredBlogs();
+
+  const isAnyFilterActive = !!(
+    selectedContentType || selectedPlatform || selectedCategory || selectedLanguage ||
+    selectedDuration || selectedCreator || selectedAuthor || selectedVerifiedCreator ||
+    selectedFollowers || selectedEngagementRate || selectedTopic || selectedSponsored ||
+    selectedOfficialCampaign || isTrending || isNew || isPopular || isEditorsPick ||
+    productCategory || productPriceRange || productAvailability || selectedReadingTime ||
+    selectedViews || selectedUploadDate || selectedMusic || sortOption !== 'default' || searchQuery
+  );
+
+  const renderFilterPanel = () => {
+    return (
+      <FullSidebarFilterPanel
+        title="Guides Scope"
+        onReset={handleClearAllFilters}
+        advancedSection={
+          <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left font-sans">
+            <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Topic / Niche</h3>
+            <div className="space-y-1">
+              {topicOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setSelectedTopic(selectedTopic === opt.value ? null : opt.value)}
+                  className={cn(
+                    "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                    selectedTopic === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                  )}
+                >
+                  <span>{opt.label}</span>
+                  {selectedTopic === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+                </button>
+              ))}
+            </div>
+            
+            <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mt-4 mb-3">Language</h3>
+            <div className="space-y-1">
+              {languageOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setSelectedLanguage(selectedLanguage === opt.value ? null : opt.value)}
+                  className={cn(
+                    "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                    selectedLanguage === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                  )}
+                >
+                  <span>{opt.label}</span>
+                  {selectedLanguage === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        }
+      >
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Recommendation Type</h3>
+          <div className="space-y-1">
+            {contentTypeOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedContentType(selectedContentType === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedContentType === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedContentType === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Platform Channel</h3>
+          <div className="space-y-1">
+            {platformOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedPlatform(selectedPlatform === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedPlatform === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedPlatform === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category</h3>
+          <div className="space-y-1">
+            {categoryOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedCategory(selectedCategory === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedCategory === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedCategory === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* SMART FILTERS SECTION */}
+        {(selectedPlatform === 'youtube' || selectedContentType === 'video') && (
+          <div className="space-y-4">
+            <div className="py-2 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#E8500A] italic block">📺 YouTube Smart Specs</span>
+            </div>
+
+            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Video Duration</h3>
+              <div className="space-y-1">
+                {videoDurationOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedDuration(selectedDuration === opt.value ? null : opt.value)}
+                    className={cn(
+                      "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                      selectedDuration === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                    )}
+                  >
+                    <span>{opt.label}</span>
+                    {selectedDuration === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Views Threshold</h3>
+              <div className="space-y-1">
+                {viewsOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedViews(selectedViews === opt.value ? null : opt.value)}
+                    className={cn(
+                      "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                      selectedViews === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                    )}
+                  >
+                    <span>{opt.label}</span>
+                    {selectedViews === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {(selectedPlatform === 'instagram' || selectedContentType === 'reels' || selectedContentType === 'shorts') && (
+          <div className="space-y-4">
+            <div className="py-2 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#E8500A] italic block">📱 Reels Dynamic Specs</span>
+            </div>
+
+            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Smart Duration</h3>
+              <div className="space-y-1">
+                {reelsDurationOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedDuration(selectedDuration === opt.value ? null : opt.value)}
+                    className={cn(
+                      "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                      selectedDuration === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                    )}
+                  >
+                    <span>{opt.label}</span>
+                    {selectedDuration === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Trending Music</h3>
+              <div className="space-y-1">
+                {musicOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedMusic(selectedMusic === opt.value ? null : opt.value)}
+                    className={cn(
+                      "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                      selectedMusic === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                    )}
+                  >
+                    <span>{opt.label}</span>
+                    {selectedMusic === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {(selectedPlatform === 'blog' || selectedContentType === 'article') && (
+          <div className="space-y-4">
+            <div className="py-2 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#E8500A] italic block">✍️ Blog / Article Specs</span>
+            </div>
+
+            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Reading Time</h3>
+              <div className="space-y-1">
+                {readTimeOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedReadingTime(selectedReadingTime === opt.value ? null : opt.value)}
+                    className={cn(
+                      "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                      selectedReadingTime === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                    )}
+                  >
+                    <span>{opt.label}</span>
+                    {selectedReadingTime === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Author</h3>
+              <div className="space-y-1">
+                {creatorOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedAuthor(selectedAuthor === opt.value ? null : opt.value)}
+                    className={cn(
+                      "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                      selectedAuthor === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                    )}
+                  >
+                    <span>{opt.label}</span>
+                    {selectedAuthor === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Creator Profile</h3>
+          <div className="space-y-1">
+            {creatorOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedCreator(selectedCreator === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedCreator === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedCreator === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Verified Creators</h3>
+          <div className="space-y-1">
+            {[
+              { value: 'all', label: 'All Creators' },
+              { value: 'verified', label: 'Verified Only' }
+            ].map(opt => {
+              const isSelected = (opt.value === 'verified' && selectedVerifiedCreator === true) || (opt.value === 'all' && selectedVerifiedCreator === null);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setSelectedVerifiedCreator(opt.value === 'verified' ? (selectedVerifiedCreator === true ? null : true) : null)}
+                  className={cn(
+                    "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                    isSelected ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                  )}
+                >
+                  <span>{opt.label}</span>
+                  {isSelected && <Check size={11} className="text-orange-primary shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Sponsors & Campaigns</h3>
+          <div className="space-y-1">
+            {[
+              { value: 'sponsored', label: 'Sponsored Guides Only' }
+            ].map(opt => {
+              const isSelected = selectedSponsored === true;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setSelectedSponsored(selectedSponsored === true ? null : true)}
+                  className={cn(
+                    "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                    isSelected ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                  )}
+                >
+                  <span>{opt.label}</span>
+                  {isSelected && <Check size={11} className="text-orange-primary shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Product Group Spec</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="text-[9.5px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Product Type</label>
+              <select
+                value={productCategory || ''}
+                onChange={(e) => setProductCategory(e.target.value || null)}
+                className="w-full text-xs font-semibold h-8 border border-[#e8edf2] rounded-[4px] focus:outline-none focus:border-orange-primary bg-slate-50/20 px-2 leading-none"
+              >
+                <option value="">All Products</option>
+                <option value="smartphones">Smartphones</option>
+                <option value="shoes">Shoes & Apparel</option>
+                <option value="skincare">Skincare</option>
+                <option value="gaming">Gaming Hardware</option>
+                <option value="coffee">Coffee Machines</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[9.5px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Price Limit</label>
+              <select
+                value={productPriceRange || ''}
+                onChange={(e) => setProductPriceRange(e.target.value || null)}
+                className="w-full text-xs font-semibold h-8 border border-[#e8edf2] rounded-[4px] focus:outline-none focus:border-orange-primary bg-slate-50/20 px-2 leading-none"
+              >
+                <option value="">Any Price</option>
+                <option value="under1k">Under 1,000 BDT</option>
+                <option value="1k-5k">1,000 – 5,000 BDT</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </FullSidebarFilterPanel>
+    );
+  };
 
   return (
     <div id="guides-root" className="flex flex-col min-h-screen bg-[#FDFDFD]">
@@ -619,130 +1298,67 @@ export function GuidesPage() {
         </div>
       </div>
 
-      {/* GLOBAL HORIZONTAL FILTERS BAR */}
-      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
-        <div className="max-w-[1440px] mx-auto px-6 w-full">
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Guides & Stories Filter Suite</span>
-              {activeCategory && activeCategory !== 'Fashion' && (
-                <button 
-                  onClick={() => setActiveCategory('Fashion')}
-                  className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-155 transition-colors cursor-pointer"
-                >
-                  Reset Active Category
-                </button>
-              )}
-            </div>
+      {/* LAYER 1: QUICK FILTER BAR */}
+      <QuickFilterBar
+        title="Guides Quick Specs"
+        onOpenFullFilters={() => setIsMobileDrawerOpen(true)}
+        filters={[
+          { id: 'all-content', label: 'All Content', active: !selectedContentType && !selectedPlatform, onClick: () => { setSelectedContentType(null); setSelectedPlatform(null); } },
+          { id: 'youtube', label: '📺 YouTube', active: selectedPlatform === 'youtube' || selectedContentType === 'video', onClick: () => { setSelectedPlatform(selectedPlatform === 'youtube' ? null : 'youtube'); setSelectedContentType(selectedPlatform === 'youtube' ? null : 'video'); } },
+          { id: 'reels', label: '📱 Reels', active: selectedContentType === 'reels', onClick: () => setSelectedContentType(selectedContentType === 'reels' ? null : 'reels') },
+          { id: 'blogs', label: '✍️ Blogs', active: selectedPlatform === 'blog' || selectedContentType === 'article', onClick: () => { setSelectedPlatform(selectedPlatform === 'blog' ? null : 'blog'); setSelectedContentType(selectedPlatform === 'blog' ? null : 'article'); } },
+          { id: 'featured-pill', label: '★ Featured', active: activeTab === 'Featured', onClick: () => setActiveTab(activeTab === 'Featured' ? 'All' : 'Featured') },
+          { id: 'verified-pill', label: '✓ Verified Creators', active: selectedVerifiedCreator === true, onClick: () => setSelectedVerifiedCreator(selectedVerifiedCreator === true ? null : true) },
+          { id: 'trending-pill', label: '🔥 Trending', active: isTrending === true, onClick: () => setIsTrending(isTrending === true ? null : true) },
+          {
+            id: 'cycle-sort',
+            label: sortOption === 'default' ? 'Filter Sort' : `Sort: ${sortOption === 'views' ? 'View Count' : sortOption === 'shares' ? 'Shared Count' : 'Newest First'}`,
+            active: sortOption !== 'default',
+            onClick: () => {
+              const next: Record<string, string> = {
+                'default': 'views',
+                'views': 'shares',
+                'shares': 'newest',
+                'newest': 'default'
+              };
+              setSortOption(next[sortOption] || 'default');
+            }
+          }
+        ]}
+      />
 
-            {/* Scrolling Categories List Slider */}
-            <div className="flex flex-row items-center gap-3 overflow-x-auto no-scrollbar py-1">
-              {categoriesList.map((cat) => {
-                const isActive = activeCategory === cat.name;
-                return (
-                  <button 
-                    key={cat.name} 
-                    onClick={() => setActiveCategory(cat.name)}
-                    className={cn(
-                      "flex items-center gap-2.5 py-1.5 px-3.5 rounded-full transition-all duration-300 border font-sans shrink-0 cursor-pointer",
-                      isActive 
-                        ? "bg-orange-primary/10 text-[#E8500A] border-orange-primary/25 font-bold" 
-                        : "bg-white border-[#e8edf2] text-navy hover:bg-gray-50/80"
-                    )}
-                  >
-                    <span className="shrink-0">{cat.icon}</span>
-                    <span className="text-[11px] font-semibold uppercase tracking-wider">{cat.name}</span>
-                    <span className={cn(
-                      "px-1.5 py-0.5 text-[8.5px] font-mono rounded-full leading-none shrink-0",
-                      isActive ? "bg-orange-primary text-white" : "bg-gray-100 text-gray-500"
-                    )}>{cat.count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ACTIVE FILTER CHIPS ROW */}
+      <ActiveFilterChips
+        chips={[
+          selectedContentType ? { id: 'contentType', label: `Type: ${selectedContentType}`, onRemove: () => setSelectedContentType(null) } : null,
+          selectedPlatform ? { id: 'platform', label: `Platform: ${selectedPlatform}`, onRemove: () => setSelectedPlatform(null) } : null,
+          selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+          selectedLanguage ? { id: 'language', label: `Language: ${selectedLanguage}`, onRemove: () => setSelectedLanguage(null) } : null,
+          selectedDuration ? { id: 'duration', label: `Duration: ${selectedDuration}`, onRemove: () => setSelectedDuration(null) } : null,
+          selectedCreator ? { id: 'creator', label: `Creator: ${selectedCreator}`, onRemove: () => setSelectedCreator(null) } : null,
+          selectedAuthor ? { id: 'author', label: `Author: ${selectedAuthor}`, onRemove: () => setSelectedAuthor(null) } : null,
+          selectedVerifiedCreator ? { id: 'verified', label: 'Verified Creators Only', onRemove: () => setSelectedVerifiedCreator(null) } : null,
+          selectedFollowers ? { id: 'followers', label: `Followers: ${selectedFollowers}`, onRemove: () => setSelectedFollowers(null) } : null,
+          selectedEngagementRate ? { id: 'engagement', label: `Engagement: ${selectedEngagementRate}`, onRemove: () => setSelectedEngagementRate(null) } : null,
+          selectedTopic ? { id: 'topic', label: `Topic: ${selectedTopic}`, onRemove: () => setSelectedTopic(null) } : null,
+          selectedSponsored ? { id: 'sponsored', label: 'Sponsored', onRemove: () => setSelectedSponsored(null) } : null,
+          selectedOfficialCampaign ? { id: 'official', label: 'Official Campaign', onRemove: () => setSelectedOfficialCampaign(null) } : null,
+          isTrending ? { id: 'trending', label: 'Trending', onRemove: () => setIsTrending(null) } : null,
+          isNew ? { id: 'new', label: 'New Releases', onRemove: () => setIsNew(null) } : null,
+          isEditorsPick ? { id: 'editors_pick', label: 'Editor\'s Pick', onRemove: () => setIsEditorsPick(null) } : null,
+          sortOption !== 'default' ? { id: 'sort', label: `Sort: ${sortOption}`, onRemove: () => setSortOption('default') } : null,
+          productCategory ? { id: 'prod_cat', label: `Group: ${productCategory}`, onRemove: () => setProductCategory(null) } : null,
+          productPriceRange ? { id: 'prod_price', label: `Price Limit: ${productPriceRange}`, onRemove: () => setProductPriceRange(null) } : null,
+          productAvailability ? { id: 'prod_avail', label: `Stock: ${productAvailability}`, onRemove: () => setProductAvailability(null) } : null,
+        ].filter(Boolean) as any[]}
+        onClearAll={handleClearAllFilters}
+      />
 
       <main className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
-         {/* Left Sidebar Navigation */}
+         {/* Left Sidebar Navigation - migrated to Full Filter Panel */}
          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
-            {/* Newsletter Widget */}
-            <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
-               <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
-                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Newsletter</h3>
-               </div>
-               
-               <p className="text-navy text-[11px] font-semibold leading-relaxed mb-4">Get the latest industry style fresh look straight to your inbox.</p>
-               <div className="space-y-3">
-                  <input 
-                     type="email" 
-                     placeholder="Enter your email address..." 
-                     className="w-full bg-white border border-[#e8edf2] rounded-lg py-2 px-3 h-9 text-xs font-semibold text-navy outline-none placeholder:text-gray-300 shadow-inner" 
-                  />
-                  <button className="w-full py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider transition-colors border-0 cursor-pointer shadow-sm">
-                     Subscribe Now
-                  </button>
-               </div>
-            </div>
-
-            {/* Need Customer Help? Widget */}
-            <div className="bg-[#1a1c3c] rounded-[5px] p-5.5 shadow-sm border border-navy/10 text-white relative overflow-hidden text-left">
-               <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12"><Search size={100} /></div>
-               <h4 className="text-[12px] font-bold mb-2 uppercase tracking-wide">Need Customer Help?</h4>
-               <p className="text-white/60 text-[11px] font-medium leading-relaxed mb-4">Ask our AI Shopping Assistant for a personalized recommendation based on your budget & lifestyle.</p>
-               <button className="w-full py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer border-0 shadow-sm">
-                 Start AI Chat
-               </button>
-            </div>
-
-
-            {/* CREATORS YOU FOLLOW */}
-            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4 shadow-sm flex flex-col">
-              <div className="flex items-center justify-between mb-3 border-b border-[#e8edf2] pb-2 px-0.5">
-                <h3 className="text-[11px] font-semibold text-[#1a1a2e] uppercase text-left">Creators You Follow</h3>
-                <span className="text-[10px] font-medium text-[#E8500A] uppercase tracking-wider bg-[#FFF0E8] px-2.5 py-0.5 rounded-full leading-none">3 Active</span>
-              </div>
-              
-              <div className="space-y-2">
-                {CREATORS.slice(0, 3).map((c, i) => (
-                  <Link 
-                    key={i} 
-                    to={`/creators/${c.id}`}
-                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all duration-300 cursor-pointer text-left block"
-                  >
-                    <img 
-                      src={c.avatar} 
-                      alt={c.name}
-                      className="w-9 h-9 rounded-full object-cover shadow border-2 border-white outline outline-1 outline-gray-200 shrink-0"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1">
-                        <p className="text-[12px] font-medium text-[#1A1D4E] truncate leading-tight uppercase">{c.name}</p>
-                        {c.score > 90 && (
-                          <span className="text-[#E8500A] shrink-0" title="Verified Creator">
-                            <Award size={12} className="fill-current text-[#E8500A]" />
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-gray-400 font-normal truncate mt-0.5">{c.bestFor} • {c.handle}</p>
-                    </div>
-                    <span className="px-2 py-0.5 bg-orange-primary/10 text-orange-primary font-black uppercase text-[8px] rounded-[3px] shrink-0">
-                      Following
-                    </span>
-                  </Link>
-                ))}
-              </div>
-
-              <div className="mt-3 pt-3 border-t border-gray-100 text-center">
-                <Link 
-                  to="/creators" 
-                  className="text-[10px] font-bold text-[#E8500A] hover:text-[#CF4400] uppercase tracking-widest inline-flex items-center gap-1.5 leading-none transition-colors"
-                >
-                  View All <ChevronRight size={12} />
-                </Link>
-              </div>
+            <div id="guides-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
+              {renderFilterPanel()}
             </div>
          </aside>
 
@@ -761,7 +1377,7 @@ export function GuidesPage() {
                         />
                      ))}
                   </div>
-                </div>
+                 </div>
              ) : (
                 <>
                   {filteredBlogs.length === 0 ? (
@@ -772,9 +1388,9 @@ export function GuidesPage() {
                        <h3 className="font-sans text-lg font-black italic uppercase tracking-tighter text-[#1A1D4E] mb-1">No Results Found</h3>
                        <p className="text-gray-400 text-xs font-semibold leading-relaxed max-w-sm">We couldn't find any guides matching your criteria. Try adjusting your search query or category.</p>
                      </div>
-                  ) : searchQuery ? (
+                  ) : isAnyFilterActive ? (
                      <div className="flex flex-col gap-10">
-                        <h4 className="font-sans text-xs font-black uppercase tracking-[0.25em] text-[#8a92a6] italic text-left">Search Results ({filteredBlogs.length})</h4>
+                        <h4 className="font-sans text-xs font-black uppercase tracking-[0.25em] text-[#8a92a6] italic text-left">Filtered Results ({filteredBlogs.length})</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                            {filteredBlogs.map(guide => (
                               <HorizontalMediaCard 
@@ -878,6 +1494,38 @@ export function GuidesPage() {
             </div>
          </aside>
       </main>
+      {/* Mobile/Tablet Bottom Sheet Drawer for Filters */}
+      {isMobileDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center lg:hidden font-sans">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/55 backdrop-blur-xs transition-opacity"
+            onClick={() => setIsMobileDrawerOpen(false)}
+          />
+          
+          {/* Sheet Panel */}
+          <div className="relative bg-white w-full max-w-lg rounded-t-2xl max-h-[85vh] overflow-y-auto z-10 shadow-2xl p-5 flex flex-col gap-4 animate-slide-up select-none border border-gray-100">
+            {/* Header / Grabber */}
+            <div className="flex flex-col items-center gap-1.5 cursor-pointer pb-2">
+              <div className="w-12 h-1.5 bg-gray-200 rounded-full" onClick={() => setIsMobileDrawerOpen(false)} />
+              <div className="w-full flex items-center justify-between mt-2 px-1">
+                <span className="text-[12px] font-black uppercase tracking-[0.16em] text-[#1a1a2e]">Recommendation Filters</span>
+                <button 
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-navy hover:bg-gray-100 transition-all border-none cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Panel Body */}
+            <div className="flex flex-col gap-4 pb-12">
+              {renderFilterPanel()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

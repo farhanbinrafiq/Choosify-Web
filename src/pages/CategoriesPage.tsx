@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
+import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
 
 interface Subcategory {
   name: string;
@@ -56,14 +57,259 @@ export function CategoriesPage() {
   const [isBrandsCollapsed, setIsBrandsCollapsed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulated content refresh loader
+  // V2 Discovery Filter States
+  const [selectedCategoryType, setSelectedCategoryType] = useState<string | null>(null);
+  const [selectedCategoryStatus, setSelectedCategoryStatus] = useState<string | null>(null);
+  const [selectedAlphabetical, setSelectedAlphabetical] = useState<string | null>(null);
+  const [selectedAvailability, setSelectedAvailability] = useState<string | null>(null);
+  const [selectedContent, setSelectedContent] = useState<string | null>(null);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  // Simulated content refresh loader that reacts to any discovery filter parameter change
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 600);
+    }, 400);
     return () => clearTimeout(timer);
-  }, [mode, searchQuery]);
+  }, [
+    mode, searchQuery, activeCategoryTab, 
+    selectedCategoryType, selectedCategoryStatus, 
+    selectedAlphabetical, selectedAvailability, selectedContent
+  ]);
+
+  const handleClearAllFilters = () => {
+    setSelectedCategoryType(null);
+    setSelectedCategoryStatus(null);
+    setSelectedAlphabetical(null);
+    setSelectedAvailability(null);
+    setSelectedContent(null);
+    setSearchQuery('');
+    setActiveCategoryTab('All Categories');
+  };
+
+  const matchCategoryType = (catName: string, type: string) => {
+    const name = catName.toLowerCase();
+    const t = type.toLowerCase();
+    if (t === 'electronics') {
+      return name.includes('tech') || name.includes('electronic') || name.includes('mobile') || name.includes('tv') || name.includes('wearable') || name.includes('gaming');
+    }
+    if (t === 'fashion') {
+      return name.includes('fashion') || name.includes('jewelry') || name.includes('accessories') || name.includes('eyewear') || name.includes('fragrance') || name.includes('beauty');
+    }
+    if (t === 'beauty') {
+      return name.includes('beauty') || name.includes('personal care') || name.includes('fragrance');
+    }
+    if (t === 'home & living') {
+      return name.includes('home') || name.includes('living') || name.includes('appliance');
+    }
+    if (t === 'grocery') {
+      return name.includes('food') || name.includes('essential');
+    }
+    if (t === 'sports') {
+      return name.includes('activewear') || name.includes('fitness') || name.includes('wearable');
+    }
+    if (t === 'automotive') {
+      return name.includes('vehicle') || name.includes('automotive');
+    }
+    if (t === 'books') {
+      return name.includes('education') || name.includes('learning') || name.includes('book');
+    }
+    if (t === 'kids') {
+      return name.includes('family') || name.includes('kids') || name.includes('baby');
+    }
+    if (t === 'health') {
+      return name.includes('health') || name.includes('wellness') || name.includes('activity');
+    }
+    if (t === 'lifestyle') {
+      return name.includes('travel') || name.includes('hospitality') || name.includes('hobby') || name.includes('creativity') || name.includes('fashion');
+    }
+    if (t === 'services') {
+      return name.includes('education') || name.includes('travel') || name.includes('learning');
+    }
+    return false;
+  };
+
+  const matchCategoryStatus = (cat: CategoryItem, status: string) => {
+    const normStatus = status.toLowerCase();
+    const name = cat.name.toLowerCase();
+    if (normStatus === 'featured') {
+      return name.includes('fashion') || name.includes('tech') || name.includes('mobile') || name.includes('food');
+    }
+    if (normStatus === 'trending') {
+      return name.includes('mobile') || name.includes('tech') || name.includes('jewelry') || name.includes('gaming');
+    }
+    if (normStatus === 'editors-picks') {
+      return name.includes('travel') || name.includes('hobbies') || name.includes('eyewear') || name.includes('beauty');
+    }
+    if (normStatus === 'newly-added') {
+      return name.includes('vehicle') || name.includes('education') || name.includes('health') || name.includes('family');
+    }
+    if (normStatus === 'popular') {
+      return cat.count > 500;
+    }
+    return true;
+  };
+
+  const matchCategoryAvailability = (cat: CategoryItem, avail: string) => {
+    const norm = avail.toLowerCase();
+    if (norm === 'products') {
+      return cat.count > 0;
+    }
+    if (norm === 'brands') {
+      return cat.subcategories && cat.subcategories.length > 0;
+    }
+    if (norm === 'deals') {
+      return cat.count > 300;
+    }
+    if (norm === 'guides') {
+      const name = cat.name.toLowerCase();
+      return name.includes('fashion') || name.includes('tech') || name.includes('mobile') || name.includes('beauty');
+    }
+    return true;
+  };
+
+  const renderFilterPanel = () => {
+    return (
+      <FullSidebarFilterPanel
+        title="Category Discovery"
+        onReset={handleClearAllFilters}
+        advancedSection={
+          <div className="flex flex-col gap-4">
+            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left font-sans">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Availability</h3>
+              <div className="space-y-1">
+                {[
+                  { value: 'products', label: 'Categories with Products' },
+                  { value: 'brands', label: 'Categories with Brands' },
+                  { value: 'deals', label: 'Categories with Deals' },
+                  { value: 'guides', label: 'Categories with Buying Guides' }
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedAvailability(selectedAvailability === opt.value ? null : opt.value)}
+                    className={cn(
+                      "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                      selectedAvailability === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                    )}
+                  >
+                    <span>{opt.label}</span>
+                    {selectedAvailability === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                  </button>
+                ))}
+              </div>
+
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mt-4 mb-3">Content Availability</h3>
+              <div className="space-y-1">
+                {[
+                  { value: 'brands', label: 'Has Brands' },
+                  { value: 'creators', label: 'Has Creators' },
+                  { value: 'recs', label: 'Has Recommendations' },
+                  { value: 'favorites', label: 'Has Customer Favorites' }
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedContent(selectedContent === opt.value ? null : opt.value)}
+                    className={cn(
+                      "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                      selectedContent === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                    )}
+                  >
+                    <span>{opt.label}</span>
+                    {selectedContent === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        }
+      >
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Type</h3>
+          <div className="space-y-1 max-h-56 overflow-y-auto no-scrollbar">
+            {[
+              { value: 'Electronics', label: 'Electronics Catalog' },
+              { value: 'Fashion', label: 'Fashion & Apparel' },
+              { value: 'Beauty', label: 'Beauty & Skincare' },
+              { value: 'Home & Living', label: 'Home & Living' },
+              { value: 'Grocery', label: 'Grocery & Essentials' },
+              { value: 'Sports', label: 'Sports & Activewear' },
+              { value: 'Automotive', label: 'Vehicles & Motoring' },
+              { value: 'Books', label: 'Books & Education' },
+              { value: 'Kids', label: 'Kids & Family' },
+              { value: 'Health', label: 'Health & Wellness' },
+              { value: 'Lifestyle', label: 'Travel & Lifestyle' },
+              { value: 'Services', label: 'Learning & Services' }
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedCategoryType(selectedCategoryType === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedCategoryType === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedCategoryType === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Status</h3>
+          <div className="space-y-1">
+            {[
+              { value: 'featured', label: 'Featured Categories' },
+              { value: 'trending', label: 'Trending Categories' },
+              { value: 'editors-picks', label: "Editor's Picks" },
+              { value: 'newly-added', label: 'Newly Added' },
+              { value: 'popular', label: 'Popular' }
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedCategoryStatus(selectedCategoryStatus === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedCategoryStatus === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedCategoryStatus === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Alphabetical</h3>
+          <div className="space-y-1">
+            {[
+              { value: 'a-z', label: 'Alphabetical: A–Z' },
+              { value: 'z-a', label: 'Alphabetical: Z–A' }
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedAlphabetical(selectedAlphabetical === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedAlphabetical === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedAlphabetical === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      </FullSidebarFilterPanel>
+    );
+  };
 
   const brandsYouFollow = [
     { name: "AARONG", sub: "Traditional Handcrafted Products", init: "AA", bg: "bg-[#452a1b]" },
@@ -155,18 +401,75 @@ export function CategoriesPage() {
     { name: 'Education & Learning', icon: 'BookOpen', count: 120, color: 'from-indigo-600 to-blue-700', subcategories: [] },
   ];
 
-  // Dynamic filter supporting the page search system
+  // Dynamic filter supporting the page search system and discovery state criteria
   const filteredCategoriesList = React.useMemo(() => {
+    let result = [...categoriesList];
+
+    // 1. Filter by Search Query (dedicated category page search searches ONLY categories)
     const q = searchQuery.toLowerCase().trim();
-    if (!q) {
-      return categoriesList;
+    if (q) {
+      result = result.filter(cat => {
+        const nameMatch = cat.name.toLowerCase().includes(q);
+        const subcategoryMatch = cat.subcategories?.some(sub => sub.name.toLowerCase().includes(q)) || false;
+        return nameMatch || subcategoryMatch;
+      });
     }
-    return categoriesList.filter(cat => {
-      const nameMatch = cat.name.toLowerCase().includes(q);
-      const subcategoryMatch = cat.subcategories?.some(sub => sub.name.toLowerCase().includes(q)) || false;
-      return nameMatch || subcategoryMatch;
-    });
-  }, [searchQuery, categoriesList]);
+
+    // 2. Filter by Category Tab (All Categories / Popular / Trending / New Arrivals / Top Rated)
+    if (activeCategoryTab === 'Popular') {
+      result = result.filter(cat => cat.count > 500);
+    } else if (activeCategoryTab === 'Trending') {
+      result = result.filter(cat => cat.name.includes('Mobile') || cat.name.includes('Tech') || cat.name.includes('Jewelry') || cat.name.includes('Gaming') || cat.name.includes('Fashion'));
+    } else if (activeCategoryTab === 'New Arrivals') {
+      result = result.filter(cat => cat.name.includes('Vehicle') || cat.name.includes('Education') || cat.name.includes('Health') || cat.name.includes('Family'));
+    } else if (activeCategoryTab === 'Top Rated') {
+      result = result.filter(cat => cat.name.includes('Fashion') || cat.name.includes('Tech') || cat.name.includes('Beauty') || cat.name.includes('Mobile') || cat.name.includes('Food'));
+    }
+
+    // 3. Filter by Category Type from Left Sidebar Panel
+    if (selectedCategoryType) {
+      result = result.filter(cat => matchCategoryType(cat.name, selectedCategoryType));
+    }
+
+    // 4. Filter by Category Status from Left Sidebar Panel
+    if (selectedCategoryStatus) {
+      result = result.filter(cat => matchCategoryStatus(cat, selectedCategoryStatus));
+    }
+
+    // 5. Filter by Availability from Sidebar
+    if (selectedAvailability) {
+      result = result.filter(cat => matchCategoryAvailability(cat, selectedAvailability));
+    }
+
+    // 6. Filter by Content Availability from Sidebar
+    if (selectedContent) {
+      result = result.filter(cat => {
+        const norm = selectedContent.toLowerCase();
+        if (norm === 'brands') {
+          return cat.subcategories && cat.subcategories.some(sub => sub.brands > 0);
+        }
+        if (norm === 'creators') {
+          return cat.name.includes('Fashion') || cat.name.includes('Tech') || cat.name.includes('Beauty') || cat.name.includes('Mobile');
+        }
+        if (norm === 'recs') {
+          return cat.count > 200;
+        }
+        if (norm === 'favorites') {
+          return cat.count > 500;
+        }
+        return true;
+      });
+    }
+
+    // 7. Alphabetical sorting
+    if (selectedAlphabetical === 'a-z' || selectedAlphabetical === 'A–Z') {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (selectedAlphabetical === 'z-a' || selectedAlphabetical === 'Z–A') {
+      result.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    return result;
+  }, [searchQuery, activeCategoryTab, selectedCategoryType, selectedCategoryStatus, selectedAvailability, selectedContent, selectedAlphabetical, categoriesList]);
 
   const handleCategoryClick = (catName: string) => {
     setExpandedCategory(expandedCategory === catName ? null : catName);
@@ -307,178 +610,89 @@ export function CategoriesPage() {
         </div>
       </div>
 
+      {/* LAYER 1: QUICK FILTER BAR */}
+      <QuickFilterBar
+        title="Category Spec Discovery"
+        onOpenFullFilters={() => setIsMobileDrawerOpen(true)}
+        filters={[
+          {
+            id: 'all-categories',
+            label: 'All Categories',
+            active: !selectedCategoryStatus && !selectedCategoryType && !selectedAlphabetical && activeCategoryTab === 'All Categories',
+            onClick: handleClearAllFilters
+          },
+          {
+            id: 'trending-pill',
+            label: '🔥 Trending',
+            active: selectedCategoryStatus === 'trending' || activeCategoryTab === 'Trending',
+            onClick: () => {
+              setSelectedCategoryStatus(selectedCategoryStatus === 'trending' ? null : 'trending');
+              setActiveCategoryTab(activeCategoryTab === 'Trending' ? 'All Categories' : 'Trending');
+            }
+          },
+          {
+            id: 'featured-pill',
+            label: '★ Featured',
+            active: selectedCategoryStatus === 'featured',
+            onClick: () => {
+              setSelectedCategoryStatus(selectedCategoryStatus === 'featured' ? null : 'featured');
+            }
+          },
+          {
+            id: 'popular-pill',
+            label: '💎 Popular',
+            active: selectedCategoryStatus === 'popular' || activeCategoryTab === 'Popular',
+            onClick: () => {
+              setSelectedCategoryStatus(selectedCategoryStatus === 'popular' ? null : 'popular');
+              setActiveCategoryTab(activeCategoryTab === 'Popular' ? 'All Categories' : 'Popular');
+            }
+          },
+          {
+            id: 'new-pill',
+            label: '📅 New Arrivals',
+            active: selectedCategoryStatus === 'newly-added' || activeCategoryTab === 'New Arrivals',
+            onClick: () => {
+              setSelectedCategoryStatus(selectedCategoryStatus === 'newly-added' ? null : 'newly-added');
+              setActiveCategoryTab(activeCategoryTab === 'New Arrivals' ? 'All Categories' : 'New Arrivals');
+            }
+          },
+          {
+            id: 'a-z-pill',
+            label: '🔤 Sort: A–Z',
+            active: selectedAlphabetical === 'a-z',
+            onClick: () => {
+              setSelectedAlphabetical(selectedAlphabetical === 'a-z' ? null : 'a-z');
+            }
+          },
+          {
+            id: 'z-a-pill',
+            label: '🔤 Sort: Z–A',
+            active: selectedAlphabetical === 'z-a',
+            onClick: () => {
+              setSelectedAlphabetical(selectedAlphabetical === 'z-a' ? null : 'z-a');
+            }
+          }
+        ]}
+      />
+
+      {/* ACTIVE FILTER CHIPS ROW */}
+      <ActiveFilterChips
+        chips={[
+          selectedCategoryType ? { id: 'categoryType', label: `Type: ${selectedCategoryType}`, onRemove: () => setSelectedCategoryType(null) } : null,
+          selectedCategoryStatus ? { id: 'status', label: `Status: ${selectedCategoryStatus}`, onRemove: () => setSelectedCategoryStatus(null) } : null,
+          selectedAlphabetical ? { id: 'alphabetical', label: `Alphabetical: ${selectedAlphabetical}`, onRemove: () => setSelectedAlphabetical(null) } : null,
+          selectedAvailability ? { id: 'availability', label: `Availability: ${selectedAvailability}`, onRemove: () => setSelectedAvailability(null) } : null,
+          selectedContent ? { id: 'content', label: `Content: ${selectedContent}`, onRemove: () => setSelectedContent(null) } : null,
+          activeCategoryTab !== 'All Categories' ? { id: 'tab', label: `Tab: ${activeCategoryTab}`, onRemove: () => setActiveCategoryTab('All Categories') } : null,
+        ].filter(Boolean) as any[]}
+        onClearAll={handleClearAllFilters}
+      />
 
       <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
-        {/* LEFT COLUMN: QUICK HIGHWAYS ASIDE COLUMN */}
+        {/* LEFT COLUMN: FULL FILTER PANEL */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0">
-          {/* QUICK ACCESS CARD */}
-          <div 
-            className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full"
-          >
-            <div className="flex items-center gap-1 pb-3 mb-4 border-b border-[#e8edf2] px-1">
-              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
-                QUICK ACCESS
-              </h3>
-            </div>
-            <div className="space-y-3.5 text-left">
-              {[
-                { 
-                  to: '/', 
-                  icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
-                      <path d="M3 10.5L12 3L21 10.5V20C21 20.5 20.5 21 20 21H15V14H9V21H4C3.5 21 3 20.5 3 20V10.5Z" stroke="#FF5B00" strokeWidth="2.2" strokeLinejoin="round" fill="none" />
-                    </svg>
-                  ), 
-                  label: 'HOME',
-                  count: '100+'
-                },
-                { 
-                  to: '/categories', 
-                  icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
-                      <rect x="5" y="5" width="6" height="6" rx="1.5" fill="#FF5B00" />
-                      <rect x="13" y="5" width="6" height="6" rx="1.5" fill="#FF5B00" />
-                      <rect x="5" y="13" width="6" height="6" rx="1.5" fill="#FF5B00" />
-                      <rect x="13" y="13" width="6" height="6" rx="1.5" fill="#FF5B00" />
-                    </svg>
-                  ), 
-                  label: 'CATEGORIES',
-                  count: '12'
-                },
-                { 
-                  to: '/products', 
-                  icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
-                      <path d="M12 4.5L6.5 12.5H17.5L12 4.5Z" fill="#FF5B00" />
-                      <rect x="6" y="14" width="5.5" height="5.5" rx="0.5" fill="#FF5B00" />
-                      <circle cx="15.5" cy="16.7" r="2.8" fill="#FF5B00" />
-                    </svg>
-                  ), 
-                  label: 'PRODUCTS',
-                  count: '550'
-                },
-                { 
-                  to: '/brands', 
-                  icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
-                      <circle cx="8.5" cy="12" r="4.2" stroke="#FF5B00" strokeWidth="2.5" fill="none" />
-                      <circle cx="8.5" cy="12" r="1.2" fill="#000435" />
-                      <circle cx="15.5" cy="12" r="4.2" stroke="#FF5B00" strokeWidth="2.5" fill="none" />
-                      <circle cx="15.5" cy="12" r="1.2" fill="#000435" />
-                    </svg>
-                  ), 
-                  label: 'BRANDS',
-                  count: '48'
-                },
-                { 
-                  to: '/guides', 
-                  icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
-                      <rect x="4" y="6" width="16" height="11" rx="1.5" stroke="#FF5B00" strokeWidth="2.2" fill="none" />
-                      <line x1="4" y1="11.5" x2="20" y2="11.5" stroke="#FF5B00" strokeWidth="2" />
-                      <line x1="12" y1="6" x2="12" y2="17" stroke="#FF5B00" strokeWidth="2" />
-                      <rect x="6" y="8" width="4" height="2" fill="#FF5B00" rx="0.5" />
-                      <path d="M10 17L9 20H15L14 17" stroke="#FF5B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ), 
-                  label: 'RECOMMENDATIONS',
-                  count: '35'
-                },
-                { 
-                  to: '/compare', 
-                  icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
-                      <rect x="5.5" y="5.5" width="5.5" height="5.5" rx="1.2" fill="#FF5B00" />
-                      <circle cx="16.5" cy="16.5" r="3" fill="#FF5B00" />
-                      <path d="M16.5 11.5V7.5H12.5" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                      <path d="M14.5 9.5L12.5 7.5L14.5 5.5" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                      <path d="M7.5 12.5V16.5H11.5" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                      <path d="M9.5 14.5L11.5 16.5L9.5 18.5" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                    </svg>
-                  ), 
-                  label: 'COMPARE',
-                  count: 'Active'
-                },
-                { 
-                  to: '/deals', 
-                  icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
-                      <path d="M12.5 4.5H18.5C19.1 4.5 19.5 4.9 19.5 5.5V11.5C19.5 11.8 19.4 12.0 19.2 12.2L11.7 19.7C11.3 20.1 10.7 20.1 10.3 19.7L5.3 14.7C4.9 14.3 4.9 13.7 5.3 13.3L12.8 5.8C13.0 5.6 13.2 5.5 13.5 5.5" stroke="#FF5B00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="#FF5B00" />
-                      <circle cx="15.5" cy="8.5" r="1.5" fill="white" />
-                    </svg>
-                  ), 
-                  label: 'DEALS',
-                  count: 'Hot'
-                },
-                { 
-                  to: '/customer-favorite', 
-                  icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
-                      <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z" stroke="#FF5B00" strokeWidth="2.2" fill="#FF5B00" />
-                    </svg>
-                  ), 
-                  label: 'CUSTOMER FAVORITE',
-                  count: 'Saved'
-                },
-                { 
-                  to: '/creators', 
-                  icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] transform transition-transform group-hover:scale-105">
-                      <path d="M17 21V19C17 17.9 16.1 17 15 17H9C7.9 17 7 17.9 7 19V21" stroke="#FF5B00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                      <circle cx="12" cy="11" r="4" stroke="#FF5B00" strokeWidth="2.2" fill="none" />
-                    </svg>
-                  ), 
-                  label: 'CREATORS',
-                  count: '75'
-                },
-              ].map((link, lidx) => (
-                <Link 
-                  key={lidx} 
-                  to={link.to} 
-                  className="flex items-center justify-between py-1 group transition-all duration-300 pointer-events-auto"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full border border-[#e8edf2] flex items-center justify-center bg-white shadow-inner group-hover:scale-105 group-hover:border-orange-primary/20 transition-all duration-300 shrink-0">
-                      {link.icon}
-                    </div>
-                    <span className="font-sans text-xs text-navy uppercase tracking-wide group-hover:text-orange-primary transition-colors duration-300 font-semibold">{link.label}</span>
-                  </div>
-                  <span className="px-2.5 py-0.5 bg-[#D6E1EC]/30 text-navy/70 text-[9px] font-mono font-semibold rounded-full leading-none">{link.count}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* BRANDS YOU FOLLOW CARD */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
-              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">BRANDS YOU FOLLOW</h3>
-              <span className="px-2 py-0.5 bg-orange-primary/10 rounded-full text-[#E8500A] font-semibold text-[9px] tracking-wide uppercase">
-                 6 active
-              </span>
-            </div>
-
-            <div className="space-y-3.5">
-              {(isBrandsCollapsed ? brandsYouFollow.slice(0, 3) : brandsYouFollow).map((brand, bidx) => (
-                <div key={bidx} className="flex items-center gap-3 text-left">
-                  <div className={cn("w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-xs shrink-0 shadow-sm border border-black/5 uppercase", brand.bg)}>
-                    {brand.init}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-sans text-xs font-semibold text-[#1A1D4E] uppercase truncate leading-tight">{brand.name}</h4>
-                    <p className="text-[10px] text-gray-400 font-sans tracking-tight truncate leading-normal">{brand.sub}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button 
-              onClick={() => setIsBrandsCollapsed(!isBrandsCollapsed)}
-              className="w-full flex items-center justify-center gap-1.5 mt-4 pt-3 border-t border-gray-100 text-[10px] font-semibold uppercase tracking-wider text-[#E8500A] hover:text-[#CF4400] transition-colors cursor-pointer"
-            >
-              {isBrandsCollapsed ? "Expand List" : "Collapse List"}
-              {isBrandsCollapsed ? <LucideIcons.ChevronDown className="w-3.5 h-3.5" /> : <LucideIcons.ChevronUp className="w-3.5 h-3.5" />}
-            </button>
+          <div id="categories-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
+            {renderFilterPanel()}
           </div>
         </aside>
 
@@ -695,6 +909,44 @@ export function CategoriesPage() {
           </div>
         </aside>
       </div>
+
+      {/* Mobile / Tablet Filter Drawer */}
+      <AnimatePresence>
+        {isMobileDrawerOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileDrawerOpen(false)}
+              className="fixed inset-0 bg-black/60 z-50 lg:hidden"
+            />
+            {/* Drawer Panel */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 bottom-0 w-4/5 max-w-xs bg-[#F0F4F9] z-50 p-5 overflow-y-auto lg:hidden shadow-2xl flex flex-col gap-4 text-left font-sans"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                <span className="text-[11px] font-black uppercase tracking-wider text-navy">Discovery Filters</span>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className="w-8 h-8 rounded-full border border-gray-200 hover:border-orange-primary flex items-center justify-center text-gray-400 hover:text-orange-primary bg-white cursor-pointer"
+                >
+                  <LucideIcons.X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex-1 pb-10">
+                {renderFilterPanel()}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
