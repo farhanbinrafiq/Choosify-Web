@@ -4,7 +4,6 @@ import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingOverlays } from './components/FloatingOverlays';
-import { YourProfileDock } from './components/YourProfileDock';
 import { DashboardProvider } from './context/DashboardContext';
 import { GlobalStateProvider } from './context/GlobalStateContext';
 import { Toaster } from 'react-hot-toast';
@@ -206,7 +205,6 @@ function AppContent() {
         </Suspense>
       </AnimatePresence>
       {!isOverview && <FloatingOverlays />}
-      {!isOverview && <YourProfileDock />}
       {!isOverview && <Footer />}
     </div>
   );
