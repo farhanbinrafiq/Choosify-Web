@@ -9,6 +9,9 @@ import {
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from './FilterEngine';
+import { useDashboard } from '../context/DashboardContext';
+import { toast } from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
 // ==========================================
 // TYPE & INTERFACE DEFINITIONS FOR ADVANCED COMPARISONS
@@ -554,6 +557,19 @@ const AIS_SECTIONS: CompareSection[] = [
 type CompareMode = 'product' | 'brand' | 'creator' | 'guide' | 'ai';
 
 export function CompareEngine() {
+  const { comparedProducts = [], setComparedProducts, addToCompare } = useDashboard() || {};
+
+  // Guard for 4-product comparison limit on any nested compare triggers
+  const handleAddToCompare = (product: any) => {
+    if (comparedProducts.length >= 4) {
+      toast.error('You can compare up to 4 products at a time. Remove one to add another.');
+      return;
+    }
+    if (addToCompare) {
+      addToCompare(product);
+    }
+  };
+
   // ==========================================
   // STATE DEFINITIONS FOR THE COMPARE MATRIX
   // ==========================================
@@ -645,14 +661,45 @@ export function CompareEngine() {
           titlePrefix: 'AI ANALYTICS' 
         };
       case 'product':
-      default:
+      default: {
+        const mappedProducts = (comparedProducts || []).map((product: any) => ({
+          id: String(product.id),
+          brand: product.brand || 'Brand',
+          name: product.name || 'Product',
+          image: (product.images && product.images[0]) || product.image || 'https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=400&h=400&fit=crop',
+          tag: product.tag || 'Popular',
+          price: product.price || 0,
+          rating: product.rating || 4.5,
+          isWinner: product.isWinner || false,
+          highlightText: product.description || 'Excellent quality decision match.',
+          specs: {
+            price: `৳${(product.price || 0).toLocaleString()}`,
+            value: product.value || 'Excellent',
+            clearance: product.discount ? `${product.discount}% OFF` : 'No Offer',
+            rating: `${product.rating || 4.5}/5.0`,
+            influence: product.influence || '90/100',
+            build: product.build || 'Premium',
+            durability: product.durability || 'High (3 yrs)',
+            experience: product.experience || 'Supreme',
+            sizes: product.sizes ? product.sizes.join(', ') : 'M-XXL',
+            material: product.material || 'Premium Cotton',
+            waterproof: product.waterproof || 'No',
+            fit: product.fit || 'Custom Fit',
+            warranty: product.warranty || '1 Year',
+            returns: product.returns || '30 Days',
+            availability: product.stock && product.stock > 0 ? 'In Stock' : 'In Stock',
+            deals: product.discount ? 'Yes' : 'Yes',
+            officialStore: 'Yes',
+          }
+        }));
         return { 
-          items: PRODUCT_ITEMS, 
+          items: mappedProducts.length > 0 ? mappedProducts : PRODUCT_ITEMS, 
           sections: PRODUCT_SECTIONS, 
           titlePrefix: 'PRODUCTS' 
         };
+      }
     }
-  }, [compareMode]);
+  }, [compareMode, comparedProducts]);
 
   // Evaluate matching condition for decision highlight (Dimming non-matching options, highlighting optimal)
   const evaluatedMatchingColumns = useMemo(() => {
@@ -834,7 +881,12 @@ export function CompareEngine() {
             </p>
 
             {/* Smart Reactive Columns Display */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className={cn("grid grid-cols-1 gap-6 max-w-5xl mx-auto",
+              evaluatedMatchingColumns.length === 1 && "md:grid-cols-1 max-w-md",
+              evaluatedMatchingColumns.length === 2 && "md:grid-cols-2 max-w-3xl",
+              evaluatedMatchingColumns.length === 3 && "md:grid-cols-3",
+              evaluatedMatchingColumns.length >= 4 && "md:grid-cols-4 max-w-7xl"
+            )}>
                {evaluatedMatchingColumns.map((p, idx) => (
                   <div key={p.id} className="relative">
                      <div className={cn(
@@ -1266,18 +1318,53 @@ export function CompareEngine() {
               </div>
             )}
 
+            {compareMode === 'product' && comparedProducts.length === 0 ? (
+               <div className="bg-[#05051A] border border-white/10 rounded-[15px] p-12 text-center flex flex-col items-center justify-center min-h-[400px] shadow-2xl relative overflow-hidden">
+                 <div className="absolute inset-0 bg-gradient-to-b from-blue-600/5 to-transparent pointer-events-none" />
+                 <div className="relative z-10 flex flex-col items-center">
+                   <div className="w-16 h-16 rounded-full bg-orange-primary/15 border border-orange-primary/25 flex items-center justify-center text-orange-primary mb-6 animate-pulse">
+                     <Layers size={32} />
+                   </div>
+                   <h3 className="text-2xl font-black text-white uppercase tracking-tight italic mb-2">No products to compare</h3>
+                   <p className="text-white/60 text-xs max-w-md mb-8 leading-relaxed font-sans">
+                     Add products to compare by clicking 'Add to Compare' on any product
+                   </p>
+                   <Link 
+                     to="/products"
+                     className="px-8 py-3 bg-orange-primary hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg shadow-orange-primary/20 hover:scale-[1.03] active:scale-95 cursor-pointer leading-none inline-block border-none animate-bounce"
+                   >
+                     Browse Products
+                   </Link>
+                 </div>
+               </div>
+            ) : (
             <div className="bg-white rounded-[15px] shadow-[0_10px_40px_rgba(0,0,0,0.03)] border border-gray-100 overflow-hidden">
                
                {/* Metadata Header with active columns */}
                <div className="overflow-x-auto no-scrollbar">
                   <div className="min-w-[700px] grid grid-cols-[1.5fr_2.5fr] gap-px bg-gray-100">
-                     <div className="bg-[#FAF9F5]/70 p-6 flex flex-col justify-center">
+                     <div className="bg-[#FAF9F5]/70 p-6 flex flex-col justify-center relative">
                         <span className="text-[10px] font-black text-orange-primary uppercase tracking-widest block leading-none mb-1.5">{titlePrefix} CONTEXT</span>
-                        <h3 className="text-lg font-black text-navy italic uppercase leading-none">Decision Matrix</h3>
+                        <div className="flex items-center justify-between">
+                           <h3 className="text-lg font-black text-navy italic uppercase leading-none">Decision Matrix</h3>
+                           {compareMode === 'product' && comparedProducts.length > 0 && setComparedProducts && (
+                              <button 
+                                onClick={() => setComparedProducts([])}
+                                className="text-[10px] font-black uppercase tracking-wider text-red-400 hover:text-red-600 border border-red-200 hover:border-red-400 px-3 py-1.5 rounded-lg transition-colors cursor-pointer border bg-transparent"
+                              >
+                                Clear All
+                              </button>
+                           )}
+                        </div>
                         <p className="text-[8.5px] font-bold text-gray-400 uppercase tracking-widest italic mt-1 leading-normal">Side-by-side parameters breakdown</p>
                      </div>
                      
-                     <div className="bg-white grid grid-cols-3 divide-x divide-gray-100">
+                     <div className={cn("bg-white grid divide-x divide-gray-100",
+                        evaluatedMatchingColumns.length === 1 && "grid-cols-1",
+                        evaluatedMatchingColumns.length === 2 && "grid-cols-2",
+                        evaluatedMatchingColumns.length === 3 && "grid-cols-3",
+                        evaluatedMatchingColumns.length >= 4 && "grid-cols-4"
+                     )}>
                         {evaluatedMatchingColumns.map((p) => (
                            <div 
                              key={p.id} 
@@ -1290,6 +1377,15 @@ export function CompareEngine() {
                                 : "opacity-35 grayscale scale-95"
                              )}
                            >
+                              {/* Add Remove button for product mode */}
+                              {compareMode === 'product' && setComparedProducts && (
+                                <button
+                                  onClick={() => setComparedProducts((prev: any[]) => prev.filter((prod: any) => String(prod.id) !== String(p.id)))}
+                                  className="absolute top-2 right-2 w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-[10px] font-black hover:bg-red-500 hover:text-white transition-colors cursor-pointer border-none"
+                                >
+                                  ×
+                                </button>
+                              )}
                               {p.matchesCriteria && p.isWinner && (
                                 <div className="absolute top-2 left-2 flex items-center gap-1 bg-[#10B981] text-white text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-[3px] shadow-xs">
                                   <Trophy size={8} /> Selected Option
@@ -1363,7 +1459,12 @@ export function CompareEngine() {
                                              {metric.subLabel && <p className="text-[8.5px] font-bold text-gray-400 italic mt-0.5 leading-relaxed">{metric.subLabel}</p>}
                                           </div>
                                           
-                                          <div className="bg-white grid grid-cols-3 divide-x divide-gray-100">
+                                          <div className={cn("bg-white grid divide-x divide-gray-100",
+                                             evaluatedMatchingColumns.length === 1 && "grid-cols-1",
+                                             evaluatedMatchingColumns.length === 2 && "grid-cols-2",
+                                             evaluatedMatchingColumns.length === 3 && "grid-cols-3",
+                                             evaluatedMatchingColumns.length >= 4 && "grid-cols-4"
+                                          )}>
                                              {evaluatedMatchingColumns.map((p, vidx) => {
                                                 const val = p.specs[metric.key] || 'N/A';
                                                 
@@ -1453,6 +1554,7 @@ export function CompareEngine() {
                    </div>
                </div>
             </div>
+         )}
          </div>
 
          {/* RIGHT COLUMN: DECISION INSIGHTS / AI ADVISOR */}

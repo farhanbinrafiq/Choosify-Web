@@ -85,6 +85,17 @@ export interface Product {
   category?: string;
   variants?: any[];
   rating?: number;
+  isDeal?: boolean;
+  dealType?: 'flash' | 'seasonal' | 'brand' | 'promo' | 'clearance';
+  discountPercent?: number;
+  originalPrice?: number;
+  promoCode?: string;
+  dealValidUntil?: string; // ISO date string
+  tags?: string[];
+  featuredFlag?: boolean;
+  publishedAt?: string;
+  isNewArrival?: boolean;
+  isBestseller?: boolean;
 }
 
 export interface SubOrderItem {
@@ -101,6 +112,9 @@ export interface SubOrder {
   deliveryFee: number;
   invoiceId: string;
   trackingStatus: 'pending' | 'dispatched' | 'transit' | 'delivered';
+  codCollected?: boolean;
+  estimatedDeliveryDate?: string;
+  cancellationReason?: string;
 }
 
 export interface Order {
@@ -111,6 +125,14 @@ export interface Order {
   overallTotal: number;
   subOrders: SubOrder[];
   createdAt: string;
+  status?: 'active' | 'cancelled' | 'completed';
+  cancelledAt?: string;
+  cancellationReason?: string;
+  cancelledBy?: 'buyer' | 'seller' | 'admin';
+  returnRequested?: boolean;
+  returnReason?: string;
+  returnRequestedAt?: string;
+  disputeId?: string;
 }
 
 export interface BuyerReputation {
@@ -133,4 +155,31 @@ export interface Report {
   evidence?: string;
   status: 'pending' | 'resolved';
   createdAt: string;
+}
+
+export interface ReturnRequest {
+  id: string;
+  orderId: string;
+  sellerId: string;
+  buyerId: string;
+  reason: string;
+  description: string;
+  evidence?: string;
+  status: 'pending' | 'approved' | 'rejected' | 'completed';
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  brandId?: string;
+  brandName?: string;
+  discountType: 'percentage' | 'flat';
+  discountValue: number;
+  minOrderValue?: number;
+  maxUsage?: number;
+  usedCount: number;
+  validUntil: string;
+  active: boolean;
 }

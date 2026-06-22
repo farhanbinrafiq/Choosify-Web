@@ -18,7 +18,15 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error('Please fill in all fields');
+      toast.error('Please enter your email and password.');
+      return;
+    }
+    if (!email.includes('@')) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters.');
       return;
     }
 
@@ -28,8 +36,8 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
     
     setIsLoading(false);
     setIsLoggedIn(true);
-    toast.success('Successfully signed in!');
     onClose();
+    toast.success('Welcome back!');
   };
 
   return (

@@ -163,3 +163,10 @@ export const DEFAULT_DYNAMIC_GUIDE: DynamicGuideData = {
     { name: 'Partner Shop', price: '13,200', delivery: '৳50 · 2-4 days', iconType: 'Bookmark' }
   ]
 };
+
+import { BLOGS } from '../constants';
+export const mockGuides = BLOGS.map(g => ({
+  ...g,
+  tags: [g.category, g.type, g.author.split(' ')[0], 'guide', 'buying']
+}));
+

@@ -79,21 +79,69 @@ interface DashboardContextType {
   addThreadMessage: (threadId: string, text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', senderName?: string) => void;
   createNewThread: (id: string, title: string, avatar: string, type: 'retail' | 'wholesale' | 'general', lastMessage: string, orderRef?: string) => void;
   markAllAsRead: () => void;
+  addToRecentlyViewed: (product: any) => void;
+  addNotification: (message: string, type: 'order' | 'message' | 'system' | 'deal') => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
-  const [savedProducts, setSavedProducts] = useState([PRODUCTS[0], PRODUCTS[3], PRODUCTS[5]]);
-  const [savedBrands, setSavedBrands] = useState([BRANDS[0], BRANDS[2], BRANDS[9]]);
-  const [lovedBrands, setLovedBrands] = useState([BRANDS[1], BRANDS[3], BRANDS[4]]);
-  const [followedBrands, setFollowedBrands] = useState([BRANDS[2], BRANDS[5], BRANDS[6], BRANDS[10]]);
-  const [recentlyViewed, setRecentlyViewed] = useState([PRODUCTS[1], PRODUCTS[2], PRODUCTS[4]]);
-  const [savedGuides, setSavedGuides] = useState([
-    { id: 1, title: 'Best Budget Smartwatches 2026', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', category: 'Tech' },
-    { id: 2, title: 'Top 5 Sustainable Fashion Brands', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=300&fit=crop', category: 'Fashion' }
-  ]);
-  const [comparedProducts, setComparedProducts] = useState([PRODUCTS[0], PRODUCTS[1]]);
+  const [savedProducts, setSavedProducts] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_saved_products');
+      return saved ? JSON.parse(saved) : [PRODUCTS[0], PRODUCTS[3], PRODUCTS[5]];
+    } catch { return [PRODUCTS[0], PRODUCTS[3], PRODUCTS[5]]; }
+  });
+
+  const [savedBrands, setSavedBrands] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_saved_brands');
+      return saved ? JSON.parse(saved) : [BRANDS[0], BRANDS[2], BRANDS[9]];
+    } catch { return [BRANDS[0], BRANDS[2], BRANDS[9]]; }
+  });
+
+  const [lovedBrands, setLovedBrands] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_loved_brands');
+      return saved ? JSON.parse(saved) : [BRANDS[1], BRANDS[3], BRANDS[4]];
+    } catch { return [BRANDS[1], BRANDS[3], BRANDS[4]]; }
+  });
+
+  const [followedBrands, setFollowedBrands] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_followed_brands');
+      return saved ? JSON.parse(saved) : [BRANDS[2], BRANDS[5], BRANDS[6], BRANDS[10]];
+    } catch { return [BRANDS[2], BRANDS[5], BRANDS[6], BRANDS[10]]; }
+  });
+
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_recently_viewed');
+      return saved ? JSON.parse(saved) : [PRODUCTS[1], PRODUCTS[2], PRODUCTS[4]];
+    } catch { return [PRODUCTS[1], PRODUCTS[2], PRODUCTS[4]]; }
+  });
+
+  const [savedGuides, setSavedGuides] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_saved_guides');
+      return saved ? JSON.parse(saved) : [
+        { id: 1, title: 'Best Budget Smartwatches 2026', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', category: 'Tech' },
+        { id: 2, title: 'Top 5 Sustainable Fashion Brands', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=300&fit=crop', category: 'Fashion' }
+      ];
+    } catch {
+      return [
+        { id: 1, title: 'Best Budget Smartwatches 2026', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', category: 'Tech' },
+        { id: 2, title: 'Top 5 Sustainable Fashion Brands', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=300&fit=crop', category: 'Fashion' }
+      ];
+    }
+  });
+
+  const [comparedProducts, setComparedProducts] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_compared_products');
+      return saved ? JSON.parse(saved) : [PRODUCTS[0], PRODUCTS[1]];
+    } catch { return [PRODUCTS[0], PRODUCTS[1]]; }
+  });
 
   // Threaded Messaging States with Localstorage persistence
   const [threads, setThreads] = useState<MessageThread[]>(() => {
@@ -125,15 +173,37 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     { id: 2, text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', time: '10:35 AM' },
     { id: 3, text: 'I have a question about the delivery time to Chittagong.', sender: 'other', senderName: 'Admin Support', time: '11:00 AM', avatar: 'https://i.pravatar.cc/150?u=admin' }
   ]);
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Price Drop Alert', message: 'Samsung S24 Ultra is now 5% cheaper!', time: '2 hours ago', type: 'price', read: false },
-    { id: 2, title: 'New Review Reply', message: 'An expert replied to your review on Apex Runner Elite.', time: '5 hours ago', type: 'reply', read: true },
-    { id: 3, title: 'Guide Update', message: 'The "Best Smartwatches 2026" guide has new entries.', time: '1 day ago', type: 'system', read: false }
-  ]);
-  const [reviews, setReviews] = useState([
-    { id: 1, product: PRODUCTS[0].title, rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
-    { id: 2, product: PRODUCTS[5].title, rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
-  ]);
+  const [notifications, setNotifications] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_notifications');
+      return saved ? JSON.parse(saved) : [
+        { id: 1, title: 'Price Drop Alert', message: 'Samsung S24 Ultra is now 5% cheaper!', time: '2 hours ago', type: 'price', read: false },
+        { id: 2, title: 'New Review Reply', message: 'An expert replied to your review on Apex Runner Elite.', time: '5 hours ago', type: 'reply', read: true },
+        { id: 3, title: 'Guide Update', message: 'The "Best Smartwatches 2026" guide has new entries.', time: '1 day ago', type: 'system', read: false }
+      ];
+    } catch {
+      return [
+        { id: 1, title: 'Price Drop Alert', message: 'Samsung S24 Ultra is now 5% cheaper!', time: '2 hours ago', type: 'price', read: false },
+        { id: 2, title: 'New Review Reply', message: 'An expert replied to your review on Apex Runner Elite.', time: '5 hours ago', type: 'reply', read: true },
+        { id: 3, title: 'Guide Update', message: 'The "Best Smartwatches 2026" guide has new entries.', time: '1 day ago', type: 'system', read: false }
+      ];
+    }
+  });
+
+  const [reviews, setReviews] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_reviews');
+      return saved ? JSON.parse(saved) : [
+        { id: 1, product: PRODUCTS[0].title, rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
+        { id: 2, product: PRODUCTS[5].title, rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
+      ];
+    } catch {
+      return [
+        { id: 1, product: PRODUCTS[0].title, rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
+        { id: 2, product: PRODUCTS[5].title, rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
+      ];
+    }
+  });
 
   const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
     const saved = localStorage.getItem('choosify_campaigns');
@@ -281,6 +351,96 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     toast.success('Product removed from comparison');
   };
 
+  // Persist standard states to localStorage
+  useEffect(() => {
+    localStorage.setItem('choosify_saved_products', JSON.stringify(savedProducts));
+  }, [savedProducts]);
+
+  useEffect(() => {
+    localStorage.setItem('choosify_saved_brands', JSON.stringify(savedBrands));
+  }, [savedBrands]);
+
+  useEffect(() => {
+    localStorage.setItem('choosify_loved_brands', JSON.stringify(lovedBrands));
+  }, [lovedBrands]);
+
+  useEffect(() => {
+    localStorage.setItem('choosify_followed_brands', JSON.stringify(followedBrands));
+  }, [followedBrands]);
+
+  useEffect(() => {
+    localStorage.setItem('choosify_recently_viewed', JSON.stringify(recentlyViewed));
+  }, [recentlyViewed]);
+
+  useEffect(() => {
+    localStorage.setItem('choosify_saved_guides', JSON.stringify(savedGuides));
+  }, [savedGuides]);
+
+  useEffect(() => {
+    localStorage.setItem('choosify_compared_products', JSON.stringify(comparedProducts));
+  }, [comparedProducts]);
+
+  useEffect(() => {
+    localStorage.setItem('choosify_notifications', JSON.stringify(notifications));
+  }, [notifications]);
+
+  useEffect(() => {
+    localStorage.setItem('choosify_reviews', JSON.stringify(reviews));
+  }, [reviews]);
+
+  const addToRecentlyViewed = (product: any) => {
+    setRecentlyViewed(prev => {
+      const filtered = prev.filter(p => p.id !== product.id);
+      return [product, ...filtered].slice(0, 12);
+    });
+  };
+
+  const addNotification = (message: string, type: 'order' | 'message' | 'system' | 'deal') => {
+    const titleVal = type === 'deal' ? 'Special Deal Alert' : type.charAt(0).toUpperCase() + type.slice(1) + ' Notification';
+    const newNotification = {
+      id: Date.now().toString(),
+      message,
+      type,
+      read: false,
+      createdAt: new Date().toISOString(),
+      title: titleVal,
+      time: 'Just now'
+    };
+    setNotifications(prev => [newNotification, ...prev]);
+  };
+
+  // Expose to window to facilitate cross-context notifications without circular imports
+  useEffect(() => {
+    (window as any).choosifyAddNotification = addNotification;
+    return () => {
+      delete (window as any).choosifyAddNotification;
+    };
+  }, [notifications]);
+
+  // Listen to order actions from GlobalStateContext
+  useEffect(() => {
+    const handleOrderPlaced = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const orderId = customEvent.detail?.orderId;
+      addNotification(`New split shipment order ${orderId} was successfully initialized for Farhan!`, 'order');
+    };
+
+    const handleOrderCancelled = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const orderId = customEvent.detail?.orderId;
+      const reason = customEvent.detail?.reason || 'No reason provided';
+      addNotification(`Order ${orderId} has been cancelled. Reason: ${reason}`, 'order');
+    };
+
+    window.addEventListener('choosify-order-placed', handleOrderPlaced);
+    window.addEventListener('choosify-order-cancelled', handleOrderCancelled);
+
+    return () => {
+      window.removeEventListener('choosify-order-placed', handleOrderPlaced);
+      window.removeEventListener('choosify-order-cancelled', handleOrderCancelled);
+    };
+  }, []);
+
   // Persist threads and thread messages
   React.useEffect(() => {
     localStorage.setItem('choosify_threads', JSON.stringify(threads));
@@ -420,7 +580,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       addMessage,
       addThreadMessage,
       createNewThread,
-      markAllAsRead
+      markAllAsRead,
+      addToRecentlyViewed,
+      addNotification
     }}>
       {children}
     </DashboardContext.Provider>

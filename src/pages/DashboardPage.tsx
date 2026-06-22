@@ -229,6 +229,7 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
 
 const SavedProductsSection = () => {
   const { savedProducts, removeSavedProduct } = useDashboard();
+  const { addToCart } = useGlobalState();
   
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
@@ -251,6 +252,16 @@ const SavedProductsSection = () => {
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
           {savedProducts.map((p) => (
             <div key={p.id} className="relative group">
+              <button 
+                onClick={() => {
+                  addToCart(p, 1);
+                  toast.success('Added to cart!');
+                }}
+                className="absolute top-6 right-18 z-30 w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-[#E8500A]/20 hover:bg-[#E8500A] hover:text-white cursor-pointer"
+                title="Add to Cart"
+              >
+                <ShoppingBag size={18} />
+              </button>
               <button 
                 onClick={() => removeSavedProduct(p.id)}
                 className="absolute top-6 right-6 z-30 w-10 h-10 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-red-500/20 hover:bg-red-500 hover:text-white"
@@ -757,13 +768,15 @@ const NotificationsSection = () => {
 };
 
 const SettingsSection = () => {
-  const [profile, setProfile] = useState({
-    name: 'Farhan Bin Rafiq',
-    email: 'farhan-88@gmail.com',
-    location: 'Dhaka, Bangladesh'
-  });
+  const { currentUser, setCurrentUser } = useGlobalState();
+  const [name, setName] = useState(currentUser?.name || 'Farhan Bin Rafiq');
+  const [email, setEmail] = useState(currentUser?.email || 'farhan-88@gmail.com');
+  const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [address, setAddress] = useState(currentUser?.address || 'Dhaka, Bangladesh');
 
   const handleSave = () => {
+    setCurrentUser({ ...currentUser, name, email, phone, address });
+    localStorage.setItem('choosify_user_profile', JSON.stringify({ name, email, phone, address }));
     toast.success('Profile settings updated successfully');
   };
 
@@ -792,9 +805,9 @@ const SettingsSection = () => {
                       <Plus className="text-white" size={32} />
                    </div>
                 </div>
-                <h4 className="text-xl font-black text-navy italic uppercase mb-1">{profile.name}</h4>
+                <h4 className="text-xl font-black text-navy italic uppercase mb-1">{name}</h4>
                 <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator • ID: 89BD-001</p>
-             </div>
+              </div>
 
              <div className="space-y-6">
                 <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Basic Intel</h3>
@@ -803,24 +816,32 @@ const SettingsSection = () => {
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Full Display Name</label>
                       <input 
                         className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
-                        value={profile.name}
-                        onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                       />
                    </div>
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Email Address</label>
                       <input 
                         className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
-                        value={profile.email}
-                        onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Location (City)</label>
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Phone Number</label>
                       <input 
                         className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
-                        value={profile.location}
-                        onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                      />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Delivery Address</label>
+                      <input 
+                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
                       />
                    </div>
                 </div>
@@ -1246,12 +1267,18 @@ export function DashboardPage() {
     comparedProducts,
     messages,
     notifications,
-    campaigns
+    campaigns,
+    reviews,
+    setReviews
   } = useDashboard();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('overview');
+
+  useEffect(() => {
+    // TODO: addToRecentlyViewed called from ProductDetailPage — see Prompt 6
+  }, []);
 
   useEffect(() => {
     if (location.state && location.state.activeTab) {
@@ -1320,30 +1347,35 @@ export function DashboardPage() {
                <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your community contributions and feedback</p>
             </div>
             <div className="space-y-6">
-               {[1, 2].map(i => {
-                 const review = {
-                   name: "You",
-                   dp: "https://i.pravatar.cc/150?u=farhan",
-                   date: `May ${12 - i}, 2026`,
-                   comment: i === 1 
-                     ? "Amazing performance! The AI features are game-changing for my daily workflow. Battery life is also significantly better than predecessors." 
-                     : "Very comfortable for daily runs, but size runs slightly small. I suggest buying one size up for the perfect fit.",
-                   rating: i === 1 ? 5 : 4,
-                   verified: true,
-                   productName: PRODUCTS[i === 1 ? 0 : 5].title,
-                   productImage: PRODUCTS[i === 1 ? 0 : 5].image
-                 };
-                 return (
-                   <PublicReviewCard
-                     key={i}
-                     review={review}
-                     isDark={false}
-                     showActions={true}
-                     onEditClick={() => toast.success("Preparing review edit editor...")}
-                     onDeleteClick={() => toast.success("Review deleted successfully.")}
-                   />
-                 );
-               })}
+               {reviews && reviews.length > 0 ? (
+                 reviews.map((r, idx) => {
+                   const productImage = PRODUCTS.find(p => p.title === r.product)?.image || PLACEHOLDER_IMAGE;
+                   return (
+                     <div key={r.id || idx} className="bg-white border border-[#e8edf2] rounded-xl p-6 flex flex-col sm:flex-row gap-6 hover:border-[#E8500A]/20 transition-all shadow-sm">
+                       <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 flex items-center justify-center shrink-0">
+                         <img src={productImage} alt={r.product} className="w-full h-full object-contain" onError={handleImageError} />
+                       </div>
+                       <div className="flex-grow text-left">
+                         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                           <h4 className="font-sans font-black text-navy text-sm uppercase italic tracking-tight">{r.product}</h4>
+                           <span className="text-[10px] font-mono text-gray-400 font-extrabold uppercase">{r.date || r.createdAt || 'Just now'}</span>
+                         </div>
+                         <div className="flex items-center gap-1.5 mb-3">
+                           {[1, 2, 3, 4, 5].map(s => (
+                             <Star key={s} size={12} className={s <= Math.floor(r.rating || 5) ? "text-[#E8500A] fill-[#E8500A]" : "text-gray-250"} />
+                           ))}
+                           <span className="text-[10px] font-bold text-gray-400">({r.rating || '5'}.0)</span>
+                         </div>
+                         <p className="text-gray-600 text-xs font-medium italic leading-relaxed">{r.comment}</p>
+                       </div>
+                     </div>
+                   );
+                 })
+               ) : (
+                 <div className="py-20 border border-dashed border-gray-200 rounded-[5px] flex flex-col items-center justify-center text-center bg-white shadow-sm w-full">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider italic">No review records found</p>
+                 </div>
+               )}
             </div>
         </div>
       );

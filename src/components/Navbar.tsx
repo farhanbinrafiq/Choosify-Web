@@ -24,11 +24,22 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn } = useGlobalState();
-  const { threads } = useDashboard();
+  const { threads, notifications = [], setNotifications } = useDashboard();
 
   const unreadMsgCount = threads.filter(t => t.unread).length;
+  const unreadNotifCount = notifications.filter((n: any) => !n.read).length;
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Mark notifications as read when user opens the notifications tab
+  useEffect(() => {
+    if (location.pathname === '/dashboard') {
+      const params = new URLSearchParams(location.search);
+      if (params.get('tab') === 'notifications') {
+        setNotifications((prev: any[]) => prev.map((n: any) => ({ ...n, read: true })));
+      }
+    }
+  }, [location, setNotifications]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -193,12 +204,29 @@ export function Navbar() {
               className="relative text-white/60 hover:text-white transition-colors"
               title="Secure Support Chats"
             >
-              <MessageSquare size={19} className="text-orange-primary animate-pulse" />
-              {unreadMsgCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 text-black text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">
-                  {unreadMsgCount}
-                </span>
-              )}
+              <div className="relative">
+                <MessageSquare size={19} className="text-orange-primary animate-pulse" />
+                {unreadMsgCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                    {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
+                  </span>
+                )}
+              </div>
+            </button>
+            <button 
+              type="button"
+              onClick={() => navigate('/dashboard?tab=notifications')}
+              className="relative text-white/60 hover:text-white transition-colors animate-in fade-in"
+              title="Notifications"
+            >
+              <div className="relative">
+                <Bell size={18} />
+                {unreadNotifCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                    {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                  </span>
+                )}
+              </div>
             </button>
           </div>
 
@@ -266,7 +294,9 @@ export function Navbar() {
                             <button
                               onClick={() => {
                                 setIsUserMenuOpen(false);
-                                if (item.tab) {
+                                if (item.tab === 'notifications') {
+                                  navigate('/dashboard?tab=notifications');
+                                } else if (item.tab) {
                                   navigate(item.path, { state: { activeTab: item.tab } });
                                 } else {
                                   navigate(item.path);
@@ -274,7 +304,19 @@ export function Navbar() {
                               }}
                               className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-white hover:bg-white/5 rounded-xl transition-all group"
                             >
-                              <item.icon size={16} className="group-hover:text-orange-primary transition-colors" />
+                              <div className="relative flex items-center justify-center">
+                                <item.icon size={16} className="group-hover:text-orange-primary transition-colors" />
+                                {item.icon === Bell && unreadNotifCount > 0 && (
+                                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-orange-primary text-white text-[7px] font-black rounded-full flex items-center justify-center leading-none">
+                                    {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                                  </span>
+                                )}
+                                {item.icon === MessageSquare && unreadMsgCount > 0 && (
+                                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-orange-primary text-white text-[7px] font-black rounded-full flex items-center justify-center leading-none">
+                                    {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
+                                  </span>
+                                )}
+                              </div>
                               <span className="italic">{item.label}</span>
                             </button>
                           </React.Fragment>
@@ -407,6 +449,17 @@ export function Navbar() {
                   </Link>
                   <Link to="/compare" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/compare')}>
                     <span className="italic">Compare Engine</span>
+                  </Link>
+                  <Link to="/dashboard?tab=notifications" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/dashboard')}>
+                    <div className="flex items-center gap-3 w-full">
+                      <Bell size={16} />
+                      <span className="italic flex-1">Notifications</span>
+                      {unreadNotifCount > 0 && (
+                        <span className="w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                          {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                        </span>
+                      )}
+                    </div>
                   </Link>
                   <Link to="/categories" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/categories')}>
                     <span className="italic">All Categories</span>

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Check } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "../lib/utils";
+import { useDashboard } from "../context/DashboardContext";
+import { useGlobalState } from "../context/GlobalStateContext";
 
 export interface FollowButtonProps {
   id: string; // Unique identifier for the brand or creator (e.g. brand ID or creator name)
@@ -17,21 +19,20 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   className,
 }) => {
   const storageKey = `choosify_followed_${id}`;
+  const { followedBrands, setFollowedBrands } = useDashboard();
+  const { allBrands } = useGlobalState();
 
-  const [isFollowed, setIsFollowed] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem(storageKey) === "true";
-    } catch {
-      return false;
-    }
-  });
+  const isFollowed = followedBrands.some((b: any) => 
+    String(b.id) === String(id) || b.name?.toLowerCase() === String(id).toLowerCase()
+  );
 
   // Keep in sync with other instances of the same button on the page in real-time
   useEffect(() => {
     const handleToggle = (e: Event) => {
       const customEvent = e as CustomEvent<{ id: string; isFollowed: boolean }>;
       if (customEvent.detail.id === id) {
-        setIsFollowed(customEvent.detail.isFollowed);
+        // Since state is now driven directly by Context, we don't need a local state setter,
+        // but keeping this listener to respond to events if needed or keep compatibility.
       }
     };
 
@@ -52,7 +53,19 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
       console.warn("localStorage write failed:", err);
     }
 
-    setIsFollowed(nextFollowed);
+    if (!nextFollowed) {
+      setFollowedBrands((prev: any[]) => prev.filter((b: any) => 
+        String(b.id) !== String(id) && b.name?.toLowerCase() !== String(id).toLowerCase()
+      ));
+    } else {
+      const brandObj = allBrands.find((b: any) => 
+        String(b.id) === String(id) || b.name?.toLowerCase() === String(id).toLowerCase()
+      ) || { id, name: String(id) };
+      setFollowedBrands((prev: any[]) => {
+        const exists = prev.some((b: any) => String(b.id) === String(id));
+        return exists ? prev : [brandObj, ...prev];
+      });
+    }
 
     // Toast notifications customized per requirements
     if (nextFollowed) {

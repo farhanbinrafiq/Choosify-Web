@@ -11,8 +11,15 @@ import toast from 'react-hot-toast';
 
 export function CustomerOrdersPage() {
   const navigate = useNavigate();
-  const { orders } = useGlobalState();
-  const { createNewThread } = useDashboard();
+  const { orders, cancelOrder } = useGlobalState();
+  const { createNewThread, addNotification } = useDashboard();
+
+  const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+
+  const [returningOrderId, setReturningOrderId] = useState<string | null>(null);
+  const [returnReason, setReturnReason] = useState('Wrong Item');
+  const [returnDesc, setReturnDesc] = useState('');
 
   const handleOpenConversation = (subOrder: any, parentOrderId: string) => {
     // Dynamically spawn or update thread before navigating to guarantee existence
@@ -30,8 +37,31 @@ export function CustomerOrdersPage() {
     navigate(`/messages/${threadId}`);
   };
 
-  const handleDownloadInvoice = (invoiceId: string) => {
-    toast.success(`Lot Pro-Forma Invoice sheet "${invoiceId}" downloaded successfully!`);
+  const handleDownloadInvoice = (order: any, sub: any) => {
+    const content = `
+CHOOSIFY.BD — OFFICIAL INVOICE
+================================
+Order ID: ${order.orderId}
+Invoice ID: ${sub.invoiceId}
+Date: ${new Date(order.createdAt).toLocaleDateString('en-BD')}
+Seller: ${sub.sellerBusinessName}
+Payment: ${order.isCOD ? 'Cash on Delivery' : 'Online Payment'}
+
+ITEMS:
+${sub.items.map((it: any) => `- ${it.productTitle} x${it.quantity} @ ৳${it.price.toLocaleString()} = ৳${(it.price * it.quantity).toLocaleString()}`).join('\n')}
+
+Subtotal: ৳${sub.items.reduce((a: number, it: any) => a + it.price * it.quantity, 0).toLocaleString()}
+Delivery: ৳${sub.deliveryFee}
+TOTAL: ৳${(sub.items.reduce((a: number, it: any) => a + it.price * it.quantity, 0) + sub.deliveryFee).toLocaleString()}
+
+Thank you for shopping with Choosify.bd
+    `.trim();
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${sub.invoiceId}.txt`; a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Invoice ${sub.invoiceId} downloaded.`);
   };
 
   // Helper to fetch matching products image based on title inside PRODUCTS constants
@@ -101,10 +131,12 @@ export function CustomerOrdersPage() {
               {orders.map((order, idx) => {
                 const orderDate = new Date(order.createdAt).toLocaleString();
                 const totalItemCount = order.subOrders.reduce((acc, sub) => acc + sub.items.reduce((sum, item) => sum + item.quantity, 0), 0);
+                const allPending = order.subOrders.every((sub: any) => sub.trackingStatus === 'pending');
+                const allDelivered = order.subOrders.every((sub: any) => sub.trackingStatus === 'delivered');
 
                 return (
                   <div key={order.orderId} className="bg-[#050514]/65 border border-white/10 rounded-[5px] p-6 md:p-8 space-y-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.01] rounded-full blur-2xl" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.01] rounded-full blur-2xl flex" />
                     
                     {/* Upper order header */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-4 gap-4">
@@ -113,6 +145,11 @@ export function CustomerOrdersPage() {
                           <span className="text-[10px] font-black bg-[#F96500]/10 border border-[#F96500]/30 text-orange-primary px-2.5 py-0.5 rounded italic uppercase tracking-wider">
                             ORDER Reference: {order.orderId}
                           </span>
+                          {order.status === 'cancelled' && (
+                            <span className="text-[9px] font-black bg-red-600/30 border border-red-500 text-red-500 px-2 py-0.5 rounded uppercase tracking-widest">
+                              CANCELLED
+                            </span>
+                          )}
                           <span className="text-[9px] font-black bg-navy border border-white/10 text-white px-2 py-0.5 rounded uppercase tracking-widest">
                             {order.isCOD ? 'Cash On Delivery' : 'Settle Pre-Paid'}
                           </span>
@@ -195,7 +232,36 @@ export function CustomerOrdersPage() {
                               </div>
 
                               {/* Action buttons inside each Lot/Suborder */}
-                              <div className="flex gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+                              <div className="flex gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto items-center">
+                                {allPending && order.status !== 'cancelled' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setCancellingOrderId(order.orderId);
+                                      setCancelReason('');
+                                      setReturningOrderId(null);
+                                    }}
+                                    className="text-[10px] font-black uppercase tracking-wider text-red-500 hover:text-red-700 transition-colors cursor-pointer bg-transparent border-none mr-2"
+                                  >
+                                    Cancel Order
+                                  </button>
+                                )}
+
+                                {allDelivered && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setReturningOrderId(order.orderId);
+                                      setReturnReason('Wrong Item');
+                                      setReturnDesc('');
+                                      setCancellingOrderId(null);
+                                    }}
+                                    className="text-[10px] font-black uppercase tracking-wider text-orange-primary hover:text-[#FF5B00] transition-colors cursor-pointer bg-transparent border-none mr-2"
+                                  >
+                                    Request Return
+                                  </button>
+                                )}
+
                                 <button
                                   type="button"
                                   onClick={() => handleOpenConversation(sub, order.orderId)}
@@ -218,8 +284,8 @@ export function CustomerOrdersPage() {
 
                                 <button
                                   type="button"
-                                  onClick={() => handleDownloadInvoice(sub.invoiceId)}
-                                  className="h-11 w-11 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 flex items-center justify-center border border-white/10"
+                                  onClick={() => handleDownloadInvoice(order, sub)}
+                                  className="h-11 w-11 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 flex items-center justify-center border border-white/10 shrink-0"
                                   title="Download corporate invoice PDF"
                                 >
                                   <FileText size={14} />
@@ -232,6 +298,118 @@ export function CustomerOrdersPage() {
                         );
                       })}
                     </div>
+
+                    {/* Inline Cancel Order UI */}
+                    {cancellingOrderId === order.orderId && (
+                      <div className="bg-red-950/20 border border-red-500/25 rounded-[5px] p-5 space-y-4 animate-fade-in text-left">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-red-500 uppercase tracking-widest leading-none">Are you sure?</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block leading-none">Reason for cancellation *</label>
+                          <textarea
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                            placeholder="Reason is required to cancel this lot..."
+                            className="w-full h-16 bg-black/40 border border-white/10 rounded-[5px] p-3 text-xs text-white focus:outline-none focus:border-red-500 font-sans"
+                          />
+                        </div>
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!cancelReason.trim()) {
+                                toast.error('Cancellation reason is required.');
+                                return;
+                              }
+                              cancelOrder(order.orderId, cancelReason);
+                              setCancellingOrderId(null);
+                              setCancelReason('');
+                              toast.success('Order cancelled successfully.');
+                            }}
+                            className="h-9 px-4 bg-red-600 hover:bg-red-700 text-white text-[9.5px] font-black uppercase tracking-wider rounded-[5px] cursor-pointer transition-colors border-none"
+                          >
+                            Confirm Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCancellingOrderId(null);
+                              setCancelReason('');
+                            }}
+                            className="h-9 px-4 bg-white/5 hover:bg-white/10 text-white text-[9.5px] font-black uppercase tracking-wider rounded-[5px] cursor-pointer transition-colors border-none"
+                          >
+                            Keep Order
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Inline Return Request UI */}
+                    {returningOrderId === order.orderId && (
+                      <div className="bg-amber-950/10 border border-[#F96500]/25 rounded-[5px] p-5 space-y-4 animate-fade-in text-left">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-orange-primary uppercase tracking-widest leading-none">Request Return / Dispute</span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block leading-none">Reason for Return</label>
+                            <select
+                              value={returnReason}
+                              onChange={(e) => setReturnReason(e.target.value)}
+                              className="w-full h-10 bg-[#050514] border border-white/10 rounded-[5px] px-3 text-xs font-bold text-white focus:outline-none focus:border-orange-primary [&>option]:bg-[#050514]"
+                            >
+                              <option value="Wrong Item">Wrong Item</option>
+                              <option value="Damaged">Damaged</option>
+                              <option value="Not as Described">Not as Described</option>
+                              <option value="Changed Mind">Changed Mind</option>
+                            </select>
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block leading-none">Detailed Description</label>
+                            <textarea
+                              value={returnDesc}
+                              onChange={(e) => setReturnDesc(e.target.value)}
+                              placeholder="Please detail why the items are being returned..."
+                              className="w-full h-20 bg-black/40 border border-white/10 rounded-[5px] p-3 text-xs text-white focus:outline-none focus:border-orange-primary font-sans"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              window.dispatchEvent(new CustomEvent('choosify-return-request', { 
+                                detail: { 
+                                  orderId: order.orderId, 
+                                  reason: returnReason, 
+                                  description: returnDesc 
+                                } 
+                              }));
+                              toast.success('Return request submitted. We will respond within 48 hours.');
+                              addNotification('Your return request has been submitted.', 'order');
+                              setReturningOrderId(null);
+                              setReturnReason('Wrong Item');
+                              setReturnDesc('');
+                            }}
+                            className="h-9 px-4 bg-orange-primary hover:bg-[#FF5B00] text-white text-[9.5px] font-black uppercase tracking-wider rounded-[5px] cursor-pointer transition-colors border-none"
+                          >
+                            Submit Return Request
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReturningOrderId(null);
+                              setReturnReason('Wrong Item');
+                              setReturnDesc('');
+                            }}
+                            className="h-9 px-4 bg-white/5 hover:bg-white/10 text-white text-[9.5px] font-black uppercase tracking-wider rounded-[5px] cursor-pointer transition-colors border-none"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                   </div>
                 );

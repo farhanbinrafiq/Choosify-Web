@@ -1,8 +1,40 @@
-import React from 'react';
-import { CheckCircle2, Smartphone, Shirt, Sparkles, Home, Cpu, Dumbbell } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { CheckCircle2 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useGlobalState } from '../context/GlobalStateContext';
+import toast from 'react-hot-toast';
 
 export function LoginSignUpPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { setIsLoggedIn } = useGlobalState();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error('Please enter your email and password.');
+      return;
+    }
+    if (!email.includes('@')) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters.');
+      return;
+    }
+
+    setIsLoggedIn(true);
+    toast.success('Welcome back!');
+    navigate(location.state?.from || '/dashboard');
+  };
+
+  const handleSocialLogin = (provider: 'Google' | 'Facebook') => {
+    toast.success(`${provider} login coming soon! Use email login for now.`);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <div className="flex-1 flex flex-col lg:flex-row">
@@ -27,18 +59,30 @@ export function LoginSignUpPage() {
                  <button className="pb-4 text-2xl font-black text-navy uppercase tracking-tighter border-b-4 border-orange-primary italic">Sign In</button>
                  <button className="pb-4 text-2xl font-black text-gray-300 uppercase tracking-tighter italic">Sign Up</button>
               </div>
-              <div className="space-y-8">
+              <form onSubmit={handleLogin} className="space-y-8">
                  <div className="space-y-2">
                     <h2 className="text-3xl font-black text-navy uppercase tracking-tighter italic">Welcome Back 👋</h2>
-                    <input type="email" placeholder="Email Address" className="w-full h-14 pl-4 rounded-xl bg-ice-blue border-none focus:ring-2 focus:ring-orange-primary outline-none font-semibold" />
-                    <input type="password" placeholder="Password" className="w-full h-14 pl-4 rounded-xl bg-ice-blue border-none focus:ring-2 focus:ring-orange-primary outline-none font-semibold" />
+                    <input 
+                      type="email" 
+                      placeholder="Email Address" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full h-14 pl-4 rounded-xl bg-ice-blue border-none focus:ring-2 focus:ring-orange-primary outline-none font-semibold" 
+                    />
+                    <input 
+                      type="password" 
+                      placeholder="Password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full h-14 pl-4 rounded-xl bg-ice-blue border-none focus:ring-2 focus:ring-orange-primary outline-none font-semibold" 
+                    />
                  </div>
-                 <button className="w-full h-16 button-gradient text-white font-black rounded-2xl text-sm uppercase tracking-widest shadow-xl shadow-orange-primary/30">Log In Now</button>
+                 <button type="submit" className="w-full h-16 button-gradient text-white font-black rounded-2xl text-sm uppercase tracking-widest shadow-xl shadow-orange-primary/30">Log In Now</button>
                  <div className="grid grid-cols-2 gap-4">
-                    <button className="h-14 rounded-2xl border-2 border-gray-100 flex items-center justify-center gap-3 font-bold text-navy hover:bg-ice-blue transition-all">Google</button>
-                    <button className="h-14 rounded-2xl border-2 border-gray-100 flex items-center justify-center gap-3 font-bold text-navy hover:bg-ice-blue transition-all">Facebook</button>
+                    <button type="button" onClick={() => handleSocialLogin('Google')} className="h-14 rounded-2xl border-2 border-gray-100 flex items-center justify-center gap-3 font-bold text-navy hover:bg-ice-blue transition-all">Google</button>
+                    <button type="button" onClick={() => handleSocialLogin('Facebook')} className="h-14 rounded-2xl border-2 border-gray-100 flex items-center justify-center gap-3 font-bold text-navy hover:bg-ice-blue transition-all">Facebook</button>
                  </div>
-              </div>
+              </form>
            </div>
         </div>
       </div>

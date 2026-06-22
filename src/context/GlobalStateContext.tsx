@@ -37,6 +37,7 @@ export interface GlobalStateContextType {
   clearCart: () => void;
   orders: Order[];
   createOrder: (isCOD: boolean) => Order | null;
+  cancelOrder: (orderId: string, reason: string) => void;
   addOrder: (order: Order) => void;
   updateSubOrderStatus: (parentOrderId: string, sellerId: string, nextStatus: 'pending' | 'dispatched' | 'transit' | 'delivered') => void;
   reports: Report[];
@@ -756,6 +757,20 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       return null;
     }
 
+    if (isCOD) {
+      const reputation = INITIAL_BUYER_REPUTATIONS.find(rep => rep.userId === currentUser.id);
+      if (reputation) {
+        if (reputation.codTrustScore < 50) {
+          toast.error('COD is not available for your account due to high cancellation history. Please use online payment.');
+          return null;
+        }
+        if (reputation.cancellationRatio > 40) {
+          toast.error('COD restricted: cancellation ratio is too high for your account.');
+          return null;
+        }
+      }
+    }
+
     // Dynamic Slabs calculations for wholesale prices
     const processItemPrice = (item: CartItem) => {
       const baseProduct = item.product;
@@ -827,13 +842,54 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       isSplit,
       overallTotal,
       subOrders,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      status: 'active'
     };
 
     setOrders(prev => [newOrder, ...prev]);
     clearCart();
     toast.success(`Order Placed Successfully! ${isSplit ? 'Split into ' + subOrders.length + ' deliveries per seller.' : 'Sent to dispatch.'}`);
+    
+    // Dispatch a custom window event for addToRecentlyViewed/notifications bridge
+    window.dispatchEvent(new CustomEvent('choosify-order-placed', { detail: { orderId: newOrder.orderId } }));
+    
     return newOrder;
+  };
+
+  const cancelOrder = (orderId: string, reason: string) => {
+    const order = orders.find(o => o.orderId === orderId);
+    if (!order) {
+      toast.error('Order not found.');
+      return;
+    }
+
+    const allPending = order.subOrders.every(sub => sub.trackingStatus === 'pending');
+    if (!allPending) {
+      toast.error('This order has already been dispatched and cannot be cancelled.');
+      return;
+    }
+
+    setOrders(prev => prev.map(o => {
+      if (o.orderId === orderId) {
+        return {
+          ...o,
+          cancelledAt: new Date().toISOString(),
+          cancellationReason: reason,
+          status: 'cancelled' as const
+        };
+      }
+      return o;
+    }));
+
+    toast.success('Order cancelled successfully.');
+
+    // Trigger notification if available, otherwise just use standard channels
+    const addNotification = (window as any).choosifyAddNotification;
+    if (typeof addNotification === 'function') {
+      addNotification(`Your order ${orderId} has been successfully cancelled!`, 'order');
+    } else {
+      window.dispatchEvent(new CustomEvent('choosify-order-cancelled', { detail: { orderId, reason } }));
+    }
   };
 
   const addOrder = (order: Order) => {
@@ -906,6 +962,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       clearCart,
       orders,
       createOrder,
+      cancelOrder,
       addOrder,
       updateSubOrderStatus,
       reports,

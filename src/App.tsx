@@ -156,6 +156,15 @@ function ScreenPreview({ title, children, id }: { title: string, children: React
 
 import { useGlobalState } from './context/GlobalStateContext';
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn } = useGlobalState();
+  const location = useLocation();
+  if (!isLoggedIn) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+  return <>{children}</>;
+}
+
 function AppContent() {
   const location = useLocation();
   const isOverview = location.pathname === '/overview';
@@ -183,23 +192,23 @@ function AppContent() {
             <Route path="/recommendations/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
             <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
-            <Route path="/post-offer" element={<PageWrapper><PostOfferPage /></PageWrapper>} />
+            <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/customer-favorite" element={<PageWrapper><CustomerFavoritePage /></PageWrapper>} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
             <Route path="/creators" element={<PageWrapper><CreatorsPage /></PageWrapper>} />
             <Route path="/creators/:id" element={<PageWrapper><CreatorProfilePage /></PageWrapper>} />
             <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
-            <Route path="/checkout" element={<PageWrapper><CheckoutPage /></PageWrapper>} />
+            <Route path="/checkout" element={<ProtectedRoute><PageWrapper><CheckoutPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />
-            <Route path="/seller/orders" element={<PageWrapper><SellerIncomingOrdersPage /></PageWrapper>} />
-            <Route path="/seller/orders/:id" element={<PageWrapper><SellerOrderDetailsPage /></PageWrapper>} />
-            <Route path="/dashboard" element={<PageWrapper><DashboardPage /></PageWrapper>} />
+            <Route path="/seller/orders" element={<ProtectedRoute><PageWrapper><SellerIncomingOrdersPage /></PageWrapper></ProtectedRoute>} />
+            <Route path="/seller/orders/:id" element={<ProtectedRoute><PageWrapper><SellerOrderDetailsPage /></PageWrapper></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/cashbook*" element={<Navigate to="/" replace />} />
-            <Route path="/messages" element={<PageWrapper><MessagesPage /></PageWrapper>} />
-            <Route path="/messages/:threadId" element={<PageWrapper><MessagesPage /></PageWrapper>} />
-            <Route path="/profile/orders" element={<PageWrapper><CustomerOrdersPage /></PageWrapper>} />
+            <Route path="/messages" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
+            <Route path="/messages/:threadId" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
+            <Route path="/profile/orders" element={<ProtectedRoute><PageWrapper><CustomerOrdersPage /></PageWrapper></ProtectedRoute>} />
             <Route path="*" element={<PageWrapper><NotFoundPage /></PageWrapper>} />
           </Routes>
         </Suspense>

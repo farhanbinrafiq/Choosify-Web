@@ -18,8 +18,15 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const KNOWN_PROMOS = [
+  { code: 'AARONG15', discount: 15, type: 'percentage' as const },
+  { code: 'APEXFOOT26', discount: 500, type: 'flat' as const },
+  { code: 'SAILOREID', discount: 20, type: 'percentage' as const },
+  { code: 'ADIEXTRA10', discount: 10, type: 'percentage' as const },
+];
+
 export function CheckoutPage() {
-  const { mode, retailCart, wholesaleCart, createOrder, addOrder, clearCart } = useGlobalState();
+  const { mode, retailCart, wholesaleCart, createOrder, addOrder, clearCart, currentUser, buyerReputations } = useGlobalState();
   const { createNewThread } = useDashboard();
   
   const navigate = useNavigate();
@@ -40,6 +47,28 @@ export function CheckoutPage() {
   const [region, setRegion] = useState('Dhaka');
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'credit'>('cod');
+
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount: number; type: 'flat' | 'percentage' } | null>(null);
+
+  const handleApplyPromo = () => {
+    const found = KNOWN_PROMOS.find(p => p.code === promoCode.trim().toUpperCase());
+    if (!found) { toast.error('Invalid or expired promo code.'); return; }
+    if (appliedPromo) { toast.error('A promo code is already applied.'); return; }
+    setAppliedPromo(found);
+    toast.success(`Promo code applied! ${found.type === 'percentage' ? found.discount + '% OFF' : '৳' + found.discount + ' OFF'}`);
+  };
+
+  const userRep = buyerReputations?.find(rep => rep.userId === currentUser?.id);
+  const codTrustScore = userRep ? userRep.codTrustScore : 100;
+  const cancellationRatio = userRep ? userRep.cancellationRatio : 0;
+  const isCODRestricted = codTrustScore < 50 || cancellationRatio > 40;
+
+  React.useEffect(() => {
+    if (isCODRestricted) {
+      setPaymentMethod('credit');
+    }
+  }, [isCODRestricted]);
 
   // If cart is empty, redirect
   React.useEffect(() => {
@@ -94,8 +123,15 @@ export function CheckoutPage() {
 
   const aggregateTotal = subtotal + deliveryTotal;
 
+  const promoDiscount = appliedPromo
+    ? appliedPromo.type === 'percentage'
+      ? Math.round(subtotal * appliedPromo.discount / 100)
+      : appliedPromo.discount
+    : 0;
+  const finalTotal = aggregateTotal - promoDiscount;
+
   // COD support limits (retail under 150k, B2B quote allowed)
-  const isCODEligible = sourceMode === 'retail' ? (aggregateTotal < 150000) : !isQuotationRequest;
+  const isCODEligible = (sourceMode === 'retail' ? (aggregateTotal < 150000) : !isQuotationRequest) && !isCODRestricted;
 
   const handlePlaceOrder = () => {
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
@@ -191,10 +227,14 @@ ORDER STATUS: PENDING_CONFIRMATION
       buyerId: 'user-standard',
       isCOD: paymentMethod === 'cod',
       isSplit: splitCount > 1,
-      overallTotal: aggregateTotal,
+      overallTotal: finalTotal,
       subOrders: generatedSubOrders,
       createdAt: new Date().toISOString()
     };
+
+    if (appliedPromo) {
+      window.dispatchEvent(new CustomEvent('choosify-promo-applied', { detail: appliedPromo }));
+    }
 
     // Add to global state (which automatically updates localStorage and triggers reactivity)
     addOrder(fullOrderObject);
@@ -372,6 +412,12 @@ ORDER STATUS: PENDING_CONFIRMATION
             <div className="space-y-3">
               <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block leading-none mb-1">Select Payment Settlement</span>
 
+              {isCODRestricted && (
+                <div id="cod-restriction-warning" className="bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold px-4 py-3 rounded-xl">
+                  ⚠ COD is restricted on your account due to order history. Please use online payment.
+                </div>
+              )}
+
               <button
                 onClick={() => setPaymentMethod('cod')}
                 disabled={!isCODEligible}
@@ -423,9 +469,52 @@ ORDER STATUS: PENDING_CONFIRMATION
                 <span className="text-navy">৳{deliveryTotal.toLocaleString()}</span>
               </div>
 
-              <div className="border-t pt-4 flex justify-between items-center font-black italic">
+              {appliedPromo && (
+                <div className="flex justify-between items-center text-[10px] font-black text-emerald-600 uppercase tracking-widest italic">
+                  <span>Promo Discount</span>
+                  <span>-৳{promoDiscount.toLocaleString()}</span>
+                </div>
+              )}
+
+              {/* Promo code input section */}
+              <div className="border-y py-4 my-2 space-y-2">
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block leading-none">Voucher Code</span>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    placeholder="Enter promo code"
+                    className="flex-1 h-10 bg-gray-50/50 border border-gray-100 rounded-xl px-4 text-xs font-black text-navy focus:outline-none focus:border-orange-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    className="h-10 px-4 bg-navy hover:bg-[#E8500A] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer transition-colors border-none"
+                  >
+                    Apply
+                  </button>
+                </div>
+                {appliedPromo && (
+                  <div className="flex items-center justify-between text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl text-[10px] font-bold">
+                    <span>✓ {appliedPromo.code} applied — saving ৳{promoDiscount.toLocaleString()}</span>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setAppliedPromo(null);
+                        setPromoCode('');
+                      }}
+                      className="text-emerald-800 hover:text-red-500 font-extrabold text-xs ml-2 cursor-pointer bg-transparent border-none"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-2 flex justify-between items-center font-black italic">
                 <span className="text-xs uppercase tracking-widest text-[#0A0A1F]">Settlement Total</span>
-                <span className="text-2xl text-orange-primary tracking-tight">৳{aggregateTotal.toLocaleString()}</span>
+                <span className="text-2xl text-orange-primary tracking-tight">৳{finalTotal.toLocaleString()}</span>
               </div>
             </div>
 

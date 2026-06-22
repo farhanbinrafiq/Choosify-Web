@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Star,
   Zap,
@@ -107,6 +107,7 @@ function WithInfluencerReviews({ brandName }: { brandName: string }) {
 export function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
 
   React.useEffect(() => {
@@ -115,8 +116,19 @@ export function ProductDetailPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const { allProducts, allBrands, addToCart, mode } = useGlobalState();
-  const { addRecentlyViewed, createNewThread, addThreadMessage } = useDashboard();
+  const { allProducts, allBrands, addToCart, mode, isLoggedIn, currentUser } = useGlobalState();
+  const {
+    addRecentlyViewed,
+    createNewThread,
+    addThreadMessage,
+    addToRecentlyViewed,
+    reviews,
+    setReviews,
+    addNotification,
+    comparedProducts,
+    setComparedProducts,
+  } = useDashboard();
+
   const product: any =
     allProducts.find((p: any) => p.id === Number(id)) ||
     allProducts.find((p: any) => p.id === Number(id) + 1000) ||
@@ -124,10 +136,52 @@ export function ProductDetailPage() {
 
   React.useEffect(() => {
     if (product) {
+      addToRecentlyViewed(product);
+    }
+  }, [product?.id]);
+
+  React.useEffect(() => {
+    if (product) {
       addRecentlyViewed(product);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.id]);
+
+  const [selectedRating, setSelectedRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+
+  const handleReviewSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newReview = {
+      id: Date.now().toString(),
+      productId: product.id,
+      productTitle: product.title,
+      rating: selectedRating,
+      text: reviewText,
+      authorName: currentUser.name,
+      createdAt: new Date().toISOString()
+    };
+    setReviews((prev: any[]) => [newReview, ...prev]);
+    setSelectedRating(5);
+    setReviewText("");
+    toast.success('Review submitted! It will appear after approval.');
+    if (typeof addNotification === 'function') {
+      addNotification('Your review was submitted successfully.', 'system');
+    }
+  };
+
+  const handleAddToCompare = () => {
+    if (comparedProducts.some((p: any) => p.id === product.id)) {
+      toast.error('This product is already in your comparison list.');
+      return;
+    }
+    if (comparedProducts.length >= 4) {
+      toast.error('Comparison limit reached (4 products)');
+      return;
+    }
+    setComparedProducts((prev: any[]) => [product, ...prev]);
+    toast.success('Added to comparison!');
+  };
   const brandObj = allBrands.find((b: any) => b.id === product.brandId);
   const brandId = brandObj ? brandObj.id : 1;
   const brandName = brandObj ? brandObj.name : "Apex";
@@ -824,6 +878,12 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   >
                     VISIT OFFICIAL STORE
                   </Link>
+                  <button
+                    onClick={handleAddToCompare}
+                    className="px-6 py-3 rounded-full bg-white text-[#1A1D4E] hover:bg-gray-50 text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all transform hover:scale-[1.03] active:scale-95 italic border border-[#e8edf2] cursor-pointer shadow-sm"
+                  >
+                    ADD TO COMPARE
+                  </button>
                 </div>
               ) : (
                 /* B2B Wholesale channels calculator inside the dark theme wrapper as well! */
@@ -945,7 +1005,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   </div>
 
                   {/* Action buttons */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
                     <button
                       onClick={handleAddToCartClick}
                       className={cn(
@@ -963,6 +1023,13 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                       className="py-3 w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-wider italic transition-all flex items-center justify-center gap-2 cursor-pointer transform hover:scale-[1.03] active:scale-95"
                     >
                       Request Business Quote
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAddToCompare}
+                      className="py-3 w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-wider italic transition-all flex items-center justify-center gap-2 cursor-pointer transform hover:scale-[1.03] active:scale-95 text-center"
+                    >
+                      Add to Compare
                     </button>
                   </div>
 
@@ -1483,8 +1550,90 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 </p>
               </div>
 
+              {/* Write a Customer Review Card */}
+              <div className="border border-gray-100 rounded-2xl p-6 bg-gray-50/50">
+                <h4 className="text-sm font-black text-navy uppercase tracking-wider mb-4 italic">
+                  Write a Customer Review
+                </h4>
+                {!isLoggedIn ? (
+                  <div className="flex flex-col items-center justify-center py-6 text-center space-y-3 bg-white border border-gray-150 rounded-xl p-6">
+                    <div className="w-10 h-10 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center">
+                      <ShieldCheck size={20} />
+                    </div>
+                    <span className="text-xs font-black text-[#555] uppercase tracking-wider">
+                      Sign in to write a review
+                    </span>
+                    <p className="text-[10px] text-gray-500 max-w-xs leading-relaxed uppercase font-black tracking-wide">
+                      Please log in to your Choosify account to provide feedback on this product.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/login', { state: { from: location.pathname } })}
+                      className="h-10 px-6 bg-[#E8500A] text-white text-[10px] font-black uppercase tracking-widest italic rounded-full hover:scale-102 active:scale-95 transition-all shadow-md cursor-pointer border-none"
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleReviewSubmit} className="space-y-4">
+                    <div className="flex flex-row items-center gap-2 text-left">
+                      <span className="text-[10px] font-black text-navy uppercase tracking-wider mr-2">Your Rating:</span>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setSelectedRating(star)}
+                          className="hover:scale-110 active:scale-90 transition-all cursor-pointer bg-transparent border-none p-0"
+                        >
+                          <Star
+                            size={18}
+                            className={cn(
+                              "transition-colors",
+                              star <= selectedRating
+                                ? "text-[#E8500A] fill-[#E8500A]"
+                                : "text-gray-300"
+                            )}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <div className="space-y-1.5 text-left">
+                      <label className="block text-[8px] font-black uppercase tracking-widest text-[#1A1A2E]/60 ml-2">Review Details</label>
+                      <textarea
+                        rows={3}
+                        required
+                        placeholder="Write your review here..."
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-xs text-navy outline-none focus:border-[#E8500A] focus:ring-1 focus:ring-[#E8500A] transition-all"
+                      />
+                    </div>
+                    <div className="text-right">
+                      <button
+                        type="submit"
+                        className="h-11 px-6 bg-[#E8500A] text-white text-[10px] font-black uppercase tracking-widest italic rounded-full shadow-lg shadow-orange-primary/10 hover:scale-[1.01] hover:brightness-110 active:scale-95 transition-all cursor-pointer border-none"
+                      >
+                        Submit Customer Review
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
+                  ...reviews
+                    .filter((r: any) => r.productId === product.id)
+                    .map((r: any) => ({
+                      name: r.authorName,
+                      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(r.authorName)}`,
+                      time: "POSTED JUST NOW",
+                      rating: String(r.rating),
+                      content: r.text,
+                      date: "RECENTLY",
+                      helpful: 0,
+                      images: []
+                    })),
                   {
                     name: "Tanvir Hasan",
                     avatar: "https://i.pravatar.cc/150?u=tanvir",

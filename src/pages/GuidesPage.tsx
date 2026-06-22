@@ -9,12 +9,25 @@ import { QuickAccessCard } from '../components/QuickAccessCard';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { RecommendationCardSkeleton } from '../components/Skeleton';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
+import { useDashboard } from '../context/DashboardContext';
+import toast from 'react-hot-toast';
 
 // Sub-component for Featured Story (Segment 1 of reference image)
 export function FeaturedCard({ guide }: { guide: any }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const { savedGuides, setSavedGuides } = useDashboard();
+  const isBookmarked = savedGuides.some((g: any) => g.id === guide.id);
+
+  const handleBookmark = () => {
+    if (isBookmarked) {
+      setSavedGuides((prev: any[]) => prev.filter((g: any) => g.id !== guide.id));
+      toast.success('Removed from saved guides');
+    } else {
+      setSavedGuides((prev: any[]) => [guide, ...prev]);
+      toast.success('Guide saved to your dashboard!');
+    }
+  };
 
   const handleMouseEnter = () => {
     setIsHovering(true);
@@ -121,7 +134,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              setIsBookmarked(!isBookmarked);
+              handleBookmark();
             }}
             className={cn(
               "w-9 h-9 rounded-full bg-white border flex items-center justify-center transition-all cursor-pointer shadow-none",
@@ -142,7 +155,18 @@ export function FeaturedCard({ guide }: { guide: any }) {
 export function ReelCard({ guide }: { guide: any }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const { savedGuides, setSavedGuides } = useDashboard();
+  const isBookmarked = savedGuides.some((g: any) => g.id === guide.id);
+
+  const handleBookmark = () => {
+    if (isBookmarked) {
+      setSavedGuides((prev: any[]) => prev.filter((g: any) => g.id !== guide.id));
+      toast.success('Removed from saved guides');
+    } else {
+      setSavedGuides((prev: any[]) => [guide, ...prev]);
+      toast.success('Guide saved to your dashboard!');
+    }
+  };
 
   const handleMouseEnter = () => {
     setIsHovering(true);
@@ -247,7 +271,7 @@ export function ReelCard({ guide }: { guide: any }) {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            setIsBookmarked(!isBookmarked);
+            handleBookmark();
           }}
           className={cn(
             "w-8 h-8 rounded-full bg-white border flex items-center justify-center transition-all cursor-pointer shadow-none",
@@ -267,7 +291,18 @@ export function ReelCard({ guide }: { guide: any }) {
 export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeType: 'youtube' | 'blog' }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const { savedGuides, setSavedGuides } = useDashboard();
+  const isBookmarked = savedGuides.some((g: any) => g.id === guide.id);
+
+  const handleBookmark = () => {
+    if (isBookmarked) {
+      setSavedGuides((prev: any[]) => prev.filter((g: any) => g.id !== guide.id));
+      toast.success('Removed from saved guides');
+    } else {
+      setSavedGuides((prev: any[]) => [guide, ...prev]);
+      toast.success('Guide saved to your dashboard!');
+    }
+  };
 
   const handleMouseEnter = () => {
     if (badgeType === 'youtube') {
@@ -396,7 +431,7 @@ export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeTyp
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              setIsBookmarked(!isBookmarked);
+              handleBookmark();
             }}
             className={cn(
               "w-8 h-8 rounded-full bg-white border flex items-center justify-center transition-all cursor-pointer shadow-none",

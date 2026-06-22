@@ -17,7 +17,7 @@ export function OrderTrackingPage() {
     return history.length > 0 ? history[0].orderId : null;
   });
 
-  const order = orders.find(o => o.orderId === selectedOrderId) || (orders.length > 0 ? orders[0] : null);
+  const order = selectedOrderId ? (orders.find(o => o.orderId === selectedOrderId) || null) : null;
 
   const [searchId, setSearchId] = useState('');
 
@@ -29,6 +29,7 @@ export function OrderTrackingPage() {
       toast.success(`Lot Ticket "${searchId.toUpperCase()}" loaded!`);
     } else {
       toast.error(`Ticket "${searchId.toUpperCase()}" not found in current local session DB.`);
+      setSelectedOrderId(null);
     }
   };
 
@@ -81,26 +82,48 @@ export function OrderTrackingPage() {
             </p>
           </div>
 
-          <div className="flex gap-2 shrink-0">
-            <input 
-              className="bg-white/5 border border-white/10 rounded-full h-8 px-4 text-[10px] font-black uppercase text-white placeholder:text-gray-500 tracking-wider focus:outline-none focus:border-orange-primary"
-              placeholder="Enter ORD-XXXXX ID"
-              value={searchId}
-              onChange={(e) => setSearchId(e.target.value)}
-            />
-            <button 
-              onClick={handleSearchOrder}
-              className="bg-orange-primary hover:bg-white hover:text-navy text-white text-[9px] font-black uppercase tracking-widest px-4 rounded-full transition-all h-8 italic cursor-pointer"
-            >
-              Search
-            </button>
-          </div>
+          {orders.length > 0 && (
+            <div className="flex gap-2 shrink-0">
+              <input 
+                className="bg-white/5 border border-white/10 rounded-full h-8 px-4 text-[10px] font-black uppercase text-white placeholder:text-gray-500 tracking-wider focus:outline-none focus:border-orange-primary"
+                placeholder="Enter ORD-XXXXX ID"
+                value={searchId}
+                onChange={(e) => setSearchId(e.target.value)}
+              />
+              <button 
+                onClick={handleSearchOrder}
+                className="bg-orange-primary hover:bg-white hover:text-navy text-white text-[9px] font-black uppercase tracking-widest px-4 rounded-full transition-all h-8 italic cursor-pointer"
+              >
+                Search
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Main Track Grid */}
       <div className="max-w-4xl mx-auto w-full px-4 py-12 flex-1">
-        {!order ? (
+        {order === null && orders.length === 0 ? (
+          <div className="bg-white border border-gray-100 rounded-[5px] p-16 text-center shadow-sm max-w-xl mx-auto space-y-6">
+            <div className="w-16 h-16 bg-orange-primary/5 rounded-full flex items-center justify-center text-orange-primary mx-auto">
+              <Package size={32} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-navy uppercase italic tracking-tighter mb-1 select-none">No orders yet</h3>
+              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black leading-relaxed">
+                Your placed orders will appear here for tracking
+              </p>
+            </div>
+            <div className="pt-4">
+              <Link 
+                to="/products"
+                className="bg-orange-primary hover:bg-[#FF5B00] text-white text-[10px] font-black uppercase tracking-widest px-8 py-3.5 rounded-full transition-all inline-block italic cursor-pointer border-none"
+              >
+                Start Shopping
+              </Link>
+            </div>
+          </div>
+        ) : !order ? (
           <div className="bg-white border border-gray-100 rounded-[5px] p-16 text-center shadow-sm max-w-xl mx-auto space-y-6">
             <div className="w-16 h-16 bg-orange-primary/5 rounded-full flex items-center justify-center text-orange-primary mx-auto">
               <Package size={32} />
@@ -115,23 +138,25 @@ export function OrderTrackingPage() {
         ) : (
           <div className="space-y-8">
             {/* Simulation controls to help satisfy multi-status routing */}
-            <div className="bg-navy p-5 rounded-[5px] text-white flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Clock size={20} className="text-orange-primary shrink-0 animate-spin" />
-                <div>
-                  <h4 className="text-[10px] uppercase font-black tracking-widest italic text-white/90">Supplier Delivery Simulator</h4>
-                  <p className="text-[8.5px] text-white/50 font-bold leading-none uppercase">Toggle status values instantly to simulate redX checkpoints</p>
+            {(import.meta as any).env?.DEV && (
+              <div className="bg-navy p-5 rounded-[5px] text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <Clock size={20} className="text-orange-primary shrink-0 animate-spin" />
+                  <div>
+                    <h4 className="text-[10px] uppercase font-black tracking-widest italic text-white/90">Supplier Delivery Simulator</h4>
+                    <p className="text-[8.5px] text-white/50 font-bold leading-none uppercase">Toggle status values instantly to simulate redX checkpoints</p>
+                  </div>
                 </div>
-              </div>
 
-              <button
-                onClick={handleSimulateTransit}
-                className="bg-[#F8FAFC]/10 hover:bg-white/10 border border-white/10 text-white text-[9px] font-black uppercase tracking-widest px-5 py-2.5 rounded-xl transition-all italic flex items-center gap-2"
-              >
-                <Settings size={12} className="text-orange-primary" />
-                Advance Transit Step
-              </button>
-            </div>
+                <button
+                  onClick={handleSimulateTransit}
+                  className="bg-[#F8FAFC]/10 hover:bg-white/10 border border-white/10 text-white text-[9px] font-black uppercase tracking-widest px-5 py-2.5 rounded-xl transition-all italic flex items-center gap-2 pointer-events-auto shrink-0 animate-none"
+                >
+                  <Settings size={12} className="text-orange-primary" />
+                  Advance Transit Step
+                </button>
+              </div>
+            )}
 
             {/* Tracker Step Status Bar */}
             <div className="bg-white border border-gray-100 rounded-[5px] p-8 md:p-10 shadow-sm space-y-8">
@@ -148,8 +173,29 @@ export function OrderTrackingPage() {
                 </div>
               </div>
 
+              {order.status === 'cancelled' && (
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-6 py-4 space-y-1 text-sm font-semibold">
+                  <div className="flex items-center gap-2 font-black text-rose-800 uppercase tracking-widest text-xs">
+                    <span className="inline-block w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse" />
+                    This order was cancelled
+                  </div>
+                  {order.cancellationReason && (
+                    <p className="text-xs text-red-600 font-medium font-sans">Reason: {order.cancellationReason}</p>
+                  )}
+                  <p className="text-[10px] text-red-500 font-mono">
+                    Cancelled on: {new Date(order.cancelledAt || order.createdAt).toLocaleDateString('en-BD', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              )}
+
               {/* Graphical Stepper */}
-              <div className="relative pt-4 pb-8">
+              <div className={`relative pt-4 pb-8 ${order.status === 'cancelled' ? 'opacity-40' : ''}`}>
                 {/* Connecting pipeline */}
                 <div className="absolute top-[26%] left-4 right-4 h-1.5 bg-gray-100 rounded-full -translate-y-1/2 z-0 hidden sm:block">
                   <div 

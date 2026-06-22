@@ -8,6 +8,8 @@ import {
 import { PRODUCTS, BRANDS, BLOGS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { toast } from 'react-hot-toast';
+import { mockGuides } from '../data/mockGuides';
+import { CREATORS } from '../data/creators';
 
 // Promo Codes & Brand Deals data
 const BRAND_DEALS = [
@@ -124,6 +126,63 @@ export function SearchPage() {
     toast.success(`Coupon "${code}" copied!`);
     setTimeout(() => setCopiedCode(null), 2000);
   };
+
+  const filteredGuides = useMemo(() => {
+    if (!rawQuery.trim()) return mockGuides;
+    const q = rawQuery.toLowerCase();
+    return mockGuides.filter((g: any) =>
+      g.title?.toLowerCase().includes(q) ||
+      g.author?.toLowerCase().includes(q) ||
+      g.tags?.some((t: any) => String(t).toLowerCase().includes(q))
+    );
+  }, [rawQuery]);
+
+  const filteredCreators = useMemo(() => {
+    const creatorList = Array.isArray(CREATORS) ? CREATORS : Object.values(CREATORS);
+    if (!rawQuery.trim()) return creatorList;
+    const q = rawQuery.toLowerCase();
+    return creatorList.filter((c: any) =>
+      c.name?.toLowerCase().includes(q) ||
+      c.handle?.toLowerCase().includes(q) ||
+      c.bio?.toLowerCase().includes(q)
+    );
+  }, [rawQuery]);
+
+  const combinedCreators = useMemo(() => {
+    const uniqueCreatorsMap = new Map<string, any>();
+    
+    // First, add all filtered creators from CREATORS
+    filteredCreators.forEach((c: any) => {
+      if (c && c.name) {
+        uniqueCreatorsMap.set(c.name.toLowerCase(), {
+          id: c.id,
+          name: c.name,
+          handle: c.handle || `@${c.name.toLowerCase().replace(/\s+/g, '')}`,
+          avatar: c.avatar || `https://i.pravatar.cc/300?u=${c.id}`,
+          bio: c.bio || '',
+          platform: Array.isArray(c.platforms) ? c.platforms[0] : (c.platform || 'YouTube'),
+          verifiedStatus: c.verifiedStatus || 'verified expert contributor',
+          quickTip: c.quickTip || '',
+          rating: c.rating || 4.8
+        });
+      }
+    });
+
+    // Then, add matched local INFLUENCERS to deduplicate by name
+    const q = rawQuery.toLowerCase().trim();
+    const matchedLocalInfluencers = INFLUENCERS.filter(inf => {
+      if (!q) return true;
+      return inf.name.toLowerCase().includes(q) || 
+             inf.handle.toLowerCase().includes(q) || 
+             inf.bio.toLowerCase().includes(q);
+    });
+
+    matchedLocalInfluencers.forEach((inf: any) => {
+      uniqueCreatorsMap.set(inf.name.toLowerCase(), inf);
+    });
+
+    return Array.from(uniqueCreatorsMap.values());
+  }, [filteredCreators, rawQuery]);
 
   // Perform multi-category unified index searching & auto scoring ranking
   const searchResults = useMemo(() => {
@@ -243,19 +302,14 @@ export function SearchPage() {
 
     const matchedDeals = [...productDeals, ...brandDealsMatches];
 
-    // 4. GUIDES & RECOMMENDATIONS (from BLOGS)
-    const matchedGuides = BLOGS.map(g => {
-      const match = g.title.toLowerCase().includes(q) || 
-                    g.author.toLowerCase().includes(q) || 
-                    g.category.toLowerCase().includes(q) || 
-                    (g.excerpt || '').toLowerCase().includes(q);
-      if (!match) return null;
-      const isHighViews = g.views.includes('M') || g.views.includes('K');
+    // 4. GUIDES & RECOMMENDATIONS
+    const matchedGuides = filteredGuides.map(g => {
+      const isHighViews = (g.views || '').includes('M') || (g.views || '').includes('K');
       return {
         ...g,
         score: getPriorityScore(g, g.title, isHighViews, undefined, g.views)
       };
-    }).filter(Boolean) as any[];
+    });
 
     // 5. COUPONS & PROMO CODES
     const matchedCoupons = PROMO_CODES.map(c => {
@@ -280,16 +334,12 @@ export function SearchPage() {
     }).filter(Boolean) as any[];
 
     // 7. INFLUENCERS & CREATORS
-    const matchedInfluencers = INFLUENCERS.map(inf => {
-      const match = inf.name.toLowerCase().includes(q) || 
-                    inf.handle.toLowerCase().includes(q) || 
-                    inf.bio.toLowerCase().includes(q);
-      if (!match) return null;
+    const matchedInfluencers = combinedCreators.map(inf => {
       return {
         ...inf,
         score: getPriorityScore(inf, inf.name, true, inf.rating)
       };
-    }).filter(Boolean) as any[];
+    });
 
     // Sort all arrays by score priority descending
     const sortFn = (a: any, b: any) => b.score - a.score;
@@ -315,7 +365,7 @@ export function SearchPage() {
       influencers: matchedInfluencers,
       total
     };
-  }, [rawQuery]);
+  }, [rawQuery, filteredGuides, combinedCreators]);
 
   // Tab configurations
   const tabConfig = [
@@ -460,6 +510,64 @@ export function SearchPage() {
               </div>
             )}
 
+            {/* GUIDES MINI-SECTION (All Tab only) */}
+            {activeTab === 'all' && filteredGuides.length > 0 && rawQuery.trim() !== '' && (
+              <div className="bg-white rounded-[5px] border border-gray-200 p-6">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={15} className="text-[#E8500A]" />
+                    <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
+                      Matching Guides ({filteredGuides.length})
+                    </h2>
+                  </div>
+                  {filteredGuides.length > 3 && (
+                    <button 
+                      onClick={() => setActiveTab('guides')} 
+                      className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1"
+                    >
+                      See All Guides <ChevronRight size={12} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {filteredGuides.slice(0, 3).map((guide: any) => (
+                    <div 
+                      key={guide.id} 
+                      className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col justify-between text-left"
+                    >
+                      <div>
+                        {guide.category && (
+                          <span className="inline-block bg-orange-primary/10 text-[#E8500A] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-2">
+                            {guide.category}
+                          </span>
+                        )}
+                        <h4 className="font-bold text-xs uppercase text-[#1A1D4E] line-clamp-2 leading-tight">
+                          {guide.title}
+                        </h4>
+                        <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">
+                          By {guide.author}
+                        </p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
+                        {guide.views && (
+                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                            {guide.views} views
+                          </span>
+                        )}
+                        <Link 
+                          to={`/guides/${guide.id}`}
+                          className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-1 hover:underline"
+                        >
+                          Read Guide <ArrowRight size={10} />
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* 2. BRANDS SECTION */}
             {(activeTab === 'all' || activeTab === 'brands') && searchResults.brands.length > 0 && (
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
@@ -583,53 +691,50 @@ export function SearchPage() {
             )}
 
             {/* 4. GUIDES & RECOMMENDATIONS SECTION */}
-            {(activeTab === 'all' || activeTab === 'guides') && searchResults.guides.length > 0 && (
+            {activeTab === 'guides' && filteredGuides.length > 0 && (
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                   <div className="flex items-center gap-2">
                     <Sparkles size={15} className="text-[#E8500A]" />
                     <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
-                      Expert Guides & Recommendations ({searchResults.guides.length})
+                      Expert Guides & Recommendations ({filteredGuides.length})
                     </h2>
                   </div>
-                  {activeTab === 'all' && searchResults.guides.length > 2 && (
-                    <button onClick={() => setActiveTab('guides')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
-                      See All Recommendations <ChevronRight size={12} />
-                    </button>
-                  )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {(activeTab === 'all' ? searchResults.guides.slice(0, 2) : searchResults.guides).map((blog) => (
-                    <Link
-                      to={`/guides/${blog.id}`}
-                      key={blog.id}
-                      className="border border-[#e8edf2] hover:border-orange-primary/30 rounded-[5px] overflow-hidden flex flex-col md:flex-row bg-white hover:shadow-soft transition-all text-left"
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {filteredGuides.map((guide: any) => (
+                    <div 
+                      key={guide.id} 
+                      className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col justify-between text-left"
                     >
-                      <div className="md:w-[40%] h-36 md:h-auto overflow-hidden shrink-0 relative">
-                        <img src={blog.image} alt={blog.title} className="w-full h-full object-cover" />
-                        <span className="absolute top-2.5 left-2.5 bg-[#E8500A] text-white text-[7.5px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
-                          {blog.type || 'RECOMMENDATION'}
-                        </span>
-                      </div>
-                      <div className="p-4 flex-1 flex flex-col justify-between">
-                        <div>
-                          <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{blog.category}</span>
-                          <h4 className="font-semibold text-xs md:text-sm text-[#1A202C] uppercase tracking-tight mt-1 group-hover:text-orange-primary line-clamp-2 leading-snug">
-                            {blog.title}
-                          </h4>
-                          <p className="text-[10.5px] text-gray-500 mt-1.5 line-clamp-2">
-                            {blog.excerpt}
-                          </p>
-                        </div>
-                        <div className="flex items-center justify-between mt-4 text-[9px] text-gray-400 font-bold border-t border-gray-100 pt-2 shrink-0">
-                          <span>{blog.author}</span>
-                          <span className="flex items-center gap-1 bg-[#0A0A1F]/5 px-1.5 py-0.5 rounded text-gray-500 font-mono">
-                            Views: {blog.views}
+                      <div>
+                        {guide.category && (
+                          <span className="inline-block bg-orange-primary/10 text-[#E8500A] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-2">
+                            {guide.category}
                           </span>
-                        </div>
+                        )}
+                        <h4 className="font-bold text-xs uppercase text-[#1A1D4E] line-clamp-2 leading-tight">
+                          {guide.title}
+                        </h4>
+                        <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">
+                          By {guide.author}
+                        </p>
                       </div>
-                    </Link>
+                      <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
+                        {guide.views && (
+                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                            {guide.views} views
+                          </span>
+                        )}
+                        <Link 
+                          to={`/guides/${guide.id}`}
+                          className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-1 hover:underline"
+                        >
+                          Read Guide <ArrowRight size={10} />
+                        </Link>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -765,7 +870,7 @@ export function SearchPage() {
 
                         <div className="mt-3 flex justify-end">
                           <Link 
-                            to={inf.id === 'inf-1' ? '/creators/creator-farhan' : inf.id === 'inf-2' ? '/creators/creator-sarah' : inf.id === 'inf-3' ? '/creators/creator-imtiaz' : '/creators'}
+                            to={inf.id.startsWith('creator-') ? `/creators/${inf.id}` : inf.id === 'inf-1' ? '/creators/creator-farhan' : inf.id === 'inf-2' ? '/creators/creator-sarah' : inf.id === 'inf-3' ? '/creators/creator-imtiaz' : '/creators'}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-orange-primary/10 hover:bg-orange-primary text-[#E8500A] hover:text-white text-[9px] font-black uppercase tracking-widest transition-all duration-300 cursor-pointer"
                           >
                             Send Direct Brief <ChevronRight size={10} className="stroke-[2.5]" />

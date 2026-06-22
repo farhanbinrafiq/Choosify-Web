@@ -70,6 +70,8 @@ export function AllProductsPage() {
   const [priceError, setPriceError] = useState<string>('');
   const [sortOption, setSortOption] = useState<'popular' | 'price-asc' | 'price-desc' | 'moq-asc'>('popular');
   const [activeSpecs, setActiveSpecs] = useState<Record<string, string>>({});
+  const [priceMin, setPriceMin] = useState<number>(0);
+  const [priceMax, setPriceMax] = useState<number>(999999);
 
   // Restore state from sessionStorage on mount
   useEffect(() => {
@@ -89,6 +91,8 @@ export function AllProductsPage() {
         if (filters.sortOption) setSortOption(filters.sortOption);
         if (filters.activeTab) setActiveTab(filters.activeTab);
         if (filters.activeSpecs) setActiveSpecs(filters.activeSpecs);
+        if (filters.priceMin !== undefined) setPriceMin(filters.priceMin);
+        if (filters.priceMax !== undefined) setPriceMax(filters.priceMax);
       }
     } catch (e) {
       console.error(e);
@@ -109,10 +113,18 @@ export function AllProductsPage() {
       maxPrice,
       sortOption,
       activeTab,
-      activeSpecs
+      activeSpecs,
+      priceMin,
+      priceMax
     };
     sessionStorage.setItem('choosify_products_filters', JSON.stringify(filters));
-  }, [selectedCategory, selectedBrand, moqFilter, priceTierSlab, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs]);
+  }, [selectedCategory, selectedBrand, moqFilter, priceTierSlab, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax]);
+
+  // Reset price range when mode changes (Fix 3)
+  useEffect(() => {
+    setPriceMin(0);
+    setPriceMax(999999);
+  }, [mode]);
 
   // Sync internal state with URL query parameters initially and on changes
   useEffect(() => {
@@ -169,16 +181,29 @@ export function AllProductsPage() {
     let result = [...allProducts];
 
     // 0. Tab Selection Filtering
-    if (activeTab === 'Trending') {
-      result = result.filter(p => p.stock && p.stock > 100);
-    } else if (activeTab === 'Popular') {
-      result = result.filter(p => !p.id || p.id % 2 === 0);
-    } else if (activeTab === 'Newest') {
-      result = [...result].reverse();
-    } else if (activeTab === 'Top Rated') {
-      result = result.filter(p => p.codSupport);
-    } else if (activeTab === 'Featured') {
-      result = result.filter(p => p.id && Math.floor(p.id) % 3 === 0);
+    if (activeTab === 'New Arrivals' || activeTab === 'Newest') {
+      const arrivals = result.filter(p => p.isNewArrival === true);
+      if (arrivals.length === 0) {
+        result = [...result].sort((a, b) => b.id - a.id).slice(0, 8);
+      } else {
+        result = arrivals;
+      }
+    } else if (activeTab === 'Bestsellers' || activeTab === 'Trending') {
+      const best = result.filter(p => p.isBestseller === true);
+      if (best.length === 0) {
+        result = result.filter(p => p.rating && p.rating >= 4.5);
+      } else {
+        result = best;
+      }
+    } else if (activeTab === 'Flash Deals' || activeTab === 'Featured' || activeTab === 'Popular') {
+      const deals = result.filter(p => p.isDeal === true && p.dealType === 'flash');
+      if (deals.length === 0) {
+        result = result.filter(p => !p.id || p.id % 2 === 0);
+      } else {
+        result = deals;
+      }
+    } else if (activeTab === 'COD Ready' || activeTab === 'Top Rated') {
+      result = result.filter(p => p.codSupport === true);
     }
 
     // 1. Text Search across Title, Description, Brand, and Category
@@ -263,6 +288,9 @@ export function AllProductsPage() {
       });
     }
 
+    // Price range filtering (Fix 2)
+    result = result.filter(p => p.price >= priceMin && p.price <= priceMax);
+
     // 6. Sorting logic
     if (sortOption === 'price-asc') {
       result.sort((a, b) => a.price - b.price);
@@ -273,7 +301,7 @@ export function AllProductsPage() {
     }
 
     return result;
-  }, [allProducts, searchParams, selectedCategory, selectedBrand, mode, moqFilter, priceTierSlab, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs]);
+  }, [allProducts, searchParams, selectedCategory, selectedBrand, mode, moqFilter, priceTierSlab, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax]);
 
   const handleResetFilters = () => {
     setSelectedCategory(null);
@@ -288,6 +316,8 @@ export function AllProductsPage() {
     setPriceError('');
     setSidebarSearch('');
     setActiveSpecs({});
+    setPriceMin(0);
+    setPriceMax(999999);
     setSearchParams(new URLSearchParams());
   };
 
@@ -367,11 +397,10 @@ export function AllProductsPage() {
           <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
             {[
               { id: 'All Products', label: "All Products", icon: <Layers size={13} /> },
-              { id: 'Trending', label: "Trending", icon: <Flame size={13} /> },
-              { id: 'Popular', label: "Popular", icon: <Star size={13} /> },
-              { id: 'Newest', label: "Newest", icon: <Clock size={13} /> },
-              { id: 'Top Rated', label: "Top Rated", icon: <Award size={13} /> },
-              { id: 'Featured', label: "Featured", icon: <Sparkles size={13} /> }
+              { id: 'New Arrivals', label: "New Arrivals", icon: <Clock size={13} /> },
+              { id: 'Bestsellers', label: "Bestsellers", icon: <Flame size={13} /> },
+              { id: 'Flash Deals', label: "Flash Deals", icon: <Sparkles size={13} /> },
+              { id: 'COD Ready', label: "COD Ready", icon: <Award size={13} /> }
             ].map((tab) => (
               <button
                 key={tab.label}
@@ -417,8 +446,8 @@ export function AllProductsPage() {
         }}
         filters={[
           { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
-          { id: 'trending', label: '🔥 Trending', active: activeTab === 'Trending', onClick: () => setActiveTab(activeTab === 'Trending' ? 'All Products' : 'Trending') },
-          { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'Top Rated', onClick: () => setActiveTab(activeTab === 'Top Rated' ? 'All Products' : 'Top Rated') },
+          { id: 'trending', label: '🔥 Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
+          { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'COD Ready', onClick: () => setActiveTab(activeTab === 'COD Ready' ? 'All Products' : 'COD Ready') },
           ...(mode === 'wholesale'
             ? [
                 { id: 'moq-low', label: 'Low MOQ (≤50)', active: moqFilter === 50, onClick: () => setMoqFilter(moqFilter === 50 ? 0 : 50) },
@@ -439,6 +468,7 @@ export function AllProductsPage() {
           ratingFilter ? { id: 'rating', label: `Rating: ${ratingFilter}★ +`, onRemove: () => setRatingFilter(null) } : null,
           availabilityFilter !== 'all' ? { id: 'availability', label: `Status: ${availabilityFilter}`, onRemove: () => setAvailabilityFilter('all') } : null,
           (minPrice || maxPrice) ? { id: 'price', label: `Price: ৳${minPrice || '0'} - ${maxPrice || 'Any'}`, onRemove: () => { setMinPrice(''); setMaxPrice(''); } } : null,
+          (priceMin > 0 || priceMax < 999999) ? { id: 'priceRange', label: `Range: ৳${priceMin.toLocaleString()} - ৳${priceMax.toLocaleString()}`, onRemove: () => { setPriceMin(0); setPriceMax(999999); } } : null,
           ...Object.entries(activeSpecs).map(([key, value]) => {
             if (!value) return null;
             return { id: `spec-${key}`, label: `${key.toUpperCase()}: ${value}`, onRemove: () => setActiveSpecs(prev => ({ ...prev, [key]: '' })) };
@@ -500,6 +530,59 @@ export function AllProductsPage() {
                       }
                     }}
                   />
+
+                  {/* Price Range Section (Fix 2) */}
+                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4 text-left">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#e8edf2]">
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">
+                        Price Range
+                      </h3>
+                      {(priceMin > 0 || priceMax < 999999) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPriceMin(0);
+                            setPriceMax(999999);
+                          }}
+                          className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer hover:text-red-650 transition-colors border-none bg-transparent"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <input
+                          type="number"
+                          placeholder="Min"
+                          value={priceMin === 0 ? '' : priceMin}
+                          onChange={(e) => {
+                            const val = e.target.value === '' ? 0 : Number(e.target.value);
+                            setPriceMin(val);
+                          }}
+                          className="h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-bold w-full focus:outline-none focus:border-orange-primary"
+                        />
+                      </div>
+                      <span className="text-gray-400 text-xs text-center font-bold px-1">to</span>
+                      <div className="flex-1">
+                        <input
+                          type="number"
+                          placeholder="Max"
+                          value={priceMax === 999999 ? '' : priceMax}
+                          onChange={(e) => {
+                            const val = e.target.value === '' ? 999999 : Number(e.target.value);
+                            setPriceMax(val);
+                          }}
+                          className="h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-bold w-full focus:outline-none focus:border-orange-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="text-[10.5px] font-bold text-navy uppercase tracking-wider">
+                      ৳{priceMin.toLocaleString()} — ৳{priceMax.toLocaleString()}
+                    </div>
+                  </div>
 
                   {mode === 'wholesale' && (
                     <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4">

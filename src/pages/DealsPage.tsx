@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ExternalLink, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle, ShieldCheck } from 'lucide-react';
 import { PRODUCTS, BRANDS } from '../constants';
@@ -7,6 +7,30 @@ import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
 
+const PROMO_CODES = [
+  { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
+  { brandId: 'apex', brandName: "Apex", code: "APEXFOOT26", discount: "BDT 500 FLAT" },
+  { brandId: 'sailor', brandName: "Sailor", code: "SAILOREID", discount: "Flat 20% OFF" },
+  { brandId: 'adidas', brandName: "Adidas", code: "ADIEXTRA10", discount: "10% FLAT OFF" }
+];
+
+function FlashDealCountdown({ validUntil }: { validUntil?: string }) {
+  const [timeLeft, setTimeLeft] = useState('');
+  useEffect(() => {
+    const target = validUntil ? new Date(validUntil) : new Date(Date.now() + 12 * 60 * 60 * 1000);
+    const interval = setInterval(() => {
+      const diff = target.getTime() - Date.now();
+      if (diff <= 0) { setTimeLeft('EXPIRED'); clearInterval(interval); return; }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [validUntil]);
+  return <span className="font-mono font-black text-orange-primary text-[11px]">{timeLeft || '12:00:00'}</span>;
+}
+
 export function DealsPage() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -14,6 +38,7 @@ export function DealsPage() {
   const [activeTab, setActiveTab] = useState('All Deals');
   const [dealType, setDealType] = useState<'all' | 'retail' | 'wholesale'>('all');
   const [minDiscount, setMinDiscount] = useState<number>(0);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   // Restore state from sessionStorage on mount
   React.useEffect(() => {
@@ -76,15 +101,20 @@ export function DealsPage() {
     let result = [...PRODUCTS];
 
     if (activeTab === 'Flash Deals') {
-      result = result.filter(p => p.id % 2 === 0);
+      const deals = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'flash');
+      result = deals.length > 0 ? deals : result.filter(p => p.id % 2 === 0);
     } else if (activeTab === 'Promo Codes') {
-      result = result.filter(p => p.id % 3 === 0);
+      const promos = result.filter(p => (p as any).isDeal === true && (p as any).promoCode != null);
+      result = promos.length > 0 ? promos : result.filter(p => p.id % 3 === 0);
     } else if (activeTab === 'Brand Deals') {
-      result = result.filter(p => p.brand);
-    } else if (activeTab === 'Seasonal Campaigns') {
-      result = result.filter(p => p.id % 5 === 0);
-    } else if (activeTab === 'Expired Deals') {
-      result = result.filter(p => p.id % 4 === 1);
+      const brands = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'brand');
+      result = brands.length > 0 ? brands : result.filter(p => p.brand);
+    } else if (activeTab === 'Seasonal Campaigns' || activeTab === 'Seasonal') {
+      const seasonal = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'seasonal');
+      result = seasonal.length > 0 ? seasonal : result.filter(p => p.id % 5 === 0);
+    } else if (activeTab === 'Expired Deals' || activeTab === 'Expired') {
+      const expired = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'clearance');
+      result = expired.length > 0 ? expired : result.filter(p => p.id % 4 === 1);
     }
 
     if (selectedCategory) {
@@ -166,21 +196,7 @@ export function DealsPage() {
                   <span className="text-[7px] font-black text-orange-primary uppercase tracking-[0.15em] italic">ENDS IN</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  {[
-                    { val: '10', label: 'HRS' },
-                    { val: '10', label: 'MIN' },
-                    { val: '10', label: 'SEC' }
-                  ].map((t, i, arr) => (
-                    <React.Fragment key={i}>
-                      <div className="flex flex-row items-baseline gap-0.5">
-                        <span className="text-xs font-black text-white font-mono leading-none tracking-tighter">{t.val}</span>
-                        <span className="text-[6px] font-black text-gray-400 tracking-[0.05em] uppercase italic">{t.label}</span>
-                      </div>
-                      {i < arr.length - 1 && (
-                        <div className="text-white/40 font-black text-xs pb-0.5">:</div>
-                      )}
-                    </React.Fragment>
-                  ))}
+                  <FlashDealCountdown validUntil={(filteredProducts[0] as any)?.dealValidUntil} />
                 </div>
               </div>
 
@@ -466,7 +482,7 @@ export function DealsPage() {
    
               <div className="flex flex-col gap-10 items-center w-full">
                  {/* Banner Card */}
-                 <div className="w-full lg:min-h-[395px] lg:h-auto flex-shrink-0">
+                 <div className="w-full lg:min-h-[395px] lg:h-auto flex-shrink-0 relative">
                     <ProductCard 
                       product={{
                         ...filteredProducts[0] || PRODUCTS[0],
@@ -477,6 +493,11 @@ export function DealsPage() {
                       variant="featured" titleStyle={{ minHeight: '60px', marginBottom: '11px' }}
                       showCountdown={true}
                     />
+                    <div className="absolute top-4 right-16 z-30 bg-white/95 px-3 py-1.5 rounded-full border border-orange-primary/20 shadow-sm flex items-center gap-1.5">
+                      <Zap size={11} className="text-orange-primary fill-orange-primary animate-pulse" />
+                      <span className="text-[8px] font-black text-navy uppercase tracking-widest">ENDS IN:</span>
+                      <FlashDealCountdown validUntil={(filteredProducts[0] as any)?.dealValidUntil} />
+                    </div>
                  </div>
                  
                  {/* Small Cards Row */}
@@ -505,18 +526,54 @@ export function DealsPage() {
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
-                {(filteredProducts.length > 0 ? filteredProducts : PRODUCTS).slice(0, 12).map((product, idx) => (
-                  <div key={`${product.id}-${idx}`} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
-                    <ProductCard 
-                      product={{
-                        ...product,
-                        tag: idx % 3 === 0 ? "HOT" : idx % 3 === 1 ? "SALE" : "NEW",
-                        tagColor: idx % 3 === 0 ? "bg-[#E93B3B]" : idx % 3 === 1 ? "bg-[#E98B8B]" : "bg-[#7CD93B]",
-                      }} 
-                      variant="compact"
-                    />
-                  </div>
-                ))}
+                {activeTab === 'Promo Codes' ? (
+                  PROMO_CODES.map((promo) => (
+                    <div key={promo.code} className="bg-white border border-gray-150 rounded-[5px] p-5 flex flex-col justify-between min-h-[180px] relative overflow-hidden shadow-sm group hover:border-[#E8500A]/30 transition-all duration-300">
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-[#E8500A]/[0.04] rounded-full -translate-y-1/2 translate-x-1/2 blur-md" />
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Gift size={13} className="text-[#E8500A]" />
+                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{promo.brandName}</span>
+                        </div>
+                        <h4 className="text-sm font-black text-navy uppercase tracking-tight italic mb-2 leading-tight">
+                          {promo.discount}
+                        </h4>
+                      </div>
+                      
+                      <div className="mt-4">
+                        <div className="bg-gray-50 border border-gray-150 rounded-lg p-1.5 flex items-center justify-between gap-2">
+                          <code className="font-mono font-black text-[11px] text-navy tracking-wider px-1.5">
+                            {promo.code}
+                          </code>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(promo.code);
+                              setCopiedCode(promo.code);
+                              setTimeout(() => setCopiedCode(null), 2000);
+                            }}
+                            className="px-3 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[9px] font-black uppercase tracking-wider italic rounded cursor-pointer transition-colors border-none font-sans"
+                          >
+                            {copiedCode === promo.code ? 'Copied' : 'Copy'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  (filteredProducts.length > 0 ? filteredProducts : PRODUCTS).slice(0, 12).map((product, idx) => (
+                    <div key={`${product.id}-${idx}`} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
+                      <ProductCard 
+                        product={{
+                          ...product,
+                          tag: idx % 3 === 0 ? "HOT" : idx % 3 === 1 ? "SALE" : "NEW",
+                          tagColor: idx % 3 === 0 ? "bg-[#E93B3B]" : idx % 3 === 1 ? "bg-[#E98B8B]" : "bg-[#7CD93B]",
+                        }} 
+                        variant="compact"
+                      />
+                    </div>
+                  ))
+                )}
               </div>
 
               <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
