@@ -21,10 +21,10 @@ export function OrderSuccessPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Visual Header */}
-      <div className="w-full bg-[#0A0B1E] pt-16 pb-24 px-4 text-center text-white relative overflow-hidden border-b border-white/5">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#F96500]/10 via-[#0A0A1F] to-[#0A0A1F] opacity-95" />
+      <div className="w-full pt-16 pb-24 px-4 text-center text-white relative overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0 hero-gradient" />
         <div className="max-w-2xl mx-auto relative z-10 flex flex-col items-center gap-6">
           <div className="w-20 h-20 bg-green-500/10 border border-green-500/30 rounded-full flex items-center justify-center text-green-400">
             <CheckCircle2 size={44} className="animate-pulse" />

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowRight, ShoppingBag, ShieldCheck, Tag, Zap, Star, Search, Shirt, Sparkles, AlertCircle, ChevronRight } from 'lucide-react';
+import { ArrowRight, ShoppingBag, ShieldCheck, Tag, Zap, Star, Search, Shirt, Sparkles, AlertCircle, ChevronRight, Filter, X } from 'lucide-react';
 import { BRANDS } from '../constants';
 import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
 
 export function BrandDealsPage() {
   const navigate = useNavigate();
@@ -13,8 +14,21 @@ export function BrandDealsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [popularityFilter, setPopularityFilter] = useState<'all' | 'high' | 'normal'>('all');
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  const dynamicCategories = React.useMemo(() => {
+    const counts: { [name: string]: number } = {};
+    BRANDS.forEach(b => {
+      const cat = b.category || 'Other';
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, count]) => ({
+      name,
+      count
+    }));
+  }, []);
 
   // Brand and deals filtering logic based on letter, category tab, and search query
   const filteredBrands = React.useMemo(() => {
@@ -73,12 +87,11 @@ export function BrandDealsPage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Hero Section */}
-      <div className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
+      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
         {/* Background Gradients */}
-        <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="absolute inset-0 hero-gradient" />
         
         <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[130px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in font-sans">
           <div className="w-full flex flex-col justify-center">
@@ -166,168 +179,49 @@ export function BrandDealsPage() {
         </div>
       </div>
 
-      {/* GLOBAL HORIZONTAL FILTERS BAR */}
-      <div className="bg-[#f8fbfd] border-b border-[#E8EDF2] py-4 transition-all duration-300 font-sans">
-        <div className="max-w-[1440px] mx-auto px-6 w-full">
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#8a9bb0]">Brand Deals Filters</span>
-              {(selectedLetter || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all' || searchQuery || activeTab !== 'All') && (
-                <button 
-                  onClick={() => {
-                    setSelectedLetter(null);
-                    setSelectedCategory(null);
-                    setVerificationFilter('all');
-                    setPopularityFilter('all');
-                    setSearchQuery('');
-                    setActiveTab('All');
-                  }}
-                  className="text-[9px] font-semibold text-orange-primary uppercase tracking-wider hover:text-red-650 transition-colors cursor-pointer"
-                >
-                  Reset All Filters
-                </button>
-              )}
-            </div>
-            
-            {/* Horizontal Scrolling wrapper for filters */}
-            <div className="flex flex-row flex-wrap lg:flex-nowrap items-stretch gap-4 overflow-x-auto no-scrollbar pb-1">
-              
-              {/* Alphabet Index Filter Card */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-4 text-left font-sans animate-fade-in min-w-[280px] flex-1">
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-2 leading-none">
-                    Filter By <span className="text-orange-primary font-bold">Initial</span>
-                  </h3>
-                  <div className="w-full h-px bg-gray-155" />
-                </div>
+      {/* GLOBAL HORIZONTAL FILTERS BAR - GLOBAL FILTER ARCHITECTURE V2 */}
+      <QuickFilterBar
+        title="Brand Deals Quick Specs"
+        onOpenFullFilters={() => {
+          const el = document.getElementById("brand-deals-sidebar-filters");
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add("ring-2", "ring-orange-primary/50");
+            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
+          } else {
+            const mobEl = document.getElementById("brand-deals-mobile-filters");
+            if (mobEl) {
+              mobEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              setIsMobileFilterOpen(true);
+            }
+          }
+        }}
+        filters={[
+          { id: 'verified', label: '✓ Verified Partners Only', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
+          { id: 'top-rated', label: '⭐ Top Rated (4.7+)', active: popularityFilter === 'high', onClick: () => setPopularityFilter(popularityFilter === 'high' ? 'all' : 'high') },
+          { id: 'cat-fashion', label: '👗 Fashion Channel', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
+          { id: 'cat-electronics', label: '💻 Electronics Channel', active: selectedCategory === 'Electronics', onClick: () => setSelectedCategory(selectedCategory === 'Electronics' ? null : 'Electronics') },
+        ]}
+      />
 
-                <div className="grid grid-cols-6 gap-1 max-h-32 overflow-y-auto no-scrollbar">
-                  <button 
-                    onClick={() => setSelectedLetter(null)}
-                    className={cn(
-                      "col-span-6 py-1.5 rounded-[5px] text-[9px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
-                      selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                    )}
-                  >
-                    All Brands
-                  </button>
-                  {letters.map((letter) => (
-                    <button 
-                      key={letter} 
-                      onClick={() => setSelectedLetter(letter)}
-                      className={cn(
-                        "h-6 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
-                        selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
-                      )}
-                    >
-                      {letter}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Category Filter Group */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[220px] flex-1">
-                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Categories</h3>
-                  {selectedCategory && (
-                    <span 
-                      onClick={() => setSelectedCategory(null)}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-600 transition-colors"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  {['Electronics', 'Tech', 'Fashion', 'Beauty', 'Sports', 'Ethnic'].map((cat) => {
-                    const isActive = selectedCategory === cat;
-                    return (
-                      <button 
-                        key={cat} 
-                        onClick={() => setSelectedCategory(isActive ? null : cat)}
-                        className={cn(
-                          "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                          isActive ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                        )}
-                      >
-                        <span>{cat}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Verification status */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[200px]">
-                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Verification</h3>
-                  {verificationFilter !== 'all' && (
-                    <span 
-                      onClick={() => setVerificationFilter('all')}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-650 transition-colors"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  {[
-                    { value: 'all', label: 'All Brands' },
-                    { value: 'verified', label: 'Verified Partners' },
-                    { value: 'unverified', label: 'Standard Outlets' }
-                  ].map((item) => (
-                    <button 
-                      key={item.value} 
-                      onClick={() => setVerificationFilter(item.value as any)}
-                      className={cn(
-                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                        verificationFilter === item.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                      )}
-                    >
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Popularity option card */}
-              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-3 text-left font-sans min-w-[200px]">
-                <div className="flex items-center justify-between pb-2 mb-1 border-b border-[#e8edf2]">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Popularity</h3>
-                  {popularityFilter !== 'all' && (
-                    <span 
-                      onClick={() => setPopularityFilter('all')}
-                      className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer tracking-wider hover:text-red-650 transition-colors"
-                    >
-                      Clear
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  {[
-                    { value: 'all', label: 'All Popularity' },
-                    { value: 'high', label: 'Top-Rated (4.7+)' },
-                    { value: 'normal', label: 'Regular' }
-                  ].map((item) => (
-                    <button 
-                      key={item.value} 
-                      onClick={() => setPopularityFilter(item.value as any)}
-                      className={cn(
-                        "w-full flex items-center justify-between text-left px-2 py-1 rounded-lg transition-colors group text-xs font-semibold cursor-pointer",
-                        popularityFilter === item.value ? "bg-orange-primary/10 text-orange-primary font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-navy"
-                      )}
-                    >
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ACTIVE FILTER CHIPS ROW */}
+      <ActiveFilterChips
+        chips={[
+          selectedLetter ? { id: 'letter', label: `Starts with: ${selectedLetter}`, onRemove: () => setSelectedLetter(null) } : null,
+          selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+          verificationFilter !== 'all' ? { id: 'verification', label: `Verification: ${verificationFilter === 'verified' ? 'Verified Only' : 'Unverified Only'}`, onRemove: () => setVerificationFilter('all') } : null,
+          popularityFilter !== 'all' ? { id: 'popularity', label: `Popularity: ${popularityFilter === 'high' ? 'Top-Rated' : 'Regular'}`, onRemove: () => setPopularityFilter('all') } : null,
+          searchQuery ? { id: 'search', label: `Query: ${searchQuery}`, onRemove: () => setSearchQuery('') } : null
+        ].filter(Boolean) as any[]}
+        onClearAll={() => {
+          setSelectedLetter(null);
+          setSelectedCategory(null);
+          setVerificationFilter('all');
+          setPopularityFilter('all');
+          setSearchQuery('');
+          setActiveTab('All');
+        }}
+      />
 
       {/* CORE THREE-COLUMN SYSTEM LAYOUT INTEGRATION */}
       <div className="w-full bg-[#F3F9FF]/30 min-h-screen py-8">
@@ -336,6 +230,104 @@ export function BrandDealsPage() {
           {/* Left Sidebar */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
             <QuickAccessCard />
+
+            {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
+            <div id="brand-deals-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
+              <FullSidebarFilterPanel
+                title="Filter Brand Deals"
+                onReset={() => {
+                  setSelectedLetter(null);
+                  setSelectedCategory(null);
+                  setVerificationFilter('all');
+                  setPopularityFilter('all');
+                  setSearchQuery('');
+                  setActiveTab('All');
+                }}
+                advancedSection={
+                  <div className="flex flex-col gap-4">
+                    {/* Initial Index selection A-Z */}
+                    <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-2">
+                      <h3 className="text-[11px] font-black text-[#8a9bb0] uppercase tracking-wider mb-2">Alpha search (A-Z)</h3>
+                      <div className="grid grid-cols-5 gap-1.5 max-h-32 overflow-y-auto no-scrollbar">
+                        <button 
+                          onClick={() => setSelectedLetter(null)}
+                          className={cn(
+                            "col-span-5 py-1.5 rounded-[5px] text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
+                            selectedLetter === null ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                          )}
+                        >
+                          All Initials
+                        </button>
+                        {letters.map((letter) => (
+                          <button 
+                            key={letter} 
+                            onClick={() => setSelectedLetter(letter)}
+                            className={cn(
+                              "h-5.5 rounded-[5px] text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                              selectedLetter === letter ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                            )}
+                          >
+                            {letter}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                }
+              >
+                <UniversalFilterRenderer
+                  profile={{
+                    entity: 'brands',
+                    filters: [
+                      {
+                        id: 'category',
+                        name: 'Category Hub',
+                        type: 'single_select',
+                        options: [
+                          { value: 'all', label: 'All Categories' },
+                          ...dynamicCategories.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
+                        ]
+                      },
+                      {
+                        id: 'verification',
+                        name: 'Verification Channel',
+                        type: 'single_select',
+                        options: [
+                          { value: 'all', label: 'All Claim Statuses' },
+                          { value: 'verified', label: 'Verified Claims Only' },
+                          { value: 'unverified', label: 'Unverified Channels' }
+                        ]
+                      },
+                      {
+                        id: 'popularity',
+                        name: 'Popularity Tier',
+                        type: 'single_select',
+                        options: [
+                          { value: 'all', label: 'All Tiers' },
+                          { value: 'high', label: '⭐ Top Rated (4.7+)' },
+                          { value: 'normal', label: 'Regular Deals' }
+                        ]
+                      }
+                    ]
+                  }}
+                  activeFilters={{
+                    category: selectedCategory || 'all',
+                    verification: verificationFilter,
+                    popularity: popularityFilter
+                  }}
+                  onFilterChange={(filterId, value) => {
+                    if (filterId === 'category') {
+                      setSelectedCategory(value === 'all' || !value ? null : value);
+                    } else if (filterId === 'verification') {
+                      setVerificationFilter(value as any);
+                    } else if (filterId === 'popularity') {
+                      setPopularityFilter(value as any);
+                    }
+                  }}
+                />
+              </FullSidebarFilterPanel>
+            </div>
+
             {/* Promo spotlight card */}
             <div className="bg-gradient-to-br from-[#0A0A1F] to-[#16163F] text-white rounded-[5px] border border-[#ff5b00]/10 p-5 shadow-lg relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
               <div className="absolute top-0 right-0 w-28 h-28 bg-[#FF5B00]/10 rounded-full blur-2xl pointer-events-none" />
@@ -344,7 +336,7 @@ export function BrandDealsPage() {
                 <span className="px-2.5 py-1 rounded-[5px] bg-[#FF5B00] text-white text-[8.5px] font-black uppercase tracking-widest italic leading-none">
                   SPOTLIGHT DEAL
                 </span>
-                <h3 className="font-sans text-lg font-black italic uppercase tracking-tight text-white leading-snug mt-4">
+                <h3 className="font-sans text-lg font-black italic uppercase tracking-tight text-white text-left leading-snug mt-4">
                   EXCLUSIVE S26 <span className="text-[#FF5B00]">BUNDLE PACKS</span>
                 </h3>
                 <p className="text-[11px] text-white/50 font-semibold mt-2 leading-relaxed">
@@ -374,6 +366,125 @@ export function BrandDealsPage() {
 
           {/* B. MIDDLE COLUMN - BRAND WISE LISTINGS */}
           <main className="min-w-0 space-y-8 font-sans">
+            
+            {/* Tablet/Mobile Collapsible Filter Card */}
+            <div id="brand-deals-mobile-filters" className="lg:hidden bg-white rounded-[5px] p-4 border border-[#e8edf2] shadow-sm mb-6 font-sans">
+              <div 
+                className="flex items-center justify-between cursor-pointer" 
+                onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5 leading-none">
+                    <Filter size={11} className="text-[#E8500A]" />
+                    ADVANCED FILTER PANEL:
+                  </span>
+                  <span className="px-2 py-0.5 bg-[#E8500A]/10 text-[#E8500A] text-[9px] font-black uppercase rounded-[3px] leading-none">
+                    {selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all' || selectedLetter ? 'Active Filters' : 'None'}
+                  </span>
+                </div>
+                <span className="text-[9.5px] font-black text-[#E8500A] uppercase tracking-widest">
+                  {isMobileFilterOpen ? 'Hide Filters ▲' : 'Show Filters ▼'}
+                </span>
+              </div>
+              
+              {isMobileFilterOpen && (
+                <div className="mt-4 pt-4 border-t border-gray-100/80 flex flex-col gap-4">
+                  <UniversalFilterRenderer
+                    profile={{
+                      entity: 'brands',
+                      filters: [
+                        {
+                          id: 'category',
+                          name: 'Category Hub',
+                          type: 'single_select',
+                          options: [
+                            { value: 'all', label: 'All Categories' },
+                            ...dynamicCategories.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
+                          ]
+                        },
+                        {
+                          id: 'verification',
+                          name: 'Verification Channel',
+                          type: 'single_select',
+                          options: [
+                            { value: 'all', label: 'All Claim Statuses' },
+                            { value: 'verified', label: 'Verified Claims Only' },
+                            { value: 'unverified', label: 'Unverified Channels' }
+                          ]
+                        },
+                        {
+                          id: 'popularity',
+                          name: 'Popularity Tier',
+                          type: 'single_select',
+                          options: [
+                            { value: 'all', label: 'All Tiers' },
+                            { value: 'high', label: '⭐ Top Rated (4.7+)' },
+                            { value: 'normal', label: 'Regular Deals' }
+                          ]
+                        }
+                      ]
+                    }}
+                    activeFilters={{
+                      category: selectedCategory || 'all',
+                      verification: verificationFilter,
+                      popularity: popularityFilter
+                    }}
+                    onFilterChange={(filterId, value) => {
+                      if (filterId === 'category') {
+                        setSelectedCategory(value === 'all' || !value ? null : value);
+                      } else if (filterId === 'verification') {
+                        setVerificationFilter(value as any);
+                      } else if (filterId === 'popularity') {
+                        setPopularityFilter(value as any);
+                      }
+                    }}
+                  />
+
+                  {/* Alphabet Selection in Mobile View */}
+                  <div className="bg-[#f8fbfd] rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-2 mt-2">
+                    <h3 className="text-[11px] font-black text-[#8a9bb0] uppercase tracking-wider mb-2">Alpha Search (A-Z)</h3>
+                    <div className="grid grid-cols-6 sm:grid-cols-9 gap-1.5 max-h-32 overflow-y-auto no-scrollbar">
+                      <button 
+                        onClick={() => setSelectedLetter(null)}
+                        className={cn(
+                          "col-span-6 sm:col-span-9 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
+                          selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                        )}
+                      >
+                        All Brands
+                      </button>
+                      {letters.map((letter) => (
+                        <button 
+                          key={letter} 
+                          onClick={() => setSelectedLetter(letter)}
+                          className={cn(
+                            "h-8 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                            selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
+                          )}
+                        >
+                          {letter}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setSelectedLetter(null);
+                      setSelectedCategory(null);
+                      setVerificationFilter('all');
+                      setPopularityFilter('all');
+                      setSearchQuery('');
+                      setActiveTab('All');
+                      setIsMobileFilterOpen(false);
+                    }}
+                    className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-black rounded-[5px] text-[10px] uppercase tracking-widest transition-all italic border-0"
+                  >
+                    Reset All Filters
+                  </button>
+                </div>
+              )}
+            </div>
             
             {/* Header info bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8edf2]">
@@ -405,35 +516,6 @@ export function BrandDealsPage() {
               )}
             </div>
 
-            {/* Active Filter Chips */}
-            {(selectedLetter || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (
-              <div className="flex flex-wrap items-center gap-3">
-                {selectedLetter && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
-                    Letter: {selectedLetter} 
-                    <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setSelectedLetter(null)}>×</span>
-                  </div>
-                )}
-                {selectedCategory && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
-                    Category: {selectedCategory} 
-                    <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setSelectedCategory(null)}>×</span>
-                  </div>
-                )}
-                {verificationFilter !== 'all' && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
-                    Verification: {verificationFilter === 'verified' ? 'Verified' : 'Standard'} 
-                    <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setVerificationFilter('all')}>×</span>
-                  </div>
-                )}
-                {popularityFilter !== 'all' && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
-                    Popularity: {popularityFilter === 'high' ? 'Top-Rated' : 'Regular'} 
-                    <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setPopularityFilter('all')}>×</span>
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Brands listing block */}
             <div className="flex flex-col gap-14">
@@ -542,8 +624,7 @@ export function BrandDealsPage() {
       </div>
 
       {/* CTA Section */}
-      <section className="py-20 bg-navy px-4 md:px-8 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,91,0,0.1),transparent_70%)]" />
+      <section className="py-20 choosify-dark-gradient px-4 md:px-8 relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative z-10 font-sans">
           <h2 className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-8 leading-tight">
             NOT FINDING YOUR <span className="text-orange-primary">FAVORITE BRAND?</span>

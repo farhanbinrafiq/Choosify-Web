@@ -114,12 +114,12 @@ export function ProductMediaGallery({ product, selectedVariantImage, isB2B = fal
   const currentMedia = mediaItems[carouselIndex] || mediaItems[0];
 
   return (
-    <div className="w-full flex flex-col bg-black">
-      {/* 1. THEATER CONTAINER: width: 100%; background: #000; height: 608px on desktop, proportional 16:9 on mobile */}
-      <div className="w-full bg-[#000000] xl:h-[608px] h-auto aspect-video xl:aspect-auto overflow-hidden relative flex items-center justify-center select-none">
+    <div className="w-full flex flex-col bg-transparent">
+      {/* 1. THEATER CONTAINER: width: 100%; background: transparent; height: 608px on desktop, proportional 16:9 on mobile */}
+      <div className="w-full bg-transparent xl:h-[608px] h-auto aspect-video xl:aspect-auto overflow-hidden relative flex items-center justify-center select-none">
         
         {/* 2. CENTER MEDIA AREA: max-width: 1080px; width: 100%; aspect-ratio: 16 / 9; margin: 0 auto; */}
-        <div className="max-w-[1080px] w-full aspect-video mx-auto h-full relative flex items-center justify-center bg-black">
+        <div className="max-w-[1080px] w-full aspect-video mx-auto h-full relative flex items-center justify-center bg-transparent">
           <AnimatePresence mode="wait">
             <motion.div
               key={carouselIndex}
@@ -130,7 +130,7 @@ export function ProductMediaGallery({ product, selectedVariantImage, isB2B = fal
               className="w-full h-full relative flex items-center justify-center"
             >
               {currentMedia.type === 'video' ? (
-                <div className="w-full h-full flex items-center justify-center relative bg-black">
+                <div className="w-full h-full flex items-center justify-center relative bg-transparent">
                   <video
                     ref={videoRef}
                     src={currentMedia.url}

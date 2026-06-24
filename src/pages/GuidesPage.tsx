@@ -1200,7 +1200,7 @@ export function GuidesPage() {
   };
 
   return (
-    <div id="guides-root" className="flex flex-col min-h-screen bg-[#FDFDFD]">
+    <div id="guides-root" className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Hero Section - Standardized Centered Alignment */}
       <div id="guides-hero" className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
         {/* Background Gradients */}
@@ -1462,15 +1462,15 @@ export function GuidesPage() {
              
              {/* Pagination Component */}
              <div className="mt-24 pt-16 border-t border-gray-100 flex flex-col items-center gap-10">
-               <div className="flex items-center gap-3">
-                  <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
+             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-full px-2">
+                  <button className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
                      <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
                   </button>
                   {[1, 2, 3, '...', 12].map((page, i) => (
                     <button 
                       key={i} 
                       className={cn(
-                        "w-12 h-12 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
+                        "w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
                         page === 1 
                         ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
                         : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
@@ -1479,7 +1479,7 @@ export function GuidesPage() {
                       {page}
                     </button>
                   ))}
-                  <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
+                  <button className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                </div>

@@ -594,6 +594,17 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
 📋 Tracking reference: #${orderRef}
 🚚 Dispatch logistics team will contact you shortly to coordinate receipt.`;
 
+    const pCard = {
+      image: product.image || PLACEHOLDER_IMAGE,
+      name: product.title,
+      variant: orderSize,
+      color: orderColor,
+      quantity: orderQty,
+      notes: orderNotes || "No custom parameter notes.",
+      price: product.price,
+      link: `/products/${product.id}`
+    };
+
     // 1. Create message thread
     createNewThread(
       threadId,
@@ -605,7 +616,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
     );
 
     // 2. Add structural msg
-    addThreadMessage(threadId, structuredMsg, "user", "Me");
+    addThreadMessage(threadId, structuredMsg, "user", "Me", pCard);
 
     // 3. Add Seller response message
     setTimeout(() => {
@@ -658,7 +669,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Breadcrumb & Meta Info */}
       <div className="max-w-7xl mx-auto px-6 py-6 border-b border-gray-100 font-sans">
         <div className="flex items-center justify-start gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 italic">
@@ -679,20 +690,21 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
         </div>
       </div>
 
-      {/* Theater Mode Media Area - Centered 1080px with deep black side letterboxing */}
-      <div className="w-full bg-[#000000] relative">
-        <ProductMediaGallery
-          product={product}
-          selectedVariantImage={selectedVariant?.image}
-        />
-      </div>
+      {/* Continuous Hero Wrapper with Unified Choosify Gradient */}
+      <div className="choosify-dark-gradient w-full relative overflow-hidden">
+        {/* Layer 1 Base & Multi-layered Ambient Light Glows */}
+        <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-br from-[#F97316]/15 to-transparent rounded-full blur-[140px] -translate-y-1/3 translate-x-1/4 pointer-events-none mix-blend-plus-lighter opacity-90" />
 
-      {/* Product Information Panel - Placed completely below the theater media area */}
-      <section className="bg-[#0B0C1E] py-12 px-6 border-b border-white/5 relative overflow-hidden font-sans">
-        {/* Absolute blur background sphere matching Brand Detail Page layout */}
-        <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none z-0">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#E8500A] rounded-full translate-x-1/2 -translate-y-1/2" />
+        {/* Theater Mode Media Area - Centered 1080px with deep black side letterboxing */}
+        <div className="w-full bg-transparent relative">
+          <ProductMediaGallery
+            product={product}
+            selectedVariantImage={selectedVariant?.image}
+          />
         </div>
+
+        {/* Product Information Panel - Placed completely below the theater media area */}
+        <section className="py-12 px-6 relative z-10 font-sans">
 
         <div className="max-w-[1080px] mx-auto text-center text-white relative z-10">
           <div className="w-full max-w-4xl mx-auto text-center text-white relative bg-transparent p-0 border-none shadow-none">
@@ -1066,6 +1078,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
           </div>
         </div>
       </section>
+      </div>
 
       {/* Post-Hero Stats Bar */}
       <div className="bg-white border-y border-gray-100 py-4.5 px-6 shadow-sm z-20 relative">
@@ -1377,7 +1390,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               </div>
 
               {/* BRAND PROFILE CARD - ONLY ONE AT RIGHT SIDEBAR */}
-              <div className="bg-white rounded-[5px] overflow-hidden shadow-xl border border-gray-100 group text-left">
+              <div className="bg-white rounded-[5px] overflow-hidden shadow-xl border border-gray-100 group text-left w-full max-w-sm mx-auto lg:max-w-none">
                 <div className="p-6 flex flex-col items-center text-center hero-gradient text-white">
                   <div className="relative mb-4 mt-2">
                     <div className="w-20 h-20 rounded-2xl bg-black flex items-center justify-center p-2.5 shadow-lg scale-100 group-hover:scale-105 transition-transform duration-500">
@@ -1421,7 +1434,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                       id={String(brandId)}
                       name={brandName}
                       type="brand"
-                      className="w-full py-3 rounded-full border border-white/20 text-[10px] md:text-[11px] font-black uppercase tracking-wider italic hover:scale-[1.03] active:scale-95 cursor-pointer bg-transparent"
+                      className="w-full h-11 rounded-full italic hover:scale-[1.03] active:scale-95 cursor-pointer text-[10.5px] font-black tracking-wider shadow-sm uppercase shrink-0 px-4"
                     />
 
                     <Link
@@ -1433,42 +1446,39 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   </div>
 
                   {/* Social Icons row */}
-                  <div className="flex justify-center gap-3 mt-6 pt-5 border-t border-white/10 w-full">
+                  <div className="flex justify-center gap-6 mt-6 pt-5 border-t border-white/10 w-full">
                     {[
                       {
-                        icon: <Facebook size={12} />,
+                        icon: <Facebook size={20} />,
                         label: "Facebook",
-                        color: "hover:text-blue-600",
                       },
                       {
-                        icon: <Instagram size={12} />,
+                        icon: <Instagram size={20} />,
                         label: "Instagram",
-                        color: "hover:text-pink-500",
                       },
                       {
-                        icon: <Share2 size={12} />,
+                        icon: (
+                          <svg viewBox="0 0 24 24" width={20} height={20} fill="currentColor">
+                            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
+                          </svg>
+                        ),
                         label: "TikTok",
-                        color: "hover:text-cyan-400",
                       },
                       {
-                        icon: <Youtube size={12} />,
+                        icon: <Youtube size={20} />,
                         label: "YouTube",
-                        color: "hover:text-red-500",
                       },
                     ].map((item, i) => (
                       <div
                         key={i}
-                        className="flex flex-col items-center gap-1 cursor-pointer group/soc"
+                        className="flex flex-col items-center gap-2 cursor-pointer group/soc focus:outline-none"
                       >
                         <div
-                          className={cn(
-                            "w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all group-hover/soc:bg-white/15 group-hover/soc:scale-110",
-                            item.color,
-                          )}
+                          className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition-all duration-300 active:scale-95 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]"
                         >
                           {item.icon}
                         </div>
-                        <span className="text-[7px] font-extrabold text-white/60 uppercase tracking-widest">
+                        <span className="text-[14px] text-white/50 group-hover/soc:text-[#F97316] font-normal transition-colors">
                           {item.label}
                         </span>
                       </div>

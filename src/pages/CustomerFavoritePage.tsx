@@ -518,12 +518,12 @@ export function CustomerFavoritePage() {
   }, [filteredProducts]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       
       {/* ================================================= */}
       {/* 1. HERO SECTION (Standardized centered alignment) */}
       {/* ================================================= */}
-      <section className="relative pt-4 pb-5 bg-[#0A0B1E] text-white overflow-hidden border-b border-white/5">
+      <section className="relative pt-4 pb-5 choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/20 via-[#EB4501]/5 to-[#0A0A1F] opacity-90" />
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-radial-gradient from-orange-primary/30 to-transparent blur-3xl pointer-events-none" />
         

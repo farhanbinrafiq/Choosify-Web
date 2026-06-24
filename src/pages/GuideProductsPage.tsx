@@ -25,11 +25,10 @@ export function GuideProductsPage() {
   const guideProducts = PRODUCTS.filter(p => recommendedProductIds.includes(p.id));
 
   return (
-    <div className="bg-white min-h-screen pb-32">
+    <div className="bg-choosify-feed min-h-screen pb-32">
       {/* Header Section */}
-      <div className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
-        <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
+        <div className="absolute inset-0 hero-gradient pointer-events-none" />
         <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex items-center gap-6">
             <Link 

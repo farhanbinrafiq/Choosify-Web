@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Youtube, Star, ChevronDown, CheckCircle2, Bookmark, ChevronLeft, ChevronRight, Zap, TrendingUp, HelpCircle, AlertCircle, Share2, MessageCircle, BarChart3, Users, Play, Smartphone, Gift, Shirt, Info, Package, DollarSign, ShieldCheck, ThumbsUp, Heart, X, ArrowRight, Lock, Sparkles, Clock } from 'lucide-react';
+import { Search, Youtube, Star, ChevronDown, CheckCircle2, Bookmark, ChevronLeft, ChevronRight, Zap, TrendingUp, HelpCircle, AlertCircle, Share2, MessageCircle, BarChart3, Users, Play, Smartphone, Gift, Shirt, Info, Package, DollarSign, ShieldCheck, ThumbsUp, Heart, X, ArrowRight, Lock, Sparkles, Clock, Facebook, Instagram } from 'lucide-react';
 import { BRANDS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { motion, AnimatePresence } from 'motion/react';
@@ -15,30 +15,18 @@ import { FollowButton } from '../components/FollowButton';
 import { ClaimProfileModal } from '../components/ClaimProfileModal';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, FilterProfile, CategorySmartFilters } from '../components/FilterEngine';
 
-interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
-  size?: number;
+function TikTokIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill="currentColor"
+    >
+      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
+    </svg>
+  );
 }
-
-// Inline Social SVG Icons matching design guidelines
-const FacebookIcon = ({ size = 16, ...props }: CustomIconProps) => (
-  <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" {...props}>
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
-
-const InstagramIcon = ({ size = 16, ...props }: CustomIconProps) => (
-  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-  </svg>
-);
-
-const TikTokIcon = ({ size = 16, ...props }: CustomIconProps) => (
-  <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" {...props}>
-    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.81-.74-3.94-1.69-.14-.12-.29-.26-.4-.39-.01 2.3-.01 4.6-.01 6.91-.01 1.63-.44 3.25-1.31 4.58-1.57 2.39-4.42 3.79-7.3 3.47-3.41-.37-6.23-3.23-6.52-6.66-.41-4.75 3.51-8.91 8.26-8.5v4.13c-2.11-.27-4.11 1.17-4.59 3.23-.59 2.5 1.11 5.09 3.63 5.4 2.11.26 4.14-1.07 4.63-3.11.09-.37.11-.75.11-1.13V0h-3.8z" />
-  </svg>
-);
 
 import { InfluencerReviews } from '../components/InfluencerReviews';
 import { PublicReviewCard } from '../components/PublicReviewCard';
@@ -587,7 +575,7 @@ export function BrandDetailPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       
       {/* 1. Brand Hero Section */}
       <motion.section 
@@ -758,36 +746,36 @@ export function BrandDetailPage() {
                  <div className="hidden lg:flex items-center gap-4 mt-2 flex-wrap justify-start">
                     <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">Find Us On</span>
                     <div className="flex items-center gap-5">
-                      <a href="#" className="group flex flex-col items-center gap-1">
-                         <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#1877F2] flex items-center justify-center text-white transition-all shadow-md">
-                           <FacebookIcon size={15} />
+                      <a href="#" className="group flex flex-col items-center gap-1.5 focus:outline-none">
+                         <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
+                           <Facebook size={20} />
                          </div>
-                         <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Facebook</span>
+                         <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">Facebook</span>
                       </a>
-                      <a href="#" className="group flex flex-col items-center gap-1">
-                         <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#C13584] flex items-center justify-center text-white transition-all shadow-md">
-                           <InstagramIcon size={15} />
+                      <a href="#" className="group flex flex-col items-center gap-1.5 focus:outline-none">
+                         <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
+                           <Instagram size={20} />
                          </div>
-                         <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Instagram</span>
+                         <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">Instagram</span>
                       </a>
-                      <a href="#" className="group flex flex-col items-center gap-1">
-                         <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-black flex items-center justify-center text-white transition-all shadow-md">
-                           <TikTokIcon size={14} />
+                      <a href="#" className="group flex flex-col items-center gap-1.5 focus:outline-none">
+                         <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
+                           <TikTokIcon size={20} />
                          </div>
-                         <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">TikTok</span>
+                         <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">TikTok</span>
                       </a>
-                      <a href="#" className="group flex flex-col items-center gap-1">
-                         <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#FF0000] flex items-center justify-center text-white transition-all shadow-md">
-                           <Youtube size={15} />
+                      <a href="#" className="group flex flex-col items-center gap-1.5 focus:outline-none">
+                         <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
+                           <Youtube size={20} />
                          </div>
-                         <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Youtube</span>
+                         <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">YouTube</span>
                       </a>
                     </div>
                  </div>
               </div>
 
               {/* Right Side: Score card */}
-              <div className="w-full lg:w-full max-w-md relative order-3 lg:order-none lg:flex lg:flex-col lg:justify-between lg:h-full">
+              <div className="w-full lg:w-full max-w-md relative order-3 lg:order-none flex flex-col justify-between h-auto lg:h-full mx-auto lg:mx-0 gap-5 lg:gap-4">
                  <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-white relative overflow-hidden group mb-auto">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/10 blur-2xl rounded-full translate-x-1/3 -translate-y-1/3" />
                     
@@ -837,19 +825,19 @@ export function BrandDetailPage() {
                  </div>
 
                  {/* Save share controls */}
-                 <div className="absolute lg:relative -bottom-6 lg:bottom-auto right-4 lg:right-auto flex items-center lg:justify-end gap-3 z-20 mt-4 lg:mt-0 lg:pt-2.5">
+                 <div className="relative flex flex-wrap items-center justify-center lg:justify-end gap-3 z-20 mt-5 lg:mt-4 lg:pt-2.5 w-full">
                     <button 
                       onClick={() => {
                         navigator.clipboard.writeText(window.location.href);
                         toast.success("Page link copied to clipboard!");
                       }}
-                      className="w-11 h-11 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50 text-navy"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50 text-navy"
                     >
                        <Share2 size={16} />
                     </button>
                     <button 
                       onClick={() => toast.success(`${brand.name} saved to your bookmarks!`)}
-                      className="w-11 h-11 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50 text-navy"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50 text-navy"
                     >
                        <Bookmark size={15} />
                     </button>
@@ -859,31 +847,62 @@ export function BrandDetailPage() {
               {/* Mobile Social links */}
               <div className="flex lg:hidden items-center gap-4 mt-8 flex-wrap justify-center order-5 w-full">
                  <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">Find Us On</span>
-                 <div className="flex items-center gap-5">
-                   <a href="#" className="group flex flex-col items-center gap-1">
-                      <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#1877F2] flex items-center justify-center text-white transition-all shadow-md">
-                        <FacebookIcon size={15} />
-                      </div>
-                      <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Facebook</span>
-                   </a>
-                   <a href="#" className="group flex flex-col items-center gap-1">
-                      <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#C13584] flex items-center justify-center text-white transition-all shadow-md">
-                        <InstagramIcon size={15} />
-                      </div>
-                      <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Instagram</span>
-                   </a>
-                   <a href="#" className="group flex flex-col items-center gap-1">
-                      <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-black flex items-center justify-center text-white transition-all shadow-md">
-                        <TikTokIcon size={14} />
-                      </div>
-                      <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">TikTok</span>
-                   </a>
-                   <a href="#" className="group flex flex-col items-center gap-1">
-                      <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 group-hover:bg-[#FF0000] flex items-center justify-center text-white transition-all shadow-md">
-                        <Youtube size={15} />
-                      </div>
-                      <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">Youtube</span>
-                   </a>
+                 <div className="flex items-center gap-6 justify-center">
+                   {/* Facebook */}
+                   <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                     <a 
+                       href="#" 
+                       className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                       aria-label="Facebook"
+                     >
+                       <Facebook size={20} />
+                     </a>
+                     <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                       Facebook
+                     </span>
+                   </div>
+
+                   {/* Instagram */}
+                   <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                     <a 
+                       href="#" 
+                       className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                       aria-label="Instagram"
+                     >
+                       <Instagram size={20} />
+                     </a>
+                     <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                       Instagram
+                     </span>
+                   </div>
+
+                   {/* TikTok */}
+                   <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                     <a 
+                       href="#" 
+                       className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                       aria-label="TikTok"
+                     >
+                       <TikTokIcon size={20} />
+                     </a>
+                     <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                       TikTok
+                     </span>
+                   </div>
+
+                   {/* YouTube */}
+                   <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                     <a 
+                       href="#" 
+                       className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                       aria-label="YouTube"
+                     >
+                       <Youtube size={20} />
+                     </a>
+                     <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                       YouTube
+                     </span>
+                   </div>
                  </div>
               </div>
 
@@ -1510,11 +1529,11 @@ export function BrandDetailPage() {
                      {/* Pagination footer (from Brand Wise Products page - standardized to global canonical style) */}
                      {localClaimStatus === 'verified' && totalPages > 1 && (
                          <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-full px-2">
                            <button 
                               disabled={currentPage === 1}
                               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                              className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] disabled:opacity-45 disabled:hover:bg-white disabled:hover:text-navy disabled:hover:border-[#e8edf2] transition-all shadow-none group cursor-pointer"
+                              className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] disabled:opacity-45 disabled:hover:bg-white disabled:hover:text-navy disabled:hover:border-[#e8edf2] transition-all shadow-none group cursor-pointer"
                             >
                                <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
                             </button>
@@ -1523,7 +1542,7 @@ export function BrandDetailPage() {
                                  key={p}
                                  onClick={() => setCurrentPage(p)}
                                  className={cn(
-                                  "w-12 h-12 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
+                                  "w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
                                   p === currentPage 
                                   ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
                                   : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
@@ -1535,7 +1554,7 @@ export function BrandDetailPage() {
                            <button 
                               disabled={currentPage === totalPages}
                               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                              className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] disabled:opacity-45 disabled:hover:bg-white disabled:hover:text-navy disabled:hover:border-[#e8edf2] transition-all shadow-none group cursor-pointer"
+                              className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] disabled:opacity-45 disabled:hover:bg-white disabled:hover:text-navy disabled:hover:border-[#e8edf2] transition-all shadow-none group cursor-pointer"
                             >
                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </button>
@@ -1721,7 +1740,7 @@ export function BrandDetailPage() {
 
          {/* TRUST STATEMENT BACKGROUND BANNER */}
          <div className="w-full hero-gradient rounded-[5px] p-8 md:p-12 text-center text-white relative overflow-hidden shadow-lg border border-white/5">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-primary/10 blur-[120px] rounded-full pointer-events-none" />
+
             <div className="relative z-10 space-y-4">
                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto text-[#4DBC15] border border-white/10">
                   <ShieldCheck size={24} />

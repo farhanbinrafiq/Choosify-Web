@@ -6,12 +6,7 @@ export default function NotFoundPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#0A0A1F] flex items-center justify-center p-8 text-center overflow-hidden relative">
-      {/* Background Orbs */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-primary/10 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#07DD05]/5 blur-[120px] rounded-full" />
-      </div>
+    <div className="min-h-screen choosify-dark-gradient flex items-center justify-center p-8 text-center overflow-hidden relative">
 
       <div className="max-w-xl relative z-10 animate-in fade-in zoom-in duration-700">
         <h1 className="text-[180px] font-black text-white/5 leading-none mb-[-40px] italic tracking-tighter">404</h1>

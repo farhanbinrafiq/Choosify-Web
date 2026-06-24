@@ -529,7 +529,7 @@ export function HomePage() {
   ];
 
   return (
-    <div className="bg-[#EEF1F8] min-h-screen text-[#1A1D4E] antialiased pb-16 font-sans overflow-x-clip">
+    <div className="bg-choosify-feed min-h-screen text-[#1A1D4E] antialiased pb-16 font-sans overflow-x-clip">
       
       {/* SECTION 2 — HERO BANNER */}
       <section 
@@ -922,8 +922,8 @@ export function HomePage() {
               {/* SPOTLIGHT BRANDS SECTION */}
               <div 
                 id="section-spotlight-brands" 
-                className="p-6 md:p-8 shadow-xl text-left relative overflow-hidden"
-                style={{ borderRadius: '5px', backgroundColor: '#1C1410' }}
+                className="p-6 md:p-8 shadow-xl text-left relative overflow-hidden choosify-dark-gradient"
+                style={{ borderRadius: '5px' }}
               >
                 {/* 1. HEADER */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

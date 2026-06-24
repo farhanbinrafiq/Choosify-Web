@@ -21,6 +21,18 @@ export interface ThreadMessage {
   time: string;
   senderName: string;
   avatar?: string;
+  productCard?: {
+    image: string;
+    name: string;
+    variant: string;
+    color: string;
+    quantity: number;
+    notes: string;
+    price: number;
+    link: string;
+    status?: string;
+    counterPrice?: number;
+  };
 }
 
 export interface Campaign {
@@ -76,7 +88,7 @@ interface DashboardContextType {
   addToCompare: (product: any) => void;
   removeFromCompare: (id: number) => void;
   addMessage: (text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator') => void;
-  addThreadMessage: (threadId: string, text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', senderName?: string) => void;
+  addThreadMessage: (threadId: string, text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', senderName?: string, productCard?: any) => void;
   createNewThread: (id: string, title: string, avatar: string, type: 'retail' | 'wholesale' | 'general', lastMessage: string, orderRef?: string) => void;
   markAllAsRead: () => void;
   addToRecentlyViewed: (product: any) => void;
@@ -471,7 +483,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     threadId: string, 
     text: string, 
     sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', 
-    senderName?: string
+    senderName?: string,
+    productCard?: any
   ) => {
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const newMsg: ThreadMessage = {
@@ -481,7 +494,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       sender,
       time: timeStr,
       senderName: senderName || (sender === 'user' ? 'Me' : 'Partner Representative'),
-      avatar: sender === 'user' ? undefined : `https://i.pravatar.cc/150?u=${threadId}`
+      avatar: sender === 'user' ? undefined : `https://i.pravatar.cc/150?u=${threadId}`,
+      productCard
     };
 
     setThreadMessages(prev => [...prev, newMsg]);

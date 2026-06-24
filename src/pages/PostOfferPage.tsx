@@ -181,7 +181,7 @@ export function PostOfferPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-navy py-12 px-8">
+    <div className="flex flex-col min-h-screen choosify-dark-gradient py-12 px-8">
       <div className="max-w-4xl mx-auto w-full">
          <div className="mb-12">
             <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 italic">Post Your Offer</h1>

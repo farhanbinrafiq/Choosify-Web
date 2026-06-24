@@ -325,7 +325,7 @@ function PWAInstallPrompt() {
     <div className="fixed bottom-[100px] left-3 right-3 
                     lg:left-auto lg:right-6 lg:bottom-6 
                     lg:w-80 z-[150] 
-                    bg-[#0A0A1F] border border-white/10 
+                    choosify-dark-gradient border border-white/10 
                     rounded-2xl p-4 shadow-2xl
                     flex items-center gap-3">
       <div className="w-10 h-10 rounded-xl bg-orange-primary/10 

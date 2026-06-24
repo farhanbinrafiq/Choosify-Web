@@ -101,7 +101,7 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="w-full text-white h-20 flex items-center px-3 lg:px-4 xl:px-8 z-50 sticky top-0 border-b shadow-2xl backdrop-blur-md transition-all duration-300 bg-[#0A0A1F]/90 border-white/5" id="main-navbar">
+      <nav className="w-full text-white h-20 flex items-center px-3 lg:px-4 xl:px-8 z-50 sticky top-0 border-b shadow-2xl backdrop-blur-md transition-all duration-300 choosify-dark-gradient border-white/5" id="main-navbar">
         
         {/* LOGO SECTOR */}
         <div className="flex items-center gap-3 mr-2 lg:mr-3 xl:mr-8 scale-110 shrink-0">
@@ -273,7 +273,7 @@ export function Navbar() {
                       initial={{ opacity: 0, scale: 0.95, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute right-0 mt-4 w-6 coordinate bg-[#050514] border border-white/10 rounded-2xl shadow-2xl p-4 z-50 overflow-hidden min-w-[240px]"
+                      className="absolute right-0 mt-4 w-6 coordinate choosify-dark-gradient border border-white/10 rounded-2xl shadow-2xl p-4 z-50 overflow-hidden min-w-[240px]"
                     >
                       <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 blur-2xl rounded-full" />
                       
@@ -395,7 +395,7 @@ export function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] h-full z-[101] shadow-2xl p-6 flex flex-col justify-between overflow-y-auto border-l bg-[#0A0A1F] border-white/5 text-white"
+              className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] h-full z-[101] shadow-2xl p-6 flex flex-col justify-between overflow-y-auto border-l choosify-dark-gradient border-white/5 text-white"
             >
               <div className="flex flex-col gap-6">
                 {/* Header */}

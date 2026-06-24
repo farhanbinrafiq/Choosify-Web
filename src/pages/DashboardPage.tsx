@@ -600,6 +600,7 @@ const CompareToolSection = () => {
   );
 };
 
+// Legacy MessagesSection removed in favor of modern /messages page
 const MessagesSection = () => {
   const { messages, addMessage } = useDashboard();
   const [inputText, setInputText] = useState('');
@@ -1286,6 +1287,12 @@ export function DashboardPage() {
     }
   }, [location.state]);
 
+  useEffect(() => {
+    if (activeTab === 'messages') {
+      navigate('/messages');
+    }
+  }, [activeTab, navigate]);
+
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
   };
@@ -1300,7 +1307,7 @@ export function DashboardPage() {
     { id: 'saved-recommendations', label: 'Saved Guides', icon: Bookmark },
     { id: 'my-comparisons', label: `My Comparisons (${comparedProducts.length})`, icon: Layers },
     { id: 'admin-campaigns', label: `Campaigns Manager (Admin) (${campaigns?.length || 0})`, icon: Sparkles },
-    { id: 'messages', label: `Messages (${messages.length})`, icon: MessageSquare },
+    { id: 'messages', label: `Messages (${messages.length})`, icon: MessageSquare, href: '/messages' },
     { id: 'notifications', label: `Notifications (${notifications.filter(n => !n.read).length})`, icon: Bell },
     { id: 'my-reviews', label: 'My Reviews', icon: Star },
     { id: 'settings', label: 'Profile Settings', icon: Settings },
@@ -1338,7 +1345,23 @@ export function DashboardPage() {
         </div>
       );
       case 'my-comparisons': return <CompareToolSection />;
-      case 'messages': return <MessagesSection />;
+      case 'messages': return (
+        <div className="flex flex-col items-center justify-center p-12 text-center max-w-lg mx-auto h-[500px]">
+          <div className="w-16 h-16 bg-[#F96500]/10 text-orange-primary rounded-full flex items-center justify-center mb-4">
+            <MessageSquare size={28} className="animate-pulse" />
+          </div>
+          <h3 className="text-md font-black uppercase text-gray-950 italic tracking-tight">Opening Workspace Chat</h3>
+          <p className="text-[10px] text-gray-500 uppercase tracking-widest leading-relaxed font-bold mb-6">
+            Connecting you to your secure buyer/seller network in the unified messenger...
+          </p>
+          <Link 
+            to="/messages" 
+            className="px-6 py-3 bg-[#F96500] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#FF5B00] transition-all italic leading-none"
+          >
+            Go to Messenger
+          </Link>
+        </div>
+      );
       case 'notifications': return <NotificationsSection />;
       case 'my-reviews': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
@@ -1386,7 +1409,7 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8F9FA] text-[#1a1a2e]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed text-[#1a1a2e]">
       {/* Mobile Top Header */}
       <div className="lg:hidden p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-50">
         <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border border-gray-200 cursor-pointer">
@@ -1396,7 +1419,7 @@ export function DashboardPage() {
 
       <div className="flex flex-1">
         {/* Sidebar Desktop */}
-        <aside className="hidden lg:flex w-[320px] flex-col border-r border-white/5 bg-[#0B0C1E] text-white h-screen sticky top-0 overflow-y-auto no-scrollbar">
+        <aside className="hidden lg:flex w-[320px] flex-col border-r border-white/5 choosify-dark-gradient text-white h-screen sticky top-0 overflow-y-auto no-scrollbar">
           <div className="p-10 border-b border-white/5">
             <Link to="/" className="flex flex-col items-start group mb-8 text-white">
               <div className="flex gap-1 mb-1">

@@ -160,10 +160,9 @@ export function DealsPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section - Standardized Centered Alignment */}
-      <div className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
+      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
         {/* Background Gradients matching other directory pages */}
-        <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="absolute inset-0 hero-gradient" />
         
         <div className="max-w-[1914px] mx-auto w-full h-[140px] md:h-[155px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
           <div className="w-full flex flex-col justify-center">
@@ -295,7 +294,7 @@ export function DealsPage() {
         </div>
       </div>
 
-      <main className="w-full bg-[#F3F9FF]/30 min-h-screen">
+      <main className="w-full bg-choosify-feed min-h-screen">
 
         {/* LAYER 1: QUICK FILTER BAR */}
         <QuickFilterBar
@@ -480,7 +479,7 @@ export function DealsPage() {
                  </div>
               </div>
    
-              <div className="flex flex-col gap-10 items-center w-full">
+              <div className="flex flex-col gap-6 items-center w-full">
                  {/* Banner Card */}
                  <div className="w-full lg:min-h-[395px] lg:h-auto flex-shrink-0 relative">
                     <ProductCard 
@@ -519,7 +518,7 @@ export function DealsPage() {
             </section>
 
             {/* ALL DEALS Section Container */}
-            <section id="all-deals" className="py-16 bg-[#F3F9FF]/20 px-6 rounded-[5px] border border-gray-100 text-center w-full">
+            <section id="all-deals" className="w-full">
               <div className="mb-12 border-l-4 border-orange-primary px-6 text-left">
                  <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-2">ALL <span className="text-orange-primary">DEALS</span></h2>
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic px-2 border-l-4 border-orange-primary">Browse All Handpicked Offers</p>

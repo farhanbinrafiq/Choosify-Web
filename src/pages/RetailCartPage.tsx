@@ -72,7 +72,7 @@ export function RetailCartPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Hero Header */}
       <div className="w-full bg-[#0A0B1E] relative overflow-hidden shrink-0 border-b border-white/5">
         <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />

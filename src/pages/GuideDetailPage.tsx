@@ -360,7 +360,7 @@ export function GuideDetailPage() {
       </div>
 
       {/* Guide Information Panel - Placed completely below the theater media area */}
-      <div className="w-full bg-[#0B0C1E] py-14 px-6 border-b border-white/15 relative overflow-hidden">
+      <div className="w-full choosify-dark-gradient py-14 px-6 border-b border-white/15 relative overflow-hidden">
         {/* Layer 1 Base & Multi-layered Ambient Light Glows */}
         {/* Top-Right Ambient Orange Glow */}
         <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-br from-[#F97316]/30 to-transparent rounded-full blur-[140px] -translate-y-1/3 translate-x-1/4 pointer-events-none mix-blend-plus-lighter opacity-90" />
@@ -1330,15 +1330,16 @@ export function GuideDetailPage() {
                     {creator.bio}
                   </p>
 
-                  <div className="flex gap-3 justify-center mb-5 shrink-0">
+                  <div className="flex gap-4 justify-center mb-5 shrink-0">
                     {creator.socials.facebook && (
                       <a
                         href={creator.socials.facebook}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                        className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
+                        aria-label="Facebook"
                       >
-                        <Facebook size={12} />
+                        <Facebook size={20} />
                       </a>
                     )}
                     {creator.socials.twitter && (
@@ -1346,9 +1347,10 @@ export function GuideDetailPage() {
                         href={creator.socials.twitter}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center hover:bg-sky-500 hover:text-white transition-all shadow-sm"
+                        className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
+                        aria-label="Twitter"
                       >
-                        <Twitter size={12} />
+                        <Twitter size={20} />
                       </a>
                     )}
                     {creator.socials.youtube && (
@@ -1356,9 +1358,10 @@ export function GuideDetailPage() {
                         href={creator.socials.youtube}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                        className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
+                        aria-label="YouTube"
                       >
-                        <Youtube size={12} />
+                        <Youtube size={20} />
                       </a>
                     )}
                   </div>
@@ -1407,15 +1410,16 @@ export function GuideDetailPage() {
                   {creator.bio}
                 </p>
 
-                <div className="flex gap-3 justify-center mb-5 shrink-0">
+                <div className="flex gap-4 justify-center mb-5 shrink-0">
                   {creator.socials.facebook && (
                     <a
                       href={creator.socials.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
+                      aria-label="Facebook"
                     >
-                      <Facebook size={12} />
+                      <Facebook size={20} />
                     </a>
                   )}
                   {creator.socials.twitter && (
@@ -1423,9 +1427,10 @@ export function GuideDetailPage() {
                       href={creator.socials.twitter}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center hover:bg-sky-500 hover:text-white transition-all shadow-sm"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
+                      aria-label="Twitter"
                     >
-                      <Twitter size={12} />
+                      <Twitter size={20} />
                     </a>
                   )}
                   {creator.socials.youtube && (
@@ -1433,9 +1438,10 @@ export function GuideDetailPage() {
                       href={creator.socials.youtube}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
+                      aria-label="YouTube"
                     >
-                      <Youtube size={12} />
+                      <Youtube size={20} />
                     </a>
                   )}
                 </div>

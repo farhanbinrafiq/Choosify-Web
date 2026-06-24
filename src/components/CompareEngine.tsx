@@ -859,7 +859,7 @@ export function CompareEngine() {
   return (
     <div className="w-full bg-[#F8FAFC]">
       {/* Compare Engine Elegant Hero Section */}
-      <div className="bg-[#05051A] px-6 relative overflow-hidden text-center flex flex-col justify-center items-center py-16" style={{ minHeight: '440px' }}>
+      <div className="choosify-dark-gradient px-6 relative overflow-hidden text-center flex flex-col justify-center items-center py-16" style={{ minHeight: '440px' }}>
          <div className="absolute inset-0 bg-gradient-to-b from-blue-600/5 to-transparent pointer-events-none" />
          
          <motion.div 
@@ -1319,8 +1319,7 @@ export function CompareEngine() {
             )}
 
             {compareMode === 'product' && comparedProducts.length === 0 ? (
-               <div className="bg-[#05051A] border border-white/10 rounded-[15px] p-12 text-center flex flex-col items-center justify-center min-h-[400px] shadow-2xl relative overflow-hidden">
-                 <div className="absolute inset-0 bg-gradient-to-b from-blue-600/5 to-transparent pointer-events-none" />
+               <div className="choosify-dark-gradient border border-white/10 rounded-[15px] p-12 text-center flex flex-col items-center justify-center min-h-[400px] shadow-2xl relative overflow-hidden">
                  <div className="relative z-10 flex flex-col items-center">
                    <div className="w-16 h-16 rounded-full bg-orange-primary/15 border border-orange-primary/25 flex items-center justify-center text-orange-primary mb-6 animate-pulse">
                      <Layers size={32} />
@@ -1528,7 +1527,7 @@ export function CompareEngine() {
                </div>
 
                {/* Dynamic Global Verdict Section */}
-               <div className="bg-[#0A0A1F] p-6 md:p-8 text-center md:text-left flex flex-col md:flex-row items-center gap-6 md:gap-8 border-t border-white/5">
+               <div className="choosify-dark-gradient p-6 md:p-8 text-center md:text-left flex flex-col md:flex-row items-center gap-6 md:gap-8 border-t border-white/5">
                    <div className="w-12 h-12 rounded-full bg-orange-primary/15 flex items-center justify-center text-orange-primary shrink-0 border border-orange-primary/20">
                       <Trophy size={20} />
                    </div>
@@ -1561,7 +1560,7 @@ export function CompareEngine() {
          <aside className="lg:sticky lg:top-36 flex flex-col gap-4">
             
             {/* 1. DECISION COGNITIVE ASSISTANT CARD */}
-            <div className="bg-[#05051A] rounded-[5px] border border-white/5 p-5 text-left relative overflow-hidden shadow-md">
+            <div className="choosify-dark-gradient rounded-[5px] border border-white/5 p-5 text-left relative overflow-hidden shadow-md">
               <div className="absolute top-0 right-0 p-3 text-orange-primary opacity-25">
                 <Sparkles size={18} />
               </div>

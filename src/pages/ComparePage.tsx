@@ -8,7 +8,7 @@ export function ComparePage() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f4f7f9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       <main className="w-full">
         <CompareEngine />
       </main>

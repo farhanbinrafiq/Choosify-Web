@@ -477,11 +477,10 @@ export function CategoriesPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
-      <div className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
+      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
         {/* Background Gradients */}
-        <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="absolute inset-0 hero-gradient" />
         
         <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[130px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
           <div className="w-full flex flex-col justify-center">

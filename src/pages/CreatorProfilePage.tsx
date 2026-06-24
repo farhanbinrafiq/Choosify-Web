@@ -13,27 +13,20 @@ import { cn } from '../lib/utils';
 import { PublicReviewCard } from '../components/PublicReviewCard';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ClaimProfileModal } from '../components/ClaimProfileModal';
+import { FollowButton } from '../components/FollowButton';
 
-// Inline Social SVG Icons matching design guidelines
-const FacebookIcon = ({ size = 16, ...props }: { size?: number; [key: string]: any }) => (
-  <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" {...props}>
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
-
-const InstagramIcon = ({ size = 16, ...props }: { size?: number; [key: string]: any }) => (
-  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-  </svg>
-);
-
-const TikTokIcon = ({ size = 16, ...props }: { size?: number; [key: string]: any }) => (
-  <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" {...props}>
-    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.81-.74-3.94-1.69-.14-.12-.29-.26-.4-.39-.01 2.3-.01 4.6-.01 6.91-.01 1.63-.44 3.25-1.31 4.58-1.57 2.39-4.42 3.79-7.3 3.47-3.41-.37-6.23-3.23-6.52-6.66-.41-4.75 3.51-8.91 8.26-8.5v4.13c-2.11-.27-4.11 1.17-4.59 3.23-.59 2.5 1.11 5.09 3.63 5.4 2.11.26 4.14-1.07 4.63-3.11.09-.37.11-.75.11-1.13V0h-3.8z" />
-  </svg>
-);
+function TikTokIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill="currentColor"
+    >
+      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
+    </svg>
+  );
+}
 
 export function CreatorProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -330,7 +323,7 @@ export function CreatorProfilePage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F0F4F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       
       {/* 1. CREATOR HERO SECTION */}
       <motion.section 
@@ -425,7 +418,7 @@ export function CreatorProfilePage() {
                            toast.success(newState ? `Added ${creator.name} to favorites!` : `Removed ${creator.name} from favorites`);
                          }}
                          className={cn(
-                           "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
+                           "text-[10px] md:text-[11px] font-black uppercase px-5 md:px-6 lg:px-8 py-3 md:py-3.5 lg:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
                            isLoved 
                              ? "bg-white text-orange-primary border-white shadow-white/5" 
                              : "bg-orange-primary text-white border-orange-primary/30 hover:bg-[#ff5d14]"
@@ -436,21 +429,12 @@ export function CreatorProfilePage() {
                        </button>
 
                        {/* Follow CTA */}
-                       <button 
-                         onClick={() => {
-                           const newState = !isJoined;
-                           setIsJoined(newState);
-                           toast.success(newState ? `You are now following ${creator.name}!` : `Unfollowed ${creator.name}`);
-                         }}
-                         className={cn(
-                           "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer",
-                           isJoined 
-                             ? "bg-[#4DBC15] text-white border-[#4DBC15]" 
-                             : "bg-white text-navy border-white hover:bg-gray-50"
-                         )}
-                       >
-                          {isJoined ? "Following" : "Follow"}
-                       </button>
+                       <FollowButton 
+                         id={creator.id}
+                         name={creator.name}
+                         type="creator"
+                         className="px-5 md:px-6 lg:px-8 py-3 md:py-3.5 lg:py-4.5 rounded-full"
+                       />
 
                        {/* Ask For Branding CTA */}
                         <button 
@@ -462,7 +446,7 @@ export function CreatorProfilePage() {
                              }
                           }}
                           className={cn(
-                             "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all italic cursor-pointer flex items-center gap-1.5",
+                             "text-[10px] md:text-[11px] font-black uppercase px-5 md:px-6 lg:px-8 py-3 md:py-3.5 lg:py-4.5 rounded-full tracking-wider transition-all italic cursor-pointer flex items-center gap-1.5",
                              localClaimStatus !== 'verified'
                                ? "bg-white/5 text-white/45 border border-white/10 cursor-not-allowed opacity-65"
                                : "bg-transparent text-white border border-white/20 hover:bg-white/10 hover:border-white/40"
@@ -482,7 +466,7 @@ export function CreatorProfilePage() {
                                    toast.success("Claim submitted successfully! Creator profile status changed to Pending Review.", { duration: 5000 });
                                 }, 1500);
                              }}
-                             className="text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer bg-white text-navy border-white hover:bg-gray-100 flex items-center gap-1.5"
+                             className="text-[10px] md:text-[11px] font-black uppercase px-5 md:px-6 lg:px-8 py-3 md:py-3.5 lg:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer bg-white text-navy border-white hover:bg-gray-100 flex items-center gap-1.5"
                            >
                               <ShieldCheck size={14} className="shrink-0" />
                               <span>Claim Profile</span>
@@ -490,7 +474,7 @@ export function CreatorProfilePage() {
                         )}
 
                         {localClaimStatus === 'pending' && (
-                           <div className="text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-md bg-amber-500 text-white border border-amber-500/35 italic flex items-center gap-1.5 select-none hover:cursor-default">
+                           <div className="text-[10px] md:text-[11px] font-black uppercase px-5 md:px-6 lg:px-8 py-3 md:py-3.5 lg:py-4.5 rounded-full tracking-wider shadow-md bg-amber-500 text-white border border-amber-500/35 italic flex items-center gap-1.5 select-none hover:cursor-default">
                               <Clock size={14} className="shrink-0" />
                               <span>Verification Pending</span>
                            </div>
@@ -498,40 +482,35 @@ export function CreatorProfilePage() {
                     </div>
                  </div>
 
-                 {/* Find Us On Indicators */}
-                 <div className="hidden lg:flex items-center gap-4 mt-2 flex-wrap justify-start">
-                    <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-orange-primary pb-1 italic">Find Us On</span>
-                    <div className="flex items-center gap-5">
-                       {creator.platforms.map(platform => {
-                          let platformUrl = "#";
-                          let colorActive = "hover:bg-red-500";
-                          let iconComp = <Youtube size={15} />;
-                          
-                          if (platform === 'YouTube') {
-                             colorActive = "hover:bg-[#FF0000]";
-                             iconComp = <Youtube size={15} />;
-                          } else if (platform === 'Instagram') {
-                             colorActive = "hover:bg-[#C13584]";
-                             iconComp = <InstagramIcon size={15} />;
-                          } else if (platform === 'Facebook') {
-                             colorActive = "hover:bg-[#1877F2]";
-                             iconComp = <FacebookIcon size={15} />;
-                          } else if (platform === 'TikTok') {
-                             colorActive = "hover:bg-[#010101]";
-                             iconComp = <TikTokIcon size={14} />;
-                          }
+                  {/* Find Us On Indicators */}
+                  <div className="hidden lg:flex items-center gap-4 mt-2 flex-wrap justify-start">
+                     <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-orange-primary pb-1 italic">Find Us On</span>
+                     <div className="flex items-center gap-5">
+                        {creator.platforms.map(platform => {
+                           let platformUrl = "#";
+                           let iconComp = <Youtube size={20} />;
+                           
+                           if (platform === 'YouTube') {
+                              iconComp = <Youtube size={20} />;
+                           } else if (platform === 'Instagram') {
+                              iconComp = <Instagram size={20} />;
+                           } else if (platform === 'Facebook') {
+                              iconComp = <Facebook size={20} />;
+                           } else if (platform === 'TikTok') {
+                              iconComp = <TikTokIcon size={20} />;
+                           }
 
-                          return (
-                            <a key={platform} href={platformUrl} className="group flex flex-col items-center gap-1">
-                               <div className={cn("w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 flex items-center justify-center text-white transition-all shadow-md", colorActive)}>
-                                 {iconComp}
-                               </div>
-                               <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">{platform}</span>
-                            </a>
-                          );
-                       })}
-                    </div>
-                 </div>
+                           return (
+                             <a key={platform} href={platformUrl} className="group flex flex-col items-center gap-1.5 focus:outline-none">
+                                <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
+                                  {iconComp}
+                                </div>
+                                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">{platform}</span>
+                             </a>
+                           );
+                        })}
+                     </div>
+                  </div>
               </div>
 
               {/* Right Side: Trust scoring scorecard card */}
@@ -605,23 +584,23 @@ export function CreatorProfilePage() {
                  </div>
               </div>
 
-               {/* Mobile platform Find Us On indicators */}
-               <div className="flex lg:hidden items-center gap-4 mt-8 flex-wrap justify-center order-5 w-full">
-                  <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-orange-primary pb-1 italic">Find Us On</span>
-                  <div className="flex items-center gap-5">
-                    {creator.platforms.map(platform => (
-                      <a key={platform} href="#" className="group flex flex-col items-center gap-1">
-                         <div className="w-10 h-10 rounded-full border border-white/10 hover:border-white bg-white/5 flex items-center justify-center text-white transition-all shadow-md">
-                           {platform === 'YouTube' && <Youtube size={15} className="text-red-500" />}
-                           {platform === 'Instagram' && <InstagramIcon size={15} className="text-pink-500" />}
-                           {platform === 'Facebook' && <FacebookIcon size={15} className="text-blue-500" />}
-                           {platform === 'TikTok' && <TikTokIcon size={14} className="text-slate-300" />}
-                         </div>
-                         <span className="text-[8px] font-bold text-gray-400 group-hover:text-white transition-colors tracking-wide">{platform}</span>
-                      </a>
-                    ))}
-                  </div>
-               </div>
+                {/* Mobile platform Find Us On indicators */}
+                <div className="flex lg:hidden items-center gap-4 mt-8 flex-wrap justify-center order-5 w-full">
+                   <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-orange-primary pb-1 italic">Find Us On</span>
+                   <div className="flex items-center gap-5">
+                     {creator.platforms.map(platform => (
+                       <a key={platform} href="#" className="group flex flex-col items-center gap-1.5 focus:outline-none">
+                          <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
+                            {platform === 'YouTube' && <Youtube size={20} />}
+                            {platform === 'Instagram' && <Instagram size={20} />}
+                            {platform === 'Facebook' && <Facebook size={20} />}
+                            {platform === 'TikTok' && <TikTokIcon size={20} />}
+                          </div>
+                          <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">{platform}</span>
+                       </a>
+                     ))}
+                   </div>
+                </div>
 
             </div>
         </div>

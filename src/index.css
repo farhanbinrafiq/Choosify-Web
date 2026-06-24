@@ -13,6 +13,7 @@
   --color-orange-deep: #EB4501;
   --color-blue-grey: #D6E1EC;
   --color-ice-blue: #F0F8FF;
+  --color-choosify-feed: #F0F8FF;
   --color-alert-red: #FF000D;
   --color-royal-blue: #2323FF;
 
@@ -72,13 +73,21 @@
 
 @layer base {
   body {
-    @apply font-sans text-[#1A1A2E] bg-[#f4f7f9] antialiased selection:bg-orange-primary/30 selection:text-navy;
+    @apply font-sans text-[#1A1A2E] bg-choosify-feed antialiased selection:bg-orange-primary/30 selection:text-navy;
   }
 }
 
+.choosify-feed-background {
+  background-color: #F0F8FF !important;
+}
+
+/* Master brand gradient token - flowing top (#3A1E22) to bottom (#000435) */
+.choosify-dark-gradient {
+  background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
+}
+
 .hero-gradient {
-  background: radial-gradient(circle at 50% 120%, rgba(210, 80, 15, 0.18) 0%, rgba(13, 10, 42, 0.1) 60%, rgba(2, 6, 38, 0) 100%),
-              linear-gradient(180deg, #020412 0%, #060922 45%, #16102D 75%, #291223 90%, #3F1517 100%);
+  background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
 }
 
 .button-gradient {
@@ -86,8 +95,7 @@
 }
 
 .dark-brand-gradient {
-  background: radial-gradient(circle at 50% 120%, rgba(210, 80, 15, 0.18) 0%, rgba(13, 10, 42, 0.1) 60%, rgba(2, 6, 38, 0) 100%),
-              linear-gradient(180deg, #020412 0%, #060922 45%, #16102D 75%, #291223 90%, #3F1517 100%);
+  background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
 }
 
 .orange-brand-gradient {
@@ -95,8 +103,7 @@
 }
 
 .footer-brand-gradient {
-  background: radial-gradient(circle at 50% 110%, rgba(210, 80, 15, 0.15) 0%, rgba(13, 10, 42, 0.1) 65%, rgba(2, 6, 38, 0) 100%),
-              linear-gradient(180deg, #01030F 0%, #04071D 45%, #120D26 75%, #230F1E 90%, #371113 100%);
+  background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
 }
 
 .shadow-soft {

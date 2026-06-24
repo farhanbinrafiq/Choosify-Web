@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { 
   Search, Star, Tag, Award, Heart, Sparkles, User, HelpCircle, 
   Copy, Check, ChevronRight, ArrowRight, ShoppingBag, FolderOpen, 
-  Percent, AlertCircle, Sparkle, LayoutGrid, CheckCircle
+  Percent, AlertCircle, Sparkle, LayoutGrid, CheckCircle, Layers
 } from 'lucide-react';
 import { PRODUCTS, BRANDS, BLOGS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
@@ -25,6 +25,15 @@ const PROMO_CODES = [
   { brandId: 'apex', brandName: "Apex", code: "APEXFOOT26", discount: "BDT 500 FLAT" },
   { brandId: 'sailor', brandName: "Sailor", code: "SAILOREID", discount: "Flat 20% OFF" },
   { brandId: 'adidas', brandName: "Adidas", code: "ADIEXTRA10", discount: "10% FLAT OFF" }
+];
+
+// Predefined Advanced Matrix Comparison Databases
+const COMPARE_DATABASES = [
+  { id: 'product-compare', title: "Sailor vs Yellow Cotton Comparison", category: "Products", route: "/compare" },
+  { id: 'brand-compare', title: "Aarong vs Yellow Positioning Matrix", category: "Brands", route: "/compare" },
+  { id: 'creator-compare', title: "Nafis Anjum vs Tasnim Creator Comparison", category: "Creators", route: "/compare" },
+  { id: 'guide-compare', title: "Capsule vs Traditional Wardrobe Comparison", category: "Guides", route: "/compare" },
+  { id: 'ai-compare', title: "Value vs Longevity Premium Quality Cost Matrix", category: "AI Matrix", route: "/compare" }
 ];
 
 // Influencers details
@@ -103,7 +112,7 @@ export function SearchPage() {
   const navigate = useNavigate();
   const rawQuery = searchParams.get('q') || '';
   const [localInput, setLocalInput] = useState(rawQuery);
-  const [activeTab, setActiveTab] = useState<'all' | 'products' | 'brands' | 'deals' | 'guides' | 'coupons' | 'categories' | 'influencers'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'products' | 'brands' | 'deals' | 'guides' | 'coupons' | 'categories' | 'influencers' | 'favorites' | 'compares'>('all');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   // Sync state with url parameter
@@ -196,6 +205,8 @@ export function SearchPage() {
         coupons: [],
         categories: [],
         influencers: [],
+        favorites: [],
+        compares: [],
         total: 0
       };
     }
@@ -341,6 +352,34 @@ export function SearchPage() {
       };
     });
 
+    // 8. CUSTOMER FAVORITES (Products with tag === '❤️ Customer Favorite' / idx % 5 === 1)
+    const matchedFavorites = PRODUCTS.map((p, idx) => {
+      const match = p.title.toLowerCase().includes(q) || 
+                    p.brand.toLowerCase().includes(q) || 
+                    p.category.toLowerCase().includes(q) || 
+                    (p.description || '').toLowerCase().includes(q);
+      const isFav = idx % 5 === 1;
+      if (!isFav || !match) return null;
+      return {
+        ...p,
+        tag: '❤️ Customer Favorite',
+        tagColor: 'bg-rose-500',
+        score: getPriorityScore(p, p.title, true, p.rating) + 120
+      };
+    }).filter(Boolean) as any[];
+
+    // 9. COMPARE RESULTS
+    const matchedCompares = COMPARE_DATABASES.map(c => {
+      const match = c.title.toLowerCase().includes(q) || 
+                    c.category.toLowerCase().includes(q) ||
+                    q.includes('vs') || q.includes('compare');
+      if (!match) return null;
+      return {
+        ...c,
+        score: getPriorityScore(c, c.title, true)
+      };
+    }).filter(Boolean) as any[];
+
     // Sort all arrays by score priority descending
     const sortFn = (a: any, b: any) => b.score - a.score;
     matchedProducts.sort(sortFn);
@@ -350,10 +389,12 @@ export function SearchPage() {
     matchedCoupons.sort(sortFn);
     matchedCategories.sort(sortFn);
     matchedInfluencers.sort(sortFn);
+    matchedFavorites.sort(sortFn);
+    matchedCompares.sort(sortFn);
 
     const total = matchedProducts.length + matchedBrands.length + matchedDeals.length + 
                   matchedGuides.length + matchedCoupons.length + matchedCategories.length + 
-                  matchedInfluencers.length;
+                  matchedInfluencers.length + matchedFavorites.length + matchedCompares.length;
 
     return {
       products: matchedProducts,
@@ -363,6 +404,8 @@ export function SearchPage() {
       coupons: matchedCoupons,
       categories: matchedCategories,
       influencers: matchedInfluencers,
+      favorites: matchedFavorites,
+      compares: matchedCompares,
       total
     };
   }, [rawQuery, filteredGuides, combinedCreators]);
@@ -371,20 +414,21 @@ export function SearchPage() {
   const tabConfig = [
     { key: 'all', label: 'All Matches', count: searchResults.total },
     { key: 'products', label: 'Products', count: searchResults.products.length },
-    { key: 'brands', label: 'Brands', count: searchResults.brands.length },
+    { key: 'brands', label: 'Brand Profiles', count: searchResults.brands.length },
     { key: 'deals', label: 'Deals', count: searchResults.deals.length },
-    { key: 'guides', label: 'Guides & Recommendations', count: searchResults.guides.length },
+    { key: 'favorites', label: 'Customer Favorites', count: searchResults.favorites.length },
+    { key: 'compares', label: 'Compare Results', count: searchResults.compares.length },
+    { key: 'guides', label: 'Buying Guides', count: searchResults.guides.length },
     { key: 'coupons', label: 'Coupons / Promos', count: searchResults.coupons.length },
     { key: 'categories', label: 'Categories', count: searchResults.categories.length },
-    { key: 'influencers', label: 'Influencers & Creators', count: searchResults.influencers.length }
+    { key: 'influencers', label: 'Creator Profiles', count: searchResults.influencers.length }
   ];
 
   return (
-    <div className="bg-[#FAF9F5] min-h-screen text-[#1A1A2E] pb-24 font-sans antialiased">
+    <div className="bg-choosify-feed min-h-screen text-[#1A1A2E] pb-24 font-sans antialiased">
       {/* Search Header Banner */}
-      <div className="w-full bg-[#0A0A1F] py-16 px-6 relative overflow-hidden flex flex-col items-center justify-center border-b border-white/5">
-        <div className="absolute inset-0 bg-[#0A0A1F]/90" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
+      <div className="w-full relative overflow-hidden flex flex-col items-center justify-center border-b border-white/5 py-16 px-6">
+        <div className="absolute inset-0 hero-gradient" />
         
         <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full">
           <div className="bg-orange-primary/10 text-orange-primary text-[8px] font-black px-3 py-1 rounded-full mb-3 uppercase tracking-[0.2em] italic inline-block w-fit">
@@ -510,17 +554,17 @@ export function SearchPage() {
               </div>
             )}
 
-            {/* GUIDES MINI-SECTION (All Tab only) */}
-            {activeTab === 'all' && filteredGuides.length > 0 && rawQuery.trim() !== '' && (
+            {/* 4. GUIDES & RECOMMENDATIONS SECTION */}
+            {(activeTab === 'all' || activeTab === 'guides') && searchResults.guides.length > 0 && (
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                   <div className="flex items-center gap-2">
                     <Sparkles size={15} className="text-[#E8500A]" />
                     <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
-                      Matching Guides ({filteredGuides.length})
+                      Expert Guides & Recommendations ({searchResults.guides.length})
                     </h2>
                   </div>
-                  {filteredGuides.length > 3 && (
+                  {activeTab === 'all' && searchResults.guides.length > 3 && (
                     <button 
                       onClick={() => setActiveTab('guides')} 
                       className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1"
@@ -531,7 +575,7 @@ export function SearchPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {filteredGuides.slice(0, 3).map((guide: any) => (
+                  {(activeTab === 'all' ? searchResults.guides.slice(0, 3) : searchResults.guides).map((guide: any) => (
                     <div 
                       key={guide.id} 
                       className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col justify-between text-left"
@@ -690,56 +734,6 @@ export function SearchPage() {
               </div>
             )}
 
-            {/* 4. GUIDES & RECOMMENDATIONS SECTION */}
-            {activeTab === 'guides' && filteredGuides.length > 0 && (
-              <div className="bg-white rounded-[5px] border border-gray-200 p-6">
-                <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={15} className="text-[#E8500A]" />
-                    <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
-                      Expert Guides & Recommendations ({filteredGuides.length})
-                    </h2>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {filteredGuides.map((guide: any) => (
-                    <div 
-                      key={guide.id} 
-                      className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col justify-between text-left"
-                    >
-                      <div>
-                        {guide.category && (
-                          <span className="inline-block bg-orange-primary/10 text-[#E8500A] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-2">
-                            {guide.category}
-                          </span>
-                        )}
-                        <h4 className="font-bold text-xs uppercase text-[#1A1D4E] line-clamp-2 leading-tight">
-                          {guide.title}
-                        </h4>
-                        <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">
-                          By {guide.author}
-                        </p>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
-                        {guide.views && (
-                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
-                            {guide.views} views
-                          </span>
-                        )}
-                        <Link 
-                          to={`/guides/${guide.id}`}
-                          className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-1 hover:underline"
-                        >
-                          Read Guide <ArrowRight size={10} />
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* 5. COUPONS & PROMOS */}
             {(activeTab === 'all' || activeTab === 'coupons') && searchResults.coupons.length > 0 && (
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
@@ -878,6 +872,72 @@ export function SearchPage() {
                         </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 8. CUSTOMER FAVORITES SECTION */}
+            {(activeTab === 'all' || activeTab === 'favorites') && searchResults.favorites.length > 0 && (
+              <div className="bg-white rounded-[5px] border border-gray-200 p-6">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Heart size={15} className="text-[#E8500A] fill-[#E8500A]" />
+                    <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
+                      Customer Favorites ({searchResults.favorites.length})
+                    </h2>
+                  </div>
+                  {activeTab === 'all' && searchResults.favorites.length > 4 && (
+                    <button onClick={() => setActiveTab('favorites')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                      See All Favorites <ChevronRight size={12} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {(activeTab === 'all' ? searchResults.favorites.slice(0, 6) : searchResults.favorites).map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 9. COMPARE RESULTS SECTION */}
+            {(activeTab === 'all' || activeTab === 'compares') && searchResults.compares.length > 0 && (
+              <div className="bg-white rounded-[5px] border border-gray-200 p-6">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Layers size={15} className="text-[#E8500A]" />
+                    <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
+                      Matched Multi-Dimensional Comparisons ({searchResults.compares.length})
+                    </h2>
+                  </div>
+                  {activeTab === 'all' && searchResults.compares.length > 3 && (
+                    <button onClick={() => setActiveTab('compares')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                      See All Comparisons <ChevronRight size={12} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {(activeTab === 'all' ? searchResults.compares.slice(0, 3) : searchResults.compares).map((compareRow, idx) => (
+                    <Link
+                      to={compareRow.route}
+                      key={idx}
+                      className="border border-[#e8edf2] hover:border-orange-primary/30 rounded-[5px] p-4 flex flex-col justify-between bg-white hover:shadow-soft transition-all text-left"
+                    >
+                      <div>
+                        <span className="bg-orange-primary/10 text-[#E8500A] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-2 inline-block">
+                          {compareRow.category} Comparisons
+                        </span>
+                        <h4 className="font-bold text-xs uppercase text-[#1A1D4E]">
+                          {compareRow.title}
+                        </h4>
+                      </div>
+                      <span className="mt-4 text-[9px] text-[#E8500A] font-black uppercase tracking-wider flex items-center gap-0.5">
+                        Open Side-By-Side Matrix <ChevronRight size={10} />
+                      </span>
+                    </Link>
                   ))}
                 </div>
               </div>

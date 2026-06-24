@@ -250,9 +250,9 @@ ORDER STATUS: PENDING_CONFIRMATION
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Checkout Header */}
-      <div className="bg-[#0A0B1E] text-white py-12 px-4 md:px-8 border-b border-white/5 relative overflow-hidden">
+      <div className="choosify-dark-gradient text-white py-12 px-4 md:px-8 border-b border-white/5 relative overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <button 

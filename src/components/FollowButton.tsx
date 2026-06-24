@@ -93,7 +93,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
         // Base transitions, typography matches the standard "Follow the Brand" button on BrandDetailPage
         "text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all duration-300 transform hover:scale-[1.03] active:scale-95 italic border cursor-pointer inline-flex items-center justify-center gap-1.5 select-none",
         isFollowed
-          ? "bg-[#22C55E] text-white border-[#22C55E] shadow-md shadow-green-500/10" 
+          ? "bg-[#22C55E] !bg-[#22C55E] text-white !text-white border-[#22C55E] !border-[#22C55E] shadow-md shadow-green-500/10" 
           : "bg-white text-[#1A1D4E] border-[#e8edf2] hover:bg-gray-50 hover:border-gray-300 shadow-sm",
         className
       )}
