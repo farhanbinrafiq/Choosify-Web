@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Star,
@@ -35,6 +35,7 @@ import {
   X,
   Calculator,
   Tag,
+  Check,
 } from "lucide-react";
 import { PRODUCTS, BRANDS, PLACEHOLDER_IMAGE } from "../constants";
 import { useGlobalState } from "../context/GlobalStateContext";
@@ -46,6 +47,87 @@ import { ProductMediaGallery } from "../components/ProductMediaGallery";
 import { InfluencerReviews } from "../components/InfluencerReviews";
 import { PublicReviewCard } from "../components/PublicReviewCard";
 import { FollowButton } from "../components/FollowButton";
+
+// ── Optional Add-ons ────────────────────────────────────────────
+export interface ProductAddon {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image?: string;
+  badge?: 'Popular' | 'Recommended' | 'Best Value';
+  available: boolean;
+}
+
+// Seeded mock add-ons per industry — keyed by product category
+// In future backend integration, these will come from the product API response
+const ADDON_SEEDS: Record<string, ProductAddon[]> = {
+  'Mobile & Gadgets': [
+    { id: 'ag1', title: 'Extended Warranty', description: '12-month extended coverage beyond standard warranty', price: 890, badge: 'Popular', available: true },
+    { id: 'ag2', title: 'Screen Protector', description: 'Premium tempered glass, 9H hardness, anti-glare', price: 350, badge: 'Recommended', available: true },
+    { id: 'ag3', title: 'Installation Service', description: 'Professional setup and data transfer at home', price: 550, available: true },
+    { id: 'ag4', title: 'Premium Case', description: 'Genuine leather protective case', price: 690, available: true },
+  ],
+  'Fashion & Clothing': [
+    { id: 'fc1', title: 'Gift Wrap', description: 'Premium branded gift wrapping with ribbon', price: 100, badge: 'Popular', available: true },
+    { id: 'fc2', title: 'Greeting Card', description: 'Personalised printed message card', price: 60, available: true },
+    { id: 'fc3', title: 'Express Ironing', description: 'Garment pressed and ready to wear', price: 150, badge: 'Recommended', available: true },
+    { id: 'fc4', title: 'Monogramming', description: 'Initials embroidered on the item', price: 350, available: false },
+  ],
+  'Fashion & Footwear': [
+    { id: 'ff1', title: 'Cleaning Kit', description: 'Professional-grade shoe care kit', price: 290, badge: 'Best Value', available: true },
+    { id: 'ff2', title: 'Hard Carry Case', description: 'Rigid protective box for travel', price: 450, available: true },
+    { id: 'ff3', title: 'Gift Wrap', description: 'Luxury box and ribbon', price: 100, badge: 'Popular', available: true },
+  ],
+  'Home Appliances': [
+    { id: 'ha1', title: 'Professional Installation', description: 'Certified technician installs at your location', price: 1200, badge: 'Recommended', available: true },
+    { id: 'ha2', title: 'Old Appliance Removal', description: 'We collect and dispose your old unit', price: 600, available: true },
+    { id: 'ha3', title: 'Annual Maintenance Contract', description: '1 year AMC with 2 free service visits', price: 2500, badge: 'Best Value', available: true },
+    { id: 'ha4', title: 'Extended Warranty', description: '2-year extended coverage', price: 1800, available: true },
+  ],
+  'Eyewear': [
+    { id: 'ew1', title: 'Cleaning Kit', description: 'Microfiber cloth + cleaning spray', price: 180, badge: 'Popular', available: true },
+    { id: 'ew2', title: 'Hard Case', description: 'Rigid protective carry case', price: 350, available: true },
+    { id: 'ew3', title: 'Anti-Reflective Coating', description: 'AR coating upgrade for lenses', price: 890, badge: 'Recommended', available: true },
+    { id: 'ew4', title: 'Blue Light Filter', description: 'Digital screen protection upgrade', price: 750, available: true },
+  ],
+  'Furniture': [
+    { id: 'fur1', title: 'Assembly Service', description: 'Expert team assembles at your home', price: 800, badge: 'Popular', available: true },
+    { id: 'fur2', title: 'Premium Delivery', description: 'White-glove delivery + room placement', price: 1200, badge: 'Recommended', available: true },
+    { id: 'fur3', title: 'Floor Protection', description: 'Rubber pads and floor protectors included', price: 350, available: true },
+    { id: 'fur4', title: '5-Year Warranty Extension', description: 'Extended structural warranty', price: 2200, badge: 'Best Value', available: true },
+  ],
+  'Beauty & Grooming': [
+    { id: 'bg1', title: 'Gift Box', description: 'Premium branded gift packaging', price: 200, badge: 'Popular', available: true },
+    { id: 'bg2', title: 'Sample Kit', description: 'Complementary brand sample collection', price: 350, badge: 'Recommended', available: true },
+    { id: 'bg3', title: 'Premium Packaging', description: 'Luxury presentation box with bow', price: 290, available: true },
+  ],
+  'Hotels & Travel': [
+    { id: 'ht1', title: 'Airport Pickup', description: 'Private car from airport to hotel', price: 1800, badge: 'Popular', available: true },
+    { id: 'ht2', title: 'Daily Breakfast', description: 'Full breakfast buffet per person', price: 950, badge: 'Recommended', available: true },
+    { id: 'ht3', title: 'Late Check-out', description: 'Check-out extended to 4:00 PM', price: 1200, available: true },
+    { id: 'ht4', title: 'Spa Package', description: 'Full day spa access + 60 min massage', price: 4500, badge: 'Best Value', available: true },
+  ],
+  'Food & Grocery': [
+    { id: 'fg1', title: 'Gift Wrap', description: 'Hamper-style gift wrapping', price: 150, badge: 'Popular', available: true },
+    { id: 'fg2', title: 'Greeting Card', description: 'Personalised message card', price: 60, available: true },
+    { id: 'fg3', title: 'Cold Chain Delivery', description: 'Temperature-controlled express delivery', price: 250, badge: 'Recommended', available: true },
+  ],
+};
+
+// Resolve add-ons for a product — returns [] if no match (section stays hidden)
+function resolveAddons(product: any): ProductAddon[] {
+  if (!product) return [];
+  const category = product.category || product.type || '';
+  // Direct match
+  if (ADDON_SEEDS[category]) return ADDON_SEEDS[category];
+  // Partial match
+  const matchKey = Object.keys(ADDON_SEEDS).find(k =>
+    category.toLowerCase().includes(k.toLowerCase()) ||
+    k.toLowerCase().includes(category.toLowerCase())
+  );
+  return matchKey ? ADDON_SEEDS[matchKey] : [];
+}
 
 function WithInfluencerReviews({ brandName }: { brandName: string }) {
   const featuredReview = {
@@ -104,6 +186,138 @@ function WithInfluencerReviews({ brandName }: { brandName: string }) {
   );
 }
 
+interface OptionalAddonsModuleProps {
+  addons: ProductAddon[];
+  selectedIds: Set<string>;
+  onToggle: (id: string) => void;
+  basePrice: number; // the product's current display price (unit price)
+  addonTotal: number;
+}
+
+export function OptionalAddonsModule({
+  addons,
+  selectedIds,
+  onToggle,
+  basePrice,
+  addonTotal,
+}: OptionalAddonsModuleProps) {
+  return (
+    <div className="w-full border-t border-white/10 pt-5 pb-2">
+      <div className="mb-3 text-left px-4 sm:px-0">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 block mb-0.5">
+          OPTIONAL ADD-ONS
+        </span>
+        <span className="text-[11px] font-bold text-white/60">
+          Enhance your purchase with optional products and services
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 px-4 sm:px-0">
+        {addons.map(addon => {
+          const isSelected = selectedIds.has(addon.id);
+          const isUnavailable = !addon.available;
+          return (
+            <button
+              key={addon.id}
+              onClick={() => !isUnavailable && onToggle(addon.id)}
+              disabled={isUnavailable}
+              className={cn(
+                "relative flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer bg-transparent",
+                isSelected
+                  ? "border-[#E8500A] bg-[#E8500A]/8 shadow-[0_0_0_1px_rgba(232,80,10,0.3)]"
+                  : isUnavailable
+                  ? "border-white/5 bg-white/2 opacity-40 cursor-not-allowed"
+                  : "border-white/10 bg-white/3 hover:border-white/20 hover:bg-white/5"
+              )}
+            >
+              {/* Selection indicator */}
+              <div className={cn(
+                "flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all mt-0.5",
+                isSelected
+                  ? "border-[#E8500A] bg-[#E8500A]"
+                  : "border-white/20 bg-transparent"
+              )}>
+                {isSelected && <Check size={10} className="text-white" strokeWidth={3} />}
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                  <span className="text-[12px] font-bold text-white leading-tight">
+                    {addon.title}
+                  </span>
+                  {addon.badge && (
+                    <span className={cn(
+                      "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full",
+                      addon.badge === 'Popular' ? "bg-[#E8500A]/20 text-[#E8500A]" :
+                      addon.badge === 'Recommended' ? "bg-emerald-500/15 text-emerald-400" :
+                      "bg-amber-500/15 text-amber-400"
+                    )}>
+                      {addon.badge}
+                    </span>
+                  )}
+                  {isUnavailable && (
+                    <span className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-white/30">
+                      Unavailable
+                    </span>
+                  )}
+                </div>
+                <p className="text-[10px] text-white/50 font-medium leading-snug mb-1.5">
+                  {addon.description}
+                </p>
+                <span className="text-[11px] font-black text-[#E8500A] italic">
+                  +৳{addon.price.toLocaleString()}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <AnimatePresence>
+        {selectedIds.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mt-4 mx-4 sm:mx-0 rounded-2xl border border-white/10 bg-[#0A0B1E]/60 px-4 py-3.5 overflow-hidden"
+          >
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 block mb-2.5">
+              ORDER SUMMARY
+            </span>
+            
+            {/* Base product price row */}
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-bold text-white/70">Product Price</span>
+              <span className="text-[11px] font-bold text-white">৳{basePrice.toLocaleString()}</span>
+            </div>
+
+            {/* Each selected add-on row */}
+            {addons.filter(a => selectedIds.has(a.id)).map(addon => (
+              <div key={addon.id} className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-medium text-white/50 truncate mr-2">{addon.title}</span>
+                <span className="text-[10px] font-bold text-[#E8500A] flex-shrink-0">+৳{addon.price.toLocaleString()}</span>
+              </div>
+            ))}
+
+            {/* Divider */}
+            <div className="border-t border-white/10 mt-2.5 mb-2.5" />
+
+            {/* Total */}
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-black uppercase tracking-wider text-white italic">Total</span>
+              <span className="text-[14px] font-black text-[#E8500A] italic">
+                ৳{(basePrice + addonTotal).toLocaleString()}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -116,7 +330,60 @@ export function ProductDetailPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const { allProducts, allBrands, addToCart, mode, isLoggedIn, currentUser } = useGlobalState();
+  const { allProducts, allBrands, addToCart: globalAddToCart, mode, isLoggedIn, currentUser } = useGlobalState();
+  
+  const product: any =
+    allProducts.find((p: any) => p.id === Number(id)) ||
+    allProducts.find((p: any) => p.id === Number(id) + 1000) ||
+    allProducts[0];
+
+  // ── Optional Add-ons State ───────────────────────────────────────
+  const [selectedAddonIds, setSelectedAddonIds] = useState<Set<string>>(new Set());
+  const resolvedAddons = useMemo(() => resolveAddons(product), [product?.id]);
+  const hasAddons = resolvedAddons.length > 0;
+
+  // Computed add-on total
+  const addonTotal = useMemo(() => {
+    return resolvedAddons
+      .filter(a => selectedAddonIds.has(a.id) && a.available)
+      .reduce((sum, a) => sum + a.price, 0);
+  }, [selectedAddonIds, resolvedAddons]);
+
+  // Selected add-on objects (for cart and message builder)
+  const selectedAddons = useMemo(() =>
+    resolvedAddons.filter(a => selectedAddonIds.has(a.id)),
+    [selectedAddonIds, resolvedAddons]
+  );
+
+  const toggleAddon = (addonId: string) => {
+    setSelectedAddonIds(prev => {
+      const next = new Set(prev);
+      if (next.has(addonId)) next.delete(addonId);
+      else next.add(addonId);
+      return next;
+    });
+  };
+
+  React.useEffect(() => {
+    setSelectedAddonIds(new Set());
+  }, [product?.id]);
+
+  const addToCart = (prod: any, qty: number, variant?: any) => {
+    const addonsToApply = resolveAddons(prod);
+    const selected = addonsToApply.filter(addon => selectedAddonIds.has(addon.id) && addon.available);
+    if (selected.length > 0) {
+      const addOnPrice = selected.reduce((sum, item) => sum + item.price, 0);
+      const addOnNames = selected.map(item => item.title).join(", ");
+      const customizedProduct = {
+        ...prod,
+        price: prod.price + addOnPrice,
+        title: `${prod.title} (${addOnNames})`
+      };
+      globalAddToCart(customizedProduct, qty, variant);
+    } else {
+      globalAddToCart(prod, qty, variant);
+    }
+  };
   const {
     addRecentlyViewed,
     createNewThread,
@@ -128,11 +395,6 @@ export function ProductDetailPage() {
     comparedProducts,
     setComparedProducts,
   } = useDashboard();
-
-  const product: any =
-    allProducts.find((p: any) => p.id === Number(id)) ||
-    allProducts.find((p: any) => p.id === Number(id) + 1000) ||
-    allProducts[0];
 
   React.useEffect(() => {
     if (product) {
@@ -520,6 +782,13 @@ export function ProductDetailPage() {
       return;
     }
     addToCart(product, b2bQty);
+    // Store selected add-ons in sessionStorage for checkout to read
+    if (selectedAddons.length > 0) {
+      sessionStorage.setItem(
+        `choosify_addons_${product.id}`,
+        JSON.stringify(selectedAddons)
+      );
+    }
     toast.success(
       `Added ${b2bQty} units of ${product.title} to your cart successfully!`,
     );
@@ -583,8 +852,11 @@ export function ProductDetailPage() {
   • Color: ${orderColor}
   • Variant: ${orderSize}
 🔢 Quantity: ${orderQty}
-💵 Total Value: BDT ${(orderQty * product.price).toLocaleString()}
 📝 Custom Memo: ${orderNotes || "No notes."}
+${selectedAddons.length > 0
+  ? `🛍️ Optional Add-ons Selected:\n${selectedAddons.map(a => `  • ${a.title} (+৳${a.price.toLocaleString()})`).join('\n')}\n💰 Add-ons Subtotal: BDT ${addonTotal.toLocaleString()}\n💵 Total Value (incl. add-ons): BDT ${(orderQty * product.price + addonTotal).toLocaleString()}`
+  : `💵 Total Value: BDT ${(orderQty * product.price).toLocaleString()}`
+}
 Ref Link: /products/${product.id}
 
 Hello, I'd like to purchase this product config! Please approve shipping.`;
@@ -870,15 +1142,36 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 </div>
               </div>
 
+              {/* ── Optional Add-ons Module ──────────────────────────────── */}
+              {hasAddons && (
+                <OptionalAddonsModule
+                  addons={resolvedAddons}
+                  selectedIds={selectedAddonIds}
+                  onToggle={toggleAddon}
+                  basePrice={activeUnitPrice || product.price}
+                  addonTotal={addonTotal}
+                />
+              )}
+              {/* ──────────────────────────────────────────────────────────── */}
+
               {/* Commercial Primary Buttons aligned horizontally */}
               {mode === "retail" ? (
                 <div className="flex flex-row flex-wrap items-center gap-3 w-full pt-4 px-4 sm:px-0 box-border text-left">
                   <button
                     onClick={() => {
                       addToCart(product, 1);
-                      toast.success(
-                        `Added ${product.title} to your Retail Cart!`,
-                      );
+                      if (selectedAddons.length > 0) {
+                        sessionStorage.setItem(
+                          `choosify_addons_${product.id}`,
+                          JSON.stringify(selectedAddons)
+                        );
+                        toast.success(
+                          `Added ${product.title} + ${selectedAddons.length} add-on${selectedAddons.length > 1 ? 's' : ''} to your cart!`,
+                          { duration: 3500 }
+                        );
+                      } else {
+                        toast.success(`Added ${product.title} to your Retail Cart!`);
+                      }
                     }}
                     className="px-6 py-3 rounded-full bg-[#E8500A] text-white text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all transform hover:scale-[1.03] active:scale-95 italic border border-[#E8500A]/30 hover:bg-[#ff5d14] cursor-pointer shadow-md shadow-orange-500/10"
                   >

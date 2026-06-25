@@ -315,6 +315,62 @@ export function BrandsPage() {
     return result;
   }, [brands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus]);
 
+  const originalFeaturedBrands = React.useMemo(() => [brands[0], brands[1], brands[2]], [brands]);
+
+  const filteredFeaturedBrands = React.useMemo(() => {
+    let result = [...originalFeaturedBrands];
+
+    // 1. Filter by Active Tab selection
+    if (activeTab === 'Trending Brands') {
+      result = result.filter(b => b.isHot || b.rating >= 4.7);
+    } else if (activeTab === 'Featured Brands') {
+      result = result.filter(b => b.isFeatured || b.rating >= 4.8);
+    } else if (activeTab === 'Hot Deals Brands') {
+      result = result.filter(b => b.isHot);
+    } else if (activeTab === 'Top Rated Brands') {
+      result = result.filter(b => b.rating >= 4.8);
+    }
+
+    // 2. Filter by search query across Name, bestFor, category, or description
+    const q = searchQuery.toLowerCase().trim();
+    if (q) {
+      result = result.filter(b => 
+        b.name.toLowerCase().includes(q) ||
+        (b.bestFor || '').toLowerCase().includes(q) ||
+        (b.category || '').toLowerCase().includes(q) ||
+        (b.description || '').toLowerCase().includes(q)
+      );
+    }
+
+    // 3. Filter by Selected Letter
+    if (selectedLetter) {
+      result = result.filter(b => b.name.toUpperCase().startsWith(selectedLetter));
+    }
+
+    // 4. Filter by Category
+    if (selectedCategory) {
+      result = result.filter(b => b.category?.toLowerCase() === selectedCategory.toLowerCase());
+    }
+
+    // 5. Filter by Verification Status
+    if (verificationFilter === 'verified') {
+      result = result.filter(b => getBrandClaimStatus(b.id) === 'verified');
+    } else if (verificationFilter === 'unverified') {
+      result = result.filter(b => getBrandClaimStatus(b.id) !== 'verified');
+    }
+
+    // 6. Filter by Popularity Status
+    if (popularityFilter === 'hot') {
+      result = result.filter(b => b.isHot);
+    } else if (popularityFilter === 'featured') {
+      result = result.filter(b => b.isFeatured);
+    } else if (popularityFilter === 'top-rated') {
+      result = result.filter(b => b.rating >= 4.8);
+    }
+
+    return result;
+  }, [originalFeaturedBrands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus]);
+
   const groupedBrands = letters.reduce((acc, letter) => {
     const filtered = filteredBrands.filter(b => b.name.toUpperCase().startsWith(letter));
     if (filtered.length > 0) {
@@ -763,104 +819,108 @@ export function BrandsPage() {
           </div>
 
           {/* Choosify Recommends Section */}
-          <div className="mb-12">
-            <div className="flex items-center gap-4 mb-8 overflow-hidden">
-              <div className="flex items-center gap-3 choosify-dark-gradient px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/10 flex-shrink-0 border border-white/10">
-                 <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
-                 <div className="flex gap-0.5">
-                    <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                    </div>
-                    <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                    </div>
-                 </div>
+          {filteredFeaturedBrands.length > 0 && (
+            <div className="mb-12">
+              <div className="flex items-center gap-4 mb-8 overflow-hidden">
+                <div className="flex items-center gap-3 choosify-dark-gradient px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/10 flex-shrink-0 border border-white/10">
+                   <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
+                   <div className="flex gap-0.5">
+                      <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      </div>
+                      <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      </div>
+                   </div>
+                </div>
+                <span className="text-[10px] font-black text-[#5C2AFE] uppercase tracking-widest whitespace-nowrap">
+                  {filteredFeaturedBrands.length} Brand{filteredFeaturedBrands.length !== 1 ? 's' : ''}
+                </span>
+                <div className="flex-1 h-px bg-orange-primary/20" />
               </div>
-              <span className="text-[10px] font-black text-[#5C2AFE] uppercase tracking-widest whitespace-nowrap">3 Brands</span>
-              <div className="flex-1 h-px bg-orange-primary/20" />
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
-              {[brands[0], brands[1], brands[2]].map((brand, i) => (
-                <motion.div 
-                  layout
-                  key={brand.id} 
-                  className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
-                  style={{ width: '100%', maxWidth: '250px', height: '280px' }}
-                >
-                  {brand.isHot && (
-                    <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">HOT</div>
-                  )}
-                  {brand.isFeatured && (
-                    <div className="absolute top-5 right-5 bg-orange-primary text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">FEATURED</div>
-                  )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
+                {filteredFeaturedBrands.map((brand, i) => (
+                  <motion.div 
+                    layout
+                    key={brand.id} 
+                    className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
+                    style={{ width: '100%', maxWidth: '250px', height: '280px' }}
+                  >
+                    {brand.isHot && (
+                      <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">HOT</div>
+                    )}
+                    {brand.isFeatured && (
+                      <div className="absolute top-5 right-5 bg-orange-primary text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">FEATURED</div>
+                    )}
 
-                  {/* Horizontal Header System */}
-                  <div className="flex gap-3 items-start relative z-10 text-left w-full">
-                    <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-2 shadow-xs">
-                      {brand.logo.length > 2 ? (
-                         <img src={brand.logo} className="w-full h-full object-contain p-2 relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
-                      ) : (
-                        <span className="text-2xl font-black text-navy">{brand.logo}</span>
-                      )}
-                    </div>
-                    <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>
-                      <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
-                      <div className="flex items-center gap-1 mb-1.5 flex-wrap">
-                        {getBrandClaimStatus(brand.id) === 'verified' && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-[7px] font-black text-green-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-green-200/50">✓ Verified Brand</span>
-                        )}
-                        {getBrandClaimStatus(brand.id) === 'pending' && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">Ownership Verification Pending</span>
-                        )}
-                        {getBrandClaimStatus(brand.id) === 'community' && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-50 text-[7px] font-black text-gray-500 rounded-xs uppercase tracking-wider scale-90 origin-left border border-gray-200/50 border-dashed">Community Brand Profile</span>
+                    {/* Horizontal Header System */}
+                    <div className="flex gap-3 items-start relative z-10 text-left w-full">
+                      <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-2 shadow-xs">
+                        {brand.logo.length > 2 ? (
+                           <img src={brand.logo} className="w-full h-full object-contain p-2 relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
+                        ) : (
+                          <span className="text-2xl font-black text-navy">{brand.logo}</span>
                         )}
                       </div>
-                      <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
-                      <div className="flex items-center gap-1">
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map(s => (
-                            <Star key={s} size={8} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(brand.rating) && "fill-gray-200 stroke-gray-200")} />
-                          ))}
+                      <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>
+                        <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
+                        <div className="flex items-center gap-1 mb-1.5 flex-wrap">
+                          {getBrandClaimStatus(brand.id) === 'verified' && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-[7px] font-black text-green-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-green-200/50">✓ Verified Brand</span>
+                          )}
+                          {getBrandClaimStatus(brand.id) === 'pending' && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">Ownership Verification Pending</span>
+                          )}
+                          {getBrandClaimStatus(brand.id) === 'community' && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-50 text-[7px] font-black text-gray-500 rounded-xs uppercase tracking-wider scale-90 origin-left border border-gray-200/50 border-dashed">Community Brand Profile</span>
+                          )}
                         </div>
-                        <span className="text-[9px] font-black text-navy italic ml-0.5">{brand.rating}</span>
-                        <span className="text-[8px] font-bold text-gray-300 ml-0.5">({brand.reviews})</span>
+                        <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
+                        <div className="flex items-center gap-1">
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <Star key={s} size={8} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(brand.rating) && "fill-gray-200 stroke-gray-200")} />
+                            ))}
+                          </div>
+                          <span className="text-[9px] font-black text-navy italic ml-0.5">{brand.rating}</span>
+                          <span className="text-[8px] font-bold text-gray-300 ml-0.5">({brand.reviews})</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Content Spacer */}
-                  <div className="flex-1" />
+                    {/* Content Spacer */}
+                    <div className="flex-1" />
 
-                  <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
+                    <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
 
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                      <span className="block text-[7px] font-black text-navy mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
-                      <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{brand.bestFor}</span>
-                    </div>
-                    <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                      <div className="flex flex-col items-center">
-                        <span className="text-base font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{brand.priceRange}</span>
-                        <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
+                        <span className="block text-[7px] font-black text-navy mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
+                        <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{brand.bestFor}</span>
+                      </div>
+                      <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
+                        <div className="flex flex-col items-center">
+                          <span className="text-base font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{brand.priceRange}</span>
+                          <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
+                        </div>
+                      </div>
+                      <div className="text-center bg-[#E6F4EA]/80 py-1.5 rounded-lg border border-green-100 min-w-0">
+                        <span className="block text-base font-black text-[#10B981] leading-none mb-0.5 italic tracking-tighter">{brand.recommended}</span>
+                        <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60 font-medium">Success</span>
                       </div>
                     </div>
-                    <div className="text-center bg-[#E6F4EA]/80 py-1.5 rounded-lg border border-green-100 min-w-0">
-                      <span className="block text-base font-black text-[#10B981] leading-none mb-0.5 italic tracking-tighter">{brand.recommended}</span>
-                      <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60 font-medium">Success</span>
-                    </div>
-                  </div>
 
-                  <div className="w-full h-[1px] bg-transparent my-1" />
+                    <div className="w-full h-[1px] bg-transparent my-1" />
 
-                  <Link to={`/brands/${brand.id}`} className="w-full py-2 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
-                    Visit Brand <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link to={`/brands/${brand.id}`} className="w-full py-2 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
+                      Visit Brand <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           {Object.entries(groupedBrands).map(([letter, letterBrands]) => (
             <div key={letter} className="space-y-6">
               <div className="flex items-center gap-4">

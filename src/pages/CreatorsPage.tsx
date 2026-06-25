@@ -168,6 +168,60 @@ export function CreatorsPage() {
     return result;
   }, [mappedCreators, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter]);
 
+  const originalFeaturedCreators = React.useMemo(() => [mappedCreators[0], mappedCreators[1], mappedCreators[3]].filter(Boolean), [mappedCreators]);
+
+  const filteredFeaturedCreators = React.useMemo(() => {
+    let result = [...originalFeaturedCreators];
+
+    // 1. Filter by Active Tab selection
+    if (activeTab === 'Trending Creators') {
+      result = result.filter(c => c.isHot || c.rating >= 4.7);
+    } else if (activeTab === 'Featured Creators') {
+      result = result.filter(c => c.isFeatured || c.rating >= 4.8);
+    } else if (activeTab === 'Hot Deals Creators') {
+      result = result.filter(c => c.isHot);
+    } else if (activeTab === 'Top Rated Creators') {
+      result = result.filter(c => c.rating >= 4.8);
+    }
+
+    // 2. Filter by search query across Name, bestFor, handle, or bio
+    const q = searchQuery.toLowerCase().trim();
+    if (q) {
+      result = result.filter(c => 
+        c.name.toLowerCase().includes(q) ||
+        (c.bestFor || '').toLowerCase().includes(q) ||
+        (c.handle || '').toLowerCase().includes(q) ||
+        (c.bio || '').toLowerCase().includes(q)
+      );
+    }
+
+    // 3. Filter by Selected Letter
+    if (selectedLetter) {
+      result = result.filter(c => c.name.toUpperCase().startsWith(selectedLetter));
+    }
+
+    // 4. Filter by Category
+    if (selectedCategory) {
+      result = result.filter(c => (c as any).category?.toLowerCase() === selectedCategory.toLowerCase() || (c as any).bestFor?.toLowerCase().includes(selectedCategory.toLowerCase()));
+    }
+
+    // 5. Filter by Verification
+    if (verificationFilter === 'verified') {
+      result = result.filter(c => c.id === 'creator-farhan' || c.id === 'creator-sarah' || c.id === 'creator-mily');
+    } else if (verificationFilter === 'unverified') {
+      result = result.filter(c => c.id !== 'creator-farhan' && c.id !== 'creator-sarah' && c.id !== 'creator-mily');
+    }
+
+    // 6. Filter by Popularity
+    if (popularityFilter === 'high') {
+      result = result.filter(c => c.rating >= 4.8);
+    } else if (popularityFilter === 'normal') {
+      result = result.filter(c => c.rating < 4.8);
+    }
+
+    return result;
+  }, [originalFeaturedCreators, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter]);
+
   const groupedCreators = letters.reduce((acc, letter) => {
     const filtered = filteredCreators.filter(c => c.name.toUpperCase().startsWith(letter));
     if (filtered.length > 0) {
@@ -613,101 +667,105 @@ export function CreatorsPage() {
           </div>
 
           {/* Choosify Recommends Section */}
-          <div className="mb-12">
-            <div className="flex items-center gap-4 mb-8 overflow-hidden">
-              <div className="flex items-center gap-3 choosify-dark-gradient px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/10 flex-shrink-0 border border-white/10">
-                 <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
-                 <div className="flex gap-0.5">
-                    <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
-                       <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                    </div>
-                    <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
-                       <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                    </div>
-                 </div>
+          {filteredFeaturedCreators.length > 0 && (
+            <div className="mb-12">
+              <div className="flex items-center gap-4 mb-8 overflow-hidden">
+                <div className="flex items-center gap-3 choosify-dark-gradient px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/10 flex-shrink-0 border border-white/10">
+                   <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
+                   <div className="flex gap-0.5">
+                      <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
+                         <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      </div>
+                      <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
+                         <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      </div>
+                   </div>
+                </div>
+                <span className="text-[10px] font-black text-[#5C2AFE] uppercase tracking-widest whitespace-nowrap">
+                  {filteredFeaturedCreators.length} Creator{filteredFeaturedCreators.length !== 1 ? 's' : ''}
+                </span>
+                <div className="flex-1 h-px bg-orange-primary/20" />
               </div>
-              <span className="text-[10px] font-black text-[#5C2AFE] uppercase tracking-widest whitespace-nowrap">3 Creators</span>
-              <div className="flex-1 h-px bg-orange-primary/20" />
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
-              {[mappedCreators[0], mappedCreators[1], mappedCreators[3]].map((creator, i) => (
-                <motion.div 
-                  layout
-                  key={creator.id} 
-                  className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
-                  style={{ width: '100%', maxWidth: '250px', height: '280px' }}
-                >
-                  {creator.isHot && (
-                    <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">HOT</div>
-                  )}
-                  {creator.isFeatured && (
-                    <div className="absolute top-5 right-5 bg-orange-primary text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">FEATURED</div>
-                  )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
+                {filteredFeaturedCreators.map((creator, i) => (
+                  <motion.div 
+                    layout
+                    key={creator.id} 
+                    className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
+                    style={{ width: '100%', maxWidth: '250px', height: '280px' }}
+                  >
+                    {creator.isHot && (
+                      <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">HOT</div>
+                    )}
+                    {creator.isFeatured && (
+                      <div className="absolute top-5 right-5 bg-orange-primary text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">FEATURED</div>
+                    )}
 
-                  {/* Horizontal Header System */}
-                  <div className="flex gap-3 items-start relative z-10 text-left w-full">
-                    <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-0 shadow-xs relative object-cover">
-                       <img src={creator.avatar} className="w-full h-full object-cover relative z-10" alt={creator.name} referrerPolicy="no-referrer" />
-                    </div>
-                    <div className={cn("flex flex-col min-w-0 flex-1", (creator.isHot || creator.isFeatured) && "pr-10")}>
-                      <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{creator.name}</h3>
-                      <div className="flex items-center gap-1 mb-1.5 flex-wrap">
-                        {getCreatorClaimStatus(creator.id) === 'verified' && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-[7px] font-black text-green-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-green-200/50">✓ Verified Creator</span>
-                        )}
-                        {getCreatorClaimStatus(creator.id) === 'pending' && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">● Pending Claim</span>
-                        )}
-                        {getCreatorClaimStatus(creator.id) === 'community' && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-50 text-[7px] font-black text-gray-500 rounded-xs uppercase tracking-wider scale-90 origin-left border border-gray-200/50 border-dashed">Community Creator</span>
-                        )}
+                    {/* Horizontal Header System */}
+                    <div className="flex gap-3 items-start relative z-10 text-left w-full">
+                      <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-0 shadow-xs relative object-cover">
+                         <img src={creator.avatar} className="w-full h-full object-cover relative z-10" alt={creator.name} referrerPolicy="no-referrer" />
                       </div>
-                      <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{creator.handle}</p>
-                      <div className="flex items-center gap-1">
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map(s => (
-                            <Star key={s} size={8} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(creator.rating) && "fill-gray-200 stroke-gray-200")} />
-                          ))}
+                      <div className={cn("flex flex-col min-w-0 flex-1", (creator.isHot || creator.isFeatured) && "pr-10")}>
+                        <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{creator.name}</h3>
+                        <div className="flex items-center gap-1 mb-1.5 flex-wrap">
+                          {getCreatorClaimStatus(creator.id) === 'verified' && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-[7px] font-black text-green-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-green-200/50">✓ Verified Creator</span>
+                          )}
+                          {getCreatorClaimStatus(creator.id) === 'pending' && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">● Pending Claim</span>
+                          )}
+                          {getCreatorClaimStatus(creator.id) === 'community' && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-50 text-[7px] font-black text-gray-500 rounded-xs uppercase tracking-wider scale-90 origin-left border border-gray-200/50 border-dashed">Community Creator</span>
+                          )}
                         </div>
-                        <span className="text-[9px] font-black text-navy italic ml-0.5">{creator.rating}</span>
-                        <span className="text-[8px] font-bold text-gray-300 ml-0.5">({creator.reviews})</span>
+                        <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{creator.handle}</p>
+                        <div className="flex items-center gap-1">
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <Star key={s} size={8} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(creator.rating) && "fill-gray-200 stroke-gray-200")} />
+                            ))}
+                          </div>
+                          <span className="text-[9px] font-black text-navy italic ml-0.5">{creator.rating}</span>
+                          <span className="text-[8px] font-bold text-gray-300 ml-0.5">({creator.reviews})</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Content Spacer */}
-                  <div className="flex-1" />
+                    {/* Content Spacer */}
+                    <div className="flex-1" />
 
-                  <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
+                    <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
 
-                  {/* Adapted Grid Content */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                      <span className="block text-[7px] font-black text-navy mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
-                      <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{creator.bestFor}</span>
-                    </div>
-                    <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                      <div className="flex flex-col items-center">
-                        <span className="text-base font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{creator.score}</span>
-                        <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Score</span>
+                    {/* Adapted Grid Content */}
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
+                        <span className="block text-[7px] font-black text-navy mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
+                        <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{creator.bestFor}</span>
+                      </div>
+                      <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
+                        <div className="flex flex-col items-center">
+                          <span className="text-base font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{creator.score}</span>
+                          <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Score</span>
+                        </div>
+                      </div>
+                      <div className="text-center bg-[#E1F5FE]/80 py-1.5 rounded-lg border border-blue-100 min-w-0">
+                        <span className="block text-[8px] font-black text-blue-600 truncate uppercase mt-0.5">{creator.platforms[0]}</span>
+                        <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60 font-medium">Popular At</span>
                       </div>
                     </div>
-                    <div className="text-center bg-[#E1F5FE]/80 py-1.5 rounded-lg border border-blue-100 min-w-0">
-                      <span className="block text-[8px] font-black text-blue-600 truncate uppercase mt-0.5">{creator.platforms[0]}</span>
-                      <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60 font-medium">Popular At</span>
-                    </div>
-                  </div>
 
-                  <div className="w-full h-[1px] bg-transparent my-1" />
+                    <div className="w-full h-[1px] bg-transparent my-1" />
 
-                  <Link to={`/creators/${creator.id}`} className="w-full py-2 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
-                    View Profile <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link to={`/creators/${creator.id}`} className="w-full py-2 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
+                      View Profile <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {Object.entries(groupedCreators).map(([letter, letterCreators]) => (
             <div key={letter} className="space-y-6">
