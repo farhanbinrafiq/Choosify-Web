@@ -334,7 +334,7 @@ export function BrandCardSkeleton() {
   return (
     <div 
       className="bg-white rounded-[5px] p-5 border border-[#e8edf2] flex flex-col justify-between overflow-hidden mx-auto animate-pulse shadow-none"
-      style={{ width: '100%', maxWidth: '250px', height: '350px' }}
+      style={{ width: '100%', maxWidth: '250px', height: '280px' }}
     >
       {/* Horizontal Header */}
       <div className="flex gap-3 items-start text-left w-full">

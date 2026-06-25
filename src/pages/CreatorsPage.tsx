@@ -636,7 +636,7 @@ export function CreatorsPage() {
                   layout
                   key={creator.id} 
                   className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
-                  style={{ width: '100%', maxWidth: '250px', height: '350px' }}
+                  style={{ width: '100%', maxWidth: '250px', height: '280px' }}
                 >
                   {creator.isHot && (
                     <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">HOT</div>
@@ -722,7 +722,7 @@ export function CreatorsPage() {
                     layout
                     key={creator.id} 
                     className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
-                    style={{ width: '100%', maxWidth: '250px', height: '350px' }}
+                    style={{ width: '100%', maxWidth: '250px', height: '280px' }}
                   >
                     {creator.isHot && (
                       <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">HOT</div>
