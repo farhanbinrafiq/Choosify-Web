@@ -147,16 +147,16 @@ export function Footer() {
                 COMPANY
               </h4>
               <div className="flex flex-col leading-[2.2]">
-                <Link to="/contact" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                <Link to="/suggest-brand" className="text-white/65 text-[14px] hover:text-white transition-colors">
                   Suggest a brand
                 </Link>
-                <Link to="/contact" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                <Link to="/partnership" className="text-white/65 text-[14px] hover:text-white transition-colors">
                   Partnership
                 </Link>
-                <Link to="/contact" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                <Link to="/advertise" className="text-white/65 text-[14px] hover:text-white transition-colors">
                   Advertise
                 </Link>
-                <Link to="/dashboard" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                <Link to="/b2b" className="text-white/65 text-[14px] hover:text-white transition-colors">
                   b2b
                 </Link>
               </div>
