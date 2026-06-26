@@ -591,10 +591,12 @@ export function BrandDetailPage() {
     const term = brandObj.name.toLowerCase();
     if (term.includes('choosify')) {
       return (
-        <div className="flex flex-col items-center justify-center h-full text-center bg-gradient-to-r from-[#FF5B00] to-[#E8500A] w-full text-white px-2 py-3 select-none">
-          <span className="font-sans tracking-tight text-[24px] font-black leading-none uppercase">CHOOSIFY</span>
-          <span className="text-[6px] tracking-[0.25em] font-mono text-orange-100 font-bold uppercase mt-1.5">VERIFIED PLATFORM</span>
-        </div>
+        <img 
+          src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1782468737/717067140_122103081177325182_5170626542063953926_n_fiefp6.jpg" 
+          className="w-full h-full object-cover" 
+          alt="Choosify Brand" 
+          referrerPolicy="no-referrer"
+        />
       );
     }
     if (term.includes('fff')) {

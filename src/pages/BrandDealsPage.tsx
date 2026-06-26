@@ -525,8 +525,12 @@ export function BrandDealsPage() {
                     {/* Brand header */}
                     <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-150">
                       <div className="flex items-center gap-4.5">
-                        <div className="w-11 h-11 rounded-[5px] bg-white shadow-sm flex items-center justify-center text-navy font-black text-lg border border-gray-150">
-                          {brand.logo}
+                        <div className="w-11 h-11 rounded-[5px] bg-white shadow-sm flex items-center justify-center text-navy font-black text-lg border border-gray-150 overflow-hidden">
+                          {brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/')) ? (
+                            <img src={brand.logo} className="w-full h-full object-cover p-1" alt={brand.name} referrerPolicy="no-referrer" />
+                          ) : (
+                            brand.logo
+                          )}
                         </div>
                         <div>
                           <h2 className="text-lg font-black text-[#1A1D4E] uppercase tracking-tight">{brand.name} Deals</h2>
@@ -554,8 +558,12 @@ export function BrandDealsPage() {
                         >
                           <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-125 transition-transform duration-700" />
                           
-                          <div className="w-16 h-16 rounded-full bg-[#F8FAFC] flex items-center justify-center text-[#1a1a2e] font-black text-2xl shadow-[inset_0_1px_4px_rgba(0,0,0,0.05)] border border-gray-100 group-hover:scale-105 transition-transform duration-500 relative z-10 shrink-0">
-                            {brand.logo}
+                          <div className="w-16 h-16 rounded-full bg-[#F8FAFC] flex items-center justify-center text-[#1a1a2e] font-black text-2xl shadow-[inset_0_1px_4px_rgba(0,0,0,0.05)] border border-gray-100 group-hover:scale-105 transition-transform duration-500 relative z-10 shrink-0 overflow-hidden">
+                            {brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/')) ? (
+                              <img src={brand.logo} className="w-full h-full object-cover p-1.5" alt={brand.name} referrerPolicy="no-referrer" />
+                            ) : (
+                              brand.logo
+                            )}
                           </div>
                           
                           <div className="flex flex-col items-center gap-2 relative z-10 w-full">

@@ -1445,8 +1445,12 @@ export function HomePage() {
                     onClick={() => navigate(`/brands/${brand.id}`)}
                     className="flex gap-3 bg-white border border-[#e8edf2] rounded-[5px] p-2.5 hover:border-gray-200 transition-all duration-200 group cursor-pointer text-left animate-fade-in"
                   >
-                    <div className="w-11 h-11 rounded-lg border border-[#e8edf2] flex items-center justify-center bg-[#E8500A]/5 text-[#E8500A] font-extrabold text-sm uppercase shrink-0">
-                      {brand.logo}
+                    <div className="w-11 h-11 rounded-lg border border-[#e8edf2] flex items-center justify-center bg-[#E8500A]/5 text-[#E8500A] font-extrabold text-sm uppercase shrink-0 overflow-hidden">
+                      {brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/')) ? (
+                        <img src={brand.logo} className="w-full h-full object-cover p-1" alt={brand.name} referrerPolicy="no-referrer" />
+                      ) : (
+                        brand.logo
+                      )}
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 text-left">
                       <h4 className="text-[11px] font-semibold text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors line-clamp-1 leading-tight">

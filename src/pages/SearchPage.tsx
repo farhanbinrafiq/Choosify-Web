@@ -672,8 +672,12 @@ export function SearchPage() {
                       key={brand.id}
                       className="border border-[#e8edf2] hover:border-orange-primary/30 rounded-[5px] p-4 flex items-center gap-4 bg-white hover:shadow-soft transition-all"
                     >
-                      <div className="w-12 h-12 rounded-full bg-[#0A0A1F] text-white flex items-center justify-center font-bold text-sm shrink-0">
-                        {brand.logo || brand.name[0]}
+                      <div className="w-12 h-12 rounded-full bg-[#0A0A1F] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
+                        {brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/')) ? (
+                          <img src={brand.logo} className="w-full h-full object-cover p-1" alt={brand.name} referrerPolicy="no-referrer" />
+                        ) : (
+                          brand.logo || brand.name[0]
+                        )}
                       </div>
                       <div className="text-left min-w-0 flex-1">
                         <h4 className="font-bold text-xs uppercase text-[#1A1D4E] group-hover:text-orange-primary transition-colors truncate">

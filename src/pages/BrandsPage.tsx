@@ -248,7 +248,7 @@ export function BrandsPage() {
       id: 'choosify',
       name: 'Choosify',
       description: 'Transparent Consumer Discovery & Marketplace Platform',
-      logo: 'Ch',
+      logo: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1782468737/717067140_122103081177325182_5170626542063953926_n_fiefp6.jpg',
       rating: 5.0,
       reviews: 24,
       bestFor: 'Brand Discovery & Recommendations',

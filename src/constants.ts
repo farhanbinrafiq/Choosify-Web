@@ -208,7 +208,7 @@ export const BRANDS = [
   { id: 13, name: 'Ecstasy', logo: 'Ec', products: 210, rating: 4.4, category: 'Fashion' },
   { id: 14, name: 'Richman', logo: 'R', products: 310, rating: 4.6, category: 'Fashion' },
   { id: 15, name: 'Star Tech', logo: 'ST', products: 1950, rating: 4.8, category: 'Tech' },
-  { id: 16, name: 'Choosify', logo: 'Ch', products: 1, rating: 5.0, category: 'Marketplace' },
+  { id: 16, name: 'Choosify', logo: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1782468737/717067140_122103081177325182_5170626542063953926_n_fiefp6.jpg', products: 1, rating: 5.0, category: 'Marketplace' },
   { id: 17, name: 'FFF Sourcing Ltd', logo: 'FFF', products: 1, rating: 4.9, category: 'Sourcing' },
 ];
 
