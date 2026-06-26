@@ -79,7 +79,7 @@ const DEFAULT_USER: User = {
   username: 'farhanrafiq',
   phone: '+880 1712-349812',
   email: 'farhanbinrafiq@gmail.com',
-  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop',
+  avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png',
   address: 'H-24, Road-11, Banani, Dhaka, Bangladesh',
   reputation_score: 95,
   orderStats: {

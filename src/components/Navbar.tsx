@@ -256,7 +256,7 @@ export function Navbar() {
                   tabIndex={0}
                   onKeyDown={(e) => { if (e.key === 'Enter') { if (isLoggedIn) navigate('/dashboard'); else navigate('/login'); } }}
                 >
-                  <img src="https://i.pravatar.cc/150?u=me" className="w-full h-full object-cover" alt="Profile" />
+                  <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-full h-full object-cover" alt="Profile" />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block italic text-white/70 group-hover:text-white transition-colors">Hi, Farhan</span>
               </div>
@@ -274,7 +274,7 @@ export function Navbar() {
                       <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 blur-2xl rounded-full" />
                       
                       <div className="flex items-center gap-3 p-3 mb-4 bg-white/5 rounded-xl border border-white/5">
-                        <img src="https://i.pravatar.cc/150?u=me" className="w-10 h-10 rounded-full object-cover border border-orange-primary/30" alt="" />
+                        <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-10 h-10 rounded-full object-cover border border-orange-primary/30" alt="" />
                         <div className="min-w-0">
                           <p className="text-[11px] font-black text-white italic uppercase truncate">Farhan Bin Rafiq</p>
                           <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">Corporate Sourcing Desk</p>

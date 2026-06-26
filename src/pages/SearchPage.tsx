@@ -57,7 +57,7 @@ const INFLUENCERS: Influencer[] = [
     id: "inf-1",
     name: "Farhan Bin Rafiq",
     handle: "@farhan",
-    avatar: "https://i.pravatar.cc/300?u=farhan",
+    avatar: "https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png",
     bio: "Senior Tech Analyst & Digital Product Researcher with 10+ years of experience in the Bangladesh market.",
     platform: "YouTube",
     verifiedStatus: "verified expert contributor",

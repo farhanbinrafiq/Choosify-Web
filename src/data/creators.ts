@@ -35,7 +35,7 @@ export const CREATORS: Creator[] = [
     id: "creator-farhan",
     name: "Farhan Bin Rafiq",
     handle: "@farhan_tech",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&h=300&q=80",
+    avatar: "https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png",
     score: 96,
     bestFor: "Tech",
     bestForTags: ["Smartphones", "Laptops", "Gadget Guides", "Dhaka Tech Hubs"],

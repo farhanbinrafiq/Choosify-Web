@@ -18,7 +18,7 @@ interface CreatorCollab {
 }
 
 const CREATOR_COLLABS: CreatorCollab[] = [
-  { id: 'creator-farhan', name: "Farhan Bin Rafiq", highlight: "PC Build Masterclass Sponsor", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&h=300&q=80", bgClass: "bg-orange-primary/95" },
+  { id: 'creator-farhan', name: "Farhan Bin Rafiq", highlight: "PC Build Masterclass Sponsor", avatar: "https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png", bgClass: "bg-orange-primary/95" },
   { id: 'creator-sarah', name: "Sarah Jenkins", highlight: "Sustainable Monsoons Drop", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&h=300&q=80", bgClass: "bg-navy" },
   { id: 'creator-mily', name: "Mily Rahman", highlight: "Youth Budgeting Workshop", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80", bgClass: "bg-teal-700" }
 ];

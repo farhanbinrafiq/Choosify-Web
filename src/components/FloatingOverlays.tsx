@@ -422,7 +422,7 @@ export function FloatingOverlays() {
               <div className="flex items-center gap-3.5 text-left">
                 <div className="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md shrink-0">
                   <img 
-                    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop" 
+                    src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" 
                     className="w-full h-full object-cover" 
                     alt="Farhan Bin Rafiq" 
                     referrerPolicy="no-referrer"
@@ -585,7 +585,7 @@ export function FloatingOverlays() {
           <div className="flex items-center gap-2 max-w-[130px]">
             <div className="w-6 h-6 rounded-full overflow-hidden bg-orange-primary/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
               <img 
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=60&h=60&fit=crop" 
+                src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" 
                 className="w-full h-full object-cover" 
                 alt="Ava" 
                 referrerPolicy="no-referrer"

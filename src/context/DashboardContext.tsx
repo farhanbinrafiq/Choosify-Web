@@ -172,7 +172,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     const saved = localStorage.getItem('choosify_threads');
     if (saved) return JSON.parse(saved);
     return [
-      { id: 'thread-general', title: 'Farhan Rafiq (Admin)', avatar: 'https://i.pravatar.cc/150?u=admin', lastMessage: 'Absolutely! We can ship the S24 Ultra...', time: '10:30 AM', type: 'general', unread: true },
+      { id: 'thread-general', title: 'Farhan Rafiq (Admin)', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png', lastMessage: 'Absolutely! We can ship the S24 Ultra...', time: '10:30 AM', type: 'general', unread: true },
       { id: 'seller-samsung', title: 'Samsung Bangladesh Ltd.', avatar: 'https://i.pravatar.cc/150?u=samsung', lastMessage: 'Let us know your wholesale quantity requirements.', time: 'Yesterday', type: 'wholesale', unread: false },
       { id: 'seller-apple', title: 'Apple Retail BD', avatar: 'https://i.pravatar.cc/150?u=apple', lastMessage: 'Welcome to Apple Retail! Feel free to ask queries.', time: '2 days ago', type: 'retail', unread: false }
     ];
@@ -184,7 +184,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     return [
       { id: 1, threadId: 'thread-general', text: 'Hello! I am interested in the Samsung S24 Ultra you posted. Is it still available?', sender: 'other', senderName: 'Rahat Hossain', time: '10:30 AM', avatar: 'https://i.pravatar.cc/150?u=1' },
       { id: 2, threadId: 'thread-general', text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', senderName: 'Me', time: '10:35 AM' },
-      { id: 3, threadId: 'thread-general', text: 'Absolutely! We can ship the S24 Ultra to Banani with standard COD coverage.', sender: 'other', senderName: 'Farhan Rafiq', time: '11:00 AM', avatar: 'https://i.pravatar.cc/150?u=admin' },
+      { id: 3, threadId: 'thread-general', text: 'Absolutely! We can ship the S24 Ultra to Banani with standard COD coverage.', sender: 'other', senderName: 'Farhan Rafiq', time: '11:00 AM', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png' },
       
       { id: 4, threadId: 'seller-samsung', text: 'Hello! Do you offer wholesale volume pricing for bulk S24 units?', sender: 'user', senderName: 'Me', time: 'Yesterday' },
       { id: 5, threadId: 'seller-samsung', text: 'Yes, we do! Let us know your wholesale quantity requirements.', sender: 'seller', senderName: 'Samsung Sales', time: 'Yesterday', avatar: 'https://i.pravatar.cc/150?u=samsung' }
@@ -195,7 +195,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [messages, setMessages] = useState([
     { id: 1, text: 'Hello! I am interested in the Samsung S24 Ultra you posted. Is it still available?', sender: 'other', senderName: 'Rahat Hossain', time: '10:30 AM', avatar: 'https://i.pravatar.cc/150?u=1' },
     { id: 2, text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', time: '10:35 AM' },
-    { id: 3, text: 'I have a question about the delivery time to Chittagong.', sender: 'other', senderName: 'Admin Support', time: '11:00 AM', avatar: 'https://i.pravatar.cc/150?u=admin' }
+    { id: 3, text: 'I have a question about the delivery time to Chittagong.', sender: 'other', senderName: 'Admin Support', time: '11:00 AM', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png' }
   ]);
   const [notifications, setNotifications] = useState<any[]>(() => {
     try {

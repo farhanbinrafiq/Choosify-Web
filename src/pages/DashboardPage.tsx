@@ -628,7 +628,7 @@ const MessagesSection = () => {
                <button onClick={() => setActiveChat(null)} className="md:hidden w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border-none cursor-pointer">
                   <ArrowLeft size={16} />
                </button>
-               <img src="https://i.pravatar.cc/150?u=admin" className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" alt="" />
+               <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" alt="" />
                <div>
                   <h4 className="text-xs md:text-sm font-black text-navy italic uppercase tracking-widest leading-none">Farhan Rafiq</h4>
                   <span className="text-[8px] md:text-[9px] font-bold text-[#059669] uppercase italic font-black">Support Active</span>
@@ -779,7 +779,7 @@ const SettingsSection = () => {
              <div className="flex flex-col items-center p-8 bg-white border border-[#e8edf2] rounded-[5px] relative overflow-hidden group shadow-sm">
                 <div className="absolute inset-0 bg-gradient-to-b from-[#E8500A]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative w-32 h-32 mb-6 cursor-pointer group/avatar">
-                   <img src="https://i.pravatar.cc/150?u=me" className="w-full h-full rounded-full object-cover border-4 border-[#E8500A]/30 transition-all group-hover/avatar:border-navy" alt="Profile" />
+                   <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-full h-full rounded-full object-cover border-4 border-[#E8500A]/30 transition-all group-hover/avatar:border-navy" alt="Profile" />
                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
                       <Plus className="text-white" size={32} />
                    </div>
