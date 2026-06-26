@@ -36,8 +36,8 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
     
     setIsLoading(false);
     setIsLoggedIn(true);
-    onClose();
     toast.success('Welcome back!');
+    onClose();
   };
 
   return (

@@ -129,10 +129,18 @@ export function OrderTrackingPage() {
               <Package size={32} />
             </div>
             <div>
-              <h3 className="text-xl font-black text-navy uppercase italic tracking-tighter mb-1 select-none">No active track record</h3>
+              <h3 className="text-xl font-black text-navy uppercase italic tracking-tighter mb-1 select-none">Order not found</h3>
               <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black leading-relaxed">
-                Provide a valid ticket reference or complete checking out products to visualize logistics milestones.
+                No order matches that reference number. Please check the ID and try again.
               </p>
+            </div>
+            <div className="pt-2">
+              <button
+                onClick={() => setSelectedOrderId(null)}
+                className="text-[10px] font-black uppercase tracking-wider text-orange-primary hover:underline cursor-pointer bg-transparent border-none"
+              >
+                Clear Search
+              </button>
             </div>
           </div>
         ) : (

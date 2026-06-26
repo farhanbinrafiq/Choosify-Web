@@ -43,7 +43,7 @@ export function Footer() {
             </h4>
 
             {/* Social icons row */}
-            <div className="flex items-center justify-center md:justify-start gap-6 flex-wrap">
+            <div className="flex items-center justify-center md:justify-start gap-4 sm:gap-6 flex-wrap">
               
               {/* Facebook */}
               <div className="flex flex-col items-center gap-2 group cursor-pointer">

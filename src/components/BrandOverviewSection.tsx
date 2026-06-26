@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle2, Users, HelpCircle, ShieldCheck } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useDashboard } from '../context/DashboardContext';
 
 interface OverviewData {
   address: string;
@@ -22,6 +23,11 @@ interface BrandOverviewSectionProps {
 }
 
 export function BrandOverviewSection({ brandName, overviewData, claimStatus }: BrandOverviewSectionProps) {
+  const { customOverviews } = useDashboard();
+  const brandCustoms = customOverviews ? customOverviews.filter(
+    co => co.targetType === 'brand' && co.targetId.toLowerCase() === brandName.toLowerCase()
+  ) : [];
+
   return (
     <div id="brand-overview-section" className="bg-white rounded-[5px] p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36">
       <div className="text-center mb-8 border-b border-gray-100 pb-5">
@@ -130,6 +136,30 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
           </div>
         </div>
       </div>
+
+      {/* 6. Dynamic Custom Overviews */}
+      {brandCustoms.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left mt-6">
+          {brandCustoms.map((co, idx) => (
+            <div key={idx} className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-2.5 mb-4 border-b border-gray-200/50 pb-3">
+                <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
+                  <CheckCircle2 size={16} fill="currentColor" className="text-[#E8500A] stroke-white" />
+                </div>
+                <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">{co.sectionName}</h4>
+              </div>
+              <div className="space-y-2.5">
+                {co.content.map((bullet, bIdx) => (
+                  <div key={bIdx} className="text-[10px] text-gray-600 font-bold uppercase tracking-wide flex items-start gap-2">
+                    <span className="text-[#E8500A] text-xs leading-none">•</span>
+                    <span>{bullet}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* BRAND PROFILE CLAIMING EXPERIENCE BLOCKS */}
       {claimStatus === 'community' && (

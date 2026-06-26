@@ -177,7 +177,7 @@
   }
 
   /* Constrain navbar to full viewport width */
-  header, nav, .navbar, [class*="nav"] {
+  header, nav, .navbar {
     width: 100% !important;
     max-width: 100vw !important;
     overflow: hidden !important;
@@ -185,11 +185,9 @@
   }
 
   /* Pull nav icons back inside */
-  .nav-actions,
   .nav-right,
   [class*="nav-icon"],
-  .hamburger,
-  .profile-avatar {
+  .hamburger {
     position: relative !important;
     right: auto !important;
     margin-right: 16px !important;

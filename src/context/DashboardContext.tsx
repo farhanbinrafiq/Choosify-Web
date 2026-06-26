@@ -50,6 +50,14 @@ export interface Campaign {
   countdownEnd?: string;
 }
 
+export interface CustomOverview {
+  id: string;
+  targetType: 'brand' | 'product';
+  targetId: string; // brand name (lowercase) or product id
+  sectionName: string; // e.g. "Sustainability"
+  content: string[]; // list of bullet points / lines
+}
+
 interface DashboardContextType {
   savedProducts: any[];
   setSavedProducts: React.Dispatch<React.SetStateAction<any[]>>;
@@ -77,9 +85,13 @@ interface DashboardContextType {
   setReviews: React.Dispatch<React.SetStateAction<any[]>>;
   campaigns: Campaign[];
   setCampaigns: React.Dispatch<React.SetStateAction<Campaign[]>>;
+  customOverviews: CustomOverview[];
+  setCustomOverviews: React.Dispatch<React.SetStateAction<CustomOverview[]>>;
   addCampaign: (campaign: Omit<Campaign, 'id'>) => void;
   updateCampaign: (campaign: Campaign) => void;
   deleteCampaign: (id: string) => void;
+  addCustomOverview: (overview: Omit<CustomOverview, 'id'>) => void;
+  deleteCustomOverview: (id: string) => void;
   removeSavedProduct: (id: number) => void;
   removeSavedBrand: (id: number) => void;
   toggleLoveBrand: (brand: any) => void;
@@ -279,9 +291,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     ];
   });
 
-  useEffect(() => {
-    localStorage.setItem('choosify_campaigns', JSON.stringify(campaigns));
-  }, [campaigns]);
+
 
   const addCampaign = (campaign: Omit<Campaign, 'id'>) => {
     const newCampaign: Campaign = {
@@ -300,6 +310,52 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const deleteCampaign = (id: string) => {
     setCampaigns(prev => prev.filter(c => c.id !== id));
     toast.success('Campaign deleted successfully.');
+  };
+
+  const [customOverviews, setCustomOverviews] = useState<CustomOverview[]>(() => {
+    const saved = localStorage.getItem('choosify_custom_overviews');
+    if (saved) return JSON.parse(saved);
+    return [
+      {
+        id: 'co-sample-1',
+        targetType: 'product',
+        targetId: '1', // Samsung Galaxy S24 Ultra
+        sectionName: 'Sustainability',
+        content: [
+          'Eco-friendly 100% recycled titanium frame components',
+          'Shipped in plastic-free packaging certified by local regulators',
+          'Long-life components designed for circular trade-in value'
+        ]
+      },
+      {
+        id: 'co-sample-2',
+        targetType: 'brand',
+        targetId: 'apex',
+        sectionName: 'Warranty Information',
+        content: [
+          'Includes local 180 days manufacturing defects coverage',
+          'Easy claim process at any authorized retail outlet across Bangladesh'
+        ]
+      }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('choosify_custom_overviews', JSON.stringify(customOverviews));
+  }, [customOverviews]);
+
+  const addCustomOverview = (ov: Omit<CustomOverview, 'id'>) => {
+    const newOv: CustomOverview = {
+      ...ov,
+      id: 'co-' + Date.now()
+    };
+    setCustomOverviews(prev => [newOv, ...prev]);
+    toast.success('Dynamic overview section created successfully!');
+  };
+
+  const deleteCustomOverview = (id: string) => {
+    setCustomOverviews(prev => prev.filter(ov => ov.id !== id));
+    toast.success('Overview section removed.');
   };
 
   const removeSavedProduct = (id: number) => {
@@ -428,6 +484,22 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       delete (window as any).choosifyAddNotification;
     };
   }, [notifications]);
+
+  useEffect(() => {
+    const handleOrderPlaced = (e: CustomEvent) => {
+      const orderId = e.detail?.orderId || 'unknown';
+      addNotification(`Your order ${orderId} was placed successfully!`, 'order');
+    };
+    const handleReturnRequest = (e: CustomEvent) => {
+      addNotification(`Return request submitted for order ${e.detail?.orderId || ''}.`, 'order');
+    };
+    window.addEventListener('choosify-order-placed', handleOrderPlaced as EventListener);
+    window.addEventListener('choosify-return-request', handleReturnRequest as EventListener);
+    return () => {
+      window.removeEventListener('choosify-order-placed', handleOrderPlaced as EventListener);
+      window.removeEventListener('choosify-return-request', handleReturnRequest as EventListener);
+    };
+  }, []);
 
   // Listen to order actions from GlobalStateContext
   useEffect(() => {
@@ -581,9 +653,12 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       notifications, setNotifications,
       reviews, setReviews,
       campaigns, setCampaigns,
+      customOverviews, setCustomOverviews,
       addCampaign,
       updateCampaign,
       deleteCampaign,
+      addCustomOverview,
+      deleteCustomOverview,
       removeSavedProduct,
       removeSavedBrand,
       toggleLoveBrand,

@@ -23,7 +23,8 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   const { allBrands } = useGlobalState();
 
   const isFollowed = followedBrands.some((b: any) => 
-    String(b.id) === String(id) || b.name?.toLowerCase() === String(id).toLowerCase()
+    String(b.id) === String(id) || 
+    (b.name && b.name.toLowerCase().trim() === String(id).toLowerCase().trim())
   );
 
   // Keep in sync with other instances of the same button on the page in real-time
@@ -55,11 +56,17 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
 
     if (!nextFollowed) {
       setFollowedBrands((prev: any[]) => prev.filter((b: any) => 
-        String(b.id) !== String(id) && b.name?.toLowerCase() !== String(id).toLowerCase()
+        String(b.id) !== String(id) && 
+        (b.name ? b.name.toLowerCase().trim() !== String(id).toLowerCase().trim() : true)
       ));
     } else {
-      const brandObj = allBrands.find((b: any) => 
-        String(b.id) === String(id) || b.name?.toLowerCase() === String(id).toLowerCase()
+      const allBrands_normalized = allBrands.map(b => ({
+        ...b,
+        _normName: b.name.toLowerCase().trim()
+      }));
+      const brandObj = allBrands_normalized.find(b => 
+        String(b.id) === String(id) || 
+        b._normName === String(id).toLowerCase().trim()
       ) || { id, name: String(id) };
       setFollowedBrands((prev: any[]) => {
         const exists = prev.some((b: any) => String(b.id) === String(id));

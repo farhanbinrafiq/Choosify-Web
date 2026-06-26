@@ -129,37 +129,6 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          icon={Heart} 
-          label="Saved Products" 
-          value={savedProducts.length} 
-          color="bg-[#E8500A]" 
-          onClick={() => onTabChange && onTabChange('saved-products')}
-        />
-        <StatCard 
-          icon={Store} 
-          label="Saved Brands" 
-          value={savedBrands.length} 
-          color="bg-[#1B5CFF]" 
-          onClick={() => onTabChange && onTabChange('saved-brands')}
-        />
-        <StatCard 
-          icon={Heart} 
-          label="Loved Brands" 
-          value={lovedBrands.length} 
-          color="bg-rose-500" 
-          onClick={() => onTabChange && onTabChange('loved-brands')}
-        />
-        <StatCard 
-          icon={CheckCircle2} 
-          label="Followed Brands" 
-          value={followedBrands.length} 
-          color="bg-[#059669]" 
-          onClick={() => onTabChange && onTabChange('followed-brands')}
-        />
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-8">
           <div className="flex items-center justify-between">
@@ -775,6 +744,15 @@ const SettingsSection = () => {
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [address, setAddress] = useState(currentUser?.address || 'Dhaka, Bangladesh');
 
+  useEffect(() => {
+    if (currentUser) {
+      setName(currentUser.name || '');
+      setEmail(currentUser.email || '');
+      setPhone(currentUser.phone || '');
+      setAddress(currentUser.address || '');
+    }
+  }, [currentUser]);
+
   const handleSave = () => {
     setCurrentUser({ ...currentUser, name, email, phone, address });
     localStorage.setItem('choosify_user_profile', JSON.stringify({ name, email, phone, address }));
@@ -886,6 +864,241 @@ const SettingsSection = () => {
              </div>
           </div>
        </div>
+    </div>
+  );
+};
+
+const AdminOverviewsSection = () => {
+  const { customOverviews, addCustomOverview, deleteCustomOverview } = useDashboard();
+  const [targetType, setTargetType] = useState<'brand' | 'product'>('product');
+  const [targetId, setTargetId] = useState('');
+  const [sectionName, setSectionName] = useState('');
+  const [bulletText, setBulletText] = useState('');
+
+  // Set default targetId when targetType changes
+  useEffect(() => {
+    if (targetType === 'brand') {
+      setTargetId(BRANDS[0]?.name.toLowerCase() || '');
+    } else {
+      setTargetId(String(PRODUCTS[0]?.id) || '');
+    }
+  }, [targetType]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!targetId || !sectionName || !bulletText) {
+      toast.error('Please fill in all fields.');
+      return;
+    }
+
+    // Process textarea lines into non-empty bullet points
+    const content = bulletText
+      .split('\n')
+      .map(line => line.trim().replace(/^•\s*/, ''))
+      .filter(line => line.length > 0);
+
+    if (content.length === 0) {
+      toast.error('Please write at least one bullet point.');
+      return;
+    }
+
+    addCustomOverview({
+      targetType,
+      targetId,
+      sectionName: sectionName.trim(),
+      content
+    });
+
+    // Reset form
+    setSectionName('');
+    setBulletText('');
+  };
+
+  return (
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700 text-left">
+      <div>
+        <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">
+          Overviews <span className="text-[#E8500A]">Manager</span>
+        </h2>
+        <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">
+          Add dynamic overview sections to brands or products in real-time
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Form Column */}
+        <div className="lg:col-span-1 bg-white border border-gray-150 rounded-[5px] p-6 shadow-sm">
+          <h3 className="text-sm font-black text-navy uppercase tracking-wider mb-4 border-b border-gray-150 pb-2 flex items-center gap-2">
+            <span className="text-[#E8500A]">✦</span> Create Section
+          </h3>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Target Type selector */}
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
+                Target Entity Type
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTargetType('product')}
+                  className={`py-2 text-[10px] font-black uppercase tracking-wider border rounded cursor-pointer ${
+                    targetType === 'product'
+                      ? 'bg-navy text-white border-navy'
+                      : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  Product
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTargetType('brand')}
+                  className={`py-2 text-[10px] font-black uppercase tracking-wider border rounded cursor-pointer ${
+                    targetType === 'brand'
+                      ? 'bg-navy text-white border-navy'
+                      : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  Brand
+                </button>
+              </div>
+            </div>
+
+            {/* Target selection dropdown */}
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
+                Select {targetType === 'product' ? 'Product' : 'Brand'}
+              </label>
+              <select
+                value={targetId}
+                onChange={(e) => setTargetId(e.target.value)}
+                className="w-full text-[11px] font-bold border border-gray-200 rounded p-2.5 bg-gray-50 uppercase tracking-wide focus:outline-none focus:border-orange-primary"
+              >
+                {targetType === 'product'
+                  ? PRODUCTS.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.title} (ID: {p.id})
+                      </option>
+                    ))
+                  : BRANDS.map(b => (
+                      <option key={b.name} value={b.name.toLowerCase()}>
+                        {b.name}
+                      </option>
+                    ))}
+              </select>
+            </div>
+
+            {/* Section Name */}
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
+                Section Name (Dynamic Header)
+              </label>
+              <input
+                type="text"
+                value={sectionName}
+                onChange={(e) => setSectionName(e.target.value)}
+                placeholder="e.g. Sustainability, Certifications"
+                className="w-full text-[11px] font-bold border border-gray-200 rounded p-2.5 bg-gray-50 uppercase tracking-wide focus:outline-none focus:border-orange-primary"
+                required
+              />
+            </div>
+
+            {/* Content Textarea */}
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
+                Content (One bullet point per line)
+              </label>
+              <textarea
+                value={bulletText}
+                onChange={(e) => setBulletText(e.target.value)}
+                placeholder="• 100% Recycled titanium frame&#10;• Certified organic cotton weave&#10;• Zero plastic packaging used"
+                rows={5}
+                className="w-full text-[11px] font-bold border border-gray-200 rounded p-2.5 bg-gray-50 tracking-wide focus:outline-none focus:border-orange-primary leading-relaxed"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white py-3 rounded text-[11px] font-black uppercase tracking-widest cursor-pointer select-none shadow-md transition-colors"
+            >
+              Add Section
+            </button>
+          </form>
+        </div>
+
+        {/* Existing Sections Column */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white border border-gray-150 rounded-[5px] p-6 shadow-sm">
+            <h3 className="text-sm font-black text-navy uppercase tracking-wider mb-4 border-b border-gray-150 pb-2 flex items-center gap-2">
+              <span className="text-[#E8500A]">✦</span> Active Custom Sections ({customOverviews?.length || 0})
+            </h3>
+
+            {customOverviews?.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 border border-dashed border-gray-200 rounded flex flex-col items-center justify-center gap-2">
+                <p className="text-xs font-bold text-gray-450 uppercase tracking-wider italic">
+                  No custom overview sections have been created yet.
+                </p>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Use the form to add a section for a brand or product.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4 max-h-[500px] overflow-y-auto no-scrollbar pr-1">
+                {customOverviews?.map((co) => {
+                  let targetName = co.targetId;
+                  if (co.targetType === 'product') {
+                    const prod = PRODUCTS.find(p => String(p.id) === String(co.targetId));
+                    targetName = prod ? prod.title : `Product ID: ${co.targetId}`;
+                  } else {
+                    const brand = BRANDS.find(b => b.name.toLowerCase() === co.targetId.toLowerCase());
+                    targetName = brand ? brand.name : co.targetId;
+                  }
+
+                  return (
+                    <div
+                      key={co.id}
+                      className="border border-[#e8edf2] rounded-[5px] p-4.5 bg-white hover:shadow-soft transition-all flex justify-between items-start gap-4"
+                    >
+                      <div className="space-y-2 min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                            co.targetType === 'product'
+                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                              : 'bg-purple-100 text-purple-800 border border-purple-200'
+                          }`}>
+                            {co.targetType}
+                          </span>
+                          <span className="text-[10px] font-black uppercase text-navy italic tracking-wide truncate max-w-[200px] sm:max-w-[300px]">
+                            {targetName}
+                          </span>
+                        </div>
+                        <h4 className="font-space font-black text-xs uppercase text-[#1A1D4E] tracking-tight">
+                          {co.sectionName}
+                        </h4>
+                        <div className="space-y-1 pl-2 border-l-2 border-orange-primary/20">
+                          {co.content.map((bullet, idx) => (
+                            <p key={idx} className="text-[10px] font-medium text-gray-500 leading-relaxed uppercase tracking-wider">
+                              • {bullet}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => deleteCustomOverview(co.id)}
+                        className="p-1.5 px-3 border border-red-200 hover:bg-red-50 text-red-500 hover:text-red-700 rounded text-[9px] font-black uppercase tracking-wider transition-colors cursor-pointer select-none"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -1270,7 +1483,10 @@ export function DashboardPage() {
     notifications,
     campaigns,
     reviews,
-    setReviews
+    setReviews,
+    customOverviews,
+    addCustomOverview,
+    deleteCustomOverview
   } = useDashboard();
   const location = useLocation();
   const navigate = useNavigate();
@@ -1307,6 +1523,7 @@ export function DashboardPage() {
     { id: 'saved-recommendations', label: 'Saved Guides', icon: Bookmark },
     { id: 'my-comparisons', label: `My Comparisons (${comparedProducts.length})`, icon: Layers },
     { id: 'admin-campaigns', label: `Campaigns Manager (Admin) (${campaigns?.length || 0})`, icon: Sparkles },
+    { id: 'admin-overviews', label: `Overviews Manager (Admin) (${customOverviews?.length || 0})`, icon: Settings },
     { id: 'messages', label: `Messages (${messages.length})`, icon: MessageSquare, href: '/messages' },
     { id: 'notifications', label: `Notifications (${notifications.filter(n => !n.read).length})`, icon: Bell },
     { id: 'my-reviews', label: 'My Reviews', icon: Star },
@@ -1314,7 +1531,7 @@ export function DashboardPage() {
   ];
 
   const controlItems = menuItems.filter(item => 
-    ['overview', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations', 'my-comparisons', 'admin-campaigns'].includes(item.id)
+    ['overview', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations', 'my-comparisons', 'admin-campaigns', 'admin-overviews'].includes(item.id)
   );
 
   const accountItems = menuItems.filter(item => 
@@ -1331,6 +1548,7 @@ export function DashboardPage() {
       case 'followed-brands': return <FollowedBrandsSection />;
       case 'recently-viewed': return <RecentlyViewedSection />;
       case 'admin-campaigns': return <AdminCampaignsSection />;
+      case 'admin-overviews': return <AdminOverviewsSection />;
       case 'saved-recommendations': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
            <div>

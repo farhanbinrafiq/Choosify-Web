@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 
 export function PostOfferPage() {
   const [step, setStep] = useState(1);
+  const [draftRestored, setDraftRestored] = useState(false);
   // Step 1 fields
   const [productName, setProductName] = useState('');
   const [category, setCategory] = useState('Mobile & Gadgets');
@@ -49,6 +50,7 @@ export function PostOfferPage() {
         if (draft.sellerName) setSellerName(draft.sellerName);
         if (draft.sellerPhone) setSellerPhone(draft.sellerPhone);
         if (draft.sellerRegion) setSellerRegion(draft.sellerRegion);
+        setDraftRestored(true);
       } catch (e) {
         console.error("Error loading draft", e);
       }
@@ -196,6 +198,25 @@ export function PostOfferPage() {
          </div>
 
          <div className="bg-white rounded-[5px] p-12 shadow-2xl space-y-16">
+            {draftRestored && (
+              <div className="flex items-center justify-between bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-wider px-4 py-3 rounded-xl mb-4">
+                <span>📝 Draft restored from your last session</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.removeItem('choosify_offer_draft');
+                    setDraftRestored(false);
+                    setProductName(''); setCategory('Mobile & Gadgets'); setBrand('');
+                    setPrice(''); setOriginalPrice(''); setStock(''); setDescription('');
+                    setSellerName(''); setSellerPhone(''); setSellerRegion('Dhaka');
+                    setStep(1);
+                  }}
+                  className="text-amber-700 hover:text-red-600 font-black underline ml-4 cursor-pointer"
+                >
+                  Clear Draft
+                </button>
+              </div>
+            )}
             {/* Step 1: Basic Info */}
             {step === 1 && (
               <section className="space-y-8">

@@ -585,18 +585,18 @@ export function CreatorProfilePage() {
               </div>
 
                 {/* Mobile platform Find Us On indicators */}
-                <div className="flex lg:hidden items-center gap-4 mt-8 flex-wrap justify-center order-5 w-full">
+                <div className="flex lg:hidden items-center gap-3 sm:gap-4 mt-8 flex-wrap justify-center order-5 w-full">
                    <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-orange-primary pb-1 italic">Find Us On</span>
-                   <div className="flex items-center gap-5">
+                   <div className="flex items-center gap-3.5 sm:gap-5 justify-center flex-wrap">
                      {creator.platforms.map(platform => (
                        <a key={platform} href="#" className="group flex flex-col items-center gap-1.5 focus:outline-none">
-                          <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                            {platform === 'YouTube' && <Youtube size={20} />}
-                            {platform === 'Instagram' && <Instagram size={20} />}
-                            {platform === 'Facebook' && <Facebook size={20} />}
-                            {platform === 'TikTok' && <TikTokIcon size={20} />}
+                          <div className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
+                            {platform === 'YouTube' && <Youtube size={18} />}
+                            {platform === 'Instagram' && <Instagram size={18} />}
+                            {platform === 'Facebook' && <Facebook size={18} />}
+                            {platform === 'TikTok' && <TikTokIcon size={18} />}
                           </div>
-                          <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">{platform}</span>
+                          <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">{platform}</span>
                        </a>
                      ))}
                    </div>

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { CampaignBannerCarousel } from '../components/CampaignBannerCarousel';
+import { GlobalSearchBar } from '../components/GlobalSearchBar';
 import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { FeaturedCard, ReelCard, HorizontalMediaCard } from './GuidesPage';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -576,30 +577,15 @@ export function HomePage() {
           </p>
 
           {/* Glassmorphic Search Container */}
-          <form 
-            onSubmit={handleSearchSubmit} 
-            className="relative w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300 mb-3"
-            style={{ width: '100%', maxWidth: '640px' }}
-          >
-            <div className="flex items-center bg-white rounded-full">
-              <div className="pl-4 text-[#E8500A] shrink-0">
-                <Search className="w-4 h-4" />
-              </div>
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search authentic Fashion hubs, Smart Gadgets & verified outlets..." 
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
-              />
-              <button 
-                type="submit"
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-              >
-                DISCOVER
-              </button>
-            </div>
-          </form>
+          <div className="relative w-full max-w-2xl mx-auto mb-3" style={{ width: '100%', maxWidth: '640px' }}>
+            <GlobalSearchBar 
+              placeholder="Search authentic Fashion hubs, Smart Gadgets & verified outlets..." 
+              onSubmit={(val) => {
+                setSearchQuery(val);
+                navigate(`/search?q=${encodeURIComponent(val)}`);
+              }}
+            />
+          </div>
 
           {/* Quick Shortcuts / Suggested */}
           <div 

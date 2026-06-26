@@ -7,9 +7,12 @@ import {
 } from 'lucide-react';
 import { PRODUCTS, BRANDS, BLOGS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
+import { GlobalSearchBar } from '../components/GlobalSearchBar';
 import { toast } from 'react-hot-toast';
 import { mockGuides } from '../data/mockGuides';
 import { CREATORS } from '../data/creators';
+import { useDashboard } from '../context/DashboardContext';
+import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '../utils/overviewRegistry';
 
 // Promo Codes & Brand Deals data
 const BRAND_DEALS = [
@@ -114,6 +117,7 @@ export function SearchPage() {
   const [localInput, setLocalInput] = useState(rawQuery);
   const [activeTab, setActiveTab] = useState<'all' | 'products' | 'brands' | 'deals' | 'guides' | 'coupons' | 'categories' | 'influencers' | 'favorites' | 'compares'>('all');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const { customOverviews } = useDashboard();
 
   // Sync state with url parameter
   React.useEffect(() => {
@@ -212,40 +216,44 @@ export function SearchPage() {
     }
 
     // Helper scoring function to adhere strictly to the priority ranking rules
-    const getPriorityScore = (item: any, titleStr: string, isHotFeatured: boolean, ratingVal?: number, viewsVal?: string) => {
+    const getPriorityScore = (
+      item: any,
+      titleStr: string,
+      isHotFeatured: boolean,
+      categoryStr?: string,
+      tagStr?: string,
+      overviewResult?: { matchedIn: string; snippet: string } | null
+    ) => {
       let score = 0;
       const titleLower = titleStr.toLowerCase();
 
-      // 1. Exact matches (for whole string, or exact token)
+      // Rule 1: Exact Name Match (+1000)
       if (titleLower === q) {
+        score += 1000;
+      }
+      // Rule 2: Exact Tag Match (+800)
+      else if (tagStr && tagStr.toLowerCase() === q) {
         score += 800;
-      } else if (titleLower.includes(q)) {
-        score += 300;
+      }
+      // Rule 3: Category Match (+600)
+      else if (categoryStr && categoryStr.toLowerCase() === q) {
+        score += 600;
+      }
+      // Rule 4: Overview Content Match (+400)
+      else if (overviewResult) {
+        score += 400;
+      }
+      // Rule 5: Partial Match (+200)
+      else if (titleLower.includes(q)) {
+        score += 200;
       }
 
-      // 2. High engagement items (rating or high views stats)
-      if (ratingVal && ratingVal >= 4.8) {
-        score += 150;
+      // Secondary tie-breakers based on rating or featured hot indicators
+      if (item.rating && item.rating >= 4.8) {
+        score += 50;
       }
-      if (viewsVal) {
-        if (viewsVal.includes('M')) {
-          score += 200; // Millions are massive engagement
-        } else if (viewsVal.includes('K')) {
-          score += 80;
-        }
-      }
-
-      // 3. Sponsored / Featured / Hot
       if (isHotFeatured) {
-        score += 250;
-      }
-
-      // 4. Recent relevance (such as date containing "2026")
-      if (item.date && item.date.includes('2026')) {
-        score += 100;
-      }
-      if (item.title && item.title.includes('2026')) {
-        score += 100;
+        score += 30;
       }
 
       return score;
@@ -255,33 +263,50 @@ export function SearchPage() {
     
     // 1. PRODUCTS
     const matchedProducts = PRODUCTS.map(p => {
+      const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews);
+      const matchedOverview = matchOverviewContent(pOverviews, q);
+
       const match = p.title.toLowerCase().includes(q) || 
                     p.brand.toLowerCase().includes(q) || 
                     p.category.toLowerCase().includes(q) || 
-                    (p.description || '').toLowerCase().includes(q);
+                    (p.description || '').toLowerCase().includes(q) ||
+                    !!matchedOverview;
+
       if (!match) return null;
       const isHot = p.tag === 'HOT' || p.tag === 'NEW';
       return {
         ...p,
-        score: getPriorityScore(p, p.title, isHot, p.rating)
+        matchOverview: matchedOverview,
+        score: getPriorityScore(p, p.title, isHot, p.category, p.tag, matchedOverview)
       };
     }).filter(Boolean) as any[];
 
     // 2. BRANDS
     const matchedBrands = BRANDS.map(b => {
+      const bOverviews = getBrandOverviews(b.name, customOverviews);
+      const matchedOverview = matchOverviewContent(bOverviews, q);
+
       const match = b.name.toLowerCase().includes(q) || 
-                    b.category.toLowerCase().includes(q);
+                    b.category.toLowerCase().includes(q) ||
+                    !!matchedOverview;
+
       if (!match) return null;
       return {
         ...b,
-        score: getPriorityScore(b, b.name, b.rating >= 4.8, b.rating)
+        matchOverview: matchedOverview,
+        score: getPriorityScore(b, b.name, b.rating >= 4.8, b.category, undefined, matchedOverview)
       };
     }).filter(Boolean) as any[];
 
     // 3. DEALS
     const productDeals = PRODUCTS.filter(p => p.originalPrice || p.tag === 'SALE' || p.tag === 'HOT').map(p => {
+      const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews);
+      const matchedOverview = matchOverviewContent(pOverviews, q);
+
       const match = p.title.toLowerCase().includes(q) || 
-                    p.brand.toLowerCase().includes(q);
+                    p.brand.toLowerCase().includes(q) ||
+                    !!matchedOverview;
+
       if (!match) return null;
       return {
         type: 'product_deal',
@@ -292,7 +317,8 @@ export function SearchPage() {
         originalPrice: p.originalPrice,
         image: p.image,
         tag: p.tag || 'DEAL',
-        score: getPriorityScore(p, p.title, true, p.rating)
+        matchOverview: matchedOverview,
+        score: getPriorityScore(p, p.title, true, p.category, p.tag, matchedOverview)
       };
     }).filter(Boolean) as any[];
 
@@ -354,17 +380,23 @@ export function SearchPage() {
 
     // 8. CUSTOMER FAVORITES (Products with tag === '❤️ Customer Favorite' / idx % 5 === 1)
     const matchedFavorites = PRODUCTS.map((p, idx) => {
+      const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews);
+      const matchedOverview = matchOverviewContent(pOverviews, q);
+
       const match = p.title.toLowerCase().includes(q) || 
                     p.brand.toLowerCase().includes(q) || 
                     p.category.toLowerCase().includes(q) || 
-                    (p.description || '').toLowerCase().includes(q);
+                    (p.description || '').toLowerCase().includes(q) ||
+                    !!matchedOverview;
+
       const isFav = idx % 5 === 1;
       if (!isFav || !match) return null;
       return {
         ...p,
+        matchOverview: matchedOverview,
         tag: '❤️ Customer Favorite',
         tagColor: 'bg-rose-500',
-        score: getPriorityScore(p, p.title, true, p.rating) + 120
+        score: getPriorityScore(p, p.title, true, p.category, '❤️ Customer Favorite', matchedOverview) + 120
       };
     }).filter(Boolean) as any[];
 
@@ -408,7 +440,7 @@ export function SearchPage() {
       compares: matchedCompares,
       total
     };
-  }, [rawQuery, filteredGuides, combinedCreators]);
+  }, [rawQuery, filteredGuides, combinedCreators, customOverviews]);
 
   // Tab configurations
   const tabConfig = [
@@ -441,24 +473,16 @@ export function SearchPage() {
             Search across authorized brands, verified products, active discount campaigns, professional recommendations, and influencer insights.
           </p>
 
-          <form onSubmit={handleSearchSubmit} className="w-full max-w-xl relative">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30">
-              <Search size={18} />
-            </div>
-            <input
-              type="text"
-              value={localInput}
-              onChange={(e) => setLocalInput(e.target.value)}
+          <div className="w-full max-w-xl relative">
+            <GlobalSearchBar 
+              initialValue={localInput}
               placeholder="Search products, brands, promo codes, influencers..."
-              className="w-full h-14 pl-12 pr-28 rounded-full bg-white/5 text-white placeholder:text-white/30 text-sm focus:outline-none focus:bg-white/10 transition-all border border-white/10 italic font-bold"
+              onSubmit={(val) => {
+                setLocalInput(val);
+                setSearchParams({ q: val.trim() });
+              }}
             />
-            <button 
-              type="submit" 
-              className="absolute right-2 top-1.5 h-11 px-6 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-colors"
-            >
-              Search
-            </button>
-          </form>
+          </div>
 
           {rawQuery && (
             <p className="text-white/40 text-[10px] font-mono mt-4">
@@ -548,7 +572,19 @@ export function SearchPage() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {(activeTab === 'all' ? searchResults.products.slice(0, 6) : searchResults.products).map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <div key={product.id} className="flex flex-col justify-between h-full group">
+                      <ProductCard product={product} />
+                      {product.matchOverview && (
+                        <div className="mt-2.5 p-2 bg-orange-primary/5 border border-orange-primary/10 rounded-[4px] text-left">
+                          <p className="text-[7.5px] font-black uppercase text-[#E8500A] tracking-wider mb-0.5">
+                            MATCHED IN {product.matchOverview.sectionName}
+                          </p>
+                          <p className="text-[8.5px] text-gray-600 font-bold leading-normal truncate italic uppercase">
+                            "{product.matchOverview.snippet}"
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -653,6 +689,16 @@ export function SearchPage() {
                           <span>•</span>
                           <span>{brand.products || 120} Products</span>
                         </div>
+                        {brand.matchOverview && (
+                          <div className="mt-2.5 p-2 bg-[#E8500A]/5 border border-[#E8500A]/10 rounded-[4px]">
+                            <p className="text-[7.5px] font-black uppercase text-[#E8500A] tracking-wider mb-0.5">
+                              Matched in {brand.matchOverview.sectionName}
+                            </p>
+                            <p className="text-[8.5px] text-gray-600 font-bold leading-normal truncate italic uppercase">
+                              "{brand.matchOverview.snippet}"
+                            </p>
+                          </div>
+                        )}
                       </div>
                       <span className="text-[9px] text-[#E8500A] font-bold uppercase tracking-wider">Explore</span>
                     </Link>

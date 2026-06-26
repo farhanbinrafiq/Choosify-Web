@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ExternalLink, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle, ShieldCheck } from 'lucide-react';
 import { PRODUCTS, BRANDS } from '../constants';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
@@ -33,12 +33,48 @@ function FlashDealCountdown({ validUntil }: { validUntil?: string }) {
 
 export function DealsPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const getInitialTab = () => {
+    const t = searchParams.get('tab');
+    const validTabs = ['flash', 'promo', 'promo_codes', 'brand', 'seasonal', 'expired', 'all'];
+    const matched = validTabs.includes(t || '') ? (t || '') : 'all';
+    if (matched === 'flash') return 'Flash Deals';
+    if (matched === 'promo' || matched === 'promo_codes') return 'Promo Codes';
+    if (matched === 'brand') return 'Brand Deals';
+    if (matched === 'seasonal') return 'Seasonal Campaigns';
+    if (matched === 'expired') return 'Expired Deals';
+    return 'All Deals';
+  };
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('All Deals');
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [dealType, setDealType] = useState<'all' | 'retail' | 'wholesale'>('all');
   const [minDiscount, setMinDiscount] = useState<number>(0);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    let urlTab = 'all';
+    if (tab === 'Flash Deals') urlTab = 'flash';
+    else if (tab === 'Promo Codes') urlTab = 'promo_codes';
+    else if (tab === 'Brand Deals') urlTab = 'brand';
+    else if (tab === 'Seasonal Campaigns' || tab === 'Seasonal') urlTab = 'seasonal';
+    else if (tab === 'Expired Deals' || tab === 'Expired') urlTab = 'expired';
+    setSearchParams({ tab: urlTab });
+  };
+
+  useEffect(() => {
+    const t = searchParams.get('tab');
+    if (t) {
+      if (t === 'flash') setActiveTab('Flash Deals');
+      else if (t === 'promo' || t === 'promo_codes') setActiveTab('Promo Codes');
+      else if (t === 'brand') setActiveTab('Brand Deals');
+      else if (t === 'seasonal') setActiveTab('Seasonal Campaigns');
+      else if (t === 'expired') setActiveTab('Expired Deals');
+      else if (t === 'all') setActiveTab('All Deals');
+    }
+  }, [searchParams]);
 
   // Restore state from sessionStorage on mount
   React.useEffect(() => {
@@ -264,7 +300,7 @@ export function DealsPage() {
               <button
                 key={tab.label}
                 onClick={() => {
-                  setActiveTab(tab.label);
+                  handleTabChange(tab.label);
                   setTimeout(() => {
                     const el = document.getElementById(tab.id);
                     if (el) {

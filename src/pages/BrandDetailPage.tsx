@@ -458,6 +458,50 @@ export function BrandDetailPage() {
 
   const getBrandOverviews = (brandName: string) => {
     const name = brandName.toLowerCase();
+    if (name.includes('choosify')) {
+       return {
+          address: "CHOOSE-HQ, SUITE 5A, METROPOLITAN TOWERS, GULSHAN-2, DHAKA 1212.",
+          website: "choosify.com",
+          map: "https://www.google.com/maps",
+          email: "hello@choosify.com",
+          phone: "09612246673",
+          priceRange: "BDT - FREE ACCESS",
+          ageRange: "AGE: 15 - 65",
+          audience: "SHOPPERS, CREATORS, VERIFIED OUTLETS & SMART BUYERS",
+          services: [
+             "TRANSPARENT COMMUNITY COMPARISONS",
+             "VERIFIED OUTLET REVIEWS & INSIGHTS",
+             "ACTIVE PROMO CODES & CAMPAIGNS",
+             "INFLUENCER INSIGHTS & EXPERIENCES",
+             "B2B WHOLESALE COORDINATION ENGINE",
+             "REAL-TIME PRICE HISTORY TRACKER"
+          ],
+          tags: ["#BrandDiscovery", "#ProductComparison", "#Deals", "#Recommendations", "#Creators", "#Marketplace", "#ConsumerInsights", "#ShoppingGuides"]
+       };
+    }
+    if (name.includes('fff')) {
+       return {
+          address: "FFF SOURCING HQ, PLOT 12, ROAD 4, SECTOR 3, UTTARA, DHAKA 1230 BANGLADESH.",
+          website: "fff.com.bd",
+          map: "https://www.google.com/maps",
+          email: "sourcing@fff.com.bd",
+          phone: "+8801711223344",
+          priceRange: "BDT - B2B SERVICE SLAB",
+          ageRange: "AGE: 18 - 60",
+          audience: "INTERNATIONAL FASHION BRANDS, RETAILERS, IMPORTERS",
+          services: [
+             "GARMENT SOURCING",
+             "BUYING HOUSE SERVICES",
+             "APPAREL MANUFACTURING COORDINATION",
+             "QUALITY CONTROL",
+             "VENDOR MANAGEMENT",
+             "PRODUCT DEVELOPMENT",
+             "EXPORT SUPPORT",
+             "COMPLIANCE MANAGEMENT"
+          ],
+          tags: ["#GarmentSourcing", "#BuyingHouse", "#ApparelManufacturing", "#BangladeshExports", "#FashionProduction", "#QualityControl", "#VendorManagement", "#TextileIndustry"]
+       };
+    }
     if (name.includes('sailor') || name.includes('la reve') || name.includes('yellow') || name.includes('aarong') || name.includes('ethnic') || name.includes('fashion') || name.includes('apex') || name.includes('bata') || name.includes('lotto')) {
        return {
           address: "GRAND SHOPPING MALL, HOUSE 2, ROAD 2, SECTOR 92. 1500 - DHAKA BANGLADESH.",
@@ -506,6 +550,20 @@ export function BrandDetailPage() {
   const getPopularCategoryPreviews = () => {
     const cat = (brand.category || '').toLowerCase();
     const name = brand.name.toLowerCase();
+    if (name.includes('choosify')) {
+      return [
+        { label: 'BRANDS', img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop' },
+        { label: 'PRODUCTS', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=600&fit=crop' },
+        { label: 'CREATORS', img: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=600&fit=crop' }
+      ];
+    }
+    if (name.includes('fff')) {
+      return [
+        { label: 'SOURCING', img: 'https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=400&h=600&fit=crop' },
+        { label: 'EXPORT', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=600&fit=crop' },
+        { label: 'GARMENTS', img: 'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=400&h=600&fit=crop' }
+      ];
+    }
     if (name.includes('sailor') || name.includes('la reve') || name.includes('yellow') || name.includes('aarong') || cat.includes('fashion') || cat.includes('lifestyle') || cat.includes('clothing') || cat.includes('ethnic')) {
       return [
         { label: 'PANJABI', img: 'https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=400&h=600&fit=crop' },
@@ -531,6 +589,22 @@ export function BrandDetailPage() {
 
   const renderBrandLogo = (brandObj: any) => {
     const term = brandObj.name.toLowerCase();
+    if (term.includes('choosify')) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-center bg-gradient-to-r from-[#FF5B00] to-[#E8500A] w-full text-white px-2 py-3 select-none">
+          <span className="font-sans tracking-tight text-[24px] font-black leading-none uppercase">CHOOSIFY</span>
+          <span className="text-[6px] tracking-[0.25em] font-mono text-orange-100 font-bold uppercase mt-1.5">VERIFIED PLATFORM</span>
+        </div>
+      );
+    }
+    if (term.includes('fff')) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-center bg-[#1E293B] w-full text-[#F1F5F9] px-2 py-3 select-none">
+          <span className="font-space tracking-wider text-[28px] font-black leading-none">FFF</span>
+          <span className="text-[6px] tracking-[0.2em] font-mono text-gray-400 font-bold uppercase mt-1.5">SOURCING LTD</span>
+        </div>
+      );
+    }
     if (term.includes('sailor')) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-center bg-[#17192C] w-full text-white px-2 py-3 select-none">
@@ -845,61 +919,61 @@ export function BrandDetailPage() {
               </div>
 
               {/* Mobile Social links */}
-              <div className="flex lg:hidden items-center gap-4 mt-8 flex-wrap justify-center order-5 w-full">
+              <div className="flex lg:hidden items-center gap-3 sm:gap-4 mt-8 flex-wrap justify-center order-5 w-full">
                  <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">Find Us On</span>
-                 <div className="flex items-center gap-6 justify-center">
+                 <div className="flex items-center gap-3.5 sm:gap-6 justify-center flex-wrap">
                    {/* Facebook */}
-                   <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                   <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
                      <a 
                        href="#" 
-                       className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                       className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
                        aria-label="Facebook"
                      >
-                       <Facebook size={20} />
+                       <Facebook size={18} />
                      </a>
-                     <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                     <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
                        Facebook
                      </span>
                    </div>
 
                    {/* Instagram */}
-                   <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                   <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
                      <a 
                        href="#" 
-                       className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                       className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
                        aria-label="Instagram"
                      >
-                       <Instagram size={20} />
+                       <Instagram size={18} />
                      </a>
-                     <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                     <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
                        Instagram
                      </span>
                    </div>
 
                    {/* TikTok */}
-                   <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                   <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
                      <a 
                        href="#" 
-                       className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                       className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
                        aria-label="TikTok"
                      >
-                       <TikTokIcon size={20} />
+                       <TikTokIcon size={18} />
                      </a>
-                     <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                     <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
                        TikTok
                      </span>
                    </div>
 
                    {/* YouTube */}
-                   <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                   <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
                      <a 
                        href="#" 
-                       className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                       className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
                        aria-label="YouTube"
                      >
-                       <Youtube size={20} />
+                       <Youtube size={18} />
                      </a>
-                     <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                     <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
                        YouTube
                      </span>
                    </div>

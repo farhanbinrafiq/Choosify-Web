@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers, ImageOff, Plus, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
+import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers, ImageOff, Plus, ChevronLeft, ChevronRight, ShoppingCart, LayoutGrid } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useDashboard } from '../context/DashboardContext';
@@ -254,7 +254,7 @@ export function ProductCard({
   isGuideDetail?: boolean
 }) {
   const navigate = useNavigate();
-  const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
+  const { savedProducts, setSavedProducts, addToCompare, comparedProducts, setComparedProducts } = useDashboard();
   const { mode, allBrands, addToCart } = useGlobalState();
 
   const brandObj = allBrands?.find((b: any) => b.id === product.brandId);
@@ -322,6 +322,32 @@ export function ProductCard({
                    )}
                 >
                    <Layers size={14} />
+                 </button>
+                 <button
+                   onClick={(e) => {
+                     e.preventDefault();
+                     e.stopPropagation();
+                     if (comparedProducts.length >= 4) {
+                       toast.error('Comparison limit reached (4 products max)');
+                       return;
+                     }
+                     const alreadyAdded = comparedProducts.some((p: any) => String(p.id) === String(product.id));
+                     if (alreadyAdded) {
+                       toast('Already in comparison');
+                       return;
+                     }
+                     setComparedProducts((prev: any[]) => [product, ...prev]);
+                     toast.success('Added to compare!');
+                   }}
+                   title="Add to Compare"
+                   className={cn(
+                     "w-8 h-8 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-none bg-white",
+                     isInCompare ? "bg-emerald-600 border-emerald-600 text-white" : "border-gray-200 text-blue-600"
+                   )}
+                 >
+                   <LayoutGrid size={14} />
+                 </button>
+                 <button className="hidden" onClick={() => {}}>
                 </button>
              </div>
             
@@ -405,6 +431,32 @@ export function ProductCard({
                  )}
                >
                   <Layers size={10} />
+               </button>
+               <button
+                 onClick={(e) => {
+                   e.preventDefault();
+                   e.stopPropagation();
+                   if (comparedProducts.length >= 4) {
+                     toast.error('Comparison limit reached (4 products max)');
+                     return;
+                   }
+                   const alreadyAdded = comparedProducts.some((p: any) => String(p.id) === String(product.id));
+                   if (alreadyAdded) {
+                     toast('Already in comparison');
+                     return;
+                   }
+                   setComparedProducts((prev: any[]) => [product, ...prev]);
+                   toast.success('Added to compare!');
+                 }}
+                 title="Add to Compare"
+                 className={cn(
+                   "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
+                   isInCompare ? "text-green-600" : "text-gray-400 hover:text-blue-500"
+                 )}
+               >
+                 <LayoutGrid size={14} />
+               </button>
+               <button className="hidden" onClick={() => {}}>
                </button>
             </div>
             
@@ -501,6 +553,32 @@ export function ProductCard({
             >
                <Layers size={11} />
             </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (comparedProducts.length >= 4) {
+                  toast.error('Comparison limit reached (4 products max)');
+                  return;
+                }
+                const alreadyAdded = comparedProducts.some((p: any) => String(p.id) === String(product.id));
+                if (alreadyAdded) {
+                  toast('Already in comparison');
+                  return;
+                }
+                setComparedProducts((prev: any[]) => [product, ...prev]);
+                toast.success('Added to compare!');
+              }}
+              title="Add to Compare"
+              className={cn(
+                "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
+                isInCompare ? "text-green-600" : "text-gray-400 hover:text-blue-500"
+              )}
+            >
+              <LayoutGrid size={14} />
+            </button>
+            <button className="hidden" onClick={() => {}}>
+            </button>
           </div>
         </div>
         <div className="flex-1 flex flex-col py-0.5 justify-between min-w-0">
@@ -595,6 +673,32 @@ export function ProductCard({
             )}
           >
              <Layers size={9} />
+          </button>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (comparedProducts.length >= 4) {
+                toast.error('Comparison limit reached (4 products max)');
+                return;
+              }
+              const alreadyAdded = comparedProducts.some((p: any) => String(p.id) === String(product.id));
+              if (alreadyAdded) {
+                toast('Already in comparison');
+                return;
+              }
+              setComparedProducts((prev: any[]) => [product, ...prev]);
+              toast.success('Added to compare!');
+            }}
+            title="Add to Compare"
+            className={cn(
+              "w-5 h-5 rounded-full border flex items-center justify-center bg-white border-gray-100 shadow-none transition-transform hover:scale-105",
+              isInCompare ? "text-green-500" : "text-gray-400 hover:text-blue-500"
+            )}
+          >
+            <LayoutGrid size={14} />
+          </button>
+          <button className="hidden" onClick={() => {}}>
           </button>
         </div>
         {product.tag && (

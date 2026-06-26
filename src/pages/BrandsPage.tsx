@@ -243,6 +243,32 @@ export function BrandsPage() {
       recommended: '95%',
       category: 'Fashion',
       isHot: true
+    },
+    {
+      id: 'choosify',
+      name: 'Choosify',
+      description: 'Transparent Consumer Discovery & Marketplace Platform',
+      logo: 'Ch',
+      rating: 5.0,
+      reviews: 24,
+      bestFor: 'Brand Discovery & Recommendations',
+      priceRange: '৳0',
+      recommended: '100%',
+      category: 'Marketplace',
+      isFeatured: true
+    },
+    {
+      id: 'fff-sourcing-ltd',
+      name: 'FFF Sourcing Ltd',
+      description: 'Bangladesh Apparel Sourcing, Buying House & Compliance Management',
+      logo: 'FFF',
+      rating: 4.9,
+      reviews: 15,
+      bestFor: 'Garment Sourcing & Buying House',
+      priceRange: 'Custom B2B',
+      recommended: '98%',
+      category: 'Sourcing',
+      isHot: true
     }
   ];
 
@@ -857,10 +883,10 @@ export function BrandsPage() {
                     {/* Horizontal Header System */}
                     <div className="flex gap-3 items-start relative z-10 text-left w-full">
                       <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-2 shadow-xs">
-                        {brand.logo.length > 2 ? (
+                        {brand.logo.startsWith('http') || brand.logo.startsWith('/') ? (
                            <img src={brand.logo} className="w-full h-full object-contain p-2 relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
                         ) : (
-                          <span className="text-2xl font-black text-navy">{brand.logo}</span>
+                          <span className="text-xl font-black text-navy tracking-tight">{brand.logo}</span>
                         )}
                       </div>
                       <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>
@@ -946,10 +972,10 @@ export function BrandsPage() {
                     {/* Horizontal Header System */}
                     <div className="flex gap-3 items-start relative z-10 text-left w-full">
                       <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-2 shadow-xs">
-                        {brand.logo.length > 2 ? (
+                        {brand.logo.startsWith('http') || brand.logo.startsWith('/') ? (
                            <img src={brand.logo} className="w-full h-full object-contain p-2 relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
                         ) : (
-                          <span className="text-2xl font-black text-navy">{brand.logo}</span>
+                          <span className="text-xl font-black text-navy tracking-tight">{brand.logo}</span>
                         )}
                       </div>
                       <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>

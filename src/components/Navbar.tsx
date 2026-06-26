@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { SignInModal } from './SignInModal';
+import { GlobalSearchBar } from './GlobalSearchBar';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
@@ -101,7 +102,7 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="w-full text-white h-20 flex items-center px-3 lg:px-4 xl:px-8 z-50 sticky top-0 border-b shadow-2xl backdrop-blur-md transition-all duration-300 choosify-dark-gradient border-white/5" id="main-navbar">
+      <nav className="w-full text-white h-20 flex items-center justify-between lg:justify-start px-3 lg:px-4 xl:px-8 z-50 sticky top-0 border-b shadow-2xl backdrop-blur-md transition-all duration-300 choosify-dark-gradient border-white/5" id="main-navbar">
         
         {/* LOGO SECTOR */}
         <div className="flex items-center gap-3 mr-2 lg:mr-3 xl:mr-8 scale-110 shrink-0">
@@ -154,19 +155,14 @@ export function Navbar() {
 
         {/* SEARCH BAR */}
         <div className="flex-1 max-w-xs mx-4 hidden xl:block">
-          <form onSubmit={handleSearch} className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30">
-              <Search size={16} />
-            </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Products, Brands, Reviews..."
-              className="w-full h-10 pl-11 pr-12 rounded-full bg-white/5 text-white placeholder:text-white/30 text-[10px] focus:outline-none focus:bg-white/10 transition-all border border-white/10 italic font-bold"
-            />
-            <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-white/40 uppercase tracking-widest hover:text-orange-primary transition-colors italic">Search</button>
-          </form>
+          <GlobalSearchBar 
+            initialValue={searchQuery}
+            placeholder="Search Products, Brands, Reviews..."
+            onSubmit={(val) => {
+              setSearchQuery(val);
+              navigate(`/search?q=${encodeURIComponent(val)}`);
+            }}
+          />
         </div>
 
         {/* ACTIONS & MESSAGES */}
@@ -254,7 +250,7 @@ export function Navbar() {
                       navigate('/login');
                     }
                   }}
-                  className="w-10 h-10 rounded-full border-2 border-orange-primary overflow-hidden group-hover:scale-105 transition-all cursor-pointer nav-avatar hover:opacity-80 flex items-center justify-center bg-white/5"
+                  className="w-11 h-11 lg:w-10 lg:h-10 rounded-full border-2 border-orange-primary overflow-hidden group-hover:scale-105 transition-all cursor-pointer nav-avatar hover:opacity-80 flex items-center justify-center bg-white/5"
                   role="button"
                   aria-label="Go to my dashboard"
                   tabIndex={0}
@@ -344,7 +340,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <div 
                 onClick={() => navigate('/login')}
-                className="w-10 h-10 rounded-full border border-white/10 overflow-hidden cursor-pointer nav-avatar hover:opacity-100 flex items-center justify-center bg-white/5 profile-icon transition-opacity opacity-75 md:flex"
+                className="w-11 h-11 lg:w-10 lg:h-10 rounded-full border border-white/10 overflow-hidden cursor-pointer nav-avatar hover:opacity-100 flex items-center justify-center bg-white/5 profile-icon transition-opacity opacity-75 md:flex"
                 role="button"
                 aria-label="Log in to my account"
                 tabIndex={0}
@@ -365,7 +361,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all relative z-50 shrink-0 hamburger"
+            className="lg:hidden w-11 h-11 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all relative z-50 shrink-0 hamburger"
             aria-label="Toggle navigation menu"
           >
             <Menu size={22} className={cn("transition-transform duration-300", isMobileMenuOpen && "rotate-90")} />
@@ -411,19 +407,15 @@ export function Navbar() {
 
                 {/* Sourcing/Search on Mobile */}
                 <div className="w-full">
-                  <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30">
-                      <Search size={14} />
-                    </div>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search products, brands..."
-                      className="w-full h-11 pl-10 pr-12 rounded-xl bg-white/5 text-white placeholder:text-white/30 text-xs focus:outline-none focus:bg-white/10 transition-all border border-white/10 italic font-bold"
-                    />
-                    <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-orange-primary uppercase tracking-widest italic">Search</button>
-                  </form>
+                  <GlobalSearchBar 
+                    initialValue={searchQuery}
+                    placeholder="Search products, brands..."
+                    onSubmit={(val) => {
+                      setSearchQuery(val);
+                      setIsMobileMenuOpen(false);
+                      navigate(`/search?q=${encodeURIComponent(val)}`);
+                    }}
+                  />
                 </div>
 
                 {/* Quick links stream */}

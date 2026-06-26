@@ -149,6 +149,46 @@ export const PRODUCTS = [
     tag: 'HOT',
     stores: ['Daraz'],
     category: 'Mobile & Phones'
+  },
+  {
+    id: 11,
+    title: 'Choosify Brand Verification Hub Suite',
+    brand: 'Choosify',
+    price: '0',
+    originalPrice: '0',
+    rating: 5.0,
+    reviews: 24,
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',
+    tag: 'PLATFORM',
+    stores: [
+      { name: 'Choosify', price: 'FREE', delivery: 'Instant', rating: 5.0, link: 'https://choosify.com' }
+    ],
+    category: 'Marketplace',
+    description: 'The definitive suite for authentic brand listing, claims verification, content auditing, and consumer discovery matching on the Choosify platform.',
+    pros: ['Completely transparent peer-reviews', 'Active fraud protection auditing', 'Zero cost for verified consumers'],
+    cons: ['Requires strict commercial business credentials to list'],
+    bestForTags: ['Consumer Discovery', 'Brand Validation', 'Trust & Verification'],
+    locations: ['GULSHAN-2, DHAKA 1212']
+  },
+  {
+    id: 12,
+    title: 'FFF Custom Apparel Production & Sourcing',
+    brand: 'FFF Sourcing Ltd',
+    price: '1,500',
+    originalPrice: '1,800',
+    rating: 4.9,
+    reviews: 15,
+    image: 'https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=400&h=400&fit=crop',
+    tag: 'B2B SOURCING',
+    stores: [
+      { name: 'FFF Sourcing', price: 'Contact for Quote', delivery: 'Custom Lead Time', rating: 4.9, link: 'https://fff.com.bd' }
+    ],
+    category: 'Sourcing',
+    description: 'End-to-end B2B apparel sourcing, quality assurance, vendor compliance coordination, and custom fabric development for international retail brands.',
+    pros: ['100% compliant local manufacturers', 'Rigorous multi-stage quality control audits', 'Dedicated English-speaking merchant support'],
+    cons: ['MOQ (Minimum Order Quantity) of 1,000 units per style'],
+    bestForTags: ['Garment Manufacturing', 'Quality Control', 'Buying House Services'],
+    locations: ['Uttara, Sector 3, Dhaka']
   }
 ];
 
@@ -168,6 +208,8 @@ export const BRANDS = [
   { id: 13, name: 'Ecstasy', logo: 'Ec', products: 210, rating: 4.4, category: 'Fashion' },
   { id: 14, name: 'Richman', logo: 'R', products: 310, rating: 4.6, category: 'Fashion' },
   { id: 15, name: 'Star Tech', logo: 'ST', products: 1950, rating: 4.8, category: 'Tech' },
+  { id: 16, name: 'Choosify', logo: 'Ch', products: 1, rating: 5.0, category: 'Marketplace' },
+  { id: 17, name: 'FFF Sourcing Ltd', logo: 'FFF', products: 1, rating: 4.9, category: 'Sourcing' },
 ];
 
 export const BLOGS = [

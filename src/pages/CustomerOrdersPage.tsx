@@ -20,6 +20,7 @@ export function CustomerOrdersPage() {
   const [returningOrderId, setReturningOrderId] = useState<string | null>(null);
   const [returnReason, setReturnReason] = useState('Wrong Item');
   const [returnDesc, setReturnDesc] = useState('');
+  const [returnedOrderIds, setReturnedOrderIds] = useState<Set<string>>(new Set());
 
   const handleOpenConversation = (subOrder: any, parentOrderId: string) => {
     // Dynamically spawn or update thread before navigating to guarantee existence
@@ -133,6 +134,7 @@ Thank you for shopping with Choosify.bd
                 const totalItemCount = order.subOrders.reduce((acc, sub) => acc + sub.items.reduce((sum, item) => sum + item.quantity, 0), 0);
                 const allPending = order.subOrders.every((sub: any) => sub.trackingStatus === 'pending');
                 const allDelivered = order.subOrders.every((sub: any) => sub.trackingStatus === 'delivered');
+                const isCancelled = order.status === 'cancelled' || !!order.cancelledAt;
 
                 return (
                   <div key={order.orderId} className="bg-[#050514]/65 border border-white/10 rounded-[5px] p-6 md:p-8 space-y-6 relative overflow-hidden group">
@@ -145,7 +147,7 @@ Thank you for shopping with Choosify.bd
                           <span className="text-[10px] font-black bg-[#F96500]/10 border border-[#F96500]/30 text-orange-primary px-2.5 py-0.5 rounded italic uppercase tracking-wider">
                             ORDER Reference: {order.orderId}
                           </span>
-                          {order.status === 'cancelled' && (
+                          {isCancelled && (
                             <span className="text-[9px] font-black bg-red-600/30 border border-red-500 text-red-500 px-2 py-0.5 rounded uppercase tracking-widest">
                               CANCELLED
                             </span>
@@ -233,7 +235,7 @@ Thank you for shopping with Choosify.bd
 
                               {/* Action buttons inside each Lot/Suborder */}
                               <div className="flex gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto items-center">
-                                {allPending && order.status !== 'cancelled' && (
+                                {allPending && !isCancelled && (
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -248,18 +250,22 @@ Thank you for shopping with Choosify.bd
                                 )}
 
                                 {allDelivered && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setReturningOrderId(order.orderId);
-                                      setReturnReason('Wrong Item');
-                                      setReturnDesc('');
-                                      setCancellingOrderId(null);
-                                    }}
-                                    className="text-[10px] font-black uppercase tracking-wider text-orange-primary hover:text-[#FF5B00] transition-colors cursor-pointer bg-transparent border-none mr-2"
-                                  >
-                                    Request Return
-                                  </button>
+                                  returnedOrderIds.has(order.orderId) ? (
+                                    <span className="text-[9px] font-black uppercase tracking-wider text-green-600 border border-green-200 px-2 py-1 rounded-lg mr-2">Return Requested</span>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setReturningOrderId(order.orderId);
+                                        setReturnReason('Wrong Item');
+                                        setReturnDesc('');
+                                        setCancellingOrderId(null);
+                                      }}
+                                      className="text-[10px] font-black uppercase tracking-wider text-orange-primary hover:text-[#FF5B00] transition-colors cursor-pointer bg-transparent border-none mr-2"
+                                    >
+                                      Request Return
+                                    </button>
+                                  )
                                 )}
 
                                 <button
@@ -388,6 +394,11 @@ Thank you for shopping with Choosify.bd
                               }));
                               toast.success('Return request submitted. We will respond within 48 hours.');
                               addNotification('Your return request has been submitted.', 'order');
+                              setReturnedOrderIds(prev => {
+                                const next = new Set(prev);
+                                next.add(order.orderId);
+                                return next;
+                              });
                               setReturningOrderId(null);
                               setReturnReason('Wrong Item');
                               setReturnDesc('');

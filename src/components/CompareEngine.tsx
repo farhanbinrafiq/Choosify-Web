@@ -1354,6 +1354,14 @@ export function CompareEngine() {
                                 Clear All
                               </button>
                            )}
+                           {(compareMode === 'creator' || compareMode === 'guide') && setComparedProducts && (
+                              <button
+                                onClick={() => setComparedProducts([])}
+                                className="text-[10px] font-black uppercase tracking-wider text-red-400 hover:text-red-600 border border-red-200 hover:border-red-400 px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                Clear All
+                              </button>
+                           )}
                         </div>
                         <p className="text-[8.5px] font-bold text-gray-400 uppercase tracking-widest italic mt-1 leading-normal">Side-by-side parameters breakdown</p>
                      </div>
@@ -1381,6 +1389,14 @@ export function CompareEngine() {
                                 <button
                                   onClick={() => setComparedProducts((prev: any[]) => prev.filter((prod: any) => String(prod.id) !== String(p.id)))}
                                   className="absolute top-2 right-2 w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-[10px] font-black hover:bg-red-500 hover:text-white transition-colors cursor-pointer border-none"
+                                >
+                                  ×
+                                </button>
+                              )}
+                              {(compareMode === 'creator' || compareMode === 'guide') && setComparedProducts && (
+                                <button
+                                  onClick={() => setComparedProducts((prev: any[]) => prev.filter((item: any) => String(item.id) !== String(p.id)))}
+                                  className="absolute top-2 right-2 w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-[10px] font-black hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
                                 >
                                   ×
                                 </button>

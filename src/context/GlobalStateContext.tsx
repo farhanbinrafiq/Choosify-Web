@@ -3,6 +3,14 @@ import { ProductModeType, Product, User, Seller, Brand, Order, SubOrder, SubOrde
 import { PRODUCTS, BRANDS } from '../constants';
 import { toast } from 'react-hot-toast';
 
+declare module '../types/schemas' {
+  interface Order {
+    promoCode?: string;
+    promoDiscount?: number;
+    promoType?: string;
+  }
+}
+
 export interface B2BRfq {
   id: string;
   item: string;
@@ -189,6 +197,8 @@ const INITIAL_RFQS: B2BRfq[] = [
 
 const GlobalStateContext = createContext<GlobalStateContextType | undefined>(undefined);
 
+let _pendingPromo: { code: string; discount: number; type: 'flat' | 'percentage' } | null = null;
+
 export function GlobalStateProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<ProductModeType>(() => {
     const saved = localStorage.getItem('choosify_mode');
@@ -267,7 +277,12 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       '12': 'community',
       '13': 'community',
       '14': 'pending',
-      '15': 'pending'
+      '15': 'pending',
+      '16': 'verified',
+      '17': 'verified',
+      'choosify': 'verified',
+      'fff sourcing ltd': 'verified',
+      'fff sourcing': 'verified'
     };
   });
 
@@ -295,7 +310,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     if (brandClaimStatuses[key]) {
       return brandClaimStatuses[key];
     }
-    if (key.includes('aarong') || key.includes('samsung') || key.includes('apple') || key.includes('apex') || key.includes('bata')) {
+    if (key.includes('aarong') || key.includes('samsung') || key.includes('apple') || key.includes('apex') || key.includes('bata') || key.includes('choosify') || key.includes('fff')) {
       return 'verified';
     }
     if (key.includes('richman') || key.includes('star tech') || key.includes('star-tech') || key.includes('reve') || key.includes('lotto') || key.includes('perfume')) {
@@ -346,6 +361,14 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     console.log("Brand: Sony | Status:", getBrandClaimStatus('Sony'), "| Source: Global Claim Status Store");
     console.log("Brand: Samsung | Status:", getBrandClaimStatus('Samsung'), "| Source: Global Claim Status Store");
   }, [brandClaimStatuses]);
+
+  useEffect(() => {
+    const handlePromo = (e: CustomEvent) => {
+      _pendingPromo = e.detail || null;
+    };
+    window.addEventListener('choosify-promo-applied', handlePromo as EventListener);
+    return () => window.removeEventListener('choosify-promo-applied', handlePromo as EventListener);
+  }, []);
 
   const [rfqs, setRfqs] = useState<B2BRfq[]>(() => {
     const saved = localStorage.getItem('choosify_b2b_rfqs');
@@ -845,6 +868,13 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       createdAt: new Date().toISOString(),
       status: 'active'
     };
+
+    if (_pendingPromo) {
+      newOrder.promoCode = _pendingPromo.code;
+      newOrder.promoDiscount = _pendingPromo.discount;
+      newOrder.promoType = _pendingPromo.type;
+      _pendingPromo = null; // clear after consuming
+    }
 
     setOrders(prev => [newOrder, ...prev]);
     clearCart();

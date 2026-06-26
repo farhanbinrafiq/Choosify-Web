@@ -88,6 +88,12 @@ export function OrderSuccessPage() {
           {/* Settle summary */}
           <div className="bg-navy p-6 rounded-[5px] text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
+              {order.promoDiscount && order.promoDiscount > 0 && (
+                <div className="flex items-center justify-between text-[10px] font-bold text-green-400 mb-2 gap-4">
+                  <span>Promo Savings ({order.promoCode})</span>
+                  <span>-৳{order.promoDiscount.toLocaleString()}</span>
+                </div>
+              )}
               <span className="text-[8px] font-black text-orange-primary uppercase tracking-widest block mb-1">Total Settlement Amount</span>
               <p className="text-2xl font-black font-sans text-white italic leading-none">৳{order.overallTotal.toLocaleString()}</p>
             </div>

@@ -394,6 +394,7 @@ export function ProductDetailPage() {
     addNotification,
     comparedProducts,
     setComparedProducts,
+    customOverviews,
   } = useDashboard();
 
   React.useEffect(() => {
@@ -1739,39 +1740,39 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   </div>
 
                   {/* Social Icons row */}
-                  <div className="flex justify-center gap-6 mt-6 pt-5 border-t border-white/10 w-full">
+                  <div className="flex justify-center gap-3 sm:gap-4 md:gap-3 xl:gap-4 flex-wrap mt-6 pt-5 border-t border-white/10 w-full">
                     {[
                       {
-                        icon: <Facebook size={20} />,
+                        icon: <Facebook size={16} />,
                         label: "Facebook",
                       },
                       {
-                        icon: <Instagram size={20} />,
+                        icon: <Instagram size={16} />,
                         label: "Instagram",
                       },
                       {
                         icon: (
-                          <svg viewBox="0 0 24 24" width={20} height={20} fill="currentColor">
+                          <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor">
                             <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
                           </svg>
                         ),
                         label: "TikTok",
                       },
                       {
-                        icon: <Youtube size={20} />,
+                        icon: <Youtube size={16} />,
                         label: "YouTube",
                       },
                     ].map((item, i) => (
                       <div
                         key={i}
-                        className="flex flex-col items-center gap-2 cursor-pointer group/soc focus:outline-none"
+                        className="flex flex-col items-center gap-1.5 cursor-pointer group/soc focus:outline-none"
                       >
                         <div
-                          className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition-all duration-300 active:scale-95 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]"
+                          className="w-9 h-9 min-w-[36px] min-h-[36px] shrink-0 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition-all duration-300 active:scale-95 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]"
                         >
                           {item.icon}
                         </div>
-                        <span className="text-[14px] text-white/50 group-hover/soc:text-[#F97316] font-normal transition-colors">
+                        <span className="text-[11.5px] text-white/50 group-hover/soc:text-[#F97316] font-normal transition-colors">
                           {item.label}
                         </span>
                       </div>
@@ -2074,6 +2075,25 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     <div>• SECURED PERSONALIZED INBOUND SUPPORT LOG</div>
                   </div>
                 </div>
+
+                {/* Dynamic custom overview sections */}
+                {customOverviews && customOverviews
+                  .filter(co => co.targetType === 'product' && String(co.targetId) === String(product.id))
+                  .map((co, idx) => (
+                    <div key={idx} className="bg-gray-50 rounded-[5px] p-5 border border-gray-100 flex flex-col gap-3">
+                      <div className="flex items-center gap-2.5 text-xs font-black text-navy uppercase tracking-wide">
+                        <div className="p-1.5 bg-orange-primary/10 rounded-lg text-orange-primary">
+                          <Award size={16} />
+                        </div>
+                        {co.sectionName}
+                      </div>
+                      <div className="space-y-2 text-[10px] font-black text-gray-500 uppercase tracking-wider leading-relaxed">
+                        {co.content.map((bullet, bIdx) => (
+                          <div key={bIdx}>• {bullet}</div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
               </div>
 
               {/* Best For Tags */}
