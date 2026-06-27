@@ -52,8 +52,10 @@ export interface GlobalStateContextType {
   addReport: (type: 'seller' | 'product' | 'brand', targetId: string, reason: string, description: string, evidence?: string) => void;
   currentUser: User;
   setCurrentUser: (user: User) => void;
+  updateCurrentUser: (updates: Partial<User>) => void;
   isLoggedIn: boolean;
   setIsLoggedIn: (loggedIn: boolean) => void;
+  logout: () => void;
   buyerReputations: BuyerReputation[];
   sellers: Seller[];
   allBrands: Brand[];
@@ -225,16 +227,45 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [currentUser, setCurrentUser] = useState<User>(DEFAULT_USER);
+  const [currentUser, setCurrentUser] = useState<User>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_user_profile');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_USER, ...parsed };
+      }
+    } catch {}
+    return DEFAULT_USER;
+  });
 
-  const [isLoggedIn, setIsLoggedInState] = useState<boolean>(() => {
-    const saved = localStorage.getItem('choosify_is_logged_in');
-    return saved !== null ? saved === 'true' : true;
+  const updateCurrentUser = (updates: Partial<User>) => {
+    setCurrentUser(prev => {
+      const next = { ...prev, ...updates };
+      try { localStorage.setItem('choosify_user_profile', JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
+  const [isLoggedIn, _setIsLoggedIn] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('choosify_is_logged_in');
+      return saved === 'true';
+    } catch {
+      return false;
+    }
   });
 
   const setIsLoggedIn = (val: boolean) => {
-    setIsLoggedInState(val);
-    localStorage.setItem('choosify_is_logged_in', String(val));
+    _setIsLoggedIn(val);
+    try {
+      localStorage.setItem('choosify_is_logged_in', String(val));
+    } catch {}
+  };
+
+  const logout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('choosify_is_logged_in');
+    // Do NOT clear user profile on logout — preserve their saved data
   };
 
   const [brandClaimStatuses, setBrandClaimStatuses] = useState<Record<string, 'verified' | 'pending' | 'community'>>(() => {
@@ -999,8 +1030,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       addReport,
       currentUser,
       setCurrentUser,
+      updateCurrentUser,
       isLoggedIn,
       setIsLoggedIn,
+      logout,
       buyerReputations: INITIAL_BUYER_REPUTATIONS,
       sellers: INITIAL_SELLERS,
       allBrands,

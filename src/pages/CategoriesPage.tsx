@@ -7,7 +7,7 @@ import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
-import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
+import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 
 interface Subcategory {
   name: string;
@@ -175,6 +175,87 @@ export function CategoriesPage() {
       <FullSidebarFilterPanel
         title="Category Discovery"
         onReset={handleClearAllFilters}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        searchPlaceholder="Search categories, subcategories..."
+        quickFilters={
+          <QuickFilterBar
+            title="Category Spec Discovery"
+            onOpenFullFilters={() => {}}
+            filters={[
+              {
+                id: 'all-categories',
+                label: 'All Categories',
+                active: !selectedCategoryStatus && !selectedCategoryType && !selectedAlphabetical && activeCategoryTab === 'All Categories',
+                onClick: handleClearAllFilters
+              },
+              {
+                id: 'trending-pill',
+                label: '🔥 Trending',
+                active: selectedCategoryStatus === 'trending' || activeCategoryTab === 'Trending',
+                onClick: () => {
+                  setSelectedCategoryStatus(selectedCategoryStatus === 'trending' ? null : 'trending');
+                  setActiveCategoryTab(activeCategoryTab === 'Trending' ? 'All Categories' : 'Trending');
+                }
+              },
+              {
+                id: 'featured-pill',
+                label: '★ Featured',
+                active: selectedCategoryStatus === 'featured',
+                onClick: () => {
+                  setSelectedCategoryStatus(selectedCategoryStatus === 'featured' ? null : 'featured');
+                }
+              },
+              {
+                id: 'popular-pill',
+                label: '💎 Popular',
+                active: selectedCategoryStatus === 'popular' || activeCategoryTab === 'Popular',
+                onClick: () => {
+                  setSelectedCategoryStatus(selectedCategoryStatus === 'popular' ? null : 'popular');
+                  setActiveCategoryTab(activeCategoryTab === 'Popular' ? 'All Categories' : 'Popular');
+                }
+              },
+              {
+                id: 'new-pill',
+                label: '📅 New Arrivals',
+                active: selectedCategoryStatus === 'newly-added' || activeCategoryTab === 'New Arrivals',
+                onClick: () => {
+                  setSelectedCategoryStatus(selectedCategoryStatus === 'newly-added' ? null : 'newly-added');
+                  setActiveCategoryTab(activeCategoryTab === 'New Arrivals' ? 'All Categories' : 'New Arrivals');
+                }
+              },
+              {
+                id: 'a-z-pill',
+                label: '🔤 Sort: A–Z',
+                active: selectedAlphabetical === 'a-z',
+                onClick: () => {
+                  setSelectedAlphabetical(selectedAlphabetical === 'a-z' ? null : 'a-z');
+                }
+              },
+              {
+                id: 'z-a-pill',
+                label: '🔤 Sort: Z–A',
+                active: selectedAlphabetical === 'z-a',
+                onClick: () => {
+                  setSelectedAlphabetical(selectedAlphabetical === 'z-a' ? null : 'z-a');
+                }
+              }
+            ]}
+          />
+        }
+        activeChips={
+          <ActiveFilterChips
+            chips={[
+              selectedCategoryType ? { id: 'categoryType', label: `Type: ${selectedCategoryType}`, onRemove: () => setSelectedCategoryType(null) } : null,
+              selectedCategoryStatus ? { id: 'status', label: `Status: ${selectedCategoryStatus}`, onRemove: () => setSelectedCategoryStatus(null) } : null,
+              selectedAlphabetical ? { id: 'alphabetical', label: `Alphabetical: ${selectedAlphabetical}`, onRemove: () => setSelectedAlphabetical(null) } : null,
+              selectedAvailability ? { id: 'availability', label: `Availability: ${selectedAvailability}`, onRemove: () => setSelectedAvailability(null) } : null,
+              selectedContent ? { id: 'content', label: `Content: ${selectedContent}`, onRemove: () => setSelectedContent(null) } : null,
+              activeCategoryTab !== 'All Categories' ? { id: 'tab', label: `Tab: ${activeCategoryTab}`, onRemove: () => setActiveCategoryTab('All Categories') } : null,
+            ].filter(Boolean) as any[]}
+            onClearAll={handleClearAllFilters}
+          />
+        }
         advancedSection={
           <div className="flex flex-col gap-4">
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left font-sans">
@@ -476,6 +557,220 @@ export function CategoriesPage() {
     setExpandedCategory(expandedCategory === catName ? null : catName);
   };
 
+  useRegisterPageFilters({
+    pageName: 'Categories',
+    renderSearch: () => (
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <LucideIcons.Search size={13} className="text-[#E8500A]" />
+        </div>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search categories, subcategories..."
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+        />
+      </div>
+    ),
+    quickFilters: [
+      {
+        id: 'all-categories',
+        label: 'All Categories',
+        active: !selectedCategoryStatus && !selectedCategoryType && !selectedAlphabetical && activeCategoryTab === 'All Categories',
+        onClick: handleClearAllFilters
+      },
+      {
+        id: 'trending-pill',
+        label: '🔥 Trending',
+        active: selectedCategoryStatus === 'trending' || activeCategoryTab === 'Trending',
+        onClick: () => {
+          setSelectedCategoryStatus(selectedCategoryStatus === 'trending' ? null : 'trending');
+          setActiveCategoryTab(activeCategoryTab === 'Trending' ? 'All Categories' : 'Trending');
+        }
+      },
+      {
+        id: 'featured-pill',
+        label: '★ Featured',
+        active: selectedCategoryStatus === 'featured',
+        onClick: () => {
+          setSelectedCategoryStatus(selectedCategoryStatus === 'featured' ? null : 'featured');
+        }
+      },
+      {
+        id: 'popular-pill',
+        label: '💎 Popular',
+        active: selectedCategoryStatus === 'popular' || activeCategoryTab === 'Popular',
+        onClick: () => {
+          setSelectedCategoryStatus(selectedCategoryStatus === 'popular' ? null : 'popular');
+          setActiveCategoryTab(activeCategoryTab === 'Popular' ? 'All Categories' : 'Popular');
+        }
+      },
+      {
+        id: 'new-pill',
+        label: '📅 New Arrivals',
+        active: selectedCategoryStatus === 'newly-added' || activeCategoryTab === 'New Arrivals',
+        onClick: () => {
+          setSelectedCategoryStatus(selectedCategoryStatus === 'newly-added' ? null : 'newly-added');
+          setActiveCategoryTab(activeCategoryTab === 'New Arrivals' ? 'All Categories' : 'New Arrivals');
+        }
+      }
+    ],
+    renderFilters: () => (
+      <div className="flex flex-col gap-4">
+        {/* Availability */}
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left font-sans">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Availability</h3>
+          <div className="space-y-1">
+            {[
+              { value: 'products', label: 'Categories with Products' },
+              { value: 'brands', label: 'Categories with Brands' },
+              { value: 'deals', label: 'Categories with Deals' },
+              { value: 'guides', label: 'Categories with Buying Guides' }
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedAvailability(selectedAvailability === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedAvailability === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedAvailability === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mt-4 mb-3">Content Availability</h3>
+          <div className="space-y-1">
+            {[
+              { value: 'brands', label: 'Has Brands' },
+              { value: 'creators', label: 'Has Creators' },
+              { value: 'recs', label: 'Has Recommendations' },
+              { value: 'favorites', label: 'Has Customer Favorites' }
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedContent(selectedContent === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedContent === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedContent === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Category Type */}
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Type</h3>
+          <div className="space-y-1 max-h-56 overflow-y-auto no-scrollbar">
+            {[
+              { value: 'Electronics', label: 'Electronics Catalog' },
+              { value: 'Fashion', label: 'Fashion & Apparel' },
+              { value: 'Beauty', label: 'Beauty & Skincare' },
+              { value: 'Home & Living', label: 'Home & Living' },
+              { value: 'Grocery', label: 'Grocery & Essentials' },
+              { value: 'Sports', label: 'Sports & Activewear' },
+              { value: 'Automotive', label: 'Vehicles & Motoring' },
+              { value: 'Books', label: 'Books & Education' },
+              { value: 'Kids', label: 'Kids & Family' },
+              { value: 'Health', label: 'Health & Wellness' },
+              { value: 'Lifestyle', label: 'Travel & Lifestyle' },
+              { value: 'Services', label: 'Learning & Services' }
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedCategoryType(selectedCategoryType === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedCategoryType === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedCategoryType === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Category Status */}
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Status</h3>
+          <div className="space-y-1">
+            {[
+              { value: 'featured', label: 'Featured Categories' },
+              { value: 'trending', label: 'Trending Categories' },
+              { value: 'editors-picks', label: "Editor's Picks" },
+              { value: 'newly-added', label: 'Newly Added' },
+              { value: 'popular', label: 'Popular' }
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedCategoryStatus(selectedCategoryStatus === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedCategoryStatus === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedCategoryStatus === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Alphabetical */}
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Alphabetical</h3>
+          <div className="space-y-1">
+            {[
+              { value: 'a-z', label: 'Alphabetical: A–Z' },
+              { value: 'z-a', label: 'Alphabetical: Z–A' }
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedAlphabetical(selectedAlphabetical === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedAlphabetical === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedAlphabetical === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    ),
+    activeFilterCount: (selectedCategoryType ? 1 : 0) +
+      (selectedCategoryStatus ? 1 : 0) +
+      (selectedAlphabetical ? 1 : 0) +
+      (selectedAvailability ? 1 : 0) +
+      (selectedContent ? 1 : 0) +
+      (activeCategoryTab !== 'All Categories' ? 1 : 0) +
+      (searchQuery ? 1 : 0),
+    onClearAll: handleClearAllFilters,
+  }, [
+    searchQuery,
+    activeCategoryTab,
+    selectedCategoryType,
+    selectedCategoryStatus,
+    selectedAlphabetical,
+    selectedAvailability,
+    selectedContent
+  ]);
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
@@ -545,7 +840,7 @@ export function CategoriesPage() {
       </div>
 
       {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
+      <div className="relative z-10 bg-white/95 border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
         <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4">
           
           {/* 1. Search Bar inside Sticky Container */}
@@ -691,6 +986,20 @@ export function CategoriesPage() {
       <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
         {/* LEFT COLUMN: FULL FILTER PANEL */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
+          {/* LEFT COLUMN SEARCH BAR */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <LucideIcons.Search size={13} className="text-[#E8500A]" />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search categories, subcategories..."
+              className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+            />
+          </div>
+
           <QuickAccessCard />
           <div id="categories-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
             {renderFilterPanel()}

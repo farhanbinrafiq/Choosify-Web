@@ -7,7 +7,7 @@ import { QuickAccessCard } from '../components/QuickAccessCard';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
 import { CREATORS, Creator } from '../data/creators';
-import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 
 interface CreatorCollab {
   id: string;
@@ -230,6 +230,125 @@ export function CreatorsPage() {
     return acc;
   }, {} as Record<string, typeof filteredCreators[0][]>);
 
+  useRegisterPageFilters({
+    pageName: 'Creators',
+    renderSearch: () => (
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={13} className="text-[#E8500A]" />
+        </div>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search creators..."
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+        />
+      </div>
+    ),
+    quickFilters: [
+      { id: 'verified', label: '✓ Verified Expert', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
+      { id: 'high-eng', label: '🔥 High Engagement (4.8+)', active: popularityFilter === 'high', onClick: () => setPopularityFilter(popularityFilter === 'high' ? 'all' : 'high') },
+      { id: 'tech', label: '💻 Tech Niches', active: selectedCategory === 'Tech & Gaming', onClick: () => setSelectedCategory(selectedCategory === 'Tech & Gaming' ? null : 'Tech & Gaming') },
+      { id: 'fashion', label: '👗 Fashion Influencer', active: selectedCategory === 'Fashion & Beauty', onClick: () => setSelectedCategory(selectedCategory === 'Fashion & Beauty' ? null : 'Fashion & Beauty') }
+    ],
+    renderFilters: () => (
+      <div className="flex flex-col gap-4">
+        <UniversalFilterRenderer
+          profile={{
+            entity: 'creators',
+            filters: [
+              {
+                id: 'niche',
+                name: 'Creator Niche Mode',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Niches' },
+                  ...['Tech & Gaming', 'Fashion & Beauty', 'Food & Lifestyle', 'Sustainable Wear', 'Youth Budgeting', 'Creative Writing'].map(cat => ({ value: cat, label: cat }))
+                ]
+              },
+              {
+                id: 'verification',
+                name: 'Expert verification',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Claim Statuses' },
+                  { value: 'verified', label: 'Verified Experts Only' },
+                  { value: 'unverified', label: 'Independent' }
+                ]
+              },
+              {
+                id: 'engagement',
+                name: 'Engagement Flow',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Engagements' },
+                  { value: 'high', label: 'Top Engagement (4.8+)' },
+                  { value: 'normal', label: 'Standard Tier' }
+                ]
+              }
+            ]
+          }}
+          activeFilters={{
+            niche: selectedCategory || 'all',
+            verification: verificationFilter,
+            engagement: popularityFilter
+          }}
+          onFilterChange={(filterId, value) => {
+            if (filterId === 'niche') {
+              setSelectedCategory(value === 'all' || !value ? null : value);
+            } else if (filterId === 'verification') {
+              setVerificationFilter(value as any);
+            } else if (filterId === 'engagement') {
+              setPopularityFilter(value as any);
+            }
+          }}
+        />
+
+        {/* Alpha Search (A-Z) */}
+        <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-2">
+          <h3 className="text-[11px] font-black text-[#8a9bb0] uppercase tracking-wider mb-2">Alpha Search (A-Z)</h3>
+          <div className="grid grid-cols-5 gap-1.5 max-h-32 overflow-y-auto no-scrollbar">
+            <button 
+              onClick={() => setSelectedLetter(null)}
+              className={cn(
+                "col-span-5 py-1.5 rounded-[5px] text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
+                selectedLetter === null ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+              )}
+            >
+              All Initials
+            </button>
+            {'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map((letter) => (
+              <button 
+                key={letter} 
+                onClick={() => setSelectedLetter(letter)}
+                className={cn(
+                  "h-5.5 rounded-[5px] text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                  selectedLetter === letter ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                )}
+              >
+                {letter}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    ),
+    activeFilterCount: (selectedCategory ? 1 : 0) +
+      (selectedLetter ? 1 : 0) +
+      (verificationFilter !== 'all' ? 1 : 0) +
+      (popularityFilter !== 'all' ? 1 : 0) +
+      (searchQuery ? 1 : 0),
+    onClearAll: () => {
+      setSelectedLetter(null); 
+      setSearchQuery(''); 
+      setActiveTab('All Creators');
+      setSelectedCategory(null);
+      setVerificationFilter('all');
+      setPopularityFilter('all');
+    },
+  }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter]);
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Hero Section */}
@@ -278,7 +397,7 @@ export function CreatorsPage() {
       </div>
 
       {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
+      <div className="relative z-10 bg-white/95 border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
         <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
           
           {/* 1. Search Bar inside Sticky Container */}
@@ -382,13 +501,59 @@ export function CreatorsPage() {
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
-          
+          {/* LEFT COLUMN SEARCH BAR */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <Search size={13} className="text-[#E8500A]" />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search creators..."
+              className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+            />
+          </div>
+
           <QuickAccessCard />
 
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
           <div id="creators-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
             <FullSidebarFilterPanel
               title="Filter Creators"
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              searchPlaceholder="Search creators, niche, handle or bio..."
+              quickFilters={
+                <QuickFilterBar
+                  title="Creators Quick Specs"
+                  onOpenFullFilters={() => {}}
+                  filters={[
+                    { id: 'verified', label: '✓ Verified Expert', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
+                    { id: 'high-eng', label: '🔥 High Engagement (4.8+)', active: popularityFilter === 'high', onClick: () => setPopularityFilter(popularityFilter === 'high' ? 'all' : 'high') },
+                    { id: 'tech', label: '💻 Tech Niches', active: selectedCategory === 'Tech & Gaming', onClick: () => setSelectedCategory(selectedCategory === 'Tech & Gaming' ? null : 'Tech & Gaming') },
+                    { id: 'fashion', label: '👗 Fashion Influencer', active: selectedCategory === 'Fashion & Beauty', onClick: () => setSelectedCategory(selectedCategory === 'Fashion & Beauty' ? null : 'Fashion & Beauty') }
+                  ]}
+                />
+              }
+              activeChips={
+                <ActiveFilterChips
+                  chips={[
+                    selectedCategory ? { id: 'category', label: `Niche: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+                    selectedLetter ? { id: 'letter', label: `Starts with: ${selectedLetter}`, onRemove: () => setSelectedLetter(null) } : null,
+                    verificationFilter !== 'all' ? { id: 'verification', label: `Verification: ${verificationFilter}`, onRemove: () => setVerificationFilter('all') } : null,
+                    popularityFilter !== 'all' ? { id: 'engagement', label: `Engagement: ${popularityFilter}`, onRemove: () => setPopularityFilter('all') } : null
+                  ].filter(Boolean) as any[]}
+                  onClearAll={() => {
+                    setSelectedLetter(null); 
+                    setSearchQuery(''); 
+                    setActiveTab('All Creators');
+                    setSelectedCategory(null);
+                    setVerificationFilter('all');
+                    setPopularityFilter('all');
+                  }}
+                />
+              }
               onReset={() => {
                 setSelectedLetter(null); 
                 setSearchQuery(''); 

@@ -4,13 +4,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShoppingCart, MessageSquare, X, Trash2, ArrowRight, Send, 
   Clock, Heart, ShoppingBag, ExternalLink, ChevronRight, CheckCircle, 
-  Package, User, Shield, Bell, HelpCircle, LogOut, Settings, Radio, Bookmark 
+  Package, User, Shield, Bell, HelpCircle, LogOut, Settings, Radio, Bookmark,
+  SlidersHorizontal, Search, X as XIcon, RotateCcw, ChevronDown
 } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { cn } from '../lib/utils';
 import { toast } from 'react-hot-toast';
+import { useFloatingFilter } from './FilterEngine';
 
 export function FloatingOverlays() {
   const navigate = useNavigate();
@@ -22,6 +24,11 @@ export function FloatingOverlays() {
 
   // Active floating panel state: null | 'cart' | 'inbox' | 'profile'
   const [activePanel, setActivePanel] = useState<'cart' | 'inbox' | 'profile' | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterDrawerRef = useRef<HTMLDivElement>(null);
+
+  const { config: filterConfig } = useFloatingFilter();
+  const hasFilters = filterConfig.renderFilters !== null || (filterConfig.quickFilters && filterConfig.quickFilters.length > 0);
   
   // Selected thread inside mini message board for real-time nested chatting
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
@@ -44,6 +51,7 @@ export function FloatingOverlays() {
   // Close active panel upon route transition
   useEffect(() => {
     setActivePanel(null);
+    setFilterOpen(false);
   }, [currentPath]);
 
   // Cart tracking details
@@ -74,17 +82,26 @@ export function FloatingOverlays() {
         // Only close if we are not clicking a route transition
         setActivePanel(null);
       }
+
+      if (
+        filterOpen &&
+        filterDrawerRef.current &&
+        !filterDrawerRef.current.contains(event.target as Node)
+      ) {
+        setFilterOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleOutsideClick);
     return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [activePanel]);
+  }, [activePanel, filterOpen]);
 
   // Close handler on ESC keypress
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setActivePanel(null);
+        setFilterOpen(false);
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -226,13 +243,14 @@ export function FloatingOverlays() {
   const standardTransition = { type: "spring" as const, damping: 25, stiffness: 350 };
 
   return (
-    <div 
-      ref={containerRef}
-      className={cn(
-        "fixed z-[220] flex flex-col items-end text-[#1A1D4E] font-sans",
-        isMobile ? "bottom-4 left-4 right-4 gap-3" : "bottom-6 right-6 lg:bottom-8 lg:right-8 gap-3 sm:gap-3.5"
-      )}
-    >
+    <>
+      <div 
+        ref={containerRef}
+        className={cn(
+          "fixed z-[220] flex flex-col items-end text-[#1A1D4E] font-sans",
+          isMobile ? "bottom-4 left-4 right-4 gap-3" : "bottom-6 right-6 lg:bottom-8 lg:right-8 gap-3 sm:gap-3.5"
+        )}
+      >
       
       {/* GLOBAL PERSISTENT FLOATING PANEL POPUPS */}
       <AnimatePresence>
@@ -767,5 +785,165 @@ export function FloatingOverlays() {
       </AnimatePresence>
 
     </div>
-  );
+
+    {/* FLOATING FILTER LAUNCHER — BOTTOM LEFT */}
+    {hasFilters && (
+      <div className={cn(
+        "fixed z-[219]",
+        isMobile ? "bottom-4 left-4" : "bottom-6 left-6 lg:bottom-8 lg:left-8"
+      )}>
+        {/* Filter Drawer */}
+        <AnimatePresence>
+          {filterOpen && (
+            <motion.div
+              ref={filterDrawerRef}
+              initial={{ opacity: 0, y: 20, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              style={isMobile ? undefined : { bottom: '80px' }}
+              className={cn(
+                "bg-white border border-[#e8edf2] shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col",
+                isMobile
+                  ? "fixed bottom-0 left-0 right-0 h-[88vh] rounded-t-[24px] z-[300] w-full"
+                  : "absolute left-0 w-[360px] rounded-[12px] max-h-[80vh]"
+              )}
+            >
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[#e8edf2] bg-[#F8FBFD] shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#E8500A]/10 flex items-center justify-center">
+                    <SlidersHorizontal size={15} className="text-[#E8500A]" />
+                  </div>
+                  <div>
+                    <div className="text-[9px] font-black uppercase tracking-[0.18em] text-[#E8500A]">
+                      {filterConfig.pageName || 'Page Filters'}
+                    </div>
+                    <div className="text-[13px] font-black text-[#1A1D4E] uppercase tracking-wide leading-tight">
+                      Filters & Search
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {filterConfig.onClearAll && filterConfig.activeFilterCount > 0 && (
+                    <button
+                      onClick={filterConfig.onClearAll}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-[#E8500A] bg-[#E8500A]/8 hover:bg-[#E8500A]/15 rounded-full transition-colors border-0 cursor-pointer"
+                    >
+                      <RotateCcw size={9} />
+                      Clear All
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setFilterOpen(false)}
+                    className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-all cursor-pointer border-0 bg-transparent"
+                  >
+                    <XIcon size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Drawer Body — scrollable */}
+              <div className="flex-1 overflow-y-auto no-scrollbar">
+
+                {/* 1. SEARCH BAR SECTION */}
+                {filterConfig.renderSearch && (
+                  <div className="px-4 pt-4 pb-3 border-b border-[#e8edf2]">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2">
+                      Page Search
+                    </div>
+                    {filterConfig.renderSearch()}
+                  </div>
+                )}
+
+                {/* 2. QUICK FILTER CHIPS */}
+                {filterConfig.quickFilters && filterConfig.quickFilters.length > 0 && (
+                  <div className="px-4 pt-4 pb-3 border-b border-[#e8edf2]">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2.5">
+                      Quick Filters
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {filterConfig.quickFilters.map((qf) => (
+                        <button
+                          key={qf.id}
+                          onClick={qf.onClick}
+                          className={cn(
+                            "px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all cursor-pointer flex items-center gap-1.5 border",
+                            qf.active
+                              ? "bg-[#E8500A] text-white border-transparent shadow-sm font-black italic"
+                              : "bg-white border-[#e8edf2] text-gray-500 hover:border-[#1A1D4E]/25 hover:text-[#1A1D4E]"
+                          )}
+                        >
+                          {qf.icon}
+                          <span>{qf.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. FULL FILTER ARCHITECTURE — identical to sidebar */}
+                {filterConfig.renderFilters && (
+                  <div className="px-4 pt-4 pb-6">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-3">
+                      All Filters
+                    </div>
+                    {filterConfig.renderFilters()}
+                  </div>
+                )}
+
+                {/* Empty state */}
+                {!filterConfig.renderFilters && !filterConfig.renderSearch && (!filterConfig.quickFilters || filterConfig.quickFilters.length === 0) && (
+                  <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                    <SlidersHorizontal size={28} className="text-gray-300 mb-3" />
+                    <p className="text-[11px] font-bold text-gray-400">No filters available on this page</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Drawer Footer */}
+              {isMobile && (
+                <div className="px-4 py-4 border-t border-[#e8edf2] bg-white shrink-0">
+                  <button
+                    onClick={() => setFilterOpen(false)}
+                    className="w-full py-3 bg-[#E8500A] text-white text-[11px] font-black uppercase tracking-widest rounded-[5px] hover:bg-[#CF4400] transition-colors cursor-pointer border-0"
+                  >
+                    Apply & Close
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Launcher Button */}
+        <motion.button
+          onClick={() => setFilterOpen(!filterOpen)}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className={cn(
+            "flex items-center gap-2.5 shadow-lg border transition-all duration-200 cursor-pointer",
+            isMobile
+              ? "px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-wider"
+              : "px-5 py-3.5 rounded-full text-[10.5px] font-black uppercase tracking-widest",
+            filterOpen
+              ? "bg-[#E8500A] text-white border-[#E8500A] shadow-[0_8px_24px_rgba(232,80,10,0.35)]"
+              : "bg-white text-[#1A1D4E] border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A] shadow-[0_4px_20px_rgba(0,0,0,0.1)]"
+          )}
+        >
+          <SlidersHorizontal size={15} className={filterOpen ? "text-white" : "text-[#E8500A]"} />
+          <span>Filters</span>
+          {filterConfig.activeFilterCount > 0 && !filterOpen && (
+            <span className="w-5 h-5 rounded-full bg-[#E8500A] text-white text-[9px] font-black flex items-center justify-center leading-none">
+              {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
+            </span>
+          )}
+          {filterOpen && (
+            <ChevronDown size={12} className="text-white" />
+          )}
+        </motion.button>
+      </div>
+    )}
+  </>
+);
 }

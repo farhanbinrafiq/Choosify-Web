@@ -13,7 +13,7 @@ import { toast } from 'react-hot-toast';
 import { BrandOverviewSection } from '../components/BrandOverviewSection';
 import { FollowButton } from '../components/FollowButton';
 import { ClaimProfileModal } from '../components/ClaimProfileModal';
-import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, FilterProfile, CategorySmartFilters } from '../components/FilterEngine';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, FilterProfile, CategorySmartFilters, useRegisterPageFilters } from '../components/FilterEngine';
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
@@ -186,6 +186,346 @@ export function BrandDetailPage() {
   ];
   const finalCategoriesList = dynamicCategories.length > 0 ? dynamicCategories : defaultCats;
 
+  useRegisterPageFilters({
+    pageName: brand.name,
+    renderSearch: () => (
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={13} className="text-[#E8500A]" />
+        </div>
+        <input
+          type="text"
+          value={currentSearchInput}
+          onChange={(e) => setCurrentSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') setSearchFilter(currentSearchInput);
+          }}
+          placeholder="Search products of this brand..."
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+        />
+      </div>
+    ),
+    quickFilters: [
+      {
+        id: 'all-products',
+        label: 'All Products',
+        active: !dealsOnlyFilter && !couponsOnlyFilter && !verifiedOnlyFilter && !inStockOnlyFilter && !featuredOnlyFilter,
+        onClick: () => {
+          setDealsOnlyFilter(false);
+          setCouponsOnlyFilter(false);
+          setVerifiedOnlyFilter(false);
+          setInStockOnlyFilter(false);
+          setFeaturedOnlyFilter(false);
+        }
+      },
+      {
+        id: 'deals-only',
+        label: 'Deals',
+        active: dealsOnlyFilter,
+        onClick: () => setDealsOnlyFilter(!dealsOnlyFilter)
+      },
+      {
+        id: 'coupons-only',
+        label: 'Coupons Available',
+        active: couponsOnlyFilter,
+        onClick: () => setCouponsOnlyFilter(!couponsOnlyFilter)
+      },
+      {
+        id: 'verified',
+        label: 'Verified Store',
+        active: verifiedOnlyFilter,
+        onClick: () => setVerifiedOnlyFilter(!verifiedOnlyFilter)
+      },
+      {
+        id: 'in-stock',
+        label: 'In Stock',
+        active: inStockOnlyFilter,
+        onClick: () => setInStockOnlyFilter(!inStockOnlyFilter)
+      },
+      {
+        id: 'featured',
+        label: 'Featured',
+        active: featuredOnlyFilter,
+        onClick: () => setFeaturedOnlyFilter(!featuredOnlyFilter)
+      },
+      {
+        id: 'sort',
+        label: sortOption === 'default' ? 'Sort Selection' : `Sort: ${
+          sortOption === 'price-asc' ? '৳ Low to High' :
+          sortOption === 'price-desc' ? '৳ High to Low' :
+          sortOption === 'rating-desc' ? 'Top Rating' : 'Best Discount'
+        }`,
+        active: sortOption !== 'default',
+        onClick: () => {
+          setSortOption(prev => {
+            if (prev === 'default') return 'price-asc';
+            if (prev === 'price-asc') return 'price-desc';
+            if (prev === 'price-desc') return 'rating-desc';
+            if (prev === 'rating-desc') return 'discount-desc';
+            return 'default';
+          });
+        }
+      }
+    ],
+    renderFilters: () => (
+      <div className="flex flex-col gap-4">
+        <CategorySmartFilters
+          category={brand.category || 'Fashion & Clothing'}
+          activeSpecs={smartSpecs}
+          onSpecChange={(specKey, val) => {
+            setSmartSpecs(prev => ({ ...prev, [specKey]: val || '' }));
+          }}
+        />
+
+        <UniversalFilterRenderer
+          profile={{
+            entity: 'products',
+            filters: [
+              {
+                id: 'price_custom',
+                name: 'Price Scope (BDT)',
+                type: 'price_custom',
+              },
+              {
+                id: 'category',
+                name: 'Categories',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Categories' },
+                  ...finalCategoriesList.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
+                ]
+              },
+              {
+                id: 'availability',
+                name: 'Availability',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Items' },
+                  { value: 'in-stock', label: 'In Stock' },
+                  { value: 'out-of-stock', label: 'Out of Stock' }
+                ]
+              },
+              {
+                id: 'rating',
+                name: 'Average Rating',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Ratings' },
+                  { value: '4.8', label: '4.8★ & Up' },
+                  { value: '4.5', label: '4.5★ & Up' },
+                  { value: '4.0', label: '4.0★ & Up' }
+                ]
+              },
+              {
+                id: 'votes',
+                name: 'Audience Votes',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'Any Vote Count' },
+                  { value: '500', label: '500+ Votes' },
+                  { value: '300', label: '300+ Votes' },
+                  { value: '100', label: '100+ Votes' }
+                ]
+              }
+            ]
+          }}
+          activeFilters={{
+            price_custom: true,
+            category: selectedCategory,
+            availability: availabilityFilter,
+            rating: ratingFilter,
+            votes: votesFilter
+          }}
+          onFilterChange={(filterId, val) => {
+            const cleanVal = val === 'all' ? null : val;
+            if (filterId === 'category') setSelectedCategory(cleanVal);
+            if (filterId === 'availability') setAvailabilityFilter(cleanVal);
+            if (filterId === 'rating') setRatingFilter(cleanVal);
+            if (filterId === 'votes') setVotesFilter(cleanVal);
+          }}
+          customPriceInputs={customPriceInputs}
+          setCustomPriceInputs={setCustomPriceInputs}
+          onCustomPriceApply={(min, max) => {
+            setPriceRangeV2([min, max]);
+          }}
+        />
+
+        <UniversalFilterRenderer
+          profile={{
+            entity: 'products',
+            filters: [
+              {
+                id: 'warranty',
+                name: 'Warranty Scope',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'Any Warranty' },
+                  { value: 'standard', label: 'Standard Brand Warranty' },
+                  { value: 'extended', label: 'Extended Merchant Warranty' },
+                  { value: 'none', label: 'No Warranty' }
+                ]
+              },
+              {
+                id: 'delivery',
+                name: 'Shipping Speed',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'Any Shipping' },
+                  { value: 'free', label: 'Free Delivery' },
+                  { value: 'express', label: 'Next Day Express' }
+                ]
+              },
+              {
+                id: 'discount',
+                name: 'Promo Discount Min',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'Any Discount' },
+                  { value: '50', label: '50% Off & Above' },
+                  { value: '30', label: '30% Off & Above' },
+                  { value: '15', label: '15% Off & Above' }
+                ]
+              },
+              {
+                id: 'coupon',
+                name: 'Coupon Support',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Offers' },
+                  { value: 'yes', label: 'Exclusive Coupon Codes' },
+                  { value: 'no', label: 'Direct Pricing Markdown' }
+                ]
+              },
+              {
+                id: 'expiry',
+                name: 'Offer Validity Status',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'Any Validity' },
+                  { value: 'active', label: 'Active Codes' },
+                  { value: 'expiring-soon', label: 'Expiring Within 48 Hrs' }
+                ]
+              },
+              {
+                id: 'product_line',
+                name: 'Product Category Line',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Lines' },
+                  { value: 'premium', label: 'Premium Signature Line' },
+                  { value: 'casual', label: 'Everyday Casual Line' },
+                  { value: 'budget', label: 'Value Budget Line' }
+                ]
+              },
+              {
+                id: 'featured_collection',
+                name: 'Featured Campaign',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Collections' },
+                  { value: 'summer', label: 'Summer Air' },
+                  { value: 'winter', label: 'Winter Cozy' },
+                  { value: 'festive', label: 'Festive / Eid Special' }
+                ]
+              },
+              {
+                id: 'official_store',
+                name: 'Official Outlet Sourced',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Stores' },
+                  { value: 'yes', label: 'Official Store Only' },
+                  { value: 'no', label: 'Third-party Retailer' }
+                ]
+              },
+              {
+                id: 'country',
+                name: 'Country of Origin',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Countries' },
+                  { value: 'Bangladesh', label: 'Bangladesh' },
+                  { value: 'China', label: 'China' },
+                  { value: 'Vietnam', label: 'Vietnam' },
+                  { value: 'India', label: 'India' }
+                ]
+              }
+            ]
+          }}
+          activeFilters={{
+            warranty: warrantyFilter,
+            delivery: deliveryFilter,
+            discount: discountFilter,
+            coupon: couponFilter,
+            expiry: expiryFilter,
+            product_line: productLineFilter,
+            featured_collection: featuredCollectionFilter,
+            official_store: officialStoreFilter,
+            country: countryFilter
+          }}
+          onFilterChange={(filterId, val) => {
+            const cleanVal = val === 'all' ? null : val;
+            if (filterId === 'warranty') setWarrantyFilter(cleanVal);
+            if (filterId === 'delivery') setDeliveryFilter(cleanVal);
+            if (filterId === 'discount') setDiscountFilter(cleanVal);
+            if (filterId === 'coupon') setCouponFilter(cleanVal);
+            if (filterId === 'expiry') setExpiryFilter(cleanVal);
+            if (filterId === 'product_line') setProductLineFilter(cleanVal);
+            if (filterId === 'featured_collection') setFeaturedCollectionFilter(cleanVal);
+            if (filterId === 'official_store') setOfficialStoreFilter(cleanVal);
+            if (filterId === 'country') setCountryFilter(cleanVal);
+          }}
+        />
+      </div>
+    ),
+    activeFilterCount: (selectedCategory ? 1 : 0) +
+      ((priceRangeV2[0] > 0 || priceRangeV2[1] !== null) ? 1 : 0) +
+      (availabilityFilter ? 1 : 0) +
+      (ratingFilter ? 1 : 0) +
+      (votesFilter ? 1 : 0) +
+      (warrantyFilter ? 1 : 0) +
+      (deliveryFilter ? 1 : 0) +
+      (discountFilter ? 1 : 0) +
+      (couponFilter ? 1 : 0) +
+      (expiryFilter ? 1 : 0) +
+      (productLineFilter ? 1 : 0) +
+      (featuredCollectionFilter ? 1 : 0) +
+      (officialStoreFilter ? 1 : 0) +
+      (countryFilter ? 1 : 0) +
+      (dealsOnlyFilter ? 1 : 0) +
+      (couponsOnlyFilter ? 1 : 0) +
+      (verifiedOnlyFilter ? 1 : 0) +
+      (inStockOnlyFilter ? 1 : 0) +
+      (featuredOnlyFilter ? 1 : 0) +
+      Object.values(smartSpecs).filter(Boolean).length,
+    onClearAll: clearAllFilters,
+  }, [
+    currentSearchInput,
+    searchFilter,
+    selectedCategory,
+    priceRangeV2,
+    customPriceInputs,
+    availabilityFilter,
+    ratingFilter,
+    votesFilter,
+    warrantyFilter,
+    deliveryFilter,
+    discountFilter,
+    couponFilter,
+    expiryFilter,
+    productLineFilter,
+    featuredCollectionFilter,
+    officialStoreFilter,
+    countryFilter,
+    dealsOnlyFilter,
+    couponsOnlyFilter,
+    verifiedOnlyFilter,
+    inStockOnlyFilter,
+    featuredOnlyFilter,
+    sortOption,
+    smartSpecs
+  ]);
+
   // Filters Engine Implementation V2
   const filteredProducts = useMemo(() => {
     return brandProducts.filter((p: any) => {
@@ -352,7 +692,7 @@ export function BrandDetailPage() {
   const totalDealsFound = finalDeals.length;
   const totalProductsFound = sortedProducts.length || brandProducts.length;
 
-  const clearAllFilters = () => {
+  function clearAllFilters() {
     setSelectedCategory(null);
     setPriceRangeV2([0, null]);
     setCustomPriceInputs({ min: '', max: '' });
@@ -377,7 +717,7 @@ export function BrandDetailPage() {
     setSmartSpecs({});
     setSearchFilter('');
     setCurrentSearchInput('');
-  };
+  }
 
 
 
@@ -1007,7 +1347,7 @@ export function BrandDetailPage() {
       </div>
 
       {/* 3. STICKY SECTION NAVIGATION */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-3.5">
+      <div className="relative z-10 bg-white/95 border-b border-gray-100 shadow-sm py-3.5">
          <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-3.5">
             
             {/* Search Bar */}
@@ -1199,11 +1539,138 @@ export function BrandDetailPage() {
             
             {/* COLUMN 1: LEFT COLUMN */}
             <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+               {/* LEFT COLUMN SEARCH BAR */}
+               <div className="relative">
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                     <Search size={13} className="text-[#E8500A]" />
+                  </div>
+                  <input
+                     type="text"
+                     value={currentSearchInput}
+                     onChange={(e) => setCurrentSearchInput(e.target.value)}
+                     onKeyDown={(e) => {
+                        if (e.key === 'Enter') setSearchFilter(currentSearchInput);
+                     }}
+                     placeholder="Search products of this brand..."
+                     className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+                  />
+               </div>
+
                <QuickAccessCard />
                <div id="brand-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
                   <FullSidebarFilterPanel
                     title="Filter Catalog"
                     onReset={clearAllFilters}
+                    searchQuery={currentSearchInput}
+                    setSearchQuery={setCurrentSearchInput}
+                    onSearchSubmit={(q) => setSearchFilter(q)}
+                    searchPlaceholder="Search products of this brand..."
+                    quickFilters={
+                      <QuickFilterBar
+                        title="Brand Catalog Quick Specs"
+                        onOpenFullFilters={() => {}}
+                        filters={[
+                          {
+                            id: 'all-products',
+                            label: 'All Products',
+                            active: !dealsOnlyFilter && !couponsOnlyFilter && !verifiedOnlyFilter && !inStockOnlyFilter && !featuredOnlyFilter,
+                            onClick: () => {
+                              setDealsOnlyFilter(false);
+                              setCouponsOnlyFilter(false);
+                              setVerifiedOnlyFilter(false);
+                              setInStockOnlyFilter(false);
+                              setFeaturedOnlyFilter(false);
+                            }
+                          },
+                          {
+                            id: 'deals-only',
+                            label: 'Deals',
+                            active: dealsOnlyFilter,
+                            onClick: () => setDealsOnlyFilter(!dealsOnlyFilter)
+                          },
+                          {
+                            id: 'coupons-only',
+                            label: 'Coupons Available',
+                            active: couponsOnlyFilter,
+                            onClick: () => setCouponsOnlyFilter(!couponsOnlyFilter)
+                          },
+                          {
+                            id: 'verified',
+                            label: 'Verified Store',
+                            active: verifiedOnlyFilter,
+                            onClick: () => setVerifiedOnlyFilter(!verifiedOnlyFilter)
+                          },
+                          {
+                            id: 'in-stock',
+                            label: 'In Stock',
+                            active: inStockOnlyFilter,
+                            onClick: () => setInStockOnlyFilter(!inStockOnlyFilter)
+                          },
+                          {
+                            id: 'featured',
+                            label: 'Featured',
+                            active: featuredOnlyFilter,
+                            onClick: () => setFeaturedOnlyFilter(!featuredOnlyFilter)
+                          },
+                          {
+                            id: 'sort',
+                            label: sortOption === 'default' ? 'Sort Selection' : `Sort: ${
+                              sortOption === 'price-asc' ? '৳ Low to High' :
+                              sortOption === 'price-desc' ? '৳ High to Low' :
+                              sortOption === 'rating-desc' ? 'Top Rating' : 'Best Discount'
+                            }`,
+                            active: sortOption !== 'default',
+                            onClick: () => {
+                              setSortOption(prev => {
+                                if (prev === 'default') return 'price-asc';
+                                if (prev === 'price-asc') return 'price-desc';
+                                if (prev === 'price-desc') return 'rating-desc';
+                                if (prev === 'rating-desc') return 'discount-desc';
+                                return 'default';
+                              });
+                            }
+                          }
+                        ]}
+                      />
+                    }
+                    activeChips={
+                      <ActiveFilterChips
+                        chips={[
+                          selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+                          (priceRangeV2[0] > 0 || priceRangeV2[1] !== null) ? {
+                            id: 'price',
+                            label: `Price: ৳${priceRangeV2[0].toLocaleString()}–${priceRangeV2[1] !== null ? `৳${priceRangeV2[1].toLocaleString()}` : 'Max'}`,
+                            onRemove: () => {
+                              setCustomPriceInputs({ min: '', max: '' });
+                              setPriceRangeV2([0, null]);
+                            }
+                          } : null,
+                          availabilityFilter ? { id: 'availability', label: `Stock: ${availabilityFilter}`, onRemove: () => setAvailabilityFilter(null) } : null,
+                          ratingFilter ? { id: 'rating', label: `Min Rating: ${ratingFilter}★`, onRemove: () => setRatingFilter(null) } : null,
+                          votesFilter ? { id: 'votes', label: `Min Votes: ${votesFilter}♥`, onRemove: () => setVotesFilter(null) } : null,
+                          warrantyFilter ? { id: 'warranty', label: `Warranty: ${warrantyFilter}`, onRemove: () => setWarrantyFilter(null) } : null,
+                          deliveryFilter ? { id: 'delivery', label: `Delivery: ${deliveryFilter}`, onRemove: () => setDeliveryFilter(null) } : null,
+                          discountFilter ? { id: 'discount', label: `Min Discount: ${discountFilter}%`, onRemove: () => setDiscountFilter(null) } : null,
+                          couponFilter ? { id: 'coupon', label: `Coupons: ${couponFilter}`, onRemove: () => setCouponFilter(null) } : null,
+                          expiryFilter ? { id: 'expiry', label: `Expiry: ${expiryFilter}`, onRemove: () => setExpiryFilter(null) } : null,
+                          productLineFilter ? { id: 'product_line', label: `Line: ${productLineFilter}`, onRemove: () => setProductLineFilter(null) } : null,
+                          featuredCollectionFilter ? { id: 'featured_collection', label: `Collection: ${featuredCollectionFilter}`, onRemove: () => setFeaturedCollectionFilter(null) } : null,
+                          officialStoreFilter ? { id: 'official_store', label: `Official: ${officialStoreFilter}`, onRemove: () => setOfficialStoreFilter(null) } : null,
+                          countryFilter ? { id: 'country', label: `Origin: ${countryFilter}`, onRemove: () => setCountryFilter(null) } : null,
+                          dealsOnlyFilter ? { id: 'deals_only', label: 'Deals Only', onRemove: () => setDealsOnlyFilter(false) } : null,
+                          couponsOnlyFilter ? { id: 'coupons_only', label: 'Coupons Only', onRemove: () => setCouponsOnlyFilter(false) } : null,
+                          verifiedOnlyFilter ? { id: 'verified_only', label: 'Verified Only', onRemove: () => setVerifiedOnlyFilter(false) } : null,
+                          inStockOnlyFilter ? { id: 'instock_only', label: 'In Stock Only', onRemove: () => setInStockOnlyFilter(false) } : null,
+                          featuredOnlyFilter ? { id: 'featured_only', label: 'Featured Only', onRemove: () => setFeaturedOnlyFilter(false) } : null,
+                          ...Object.entries(smartSpecs).map(([key, val]) => val ? {
+                            id: `smart-${key}`,
+                            label: `${key.toUpperCase()}: ${val}`,
+                            onRemove: () => setSmartSpecs(prev => ({ ...prev, [key]: null as any }))
+                          } : null)
+                        ].filter(Boolean) as any[]}
+                        onClearAll={clearAllFilters}
+                      />
+                    }
                     advancedSection={
                       <div className="flex flex-col gap-4">
                         {/* Dynamic Smart Filters depending on the brand category */}

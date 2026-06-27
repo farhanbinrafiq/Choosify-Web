@@ -6,6 +6,7 @@ import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingOverlays } from './components/FloatingOverlays';
 import { DashboardProvider } from './context/DashboardContext';
 import { GlobalStateProvider } from './context/GlobalStateContext';
+import { DrawerFilterProvider, FloatingFilterProvider } from './components/FilterEngine';
 import { Toaster } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'motion/react';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -261,7 +262,11 @@ export default function App() {
               }} 
             />
             <ScrollToTop />
-            <AppContent />
+            <DrawerFilterProvider>
+              <FloatingFilterProvider>
+                <AppContent />
+              </FloatingFilterProvider>
+            </DrawerFilterProvider>
             <PWAInstallPrompt />
           </DashboardProvider>
         </GlobalStateProvider>

@@ -7,7 +7,7 @@ import { motion } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
 import { ProductCardSkeleton } from '../components/Skeleton';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel } from '../components/FilterEngine';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 
 const SPONSORED_RECOMMENDATIONS = [
   {
@@ -138,7 +138,7 @@ export function AllProductsPage() {
   }, [rawQuery, searchParams]);
 
   // Handle local text search execute
-  const executeSearch = (term: string) => {
+  function executeSearch(term: string) {
     const updated = new URLSearchParams(searchParams);
     if (term.trim()) {
       updated.set('q', term);
@@ -146,7 +146,7 @@ export function AllProductsPage() {
       updated.delete('q');
     }
     setSearchParams(updated);
-  };
+  }
 
   // Dynamically group categories & brands from active mode's actual dataset to respect data isolation
   const dynamicCategories = React.useMemo(() => {
@@ -175,6 +175,257 @@ export function AllProductsPage() {
       checked: selectedBrand === name
     }));
   }, [allProducts, allBrands, selectedBrand]);
+
+  useRegisterPageFilters({
+    pageName: 'Products',
+    renderSearch: () => (
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={13} className="text-[#E8500A]" />
+        </div>
+        <input
+          type="text"
+          value={sidebarSearch}
+          onChange={(e) => setSidebarSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
+          placeholder={mode === 'retail' ? "Search retail products, brands or details..." : "Search wholesale factory suppliers, bulk slots..."}
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+        />
+      </div>
+    ),
+    quickFilters: [
+      { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
+      { id: 'trending', label: '🔥 Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
+      { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'COD Ready', onClick: () => setActiveTab(activeTab === 'COD Ready' ? 'All Products' : 'COD Ready') },
+      ...(mode === 'wholesale'
+        ? [
+            { id: 'moq-low', label: 'Low MOQ (≤50)', active: moqFilter === 50, onClick: () => setMoqFilter(moqFilter === 50 ? 0 : 50) },
+            { id: 'slab-low', label: 'Under ৳5k', active: priceTierSlab === 5000, onClick: () => setPriceTierSlab(priceTierSlab === 5000 ? 100000 : 5000) }
+          ]
+        : [
+            { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
+          ]
+      )
+    ],
+    renderFilters: () => (
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5 font-sans">
+          <label className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-wider">Sort Listings By</label>
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value as any)}
+            className="w-full h-10 px-3 bg-[#F4F8FA] border border-[#e8edf2] rounded-[5px] text-xs font-semibold text-navy outline-none focus:border-orange-primary/30"
+          >
+            <option value="featured">Featured / Recommended</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating-desc">Rating: High to Low</option>
+            {mode === 'wholesale' && <option value="moq-asc">Min Order Quantity: Low to High</option>}
+          </select>
+        </div>
+
+        <UniversalFilterRenderer
+          profile={{
+            entity: 'products',
+            filters: [
+              {
+                id: 'category',
+                name: 'Categories',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Categories' },
+                  ...dynamicCategories.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
+                ]
+              },
+              {
+                id: 'brand',
+                name: 'Featured Brands',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Brands' },
+                  ...dynamicBrands.map(b => ({ value: b.name, label: b.name, count: b.count }))
+                ]
+              },
+              {
+                id: 'price_custom',
+                name: 'Price Target (BDT)',
+                type: 'price_custom'
+              }
+            ]
+          }}
+          activeFilters={{
+            category: selectedCategory || 'all',
+            brand: selectedBrand || 'all'
+          }}
+          customPriceInputs={{ min: minPrice, max: maxPrice }}
+          setCustomPriceInputs={(inputs) => {
+            setMinPrice(inputs.min);
+            setMaxPrice(inputs.max);
+          }}
+          onCustomPriceApply={(min, max) => {
+            setMinPrice(min > 0 ? min.toString() : '');
+            setMaxPrice(max !== null ? max.toString() : '');
+          }}
+          onFilterChange={(filterId, value) => {
+            if (filterId === 'category') {
+              setSelectedCategory(value === 'all' || !value ? null : value);
+            } else if (filterId === 'brand') {
+              setSelectedBrand(value === 'all' || !value ? null : value);
+            }
+          }}
+        />
+
+        <UniversalFilterRenderer
+          profile={{
+            entity: 'products',
+            filters: [
+              {
+                id: 'rating',
+                name: 'Rating Score',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Ratings' },
+                  { value: '4.8', label: '4.8★ & Up' },
+                  { value: '4.5', label: '4.5★ & Up' },
+                  { value: '4.0', label: '4.0★ & Up' }
+                ]
+              },
+              {
+                id: 'availability',
+                name: 'Availability',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Items' },
+                  { value: 'in-stock', label: 'In Stock Only' },
+                  { value: 'out-of-stock', label: 'Out of Stock' }
+                ]
+              }
+            ]
+          }}
+          activeFilters={{
+            rating: ratingFilter ? ratingFilter.toString() : 'all',
+            availability: availabilityFilter
+          }}
+          onFilterChange={(filterId, value) => {
+            if (filterId === 'rating') {
+              setRatingFilter(value === 'all' || !value ? null : parseFloat(value));
+            } else if (filterId === 'availability') {
+              setAvailabilityFilter(value || 'all');
+            }
+          }}
+        />
+
+        <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4 text-left">
+          <div className="flex items-center justify-between pb-2 border-b border-[#e8edf2]">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">
+              Price Range
+            </h3>
+            {(priceMin > 0 || priceMax < 999999) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPriceMin(0);
+                  setPriceMax(999999);
+                }}
+                className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer hover:text-red-650 transition-colors border-none bg-transparent"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <input
+                type="number"
+                placeholder="Min"
+                value={priceMin === 0 ? '' : priceMin}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? 0 : Number(e.target.value);
+                  setPriceMin(val);
+                }}
+                className="h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-bold w-full focus:outline-none focus:border-orange-primary"
+              />
+            </div>
+            <span className="text-gray-400 text-xs text-center font-bold px-1">to</span>
+            <div className="flex-1">
+              <input
+                type="number"
+                placeholder="Max"
+                value={priceMax === 999999 ? '' : priceMax}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? 999999 : Number(e.target.value);
+                  setPriceMax(val);
+                }}
+                className="h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-bold w-full focus:outline-none focus:border-orange-primary"
+              />
+            </div>
+          </div>
+
+          <div className="text-[10.5px] font-bold text-navy uppercase tracking-wider">
+            ৳{priceMin.toLocaleString()} — ৳{priceMax.toLocaleString()}
+          </div>
+        </div>
+
+        {mode === 'wholesale' && (
+          <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4">
+            <div className="flex items-center gap-1.5 pb-2 border-b border-[#e8edf2]">
+              <Calculator size={14} className="text-[#E8500A]" />
+              <h3 className="text-[11px] font-black uppercase text-[#8a9bb0]">Wholesale Specs</h3>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-[10px] font-semibold uppercase text-gray-400">
+                <span>Max MOQ:</span>
+                <span className="text-navy bg-gray-100 px-2 py-0.5 rounded font-mono text-[10px]">{moqFilter === 0 ? 'Any MOQ' : `${moqFilter} Pcs`}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="150" 
+                step="10"
+                value={moqFilter} 
+                onChange={(e) => setMoqFilter(Number(e.target.value))}
+                className="w-full h-1 accent-orange-primary cursor-pointer"
+              />
+            </div>
+          </div>
+        )}
+
+        <CategorySmartFilters
+          category={selectedCategory}
+          activeSpecs={activeSpecs}
+          onSpecChange={(key, value) => {
+            setActiveSpecs(prev => ({ ...prev, [key]: value || '' }));
+          }}
+        />
+      </div>
+    ),
+    activeFilterCount: (selectedCategory ? 1 : 0) +
+      (selectedBrand ? 1 : 0) +
+      (ratingFilter ? 1 : 0) +
+      (availabilityFilter !== 'all' ? 1 : 0) +
+      ((minPrice || maxPrice) ? 1 : 0) +
+      ((priceMin > 0 || priceMax < 999999) ? 1 : 0) +
+      (sidebarSearch ? 1 : 0) +
+      Object.values(activeSpecs).filter(Boolean).length,
+    onClearAll: handleResetFilters,
+  }, [
+    sidebarSearch,
+    activeTab,
+    selectedCategory,
+    selectedBrand,
+    moqFilter,
+    priceTierSlab,
+    ratingFilter,
+    availabilityFilter,
+    retailPriceLimit,
+    minPrice,
+    maxPrice,
+    sortOption,
+    activeSpecs,
+    priceMin,
+    priceMax
+  ]);
 
   // Core reactive filtering logic
   const filteredProducts = React.useMemo(() => {
@@ -303,7 +554,7 @@ export function AllProductsPage() {
     return result;
   }, [allProducts, searchParams, selectedCategory, selectedBrand, mode, moqFilter, priceTierSlab, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax]);
 
-  const handleResetFilters = () => {
+  function handleResetFilters() {
     setSelectedCategory(null);
     setSelectedBrand(null);
     setMoqFilter(0);
@@ -319,7 +570,7 @@ export function AllProductsPage() {
     setPriceMin(0);
     setPriceMax(999999);
     setSearchParams(new URLSearchParams());
-  };
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
@@ -367,7 +618,7 @@ export function AllProductsPage() {
       </div>
 
       {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-[#E8EDF2] shadow-sm py-4 transition-all duration-300">
+      <div className="relative z-10 bg-white/95 border-b border-[#E8EDF2] shadow-sm py-4 transition-all duration-300">
         <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
           
           {/* 1. Search Bar inside Sticky Container */}
@@ -481,6 +732,20 @@ export function AllProductsPage() {
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+          {/* LEFT COLUMN SEARCH BAR */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <Search size={13} className="text-[#E8500A]" />
+            </div>
+            <input
+              type="text"
+              value={sidebarSearch}
+              onChange={(e) => setSidebarSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
+              placeholder={mode === 'retail' ? "Search retail products, brands or details..." : "Search wholesale factory suppliers, bulk slots..."}
+              className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+            />
+          </div>
           
           <QuickAccessCard />
 
@@ -489,6 +754,63 @@ export function AllProductsPage() {
             <FullSidebarFilterPanel
               title="Filter Catalog"
               onReset={handleResetFilters}
+              searchQuery={sidebarSearch}
+              setSearchQuery={setSidebarSearch}
+              onSearchSubmit={executeSearch}
+              searchPlaceholder={mode === 'retail' ? "Search retail products, brands or details..." : "Search wholesale factory suppliers, bulk slots..."}
+              quickFilters={
+                <QuickFilterBar
+                  title="Products Quick Specs"
+                  onOpenFullFilters={() => {}}
+                  filters={[
+                    { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
+                    { id: 'trending', label: '🔥 Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
+                    { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'COD Ready', onClick: () => setActiveTab(activeTab === 'COD Ready' ? 'All Products' : 'COD Ready') },
+                    ...(mode === 'wholesale'
+                      ? [
+                          { id: 'moq-low', label: 'Low MOQ (≤50)', active: moqFilter === 50, onClick: () => setMoqFilter(moqFilter === 50 ? 0 : 50) },
+                          { id: 'slab-low', label: 'Under ৳5k', active: priceTierSlab === 5000, onClick: () => setPriceTierSlab(priceTierSlab === 5000 ? 100000 : 5000) }
+                        ]
+                      : [
+                          { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
+                        ]
+                    )
+                  ]}
+                />
+              }
+              activeChips={
+                <ActiveFilterChips
+                  chips={[
+                    selectedCategory ? { id: 'category', label: `Cat: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+                    selectedBrand ? { id: 'brand', label: `Brand: ${selectedBrand}`, onRemove: () => setSelectedBrand(null) } : null,
+                    ratingFilter ? { id: 'rating', label: `Rating: ${ratingFilter}★ +`, onRemove: () => setRatingFilter(null) } : null,
+                    availabilityFilter !== 'all' ? { id: 'availability', label: `Status: ${availabilityFilter}`, onRemove: () => setAvailabilityFilter('all') } : null,
+                    (minPrice || maxPrice) ? { id: 'price', label: `Price: ৳${minPrice || '0'} - ${maxPrice || 'Any'}`, onRemove: () => { setMinPrice(''); setMaxPrice(''); } } : null,
+                    (priceMin > 0 || priceMax < 999999) ? { id: 'priceRange', label: `Range: ৳${priceMin.toLocaleString()} - ৳${priceMax.toLocaleString()}`, onRemove: () => { setPriceMin(0); setPriceMax(999999); } } : null,
+                    ...Object.entries(activeSpecs).map(([key, value]) => {
+                      if (!value) return null;
+                      return { id: `spec-${key}`, label: `${key.toUpperCase()}: ${value}`, onRemove: () => setActiveSpecs(prev => ({ ...prev, [key]: '' })) };
+                    })
+                  ].filter(Boolean) as any[]}
+                  onClearAll={handleResetFilters}
+                />
+              }
+              sorting={
+                <div className="flex flex-col gap-1.5 font-sans">
+                  <label className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-wider">Sort Listings By</label>
+                  <select
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value as any)}
+                    className="w-full h-10 px-3 bg-[#F4F8FA] border border-[#e8edf2] rounded-[5px] text-xs font-semibold text-navy outline-none focus:border-orange-primary/30"
+                  >
+                    <option value="featured">Featured / Recommended</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="rating-desc">Rating: High to Low</option>
+                    {mode === 'wholesale' && <option value="moq-asc">Min Order Quantity: Low to High</option>}
+                  </select>
+                </div>
+              }
               advancedSection={
                 <div className="flex flex-col gap-4">
                   <UniversalFilterRenderer

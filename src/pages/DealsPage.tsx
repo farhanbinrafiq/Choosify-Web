@@ -5,7 +5,7 @@ import { PRODUCTS, BRANDS } from '../constants';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
-import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 
 const PROMO_CODES = [
   { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
@@ -193,6 +193,113 @@ export function DealsPage() {
     { name: 'Kids', icon: <Smile size={16} className="stroke-[2.5]" />, count: 240 },
     { name: 'Cars / Bike', icon: <Car size={16} className="stroke-[2.5]" />, count: 310 }
   ];
+
+  useRegisterPageFilters({
+    pageName: 'Brand Deals',
+    renderSearch: () => (
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={13} className="text-[#E8500A]" />
+        </div>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search brand deals..."
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+        />
+      </div>
+    ),
+    quickFilters: [
+      { id: 'all-deals', label: 'All Deals', active: activeTab === 'All Deals', onClick: () => setActiveTab('All Deals') },
+      { id: 'fashion-pill', label: '👗 Fashion Deals', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
+      { id: 'retail-pill', label: '🛍️ Retail', active: dealType === 'retail', onClick: () => setDealType(dealType === 'retail' ? 'all' : 'retail') },
+      { id: 'wholesale-pill', label: '📦 Wholesale', active: dealType === 'wholesale', onClick: () => setDealType(dealType === 'wholesale' ? 'all' : 'wholesale') },
+      { id: 'discount-25', label: '🔥 25% Off +', active: minDiscount === 25, onClick: () => setMinDiscount(minDiscount === 25 ? 0 : 25) }
+    ],
+    renderFilters: () => (
+      <div className="flex flex-col gap-4">
+        <UniversalFilterRenderer
+          profile={{
+            entity: 'deals',
+            filters: [
+              {
+                id: 'category',
+                name: 'Product Categories',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Categories' },
+                  ...categoriesList.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
+                ]
+              },
+              {
+                id: 'deal_channel',
+                name: 'Sellers Channels',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Channels' },
+                  { value: 'retail', label: 'Retail Sales' },
+                  { value: 'wholesale', label: 'Wholesale Only' }
+                ]
+              }
+            ]
+          }}
+          activeFilters={{
+            category: selectedCategory,
+            deal_channel: dealType
+          }}
+          onFilterChange={(filterId, value) => {
+            if (filterId === 'category') {
+              setSelectedCategory(value === 'all' || !value ? null : value);
+            }
+            if (filterId === 'deal_channel') {
+              setDealType(value === 'all' || !value ? 'all' : value as any);
+            }
+          }}
+        />
+
+        <UniversalFilterRenderer
+          profile={{
+            entity: 'deals',
+            filters: [
+              {
+                id: 'discount_range2',
+                name: 'Minimum Discount',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'Any Savings' },
+                  { value: '10', label: '10% Savings & Up' },
+                  { value: '25', label: '25% Savings & Up' },
+                  { value: '40', label: '40% Savings & Up' },
+                  { value: '60', label: '60% Savings & Up' }
+                ]
+              }
+            ]
+          }}
+          activeFilters={{
+            discount_range2: minDiscount === 0 ? 'all' : minDiscount.toString()
+          }}
+          onFilterChange={(filterId, value) => {
+            if (filterId === 'discount_range2') {
+              setMinDiscount(value === 'all' || !value ? 0 : Number(value));
+            }
+          }}
+        />
+      </div>
+    ),
+    activeFilterCount: (selectedCategory ? 1 : 0) +
+      (dealType !== 'all' ? 1 : 0) +
+      (minDiscount > 0 ? 1 : 0) +
+      (searchQuery ? 1 : 0),
+    onClearAll: () => {
+      setSelectedCategory(null);
+      setDealType('all');
+      setMinDiscount(0);
+      setSearchQuery('');
+      setActiveTab('All Deals');
+    },
+  }, [searchQuery, activeTab, selectedCategory, dealType, minDiscount]);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section - Standardized Centered Alignment */}
@@ -262,7 +369,7 @@ export function DealsPage() {
       </div>
 
       {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-4 transition-all duration-300">
+      <div className="relative z-10 bg-white/95 border-b border-gray-100 shadow-sm py-4 transition-all duration-300">
         <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4">
           
           {/* 1. Search Bar inside Sticky Navigation */}
@@ -372,6 +479,19 @@ export function DealsPage() {
           
           {/* Left Sidebar */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+             {/* LEFT COLUMN SEARCH BAR */}
+             <div className="relative mb-2">
+               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                 <Search size={13} className="text-[#E8500A]" />
+               </div>
+               <input
+                 type="text"
+                 value={searchQuery}
+                 onChange={(e) => setSearchQuery(e.target.value)}
+                 placeholder="Search brand deals..."
+                 className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+               />
+             </div>
              
              <QuickAccessCard />
 
@@ -379,6 +499,37 @@ export function DealsPage() {
              <div id="deals-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
                <FullSidebarFilterPanel
                  title="Filter Deals"
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  searchPlaceholder="Search active deals and promos..."
+                  quickFilters={
+                    <QuickFilterBar
+                      title="Deals Quick Specs"
+                      onOpenFullFilters={() => {}}
+                      filters={[
+                        { id: 'all-retail', label: 'Retail Only', active: dealType === 'retail', onClick: () => setDealType(dealType === 'retail' ? 'all' : 'retail') },
+                        { id: 'all-wholesale', label: 'Wholesale Only', active: dealType === 'wholesale', onClick: () => setDealType(dealType === 'wholesale' ? 'all' : 'wholesale') },
+                        { id: 'savings-20', label: '🔥 20%+ Off', active: minDiscount === 20, onClick: () => setMinDiscount(minDiscount === 20 ? 0 : 20) },
+                        { id: 'savings-45', label: '💥 45%+ Off', active: minDiscount === 45, onClick: () => setMinDiscount(minDiscount === 45 ? 0 : 45) }
+                      ]}
+                    />
+                  }
+                  activeChips={
+                    <ActiveFilterChips
+                      chips={[
+                        selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+                        dealType !== 'all' ? { id: 'deal_channel', label: `Channel: ${dealType}`, onRemove: () => setDealType('all') } : null,
+                        minDiscount > 0 ? { id: 'discount_range', label: `Savings: ${minDiscount}%+`, onRemove: () => setMinDiscount(0) } : null
+                      ].filter(Boolean) as any[]}
+                      onClearAll={() => {
+                        setSelectedCategory(null);
+                        setDealType('all');
+                        setMinDiscount(0);
+                        setSearchQuery('');
+                        setActiveTab('All Deals');
+                      }}
+                    />
+                  }
                  onReset={() => {
                    setSelectedCategory(null);
                    setDealType('all');

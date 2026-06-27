@@ -8,7 +8,7 @@ import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { RecommendationCardSkeleton } from '../components/Skeleton';
-import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from '../components/FilterEngine';
+import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { useDashboard } from '../context/DashboardContext';
 import toast from 'react-hot-toast';
 
@@ -846,6 +846,65 @@ export function GuidesPage() {
       <FullSidebarFilterPanel
         title="Guides Scope"
         onReset={handleClearAllFilters}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        searchPlaceholder="Search guides, topics..."
+        quickFilters={
+          <QuickFilterBar
+            title="Guides Quick Specs"
+            onOpenFullFilters={() => {}}
+            filters={[
+              { id: 'all-content', label: 'All Content', active: !selectedContentType && !selectedPlatform, onClick: () => { setSelectedContentType(null); setSelectedPlatform(null); } },
+              { id: 'youtube', label: '📺 YouTube', active: selectedPlatform === 'youtube' || selectedContentType === 'video', onClick: () => { setSelectedPlatform(selectedPlatform === 'youtube' ? null : 'youtube'); setSelectedContentType(selectedPlatform === 'youtube' ? null : 'video'); } },
+              { id: 'reels', label: '📱 Reels', active: selectedContentType === 'reels', onClick: () => setSelectedContentType(selectedContentType === 'reels' ? null : 'reels') },
+              { id: 'blogs', label: '✍️ Blogs', active: selectedPlatform === 'blog' || selectedContentType === 'article', onClick: () => { setSelectedPlatform(selectedPlatform === 'blog' ? null : 'blog'); setSelectedContentType(selectedPlatform === 'blog' ? null : 'article'); } },
+              { id: 'featured-pill', label: '★ Featured', active: activeTab === 'Featured', onClick: () => setActiveTab(activeTab === 'Featured' ? 'All' : 'Featured') },
+              { id: 'verified-pill', label: '✓ Verified Creators', active: selectedVerifiedCreator === true, onClick: () => setSelectedVerifiedCreator(selectedVerifiedCreator === true ? null : true) },
+              { id: 'trending-pill', label: '🔥 Trending', active: isTrending === true, onClick: () => setIsTrending(isTrending === true ? null : true) },
+              {
+                id: 'cycle-sort',
+                label: sortOption === 'default' ? 'Filter Sort' : `Sort: ${sortOption === 'views' ? 'View Count' : sortOption === 'shares' ? 'Shared Count' : 'Newest First'}`,
+                active: sortOption !== 'default',
+                onClick: () => {
+                  const next: Record<string, string> = {
+                    'default': 'views',
+                    'views': 'shares',
+                    'shares': 'newest',
+                    'newest': 'default'
+                  };
+                  setSortOption(next[sortOption] || 'default');
+                }
+              }
+            ]}
+          />
+        }
+        activeChips={
+          <ActiveFilterChips
+            chips={[
+              selectedContentType ? { id: 'contentType', label: `Type: ${selectedContentType}`, onRemove: () => setSelectedContentType(null) } : null,
+              selectedPlatform ? { id: 'platform', label: `Platform: ${selectedPlatform}`, onRemove: () => setSelectedPlatform(null) } : null,
+              selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+              selectedLanguage ? { id: 'language', label: `Language: ${selectedLanguage}`, onRemove: () => setSelectedLanguage(null) } : null,
+              selectedDuration ? { id: 'duration', label: `Duration: ${selectedDuration}`, onRemove: () => setSelectedDuration(null) } : null,
+              selectedCreator ? { id: 'creator', label: `Creator: ${selectedCreator}`, onRemove: () => setSelectedCreator(null) } : null,
+              selectedAuthor ? { id: 'author', label: `Author: ${selectedAuthor}`, onRemove: () => setSelectedAuthor(null) } : null,
+              selectedVerifiedCreator ? { id: 'verified', label: 'Verified Creators Only', onRemove: () => setSelectedVerifiedCreator(null) } : null,
+              selectedFollowers ? { id: 'followers', label: `Followers: ${selectedFollowers}`, onRemove: () => setSelectedFollowers(null) } : null,
+              selectedEngagementRate ? { id: 'engagement', label: `Engagement: ${selectedEngagementRate}`, onRemove: () => setSelectedEngagementRate(null) } : null,
+              selectedTopic ? { id: 'topic', label: `Topic: ${selectedTopic}`, onRemove: () => setSelectedTopic(null) } : null,
+              selectedSponsored ? { id: 'sponsored', label: 'Sponsored', onRemove: () => setSelectedSponsored(null) } : null,
+              selectedOfficialCampaign ? { id: 'official', label: 'Official Campaign', onRemove: () => setSelectedOfficialCampaign(null) } : null,
+              isTrending ? { id: 'trending', label: 'Trending', onRemove: () => setIsTrending(null) } : null,
+              isNew ? { id: 'new', label: 'New Releases', onRemove: () => setIsNew(null) } : null,
+              isEditorsPick ? { id: 'editors_pick', label: 'Editor\'s Pick', onRemove: () => setIsEditorsPick(null) } : null,
+              sortOption !== 'default' ? { id: 'sort', label: `Sort: ${sortOption}`, onRemove: () => setSortOption('default') } : null,
+              productCategory ? { id: 'prod_cat', label: `Group: ${productCategory}`, onRemove: () => setProductCategory(null) } : null,
+              productPriceRange ? { id: 'prod_price', label: `Price Limit: ${productPriceRange}`, onRemove: () => setProductPriceRange(null) } : null,
+              productAvailability ? { id: 'prod_avail', label: `Stock: ${productAvailability}`, onRemove: () => setProductAvailability(null) } : null,
+            ].filter(Boolean) as any[]}
+            onClearAll={handleClearAllFilters}
+          />
+        }
         advancedSection={
           <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left font-sans">
             <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Topic / Niche</h3>
@@ -1199,6 +1258,216 @@ export function GuidesPage() {
     );
   };
 
+  useRegisterPageFilters({
+    pageName: 'Guides',
+    renderSearch: () => (
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={13} className="text-[#E8500A]" />
+        </div>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search guides, topics..."
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+        />
+      </div>
+    ),
+    quickFilters: [
+      { id: 'all-content', label: 'All Content', active: !selectedContentType && !selectedPlatform, onClick: () => { setSelectedContentType(null); setSelectedPlatform(null); } },
+      { id: 'youtube', label: '📺 YouTube', active: selectedPlatform === 'youtube' || selectedContentType === 'video', onClick: () => { setSelectedPlatform(selectedPlatform === 'youtube' ? null : 'youtube'); setSelectedContentType(selectedPlatform === 'youtube' ? null : 'video'); } },
+      { id: 'reels', label: '📱 Reels', active: selectedContentType === 'reels', onClick: () => setSelectedContentType(selectedContentType === 'reels' ? null : 'reels') },
+      { id: 'blogs', label: '✍️ Blogs', active: selectedPlatform === 'blog' || selectedContentType === 'article', onClick: () => { setSelectedPlatform(selectedPlatform === 'blog' ? null : 'blog'); setSelectedContentType(selectedPlatform === 'blog' ? null : 'article'); } },
+      { id: 'featured-pill', label: '★ Featured', active: activeTab === 'Featured', onClick: () => setActiveTab(activeTab === 'Featured' ? 'All' : 'Featured') },
+      { id: 'verified-pill', label: '✓ Verified Creators', active: selectedVerifiedCreator === true, onClick: () => setSelectedVerifiedCreator(selectedVerifiedCreator === true ? null : true) },
+      { id: 'trending-pill', label: '🔥 Trending', active: isTrending === true, onClick: () => setIsTrending(isTrending === true ? null : true) }
+    ],
+    renderFilters: () => (
+      <div className="flex flex-col gap-4">
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Recommendation Type</h3>
+          <div className="space-y-1">
+            {contentTypeOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedContentType(selectedContentType === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedContentType === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedContentType === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Social Platforms</h3>
+          <div className="space-y-1">
+            {platformOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedPlatform(selectedPlatform === opt.value ? null : opt.value)}
+                className={cn(
+                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                  selectedPlatform === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                )}
+              >
+                <span>{opt.label}</span>
+                {selectedPlatform === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Verified Creators</h3>
+          <div className="space-y-1">
+            {[
+              { value: 'all', label: 'All Creators' },
+              { value: 'verified', label: 'Verified Only' }
+            ].map(opt => {
+              const isSelected = (opt.value === 'verified' && selectedVerifiedCreator === true) || (opt.value === 'all' && selectedVerifiedCreator === null);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setSelectedVerifiedCreator(opt.value === 'verified' ? (selectedVerifiedCreator === true ? null : true) : null)}
+                  className={cn(
+                    "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                    isSelected ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                  )}
+                >
+                  <span>{opt.label}</span>
+                  {isSelected && <Check size={11} className="text-orange-primary shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Sponsors & Campaigns</h3>
+          <div className="space-y-1">
+            {[
+              { value: 'sponsored', label: 'Sponsored Guides Only' }
+            ].map(opt => {
+              const isSelected = selectedSponsored === true;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setSelectedSponsored(selectedSponsored === true ? null : true)}
+                  className={cn(
+                    "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
+                    isSelected ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                  )}
+                >
+                  <span>{opt.label}</span>
+                  {isSelected && <Check size={11} className="text-orange-primary shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Product Group Spec</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="text-[9.5px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Product Type</label>
+              <select
+                value={productCategory || ''}
+                onChange={(e) => setProductCategory(e.target.value || null)}
+                className="w-full text-xs font-semibold h-8 border border-[#e8edf2] rounded-[4px] focus:outline-none focus:border-orange-primary bg-slate-50/20 px-2 leading-none"
+              >
+                <option value="">All Products</option>
+                <option value="smartphones">Smartphones</option>
+                <option value="shoes">Shoes & Apparel</option>
+                <option value="skincare">Skincare</option>
+                <option value="gaming">Gaming Hardware</option>
+                <option value="coffee">Coffee Machines</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[9.5px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Price Limit</label>
+              <select
+                value={productPriceRange || ''}
+                onChange={(e) => setProductPriceRange(e.target.value || null)}
+                className="w-full text-xs font-semibold h-8 border border-[#e8edf2] rounded-[4px] focus:outline-none focus:border-orange-primary bg-slate-50/20 px-2 leading-none"
+              >
+                <option value="">Any Price</option>
+                <option value="under1k">Under 1,000 BDT</option>
+                <option value="1k-5k">1,000 – 5,000 BDT</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    activeFilterCount: (selectedContentType ? 1 : 0) +
+      (selectedPlatform ? 1 : 0) +
+      (selectedCategory ? 1 : 0) +
+      (selectedLanguage ? 1 : 0) +
+      (selectedDuration ? 1 : 0) +
+      (selectedCreator ? 1 : 0) +
+      (selectedAuthor ? 1 : 0) +
+      (selectedVerifiedCreator ? 1 : 0) +
+      (selectedFollowers ? 1 : 0) +
+      (selectedEngagementRate ? 1 : 0) +
+      (selectedTopic ? 1 : 0) +
+      (selectedSponsored ? 1 : 0) +
+      (selectedOfficialCampaign ? 1 : 0) +
+      (isTrending ? 1 : 0) +
+      (isNew ? 1 : 0) +
+      (isPopular ? 1 : 0) +
+      (isEditorsPick ? 1 : 0) +
+      (productCategory ? 1 : 0) +
+      (productPriceRange ? 1 : 0) +
+      (productAvailability ? 1 : 0) +
+      (selectedReadingTime ? 1 : 0) +
+      (selectedViews ? 1 : 0) +
+      (selectedUploadDate ? 1 : 0) +
+      (selectedMusic ? 1 : 0) +
+      (sortOption !== 'default' ? 1 : 0) +
+      (searchQuery ? 1 : 0),
+    onClearAll: handleClearAllFilters,
+  }, [
+    searchQuery,
+    activeTab,
+    selectedContentType,
+    selectedPlatform,
+    selectedCategory,
+    selectedTopic,
+    selectedLanguage,
+    selectedDuration,
+    selectedCreator,
+    selectedAuthor,
+    selectedVerifiedCreator,
+    selectedFollowers,
+    selectedEngagementRate,
+    selectedSponsored,
+    selectedOfficialCampaign,
+    isTrending,
+    isNew,
+    isPopular,
+    isEditorsPick,
+    productCategory,
+    productPriceRange,
+    productAvailability,
+    selectedReadingTime,
+    selectedViews,
+    selectedUploadDate,
+    selectedMusic,
+    sortOption
+  ]);
+
   return (
     <div id="guides-root" className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Hero Section - Standardized Centered Alignment */}
@@ -1268,7 +1537,7 @@ export function GuidesPage() {
         </div>
 
       {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
+      <div className="relative z-10 bg-white/95 border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
         <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
           
           {/* 1. Search Bar inside Sticky Container */}
@@ -1393,6 +1662,19 @@ export function GuidesPage() {
       <main className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
          {/* Left Sidebar Navigation - migrated to Full Filter Panel */}
          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+            {/* LEFT COLUMN SEARCH BAR */}
+            <div className="relative mb-2">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Search size={13} className="text-[#E8500A]" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search guides, topics..."
+                className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+              />
+            </div>
             <QuickAccessCard />
             <div id="guides-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
               {renderFilterPanel()}

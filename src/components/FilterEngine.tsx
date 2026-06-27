@@ -1,6 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, createContext, useContext } from 'react';
 import { cn } from '../lib/utils';
-import { Star, ShieldCheck, HelpCircle, Check, Sparkles, Flame, Tag, DollarSign } from 'lucide-react';
+import { Star, ShieldCheck, HelpCircle, Check, Sparkles, Flame, Tag, DollarSign, Filter, Search, X, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 // ==========================================
 // LAYER 1: FILTER ENGINE (GLOBAL DEFINITIONS)
@@ -867,15 +868,89 @@ interface FullSidebarFilterPanelProps {
   advancedSection?: React.ReactNode;
   onReset?: () => void;
   title?: string;
+  // Page search & layout props for global floating integration
+  searchQuery?: string;
+  setSearchQuery?: (q: string) => void;
+  onSearchSubmit?: (q: string) => void;
+  searchPlaceholder?: string;
+  quickFilters?: React.ReactNode;
+  activeChips?: React.ReactNode;
+  sorting?: React.ReactNode;
 }
 
 export function FullSidebarFilterPanel({
   children,
   advancedSection,
   onReset,
-  title = "Filter Scope"
+  title = "Filter Scope",
+  searchQuery,
+  setSearchQuery,
+  onSearchSubmit,
+  searchPlaceholder,
+  quickFilters,
+  activeChips,
+  sorting
 }: FullSidebarFilterPanelProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const { registerPageFilters, setIsOpen } = useFloatingFilters();
+
+  useEffect(() => {
+    const pageId = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    
+    return registerPageFilters(pageId, {
+      searchQuery,
+      setSearchQuery,
+      onSearchSubmit,
+      searchPlaceholder,
+      quickFilters,
+      activeChips,
+      sorting,
+      fullFilters: (
+        <div className="flex flex-col gap-4 text-left">
+          {children}
+          {advancedSection && (
+            <div className="flex flex-col gap-4 border-t border-[#e8edf2] pt-4 mt-1">
+              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Advanced Refinements</div>
+              {advancedSection}
+            </div>
+          )}
+        </div>
+      ),
+      footerActions: (
+        <>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="flex-1 py-3 bg-[#E8500A] text-white hover:bg-[#CF4400] font-sans text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs border-none"
+          >
+            Apply Filters
+          </button>
+          {onReset && (
+            <button
+              onClick={() => {
+                onReset();
+                setIsOpen(false);
+              }}
+              className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-sans text-[10px] font-black uppercase tracking-wider rounded-lg border border-white/15 flex items-center justify-center transition-all cursor-pointer"
+            >
+              Reset All
+            </button>
+          )}
+        </>
+      )
+    });
+  }, [
+    title,
+    children,
+    advancedSection,
+    onReset,
+    searchQuery,
+    setSearchQuery,
+    onSearchSubmit,
+    searchPlaceholder,
+    quickFilters,
+    activeChips,
+    sorting
+  ]);
 
   return (
     <div className="flex flex-col gap-4 w-full animate-fade-in text-left font-sans">
@@ -923,4 +998,393 @@ export function FullSidebarFilterPanel({
     </div>
   );
 }
+
+// ===============================================
+// GLOBAL FLOATING FILTER CONTEXT & PROVIDER SYSTEM
+// ===============================================
+
+export interface FloatingFilterData {
+  searchQuery?: string;
+  setSearchQuery?: (q: string) => void;
+  onSearchSubmit?: (q: string) => void;
+  searchPlaceholder?: string;
+  quickFilters?: React.ReactNode;
+  activeChips?: React.ReactNode;
+  fullFilters?: React.ReactNode;
+  sorting?: React.ReactNode;
+  footerActions?: React.ReactNode;
+}
+
+interface DrawerFilterContextType {
+  registerPageFilters: (id: string, data: FloatingFilterData) => () => void;
+  activePageId: string | null;
+  activeFiltersData: FloatingFilterData | null;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
+
+const DrawerFilterContext = createContext<DrawerFilterContextType | undefined>(undefined);
+
+export function DrawerFilterProvider({ children }: { children: React.ReactNode }) {
+  const [activeFiltersMap, setActiveFiltersMap] = useState<Record<string, FloatingFilterData>>({});
+  const [activePageId, setActivePageId] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 768px)");
+    setIsMobile(media.matches);
+    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
+
+  const registerPageFilters = (id: string, data: FloatingFilterData) => {
+    setActiveFiltersMap((prev) => ({ ...prev, [id]: data }));
+    setActivePageId(id);
+    return () => {
+      setActiveFiltersMap((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      setActivePageId((prev) => (prev === id ? null : prev));
+    };
+  };
+
+  const activeFiltersData = activePageId ? activeFiltersMap[activePageId] : null;
+
+  // ESC key to close
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  return (
+    <DrawerFilterContext.Provider
+      value={{
+        registerPageFilters,
+        activePageId,
+        activeFiltersData,
+        isOpen,
+        setIsOpen,
+      }}
+    >
+      {children}
+
+      {/* FLOATING LAUNCHER BUTTON ON BOTTOM LEFT */}
+      <AnimatePresence>
+        {activeFiltersData && !isOpen && (
+          <div className={cn(
+            "fixed z-[220] flex flex-col items-start font-sans",
+            isMobile ? "bottom-4 left-4" : "bottom-6 left-6 lg:bottom-8 lg:left-8"
+          )}>
+            <motion.button
+              id="floating-filters-launcher"
+              onClick={() => setIsOpen(true)}
+              initial={{ scale: 0, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0, opacity: 0, y: 15 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 cursor-pointer bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40 focus:outline-none group"
+              title="Filters & Search"
+            >
+              <div className="flex items-center gap-2">
+                <Filter size={15} className="text-[#8a9bb0] group-hover:text-[#E8500A] transition-colors" />
+                <span className="text-[10px] font-black uppercase tracking-wider">
+                  Filters & Search
+                </span>
+              </div>
+              <ChevronRight size={14} className="text-[#8a9bb0] group-hover:text-[#E8500A] group-hover:translate-x-1 transition-all" />
+            </motion.button>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* FILTER DRAWER / BOTTOM SHEET */}
+      <AnimatePresence>
+        {isOpen && activeFiltersData && (
+          <>
+            {/* Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 z-[240]"
+              onClick={() => setIsOpen(false)}
+            />
+
+            {/* Drawer */}
+            <motion.div
+              id="floating-filter-drawer"
+              initial={isMobile ? { y: '100%' } : { x: '-100%' }}
+              animate={isMobile ? { y: 0 } : { x: 0 }}
+              exit={isMobile ? { y: '100%' } : { x: '-100%' }}
+              transition={{ type: "spring", damping: 25, stiffness: 350 }}
+              className={cn(
+                "bg-[#0A0B1E]/95 backdrop-blur-xl border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] text-white flex flex-col z-[250]",
+                isMobile
+                  ? "fixed bottom-0 left-0 right-0 h-[85vh] rounded-t-[32px] w-full border-t border-white/10"
+                  : "fixed left-0 top-0 bottom-0 w-[420px] max-w-full border-r border-white/10"
+              )}
+            >
+              {/* Drawer Header */}
+              <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02] shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                    <Filter size={16} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase tracking-widest text-[#E8500A] font-extrabold text-left">Consolidated discovery</div>
+                    <h3 className="text-sm font-black uppercase italic tracking-wider text-left">Filter & Search Panel</h3>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/15 hover:border-white/20 transition-all text-white shrink-0 cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              {/* Drawer Scrollable Body with Clean light theme style for perfect high-contrast filter rendering */}
+              <div className="flex-1 overflow-y-auto bg-[#F8FBFD] text-navy scroll-smooth p-6 space-y-6 text-left">
+                {/* 1. Page Search */}
+                {(activeFiltersData.searchQuery !== undefined || activeFiltersData.onSearchSubmit) && (
+                  <div className="flex flex-col gap-2">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Page Directory Search</div>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (activeFiltersData.onSearchSubmit) {
+                          activeFiltersData.onSearchSubmit(activeFiltersData.searchQuery || '');
+                        }
+                      }}
+                      className="relative w-full bg-[#0A0B1E]/5 p-1 rounded-full border border-gray-200 focus-within:border-[#E8500A]/40 transition-all duration-300"
+                    >
+                      <div className="flex items-center bg-white rounded-full overflow-hidden">
+                        <div className="pl-4 text-[#E8500A] shrink-0">
+                          <Search className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="text"
+                          value={activeFiltersData.searchQuery || ''}
+                          onChange={(e) => {
+                            if (activeFiltersData.setSearchQuery) {
+                              activeFiltersData.setSearchQuery(e.target.value);
+                            }
+                          }}
+                          placeholder={activeFiltersData.searchPlaceholder || "Search catalog..."}
+                          className="w-full h-10 bg-transparent outline-none pl-3 pr-20 text-navy text-xs font-semibold placeholder-gray-400 focus:outline-none focus:ring-0 border-none"
+                        />
+                        <button
+                          type="submit"
+                          className="absolute right-1.5 top-1.5 bottom-1.5 px-4 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                        >
+                          Search
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                {/* 2. Quick Filters */}
+                {activeFiltersData.quickFilters && (
+                  <div className="flex flex-col gap-2">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Quick Filters</div>
+                    <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3 shadow-sm">
+                      {activeFiltersData.quickFilters}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Active Chips */}
+                {activeFiltersData.activeChips && (
+                  <div className="flex flex-col gap-2">
+                    {activeFiltersData.activeChips}
+                  </div>
+                )}
+
+                {/* 4. Full Filter Architecture V2 */}
+                {activeFiltersData.fullFilters && (
+                  <div className="flex flex-col gap-2">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Advanced Refinements</div>
+                    <div>
+                      {activeFiltersData.fullFilters}
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. Sorting */}
+                {activeFiltersData.sorting && (
+                  <div className="flex flex-col gap-2">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Sorting & Display</div>
+                    <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm">
+                      {activeFiltersData.sorting}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 6. Footer Actions */}
+              {activeFiltersData.footerActions && (
+                <div className="p-4 border-t border-white/5 bg-white/[0.02] flex gap-2 shrink-0">
+                  {activeFiltersData.footerActions}
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </DrawerFilterContext.Provider>
+  );
+}
+
+export function useFloatingFilters() {
+  const context = useContext(DrawerFilterContext);
+  if (!context) {
+    throw new Error('useFloatingFilters must be used within a DrawerFilterProvider');
+  }
+  return context;
+}
+
+export function RegisterPageFilters({
+  id,
+  searchQuery,
+  setSearchQuery,
+  onSearchSubmit,
+  searchPlaceholder,
+  quickFilters,
+  activeChips,
+  fullFilters,
+  sorting,
+  footerActions
+}: { id: string } & FloatingFilterData) {
+  const { registerPageFilters } = useFloatingFilters();
+
+  useEffect(() => {
+    return registerPageFilters(id, {
+      searchQuery,
+      setSearchQuery,
+      onSearchSubmit,
+      searchPlaceholder,
+      quickFilters,
+      activeChips,
+      fullFilters,
+      sorting,
+      footerActions
+    });
+  }, [id, searchQuery, setSearchQuery, onSearchSubmit, searchPlaceholder, quickFilters, activeChips, fullFilters, sorting, footerActions]);
+
+  return null;
+}
+
+// ==========================================
+// FLOATING FILTER CONTEXT
+// Shared between pages and FloatingOverlays
+// ==========================================
+
+export interface FloatingFilterConfig {
+  // The complete left sidebar filter render function for this page
+  // Pages pass their entire sidebar filter JSX as a render prop
+  renderFilters: (() => React.ReactNode) | null;
+  // The page search bar — render prop
+  renderSearch: (() => React.ReactNode) | null;
+  // Active filter count for the badge
+  activeFilterCount: number;
+  // Quick filter bar chips for this page
+  quickFilters: QuickFilter[];
+  // Page name for the drawer header
+  pageName: string;
+  // Clear all filters for this page
+  onClearAll: (() => void) | null;
+}
+
+const defaultConfig: FloatingFilterConfig = {
+  renderFilters: null,
+  renderSearch: null,
+  activeFilterCount: 0,
+  quickFilters: [],
+  pageName: '',
+  onClearAll: null,
+};
+
+export const FloatingFilterContext = createContext<{
+  config: FloatingFilterConfig;
+  setConfig: (config: FloatingFilterConfig) => void;
+}>({
+  config: defaultConfig,
+  setConfig: () => {},
+});
+
+export function useFloatingFilter() {
+  return useContext(FloatingFilterContext);
+}
+
+// Provider — wrap App with this
+export function FloatingFilterProvider({ children }: { children: React.ReactNode }) {
+  const [config, setConfig] = useState<FloatingFilterConfig>(defaultConfig);
+  return (
+    <FloatingFilterContext.Provider value={{ config, setConfig }}>
+      {children}
+    </FloatingFilterContext.Provider>
+  );
+}
+
+// Hook for pages to register their filter config
+// Call this inside a page to register filter callbacks and active values
+export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[]) {
+  const { setConfig } = useFloatingFilter();
+  
+  const prevDepsRef = useRef<any[] | undefined>(undefined);
+  const prevConfigRef = useRef<FloatingFilterConfig | undefined>(undefined);
+
+  useEffect(() => {
+    let shouldUpdate = false;
+
+    if (deps) {
+      // Compare deps array manually if provided
+      if (!prevDepsRef.current) {
+        shouldUpdate = true;
+      } else {
+        shouldUpdate = deps.some((dep, i) => !Object.is(dep, prevDepsRef.current?.[i]));
+      }
+      prevDepsRef.current = deps;
+    } else {
+      // Do a robust semantic comparison of the config properties if no deps are provided
+      if (!prevConfigRef.current) {
+        shouldUpdate = true;
+      } else {
+        const prev = prevConfigRef.current;
+        const isSame = 
+          prev.pageName === config.pageName &&
+          prev.activeFilterCount === config.activeFilterCount &&
+          prev.onClearAll === config.onClearAll &&
+          prev.quickFilters.length === config.quickFilters.length &&
+          prev.quickFilters.every((q, i) => {
+            const target = config.quickFilters[i];
+            return target && q.id === target.id && q.label === target.label && q.active === target.active;
+          });
+        shouldUpdate = !isSame;
+      }
+    }
+
+    if (shouldUpdate) {
+      setConfig(config);
+    }
+    
+    prevConfigRef.current = config;
+
+    return () => {
+      // When the component unmounts, reset config to default
+      setConfig(defaultConfig);
+    };
+  }); // Runs on every render to manually check dependency/config updates safely
+}
+
 
