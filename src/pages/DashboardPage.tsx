@@ -739,10 +739,10 @@ const NotificationsSection = () => {
 
 const SettingsSection = () => {
   const { currentUser, setCurrentUser } = useGlobalState();
-  const [name, setName] = useState(currentUser?.name || 'Farhan Bin Rafiq');
-  const [email, setEmail] = useState(currentUser?.email || 'farhan-88@gmail.com');
+  const [name, setName] = useState(currentUser?.name || '');
+  const [email, setEmail] = useState(currentUser?.email || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
-  const [address, setAddress] = useState(currentUser?.address || 'Dhaka, Bangladesh');
+  const [address, setAddress] = useState(currentUser?.address || '');
 
   useEffect(() => {
     if (currentUser) {
@@ -797,6 +797,7 @@ const SettingsSection = () => {
                         className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        placeholder="Your full name"
                       />
                    </div>
                    <div className="space-y-2">
@@ -805,6 +806,7 @@ const SettingsSection = () => {
                         className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        placeholder="your@email.com"
                       />
                    </div>
                    <div className="space-y-2">
@@ -813,6 +815,7 @@ const SettingsSection = () => {
                         className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+880 1XXX-XXXXXX"
                       />
                    </div>
                    <div className="space-y-2">
@@ -821,6 +824,7 @@ const SettingsSection = () => {
                         className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
+                        placeholder="Your address, Dhaka, Bangladesh"
                       />
                    </div>
                 </div>

@@ -322,14 +322,10 @@ export function AllProductsPage() {
             </h3>
             {(priceMin > 0 || priceMax < 999999) && (
               <button
-                type="button"
-                onClick={() => {
-                  setPriceMin(0);
-                  setPriceMax(999999);
-                }}
-                className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer hover:text-red-650 transition-colors border-none bg-transparent"
+                onClick={() => { setPriceMin(0); setPriceMax(999999); }}
+                className="text-[9px] font-black text-app-text-secondary hover:text-orange-primary underline ml-auto"
               >
-                Clear
+                Reset
               </button>
             )}
           </div>
@@ -340,9 +336,9 @@ export function AllProductsPage() {
                 type="number"
                 placeholder="Min"
                 value={priceMin === 0 ? '' : priceMin}
-                onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : Number(e.target.value);
-                  setPriceMin(val);
+                onChange={e => {
+                  const val = Math.max(0, Number(e.target.value) || 0);
+                  setPriceMin(Math.min(val, priceMax - 1));
                 }}
                 className="h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-bold w-full focus:outline-none focus:border-orange-primary"
               />
@@ -353,14 +349,20 @@ export function AllProductsPage() {
                 type="number"
                 placeholder="Max"
                 value={priceMax === 999999 ? '' : priceMax}
-                onChange={(e) => {
-                  const val = e.target.value === '' ? 999999 : Number(e.target.value);
-                  setPriceMax(val);
+                onChange={e => {
+                  const val = Math.max(1, Number(e.target.value) || 999999);
+                  setPriceMax(Math.max(val, priceMin + 1));
                 }}
                 className="h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-bold w-full focus:outline-none focus:border-orange-primary"
               />
             </div>
           </div>
+
+          {priceMin >= priceMax && (
+            <p className="text-[9px] text-red-500 font-bold mt-1">
+              Min price must be less than max price
+            </p>
+          )}
 
           <div className="text-[10.5px] font-bold text-navy uppercase tracking-wider">
             ৳{priceMin.toLocaleString()} — ৳{priceMax.toLocaleString()}
@@ -617,11 +619,9 @@ export function AllProductsPage() {
         </div>
       </div>
 
-      {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="relative z-10 bg-white/95 border-b border-[#E8EDF2] shadow-sm py-4 transition-all duration-300">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
-          
-          {/* 1. Search Bar inside Sticky Container */}
+      {/* PAGE SEARCH BAR — static, not sticky */}
+      <div className="w-full bg-white border-b border-[#E8EDF2] py-3">
+        <div className="max-w-[1440px] mx-auto px-6">
           <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
             <div className="flex items-center bg-white rounded-full">
               <div className="pl-4 text-[#E8500A] shrink-0">
@@ -643,73 +643,8 @@ export function AllProductsPage() {
               </button>
             </div>
           </div>
-
-          {/* 2. Navigation Tabs */}
-          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
-            {[
-              { id: 'All Products', label: "All Products", icon: <Layers size={13} /> },
-              { id: 'New Arrivals', label: "New Arrivals", icon: <Clock size={13} /> },
-              { id: 'Bestsellers', label: "Bestsellers", icon: <Flame size={13} /> },
-              { id: 'Flash Deals', label: "Flash Deals", icon: <Sparkles size={13} /> },
-              { id: 'COD Ready', label: "COD Ready", icon: <Award size={13} /> }
-            ].map((tab) => (
-              <button
-                key={tab.label}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  const el = document.getElementById("all-products-display");
-                  if (el) {
-                    const offset = 220; // safe header + sticky offset
-                    const elementPosition = el.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - offset;
-                    window.scrollTo({
-                      top: offsetPosition,
-                      behavior: 'smooth'
-                    });
-                  }
-                }}
-                className={cn(
-                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
-                  activeTab === tab.id
-                    ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
-                    : "bg-white border-gray-250 text-gray-400 hover:text-navy hover:bg-gray-50/80"
-                )}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-
         </div>
       </div>
-
-      {/* LAYER 1: QUICK FILTER BAR */}
-      <QuickFilterBar
-        title="Products Quick Specs"
-        onOpenFullFilters={() => {
-          const el = document.getElementById("global-sidebar-filters");
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add("ring-2", "ring-orange-primary/50");
-            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
-          }
-        }}
-        filters={[
-          { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
-          { id: 'trending', label: '🔥 Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
-          { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'COD Ready', onClick: () => setActiveTab(activeTab === 'COD Ready' ? 'All Products' : 'COD Ready') },
-          ...(mode === 'wholesale'
-            ? [
-                { id: 'moq-low', label: 'Low MOQ (≤50)', active: moqFilter === 50, onClick: () => setMoqFilter(moqFilter === 50 ? 0 : 50) },
-                { id: 'slab-low', label: 'Under ৳5k', active: priceTierSlab === 5000, onClick: () => setPriceTierSlab(priceTierSlab === 5000 ? 100000 : 5000) }
-              ]
-            : [
-                { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
-              ]
-          )
-        ]}
-      />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -861,14 +796,10 @@ export function AllProductsPage() {
                       </h3>
                       {(priceMin > 0 || priceMax < 999999) && (
                         <button
-                          type="button"
-                          onClick={() => {
-                            setPriceMin(0);
-                            setPriceMax(999999);
-                          }}
-                          className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer hover:text-red-650 transition-colors border-none bg-transparent"
+                          onClick={() => { setPriceMin(0); setPriceMax(999999); }}
+                          className="text-[9px] font-black text-app-text-secondary hover:text-orange-primary underline ml-auto"
                         >
-                          Clear
+                          Reset
                         </button>
                       )}
                     </div>
@@ -879,9 +810,9 @@ export function AllProductsPage() {
                           type="number"
                           placeholder="Min"
                           value={priceMin === 0 ? '' : priceMin}
-                          onChange={(e) => {
-                            const val = e.target.value === '' ? 0 : Number(e.target.value);
-                            setPriceMin(val);
+                          onChange={e => {
+                            const val = Math.max(0, Number(e.target.value) || 0);
+                            setPriceMin(Math.min(val, priceMax - 1));
                           }}
                           className="h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-bold w-full focus:outline-none focus:border-orange-primary"
                         />
@@ -892,14 +823,20 @@ export function AllProductsPage() {
                           type="number"
                           placeholder="Max"
                           value={priceMax === 999999 ? '' : priceMax}
-                          onChange={(e) => {
-                            const val = e.target.value === '' ? 999999 : Number(e.target.value);
-                            setPriceMax(val);
+                          onChange={e => {
+                            const val = Math.max(1, Number(e.target.value) || 999999);
+                            setPriceMax(Math.max(val, priceMin + 1));
                           }}
                           className="h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-bold w-full focus:outline-none focus:border-orange-primary"
                         />
                       </div>
                     </div>
+
+                    {priceMin >= priceMax && (
+                      <p className="text-[9px] text-red-500 font-bold mt-1">
+                        Min price must be less than max price
+                      </p>
+                    )}
 
                     <div className="text-[10.5px] font-bold text-navy uppercase tracking-wider">
                       ৳{priceMin.toLocaleString()} — ৳{priceMax.toLocaleString()}

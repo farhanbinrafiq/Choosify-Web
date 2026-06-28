@@ -2,17 +2,28 @@ import React from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { CheckCircle2, ShoppingBag, FileText, ArrowRight, MessageSquare, ShieldCheck, Download, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useGlobalState } from '../context/GlobalStateContext';
 
 export function OrderSuccessPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const order = (location.state as any)?.order;
+  const { clearCart } = useGlobalState();
 
   React.useEffect(() => {
     if (!order) {
       navigate('/');
     }
   }, [order, navigate]);
+
+  React.useEffect(() => {
+    // Clear cart after successful order display
+    // Small delay so the success page has time to read order data before cart clears
+    const timer = setTimeout(() => {
+      if (typeof clearCart === 'function') clearCart();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [clearCart]);
 
   if (!order) return null;
 

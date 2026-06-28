@@ -1346,11 +1346,9 @@ export function BrandDetailPage() {
          </div>
       </div>
 
-      {/* 3. STICKY SECTION NAVIGATION */}
-      <div className="relative z-10 bg-white/95 border-b border-gray-100 shadow-sm py-3.5">
-         <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-3.5">
-            
-            {/* Search Bar */}
+      {/* PAGE SEARCH BAR — static, not sticky */}
+      <div className="w-full bg-white border-b border-[#E8EDF2] py-3">
+         <div className="max-w-[1440px] mx-auto px-6">
             <div 
                className="relative w-full max-w-2xl mx-auto bg-gray-50 p-1 rounded-full border border-gray-200/50 shadow-sm focus-within:border-gray-200/90 transition-all duration-300"
                style={{ width: '100%', maxWidth: '640px' }}
@@ -1377,121 +1375,8 @@ export function BrandDetailPage() {
                   </button>
                </div>
             </div>
-
-            <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
-               
-               <button 
-                 onClick={() => scrollToSection('all')}
-                 className={cn(
-                   "px-6 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
-                   activeSection === 'all' 
-                     ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent" 
-                     : "bg-white border border-gray-200/85 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-50/80"
-                 )}
-               >
-                  All
-               </button>
-
-               {[
-                 { id: 'deals-section', name: 'deals', label: 'Deals', icon: <Gift size={13} /> },
-                 { id: 'products-section', name: 'products', label: 'Products', icon: <Package size={13} /> },
-                 { id: 'influencer-reviews-section', name: 'influencer', label: 'Influencer Reviews', icon: <Play size={13} /> },
-                 { id: 'public-reviews-section', name: 'public', label: 'Public Reviews', icon: <Star size={13} /> },
-                 { id: 'brand-overview-section', name: 'overview', label: 'Brand Overview', icon: <Info size={13} /> }
-               ].map(item => (
-                 <button 
-                   key={item.id}
-                   onClick={() => scrollToSection(item.id)}
-                   className={cn(
-                     "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
-                     activeSection === item.name 
-                       ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent" 
-                       : "bg-white border border-gray-200/85 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-50/80"
-                   )}
-                 >
-                    {item.icon}
-                    <span>{item.label}</span>
-                 </button>
-               ))}
-            </div>
-          </div>
-       </div>
-
-      {/* QUICK FILTER BAR & ACTIVE FILTER CHIPS (V2 Architecture) */}
-      <QuickFilterBar
-        title="Brand Catalog Quick Specs"
-        onOpenFullFilters={() => {
-          const el = document.getElementById("brand-sidebar-filters");
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add("ring-2", "ring-orange-primary/50");
-            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
-          }
-        }}
-        filters={[
-          {
-            id: 'all-products',
-            label: 'All Products',
-            active: !dealsOnlyFilter && !couponsOnlyFilter && !verifiedOnlyFilter && !inStockOnlyFilter && !featuredOnlyFilter,
-            onClick: () => {
-              setDealsOnlyFilter(false);
-              setCouponsOnlyFilter(false);
-              setVerifiedOnlyFilter(false);
-              setInStockOnlyFilter(false);
-              setFeaturedOnlyFilter(false);
-            }
-          },
-          {
-            id: 'deals-only',
-            label: 'Deals',
-            active: dealsOnlyFilter,
-            onClick: () => setDealsOnlyFilter(!dealsOnlyFilter)
-          },
-          {
-            id: 'coupons-only',
-            label: 'Coupons Available',
-            active: couponsOnlyFilter,
-            onClick: () => setCouponsOnlyFilter(!couponsOnlyFilter)
-          },
-          {
-            id: 'verified',
-            label: 'Verified Store',
-            active: verifiedOnlyFilter,
-            onClick: () => setVerifiedOnlyFilter(!verifiedOnlyFilter)
-          },
-          {
-            id: 'in-stock',
-            label: 'In Stock',
-            active: inStockOnlyFilter,
-            onClick: () => setInStockOnlyFilter(!inStockOnlyFilter)
-          },
-          {
-            id: 'featured',
-            label: 'Featured',
-            active: featuredOnlyFilter,
-            onClick: () => setFeaturedOnlyFilter(!featuredOnlyFilter)
-          },
-          {
-            id: 'sort',
-            label: sortOption === 'default' ? 'Sort Selection' : `Sort: ${
-              sortOption === 'price-asc' ? '৳ Low to High' :
-              sortOption === 'price-desc' ? '৳ High to Low' :
-              sortOption === 'rating-desc' ? 'Top Rating' : 'Best Discount'
-            }`,
-            active: sortOption !== 'default',
-            onClick: () => {
-              // Cycle through sort options
-              setSortOption(prev => {
-                if (prev === 'default') return 'price-asc';
-                if (prev === 'price-asc') return 'price-desc';
-                if (prev === 'price-desc') return 'rating-desc';
-                if (prev === 'rating-desc') return 'discount-desc';
-                return 'default';
-              });
-            }
-          }
-        ]}
-      />
+         </div>
+      </div>
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips

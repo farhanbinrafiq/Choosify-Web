@@ -319,6 +319,17 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
 
         {/* Messaging / Conversation content viewport */}
         <main className={`flex-1 flex flex-col bg-choosify-feed ${threadId ? 'flex' : 'hidden md:flex'}`}>
+          {threadId && (
+            <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-[#D6E1EC] flex-shrink-0">
+              <Link
+                to="/messages"
+                className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-600 hover:text-navy transition-colors"
+              >
+                <ArrowLeft size={14} />
+                Back to Messages
+              </Link>
+            </div>
+          )}
           {activeThread ? (
             <>
               {/* Header inside open thread Chat */}

@@ -3,7 +3,8 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { 
   Search, Star, Tag, Award, Heart, Sparkles, User, HelpCircle, 
   Copy, Check, ChevronRight, ArrowRight, ShoppingBag, FolderOpen, 
-  Percent, AlertCircle, Sparkle, LayoutGrid, CheckCircle, Layers
+  Percent, AlertCircle, Sparkle, LayoutGrid, CheckCircle, Layers,
+  BookOpen, Users
 } from 'lucide-react';
 import { PRODUCTS, BRANDS, BLOGS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
@@ -158,6 +159,17 @@ export function SearchPage() {
       c.name?.toLowerCase().includes(q) ||
       c.handle?.toLowerCase().includes(q) ||
       c.bio?.toLowerCase().includes(q)
+    );
+  }, [rawQuery]);
+
+  const filteredProducts = useMemo(() => {
+    if (!rawQuery.trim()) return PRODUCTS;
+    const q = rawQuery.toLowerCase();
+    return PRODUCTS.filter(p =>
+      p.title.toLowerCase().includes(q) || 
+      p.brand.toLowerCase().includes(q) || 
+      p.category.toLowerCase().includes(q) || 
+      (p.description || '').toLowerCase().includes(q)
     );
   }, [rawQuery]);
 
@@ -445,15 +457,15 @@ export function SearchPage() {
   // Tab configurations
   const tabConfig = [
     { key: 'all', label: 'All Matches', count: searchResults.total },
-    { key: 'products', label: 'Products', count: searchResults.products.length },
+    { key: 'products', label: 'Products', count: filteredProducts.length },
     { key: 'brands', label: 'Brand Profiles', count: searchResults.brands.length },
     { key: 'deals', label: 'Deals', count: searchResults.deals.length },
     { key: 'favorites', label: 'Customer Favorites', count: searchResults.favorites.length },
     { key: 'compares', label: 'Compare Results', count: searchResults.compares.length },
-    { key: 'guides', label: 'Buying Guides', count: searchResults.guides.length },
+    { key: 'guides', label: 'Buying Guides', count: filteredGuides.length },
     { key: 'coupons', label: 'Coupons / Promos', count: searchResults.coupons.length },
     { key: 'categories', label: 'Categories', count: searchResults.categories.length },
-    { key: 'influencers', label: 'Creator Profiles', count: searchResults.influencers.length }
+    { key: 'influencers', label: 'Creator Profiles', count: filteredCreators.length }
   ];
 
   return (
@@ -591,61 +603,79 @@ export function SearchPage() {
             )}
 
             {/* 4. GUIDES & RECOMMENDATIONS SECTION */}
-            {(activeTab === 'all' || activeTab === 'guides') && searchResults.guides.length > 0 && (
-              <div className="bg-white rounded-[5px] border border-gray-200 p-6">
-                <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={15} className="text-[#E8500A]" />
-                    <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
-                      Expert Guides & Recommendations ({searchResults.guides.length})
-                    </h2>
-                  </div>
-                  {activeTab === 'all' && searchResults.guides.length > 3 && (
-                    <button 
-                      onClick={() => setActiveTab('guides')} 
-                      className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1"
-                    >
-                      See All Guides <ChevronRight size={12} />
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {(activeTab === 'all' ? searchResults.guides.slice(0, 3) : searchResults.guides).map((guide: any) => (
-                    <div 
-                      key={guide.id} 
-                      className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col justify-between text-left"
-                    >
-                      <div>
-                        {guide.category && (
-                          <span className="inline-block bg-orange-primary/10 text-[#E8500A] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-2">
-                            {guide.category}
-                          </span>
-                        )}
-                        <h4 className="font-bold text-xs uppercase text-[#1A1D4E] line-clamp-2 leading-tight">
-                          {guide.title}
-                        </h4>
-                        <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">
-                          By {guide.author}
-                        </p>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
-                        {guide.views && (
-                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
-                            {guide.views} views
-                          </span>
-                        )}
-                        <Link 
-                          to={`/guides/${guide.id}`}
-                          className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-1 hover:underline"
-                        >
-                          Read Guide <ArrowRight size={10} />
-                        </Link>
-                      </div>
+            {(activeTab === 'all' || activeTab === 'guides') && (
+              searchResults.guides.length > 0 ? (
+                <div className="bg-white rounded-[5px] border border-gray-200 p-6">
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={15} className="text-[#E8500A]" />
+                      <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
+                        Expert Guides & Recommendations ({searchResults.guides.length})
+                      </h2>
                     </div>
-                  ))}
+                    {activeTab === 'all' && searchResults.guides.length > 3 && (
+                      <button 
+                        onClick={() => setActiveTab('guides')} 
+                        className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1"
+                      >
+                        See All Guides <ChevronRight size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {(activeTab === 'all' ? searchResults.guides.slice(0, 3) : searchResults.guides).map((guide: any) => (
+                      <div 
+                        key={guide.id} 
+                        className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col justify-between text-left"
+                      >
+                        <div>
+                          {guide.category && (
+                            <span className="inline-block bg-orange-primary/10 text-[#E8500A] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-2">
+                              {guide.category}
+                            </span>
+                          )}
+                          <h4 className="font-bold text-xs uppercase text-[#1A1D4E] line-clamp-2 leading-tight">
+                            {guide.title}
+                          </h4>
+                          <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">
+                            By {guide.author}
+                          </p>
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
+                          {guide.views && (
+                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                              {guide.views} views
+                            </span>
+                          )}
+                          <Link 
+                            to={`/guides/${guide.id}`}
+                            className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-1 hover:underline"
+                          >
+                            Read Guide <ArrowRight size={10} />
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : activeTab === 'guides' ? (
+                <>
+                  {filteredGuides.length === 0 && rawQuery.trim() && (
+                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                      <BookOpen className="w-10 h-10 text-white/20 mb-4" />
+                      <p className="text-white/40 text-sm font-bold">No guides found for "{rawQuery}"</p>
+                      <p className="text-white/25 text-xs mt-1">Try a different search term</p>
+                    </div>
+                  )}
+                  {filteredGuides.length === 0 && !rawQuery.trim() && (
+                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                      <BookOpen className="w-10 h-10 text-white/20 mb-4" />
+                      <p className="text-white/40 text-sm font-bold">Start typing to search guides</p>
+                    </div>
+                  )}
+                </>
+              ) : null
             )}
 
             {/* 2. BRANDS SECTION */}
@@ -857,74 +887,83 @@ export function SearchPage() {
             )}
 
             {/* 7. INFLUENCERS & CREATORS SECTION */}
-            {(activeTab === 'all' || activeTab === 'influencers') && searchResults.influencers.length > 0 && (
-              <div className="bg-white rounded-[5px] border border-gray-200 p-6">
-                <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
-                  <div className="flex items-center gap-2">
-                    <User size={15} className="text-[#E8500A]" />
-                    <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
-                      Professional Influencers & Creators ({searchResults.influencers.length})
-                    </h2>
-                  </div>
-                  {activeTab === 'all' && searchResults.influencers.length > 2 && (
-                    <button onClick={() => setActiveTab('influencers')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
-                      See All Creators <ChevronRight size={12} />
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {(activeTab === 'all' ? searchResults.influencers.slice(0, 2) : searchResults.influencers).map((inf) => (
-                    <div
-                      key={inf.id}
-                      className="border border-[#e8edf2] rounded-[5px] p-5 bg-white text-left flex gap-5 hover:border-orange-primary/20 transition-all shadow-none"
-                    >
-                      <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 bg-gray-100 border border-[#21262D]">
-                        <img src={inf.avatar} alt={inf.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0 flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-center justify-between gap-2">
-                            <div>
-                              <h4 className="font-sans text-xs font-semibold uppercase tracking-tight text-[#1A1D4E] flex items-center gap-1.5 leading-none">
-                                {inf.name}
-                                <span className="bg-emerald-100 text-emerald-800 text-[6.5px] font-sans font-black px-1.5 py-0.5 rounded uppercase tracking-wider scale-95 leading-none">
-                                  {inf.verifiedStatus}
-                                </span>
-                              </h4>
-                              <span className="text-[10px] text-gray-400 font-medium font-mono leading-none">{inf.handle} ({inf.platform})</span>
-                            </div>
-                            <div className="flex items-center gap-0.5 shrink-0 bg-orange-primary/5 px-1.5 py-0.5 rounded leading-none">
-                              <Star size={9.5} className="fill-orange-primary text-orange-primary" />
-                              <span className="text-[8.5px] font-bold text-gray-650">{inf.rating || 4.7}</span>
-                            </div>
-                          </div>
-                          
-                          <p className="text-[10.5px] text-gray-500 mt-2 hover:line-clamp-none line-clamp-2">
-                            {inf.bio}
-                          </p>
-                        </div>
-
-                        {inf.quickTip && (
-                          <div className="mt-4 pt-3 border-t border-dashed border-gray-150 text-[10px] text-orange-primary italic flex items-start gap-1">
-                            <Sparkle size={10} className="shrink-0 mt-0.5 fill-[#E8500A]" />
-                            <span><strong>Expert Tip:</strong> {inf.quickTip}</span>
-                          </div>
-                        )}
-
-                        <div className="mt-3 flex justify-end">
-                          <Link 
-                            to={inf.id.startsWith('creator-') ? `/creators/${inf.id}` : inf.id === 'inf-1' ? '/creators/creator-farhan' : inf.id === 'inf-2' ? '/creators/creator-sarah' : inf.id === 'inf-3' ? '/creators/creator-imtiaz' : '/creators'}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-orange-primary/10 hover:bg-orange-primary text-[#E8500A] hover:text-white text-[9px] font-black uppercase tracking-widest transition-all duration-300 cursor-pointer"
-                          >
-                            Send Direct Brief <ChevronRight size={10} className="stroke-[2.5]" />
-                          </Link>
-                        </div>
-                      </div>
+            {(activeTab === 'all' || activeTab === 'influencers') && (
+              searchResults.influencers.length > 0 ? (
+                <div className="bg-white rounded-[5px] border border-gray-200 p-6">
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
+                    <div className="flex items-center gap-2">
+                      <User size={15} className="text-[#E8500A]" />
+                      <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
+                        Professional Influencers & Creators ({searchResults.influencers.length})
+                      </h2>
                     </div>
-                  ))}
+                    {activeTab === 'all' && searchResults.influencers.length > 2 && (
+                      <button onClick={() => setActiveTab('influencers')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                        See All Creators <ChevronRight size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {(activeTab === 'all' ? searchResults.influencers.slice(0, 2) : searchResults.influencers).map((inf) => (
+                      <div
+                        key={inf.id}
+                        className="border border-[#e8edf2] rounded-[5px] p-5 bg-white text-left flex gap-5 hover:border-orange-primary/20 transition-all shadow-none"
+                      >
+                        <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 bg-gray-100 border border-[#21262D]">
+                          <img src={inf.avatar} alt={inf.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between gap-2">
+                              <div>
+                                <h4 className="font-sans text-xs font-semibold uppercase tracking-tight text-[#1A1D4E] flex items-center gap-1.5 leading-none">
+                                  {inf.name}
+                                  <span className="bg-emerald-100 text-emerald-800 text-[6.5px] font-sans font-black px-1.5 py-0.5 rounded uppercase tracking-wider scale-95 leading-none">
+                                    {inf.verifiedStatus}
+                                  </span>
+                                </h4>
+                                <span className="text-[10px] text-gray-400 font-medium font-mono leading-none">{inf.handle} ({inf.platform})</span>
+                              </div>
+                              <div className="flex items-center gap-0.5 shrink-0 bg-orange-primary/5 px-1.5 py-0.5 rounded leading-none">
+                                <Star size={9.5} className="fill-orange-primary text-orange-primary" />
+                                <span className="text-[8.5px] font-bold text-gray-650">{inf.rating || 4.7}</span>
+                              </div>
+                            </div>
+                            
+                            <p className="text-[10.5px] text-gray-500 mt-2 hover:line-clamp-none line-clamp-2">
+                              {inf.bio}
+                            </p>
+                          </div>
+
+                          {inf.quickTip && (
+                            <div className="mt-4 pt-3 border-t border-dashed border-gray-150 text-[10px] text-orange-primary italic flex items-start gap-1">
+                              <Sparkle size={10} className="shrink-0 mt-0.5 fill-[#E8500A]" />
+                              <span><strong>Expert Tip:</strong> {inf.quickTip}</span>
+                            </div>
+                          )}
+
+                          <div className="mt-3 flex justify-end">
+                            <Link 
+                              to={inf.id.startsWith('creator-') ? `/creators/${inf.id}` : inf.id === 'inf-1' ? '/creators/creator-farhan' : inf.id === 'inf-2' ? '/creators/creator-sarah' : inf.id === 'inf-3' ? '/creators/creator-imtiaz' : '/creators'}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-orange-primary/10 hover:bg-orange-primary text-[#E8500A] hover:text-white text-[9px] font-black uppercase tracking-widest transition-all duration-300 cursor-pointer"
+                            >
+                              Send Direct Brief <ChevronRight size={10} className="stroke-[2.5]" />
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : activeTab === 'influencers' ? (
+                filteredCreators.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <Users className="w-10 h-10 text-white/20 mb-4" />
+                    <p className="text-white/40 text-sm font-bold">No creators found{rawQuery.trim() ? ` for "${rawQuery}"` : ''}</p>
+                  </div>
+                )
+              ) : null
             )}
 
             {/* 8. CUSTOMER FAVORITES SECTION */}

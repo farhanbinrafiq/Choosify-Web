@@ -24,7 +24,7 @@ export function Navbar() {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn } = useGlobalState();
+  const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn, currentUser } = useGlobalState();
   const { threads, notifications = [], setNotifications } = useDashboard();
 
   const unreadMsgCount = threads.filter(t => t.unread).length;
@@ -209,21 +209,18 @@ export function Navbar() {
                 )}
               </div>
             </button>
-            <button 
-              type="button"
-              onClick={() => navigate('/dashboard?tab=notifications')}
-              className="relative text-white/60 hover:text-white transition-colors animate-in fade-in"
+            <Link
+              to="/dashboard?tab=notifications"
+              className="relative flex items-center justify-center w-9 h-9 rounded-xl hover:bg-white/5 transition-colors"
               title="Notifications"
             >
-              <div className="relative">
-                <Bell size={18} />
-                {unreadNotifCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
-                    {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                  </span>
-                )}
-              </div>
-            </button>
+              <Bell size={18} className="text-white/70 hover:text-white transition-colors" />
+              {unreadNotifCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                </span>
+              )}
+            </Link>
           </div>
 
           {/* POST YOUR DEAL BUTTON FOR VISITORS */}
@@ -258,7 +255,9 @@ export function Navbar() {
                 >
                   <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-full h-full object-cover" alt="Profile" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block italic text-white/70 group-hover:text-white transition-colors">Hi, Farhan</span>
+                <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block italic text-white/70 group-hover:text-white transition-colors">
+                  Hi, {currentUser?.name?.split(' ')[0] || 'You'}
+                </span>
               </div>
 
               <AnimatePresence>

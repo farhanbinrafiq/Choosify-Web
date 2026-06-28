@@ -714,13 +714,9 @@ export function CustomerFavoritePage() {
         </div>
       </div>
 
-      {/* ================================================= */}
-      {/* 3. STICKY SUB-NAVIGATION BAR (Directly below hero) */}
-      {/* ================================================= */}
-      <div className="relative z-10 bg-white/95 border-b border-gray-150 shadow-sm py-4">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4">
-          
-          {/* A. Search Bar inside Sticky Container */}
+      {/* PAGE SEARCH BAR — static, not sticky */}
+      <div className="w-full bg-white border-b border-[#E8EDF2] py-3">
+        <div className="max-w-[1440px] mx-auto px-6">
           <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
             <div className="flex items-center bg-white rounded-full">
               <div className="pl-4 text-[#E8500A] shrink-0">
@@ -741,108 +737,8 @@ export function CustomerFavoritePage() {
               </button>
             </div>
           </div>
-
-          {/* B. Dynamic Navigation Tabs with icons */}
-          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
-            {navigationItems.map(item => {
-              // Micro icon associations matching requirements
-              let icon = <Package size={13} />;
-              if (item === 'Gadgets') icon = <Smartphone size={13} />;
-              if (item === 'Jewelry') icon = <Star size={13} />;
-              if (item === 'Clothing') icon = <Shirt size={13} />;
-              if (item === 'Belts') icon = <Award size={13} />;
-              if (item === 'Eyewear') icon = <Eye size={13} />;
-
-              return (
-                <button 
-                  key={item}
-                  onClick={() => {
-                    setActiveTab(item);
-                    window.scrollTo({ top: 320, behavior: 'smooth' });
-                  }}
-                  className={cn(
-                    "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
-                    activeTab === item 
-                      ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic" 
-                      : "bg-white border-gray-200 text-gray-400 hover:text-navy hover:bg-gray-50"
-                  )}
-                >
-                  {icon}
-                  <span>{item}</span>
-                </button>
-              );
-            })}
-          </div>
-
         </div>
       </div>
-
-      {/* ================================================= */}
-      {/* LAYER 1: QUICK FILTER BAR */}
-      {/* ================================================= */}
-      <QuickFilterBar
-        title="Favorites Quick Specs"
-        onOpenFullFilters={() => {
-          const el = document.getElementById("favorites-sidebar-filters");
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add("ring-2", "ring-orange-primary/50");
-            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
-          }
-        }}
-        filters={[
-          {
-            id: 'trending-today',
-            label: '🔥 Trending Today',
-            active: trendingFilter === '🔥 Trending Today',
-            onClick: () => setTrendingFilter(trendingFilter === '🔥 Trending Today' ? 'All' : '🔥 Trending Today')
-          },
-          {
-            id: 'most-loved',
-            label: '❤️ Most Loved',
-            active: trendingFilter === '❤️ Most Loved',
-            onClick: () => setTrendingFilter(trendingFilter === '❤️ Most Loved' ? 'All' : '❤️ Most Loved')
-          },
-          {
-            id: 'highest-rated',
-            label: '⭐ Highest Rated (4.8+)',
-            active: ratingFilter === '4.8',
-            onClick: () => setRatingFilter(ratingFilter === '4.8' ? null : '4.8')
-          },
-          {
-            id: 'recently-added',
-            label: '⏰ Recently Added',
-            active: sortOption === 'views-desc',
-            onClick: () => setSortOption(sortOption === 'views-desc' ? 'default' : 'views-desc')
-          },
-          {
-            id: 'verified-brands',
-            label: '✓ Verified Brands',
-            active: verifiedBrandFilter === 'verified',
-            onClick: () => setVerifiedBrandFilter(verifiedBrandFilter === 'verified' ? null : 'verified')
-          },
-          {
-            id: 'shop-now',
-            label: '🛒 Shop Now (In Stock)',
-            active: availabilityFilter === 'in-stock',
-            onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? null : 'in-stock')
-          },
-          {
-            id: 'cycle-sort',
-            label: sortOption === 'default' ? 'Sort' : `Sort: ${sortOption === 'price-asc' ? '৳ Low' : sortOption === 'price-desc' ? '৳ High' : sortOption === 'rating-desc' ? 'Rating' : 'Views'}`,
-            active: sortOption !== 'default',
-            onClick: () => {
-              const next: Record<string, string> = {
-                'default': 'price-asc',
-                'price-asc': 'price-desc',
-                'price-desc': 'rating-desc',
-                'rating-desc': 'default'
-              };
-              setSortOption(next[sortOption] || 'default');
-            }
-          }
-        ]}
-      />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips

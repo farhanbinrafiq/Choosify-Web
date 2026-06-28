@@ -212,7 +212,7 @@ export function OptionalAddonsModule({
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 px-4 sm:px-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
         {addons.map(addon => {
           const isSelected = selectedIds.has(addon.id);
           const isUnavailable = !addon.available;
@@ -281,7 +281,7 @@ export function OptionalAddonsModule({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="mt-4 mx-4 sm:mx-0 rounded-2xl border border-white/10 bg-[#0A0B1E]/60 px-4 py-3.5 overflow-hidden"
+            className="mt-3 sm:mt-4 rounded-2xl border border-white/10 bg-[#0A0B1E]/60 px-4 py-3.5 overflow-hidden"
           >
             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 block mb-2.5">
               ORDER SUMMARY
@@ -307,7 +307,7 @@ export function OptionalAddonsModule({
             {/* Total */}
             <div className="flex items-center justify-between">
               <span className="text-[12px] font-black uppercase tracking-wider text-white italic">Total</span>
-              <span className="text-[14px] font-black text-[#E8500A] italic">
+              <span className="text-[13px] sm:text-[14px] font-black text-[#E8500A] italic">
                 ৳{(basePrice + addonTotal).toLocaleString()}
               </span>
             </div>

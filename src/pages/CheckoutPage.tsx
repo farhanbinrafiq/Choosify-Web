@@ -128,7 +128,7 @@ export function CheckoutPage() {
       ? Math.round(subtotal * appliedPromo.discount / 100)
       : appliedPromo.discount
     : 0;
-  const finalTotal = aggregateTotal - promoDiscount;
+  const finalTotal = Math.max(0, aggregateTotal - promoDiscount);
 
   // COD support limits (retail under 150k, B2B quote allowed)
   const isCODEligible = (sourceMode === 'retail' ? (aggregateTotal < 150000) : !isQuotationRequest) && !isCODRestricted;
@@ -229,7 +229,9 @@ ORDER STATUS: PENDING_CONFIRMATION
       isSplit: splitCount > 1,
       overallTotal: finalTotal,
       subOrders: generatedSubOrders,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      promoCode: appliedPromo?.code,
+      promoDiscount: promoDiscount
     };
 
     if (appliedPromo) {
@@ -244,9 +246,8 @@ ORDER STATUS: PENDING_CONFIRMATION
 
     toast.success('Order placed successfully! Live support thread generated.');
     
-    // Auto-open newly spawned buyer-seller conversation thread
-    const firstThreadId = sellerIds.length > 0 ? `thread-${sellerIds[0]}` : 'thread-general';
-    navigate(`/messages/${firstThreadId}`);
+    // Auto-open newly spawned buyer-seller conversation thread or show success screen
+    navigate('/order-success', { state: { order: fullOrderObject } });
   };
 
   return (

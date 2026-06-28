@@ -839,11 +839,9 @@ export function CategoriesPage() {
         </div>
       </div>
 
-      {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="relative z-10 bg-white/95 border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4">
-          
-          {/* 1. Search Bar inside Sticky Container */}
+      {/* PAGE SEARCH BAR — static, not sticky */}
+      <div className="w-full bg-white border-b border-[#E8EDF2] py-3">
+        <div className="max-w-[1440px] mx-auto px-6">
           <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
             <div className="flex items-center bg-white rounded-full">
               <div className="pl-4 text-[#E8500A] shrink-0">
@@ -864,111 +862,8 @@ export function CategoriesPage() {
               </button>
             </div>
           </div>
-
-          {/* 2. Navigation Tabs */}
-          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
-            {[
-              { label: "All Categories", icon: <LucideIcons.Layers size={13} /> },
-              { label: "Popular", icon: <LucideIcons.Flame size={13} /> },
-              { label: "Trending", icon: <LucideIcons.TrendingUp size={13} /> },
-              { label: "New Arrivals", icon: <LucideIcons.Clock size={13} /> },
-              { label: "Top Rated", icon: <LucideIcons.Award size={13} /> }
-            ].map((tab) => (
-              <button
-                key={tab.label}
-                onClick={() => {
-                  setActiveCategoryTab(tab.label);
-                  const resultsDiv = document.getElementById("categories-main-display");
-                  if (resultsDiv) {
-                    const offset = 220; // top header offset
-                    const elementPosition = resultsDiv.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - offset;
-                    window.scrollTo({
-                      top: offsetPosition,
-                      behavior: "smooth"
-                    });
-                  }
-                }}
-                className={cn(
-                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
-                  activeCategoryTab === tab.label
-                    ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
-                    : "bg-white border-gray-200 text-gray-400 hover:text-navy hover:bg-gray-50"
-                )}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-
         </div>
       </div>
-
-      {/* LAYER 1: QUICK FILTER BAR */}
-      <QuickFilterBar
-        title="Category Spec Discovery"
-        onOpenFullFilters={() => setIsMobileDrawerOpen(true)}
-        filters={[
-          {
-            id: 'all-categories',
-            label: 'All Categories',
-            active: !selectedCategoryStatus && !selectedCategoryType && !selectedAlphabetical && activeCategoryTab === 'All Categories',
-            onClick: handleClearAllFilters
-          },
-          {
-            id: 'trending-pill',
-            label: '🔥 Trending',
-            active: selectedCategoryStatus === 'trending' || activeCategoryTab === 'Trending',
-            onClick: () => {
-              setSelectedCategoryStatus(selectedCategoryStatus === 'trending' ? null : 'trending');
-              setActiveCategoryTab(activeCategoryTab === 'Trending' ? 'All Categories' : 'Trending');
-            }
-          },
-          {
-            id: 'featured-pill',
-            label: '★ Featured',
-            active: selectedCategoryStatus === 'featured',
-            onClick: () => {
-              setSelectedCategoryStatus(selectedCategoryStatus === 'featured' ? null : 'featured');
-            }
-          },
-          {
-            id: 'popular-pill',
-            label: '💎 Popular',
-            active: selectedCategoryStatus === 'popular' || activeCategoryTab === 'Popular',
-            onClick: () => {
-              setSelectedCategoryStatus(selectedCategoryStatus === 'popular' ? null : 'popular');
-              setActiveCategoryTab(activeCategoryTab === 'Popular' ? 'All Categories' : 'Popular');
-            }
-          },
-          {
-            id: 'new-pill',
-            label: '📅 New Arrivals',
-            active: selectedCategoryStatus === 'newly-added' || activeCategoryTab === 'New Arrivals',
-            onClick: () => {
-              setSelectedCategoryStatus(selectedCategoryStatus === 'newly-added' ? null : 'newly-added');
-              setActiveCategoryTab(activeCategoryTab === 'New Arrivals' ? 'All Categories' : 'New Arrivals');
-            }
-          },
-          {
-            id: 'a-z-pill',
-            label: '🔤 Sort: A–Z',
-            active: selectedAlphabetical === 'a-z',
-            onClick: () => {
-              setSelectedAlphabetical(selectedAlphabetical === 'a-z' ? null : 'a-z');
-            }
-          },
-          {
-            id: 'z-a-pill',
-            label: '🔤 Sort: Z–A',
-            active: selectedAlphabetical === 'z-a',
-            onClick: () => {
-              setSelectedAlphabetical(selectedAlphabetical === 'z-a' ? null : 'z-a');
-            }
-          }
-        ]}
-      />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips

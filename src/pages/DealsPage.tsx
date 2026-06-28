@@ -36,14 +36,13 @@ export function DealsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const getInitialTab = () => {
     const t = searchParams.get('tab');
-    const validTabs = ['flash', 'promo', 'promo_codes', 'brand', 'seasonal', 'expired', 'all'];
-    const matched = validTabs.includes(t || '') ? (t || '') : 'all';
-    if (matched === 'flash') return 'Flash Deals';
-    if (matched === 'promo' || matched === 'promo_codes') return 'Promo Codes';
-    if (matched === 'brand') return 'Brand Deals';
-    if (matched === 'seasonal') return 'Seasonal Campaigns';
-    if (matched === 'expired') return 'Expired Deals';
-    return 'All Deals';
+    if (t === 'flash') return 'Flash Deals';
+    if (t === 'promo' || t === 'promo_codes') return 'Promo Codes';
+    if (t === 'brand') return 'Brand Deals';
+    if (t === 'seasonal') return 'Seasonal Campaigns';
+    if (t === 'expired') return 'Expired Deals';
+    if (t === 'all') return 'All Deals';
+    return 'Flash Deals'; // default
   };
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -53,15 +52,19 @@ export function DealsPage() {
   const [minDiscount, setMinDiscount] = useState<number>(0);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
+  const TAB_TO_URL: Record<string, string> = {
+    'Flash Deals': 'flash',
+    'Promo Codes': 'promo',
+    'Brand Deals': 'brand',
+    'Seasonal Campaigns': 'seasonal',
+    'Expired Deals': 'expired',
+    'All Deals': 'all',
+  };
+
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    let urlTab = 'all';
-    if (tab === 'Flash Deals') urlTab = 'flash';
-    else if (tab === 'Promo Codes') urlTab = 'promo_codes';
-    else if (tab === 'Brand Deals') urlTab = 'brand';
-    else if (tab === 'Seasonal Campaigns' || tab === 'Seasonal') urlTab = 'seasonal';
-    else if (tab === 'Expired Deals' || tab === 'Expired') urlTab = 'expired';
-    setSearchParams({ tab: urlTab });
+    const urlKey = TAB_TO_URL[tab] || tab.toLowerCase().replace(/\s+/g, '_');
+    setSearchParams({ tab: urlKey });
   };
 
   useEffect(() => {

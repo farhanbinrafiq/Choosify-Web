@@ -786,84 +786,88 @@ export function FloatingOverlays() {
 
     </div>
 
-    {/* FLOATING FILTER LAUNCHER — BOTTOM LEFT */}
+    {/* FILTER LAUNCHER — BOTTOM LEFT — mirrors right-side profile stack position */}
     {hasFilters && (
       <div className={cn(
-        "fixed z-[219]",
+        "fixed z-[219] flex flex-col items-start",
         isMobile ? "bottom-4 left-4" : "bottom-6 left-6 lg:bottom-8 lg:left-8"
       )}>
-        {/* Filter Drawer */}
         <AnimatePresence>
           {filterOpen && (
             <motion.div
               ref={filterDrawerRef}
-              initial={{ opacity: 0, y: 20, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              style={isMobile ? undefined : { bottom: '80px' }}
+              // --- EXACT SAME ANIMATION AS PROFILE PANEL ---
+              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+              transition={standardTransition}
+              style={isMobile ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
+              drag={isMobile ? "y" : false}
+              dragConstraints={{ top: 0, bottom: 250 }}
+              dragElastic={{ top: 0.1, bottom: 0.8 }}
+              onDragEnd={(_e: any, info: any) => {
+                if (info.offset.y > 120) setFilterOpen(false);
+              }}
               className={cn(
-                "bg-white border border-[#e8edf2] shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col",
+                "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
                 isMobile
-                  ? "fixed bottom-0 left-0 right-0 h-[88vh] rounded-t-[24px] z-[300] w-full"
-                  : "absolute left-0 w-[360px] rounded-[12px] max-h-[80vh]"
+                  ? "fixed bottom-0 left-0 right-0 h-[85vh] rounded-t-[28px] z-[250] w-full"
+                  : "absolute left-0 w-[380px] rounded-[24px] max-h-[75vh]"
               )}
             >
-              {/* Drawer Header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-[#e8edf2] bg-[#F8FBFD] shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#E8500A]/10 flex items-center justify-center">
-                    <SlidersHorizontal size={15} className="text-[#E8500A]" />
+              {/* Mobile drag indicator */}
+              {isMobile && (
+                <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
+              )}
+
+              {/* Header */}
+              <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3 text-left">
+                  <div className="w-11 h-11 rounded-full bg-[#E8500A]/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
+                    <SlidersHorizontal size={18} className="text-[#E8500A]" />
                   </div>
                   <div>
-                    <div className="text-[9px] font-black uppercase tracking-[0.18em] text-[#E8500A]">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#E8500A]">
                       {filterConfig.pageName || 'Page Filters'}
                     </div>
-                    <div className="text-[13px] font-black text-[#1A1D4E] uppercase tracking-wide leading-tight">
+                    <h3 className="text-xs font-black text-[#1A1A2E] leading-tight uppercase">
                       Filters & Search
-                    </div>
+                    </h3>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {filterConfig.onClearAll && filterConfig.activeFilterCount > 0 && (
                     <button
                       onClick={filterConfig.onClearAll}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-[#E8500A] bg-[#E8500A]/8 hover:bg-[#E8500A]/15 rounded-full transition-colors border-0 cursor-pointer"
+                      className="text-[9px] font-black uppercase tracking-wider text-[#E8500A] bg-[#E8500A]/8 hover:bg-[#E8500A]/15 px-3 py-1.5 rounded-full transition-colors border-0 cursor-pointer flex items-center gap-1"
                     >
-                      <RotateCcw size={9} />
-                      Clear All
+                      <RotateCcw size={9} /> Clear All
                     </button>
                   )}
                   <button
                     onClick={() => setFilterOpen(false)}
-                    className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-all cursor-pointer border-0 bg-transparent"
+                    className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#1A1A2E] transition-all border border-[#e8edf2] cursor-pointer"
                   >
-                    <XIcon size={16} />
+                    <XIcon size={14} />
                   </button>
                 </div>
               </div>
 
-              {/* Drawer Body — scrollable */}
+              {/* Scrollable body */}
               <div className="flex-1 overflow-y-auto no-scrollbar">
 
-                {/* 1. SEARCH BAR SECTION */}
                 {filterConfig.renderSearch && (
-                  <div className="px-4 pt-4 pb-3 border-b border-[#e8edf2]">
-                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2">
-                      Page Search
-                    </div>
+                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2">Page Search</div>
                     {filterConfig.renderSearch()}
                   </div>
                 )}
 
-                {/* 2. QUICK FILTER CHIPS */}
                 {filterConfig.quickFilters && filterConfig.quickFilters.length > 0 && (
-                  <div className="px-4 pt-4 pb-3 border-b border-[#e8edf2]">
-                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2.5">
-                      Quick Filters
-                    </div>
+                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2.5">Quick Filters</div>
                     <div className="flex flex-wrap gap-2">
-                      {filterConfig.quickFilters.map((qf) => (
+                      {filterConfig.quickFilters.map((qf: any) => (
                         <button
                           key={qf.id}
                           onClick={qf.onClick}
@@ -882,12 +886,9 @@ export function FloatingOverlays() {
                   </div>
                 )}
 
-                {/* 3. FULL FILTER ARCHITECTURE — identical to sidebar */}
                 {filterConfig.renderFilters && (
-                  <div className="px-4 pt-4 pb-6">
-                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-3">
-                      All Filters
-                    </div>
+                  <div className="px-5 pt-4 pb-6">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-3">All Filters</div>
                     {filterConfig.renderFilters()}
                   </div>
                 )}
@@ -899,48 +900,61 @@ export function FloatingOverlays() {
                     <p className="text-[11px] font-bold text-gray-400">No filters available on this page</p>
                   </div>
                 )}
+
               </div>
 
-              {/* Drawer Footer */}
+              {/* Mobile footer */}
               {isMobile && (
-                <div className="px-4 py-4 border-t border-[#e8edf2] bg-white shrink-0">
+                <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
                   <button
                     onClick={() => setFilterOpen(false)}
-                    className="w-full py-3 bg-[#E8500A] text-white text-[11px] font-black uppercase tracking-widest rounded-[5px] hover:bg-[#CF4400] transition-colors cursor-pointer border-0"
+                    className="w-full py-3.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] font-black uppercase tracking-widest rounded-[8px] transition-colors cursor-pointer border-0"
                   >
-                    Apply & Close
+                    Show Results
                   </button>
                 </div>
               )}
+
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Launcher Button */}
+        {/* The pill button */}
         <motion.button
           onClick={() => setFilterOpen(!filterOpen)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className={cn(
-            "flex items-center gap-2.5 shadow-lg border transition-all duration-200 cursor-pointer",
-            isMobile
-              ? "px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-wider"
-              : "px-5 py-3.5 rounded-full text-[10.5px] font-black uppercase tracking-widest",
+            "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
             filterOpen
-              ? "bg-[#E8500A] text-white border-[#E8500A] shadow-[0_8px_24px_rgba(232,80,10,0.35)]"
-              : "bg-white text-[#1A1D4E] border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A] shadow-[0_4px_20px_rgba(0,0,0,0.1)]"
+              ? "bg-[#FFF0E8] border-[#E8500A] text-[#E8500A]"
+              : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40"
           )}
         >
-          <SlidersHorizontal size={15} className={filterOpen ? "text-white" : "text-[#E8500A]"} />
-          <span>Filters</span>
-          {filterConfig.activeFilterCount > 0 && !filterOpen && (
-            <span className="w-5 h-5 rounded-full bg-[#E8500A] text-white text-[9px] font-black flex items-center justify-center leading-none">
-              {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal
+              size={15}
+              className={cn(
+                "transition-colors",
+                filterOpen ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A]"
+              )}
+            />
+            <span className="text-[10px] font-black uppercase tracking-wider">
+              FILTERS
             </span>
-          )}
-          {filterOpen && (
-            <ChevronDown size={12} className="text-white" />
-          )}
+            {filterConfig.activeFilterCount > 0 && (
+              <span className="w-5 h-5 rounded-full bg-[#E8500A] text-white text-[9px] font-black flex items-center justify-center leading-none">
+                {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
+              </span>
+            )}
+          </div>
+          <ArrowRight
+            size={14}
+            className={cn(
+              "transition-transform duration-300",
+              filterOpen ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A] group-hover:translate-x-1"
+            )}
+          />
         </motion.button>
       </div>
     )}

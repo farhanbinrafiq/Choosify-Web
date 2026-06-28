@@ -617,53 +617,8 @@ export function HomePage() {
           <span>🛡️ 100% ORIGINAL PRODUCTS ONLY • VERIFIED SHOPS IN BANGLADESH • CHOOSE WISELY 🛡️</span>
           <span>💎 AUTHENTIC OUTLETS DIRECTORY • NO MORE ONLINE SCAMS • SHOP WITH CONFIDENCE 💎</span>
           <span>🛡️ 100% ORIGINAL PRODUCTS ONLY • VERIFIED SHOPS IN BANGLADESH • CHOOSE WISELY 🛡️</span>
+          <span>💎 AUTHENTIC OUTLETS DIRECTORY • NO MORE ONLINE SCAMS • SHOP WITH CONFIDENCE 💎</span>
         </div>
-      </div>
-
-      {/* FULL WIDTH CAMPAIGN SECTION */}
-      <CampaignBannerCarousel />
-
-      {/* GLOBAL STICKY NAVIGATION BAR */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-3.5">
-         <div className="max-w-[1440px] mx-auto px-6">
-            <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
-               
-               <button 
-                 onClick={() => scrollToSection('all')}
-                 className={cn(
-                   "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
-                   activeStickySection === 'all' 
-                     ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
-                     : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100"
-                 )}
-               >
-                  All
-               </button>
-  
-               {[
-                 { id: 'section-trending-brands', name: 'brands', label: 'Trending Brands', icon: <Award size={13} /> },
-                 { id: 'section-popular-products', name: 'products', label: 'Popular Products', icon: <Package size={13} /> },
-                 { id: 'section-hot-deals', name: 'deals', label: 'Hot Deals', icon: <Zap size={13} /> },
-                 { id: 'section-recommendations', name: 'recommendations', label: 'Recommendations', icon: <Sparkles size={13} /> },
-                 { id: 'section-categories', name: 'categories', label: 'Popular Categories', icon: <ShoppingBag size={13} /> },
-                 { id: 'section-customer-favorites', name: 'favorites', label: 'Customer Favorites', icon: <Flame size={13} /> }
-               ].map(item => (
-                 <button 
-                   key={item.id}
-                   onClick={() => scrollToSection(item.id)}
-                   className={cn(
-                     "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
-                     activeStickySection === item.name 
-                       ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic" 
-                       : "bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100"
-                   )}
-                 >
-                    {item.icon}
-                    <span>{item.label}</span>
-                 </button>
-               ))}
-            </div>
-         </div>
       </div>
 
       {/* SECTION 4 — THREE COLUMN GRID */}

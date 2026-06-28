@@ -101,23 +101,23 @@ export function PostOfferPage() {
   const handleContinue = () => {
     if (step === 1) {
       if (!productName.trim()) {
-        toast.error('Product Name is required.');
+        toast.error('Please enter a product name.');
         return;
       }
       if (!brand.trim()) {
-        toast.error('Brand is required.');
+        toast.error('Please enter a brand name.');
         return;
       }
       setStep(2);
     } else if (step === 2) {
       if (imagePreviewUrls.length === 0) {
-        toast.error('Please upload at least one image.');
+        toast.error('Please add at least one product image.');
         return;
       }
       setStep(3);
     } else if (step === 3) {
-      if (!price.trim() || isNaN(Number(price)) || Number(price) <= 0) {
-        toast.error('Please enter a valid price (৳).');
+      if (!price || Number(price) <= 0) {
+        toast.error('Please enter a valid product price.');
         return;
       }
       if (originalPrice && (isNaN(Number(originalPrice)) || Number(originalPrice) < Number(price))) {
@@ -128,8 +128,8 @@ export function PostOfferPage() {
         toast.error('Stock Quantity must be a valid non-negative number.');
         return;
       }
-      if (!description.trim() || description.trim().length < 10) {
-        toast.error('Please provide a product description of at least 10 characters.');
+      if (!description.trim() || description.trim().length < 20) {
+        toast.error('Please write a product description (at least 20 characters).');
         return;
       }
       if (isDeal && !promoCode.trim()) {
@@ -139,15 +139,15 @@ export function PostOfferPage() {
       setStep(4);
     } else if (step === 4) {
       if (!sellerName.trim()) {
-        toast.error('Seller Business Name is required.');
+        toast.error('Please enter your business/seller name.');
         return;
       }
       if (!sellerPhone.trim()) {
-        toast.error('Seller Phone is required.');
+        toast.error('Please enter a contact phone number.');
         return;
       }
       if (!agreeToTerms) {
-        toast.error('You must agree to the Terms & Conditions.');
+        toast.error('Please agree to the terms and conditions to proceed.');
         return;
       }
       

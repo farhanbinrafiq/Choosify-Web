@@ -396,11 +396,9 @@ export function CreatorsPage() {
         </div>
       </div>
 
-      {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="relative z-10 bg-white/95 border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
-          
-          {/* 1. Search Bar inside Sticky Container */}
+      {/* PAGE SEARCH BAR — static, not sticky */}
+      <div className="w-full bg-white border-b border-[#E8EDF2] py-3">
+        <div className="max-w-[1440px] mx-auto px-6">
           <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
             <div className="flex items-center bg-white rounded-full">
               <div className="pl-4 text-[#E8500A] shrink-0">
@@ -421,63 +419,8 @@ export function CreatorsPage() {
               </button>
             </div>
           </div>
-
-          {/* 2. Navigation Tabs */}
-          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
-            {[
-              { id: 'All Creators', label: "All Creators", icon: <Layers size={13} /> },
-              { id: 'Trending Creators', label: "Trending Creators", icon: <Flame size={13} /> },
-              { id: 'Featured Creators', label: "Featured Creators", icon: <Sparkles size={13} /> },
-              { id: 'Hot Deals Creators', label: "Hot Deals Creators", icon: <Zap size={13} /> },
-              { id: 'Top Rated Creators', label: "Top Rated Creators", icon: <Star size={13} /> }
-            ].map((tab) => (
-              <button
-                key={tab.label}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  const el = document.getElementById("creators-main-display");
-                  if (el) {
-                    const offset = 220; // safe header + sticky offset
-                    const elementPosition = el.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - offset;
-                    window.scrollTo({
-                      top: offsetPosition,
-                      behavior: 'smooth'
-                    });
-                  }
-                }}
-                className={cn(
-                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
-                  activeTab === tab.id
-                    ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
-                    : "bg-white border-gray-250 text-gray-400 hover:text-navy hover:bg-gray-50/80"
-                )}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-
         </div>
-      </div>      {/* LAYER 1: QUICK FILTER BAR */}
-      <QuickFilterBar
-        title="Creators Quick Specs"
-        onOpenFullFilters={() => {
-          const el = document.getElementById("creators-sidebar-filters");
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add("ring-2", "ring-orange-primary/50");
-            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
-          }
-        }}
-        filters={[
-          { id: 'verified', label: '✓ Verified Expert', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
-          { id: 'high-eng', label: '🔥 High Engagement (4.8+)', active: popularityFilter === 'high', onClick: () => setPopularityFilter(popularityFilter === 'high' ? 'all' : 'high') },
-          { id: 'tech', label: '💻 Tech Niches', active: selectedCategory === 'Tech & Gaming', onClick: () => setSelectedCategory(selectedCategory === 'Tech & Gaming' ? null : 'Tech & Gaming') },
-          { id: 'fashion', label: '👗 Fashion Influencer', active: selectedCategory === 'Fashion & Beauty', onClick: () => setSelectedCategory(selectedCategory === 'Fashion & Beauty' ? null : 'Fashion & Beauty') }
-        ]}
-      />
+      </div>
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips

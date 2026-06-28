@@ -238,11 +238,9 @@ export function BrandDealsPage() {
         </div>
       </div>
 
-      {/* GLOBAL STICKY NAVIGATION SYSTEM (MASTER REFERENCE COHESION) */}
-      <div className="relative z-10 bg-white/95 border-b border-gray-150 shadow-sm py-4 transition-all duration-300 font-sans">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
-          
-          {/* 1. Page-Scoped Search Bar */}
+      {/* PAGE SEARCH BAR — static, not sticky */}
+      <div className="w-full bg-white border-b border-[#E8EDF2] py-3 font-sans">
+        <div className="max-w-[1440px] mx-auto px-6">
           <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
             <div className="flex items-center bg-white rounded-full">
               <div className="pl-4 text-[#E8500A] shrink-0">
@@ -263,65 +261,8 @@ export function BrandDealsPage() {
               </button>
             </div>
           </div>
-
-          {/* 2. Category Tabs */}
-          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
-            {tabs.map((tab) => (
-              <button
-                key={tab.label}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  const el = document.getElementById("brand-deals-main");
-                  if (el) {
-                    const offset = 220; // safe header + sticky offset
-                    const elementPosition = el.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - offset;
-                    window.scrollTo({
-                      top: offsetPosition,
-                      behavior: 'smooth'
-                    });
-                  }
-                }}
-                className={cn(
-                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
-                  activeTab === tab.id
-                    ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
-                    : "bg-white border-gray-250 text-gray-400 hover:text-navy hover:bg-gray-50/80"
-                )}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-
         </div>
       </div>
-
-      {/* GLOBAL HORIZONTAL FILTERS BAR - GLOBAL FILTER ARCHITECTURE V2 */}
-      <QuickFilterBar
-        title="Brand Deals Quick Specs"
-        onOpenFullFilters={() => {
-          const el = document.getElementById("brand-deals-sidebar-filters");
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add("ring-2", "ring-orange-primary/50");
-            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
-          } else {
-            const mobEl = document.getElementById("brand-deals-mobile-filters");
-            if (mobEl) {
-              mobEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              setIsMobileFilterOpen(true);
-            }
-          }
-        }}
-        filters={[
-          { id: 'verified', label: '✓ Verified Partners Only', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
-          { id: 'top-rated', label: '⭐ Top Rated (4.7+)', active: popularityFilter === 'high', onClick: () => setPopularityFilter(popularityFilter === 'high' ? 'all' : 'high') },
-          { id: 'cat-fashion', label: '👗 Fashion Channel', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
-          { id: 'cat-electronics', label: '💻 Electronics Channel', active: selectedCategory === 'Electronics', onClick: () => setSelectedCategory(selectedCategory === 'Electronics' ? null : 'Electronics') },
-        ]}
-      />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
