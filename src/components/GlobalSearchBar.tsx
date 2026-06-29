@@ -330,14 +330,14 @@ export function GlobalSearchBar({
 
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
-      {/* Home Hero style glassmorphic search input box */}
-      <form 
-        onSubmit={handleSearchSubmit} 
-        className="relative w-full bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300"
-      >
-        <div className="flex items-center bg-white rounded-full">
-          <div className="pl-4 text-[#E8500A] shrink-0">
-            <Search className="w-4 h-4" />
+      {/* Home Hero or Navbar style glassmorphic search input box */}
+      {variant === 'navbar' ? (
+        <form 
+          onSubmit={handleSearchSubmit} 
+          className="relative w-full bg-white/5 hover:bg-white/10 focus-within:bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 focus-within:border-white/20 transition-all duration-300 flex items-center"
+        >
+          <div className="text-gray-400 shrink-0">
+            <Search className="w-3.5 h-3.5" />
           </div>
           <input 
             ref={inputRef}
@@ -354,16 +354,56 @@ export function GlobalSearchBar({
             }}
             onKeyDown={handleKeyDown}
             placeholder={placeholder} 
-            className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+            className="w-full bg-transparent outline-none pl-2.5 pr-2 text-white text-[10px] font-semibold placeholder-gray-400 focus:outline-none focus:ring-0 border-none" 
           />
-          <button 
-            type="submit"
-            className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
-          >
-            DISCOVER
-          </button>
-        </div>
-      </form>
+          {query && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery('');
+                inputRef.current?.focus();
+              }}
+              className="text-gray-400 hover:text-white shrink-0 p-0.5 cursor-pointer bg-transparent border-none"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </form>
+      ) : (
+        <form 
+          onSubmit={handleSearchSubmit} 
+          className="relative w-full bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300"
+        >
+          <div className="flex items-center bg-white rounded-full">
+            <div className="pl-4 text-[#E8500A] shrink-0">
+              <Search className="w-4 h-4" />
+            </div>
+            <input 
+              ref={inputRef}
+              type="text" 
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setIsOpen(true);
+                setActiveIndex(-1);
+              }}
+              onFocus={() => {
+                setIsOpen(true);
+                setActiveIndex(-1);
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder} 
+              className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+            />
+            <button 
+              type="submit"
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+            >
+              DISCOVER
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Intelligent Live Suggestions Dropdown */}
       {isOpen && (

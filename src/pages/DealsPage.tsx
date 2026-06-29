@@ -310,7 +310,7 @@ export function DealsPage() {
         {/* Background Gradients matching other directory pages */}
         <div className="absolute inset-0 hero-gradient" />
         
-        <div className="max-w-[1914px] mx-auto w-full h-[140px] md:h-[155px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
+        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
           <div className="w-full flex flex-col justify-center">
             {/* Breadcrumbs */}
             <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 w-full">
@@ -355,6 +355,30 @@ export function DealsPage() {
                 <span className="text-[8px] font-black text-navy uppercase tracking-[0.12em] italic">Post Your Deals</span>
               </button>
             </div>
+
+            {/* SEARCH BAR — placed inside hero section at bottom */}
+            <div className="relative w-full max-w-2xl mx-auto mt-6">
+              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
+                <div className="flex items-center bg-white rounded-full">
+                  <div className="pl-4 text-[#E8500A] shrink-0">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search deals, brands, categories..." 
+                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
+                  />
+                  <button 
+                    onClick={() => setSearchQuery(searchQuery)}
+                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -371,95 +395,7 @@ export function DealsPage() {
         </div>
       </div>
 
-      {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="relative z-10 bg-white/95 border-b border-gray-100 shadow-sm py-4 transition-all duration-300">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4">
-          
-          {/* 1. Search Bar inside Sticky Navigation */}
-          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-            <div className="flex items-center bg-white rounded-full">
-              <div className="pl-4 text-[#E8500A] shrink-0">
-                <Search className="w-4 h-4" />
-              </div>
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search deals, brands, categories..." 
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
-              />
-              <button 
-                onClick={() => setSearchQuery(searchQuery)}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-              >
-                Search
-              </button>
-            </div>
-          </div>
-
-          {/* 2. Page Specific Navigation Tabs */}
-          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
-            {[
-              { id: 'all-deals', label: "All Deals", icon: <Package size={13} /> },
-              { id: 'all-deals', label: "Flash Deals", icon: <Zap size={13} /> },
-              { id: 'all-deals', label: "Promo Codes", icon: <Gift size={13} /> },
-              { id: 'featured-brand-deals-section', label: "Brand Deals", icon: <Award size={13} /> },
-              { id: 'all-deals', label: "Seasonal Campaigns", icon: <CalendarDays size={13} /> },
-              { id: 'all-deals', label: "Expired Deals", icon: <XCircle size={13} /> }
-            ].map((tab) => (
-              <button
-                key={tab.label}
-                onClick={() => {
-                  handleTabChange(tab.label);
-                  setTimeout(() => {
-                    const el = document.getElementById(tab.id);
-                    if (el) {
-                      const offset = 220; // safe offset for header + sticky nav
-                      const elementPosition = el.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - offset;
-                      window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                      });
-                    }
-                  }, 50);
-                }}
-                className={cn(
-                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px]",
-                  activeTab === tab.label
-                    ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent"
-                    : "bg-white border border-gray-200/85 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-50/80"
-                )}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-
-        </div>
-      </div>
-
       <main className="w-full bg-choosify-feed min-h-screen">
-
-        {/* LAYER 1: QUICK FILTER BAR */}
-        <QuickFilterBar
-          title="Deals Quick Specs"
-          onOpenFullFilters={() => {
-            const el = document.getElementById("deals-sidebar-filters");
-            if (el) {
-              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              el.classList.add("ring-2", "ring-orange-primary/50");
-              setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
-            }
-          }}
-          filters={[
-            { id: 'all-retail', label: 'Retail Only', active: dealType === 'retail', onClick: () => setDealType(dealType === 'retail' ? 'all' : 'retail') },
-            { id: 'all-wholesale', label: 'Wholesale Only', active: dealType === 'wholesale', onClick: () => setDealType(dealType === 'wholesale' ? 'all' : 'wholesale') },
-            { id: 'savings-20', label: '🔥 20%+ Off', active: minDiscount === 20, onClick: () => setMinDiscount(minDiscount === 20 ? 0 : 20) },
-            { id: 'savings-45', label: '💥 45%+ Off', active: minDiscount === 45, onClick: () => setMinDiscount(minDiscount === 45 ? 0 : 45) }
-          ]}
-        />
 
         {/* ACTIVE FILTER CHIPS ROW */}
         <ActiveFilterChips

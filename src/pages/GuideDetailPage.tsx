@@ -54,6 +54,7 @@ import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
 import toast from "react-hot-toast";
 import { FollowButton } from "../components/FollowButton";
+import { useRegisterPageFilters } from "../components/FilterEngine";
 
 const evaluations = evaluationsData as EvaluationData[];
 
@@ -137,6 +138,19 @@ export function GuideDetailPage() {
 
   // Find the blog/guide. Fallback to first if not found
   const guide = BLOGS.find((b) => b.id === Number(id)) || BLOGS[0];
+
+  useRegisterPageFilters({
+    pageName: guide ? guide.title : 'Guide Details',
+    renderSearch: null,
+    quickFilters: [
+      { id: 'article', label: '📖 Editorial Guide', active: true, onClick: () => {} },
+      { id: 'products', label: '🛒 Recommended Products', active: false, onClick: () => {} },
+      { id: 'specs', label: '📊 Spec Breakdown', active: false, onClick: () => {} }
+    ],
+    renderFilters: null,
+    activeFilterCount: 0,
+    onClearAll: null
+  }, [guide]);
 
   const guideId = Number(id);
   const dynamicData = DYNAMIC_GUIDES[guideId] || {
@@ -546,78 +560,6 @@ export function GuideDetailPage() {
             <span className="text-sm font-black text-navy uppercase italic">
               June 2026
             </span>
-          </div>
-        </div>
-      </div>
-
-      {/* STICKY GUIDE NAVIGATION */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-3.5">
-        <div className="max-w-[1440px] mx-auto px-6">
-          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
-            {[
-              {
-                id: "all-section",
-                name: "all",
-                label: "All",
-                icon: <Package size={13} />,
-              },
-              {
-                id: "winner",
-                name: "winner",
-                label: "Winner Product",
-                icon: <Award size={13} />,
-              },
-              {
-                id: "why-won",
-                name: "why-won",
-                label: "Why It Won",
-                icon: <ShieldCheck size={13} />,
-              },
-              {
-                id: "quick-verdict",
-                name: "quick-verdict",
-                label: "Quick Verdict",
-                icon: <HelpCircle size={13} />,
-              },
-              {
-                id: "takeaways",
-                name: "takeaways",
-                label: "Key Takeaways",
-                icon: <Layers size={13} />,
-              },
-              {
-                id: "top-3",
-                name: "top-3",
-                label: "Top Alternatives",
-                icon: <Star size={13} />,
-              },
-              {
-                id: "all-products",
-                name: "all-products",
-                label: "All Mentioned Products",
-                icon: <ShoppingBag size={13} />,
-              },
-              {
-                id: "reviewer-profile",
-                name: "reviewer-profile",
-                label: "Reviewer Profile",
-                icon: <User size={13} />,
-              },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => scrollToSection(item.id)}
-                className={cn(
-                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px]",
-                  activeSection === item.name
-                    ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent"
-                    : "bg-white border border-gray-200/85 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-50/80",
-                )}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </button>
-            ))}
           </div>
         </div>
       </div>

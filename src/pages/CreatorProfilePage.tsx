@@ -14,6 +14,7 @@ import { PublicReviewCard } from '../components/PublicReviewCard';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ClaimProfileModal } from '../components/ClaimProfileModal';
 import { FollowButton } from '../components/FollowButton';
+import { useRegisterPageFilters } from '../components/FilterEngine';
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
@@ -35,6 +36,19 @@ export function CreatorProfilePage() {
 
   // Find creator or fallback safely to first creator
   const creator = CREATORS.find(c => c.id === id) || CREATORS[0];
+
+  useRegisterPageFilters({
+    pageName: creator ? creator.name : 'Creator Profile',
+    renderSearch: null,
+    quickFilters: [
+      { id: 'about', label: 'ℹ️ About', active: true, onClick: () => {} },
+      { id: 'collabs', label: '🤝 Collaborations', active: false, onClick: () => {} },
+      { id: 'reviews', label: '⭐ Reviews', active: false, onClick: () => {} }
+    ],
+    renderFilters: null,
+    activeFilterCount: 0,
+    onClearAll: null
+  }, [creator]);
 
   const [localClaimStatus, setLocalClaimStatus] = useState<'verified' | 'pending' | 'community'>(() => getCreatorClaimStatus(creator.id));
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
@@ -622,81 +636,6 @@ export function CreatorProfilePage() {
             <div className="flex items-center gap-2">
                <span className="text-orange-primary text-lg font-space font-black">✍</span>
                <span>{creator.blogs.length} Case Blogs</span>
-            </div>
-         </div>
-      </div>
-
-      {/* 3. STICKY DECR DETAIL NAVIGATION */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-3.5">
-         <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-3.5">
-            
-            {/* Context Search Filter */}
-            <div 
-               className="relative w-full max-w-2xl mx-auto bg-gray-50 p-1 rounded-full border border-gray-200/50 shadow-sm focus-within:border-gray-200/90 transition-all duration-300"
-               style={{ width: '100%', maxWidth: '640px' }}
-            >
-               <div className="flex items-center bg-white rounded-full">
-                  <div className="pl-4 text-orange-primary shrink-0">
-                     <Search className="w-4 h-4" />
-                  </div>
-                  <input 
-                     type="text" 
-                     placeholder="Search creator's creations..." 
-                     value={currentSearchInput}
-                     onChange={(e) => setCurrentSearchInput(e.target.value)}
-                     onKeyDown={(e) => {
-                        if (e.key === 'Enter') setSearchFilter(currentSearchInput);
-                     }}
-                     className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none text-left animate-none" 
-                  />
-                  <button 
-                     onClick={() => setSearchFilter(currentSearchInput)}
-                     className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                  >
-                     Search
-                  </button>
-               </div>
-            </div>
-
-            <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider">
-               
-               <button 
-                 onClick={() => {
-                    setSearchFilter('');
-                    setCurrentSearchInput('');
-                    scrollToSection('all');
-                 }}
-                 className={cn(
-                   "px-6 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
-                   activeSection === 'all' 
-                     ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent" 
-                     : "bg-white border border-gray-200/85 text-gray-400 hover:text-navy hover:bg-gray-50/80"
-                 )}
-               >
-                  All
-               </button>
-
-               {[
-                 { id: 'videos-section', name: 'videos', label: 'Videos', icon: <Video size={13} /> },
-                 { id: 'reels-section', name: 'reels', label: 'Reels', icon: <Play size={13} /> },
-                 { id: 'blogs-section', name: 'blogs', label: 'Insights/Blogs', icon: <BookOpen size={13} /> },
-                 { id: 'brand-reviews-section', name: 'reviews', label: 'Brand Reviews', icon: <Star size={13} /> },
-                 { id: 'creator-overview-section', name: 'overview', label: 'Creator Overview', icon: <Info size={13} /> }
-               ].map(item => (
-                 <button 
-                   key={item.id}
-                   onClick={() => scrollToSection(item.id)}
-                   className={cn(
-                     "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
-                     activeSection === item.name 
-                       ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent" 
-                       : "bg-white border border-gray-200/85 text-gray-400 hover:text-navy hover:bg-gray-50/80"
-                   )}
-                 >
-                    {item.icon}
-                    <span>{item.label}</span>
-                 </button>
-               ))}
             </div>
          </div>
       </div>

@@ -178,71 +178,6 @@ export function CategoriesPage() {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         searchPlaceholder="Search categories, subcategories..."
-        quickFilters={
-          <QuickFilterBar
-            title="Category Spec Discovery"
-            onOpenFullFilters={() => {}}
-            filters={[
-              {
-                id: 'all-categories',
-                label: 'All Categories',
-                active: !selectedCategoryStatus && !selectedCategoryType && !selectedAlphabetical && activeCategoryTab === 'All Categories',
-                onClick: handleClearAllFilters
-              },
-              {
-                id: 'trending-pill',
-                label: '🔥 Trending',
-                active: selectedCategoryStatus === 'trending' || activeCategoryTab === 'Trending',
-                onClick: () => {
-                  setSelectedCategoryStatus(selectedCategoryStatus === 'trending' ? null : 'trending');
-                  setActiveCategoryTab(activeCategoryTab === 'Trending' ? 'All Categories' : 'Trending');
-                }
-              },
-              {
-                id: 'featured-pill',
-                label: '★ Featured',
-                active: selectedCategoryStatus === 'featured',
-                onClick: () => {
-                  setSelectedCategoryStatus(selectedCategoryStatus === 'featured' ? null : 'featured');
-                }
-              },
-              {
-                id: 'popular-pill',
-                label: '💎 Popular',
-                active: selectedCategoryStatus === 'popular' || activeCategoryTab === 'Popular',
-                onClick: () => {
-                  setSelectedCategoryStatus(selectedCategoryStatus === 'popular' ? null : 'popular');
-                  setActiveCategoryTab(activeCategoryTab === 'Popular' ? 'All Categories' : 'Popular');
-                }
-              },
-              {
-                id: 'new-pill',
-                label: '📅 New Arrivals',
-                active: selectedCategoryStatus === 'newly-added' || activeCategoryTab === 'New Arrivals',
-                onClick: () => {
-                  setSelectedCategoryStatus(selectedCategoryStatus === 'newly-added' ? null : 'newly-added');
-                  setActiveCategoryTab(activeCategoryTab === 'New Arrivals' ? 'All Categories' : 'New Arrivals');
-                }
-              },
-              {
-                id: 'a-z-pill',
-                label: '🔤 Sort: A–Z',
-                active: selectedAlphabetical === 'a-z',
-                onClick: () => {
-                  setSelectedAlphabetical(selectedAlphabetical === 'a-z' ? null : 'a-z');
-                }
-              },
-              {
-                id: 'z-a-pill',
-                label: '🔤 Sort: Z–A',
-                active: selectedAlphabetical === 'z-a',
-                onClick: () => {
-                  setSelectedAlphabetical(selectedAlphabetical === 'z-a' ? null : 'z-a');
-                }
-              }
-            ]}
-          />
-        }
         activeChips={
           <ActiveFilterChips
             chips={[
@@ -777,7 +712,7 @@ export function CategoriesPage() {
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient" />
         
-        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[130px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
+        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
           <div className="w-full flex flex-col justify-center">
             {mode === 'wholesale' ? (
               <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
@@ -832,34 +767,32 @@ export function CategoriesPage() {
               </motion.div>
             </div>
    
-            <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8px] lg:text-[9.5px] mb-0 uppercase tracking-[0.2em] opacity-80 leading-normal">
+            <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8px] lg:text-[9.5px] mb-0 uppercase tracking-[0.2em] opacity-80 leading-normal mb-4">
               DISCOVER PREMIUM PRODUCTS, OFFICIAL STORES, AND BEST DEALS ACROSS BANGLADESH.
             </p>
-          </div>
-        </div>
-      </div>
 
-      {/* PAGE SEARCH BAR — static, not sticky */}
-      <div className="w-full bg-white border-b border-[#E8EDF2] py-3">
-        <div className="max-w-[1440px] mx-auto px-6">
-          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-            <div className="flex items-center bg-white rounded-full">
-              <div className="pl-4 text-[#E8500A] shrink-0">
-                <LucideIcons.Search className="w-4 h-4" />
+            {/* SEARCH BAR — placed inside hero section at bottom */}
+            <div className="relative w-full max-w-2xl mx-auto mt-2">
+              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
+                <div className="flex items-center bg-white rounded-full">
+                  <div className="pl-4 text-[#E8500A] shrink-0">
+                    <LucideIcons.Search className="w-4 h-4" />
+                  </div>
+                  <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by Brand Name or Category..." 
+                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
+                  />
+                  <button 
+                    onClick={() => setSearchQuery(searchQuery)}
+                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                  >
+                    Search
+                  </button>
+                </div>
               </div>
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by Brand Name or Category..." 
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
-              />
-              <button 
-                onClick={() => setSearchQuery(searchQuery)}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-              >
-                Search
-              </button>
             </div>
           </div>
         </div>

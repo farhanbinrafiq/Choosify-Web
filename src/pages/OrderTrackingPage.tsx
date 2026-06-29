@@ -67,7 +67,7 @@ export function OrderTrackingPage() {
       {/* Header Panel */}
       <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
         <div className="absolute inset-0 hero-gradient pointer-events-none" />
-        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
+        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-1 text-[9px] text-gray-500 uppercase tracking-widest font-black italic mb-1">
               <Link to="/" className="hover:text-white transition-colors">Home</Link>

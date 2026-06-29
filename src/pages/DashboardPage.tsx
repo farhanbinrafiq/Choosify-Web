@@ -768,7 +768,7 @@ const SettingsSection = () => {
           </div>
           <button 
             onClick={handleSave}
-            className="px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#E8500A]/10 hover:scale-105 transition-all italic border-none cursor-pointer"
+            className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
           >
             Save Changes
           </button>
@@ -1091,7 +1091,7 @@ const AdminOverviewsSection = () => {
 
                       <button
                         onClick={() => deleteCustomOverview(co.id)}
-                        className="p-1.5 px-3 border border-red-200 hover:bg-red-50 text-red-500 hover:text-red-700 rounded text-[9px] font-black uppercase tracking-wider transition-colors cursor-pointer select-none"
+                        className="px-6 py-3 bg-white hover:bg-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-red-200 hover:border-red-300"
                       >
                         Delete
                       </button>
@@ -1452,7 +1452,7 @@ const AdminCampaignsSection = () => {
               <button
                 type="button"
                 onClick={() => setFormMode('list')}
-                className="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white rounded-full text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all"
+                className="px-6 py-3 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-[#e8edf2] hover:border-[#1A1D4E]/20"
               >
                 Cancel
               </button>
@@ -1460,7 +1460,7 @@ const AdminCampaignsSection = () => {
               <button
                 type="button"
                 onClick={handleSave}
-                className="px-8 py-2.5 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white rounded-full text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all shadow-md italic"
+                className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
               >
                 Save Campaign
               </button>
@@ -1712,37 +1712,7 @@ export function DashboardPage() {
 
         {/* Main Content */}
         <main className="flex-1 w-full relative">
-          {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-          <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
-            <div className="max-w-[1400px] mx-auto px-6">
-              <div className="flex items-center justify-start lg:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1">
-                {[
-                  { id: 'overview', label: "Overview", icon: <LayoutDashboard size={13} /> },
-                  { id: 'saved-products', label: "Saved Products", icon: <Bookmark size={13} /> },
-                  { id: 'saved-brands', label: "Saved Brands", icon: <Store size={13} /> },
-                  { id: 'loved-brands', label: "Loved Brands", icon: <Heart size={13} /> },
-                  { id: 'followed-brands', label: "Followed Brands", icon: <CheckCircle2 size={13} /> },
-                  { id: 'recently-viewed', label: "Recently Viewed", icon: <Clock size={13} /> }
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
-                      setActiveTab(tab.id);
-                    }}
-                    className={cn(
-                      "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
-                      activeTab === tab.id
-                        ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
-                        : "bg-white border-gray-200 text-gray-500 hover:text-navy hover:bg-gray-50/80"
-                    )}
-                  >
-                    {tab.icon}
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+
 
            <div className="p-8 md:p-12 lg:p-20 max-w-[1400px] mx-auto min-h-screen">
               <div className="animate-in fade-in transition-all duration-700">

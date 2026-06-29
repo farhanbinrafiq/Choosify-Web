@@ -47,6 +47,7 @@ import { ProductMediaGallery } from "../components/ProductMediaGallery";
 import { InfluencerReviews } from "../components/InfluencerReviews";
 import { PublicReviewCard } from "../components/PublicReviewCard";
 import { FollowButton } from "../components/FollowButton";
+import { useRegisterPageFilters } from "../components/FilterEngine";
 
 // ── Optional Add-ons ────────────────────────────────────────────
 export interface ProductAddon {
@@ -341,6 +342,15 @@ export function ProductDetailPage() {
   const [selectedAddonIds, setSelectedAddonIds] = useState<Set<string>>(new Set());
   const resolvedAddons = useMemo(() => resolveAddons(product), [product?.id]);
   const hasAddons = resolvedAddons.length > 0;
+
+  useRegisterPageFilters({
+    pageName: 'Product',
+    renderSearch: null,
+    quickFilters: [],
+    renderFilters: null, // product detail has no sidebar filters
+    activeFilterCount: 0,
+    onClearAll: null,
+  });
 
   // Computed add-on total
   const addonTotal = useMemo(() => {
@@ -1449,62 +1459,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
         </div>
       </div>
 
-      {/* Sticky Section Navigation */}
-      <div className="sticky top-[80px] z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm py-3.5">
-        <div className="max-w-[1440px] mx-auto px-6 flex items-center justify-between gap-4">
-          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
-            {[
-              { label: "All", id: "all-section", icon: <Package size={13} /> },
-              {
-                label: "Influencer Reviews",
-                id: "influencer-reviews-section",
-                icon: <Play size={13} />,
-              },
-              {
-                label: "Public Reviews",
-                id: "public-reviews-section",
-                icon: <Star size={13} />,
-              },
-              {
-                label: "Product Overview",
-                id: "product-overview-section",
-                icon: <Info size={13} />,
-              },
-              {
-                label: "Brand Overview",
-                id: "brand-overview-section",
-                icon: <Award size={13} />,
-              },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => scrollToSection(item.id)}
-                className={cn(
-                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px]",
-                  activeSection === item.label
-                    ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 italic border border-transparent"
-                    : "bg-white border border-gray-200/85 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-50/80",
-                )}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
-              toast.success("Product share link copied directly to clipboard!");
-            }}
-            className="flex items-center gap-2 text-gray-400 hover:text-[#1A1D4E] transition-colors shrink-0 font-sans cursor-pointer"
-          >
-            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">
-              Share Now
-            </span>
-            <Share2 size={13} />
-          </button>
-        </div>
-      </div>
+
 
       {/* Main Content Area */}
       <main id="all-section" className="bg-[#F8FAFC] py-5">

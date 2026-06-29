@@ -14,6 +14,7 @@ import { mockGuides } from '../data/mockGuides';
 import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
 import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '../utils/overviewRegistry';
+import { useRegisterPageFilters } from '../components/FilterEngine';
 
 // Promo Codes & Brand Deals data
 const BRAND_DEALS = [
@@ -119,6 +120,44 @@ export function SearchPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'products' | 'brands' | 'deals' | 'guides' | 'coupons' | 'categories' | 'influencers' | 'favorites' | 'compares'>('all');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const { customOverviews } = useDashboard();
+
+  useRegisterPageFilters({
+    pageName: 'Search',
+    renderSearch: () => (
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={13} className="text-[#E8500A]" />
+        </div>
+        <input
+          type="text"
+          value={rawQuery}
+          onChange={(e) => {
+            const val = e.target.value;
+            setLocalInput(val);
+            setSearchParams(val ? { q: val } : {});
+          }}
+          placeholder="Search all content..."
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+        />
+      </div>
+    ),
+    quickFilters: [
+      { id: 'all', label: '🌐 All results', active: activeTab === 'all', onClick: () => setActiveTab('all') },
+      { id: 'products', label: '🛍️ Products', active: activeTab === 'products', onClick: () => setActiveTab('products') },
+      { id: 'brands', label: '🏢 Brands', active: activeTab === 'brands', onClick: () => setActiveTab('brands') },
+      { id: 'deals', label: '🏷️ Deals', active: activeTab === 'deals', onClick: () => setActiveTab('deals') },
+      { id: 'guides', label: '📖 Guides', active: activeTab === 'guides', onClick: () => setActiveTab('guides') },
+      { id: 'coupons', label: '🎫 Coupons', active: activeTab === 'coupons', onClick: () => setActiveTab('coupons') },
+      { id: 'influencers', label: '👥 Influencers', active: activeTab === 'influencers', onClick: () => setActiveTab('influencers') }
+    ],
+    renderFilters: null,
+    activeFilterCount: activeTab !== 'all' || rawQuery.trim() !== '' ? 1 : 0,
+    onClearAll: () => {
+      setActiveTab('all');
+      setLocalInput('');
+      setSearchParams({});
+    }
+  }, [rawQuery, activeTab]);
 
   // Sync state with url parameter
   React.useEffect(() => {
@@ -471,7 +510,7 @@ export function SearchPage() {
   return (
     <div className="bg-choosify-feed min-h-screen text-[#1A1A2E] pb-24 font-sans antialiased">
       {/* Search Header Banner */}
-      <div className="w-full relative overflow-hidden flex flex-col items-center justify-center border-b border-white/5 py-16 px-6">
+      <div className="w-full relative overflow-hidden flex flex-col items-center justify-center border-b border-white/5 h-[303px] px-6">
         <div className="absolute inset-0 hero-gradient" />
         
         <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full">

@@ -253,7 +253,7 @@ ORDER STATUS: PENDING_CONFIRMATION
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Checkout Header */}
-      <div className="choosify-dark-gradient text-white py-12 px-4 md:px-8 border-b border-white/5 relative overflow-hidden">
+      <div className="choosify-dark-gradient text-white h-[303px] flex items-center px-4 md:px-8 border-b border-white/5 relative overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <button 
@@ -491,7 +491,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                   <button
                     type="button"
                     onClick={handleApplyPromo}
-                    className="h-10 px-4 bg-navy hover:bg-[#E8500A] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer transition-colors border-none"
+                    className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
                   >
                     Apply
                   </button>
@@ -522,7 +522,7 @@ ORDER STATUS: PENDING_CONFIRMATION
             {/* Action check button */}
             <button
               onClick={handlePlaceOrder}
-              className="w-full h-14 bg-orange-primary hover:bg-[#0A0B1E] text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-full flex items-center justify-between px-8 shadow-lg shadow-orange-primary/10 transition-all italic hover:scale-[1.01]"
+              className="w-full px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-between gap-2 italic"
             >
               <span>{sourceMode === 'wholesale' ? 'Authorize Wholesale Lot' : 'Confirm & Place Retail Order'}</span>
               <ArrowRight size={16} />

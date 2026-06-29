@@ -346,8 +346,8 @@ function PWAInstallPrompt() {
   if (!showPrompt) return null;
 
   return (
-    <div className="fixed bottom-[100px] left-3 right-3 
-                    lg:left-auto lg:right-6 lg:bottom-6 
+    <div className="fixed bottom-[120px] left-3 right-3 
+                    lg:left-auto lg:right-6 lg:bottom-[200px] 
                     lg:w-80 z-[150] 
                     choosify-dark-gradient border border-white/10 
                     rounded-2xl p-4 shadow-2xl

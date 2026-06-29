@@ -859,77 +859,81 @@ export function CompareEngine() {
   return (
     <div className="w-full bg-[#F8FAFC]">
       {/* Compare Engine Elegant Hero Section */}
-      <div className="choosify-dark-gradient px-6 relative overflow-hidden text-center flex flex-col justify-center items-center py-16" style={{ minHeight: '440px' }}>
-         <div className="absolute inset-0 bg-gradient-to-b from-blue-600/5 to-transparent pointer-events-none" />
+      <div className="relative px-6 overflow-hidden text-center flex flex-col justify-center items-center h-[303px] border-b border-white/5">
+         <div className="absolute inset-0 hero-gradient" />
          
          <motion.div 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative z-10 w-full max-w-7xl"
+            className="relative z-10 w-full max-w-7xl flex flex-col justify-center h-full"
           >
-            <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="flex items-center justify-center gap-2 mb-3">
               <span className="px-3 py-1 bg-orange-primary/10 border border-orange-primary/20 text-orange-primary text-[10px] font-black uppercase tracking-widest rounded-full flex items-center gap-1.5 animate-pulse">
                 <Sparkles size={12} /> Decision-Intelligence V2 Active
               </span>
             </div>
 
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white italic uppercase tracking-tighter leading-none mb-4">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white italic uppercase tracking-tighter leading-none mb-3">
                COMPARE <span className="text-orange-primary">ENGINE</span>
             </h2>
-            <p className="text-white/40 text-[9.5px] font-black uppercase tracking-[0.25em] italic max-w-2xl mx-auto mb-10">
+            <p className="text-white/40 text-[9.5px] font-black uppercase tracking-[0.25em] italic max-w-2xl mx-auto mb-0">
                State-of-the-art multi-dimensional matrix. Pivot parameters, analyze risk models, and compare verified choices.
             </p>
-
-            {/* Smart Reactive Columns Display */}
-            <div className={cn("grid grid-cols-1 gap-6 max-w-5xl mx-auto",
-              evaluatedMatchingColumns.length === 1 && "md:grid-cols-1 max-w-md",
-              evaluatedMatchingColumns.length === 2 && "md:grid-cols-2 max-w-3xl",
-              evaluatedMatchingColumns.length === 3 && "md:grid-cols-3",
-              evaluatedMatchingColumns.length >= 4 && "md:grid-cols-4 max-w-7xl"
-            )}>
-               {evaluatedMatchingColumns.map((p, idx) => (
-                  <div key={p.id} className="relative">
-                     <div className={cn(
-                       "bg-[#0A0A26] border rounded-[5px] p-6 text-left group transition-all duration-300 flex flex-col justify-between h-44 relative overflow-hidden",
-                       p.matchesCriteria 
-                        ? p.isWinner 
-                          ? "border-orange-primary shadow-lg shadow-orange-primary/10" 
-                          : "border-white/10 hover:border-orange-primary/30"
-                        : "border-white/5 opacity-40 grayscale"
-                     )}>
-                        {p.isWinner && (
-                           <div className="absolute -top-1.5 right-4 bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-b-[4px] uppercase tracking-widest z-20 shadow-md">
-                              AI Winner
-                           </div>
-                        )}
-                        {!p.matchesCriteria && (
-                           <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 text-[8px] font-black px-2 py-0.5 rounded-[3px] uppercase tracking-wider z-20">
-                              Filtered Out
-                           </div>
-                        )}
-                        
-                        <div className="flex items-center gap-4 mb-4">
-                           <div className="w-14 h-14 rounded overflow-hidden bg-white/5 border border-white/10 p-1 shrink-0 flex items-center justify-center">
-                              <img src={p.image} className="w-full h-full object-cover rounded-[3px]" alt={p.name} />
-                           </div>
-                           <div className="min-w-0">
-                              <span className="text-orange-primary text-[8px] font-black uppercase italic tracking-widest block leading-none mb-1">{p.brand}</span>
-                              <h4 className="text-white text-xs font-bold italic line-clamp-2 leading-snug">{p.name}</h4>
-                           </div>
-                        </div>
-
-                        <div>
-                          <div className="w-full h-px bg-white/5 my-2" />
-                          <p className="text-white/60 text-[10px] font-medium leading-none truncate italic">
-                            💡 {p.highlightText || 'Algorithmic assessment matched.'}
-                          </p>
-                        </div>
-                     </div>
-                  </div>
-               ))}
-            </div>
          </motion.div>
       </div>
+
+      {/* Smart Reactive Columns Display below hero */}
+      {evaluatedMatchingColumns.length > 0 && (
+        <div className="w-full bg-[#05051A]/60 py-8 px-6 border-b border-white/5">
+          <div className={cn("grid grid-cols-1 gap-6 max-w-5xl mx-auto",
+            evaluatedMatchingColumns.length === 1 && "md:grid-cols-1 max-w-md",
+            evaluatedMatchingColumns.length === 2 && "md:grid-cols-2 max-w-3xl",
+            evaluatedMatchingColumns.length === 3 && "md:grid-cols-3",
+            evaluatedMatchingColumns.length >= 4 && "md:grid-cols-4 max-w-7xl"
+          )}>
+             {evaluatedMatchingColumns.map((p, idx) => (
+                <div key={p.id} className="relative">
+                   <div className={cn(
+                     "bg-[#0A0A26] border rounded-[5px] p-6 text-left group transition-all duration-300 flex flex-col justify-between h-44 relative overflow-hidden",
+                     p.matchesCriteria 
+                      ? p.isWinner 
+                        ? "border-orange-primary shadow-lg shadow-orange-primary/10" 
+                        : "border-white/10 hover:border-orange-primary/30"
+                      : "border-white/5 opacity-40 grayscale"
+                   )}>
+                      {p.isWinner && (
+                         <div className="absolute -top-1.5 right-4 bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-b-[4px] uppercase tracking-widest z-20 shadow-md">
+                            AI Winner
+                         </div>
+                      )}
+                      {!p.matchesCriteria && (
+                         <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 text-[8px] font-black px-2 py-0.5 rounded-[3px] uppercase tracking-wider z-20">
+                            Filtered Out
+                         </div>
+                      )}
+                      
+                      <div className="flex items-center gap-4 mb-4">
+                         <div className="w-14 h-14 rounded overflow-hidden bg-white/5 border border-white/10 p-1 shrink-0 flex items-center justify-center">
+                            <img src={p.image} className="w-full h-full object-cover rounded-[3px]" alt={p.name} />
+                         </div>
+                         <div className="min-w-0">
+                            <span className="text-orange-primary text-[8px] font-black uppercase italic tracking-widest block leading-none mb-1">{p.brand}</span>
+                            <h4 className="text-white text-xs font-bold italic line-clamp-2 leading-snug">{p.name}</h4>
+                         </div>
+                      </div>
+
+                      <div>
+                        <div className="w-full h-px bg-white/5 my-2" />
+                        <p className="text-white/60 text-[10px] font-medium leading-none truncate italic">
+                          💡 {p.highlightText || 'Algorithmic assessment matched.'}
+                        </p>
+                      </div>
+                   </div>
+                </div>
+             ))}
+          </div>
+        </div>
+      )}
 
       {/* ==========================================
           LAYER 1: DECISION FILTER CONTROL BAR (NEW CORE LAYER)

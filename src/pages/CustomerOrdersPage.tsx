@@ -76,7 +76,7 @@ Thank you for shopping with Choosify.bd
       {/* Visual Workspace Hero */}
       <div className="w-full bg-[#050514] relative overflow-hidden shrink-0 border-b border-white/5">
         <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
-        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
+        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex flex-col justify-center">
             <Link to="/dashboard" className="text-[10px] font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1.5 mb-1">
               <ArrowLeft size={12} /> Return to Profile Dashboard
@@ -243,7 +243,7 @@ Thank you for shopping with Choosify.bd
                                       setCancelReason('');
                                       setReturningOrderId(null);
                                     }}
-                                    className="text-[10px] font-black uppercase tracking-wider text-red-500 hover:text-red-700 transition-colors cursor-pointer bg-transparent border-none mr-2"
+                                    className="px-6 py-3 bg-white hover:bg-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-red-200 hover:border-red-300 mr-2"
                                   >
                                     Cancel Order
                                   </button>
@@ -333,7 +333,7 @@ Thank you for shopping with Choosify.bd
                               setCancelReason('');
                               toast.success('Order cancelled successfully.');
                             }}
-                            className="h-9 px-4 bg-red-600 hover:bg-red-700 text-white text-[9.5px] font-black uppercase tracking-wider rounded-[5px] cursor-pointer transition-colors border-none"
+                            className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
                           >
                             Confirm Cancel
                           </button>
@@ -343,7 +343,7 @@ Thank you for shopping with Choosify.bd
                               setCancellingOrderId(null);
                               setCancelReason('');
                             }}
-                            className="h-9 px-4 bg-white/5 hover:bg-white/10 text-white text-[9.5px] font-black uppercase tracking-wider rounded-[5px] cursor-pointer transition-colors border-none"
+                            className="px-6 py-3 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-[#e8edf2] hover:border-[#1A1D4E]/20"
                           >
                             Keep Order
                           </button>
@@ -403,7 +403,7 @@ Thank you for shopping with Choosify.bd
                               setReturnReason('Wrong Item');
                               setReturnDesc('');
                             }}
-                            className="h-9 px-4 bg-orange-primary hover:bg-[#FF5B00] text-white text-[9.5px] font-black uppercase tracking-wider rounded-[5px] cursor-pointer transition-colors border-none"
+                            className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
                           >
                             Submit Return Request
                           </button>
@@ -414,7 +414,7 @@ Thank you for shopping with Choosify.bd
                               setReturnReason('Wrong Item');
                               setReturnDesc('');
                             }}
-                            className="h-9 px-4 bg-white/5 hover:bg-white/10 text-white text-[9.5px] font-black uppercase tracking-wider rounded-[5px] cursor-pointer transition-colors border-none"
+                            className="px-6 py-3 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-[#e8edf2] hover:border-[#1A1D4E]/20"
                           >
                             Cancel
                           </button>

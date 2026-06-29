@@ -162,6 +162,7 @@ export function Navbar() {
               setSearchQuery(val);
               navigate(`/search?q=${encodeURIComponent(val)}`);
             }}
+            variant="navbar"
           />
         </div>
 
@@ -253,7 +254,12 @@ export function Navbar() {
                   tabIndex={0}
                   onKeyDown={(e) => { if (e.key === 'Enter') { if (isLoggedIn) navigate('/dashboard'); else navigate('/login'); } }}
                 >
-                  <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-full h-full object-cover" alt="Profile" />
+                  <img 
+                    src={currentUser?.avatar || "https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png"} 
+                    className="w-full h-full object-cover" 
+                    alt="Profile" 
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block italic text-white/70 group-hover:text-white transition-colors">
                   Hi, {currentUser?.name?.split(' ')[0] || 'You'}
@@ -273,9 +279,14 @@ export function Navbar() {
                       <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 blur-2xl rounded-full" />
                       
                       <div className="flex items-center gap-3 p-3 mb-4 bg-white/5 rounded-xl border border-white/5">
-                        <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-10 h-10 rounded-full object-cover border border-orange-primary/30" alt="" />
+                        <img 
+                          src={currentUser?.avatar || "https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png"} 
+                          className="w-10 h-10 rounded-full object-cover border border-orange-primary/30" 
+                          alt="" 
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
                         <div className="min-w-0">
-                          <p className="text-[11px] font-black text-white italic uppercase truncate">Farhan Bin Rafiq</p>
+                          <p className="text-[11px] font-black text-white italic uppercase truncate">{currentUser?.name || "Farhan Bin Rafiq"}</p>
                           <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">Corporate Sourcing Desk</p>
                         </div>
                       </div>
@@ -414,6 +425,7 @@ export function Navbar() {
                       setIsMobileMenuOpen(false);
                       navigate(`/search?q=${encodeURIComponent(val)}`);
                     }}
+                    variant="navbar"
                   />
                 </div>
 
@@ -468,9 +480,90 @@ export function Navbar() {
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-white/10 flex flex-col gap-4">
-                <div className="text-center">
-                  <span className="text-[8px] font-mono font-bold text-gray-500 uppercase tracking-widest">Choosify Bangladesh • Design system v1.0</span>
+              <div className="pt-6 border-t border-white/10 flex flex-col gap-3">
+                {isLoggedIn ? (
+                  <>
+                    {/* User info row */}
+                    <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                      <img
+                        src="https://i.pravatar.cc/150?u=me"
+                        className="w-10 h-10 rounded-full object-cover border border-orange-primary/30 shrink-0"
+                        alt="Profile"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-black text-white italic uppercase truncate">
+                          {currentUser?.name || 'My Account'}
+                        </p>
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">
+                          Choosify Member
+                        </p>
+                      </div>
+                    </div>
+                    {/* Quick links */}
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
+                    >
+                      <User size={14} className="text-orange-primary" />
+                      <span className="italic">My Dashboard</span>
+                    </Link>
+                    <Link
+                      to="/profile/orders"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
+                    >
+                      <Package size={14} className="text-orange-primary" />
+                      <span className="italic">My Orders</span>
+                    </Link>
+                    <Link
+                      to="/messages"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
+                    >
+                      <MessageSquare size={14} className="text-orange-primary" />
+                      <span className="italic">Messages</span>
+                      {unreadMsgCount > 0 && (
+                        <span className="ml-auto w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center">
+                          {unreadMsgCount}
+                        </span>
+                      )}
+                    </Link>
+                    {/* Sign out */}
+                    <button
+                      onClick={() => {
+                        setIsLoggedIn(false);
+                        setIsMobileMenuOpen(false);
+                        toast.success('Successfully logged out.');
+                        navigate('/');
+                      }}
+                      className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-red-400 hover:text-red-300 hover:bg-red-500/5 border border-red-500/10 transition-all cursor-pointer w-full text-left"
+                    >
+                      <LogIn size={14} className="rotate-180" />
+                      <span className="italic">Sign Out</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest text-center">
+                      Join Choosify Bangladesh
+                    </p>
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsSignInOpen(true);
+                      }}
+                      className="w-full py-3.5 bg-orange-primary hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors cursor-pointer border-0 flex items-center justify-center gap-2"
+                    >
+                      <LogIn size={14} />
+                      <span className="italic">Sign In / Register</span>
+                    </button>
+                  </>
+                )}
+                <div className="text-center pt-2">
+                  <span className="text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest">
+                    Choosify Bangladesh • v1.0
+                  </span>
                 </div>
               </div>
             </motion.div>

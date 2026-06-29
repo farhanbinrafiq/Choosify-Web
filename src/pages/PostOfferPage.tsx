@@ -455,7 +455,7 @@ export function PostOfferPage() {
                      <button 
                        type="button"
                        onClick={() => setStep(prev => prev - 1)}
-                       className="flex-1 h-14 border-2 border-blue-grey text-navy font-black rounded-2xl text-xs uppercase tracking-widest hover:bg-ice-blue transition-all cursor-pointer bg-transparent"
+                       className="flex-1 px-6 py-3 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-[#e8edf2] hover:border-[#1A1D4E]/20"
                      >
                        Back
                      </button>
@@ -463,14 +463,14 @@ export function PostOfferPage() {
                   <button 
                      type="button"
                      onClick={saveDraft}
-                     className="flex-1 h-14 border-2 border-blue-grey text-navy font-black rounded-2xl text-xs uppercase tracking-widest hover:bg-ice-blue transition-all cursor-pointer bg-transparent"
+                     className="flex-1 px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 italic"
                   >
                      Save Draft
                   </button>
                   <button 
                      type="button"
                      onClick={handleContinue}
-                     className="flex-[2] h-14 button-gradient text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 cursor-pointer border-none"
+                     className="flex-[2] px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 italic"
                   >
                     {step === 4 ? (
                       <>Submit Offer <CheckCircle2 size={18} /></>

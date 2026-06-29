@@ -640,7 +640,7 @@ export function CustomerFavoritePage() {
       {/* ================================================= */}
       {/* 1. HERO SECTION (Standardized centered alignment) */}
       {/* ================================================= */}
-      <section className="relative pt-4 pb-5 choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
+      <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/20 via-[#EB4501]/5 to-[#0A0A1F] opacity-90" />
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-radial-gradient from-orange-primary/30 to-transparent blur-3xl pointer-events-none" />
         
@@ -698,6 +698,30 @@ export function CustomerFavoritePage() {
               </button>
             </div>
 
+            {/* SEARCH BAR — placed inside hero section at bottom */}
+            <div className="relative w-full max-w-2xl mx-auto mt-6">
+              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
+                <div className="flex items-center bg-white rounded-full">
+                  <div className="pl-4 text-[#E8500A] shrink-0">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search customer-recommended products..." 
+                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
+                  />
+                  <button 
+                    onClick={() => setSearchQuery(searchQuery)}
+                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -711,32 +735,6 @@ export function CustomerFavoritePage() {
           <span>💎 AUTHENTIC OUTLETS DIRECTORY • NO MORE ONLINE SCAMS • SHOP WITH CONFIDENCE 💎</span>
           <span>🛡️ 100% ORIGINAL PRODUCTS ONLY • VERIFIED SHOPS IN BANGLADESH • CHOOSE WISELY 🛡️</span>
           <span>💎 AUTHENTIC OUTLETS DIRECTORY • NO MORE ONLINE SCAMS • SHOP WITH CONFIDENCE 💎</span>
-        </div>
-      </div>
-
-      {/* PAGE SEARCH BAR — static, not sticky */}
-      <div className="w-full bg-white border-b border-[#E8EDF2] py-3">
-        <div className="max-w-[1440px] mx-auto px-6">
-          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-            <div className="flex items-center bg-white rounded-full">
-              <div className="pl-4 text-[#E8500A] shrink-0">
-                <Search className="w-4 h-4" />
-              </div>
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search customer-recommended products..." 
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none" 
-              />
-              <button 
-                onClick={() => setSearchQuery(searchQuery)}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-              >
-                Search
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 

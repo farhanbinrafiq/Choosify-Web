@@ -533,7 +533,7 @@ export function BrandsPage() {
         {/* Background Gradients */}
         <div className="absolute inset-0 hero-gradient" />
         
-        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[130px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
+        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
           <div className="w-full flex flex-col justify-center">
             {mode === 'wholesale' ? (
               <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
@@ -568,95 +568,33 @@ export function BrandsPage() {
             <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8px] lg:text-[9.5px] mb-0 uppercase tracking-wide opacity-80 leading-tight">
               Discover official stores, authorized dealers, and independent brands across Bangladesh.
             </p>
-          </div>
-        </div>
-      </div>
 
-      {/* GLOBAL STICKY NAVIGATION SYSTEM */}
-      <div className="relative z-10 bg-white/95 border-b border-gray-150 shadow-sm py-4 transition-all duration-300">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-col gap-4 w-full">
-          
-          {/* 1. Search Bar inside Sticky Container */}
-          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-            <div className="flex items-center bg-white rounded-full">
-              <div className="pl-4 text-[#E8500A] shrink-0">
-                <Search className="w-4 h-4" />
+            {/* SEARCH BAR — placed inside hero section at bottom */}
+            <div className="relative w-full max-w-2xl mx-auto mt-6 font-sans">
+              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
+                <div className="flex items-center bg-white rounded-full">
+                  <div className="pl-4 text-[#E8500A] shrink-0">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by Brand Name or Category..." 
+                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
+                  />
+                  <button 
+                    onClick={() => setSearchQuery(searchQuery)}
+                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                  >
+                    Search
+                  </button>
+                </div>
               </div>
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by Brand Name or Category..." 
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
-              />
-              <button 
-                onClick={() => setSearchQuery(searchQuery)}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-              >
-                Search
-              </button>
             </div>
           </div>
-
-          {/* 2. Navigation Tabs */}
-          <div className="flex items-center justify-start md:justify-center gap-1.5 md:gap-3 overflow-x-auto no-scrollbar py-1 text-[10px] font-black uppercase tracking-wider w-full">
-            {[
-              { id: 'All Brands', label: "All Brands", icon: <Layers size={13} /> },
-              { id: 'Trending Brands', label: "Trending Brands", icon: <Flame size={13} /> },
-              { id: 'Featured Brands', label: "Featured Brands", icon: <Sparkles size={13} /> },
-              { id: 'Hot Deals Brands', label: "Hot Deals Brands", icon: <Zap size={13} /> },
-              { id: 'Top Rated Brands', label: "Top Rated Brands", icon: <Star size={13} /> }
-            ].map((tab) => (
-              <button
-                key={tab.label}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  const el = document.getElementById("brands-main-display");
-                  if (el) {
-                    const offset = 220; // safe header + sticky offset
-                    const elementPosition = el.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - offset;
-                    window.scrollTo({
-                      top: offsetPosition,
-                      behavior: 'smooth'
-                    });
-                  }
-                }}
-                className={cn(
-                  "px-5 py-2.5 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1.5 font-black uppercase tracking-wider text-[10px] border",
-                  activeTab === tab.id
-                    ? "bg-[#E8500A] border-transparent text-white shadow-md shadow-[#E8500A]/10 italic"
-                    : "bg-white border-gray-250 text-gray-400 hover:text-navy hover:bg-gray-50/80"
-                )}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-
         </div>
       </div>
-
-       {/* LAYER 1: QUICK FILTER BAR */}
-      <QuickFilterBar
-        title="Brands Quick Specs"
-        onOpenFullFilters={() => {
-          const el = document.getElementById("brands-sidebar-filters");
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add("ring-2", "ring-orange-primary/50");
-            setTimeout(() => el.classList.remove("ring-2", "ring-orange-primary/50"), 1500);
-          }
-        }}
-        filters={[
-          { id: 'verified', label: '✓ Verified Claims', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
-          { id: 'hot', label: '🔥 Hot Brands', active: popularityFilter === 'hot', onClick: () => setPopularityFilter(popularityFilter === 'hot' ? 'all' : 'hot') },
-          { id: 'top-rated', label: '⭐ Top Rated', active: popularityFilter === 'top-rated', onClick: () => setPopularityFilter(popularityFilter === 'top-rated' ? 'all' : 'top-rated') },
-          { id: 'fashion', label: '👗 Fashion Brands', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
-          { id: 'tech', label: '💻 Tech Devices', active: selectedCategory === 'Tech', onClick: () => setSelectedCategory(selectedCategory === 'Tech' ? null : 'Tech') }
-        ]}
-      />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -1050,18 +988,41 @@ export function BrandsPage() {
 
                     {/* Horizontal Header System */}
                     <div className="flex gap-3 items-start relative z-10 text-left w-full">
-                      <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-2 shadow-xs">
+                      <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 shadow-xs">
                         {brand.logo.startsWith('http') || brand.logo.startsWith('/') ? (
-                           <img src={brand.logo} className="w-full h-full object-contain p-2 relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
+                           <img 
+                             src={brand.logo} 
+                             className="w-full h-full object-cover" 
+                             alt={brand.name} 
+                             referrerPolicy="no-referrer"
+                             onError={(e) => {
+                               // If image fails to load, hide img and show initials fallback
+                               const el = e.target as HTMLImageElement;
+                               el.style.display = 'none';
+                               const parent = el.parentElement;
+                               if (parent) {
+                                 const fallback = document.createElement('span');
+                                 fallback.className = 'text-lg font-black text-navy';
+                                 fallback.textContent = brand.name.substring(0, 2).toUpperCase();
+                                 parent.appendChild(fallback);
+                               }
+                             }}
+                           />
                         ) : (
-                          <span className="text-xl font-black text-navy tracking-tight">{brand.logo}</span>
+                           <span className="text-xl font-black text-navy tracking-tight">{brand.logo}</span>
                         )}
                       </div>
                       <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>
                         <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
                         <div className="flex items-center gap-1 mb-1.5 flex-wrap">
                           {getBrandClaimStatus(brand.id) === 'verified' && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-[7px] font-black text-green-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-green-200/50">✓ Verified Brand</span>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black rounded-full uppercase tracking-wider shadow-sm scale-90 origin-left">
+                              <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
+                                <circle cx="6" cy="6" r="6" fill="white" fillOpacity="0.2"/>
+                                <path d="M3 6l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              Verified
+                            </span>
                           )}
                           {getBrandClaimStatus(brand.id) === 'pending' && (
                             <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">Ownership Verification Pending</span>
@@ -1139,18 +1100,41 @@ export function BrandsPage() {
 
                     {/* Horizontal Header System */}
                     <div className="flex gap-3 items-start relative z-10 text-left w-full">
-                      <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-2 shadow-xs">
+                      <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 shadow-xs">
                         {brand.logo.startsWith('http') || brand.logo.startsWith('/') ? (
-                           <img src={brand.logo} className="w-full h-full object-contain p-2 relative z-10" alt={brand.name} referrerPolicy="no-referrer" />
+                           <img 
+                             src={brand.logo} 
+                             className="w-full h-full object-cover" 
+                             alt={brand.name} 
+                             referrerPolicy="no-referrer"
+                             onError={(e) => {
+                               // If image fails to load, hide img and show initials fallback
+                               const el = e.target as HTMLImageElement;
+                               el.style.display = 'none';
+                               const parent = el.parentElement;
+                               if (parent) {
+                                 const fallback = document.createElement('span');
+                                 fallback.className = 'text-lg font-black text-navy';
+                                 fallback.textContent = brand.name.substring(0, 2).toUpperCase();
+                                 parent.appendChild(fallback);
+                               }
+                             }}
+                           />
                         ) : (
-                          <span className="text-xl font-black text-navy tracking-tight">{brand.logo}</span>
+                           <span className="text-xl font-black text-navy tracking-tight">{brand.logo}</span>
                         )}
                       </div>
                       <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>
                         <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
                         <div className="flex items-center gap-1 mb-1.5 flex-wrap">
                           {getBrandClaimStatus(brand.id) === 'verified' && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-[7px] font-black text-green-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-green-200/50">✓ Verified Brand</span>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black rounded-full uppercase tracking-wider shadow-sm scale-90 origin-left">
+                              <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
+                                <circle cx="6" cy="6" r="6" fill="white" fillOpacity="0.2"/>
+                                <path d="M3 6l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              Verified
+                            </span>
                           )}
                           {getBrandClaimStatus(brand.id) === 'pending' && (
                             <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">Ownership Verification Pending</span>

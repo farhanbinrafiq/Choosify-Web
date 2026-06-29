@@ -39,13 +39,21 @@ export function FloatingOverlays() {
 
   // Tracking responsive media
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 768px)");
-    setIsMobile(media.matches);
-    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
+    const mobileMedia = window.matchMedia("(max-width: 640px)");
+    const tabletMedia = window.matchMedia("(min-width: 641px) and (max-width: 1023px)");
+    setIsMobile(mobileMedia.matches);
+    setIsTablet(tabletMedia.matches);
+    const mobileListener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    const tabletListener = (e: MediaQueryListEvent) => setIsTablet(e.matches);
+    mobileMedia.addEventListener("change", mobileListener);
+    tabletMedia.addEventListener("change", tabletListener);
+    return () => {
+      mobileMedia.removeEventListener("change", mobileListener);
+      tabletMedia.removeEventListener("change", tabletListener);
+    };
   }, []);
 
   // Close active panel upon route transition
@@ -142,11 +150,7 @@ export function FloatingOverlays() {
     }
   }, [totalCartItems, activePanel]);
 
-  useEffect(() => {
-    if (activePanel === 'inbox' && unreadCount === 0) {
-      setActivePanel(null);
-    }
-  }, [unreadCount, activePanel]);
+
 
   const subtotal = activeCart.reduce((sum, item) => {
     const price = item.selectedVariant?.price || item.product.price;
@@ -259,16 +263,18 @@ export function FloatingOverlays() {
         {activePanel === 'cart' && (
           <motion.div 
             ref={panelRef}
-            initial={{ opacity: 0, y: 30, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.95 }}
+            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+            animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
             transition={standardTransition}
-            style={isMobile ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
+            style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
             className={cn(
               "bg-[#0A0B1E]/95 backdrop-blur-xl border border-white/10 overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] text-white flex flex-col",
-              isMobile 
-                ? "fixed bottom-0 left-0 right-0 h-[80vh] rounded-t-[32px] z-50 w-full"
-                : "absolute right-0 w-[380px] rounded-[32px] max-h-[75vh]"
+              isMobile
+                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                : isTablet
+                  ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
+                  : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
             )}
             id="floating-mini-cart-drawer"
           >
@@ -405,15 +411,15 @@ export function FloatingOverlays() {
           </motion.div>
         )}
 
-        {/* PANEL 3: YOUR PROFILE DRAWER (Slide Up bottom->top dock system) */}
-        {activePanel === 'profile' && (
+        {/* PANEL 2: MINI FLOATING INBOX */}
+        {activePanel === 'inbox' && (
           <motion.div
             ref={panelRef}
             initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
             animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
             transition={standardTransition}
-            style={isMobile ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
+            style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
             drag={isMobile ? "y" : false}
             dragConstraints={{ top: 0, bottom: 250 }}
             dragElastic={{ top: 0.1, bottom: 0.8 }}
@@ -424,9 +430,157 @@ export function FloatingOverlays() {
             }}
             className={cn(
               "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
-              isMobile 
-                ? "fixed bottom-0 left-0 right-0 h-[85vh] rounded-t-[28px] z-[250] w-full"
-                : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
+              isMobile
+                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                : isTablet
+                  ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
+                  : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
+            )}
+            id="floating-mini-inbox-drawer"
+          >
+            {/* Drawer Drag Indicator on Mobile */}
+            {isMobile && (
+              <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
+            )}
+
+            {/* Inbox Header Block */}
+            <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3.5 text-left">
+                <div className="w-9 h-9 rounded-full bg-orange-primary/10 flex items-center justify-center text-orange-primary shrink-0">
+                  <MessageSquare size={16} />
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-[#E8500A] font-extrabold text-left">Quick Connect</div>
+                  <h3 className="text-xs md:text-sm font-black text-[#1A1A2E] leading-tight uppercase">
+                    Merchant Inbox
+                  </h3>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => { setActivePanel(null); navigate('/messages'); }}
+                  className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider hover:underline cursor-pointer border-0 bg-transparent"
+                >
+                  Open Full ↗
+                </button>
+                <button 
+                  onClick={() => setActivePanel(null)}
+                  className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#1A1A2E] transition-all border border-[#e8edf2] cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+
+            {/* Panel Body */}
+            {activeThreadId === null ? (
+              <div className="flex-1 overflow-y-auto no-scrollbar divide-y divide-[#e8edf2]">
+                {threads.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                    <MessageSquare size={28} className="text-gray-300 mb-3" />
+                    <p className="text-[11px] font-bold text-gray-400">No conversations yet</p>
+                  </div>
+                ) : threads.map(thread => {
+                  const displayName = thread.title;
+                  return (
+                    <button
+                      key={thread.id}
+                      onClick={() => setActiveThreadId(thread.id)}
+                      className="w-full flex items-start gap-3 p-4 hover:bg-gray-50 transition-colors text-left font-sans"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-orange-primary/10 flex items-center justify-center shrink-0 text-[10px] font-black text-orange-primary">
+                        {displayName?.substring(0, 2) || '??'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-[11px] font-black text-[#1A1A2E] truncate uppercase">{displayName}</span>
+                          {thread.unread && <span className="w-2 h-2 rounded-full bg-orange-primary shrink-0 ml-2" />}
+                        </div>
+                        <p className="text-[10px] text-gray-400 truncate font-medium">{thread.lastMessage}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Chat view */
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-[#e8edf2] shrink-0 bg-gray-50">
+                  <button onClick={() => setActiveThreadId(null)} className="text-gray-400 hover:text-[#1A1A2E] p-1 cursor-pointer bg-transparent border-0 text-[12px] font-bold">
+                    ←
+                  </button>
+                  <span className="text-[11px] font-black text-[#1A1A2E] uppercase">
+                    {threads.find(t => t.id === activeThreadId)?.title}
+                  </span>
+                </div>
+                <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-3">
+                  {(activeMessages || []).map((msg: any, i: number) => {
+                    const isOutgoing = msg.sender === 'user';
+                    return (
+                      <div key={i} className={`flex ${isOutgoing ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[75%] px-3 py-2 rounded-2xl text-[11px] font-medium ${isOutgoing ? 'bg-orange-primary text-white rounded-br-sm' : 'bg-gray-100 text-[#1A1A2E] rounded-bl-sm'}`}>
+                          {msg.text || msg.content || msg.message}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={miniChatBottomRef} />
+                </div>
+                <div className="p-3 border-t border-[#e8edf2] flex gap-2 shrink-0">
+                  <input
+                    value={chatInput}
+                    onChange={e => setChatInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && chatInput.trim()) {
+                        addThreadMessage(activeThreadId, chatInput.trim(), 'user', 'Me');
+                        setChatInput('');
+                      }
+                    }}
+                    placeholder="Type a message..."
+                    className="flex-1 px-3 py-2 bg-gray-50 border border-[#e8edf2] rounded-full text-[11px] font-medium outline-none focus:border-orange-primary text-[#1A1A2E]"
+                  />
+                  <button
+                    onClick={() => {
+                      if (chatInput.trim()) {
+                        addThreadMessage(activeThreadId, chatInput.trim(), 'user', 'Me');
+                        setChatInput('');
+                      }
+                    }}
+                    className="w-9 h-9 rounded-full bg-orange-primary text-white flex items-center justify-center shrink-0 cursor-pointer border-0 hover:bg-[#CF4400] transition-colors"
+                  >
+                    <Send size={13} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* PANEL 3: YOUR PROFILE DRAWER (Slide Up bottom->top dock system) */}
+        {activePanel === 'profile' && (
+          <motion.div
+            ref={panelRef}
+            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+            animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+            transition={standardTransition}
+            style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
+            drag={isMobile ? "y" : false}
+            dragConstraints={{ top: 0, bottom: 250 }}
+            dragElastic={{ top: 0.1, bottom: 0.8 }}
+            onDragEnd={(e, info) => {
+              if (info.offset.y > 120) {
+                setActivePanel(null);
+              }
+            }}
+            className={cn(
+              "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
+              isMobile
+                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                : isTablet
+                  ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
+                  : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
             )}
             id="floating-profile-dock-drawer"
           >
@@ -682,10 +836,7 @@ export function FloatingOverlays() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0, opacity: 0, y: 15 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              onClick={() => {
-                setActivePanel(null);
-                navigate('/messages');
-              }}
+              onClick={() => setActivePanel(activePanel === 'inbox' ? null : 'inbox')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
@@ -789,30 +940,31 @@ export function FloatingOverlays() {
     {/* FILTER LAUNCHER — BOTTOM LEFT — mirrors right-side profile stack position */}
     {hasFilters && (
       <div className={cn(
-        "fixed z-[219] flex flex-col items-start",
+        "fixed z-[219] flex flex-col items-start gap-3",
         isMobile ? "bottom-4 left-4" : "bottom-6 left-6 lg:bottom-8 lg:left-8"
       )}>
         <AnimatePresence>
           {filterOpen && (
             <motion.div
               ref={filterDrawerRef}
-              // --- EXACT SAME ANIMATION AS PROFILE PANEL ---
-              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
-              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, scale: 0.95 }}
+              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, scale: 1 }}
+              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, scale: 0.95 }}
               transition={standardTransition}
-              style={isMobile ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
               drag={isMobile ? "y" : false}
               dragConstraints={{ top: 0, bottom: 250 }}
               dragElastic={{ top: 0.1, bottom: 0.8 }}
               onDragEnd={(_e: any, info: any) => {
                 if (info.offset.y > 120) setFilterOpen(false);
               }}
+              style={isMobile ? undefined : { bottom: '100%', marginBottom: '12px' }}
               className={cn(
                 "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
                 isMobile
-                  ? "fixed bottom-0 left-0 right-0 h-[85vh] rounded-t-[28px] z-[250] w-full"
-                  : "absolute left-0 w-[380px] rounded-[24px] max-h-[75vh]"
+                  ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                  : isTablet
+                    ? "fixed bottom-4 left-4 w-[420px] max-h-[70vh] rounded-[24px] z-[250]"
+                    : "absolute left-0 w-[380px] rounded-[24px] max-h-[75vh]"
               )}
             >
               {/* Mobile drag indicator */}

@@ -212,7 +212,7 @@ export default defineConfig(({ mode }) => {
         
         // Dev options — enable PWA in development for testing
         devOptions: {
-          enabled: true,
+          enabled: false,
           type: 'module'
         }
       })

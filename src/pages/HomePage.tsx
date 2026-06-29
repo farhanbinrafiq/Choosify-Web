@@ -16,44 +16,42 @@ import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { FeaturedCard, ReelCard, HorizontalMediaCard } from './GuidesPage';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
+import { useRegisterPageFilters } from '../components/FilterEngine';
+import { CREATORS } from '../data/creators';
+import { FollowButton } from '../components/FollowButton';
 import toast from 'react-hot-toast';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
 
-interface CarouselBrandMeta {
-  id: number;
-  name: string;
-  category: string;
-  image: string;
-}
+const BRAND_IMAGES: Record<string, string> = {
+  "Samsung": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
+  "Apple": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=1200&q=80",
+  "Apex": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80",
+  "Bata": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=1200&q=80",
+  "Sony": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200&q=80",
+  "Lotto": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=1200&q=80",
+  "La Reve": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80",
+  "Le Reve": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80",
+  "Perfume World": "https://images.unsplash.com/photo-1541643600914-78b084683601?w=1200&q=80",
+  "Pickaboo": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&q=80",
+  "Aarong": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=1200&q=80",
+  "Yellow": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80",
+  "Sailor": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=1200&q=80",
+  "Ecstasy": "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1200&q=80",
+  "Richman": "https://images.unsplash.com/photo-1488161628813-04466f872be2?w=1200&q=80",
+  "Star Tech": "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=1200&q=80",
+  "Choosify": "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&q=80",
+  "FFF Sourcing Ltd": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&q=80"
+};
 
-const CAROUSEL_BRANDS: CarouselBrandMeta[] = [
-  {
-    id: 3, // Apex
-    name: "Apex",
-    category: "Best Shoes",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80"
-  },
-  {
-    id: 7, // La Reve
-    name: "Le Reve",
-    category: "Clothing & Lifestyle",
-    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80"
-  },
-  {
-    id: 8, // Perfume World
-    name: "Perfume World",
-    category: "Best Perfume",
-    image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=1200&q=80"
-  },
-  {
-    id: 1, // Samsung
-    name: "Samsung",
-    category: "Mobile & Wearables",
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80"
-  }
-];
+const CATEGORY_IMAGES: Record<string, string> = {
+  "Fashion": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80",
+  "Tech": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&q=80",
+  "Electronics": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200&q=80",
+  "Beauty": "https://images.unsplash.com/photo-1541643600914-78b084683601?w=1200&q=80",
+  "Sports": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=1200&q=80",
+};
 
 // Helper to map category names to Lucide icons
 const getCategoryIcon = (category: string) => {
@@ -70,7 +68,7 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, mode, addToCart } = useGlobalState();
+  const { allProducts, allBrands, mode, addToCart, getCreatorClaimStatus } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -79,43 +77,124 @@ export function HomePage() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [showAllFollowed, setShowAllFollowed] = useState(false);
   const [activeStickySection, setActiveStickySection] = useState('all');
+  const [activeRecsTab, setActiveRecsTab] = useState<'guides' | 'creators'>('guides');
+  const [activeBrandsTab, setActiveBrandsTab] = useState<'brands' | 'products'>('brands');
 
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  useRegisterPageFilters({
+    pageName: 'Home',
+    renderSearch: null, // home has its own hero search
+    quickFilters: [], // no quick filters on homepage
+    renderFilters: null, // no sidebar filters on homepage
+    activeFilterCount: 0,
+    onClearAll: null,
+  });
+
+  const [isMobile, setIsMobile] = useState(false);
   const [dragStartX, setDragStartX] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const lastWheelTime = React.useRef(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(800);
+  const carouselBrandsRef = React.useRef<any[]>([]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    
+    // Keyboard arrows support for accessibility & premium experience
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+        return;
+      }
+      const len = carouselBrandsRef.current.length || 1;
+      if (e.key === 'ArrowLeft') {
+        setCarouselIndex((prev) => (prev - 1 + len) % len);
+      } else if (e.key === 'ArrowRight') {
+        setCarouselIndex((prev) => (prev + 1) % len);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
+    setDragStartX(e.touches[0].clientX);
+    setDragOffset(0);
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX === null) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX - touchEndX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) {
-        setCarouselIndex((prev) => (prev + 1) % CAROUSEL_BRANDS.length);
-      } else {
-        setCarouselIndex((prev) => (prev - 1 + CAROUSEL_BRANDS.length) % CAROUSEL_BRANDS.length);
-      }
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (dragStartX === null) return;
+    const diff = dragStartX - e.touches[0].clientX;
+    setDragOffset(diff);
+  };
+
+  const handleTouchEnd = () => {
+    if (dragStartX === null) return;
+    const len = carouselBrandsRef.current.length || 1;
+    if (dragOffset > 60) {
+      setCarouselIndex((prev) => (prev + 1) % len);
+    } else if (dragOffset < -60) {
+      setCarouselIndex((prev) => (prev - 1 + len) % len);
     }
-    setTouchStartX(null);
+    setDragStartX(null);
+    setDragOffset(0);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setDragStartX(e.clientX);
+    setDragOffset(0);
   };
 
-  const handleMouseUp = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: React.MouseEvent) => {
     if (dragStartX === null) return;
     const diff = dragStartX - e.clientX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) {
-        setCarouselIndex((prev) => (prev + 1) % CAROUSEL_BRANDS.length);
-      } else {
-        setCarouselIndex((prev) => (prev - 1 + CAROUSEL_BRANDS.length) % CAROUSEL_BRANDS.length);
-      }
+    setDragOffset(diff);
+  };
+
+  const handleMouseUpOrLeave = () => {
+    if (dragStartX === null) return;
+    const len = carouselBrandsRef.current.length || 1;
+    if (dragOffset > 60) {
+      setCarouselIndex((prev) => (prev + 1) % len);
+    } else if (dragOffset < -60) {
+      setCarouselIndex((prev) => (prev - 1 + len) % len);
     }
     setDragStartX(null);
+    setDragOffset(0);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    const now = Date.now();
+    if (now - lastWheelTime.current < 600) return;
+    
+    const len = carouselBrandsRef.current.length || 1;
+    if (Math.abs(e.deltaX) > 30 || Math.abs(e.deltaY) > 50) {
+      if (e.deltaX > 30 || e.deltaY > 50) {
+        setCarouselIndex((prev) => (prev + 1) % len);
+      } else {
+        setCarouselIndex((prev) => (prev - 1 + len) % len);
+      }
+      lastWheelTime.current = now;
+      e.preventDefault();
+    }
   };
 
   useEffect(() => {
@@ -374,12 +453,71 @@ export function HomePage() {
 
   // Trending brands slider helper
   const rightBrandsList = allBrands && allBrands.length > 0 ? allBrands : BRANDS;
+  const carouselBrands = React.useMemo(() => {
+    return rightBrandsList.map((brand: any) => {
+      const img = BRAND_IMAGES[brand.name] || CATEGORY_IMAGES[brand.category] || "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&q=80";
+      return {
+        id: brand.id,
+        name: brand.name,
+        category: brand.category,
+        image: img
+      };
+    });
+  }, [rightBrandsList]);
+
+  // Sync ref
+  carouselBrandsRef.current = carouselBrands;
+
   const popularBrands = rightBrandsList.slice(0, 6);
+
+  const isMobileSize = containerWidth < 768;
+  const activeWidth = isMobileSize ? 260 : containerWidth * 0.58;
+  const inactiveWidth = isMobileSize ? 260 : containerWidth * 0.21;
+  const gap = 16; // gap-4
+  const translateX = (containerWidth / 2) - (carouselIndex * (inactiveWidth + gap) + (activeWidth / 2)) - dragOffset;
 
   // Spotlight Brands list (6-10 maximum, let's select 8)
   const spotlightBrands = React.useMemo(() => {
     return rightBrandsList.filter((b: any) => b.ratings >= 4.7 || b.featuredFlag || b.sponsoredFlag).slice(0, 8);
   }, [rightBrandsList]);
+
+  // Spotlight Creators list (5-8 maximum)
+  const spotlightCreators = React.useMemo(() => {
+    return CREATORS.map(c => {
+      let rating = 4.7;
+      let reviews = 85;
+      let isHot = false;
+      let isFeatured = false;
+
+      if (c.id === 'creator-farhan') {
+        rating = 4.9;
+        reviews = 240;
+        isHot = true;
+      } else if (c.id === 'creator-sarah') {
+        rating = 4.8;
+        reviews = 190;
+        isFeatured = true;
+      } else if (c.id === 'creator-mily') {
+        rating = 4.9;
+        reviews = 150;
+        isHot = true;
+      } else if (c.id === 'creator-imtiaz') {
+        rating = 4.7;
+        reviews = 80;
+      } else if (c.id === 'creator-shakib') {
+        rating = 4.6;
+        reviews = 70;
+      }
+
+      return {
+        ...c,
+        rating,
+        reviews,
+        isHot,
+        isFeatured
+      };
+    }).slice(0, 8);
+  }, []);
 
   // Products filters based on context & states
   const rightProductsList = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
@@ -699,379 +837,329 @@ export function HomePage() {
 
                 {/* Interactive Brands sliding carousel */}
                 <div 
+                  ref={containerRef}
                   onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
                   onMouseDown={handleMouseDown}
-                  onMouseUp={handleMouseUp}
-                  className="flex items-center justify-center gap-3 md:gap-4 overflow-hidden select-none active:cursor-grabbing" 
-                  style={{ height: '458.656px' }}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUpOrLeave}
+                  onMouseLeave={handleMouseUpOrLeave}
+                  onWheel={handleWheel}
+                  className="relative flex items-center overflow-hidden select-none active:cursor-grabbing w-full h-[360px] md:h-[460px]"
                 >
-                  {CAROUSEL_BRANDS.map((brand, i) => {
-                    const isActive = i === carouselIndex;
-                    
-                    return (
-                      <motion.div
-                        key={brand.id}
-                        onClick={() => {
-                          if (isActive) {
-                            navigate(`/brands/${brand.id}`);
-                          } else {
-                            setCarouselIndex(i);
-                          }
-                        }}
-                        initial={false}
-                        animate={{
-                          width: isActive ? '55%' : '15%',
-                          flex: isActive ? 5 : 1,
-                          opacity: isActive ? 1 : 0.8,
-                        }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 100,
-                          damping: 18
-                        }}
-                        style={{ height: '458.656px' }}
-                        className={cn(
-                          "relative w-full rounded-[5px] overflow-hidden cursor-pointer group select-none border border-gray-100",
-                          !isActive && "hidden md:block" // Hide side cards on mobile to focus on active
-                        )}
-                      >
-                        {/* Background Image */}
-                        <img 
-                          src={brand.image} 
-                          className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
-                          alt={brand.name}
-                        />
-                        <div className={cn(
-                           "absolute inset-0 transition-opacity duration-700",
-                           isActive ? "bg-gradient-to-t from-black/85 via-black/30 to-transparent" : "bg-black/30"
-                        )} />
+                  <motion.div
+                    animate={{ x: translateX }}
+                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                    className="flex gap-4 items-center w-max h-full"
+                  >
+                    {carouselBrands.map((brand, i) => {
+                      const isActive = i === carouselIndex;
+                      const brandTaglines: Record<number, string> = {
+                        3: "Crafted for comfort, styled for the streets.",
+                        7: "Unveiling modern elegance and ethnic charm.",
+                        8: "Your signature scent, curated from the finest houses.",
+                        1: "Unfolding the future of mobile innovation.",
+                      };
+                      const tagline = brandTaglines[brand.id] || "Dressed in authenticity, validated by shoppers.";
+                      return (
+                        <motion.div
+                          key={brand.id}
+                          onClick={() => {
+                            if (isActive) {
+                              navigate(`/brands/${brand.id}`);
+                            } else {
+                              setCarouselIndex(i);
+                            }
+                          }}
+                          animate={{
+                            scale: isActive ? 1.0 : 0.95,
+                            opacity: isActive ? 1.0 : 0.85,
+                          }}
+                          transition={{ type: "spring", stiffness: 110, damping: 19 }}
+                          style={{
+                            width: isMobile ? 260 : isActive ? containerWidth * 0.58 : containerWidth * 0.21,
+                          }}
+                          className="relative rounded-[12px] overflow-hidden cursor-pointer group select-none shadow-md border border-gray-100 flex flex-col justify-end text-left h-[325px] md:h-[440px] shrink-0 transition-shadow duration-300 hover:shadow-xl"
+                        >
+                          {/* Background Image */}
+                          <img 
+                            src={brand.image} 
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
+                            alt={brand.name}
+                            referrerPolicy="no-referrer"
+                          />
+                          
+                          {/* Dark Gradient Overlay */}
+                          <div className={cn(
+                             "absolute inset-0 transition-opacity duration-700 bg-gradient-to-t from-black/95 via-black/50 to-black/10",
+                             !isActive && "opacity-90 bg-black/45"
+                          )} />
 
-                        {/* Content for Inactive (Horizontal matching label at bottom) */}
-                        {!isActive && (
-                           <div className="absolute inset-x-0 bottom-4 flex justify-center text-center px-2">
-                              <span className="text-white/95 text-[9.5px] font-black uppercase tracking-wider bg-black/45 backdrop-blur-md px-3 py-1.5 rounded-full truncate max-w-full italic font-space border border-white/5">
-                                 {brand.name} | {brand.category.substring(0, 10)}...
-                              </span>
-                           </div>
-                        )}
+                          {/* Category Badge top-left */}
+                          <div className="absolute top-4 md:top-5 left-4 md:left-5 z-20">
+                            <span className="px-2.5 md:px-3 py-1 bg-[#E8500A] text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-md backdrop-blur-md border border-white/10">
+                              {brand.category}
+                            </span>
+                          </div>
 
-                        {/* Content for Active Card */}
-                        {isActive && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 15 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.15 }}
-                            className="absolute inset-0 p-5 md:p-7 flex flex-col justify-end items-start text-left"
-                          >
-                            <div className="flex items-center gap-1.5 mb-3 bg-black/45 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                               <div className="w-5 h-5 rounded-full bg-[#E8500A] flex items-center justify-center text-white shadow-md">
-                                  <Flame size={10} className="fill-current text-white" />
+                          {/* Verified Badge top-right */}
+                          {isActive && (
+                            <div className="absolute top-4 md:top-5 right-4 md:right-5 z-20 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+                               <div className="w-3.5 h-3.5 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
+                                  <Check size={8} strokeWidth={3} />
                                </div>
-                               <span className="text-[8.5px] font-black text-white uppercase tracking-wider font-space">TOP VERIFIED</span>
+                               <span className="text-[7.5px] font-black text-white uppercase tracking-widest">VERIFIED</span>
+                            </div>
+                          )}
+
+                          {/* Info bottom-left */}
+                          <div className="p-4 md:p-6 relative z-10 w-full flex flex-col items-start">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h3 className={cn(
+                                "font-black text-white italic uppercase tracking-tighter leading-none transition-all duration-300",
+                                isActive ? "text-lg md:text-3xl" : "text-sm md:text-base"
+                              )}>
+                                {brand.name}
+                              </h3>
+                              {isActive && (
+                                <span className="text-[7.5px] md:text-[8px] font-extrabold text-blue-400 uppercase tracking-widest">
+                                  ● TOP RATED
+                                </span>
+                              )}
                             </div>
 
-                            <h3 className="text-xl md:text-3xl font-black text-white italic tracking-tighter uppercase mb-1 leading-none font-space">
-                              {brand.name}
-                            </h3>
-                            
-                            <p className="text-white/80 text-[10px] md:text-xs font-bold uppercase tracking-widest italic mb-4">
-                              {brand.category}
-                            </p>
-                            
-                            <button 
+                            <motion.p 
+                              animate={{ 
+                                opacity: isActive ? 1 : 0.8,
+                                height: isActive ? "auto" : "24px",
+                                marginTop: isActive ? 4 : 2
+                              }}
+                              transition={{ duration: 0.3 }}
+                              className={cn(
+                                "text-white/80 text-[10px] md:text-[11px] font-medium leading-relaxed max-w-md overflow-hidden",
+                                !isActive && "line-clamp-1"
+                              )}
+                            >
+                              {tagline}
+                            </motion.p>
+
+                            {isActive && (
+                              <div className="flex items-center gap-1.5 mt-2">
+                                <span className="text-[10px] font-black text-amber-400 italic">★ 4.8</span>
+                                <span className="text-[9px] font-bold text-white/50">(450+ Shoppers Verified)</span>
+                              </div>
+                            )}
+
+                            <motion.button
                               type="button"
+                              animate={{ 
+                                opacity: isActive ? 1 : 0,
+                                scale: isActive ? 1 : 0.8,
+                                height: isActive ? "auto" : 0,
+                                marginTop: isActive ? 12 : 0
+                              }}
+                              transition={{ duration: 0.3 }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/brands/${brand.id}`);
                               }}
-                              className="flex items-center gap-2 px-5 py-2.5 bg-white/15 hover:bg-white text-white hover:text-[#E8500A] backdrop-blur-sm border border-white/20 hover:border-white transition-all rounded-full group/btn"
+                              className="flex items-center gap-2.5 px-4 py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white rounded-full font-black text-[9px] uppercase tracking-widest shadow-md cursor-pointer border-0"
                             >
-                              <span className="text-[9px] font-black uppercase tracking-widest">EXPLORE BRAND</span>
-                              <ArrowUpRight size={12} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-                            </button>
-                          </motion.div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
+                              <span>Explore Brand</span>
+                              <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center text-[#E8500A] shrink-0">
+                                <ArrowUpRight size={10} strokeWidth={3} />
+                              </div>
+                            </motion.button>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </motion.div>
                 </div>
 
                 {/* Sliding Carousel Controls & Navigation */}
-                <div className="mt-5 flex items-center justify-center gap-10 border-t border-gray-100 pt-4 select-none">
-                   <div className="flex gap-2">
-                     {CAROUSEL_BRANDS.map((_, i) => (
-                       <button
-                         key={i}
+                <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4 select-none">
+                    <div className="flex gap-2">
+                      {carouselBrands.map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setCarouselIndex(i)}
+                          className={cn(
+                            "h-1.5 transition-all duration-500 rounded-full",
+                            carouselIndex === i ? "w-10 bg-[#E8500A]" : "w-2.5 bg-gray-200 hover:bg-gray-300"
+                          )}
+                          aria-label={`Go to brand slide ${i + 1}`}
+                        />
+                      ))}
+                    </div>
+                    
+                    <div className="flex gap-3">
+                       <button 
                          type="button"
-                         onClick={() => setCarouselIndex(i)}
-                         className={cn(
-                           "h-1 transition-all duration-500 rounded-full",
-                           carouselIndex === i ? "w-10 bg-[#E8500A]" : "w-2.5 bg-gray-200 hover:bg-gray-300"
-                         )}
-                         aria-label={`Go to brand slide ${i + 1}`}
-                       />
-                     ))}
-                   </div>
-                   
-                   <div className="flex gap-3">
-                      <button 
-                        type="button"
-                        onClick={() => setCarouselIndex((prev) => (prev - 1 + CAROUSEL_BRANDS.length) % CAROUSEL_BRANDS.length)} 
-                        className="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:border-[#E8500A]/30 transition-all active:scale-90"
-                        title="Previous Brand"
-                      >
-                         <ChevronLeft size={16} />
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => setCarouselIndex((prev) => (prev + 1) % CAROUSEL_BRANDS.length)} 
-                        className="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:border-[#E8500A]/30 transition-all active:scale-90"
-                        title="Next Brand"
-                      >
-                         <ChevronRight size={16} />
-                      </button>
-                   </div>
+                         onClick={() => setCarouselIndex((prev) => (prev - 1 + carouselBrands.length) % carouselBrands.length)} 
+                         className="w-10 h-10 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A]/30 transition-all active:scale-90 shadow-xs"
+                         title="Previous Brand"
+                       >
+                          <ChevronLeft size={18} />
+                       </button>
+                       <button 
+                         type="button"
+                         onClick={() => setCarouselIndex((prev) => (prev + 1) % carouselBrands.length)} 
+                         className="w-10 h-10 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A]/30 transition-all active:scale-90 shadow-xs"
+                         title="Next Brand"
+                       >
+                          <ChevronRight size={18} />
+                       </button>
+                    </div>
                 </div>
               </div>
 
-              {/* FEED SECTION B — POPULAR PRODUCTS */}
-              <div id="section-popular-products" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
+              {/* SECTION 2 — NEW ON CHOOSIFY */}
+              <div id="section-new-on-choosify" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
                   <div className="text-left">
                     <div className="flex items-center gap-1">
-                      <span className="text-base font-semibold text-[#1a1a2e]">Popular</span>
-                      <span className="text-base font-semibold text-[#E8500A]">Products</span>
+                      <span className="text-base font-semibold text-[#1a1a2e]">New on</span>
+                      <span className="text-base font-semibold text-[#E8500A]">Choosify</span>
                     </div>
                     <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
-                      Handpicked, verified, and community tested luxury catalog direct from approved vendors.
+                      Fresh arrivals, latest reviews, and newly verified buying options in Bangladesh.
                     </p>
                   </div>
                   <Link to="/products" className="text-[12px] font-medium text-[#FF5B00] shrink-0 hover:underline">
-                    BROWSE ALL
+                    View All Products
                   </Link>
                 </div>
 
-                {/* Popular Product list in visual cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {rightProductsList.slice(0, 4).map((p) => (
-                    <ProductCard key={p.id} product={p} variant="compact" />
-                  ))}
+                {/* 4-column, 2-row Product Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {((allProducts.length > 0 ? allProducts : PRODUCTS) as any[])
+                    .filter((p: any) => p.isNewArrival || p.id % 3 === 0)
+                    .sort((a: any, b: any) => b.id - a.id)
+                    .slice(0, 8)
+                    .map((product) => (
+                      <ProductCard key={product.id} product={product} variant="grid" />
+                    ))}
+                </div>
+
+                {/* Bottom CTA Button */}
+                <div className="text-center mt-6 pt-4 border-t border-gray-50">
+                  <Link 
+                    to="/products" 
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] uppercase rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-all font-medium"
+                  >
+                    <span>BROWSE ALL PRODUCTS</span>
+                  </Link>
                 </div>
               </div>
 
-              {/* SPOTLIGHT BRANDS SECTION */}
+              {/* SECTION 3 — SPOTLIGHT BRANDS */}
               <div 
                 id="section-spotlight-brands" 
-                className="p-6 md:p-8 shadow-xl text-left relative overflow-hidden choosify-dark-gradient"
-                style={{ borderRadius: '5px' }}
+                className="p-6 md:p-8 shadow-sm text-left bg-white rounded-[5px] border border-[#e8edf2]"
               >
-                {/* 1. HEADER */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-100 pb-3 mb-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-[#F97316] uppercase tracking-[0.25em]">Sponsored Brand</span>
-                      <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-[#F97316]/90 border border-[#F97316]/30 uppercase bg-[#F97316]/10 rounded-full">AD</span>
+                      <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-[0.25em]">Sponsored Brands Spotlight</span>
+                      <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-[#E8500A]/90 border border-[#E8500A]/30 uppercase bg-[#E8500A]/10 rounded-full">AD</span>
                     </div>
-                    <h2 className="text-xl md:text-2xl font-black text-white mt-1 italic tracking-tight">SPOTLIGHT BRAND</h2>
+                    <h2 className="text-base font-semibold text-[#1a1a2e] mt-1">SPOTLIGHT <span className="text-[#E8500A]">BRANDS</span></h2>
                     <p className="text-xs text-gray-400 mt-1">Discover curated exclusive collections directly from official certified channels.</p>
                   </div>
                   <div>
-                    <span className="rounded-full px-2.5 py-1 text-[10px] font-extrabold tracking-wider bg-white/5 text-gray-300 border border-white/10 uppercase">
+                    <span className="rounded-full px-2.5 py-1 text-[10px] font-extrabold tracking-wider bg-[#E8500A]/5 text-[#E8500A] border border-[#E8500A]/15 uppercase">
                       Sponsored AD
                     </span>
                   </div>
                 </div>
 
-                <div className="h-[1px] my-5" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }} />
+                {/* Horizontal Carousel */}
+                <div className="flex gap-4 overflow-x-auto pb-4 pt-2 scrollbar-thin">
+                  {spotlightBrands.map((brand: any) => {
+                    const originalBrand = BRANDS.find(b => b.id === brand.id) || {};
+                    const bestFor = (originalBrand as any).category === 'Fashion' ? 'Footwear' : 'Electronics';
+                    const priceRange = (originalBrand as any).category === 'Fashion' ? '৳1200' : '৳15000';
+                    const recommended = '94%';
 
-                {/* 2. BRAND IDENTITY ROW */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-white/5 rounded-[5px] p-4.5 border border-white/5">
-                  {/* Zone A: Logo block */}
-                  <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/brands/3')}>
-                    <div className="relative w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md border-2 border-[#F97316]/50 transition-transform hover:scale-105">
-                      <span className="text-[#1C1410] font-black text-2xl tracking-tighter">S</span>
-                      <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm">
-                        <svg className="w-4 h-4 text-[#22C55E]" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-                        </svg>
-                      </span>
-                    </div>
-                    <div className="text-left">
-                      <span className="text-[10px] font-extrabold text-[#F97316] uppercase tracking-widest block mb-0.5">ESTABLISHED BRAND</span>
-                      <span className="text-[11px] font-bold text-gray-400 hover:text-white transition-colors">VIEW PROFILE ➔</span>
-                    </div>
-                  </div>
-
-                  {/* Zone B: Brand identity info */}
-                  <div className="text-left md:border-l md:border-white/10 md:pl-6">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-xl font-bold text-white tracking-tight">Sailor</h3>
-                      <span className="bg-[#22C55E]/15 text-[#22C55E] text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-[#22C55E]/20">
-                        VERIFIED STORE
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-400 capitalize">Category: Fashion & Lifestyle</p>
-                    <div className="flex items-center gap-2 mt-2 text-xs font-bold text-gray-300">
-                      <span className="text-amber-400">4.8 ★★★★★</span>
-                      <span className="text-white/40">•</span>
-                      <span>450+ Products</span>
-                      <span className="text-white/40">•</span>
-                      <span>12K Followers</span>
-                    </div>
-                  </div>
-
-                  {/* Zone C: Metrics block */}
-                  <div className="flex flex-wrap md:flex-col lg:flex-row gap-2 justify-start md:justify-end md:border-l md:border-white/10 md:pl-6 w-full">
-                    <span className="px-3 py-1.5 text-xs text-white/95 rounded-[5px] font-bold transition-all hover:bg-white/10 text-center" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
-                      🛡️ 100% Authentic
-                    </span>
-                    <span className="px-3 py-1.5 text-xs text-white/95 rounded-[5px] font-bold transition-all hover:bg-white/10 text-center" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
-                      ✨ Official Store Deal
-                    </span>
-                    <span className="px-3 py-1.5 text-xs text-white/95 rounded-[5px] font-bold transition-all hover:bg-white/10 text-center" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
-                      ⚡ Express Delivery
-                    </span>
-                  </div>
-                </div>
-
-                {/* 3. PRODUCT GRID */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                  {sailorProductList.map((product: any, idx: number) => {
-                    const pKey = `p${idx + 1}`;
-                    const pReact = spotlightProductStates[pKey] || { likes: 12000, views: 1200, shares: 450, liked: false };
-                    
                     return (
-                      <div 
-                        key={product.id}
-                        className="bg-white rounded-[5px] p-3 border border-white/10 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group cursor-pointer text-left relative overflow-hidden"
-                        onClick={() => navigate(`/products/${product.id}`)}
+                      <motion.div 
+                        key={brand.id} 
+                        className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden shadow-xs shrink-0"
+                        style={{ width: '280px', height: '280px' }}
                       >
-                        {/* Sponsored Badge overlay */}
-                        <div className="absolute top-2 left-2 z-10 bg-black/70 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full">
-                          SPONSORED
-                        </div>
-                        
-                        {/* Image block (clean aspect-square) */}
-                        <div className="w-full aspect-square rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center relative mb-3">
-                          <img 
-                            src={product.image || 'https://images.unsplash.com/photo-1445205170230-053b830c6050?w=400&fit=crop'} 
-                            referrerPolicy="no-referrer"
-                            alt={product.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        </div>
+                        {brand.featuredFlag && (
+                          <div className="absolute top-5 right-5 bg-[#E8500A] text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">FEATURED</div>
+                        )}
 
-                        {/* Brand line & Rating */}
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[9px] font-black tracking-wider uppercase text-gray-400">
-                            {product.brand || 'SAILOR OFFICIAL'}
-                          </span>
-                          <div className="flex items-center gap-0.5 text-amber-500 text-[10px] font-bold">
-                            <span>{product.rating || 4.8}</span>
-                            <span>★</span>
+                        {/* Horizontal Header System */}
+                        <div className="flex gap-3 items-start relative z-10 text-left w-full">
+                          <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 shadow-xs">
+                            {brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/')) ? (
+                               <img 
+                                 src={brand.logo} 
+                                 className="w-full h-full object-cover" 
+                                 alt={brand.name} 
+                                 referrerPolicy="no-referrer"
+                               />
+                            ) : (
+                               <span className="text-xl font-black text-[#1a1a2e] tracking-tight">{brand.logo || brand.name.substring(0, 2).toUpperCase()}</span>
+                            )}
+                          </div>
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <h3 className="text-sm font-black text-[#1a1a2e] leading-tight mb-0.5 group-hover:text-[#E8500A] transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
+                            <div className="flex items-center gap-1 mb-1.5 flex-wrap">
+                              {brand.verifiedStatus && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black rounded-full uppercase tracking-wider shadow-sm scale-90 origin-left">
+                                  <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
+                                    <circle cx="6" cy="6" r="6" fill="white" fillOpacity="0.2"/>
+                                    <path d="M3 6l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                  Verified
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.category}</p>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[9px] font-black text-[#1a1a2e] italic">★ {brand.ratings || brand.rating || '4.8'}</span>
+                              <span className="text-[8px] font-bold text-gray-300 ml-0.5">({Math.floor((brand.followers || 10) * 0.1)} reviews)</span>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Product title */}
-                        <h4 className="text-xs font-bold text-[#1a1a2e] mb-2 truncate group-hover:text-[#F97316] transition-colors">
-                          {product.title || product.name}
-                        </h4>
+                        {/* Content Spacer */}
+                        <div className="flex-1" />
 
-                        {/* Price & CTA Button */}
-                        <div className="flex items-center justify-between pb-2 border-b border-gray-100 min-h-[32px]">
-                          <div className="text-left">
-                            <span className="text-[10px] text-gray-400 block -mb-0.5">EXCLUSIVE DEAL</span>
-                            <span className="text-sm font-black text-[#1a1a2e]">
-                              ৳ {product.price || '1,850'}
-                            </span>
+                        <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
+
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
+                            <span className="block text-[7px] font-black text-[#1a1a2e] mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
+                            <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{bestFor}</span>
                           </div>
-                          <button 
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/products/${product.id}`);
-                            }}
-                            className="px-2.5 py-1 text-[10px] font-black uppercase text-white rounded-[5px] transition-all bg-[#F97316] hover:bg-[#E8500A] active:scale-95 shadow-sm"
-                          >
-                            GET DEAL
-                          </button>
+                          <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
+                            <div className="flex flex-col items-center">
+                              <span className="text-sm font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{priceRange}</span>
+                              <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
+                            </div>
+                          </div>
+                          <div className="text-center bg-[#E6F4EA]/80 py-1.5 rounded-lg border border-green-100 min-w-0">
+                            <span className="block text-sm font-black text-[#10B981] leading-none mb-0.5 italic tracking-tighter">{recommended}</span>
+                            <span className="block text-[7px] font-black text-[#1a1a2e] uppercase tracking-widest opacity-60 font-medium">Success</span>
+                          </div>
                         </div>
 
-                        {/* Interactive Engagement Stats */}
-                        <div className="flex items-center justify-between pt-2 text-[10px] text-gray-500" onClick={(e) => e.stopPropagation()}>
-                          <button 
-                            type="button"
-                            onClick={() => handleSpotlightProductReact(pKey, 'likes')}
-                            className={`flex items-center gap-1 hover:text-red-500 transition-colors ${pReact.liked ? 'text-red-500 font-extrabold' : 'font-medium'}`}
-                          >
-                            <span>❤️</span>
-                            <span>{pReact.likes.toLocaleString()}</span>
-                          </button>
-                          
-                          <button 
-                            type="button"
-                            onClick={() => handleSpotlightProductReact(pKey, 'views')}
-                            className="flex items-center gap-1 hover:text-blue-500 transition-colors font-medium text-gray-400"
-                          >
-                            <span>👁️</span>
-                            <span>{pReact.views.toLocaleString()}</span>
-                          </button>
+                        <div className="w-full h-[1px] bg-transparent my-1" />
 
-                          <button 
-                            type="button"
-                            onClick={() => handleSpotlightProductReact(pKey, 'shares')}
-                            className="flex items-center gap-1 hover:text-[#F97316] transition-colors font-medium text-gray-400"
-                          >
-                            <span>🔗</span>
-                            <span>{pReact.shares.toLocaleString()}</span>
-                          </button>
-                        </div>
-                      </div>
+                        <Link to={`/brands/${brand.id}`} className="w-full py-2 bg-[#1a1a2e] text-white text-[9px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
+                          Visit Brand <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                        </Link>
+                      </motion.div>
                     );
                   })}
-                </div>
-
-                {/* 4. FOOTER */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-5 border-t border-white/10">
-                  <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-gray-400">
-                    <span className="text-[10px] tracking-widest text-[#F97316] uppercase shrink-0">Brand Campaign Stats:</span>
-                    <button 
-                      type="button"
-                      onClick={() => handleSpotlightAction('likes')}
-                      className={`flex items-center gap-1 px-2.5 py-1 rounded bg-white/5 border border-white/10 hover:bg-white/10 transition-colors ${spotlightStates.liked ? 'text-red-400 border-red-500/30' : 'text-gray-300'}`}
-                    >
-                      <span>❤️ Loved:</span>
-                      <span>{spotlightStates.likes.toLocaleString()}</span>
-                    </button>
-                    
-                    <button 
-                      type="button"
-                      onClick={() => handleSpotlightAction('views')}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 transition-colors"
-                    >
-                      <span>👁️ Views:</span>
-                      <span>{spotlightStates.views.toLocaleString()}</span>
-                    </button>
-
-                    <button 
-                      type="button"
-                      onClick={() => handleSpotlightAction('shares')}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 transition-colors"
-                    >
-                      <span>🔗 Copy Link:</span>
-                      <span>{spotlightStates.shares.toLocaleString()}</span>
-                    </button>
-                  </div>
-
-                  <div>
-                    <Link 
-                      to="/brands/3" 
-                      className="inline-flex items-center gap-1.5 text-xs font-black tracking-widest text-[#F97316] hover:text-[#F97316]/85 hover:underline uppercase transition-all duration-300"
-                    >
-                      Browse All From Sailor Store ➔
-                    </Link>
-                  </div>
                 </div>
               </div>
 
@@ -1106,6 +1194,137 @@ export function HomePage() {
                 </div>
               </div>
 
+              {/* SECTION 5 — CREATOR SPOTLIGHTS */}
+              <div id="section-creator-spotlights" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left mb-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-100 pb-3 mb-6 gap-4">
+                  <div className="text-left">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base font-semibold text-[#1a1a2e]">CREATOR</span>
+                      <span className="text-base font-semibold text-[#E8500A]">SPOTLIGHT</span>
+                    </div>
+                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
+                      Discover verified, featured, and sponsored creators producing trusted reviews, recommendations, and buying insights.
+                    </p>
+                  </div>
+                  <Link to="/creators" className="text-[12px] font-medium text-[#FF5B00] shrink-0 hover:underline">
+                    View All Creators
+                  </Link>
+                </div>
+
+                {/* Horizontal Carousel */}
+                <div className="flex gap-4 overflow-x-auto pb-4 pt-2 scrollbar-thin">
+                  {spotlightCreators.map((creator: any) => {
+                    const primaryPlatform = creator.platforms[0] || 'YouTube';
+                    const followerCount = creator.followers[primaryPlatform] || Object.values(creator.followers)[0] || '100K+';
+                    
+                    return (
+                      <motion.div 
+                        key={creator.id} 
+                        className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden shadow-xs shrink-0"
+                        style={{ width: '280px', height: '320px' }}
+                      >
+                        {creator.isHot && (
+                          <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">HOT</div>
+                        )}
+                        {creator.isFeatured && (
+                          <div className="absolute top-5 right-5 bg-orange-primary text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">FEATURED</div>
+                        )}
+
+                        {/* Horizontal Header System */}
+                        <div className="flex gap-3 items-start relative z-10 text-left w-full">
+                          <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-0 shadow-xs relative object-cover">
+                             <img src={creator.avatar} className="w-full h-full object-cover relative z-10" alt={creator.name} referrerPolicy="no-referrer" />
+                          </div>
+                          <div className={cn("flex flex-col min-w-0 flex-1", (creator.isHot || creator.isFeatured) && "pr-10")}>
+                            <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{creator.name}</h3>
+                            <div className="flex items-center gap-1 mb-1.5 flex-wrap">
+                              {getCreatorClaimStatus(creator.id) === 'verified' && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black rounded-full uppercase tracking-wider shadow-sm scale-90 origin-left">
+                                  <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
+                                    <circle cx="6" cy="6" r="6" fill="white" fillOpacity="0.2"/>
+                                    <path d="M3 6l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                  Verified
+                                </span>
+                              )}
+                              {getCreatorClaimStatus(creator.id) === 'pending' && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-55 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">● Pending Claim</span>
+                              )}
+                              {getCreatorClaimStatus(creator.id) === 'community' && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-55 text-[7px] font-black text-gray-500 rounded-xs uppercase tracking-wider scale-90 origin-left border border-gray-200/50 border-dashed">Community</span>
+                              )}
+                            </div>
+                            <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{creator.handle}</p>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[9px] font-black text-navy italic">★ {creator.rating}</span>
+                              <span className="text-[8px] font-bold text-gray-300 ml-0.5">({creator.reviews} reviews)</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Bio/Tagline block */}
+                        <div className="mt-3 text-left">
+                          <p className="text-[11px] text-gray-500 line-clamp-2 font-medium leading-relaxed">
+                            {creator.bio}
+                          </p>
+                        </div>
+
+                        {/* Content Spacer */}
+                        <div className="flex-1" />
+
+                        <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
+
+                        {/* Adapted Grid Content */}
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
+                            <span className="block text-[7px] font-black text-navy mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
+                            <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{creator.bestFor}</span>
+                          </div>
+                          <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
+                            <div className="flex flex-col items-center">
+                              <span className="text-sm font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{followerCount}</span>
+                              <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Audience</span>
+                            </div>
+                          </div>
+                          <div className="text-center bg-[#E1F5FE]/80 py-1.5 rounded-lg border border-blue-100 min-w-0">
+                            <span className="block text-[8px] font-black text-blue-600 truncate uppercase mt-0.5">{creator.platforms[0]}</span>
+                            <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60 font-medium">Platform</span>
+                          </div>
+                        </div>
+
+                        <div className="w-full h-[1px] bg-transparent my-1" />
+
+                        {/* Action Row containing Follow and View Profile */}
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          <FollowButton 
+                            id={creator.id} 
+                            name={creator.name} 
+                            type="creator" 
+                            className="w-full h-8 rounded-lg !text-[10px]" 
+                          />
+                          <Link 
+                            to={`/creators/${creator.id}`} 
+                            className="w-full h-8 bg-navy text-white text-[10px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1 uppercase tracking-widest text-center italic z-10 shrink-0"
+                          >
+                            Profile →
+                          </Link>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {/* Bottom CTA to Creators */}
+                <div className="text-center mt-6 pt-4 border-t border-gray-50">
+                  <Link 
+                    to="/creators" 
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] uppercase rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-all font-medium"
+                  >
+                    <span>Browse All Creators</span>
+                  </Link>
+                </div>
+              </div>
+
               {/* FEED SECTION E — FEATURED RECOMMENDATIONS */}
               <div id="section-recommendations" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 
@@ -1119,31 +1338,188 @@ export function HomePage() {
                   </p>
                 </div>
 
-                {/* Main Featured Buying Guide banner blog layout */}
-                <div className="mb-6">
-                  <FeaturedCard guide={BLOGS[0]} />
-                </div>
-
-                {/* Sub Guides Grid matching elements visually */}
-                <div 
-                  id="section-guides"
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
-                  style={{ paddingTop: '0px', paddingBottom: '0px' }}
-                >
-                  <ReelCard guide={BLOGS[1]} />
-                  <HorizontalMediaCard guide={BLOGS[2]} badgeType="youtube" />
-                  <HorizontalMediaCard guide={BLOGS[3]} badgeType="blog" />
-                </div>
-
-                {/* Explore all Recommendations bottom action button */}
-                <div className="text-center">
-                  <Link 
-                    to="/guides" 
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] uppercase rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-all font-medium"
+                {/* TAB BAR — Recommendations Section */}
+                <div className="flex gap-0 mt-5 mb-5 border-b border-[#e8edf2] overflow-x-auto">
+                  <button
+                    onClick={() => setActiveRecsTab('guides')}
+                    className={cn(
+                      "pb-3 px-5 text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-200 border-b-2 -mb-px cursor-pointer border-0 bg-transparent",
+                      activeRecsTab === 'guides'
+                        ? "text-[#E8500A] border-[#E8500A]"
+                        : "text-[#8a9bb0] border-transparent hover:text-[#1A1D4E]"
+                    )}
                   >
-                    <span>EXPLORE ALL RECOMMENDATIONS</span>
-                  </Link>
+                    📖 Guides & Reviews
+                  </button>
+                  <button
+                    onClick={() => setActiveRecsTab('creators')}
+                    className={cn(
+                      "pb-3 px-5 text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-200 border-b-2 -mb-px cursor-pointer border-0 bg-transparent",
+                      activeRecsTab === 'creators'
+                        ? "text-[#E8500A] border-[#E8500A]"
+                        : "text-[#8a9bb0] border-transparent hover:text-[#1A1D4E]"
+                    )}
+                  >
+                    🎯 Creator Spotlights
+                  </button>
                 </div>
+
+                {activeRecsTab === 'guides' && (
+                  <>
+                    {/* Main Featured Buying Guide banner blog layout */}
+                    <div className="mb-6">
+                      <FeaturedCard guide={BLOGS[0]} />
+                    </div>
+
+                    {/* Sub Guides Grid matching elements visually */}
+                    <div 
+                      id="section-guides"
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
+                      style={{ paddingTop: '0px', paddingBottom: '0px' }}
+                    >
+                      <ReelCard guide={BLOGS[1]} />
+                      <HorizontalMediaCard guide={BLOGS[2]} badgeType="youtube" />
+                      <HorizontalMediaCard guide={BLOGS[3]} badgeType="blog" />
+                    </div>
+
+                    {/* Explore all Recommendations bottom action button */}
+                    <div className="text-center">
+                      <Link 
+                        to="/guides" 
+                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] uppercase rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-all font-medium"
+                      >
+                        <span>EXPLORE ALL RECOMMENDATIONS</span>
+                      </Link>
+                    </div>
+                  </>
+                )}
+
+                {activeRecsTab === 'creators' && (
+                  <div className="space-y-4">
+                    {/* Creator cards grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-max">
+                      {[
+                        {
+                          id: 'c1',
+                          name: 'Rifat Hasan',
+                          handle: '@rifat.h',
+                          category: 'Tech & Gadgets',
+                          avatar: 'https://i.pravatar.cc/150?u=rifat',
+                          bio: 'Honest reviews on the latest tech, gadgets, and mobile accessories for Bangladeshi consumers.',
+                          followers: '128K',
+                          guides: 47,
+                          badge: '🔥 Top Pick',
+                          badgeColor: 'bg-orange-50 text-[#E8500A]',
+                          featuredProduct: 'Samsung Galaxy S24 Ultra',
+                          featuredProductImg: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=200&q=80',
+                        },
+                        {
+                          id: 'c2',
+                          name: 'Nadia Islam',
+                          handle: '@nadia.style',
+                          category: 'Fashion & Lifestyle',
+                          avatar: 'https://i.pravatar.cc/150?u=nadia',
+                          bio: 'Curating the best in Bangladeshi fashion — from everyday wear to special occasion styling.',
+                          followers: '94K',
+                          guides: 62,
+                          badge: '✨ Trending',
+                          badgeColor: 'bg-purple-50 text-purple-600',
+                          featuredProduct: 'Aarong Jamdani Collection',
+                          featuredProductImg: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=200&q=80',
+                        },
+                        {
+                          id: 'c3',
+                          name: 'Karim Khan',
+                          handle: '@karimreviews',
+                          category: 'Electronics & Home',
+                          avatar: 'https://i.pravatar.cc/150?u=karim',
+                          bio: 'Deep-dive reviews on home appliances and electronics. Helping BD families buy smarter.',
+                          followers: '76K',
+                          guides: 38,
+                          badge: '⭐ Expert',
+                          badgeColor: 'bg-blue-50 text-blue-600',
+                          featuredProduct: 'Walton AC Inverter Pro',
+                          featuredProductImg: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&q=80',
+                        },
+                        {
+                          id: 'c4',
+                          name: 'Sumaiya Rahman',
+                          handle: '@sumaiya.bd',
+                          category: 'Beauty & Skincare',
+                          avatar: 'https://i.pravatar.cc/150?u=sumaiya',
+                          bio: 'Beauty insider breaking down skincare science for the Bangladeshi climate and skin tone.',
+                          followers: '112K',
+                          guides: 54,
+                          badge: '💄 Editor Pick',
+                          badgeColor: 'bg-rose-50 text-rose-600',
+                          featuredProduct: 'Himalaya Face Wash Range',
+                          featuredProductImg: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=200&q=80',
+                        },
+                      ].map(creator => (
+                        <Link
+                          key={creator.id}
+                          to={`/creators/${creator.id}`}
+                          className="bg-white border border-[#e8edf2] rounded-[5px] p-4 hover:border-[#E8500A]/30 hover:shadow-md transition-all duration-200 group flex flex-col gap-3"
+                        >
+                          {/* Creator Header */}
+                          <div className="flex items-start gap-3">
+                            <img
+                              src={creator.avatar}
+                              alt={creator.name}
+                              className="w-11 h-11 rounded-full object-cover border-2 border-[#e8edf2] group-hover:border-[#E8500A]/30 transition-colors shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                <span className="text-[12px] font-black text-[#1a1a2e] uppercase tracking-tight group-hover:text-[#E8500A] transition-colors">
+                                  {creator.name}
+                                </span>
+                                <svg className="w-3.5 h-3.5 text-blue-600 shrink-0" viewBox="0 0 14 14" fill="none">
+                                  <circle cx="7" cy="7" r="7" fill="#2563EB" fillOpacity="0.15"/>
+                                  <path d="M4 7l2 2 4-4" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                              <span className="text-[9px] font-bold text-[#8a9bb0] block">{creator.handle} · {creator.category}</span>
+                            </div>
+                            <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-full shrink-0 ${creator.badgeColor}`}>
+                              {creator.badge}
+                            </span>
+                          </div>
+
+                          {/* Bio */}
+                          <p className="text-[10px] text-[#8a9bb0] font-medium leading-relaxed line-clamp-2">
+                            {creator.bio}
+                          </p>
+
+                          {/* Stats row */}
+                          <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-wider">
+                            <span className="text-[#1a1a2e]">{creator.followers} <span className="font-normal text-[#8a9bb0]">followers</span></span>
+                            <span className="text-[#E8500A]">{creator.guides} <span className="font-normal text-[#8a9bb0]">guides</span></span>
+                          </div>
+
+                          {/* Featured product chip */}
+                          <div className="flex items-center gap-2 bg-[#F8FBFD] border border-[#e8edf2] rounded-[5px] p-2">
+                            <img src={creator.featuredProductImg} className="w-8 h-8 rounded object-cover shrink-0" alt="" />
+                            <div className="min-w-0">
+                              <span className="text-[8px] font-black uppercase tracking-wider text-[#8a9bb0] block">Latest Pick</span>
+                              <span className="text-[10px] font-bold text-[#1a1a2e] truncate block">{creator.featuredProduct}</span>
+                            </div>
+                            <ArrowUpRight size={12} className="text-[#E8500A] ml-auto shrink-0" />
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* See all creators CTA */}
+                    <div className="text-center pt-2">
+                      <Link
+                        to="/creators"
+                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] uppercase rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-all font-medium"
+                      >
+                        <span>EXPLORE ALL CREATORS</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* FEED SECTION F — POPULAR CATEGORIES */}

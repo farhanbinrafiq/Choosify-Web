@@ -48,7 +48,7 @@ export function SellerIncomingOrdersPage() {
       {/* Merchant Header */}
       <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
         <div className="absolute inset-0 hero-gradient pointer-events-none" />
-        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[135px] lg:h-[160.5px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
+        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex flex-col justify-center">
             <Link to="/dashboard" className="text-[10px] font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1 mb-1">
               <ArrowLeft size={12} /> Return to Personal Dashboard

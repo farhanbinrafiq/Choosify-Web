@@ -357,7 +357,7 @@ export function CreatorsPage() {
         <div className="absolute inset-0 hero-gradient opacity-95" />
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         
-        <div className="max-w-[1914px] mx-auto w-full h-[120px] md:h-[130px] lg:h-[160.5px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
+        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
           <div className="w-full flex flex-col justify-center">
             {mode === 'wholesale' ? (
               <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
@@ -392,31 +392,29 @@ export function CreatorsPage() {
             <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8px] lg:text-[9.5px] mb-0 uppercase tracking-wide opacity-80 leading-tight">
               Discover verified local experts & digital curators in Bangladesh. Send structured briefs directly—no platform middleman.
             </p>
-          </div>
-        </div>
-      </div>
 
-      {/* PAGE SEARCH BAR — static, not sticky */}
-      <div className="w-full bg-white border-b border-[#E8EDF2] py-3">
-        <div className="max-w-[1440px] mx-auto px-6">
-          <div className="relative w-full max-w-2xl mx-auto bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-            <div className="flex items-center bg-white rounded-full">
-              <div className="pl-4 text-[#E8500A] shrink-0">
-                <Search className="w-4 h-4" />
+            {/* SEARCH BAR — placed inside hero section at bottom */}
+            <div className="relative w-full max-w-2xl mx-auto mt-6">
+              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
+                <div className="flex items-center bg-white rounded-full">
+                  <div className="pl-4 text-[#E8500A] shrink-0">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search creators..." 
+                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
+                  />
+                  <button 
+                    onClick={() => setSearchQuery(searchQuery)}
+                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                  >
+                    Search
+                  </button>
+                </div>
               </div>
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search creators..." 
-                className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
-              />
-              <button 
-                onClick={() => setSearchQuery(searchQuery)}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-              >
-                Search
-              </button>
             </div>
           </div>
         </div>
@@ -467,18 +465,6 @@ export function CreatorsPage() {
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               searchPlaceholder="Search creators, niche, handle or bio..."
-              quickFilters={
-                <QuickFilterBar
-                  title="Creators Quick Specs"
-                  onOpenFullFilters={() => {}}
-                  filters={[
-                    { id: 'verified', label: '✓ Verified Expert', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
-                    { id: 'high-eng', label: '🔥 High Engagement (4.8+)', active: popularityFilter === 'high', onClick: () => setPopularityFilter(popularityFilter === 'high' ? 'all' : 'high') },
-                    { id: 'tech', label: '💻 Tech Niches', active: selectedCategory === 'Tech & Gaming', onClick: () => setSelectedCategory(selectedCategory === 'Tech & Gaming' ? null : 'Tech & Gaming') },
-                    { id: 'fashion', label: '👗 Fashion Influencer', active: selectedCategory === 'Fashion & Beauty', onClick: () => setSelectedCategory(selectedCategory === 'Fashion & Beauty' ? null : 'Fashion & Beauty') }
-                  ]}
-                />
-              }
               activeChips={
                 <ActiveFilterChips
                   chips={[
@@ -819,7 +805,13 @@ export function CreatorsPage() {
                         <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{creator.name}</h3>
                         <div className="flex items-center gap-1 mb-1.5 flex-wrap">
                           {getCreatorClaimStatus(creator.id) === 'verified' && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-[7px] font-black text-green-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-green-200/50">✓ Verified Creator</span>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black rounded-full uppercase tracking-wider shadow-sm scale-90 origin-left">
+                              <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
+                                <circle cx="6" cy="6" r="6" fill="white" fillOpacity="0.2"/>
+                                <path d="M3 6l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              Verified
+                            </span>
                           )}
                           {getCreatorClaimStatus(creator.id) === 'pending' && (
                             <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">● Pending Claim</span>
@@ -906,7 +898,13 @@ export function CreatorsPage() {
                         <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{creator.name}</h3>
                         <div className="flex items-center gap-1 mb-1.5 flex-wrap">
                           {getCreatorClaimStatus(creator.id) === 'verified' && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-[7px] font-black text-green-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-green-200/50">✓ Verified Creator</span>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black rounded-full uppercase tracking-wider shadow-sm scale-90 origin-left">
+                              <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
+                                <circle cx="6" cy="6" r="6" fill="white" fillOpacity="0.2"/>
+                                <path d="M3 6l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              Verified
+                            </span>
                           )}
                           {getCreatorClaimStatus(creator.id) === 'pending' && (
                             <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">● Pending Claim</span>

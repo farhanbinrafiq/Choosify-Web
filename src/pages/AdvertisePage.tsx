@@ -62,7 +62,7 @@ export function AdvertisePage() {
   return (
     <div className="min-h-screen bg-[#F0F8FF] font-sans">
       {/* 1. HERO SECTION */}
-      <section className="relative py-12 md:py-20 choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
+      <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
         <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full">
           {/* Breadcrumbs */}
