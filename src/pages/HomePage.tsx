@@ -1173,11 +1173,11 @@ export function HomePage() {
                 {/* Hot Deals Carousel of featured Products */}
                 <PremiumCarousel
                   items={featuredDeals}
-                  itemWidth={260}
+                  itemWidth={210}
                   gap={16}
                   renderCard={(product) => (
-                    <div className="w-[260px] shrink-0">
-                      <ProductCard product={product} variant="grid" />
+                    <div className="w-[210px] shrink-0 flex flex-col min-h-[270px] h-full">
+                      <ProductCard product={product} variant="compact" />
                     </div>
                   )}
                 />

@@ -377,29 +377,13 @@ export function GuideDetailPage() {
       <div className="w-full choosify-dark-gradient py-14 px-6 border-b border-white/15 relative overflow-hidden">
         {/* Layer 1 Base & Multi-layered Ambient Light Glows */}
         {/* Top-Right Ambient Orange Glow */}
-        <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-br from-[#F97316]/30 to-transparent rounded-full blur-[140px] -translate-y-1/3 translate-x-1/4 pointer-events-none mix-blend-plus-lighter opacity-90" />
+        <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-br from-[#F97316]/20 to-transparent rounded-full blur-[140px] -translate-y-1/3 translate-x-1/4 pointer-events-none mix-blend-plus-lighter opacity-90" />
         
         {/* Mid-Center Warm Atmospheric Lighting Orb */}
-        <div className="absolute top-1/2 left-2/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.22),transparent_70%)] pointer-events-none mix-blend-color-dodge" />
+        <div className="absolute top-1/2 left-2/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.15),transparent_70%)] pointer-events-none mix-blend-color-dodge" />
         
         {/* Bottom-Left Soft Glow */}
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#F97316]/18 to-transparent rounded-full blur-[120px] translate-y-1/4 -translate-x-1/4 pointer-events-none mix-blend-screen opacity-80" />
-
-        {/* Deep Premium Royal/Navy backplate layer */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_10%,_rgba(6,7,20,0.85)_60%,_#02020a_100%)] pointer-events-none" />
-
-        {/* Layer 2: Glass Panel Reflection Design & Specs */}
-        {/* Elegant Translucent Angled Specular Sheen (mimics high-end glass physics) */}
-        <div className="absolute inset-0 transform -skew-y-12 bg-gradient-to-r from-transparent via-white/[0.035] to-transparent pointer-events-none" />
-        
-        {/* Solid Glass Highlight Trim Base */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.06] to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.08),transparent_50%)] pointer-events-none" />
-        {/* Subtle Fluid Double-Border Sheen Bottom Light for Glass Depth */}
-        <span className="absolute bottom-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent pointer-events-none" />
-        
-        {/* Premium Warm Glass Edge Border (Top border light) */}
-        <span className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#F97316]/60 to-transparent pointer-events-none shadow-[0_1px_5px_rgba(249,115,22,0.3)]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#F97316]/12 to-transparent rounded-full blur-[120px] translate-y-1/4 -translate-x-1/4 pointer-events-none mix-blend-screen opacity-80" />
 
         <div className="max-w-[1080px] mx-auto text-left relative z-10">
           {/* Guide Title */}
@@ -413,8 +397,8 @@ export function GuideDetailPage() {
               "An in-depth expert curation guiding your next big decision, backed by extensive testing and research."}
           </p>
 
-          {/* Guide Statistics — Framed in fully frosted glass */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 bg-white/[0.035] backdrop-blur-xl rounded-[5px] p-6 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] mb-8">
+          {/* Guide Statistics — Premium solid design matching Product Details Page Hero */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 bg-white/[0.04] rounded-[5px] p-6 border border-white/10 shadow-lg mb-8">
             <div className="flex flex-col text-left">
               <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
                 Published Date
@@ -455,7 +439,7 @@ export function GuideDetailPage() {
               onClick={() => {
                 toast.success("Guide saved to your dashboard!");
               }}
-              className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/15 border border-white/15 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic cursor-pointer shadow-lg backdrop-blur-md"
+              className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/15 border border-white/15 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic cursor-pointer shadow-lg"
             >
               <Bookmark size={14} className="text-[#F97316]" />
               Save Guide
@@ -472,8 +456,8 @@ export function GuideDetailPage() {
             </button>
           </div>
 
-          {/* Reviewer Information — Framed in elegant frosted glass */}
-          <div className="flex items-center gap-5 bg-white/[0.025] backdrop-blur-xl rounded-[5px] p-6 border border-white/10 max-w-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+          {/* Reviewer Information — Premium solid design matching Product Details Page Hero */}
+          <div className="flex items-center gap-5 bg-white/[0.03] rounded-[5px] p-6 border border-white/10 max-w-2xl shadow-lg">
             <div className="w-14 h-14 rounded-full border-2 border-[#F97316] p-0.5 shadow-[0_0_20px_rgba(249,115,22,0.3)] shrink-0">
               <img
                 src={`https://i.pravatar.cc/150?u=${guide.author}`}
