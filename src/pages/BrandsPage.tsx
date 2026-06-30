@@ -55,7 +55,7 @@ interface Brand {
 }
 
 export function BrandsPage() {
-  const { mode, getBrandClaimStatus } = useGlobalState();
+  const { mode, allBrands: globalBrands, getBrandClaimStatus } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Brands');
@@ -93,7 +93,7 @@ export function BrandsPage() {
     sessionStorage.setItem('choosify_brands_filters', JSON.stringify(filters));
   }, [selectedCategory, selectedLetter, verificationFilter, popularityFilter, activeTab]);
 
-  const brands: Brand[] = [
+  const fallbackBrands: Brand[] = [
     {
       id: 'samsung',
       name: 'Samsung',
@@ -272,6 +272,26 @@ export function BrandsPage() {
       isHot: true
     }
   ];
+
+  const brands: Brand[] = React.useMemo(() => {
+    if (globalBrands && globalBrands.length > 0) {
+      return globalBrands.map((brand) => ({
+        id: String(brand.id),
+        name: brand.name,
+        description: `${brand.name} official listing on Choosify`,
+        logo: typeof brand.logo === 'string' ? brand.logo : brand.name.slice(0, 2).toUpperCase(),
+        rating: brand.ratings || 0,
+        reviews: brand.followers || 0,
+        bestFor: brand.category || 'General',
+        priceRange: '৳500',
+        recommended: `${Math.min(99, Math.max(70, Math.round((brand.ratings || 4) * 20)))}%`,
+        category: brand.category || 'General',
+        isHot: brand.sponsoredFlag,
+        isFeatured: brand.featuredFlag,
+      }));
+    }
+    return fallbackBrands;
+  }, [globalBrands]);
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 

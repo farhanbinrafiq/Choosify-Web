@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ProductModeType, Product, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
 import { PRODUCTS, BRANDS } from '../constants';
 import { toast } from 'react-hot-toast';
+import { catalogApi } from '../services/catalogApi';
+import type { CatalogBrand, CatalogCategory, CatalogDeal, CatalogProduct, HomepageConfig } from '../types/catalog';
 
 declare module '../types/schemas' {
   interface Order {
@@ -60,6 +62,9 @@ export interface GlobalStateContextType {
   sellers: Seller[];
   allBrands: Brand[];
   allProducts: Product[];
+  allCategories: CatalogCategory[];
+  allDeals: CatalogDeal[];
+  homepageConfig: HomepageConfig | null;
   rfqs: B2BRfq[];
   submitRfq: (rfq: Omit<B2BRfq, 'id' | 'date' | 'status'>) => void;
   acceptQuotation: (rfqId: string) => void;
@@ -475,8 +480,43 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     localStorage.setItem('choosify_orders', JSON.stringify(orders));
   }, [orders]);
 
+  const [catalogBrands, setCatalogBrands] = useState<CatalogBrand[] | null>(null);
+  const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[] | null>(null);
+  const [catalogCategories, setCatalogCategories] = useState<CatalogCategory[]>([]);
+  const [catalogDeals, setCatalogDeals] = useState<CatalogDeal[]>([]);
+  const [homepageConfig, setHomepageConfig] = useState<HomepageConfig | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydrateCatalogFromApi() {
+      try {
+        const [products, brands, categories, deals, homepage] = await Promise.all([
+          catalogApi.listProducts(),
+          catalogApi.listBrands(),
+          catalogApi.listCategories(),
+          catalogApi.listDeals(),
+          catalogApi.getHomepage(),
+        ]);
+        if (cancelled) return;
+        setCatalogProducts(products);
+        setCatalogBrands(brands);
+        setCatalogCategories(categories);
+        setCatalogDeals(deals);
+        setHomepageConfig(homepage.homepage);
+      } catch (error) {
+        console.warn('[GlobalStateContext] Catalog API unavailable, using static fallback.', error);
+      }
+    }
+
+    hydrateCatalogFromApi();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Combine static brands with schema rules
-  const allBrands: Brand[] = BRANDS.map(b => {
+  const fallbackBrands: Brand[] = BRANDS.map(b => {
     const status = getBrandClaimStatus(b.id);
     return {
       id: b.id,
@@ -735,6 +775,66 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       category: p.category
     });
   });
+
+  const toNumericId = (value: string, fallback: number): number => {
+    const numeric = Number(value.replace(/[^0-9]/g, ''));
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : fallback;
+  };
+
+  const apiBrands: Brand[] = (catalogBrands || []).map((brand, idx) => {
+    const status = getBrandClaimStatus(brand.id);
+    return {
+      id: toNumericId(brand.id, idx + 1),
+      name: brand.name,
+      logo: brand.logo || brand.name.slice(0, 2).toUpperCase(),
+      verifiedStatus: brand.verifiedStatus || status === 'verified',
+      followers: brand.followers || 0,
+      ratings: brand.ratings || 0,
+      sponsoredFlag: brand.sponsoredFlag,
+      featuredFlag: brand.featuredFlag,
+      wholesaleSupport: true,
+      category: brand.category,
+      claimStatus: status,
+    };
+  });
+
+  const apiProducts: Product[] = (catalogProducts || []).map((product, idx) => {
+    const normalizedId = toNumericId(product.id, idx + 1);
+    const normalizedBrandId = toNumericId(product.brandId, idx + 1);
+    const modeType = product.modeType || 'retail';
+    return {
+      id: modeType === 'wholesale' ? normalizedId + 1000 : normalizedId,
+      title: product.title,
+      image: product.image || '',
+      mode_type: modeType,
+      moq: modeType === 'wholesale' ? 10 : undefined,
+      bulkPricing: modeType === 'wholesale',
+      codSupport: modeType !== 'wholesale',
+      quotationSupport: modeType === 'wholesale',
+      stock: typeof product.stock === 'number' ? product.stock : 0,
+      sellerId: `seller-${(product.brandName || 'platform').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      brandId: normalizedBrandId,
+      brand: product.brandName,
+      price: product.price || 0,
+      description: product.description || '',
+      category: product.categoryName || 'General',
+      variants: undefined,
+      rating: 4.5,
+      isDeal: product.isDeal,
+      dealType: product.dealType,
+      discountPercent: product.discountPercent,
+      originalPrice: product.originalPrice,
+      promoCode: product.promoCode,
+      dealValidUntil: product.dealValidUntil,
+      featuredFlag: product.featuredFlag,
+      isNewArrival: product.isNewArrival,
+      isBestseller: product.isBestseller,
+    };
+  });
+
+  const allBrands: Brand[] = apiBrands.length > 0 ? apiBrands : fallbackBrands;
+  const allCategories: CatalogCategory[] = catalogCategories;
+  const allDeals: CatalogDeal[] = catalogDeals;
 
   const addToCart = (product: any, quantity: number, selectedVariant?: any) => {
     if (mode === 'retail') {
@@ -999,7 +1099,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   };
 
   // Filter products by active mode to ensure data separation
-  const allProducts = mappedProducts.filter(p => p.mode_type === mode);
+  const productSource = apiProducts.length > 0 ? apiProducts : mappedProducts;
+  const allProducts = productSource.filter(p => p.mode_type === mode);
 
   const [activeVideo, setActiveVideo] = useState<{ url: string; title: string; isVertical?: boolean } | null>(null);
 
@@ -1038,6 +1139,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       sellers: INITIAL_SELLERS,
       allBrands,
       allProducts,
+      allCategories,
+      allDeals,
+      homepageConfig,
       rfqs,
       submitRfq,
       acceptQuotation,

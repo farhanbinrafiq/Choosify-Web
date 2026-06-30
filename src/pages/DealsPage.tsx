@@ -6,6 +6,7 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
+import { useGlobalState } from '../context/GlobalStateContext';
 
 const PROMO_CODES = [
   { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
@@ -33,6 +34,7 @@ function FlashDealCountdown({ validUntil }: { validUntil?: string }) {
 
 export function DealsPage() {
   const navigate = useNavigate();
+  const { allProducts, allBrands, allDeals } = useGlobalState();
   const [searchParams, setSearchParams] = useSearchParams();
   const getInitialTab = () => {
     const t = searchParams.get('tab');
@@ -51,6 +53,25 @@ export function DealsPage() {
   const [dealType, setDealType] = useState<'all' | 'retail' | 'wholesale'>('all');
   const [minDiscount, setMinDiscount] = useState<number>(0);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const productSource: any[] = allProducts.length > 0 ? allProducts : PRODUCTS;
+  const brandSource: any[] =
+    allBrands.length > 0
+      ? allBrands.map((brand) => ({ ...brand, rating: brand.ratings, products: brand.followers || 0 }))
+      : BRANDS;
+  const promoCodes = React.useMemo(
+    () =>
+      allDeals.length > 0
+        ? allDeals
+            .filter((deal) => !!deal.promoCode)
+            .map((deal) => ({
+              brandId: deal.brandId || 'brand-generic',
+              brandName: deal.seller || 'Brand',
+              code: deal.promoCode || '',
+              discount: deal.discountType === 'flat' ? `Flat ৳${deal.discountValue} OFF` : `${deal.discountValue}% OFF`,
+            }))
+        : PROMO_CODES,
+    [allDeals]
+  );
 
   const TAB_TO_URL: Record<string, string> = {
     'Flash Deals': 'flash',
@@ -137,7 +158,7 @@ export function DealsPage() {
   }, []);
 
   const filteredProducts = React.useMemo(() => {
-    let result = [...PRODUCTS];
+    let result = [...productSource];
 
     if (activeTab === 'Flash Deals') {
       const deals = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'flash');
@@ -183,7 +204,7 @@ export function DealsPage() {
       );
     }
     return result;
-  }, [searchQuery, activeTab, selectedCategory, dealType, minDiscount]);
+  }, [searchQuery, activeTab, selectedCategory, dealType, minDiscount, productSource]);
 
   const categoriesList = [
     { name: 'Fashion', icon: <Shirt size={16} className="stroke-[2.5]" />, count: 550 },
@@ -610,7 +631,7 @@ export function DealsPage() {
                  <div className="w-full lg:min-h-[395px] lg:h-auto flex-shrink-0 relative">
                     <ProductCard 
                       product={{
-                        ...filteredProducts[0] || PRODUCTS[0],
+                        ...filteredProducts[0] || productSource[0],
                         tag: "HOT",
                         tagColor: "bg-[#E93B3B]",
                         originalPrice: "3,500"
@@ -627,7 +648,7 @@ export function DealsPage() {
                  
                  {/* Small Cards Row */}
                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
-                    {(filteredProducts.length > 1 ? filteredProducts : PRODUCTS).slice(1, 5).map((product) => (
+                    {(filteredProducts.length > 1 ? filteredProducts : productSource).slice(1, 5).map((product) => (
                        <div key={product.id} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
                          <ProductCard 
                            product={{
@@ -652,7 +673,7 @@ export function DealsPage() {
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
                 {activeTab === 'Promo Codes' ? (
-                  PROMO_CODES.map((promo) => (
+                  promoCodes.map((promo) => (
                     <div key={promo.code} className="bg-white border border-gray-150 rounded-[5px] p-5 flex flex-col justify-between min-h-[180px] relative overflow-hidden shadow-sm group hover:border-[#E8500A]/30 transition-all duration-300">
                       <div className="absolute top-0 right-0 w-20 h-20 bg-[#E8500A]/[0.04] rounded-full -translate-y-1/2 translate-x-1/2 blur-md" />
                       <div>
@@ -686,7 +707,7 @@ export function DealsPage() {
                     </div>
                   ))
                 ) : (
-                  (filteredProducts.length > 0 ? filteredProducts : PRODUCTS).slice(0, 12).map((product, idx) => (
+                  (filteredProducts.length > 0 ? filteredProducts : productSource).slice(0, 12).map((product, idx) => (
                     <div key={`${product.id}-${idx}`} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
                       <ProductCard 
                         product={{
@@ -759,7 +780,7 @@ export function DealsPage() {
              </div>
              
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[BRANDS[0], BRANDS[1], BRANDS[2], BRANDS[8]].map((brand, i) => {
+                {[brandSource[0], brandSource[1], brandSource[2], brandSource[8]].filter(Boolean).map((brand, i) => {
                   return (
                     <div 
                       key={i} 
