@@ -23,6 +23,7 @@ import toast from 'react-hot-toast';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
+import { BrandCardDesign } from '../components/BrandCardDesign';
 
 const BRAND_IMAGES: Record<string, string> = {
   "Samsung": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
@@ -74,6 +75,22 @@ export function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('FEED');
   const [carouselIndex, setCarouselIndex] = useState(1);
+
+  // Trending brands slider helper
+  const rightBrandsList = allBrands && allBrands.length > 0 ? allBrands : BRANDS;
+  const carouselBrands = React.useMemo(() => {
+    return rightBrandsList.map((brand: any) => {
+      const img = BRAND_IMAGES[brand.name] || CATEGORY_IMAGES[brand.category] || "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&q=80";
+      return {
+        id: brand.id,
+        name: brand.name,
+        category: brand.category,
+        image: img
+      };
+    });
+  }, [rightBrandsList]);
+
+  const CAROUSEL_BRANDS = carouselBrands;
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [showAllFollowed, setShowAllFollowed] = useState(false);
   const [activeStickySection, setActiveStickySection] = useState('all');
@@ -134,6 +151,24 @@ export function HomePage() {
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, []);
+
+  // Keyboard nav for brand carousel
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') setCarouselIndex(prev => (prev + 1) % CAROUSEL_BRANDS.length);
+      if (e.key === 'ArrowLeft') setCarouselIndex(prev => (prev - 1 + CAROUSEL_BRANDS.length) % CAROUSEL_BRANDS.length);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [CAROUSEL_BRANDS.length]);
+
+  // Auto-advance carousel every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCarouselIndex(prev => (prev + 1) % CAROUSEL_BRANDS.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [CAROUSEL_BRANDS.length]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setDragStartX(e.touches[0].clientX);
@@ -450,20 +485,6 @@ export function HomePage() {
     toast.success('Your subscription is complete! Welcome to Choosify.bd newsletter.');
     setNewsletterEmail('');
   };
-
-  // Trending brands slider helper
-  const rightBrandsList = allBrands && allBrands.length > 0 ? allBrands : BRANDS;
-  const carouselBrands = React.useMemo(() => {
-    return rightBrandsList.map((brand: any) => {
-      const img = BRAND_IMAGES[brand.name] || CATEGORY_IMAGES[brand.category] || "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&q=80";
-      return {
-        id: brand.id,
-        name: brand.name,
-        category: brand.category,
-        image: img
-      };
-    });
-  }, [rightBrandsList]);
 
   // Sync ref
   carouselBrandsRef.current = carouselBrands;
@@ -835,185 +856,198 @@ export function HomePage() {
                   </Link>
                 </div>
 
-                {/* Interactive Brands sliding carousel */}
-                <div 
-                  ref={containerRef}
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUpOrLeave}
-                  onMouseLeave={handleMouseUpOrLeave}
-                  onWheel={handleWheel}
-                  className="relative flex items-center overflow-hidden select-none active:cursor-grabbing w-full h-[360px] md:h-[460px]"
-                >
-                  <motion.div
-                    animate={{ x: translateX }}
-                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                    className="flex gap-4 items-center w-max h-full"
-                  >
-                    {carouselBrands.map((brand, i) => {
-                      const isActive = i === carouselIndex;
-                      const brandTaglines: Record<number, string> = {
-                        3: "Crafted for comfort, styled for the streets.",
-                        7: "Unveiling modern elegance and ethnic charm.",
-                        8: "Your signature scent, curated from the finest houses.",
-                        1: "Unfolding the future of mobile innovation.",
-                      };
-                      const tagline = brandTaglines[brand.id] || "Dressed in authenticity, validated by shoppers.";
-                      return (
-                        <motion.div
-                          key={brand.id}
-                          onClick={() => {
-                            if (isActive) {
-                              navigate(`/brands/${brand.id}`);
-                            } else {
-                              setCarouselIndex(i);
-                            }
-                          }}
-                          animate={{
-                            scale: isActive ? 1.0 : 0.95,
-                            opacity: isActive ? 1.0 : 0.85,
-                          }}
-                          transition={{ type: "spring", stiffness: 110, damping: 19 }}
-                          style={{
-                            width: isMobile ? 260 : isActive ? containerWidth * 0.58 : containerWidth * 0.21,
-                          }}
-                          className="relative rounded-[12px] overflow-hidden cursor-pointer group select-none shadow-md border border-gray-100 flex flex-col justify-end text-left h-[325px] md:h-[440px] shrink-0 transition-shadow duration-300 hover:shadow-xl"
-                        >
-                          {/* Background Image */}
-                          <img 
-                            src={brand.image} 
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
-                            alt={brand.name}
-                            referrerPolicy="no-referrer"
-                          />
-                          
-                          {/* Dark Gradient Overlay */}
-                          <div className={cn(
-                             "absolute inset-0 transition-opacity duration-700 bg-gradient-to-t from-black/95 via-black/50 to-black/10",
-                             !isActive && "opacity-90 bg-black/45"
-                          )} />
+                {/* ── PREMIUM EXPANDING BRAND CAROUSEL ──────────────────────── */}
+                {(() => {
+                  // We use an IIFE to add extra local helpers without new state declarations.
+                  // carouselIndex and setCarouselIndex are already declared above.
+                  const CAROUSEL_BRANDS = carouselBrands;
 
-                          {/* Category Badge top-left */}
-                          <div className="absolute top-4 md:top-5 left-4 md:left-5 z-20">
-                            <span className="px-2.5 md:px-3 py-1 bg-[#E8500A] text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-md backdrop-blur-md border border-white/10">
-                              {brand.category}
-                            </span>
-                          </div>
+                  const TOTAL = CAROUSEL_BRANDS.length;
 
-                          {/* Verified Badge top-right */}
-                          {isActive && (
-                            <div className="absolute top-4 md:top-5 right-4 md:right-5 z-20 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
-                               <div className="w-3.5 h-3.5 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
-                                  <Check size={8} strokeWidth={3} />
-                               </div>
-                               <span className="text-[7.5px] font-black text-white uppercase tracking-widest">VERIFIED</span>
-                            </div>
-                          )}
+                  // Compute visible indices: [prev, active, next] with infinite wrap
+                  const prevIdx = (carouselIndex - 1 + TOTAL) % TOTAL;
+                  const nextIdx = (carouselIndex + 1) % TOTAL;
 
-                          {/* Info bottom-left */}
-                          <div className="p-4 md:p-6 relative z-10 w-full flex flex-col items-start">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <h3 className={cn(
-                                "font-black text-white italic uppercase tracking-tighter leading-none transition-all duration-300",
-                                isActive ? "text-lg md:text-3xl" : "text-sm md:text-base"
-                              )}>
-                                {brand.name}
-                              </h3>
-                              {isActive && (
-                                <span className="text-[7.5px] md:text-[8px] font-extrabold text-blue-400 uppercase tracking-widest">
-                                  ● TOP RATED
-                                </span>
-                              )}
-                            </div>
+                  // The three visible slots
+                  const visibleSlots = [
+                    { brand: CAROUSEL_BRANDS[prevIdx], slotIndex: prevIdx, position: 'prev' as const },
+                    { brand: CAROUSEL_BRANDS[carouselIndex], slotIndex: carouselIndex, position: 'active' as const },
+                    { brand: CAROUSEL_BRANDS[nextIdx], slotIndex: nextIdx, position: 'next' as const },
+                  ];
 
-                            <motion.p 
-                              animate={{ 
-                                opacity: isActive ? 1 : 0.8,
-                                height: isActive ? "auto" : "24px",
-                                marginTop: isActive ? 4 : 2
-                              }}
-                              transition={{ duration: 0.3 }}
-                              className={cn(
-                                "text-white/80 text-[10px] md:text-[11px] font-medium leading-relaxed max-w-md overflow-hidden",
-                                !isActive && "line-clamp-1"
-                              )}
-                            >
-                              {tagline}
-                            </motion.p>
+                  const goNext = () => setCarouselIndex(prev => (prev + 1) % TOTAL);
+                  const goPrev = () => setCarouselIndex(prev => (prev - 1 + TOTAL) % TOTAL);
 
-                            {isActive && (
-                              <div className="flex items-center gap-1.5 mt-2">
-                                <span className="text-[10px] font-black text-amber-400 italic">★ 4.8</span>
-                                <span className="text-[9px] font-bold text-white/50">(450+ Shoppers Verified)</span>
-                              </div>
-                            )}
+                  return (
+                    <>
+                      {/* CAROUSEL TRACK */}
+                      <div
+                        className="relative w-full overflow-hidden select-none"
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
+                        onMouseDown={handleMouseDown}
+                        onMouseUp={handleMouseUpOrLeave}
+                        style={{ height: '480px' }}
+                      >
+                        {/* Cards container — flex row, always 3 cards */}
+                        <div className="flex items-stretch gap-3 h-full w-full">
+                          {visibleSlots.map(({ brand, slotIndex, position }) => {
+                            const isActive = position === 'active';
 
-                            <motion.button
+                            return (
+                              <motion.div
+                                key={`${slotIndex}-${brand.id}`}
+                                layoutId={`brand-card-${brand.id}`}
+                                onClick={() => {
+                                  if (position === 'prev') goPrev();
+                                  else if (position === 'next') goNext();
+                                  else navigate(`/brands/${brand.id}`);
+                                }}
+                                initial={false}
+                                animate={{
+                                  flex: isActive ? 5.5 : 2,
+                                  opacity: isActive ? 1 : 0.82,
+                                  scale: isActive ? 1 : 0.97,
+                                }}
+                                transition={{
+                                  type: 'spring',
+                                  stiffness: 260,
+                                  damping: 28,
+                                  mass: 0.9,
+                                }}
+                                className="relative overflow-hidden cursor-pointer group"
+                                style={{ borderRadius: '20px', minWidth: 0, flexShrink: 0 }}
+                              >
+                                {/* Background image */}
+                                <img
+                                  src={brand.image}
+                                  alt={brand.name}
+                                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-105"
+                                  draggable={false}
+                                />
+
+                                {/* Gradient overlay */}
+                                <div
+                                  className="absolute inset-0 transition-opacity duration-500"
+                                  style={{
+                                    background: isActive
+                                      ? 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.08) 100%)'
+                                      : 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 100%)',
+                                  }}
+                                />
+
+                                {/* Category badge — top left */}
+                                <div className="absolute top-4 left-4 z-10">
+                                  <span
+                                    className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-white"
+                                    style={{ background: '#E8500A' }}
+                                  >
+                                    {brand.category}
+                                  </span>
+                                </div>
+
+                                {/* ACTIVE CARD — full content bottom left */}
+                                {isActive && (
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 18 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.12, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                                    className="absolute inset-x-0 bottom-0 p-6 flex flex-col items-start gap-3 z-10"
+                                  >
+                                    <h3
+                                      className="text-3xl font-black text-white uppercase leading-none tracking-tight"
+                                      style={{ fontStyle: 'italic' }}
+                                    >
+                                      {brand.name}
+                                    </h3>
+                                    <p className="text-white/70 text-[11px] font-bold uppercase tracking-widest">
+                                      Verified Brand on Choosify
+                                    </p>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/brands/${brand.id}`);
+                                      }}
+                                      className="flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-white/25 bg-white/12 backdrop-blur-md hover:bg-white hover:text-[#E8500A] text-white transition-all duration-300 group/btn"
+                                    >
+                                      <span className="text-[10px] font-black uppercase tracking-widest">
+                                        Explore Brand
+                                      </span>
+                                      <div className="w-5 h-5 rounded-full border border-current flex items-center justify-center group-hover/btn:rotate-45 transition-transform duration-300">
+                                        <ArrowUpRight size={10} />
+                                      </div>
+                                    </button>
+                                  </motion.div>
+                                )}
+
+                                {/* INACTIVE CARD — name pill only */}
+                                {!isActive && (
+                                  <div className="absolute inset-x-0 bottom-5 flex justify-center px-3 z-10">
+                                    <span
+                                      className="text-[10px] font-black uppercase tracking-wider text-white px-4 py-2 rounded-full truncate max-w-full border border-white/10"
+                                      style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
+                                    >
+                                      {brand.name}
+                                    </span>
+                                  </div>
+                                )}
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* NAVIGATION CONTROLS */}
+                      <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4 select-none px-1">
+
+                        {/* Dot indicators */}
+                        <div className="flex items-center gap-2">
+                          {CAROUSEL_BRANDS.map((_, i) => (
+                            <button
+                              key={i}
                               type="button"
-                              animate={{ 
-                                opacity: isActive ? 1 : 0,
-                                scale: isActive ? 1 : 0.8,
-                                height: isActive ? "auto" : 0,
-                                marginTop: isActive ? 12 : 0
+                              onClick={() => setCarouselIndex(i)}
+                              className="transition-all duration-500 rounded-full border-0 cursor-pointer p-0"
+                              style={{
+                                width: carouselIndex === i ? '36px' : '8px',
+                                height: '8px',
+                                background: carouselIndex === i ? '#E8500A' : '#e8edf2',
                               }}
-                              transition={{ duration: 0.3 }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/brands/${brand.id}`);
-                              }}
-                              className="flex items-center gap-2.5 px-4 py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white rounded-full font-black text-[9px] uppercase tracking-widest shadow-md cursor-pointer border-0"
-                            >
-                              <span>Explore Brand</span>
-                              <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center text-[#E8500A] shrink-0">
-                                <ArrowUpRight size={10} strokeWidth={3} />
-                              </div>
-                            </motion.button>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </motion.div>
-                </div>
+                              aria-label={`Go to brand ${i + 1}`}
+                            />
+                          ))}
+                        </div>
 
-                {/* Sliding Carousel Controls & Navigation */}
-                <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4 select-none">
-                    <div className="flex gap-2">
-                      {carouselBrands.map((_, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => setCarouselIndex(i)}
-                          className={cn(
-                            "h-1.5 transition-all duration-500 rounded-full",
-                            carouselIndex === i ? "w-10 bg-[#E8500A]" : "w-2.5 bg-gray-200 hover:bg-gray-300"
-                          )}
-                          aria-label={`Go to brand slide ${i + 1}`}
-                        />
-                      ))}
-                    </div>
-                    
-                    <div className="flex gap-3">
-                       <button 
-                         type="button"
-                         onClick={() => setCarouselIndex((prev) => (prev - 1 + carouselBrands.length) % carouselBrands.length)} 
-                         className="w-10 h-10 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A]/30 transition-all active:scale-90 shadow-xs"
-                         title="Previous Brand"
-                       >
-                          <ChevronLeft size={18} />
-                       </button>
-                       <button 
-                         type="button"
-                         onClick={() => setCarouselIndex((prev) => (prev + 1) % carouselBrands.length)} 
-                         className="w-10 h-10 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A]/30 transition-all active:scale-90 shadow-xs"
-                         title="Next Brand"
-                       >
-                          <ChevronRight size={18} />
-                       </button>
-                    </div>
-                </div>
+                        {/* Slide counter */}
+                        <span className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-widest tabular-nums">
+                          {String(carouselIndex + 1).padStart(2, '0')} / {String(TOTAL).padStart(2, '0')}
+                        </span>
+
+                        {/* Arrow buttons */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={goPrev}
+                            className="w-9 h-9 rounded-full border border-[#e8edf2] flex items-center justify-center hover:border-[#E8500A]/40 hover:bg-[#E8500A]/5 transition-all active:scale-90 cursor-pointer bg-white"
+                            title="Previous Brand"
+                          >
+                            <ChevronLeft size={16} className="text-[#1a1a2e]" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={goNext}
+                            className="w-9 h-9 rounded-full border border-[#e8edf2] flex items-center justify-center hover:border-[#E8500A]/40 hover:bg-[#E8500A]/5 transition-all active:scale-90 cursor-pointer bg-white"
+                            title="Next Brand"
+                          >
+                            <ChevronRight size={16} className="text-[#1a1a2e]" />
+                          </button>
+                        </div>
+
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
 
               {/* SECTION 2 — NEW ON CHOOSIFY */}
@@ -1048,17 +1082,18 @@ export function HomePage() {
                 <div className="text-center mt-6 pt-4 border-t border-gray-50">
                   <Link 
                     to="/products" 
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] uppercase rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-all font-medium"
+                    className="inline-flex items-center gap-1.5 text-sm font-black text-[#E8500A] hover:text-[#CF4400] transition-colors uppercase tracking-wider"
                   >
-                    <span>BROWSE ALL PRODUCTS</span>
+                    <span>Browse All Products</span>
+                    <ChevronRight size={16} />
                   </Link>
                 </div>
               </div>
 
-              {/* SECTION 3 — SPOTLIGHT BRANDS */}
+              {/* FEED SECTION C — SPOTLIGHT BRANDS */}
               <div 
                 id="section-spotlight-brands" 
-                className="p-6 md:p-8 shadow-sm text-left bg-white rounded-[5px] border border-[#e8edf2]"
+                className="p-6 md:p-8 shadow-sm text-left bg-white rounded-[5px] border border-[#e8edf2] mt-6"
               >
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-100 pb-3 mb-4">
@@ -1077,90 +1112,38 @@ export function HomePage() {
                   </div>
                 </div>
 
-                {/* Horizontal Carousel */}
-                <div className="flex gap-4 overflow-x-auto pb-4 pt-2 scrollbar-thin">
-                  {spotlightBrands.map((brand: any) => {
+                {/* Premium Horizontal Carousel */}
+                <PremiumCarousel
+                  items={spotlightBrands}
+                  itemWidth={300}
+                  gap={16}
+                  renderCard={(brand) => {
                     const originalBrand = BRANDS.find(b => b.id === brand.id) || {};
                     const bestFor = (originalBrand as any).category === 'Fashion' ? 'Footwear' : 'Electronics';
                     const priceRange = (originalBrand as any).category === 'Fashion' ? '৳1200' : '৳15000';
-                    const recommended = '94%';
+                    const recommended = '94';
+
+                    const cardBrand = {
+                      id: brand.id,
+                      name: brand.name,
+                      logo: brand.logo,
+                      category: brand.category || (originalBrand as any).category || 'Fashion',
+                      bestFor: bestFor,
+                      priceRange: priceRange,
+                      rating: brand.rating || brand.ratings || 4.8,
+                      reviewCount: Math.floor((brand.followers || 8400) * 0.1) || 840,
+                      isFeatured: !!brand.featuredFlag,
+                      successScore: parseInt(recommended) || 94,
+                      tagline: (originalBrand as any).description || 'Traditional & contemporary clothing'
+                    };
 
                     return (
-                      <motion.div 
-                        key={brand.id} 
-                        className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden shadow-xs shrink-0"
-                        style={{ width: '280px', height: '280px' }}
-                      >
-                        {brand.featuredFlag && (
-                          <div className="absolute top-5 right-5 bg-[#E8500A] text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">FEATURED</div>
-                        )}
-
-                        {/* Horizontal Header System */}
-                        <div className="flex gap-3 items-start relative z-10 text-left w-full">
-                          <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 shadow-xs">
-                            {brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/')) ? (
-                               <img 
-                                 src={brand.logo} 
-                                 className="w-full h-full object-cover" 
-                                 alt={brand.name} 
-                                 referrerPolicy="no-referrer"
-                               />
-                            ) : (
-                               <span className="text-xl font-black text-[#1a1a2e] tracking-tight">{brand.logo || brand.name.substring(0, 2).toUpperCase()}</span>
-                            )}
-                          </div>
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <h3 className="text-sm font-black text-[#1a1a2e] leading-tight mb-0.5 group-hover:text-[#E8500A] transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
-                            <div className="flex items-center gap-1 mb-1.5 flex-wrap">
-                              {brand.verifiedStatus && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black rounded-full uppercase tracking-wider shadow-sm scale-90 origin-left">
-                                  <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
-                                    <circle cx="6" cy="6" r="6" fill="white" fillOpacity="0.2"/>
-                                    <path d="M3 6l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                  </svg>
-                                  Verified
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.category}</p>
-                            <div className="flex items-center gap-1">
-                              <span className="text-[9px] font-black text-[#1a1a2e] italic">★ {brand.ratings || brand.rating || '4.8'}</span>
-                              <span className="text-[8px] font-bold text-gray-300 ml-0.5">({Math.floor((brand.followers || 10) * 0.1)} reviews)</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Content Spacer */}
-                        <div className="flex-1" />
-
-                        <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
-
-                        <div className="grid grid-cols-3 gap-2">
-                          <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                            <span className="block text-[7px] font-black text-[#1a1a2e] mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
-                            <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{bestFor}</span>
-                          </div>
-                          <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                            <div className="flex flex-col items-center">
-                              <span className="text-sm font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{priceRange}</span>
-                              <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
-                            </div>
-                          </div>
-                          <div className="text-center bg-[#E6F4EA]/80 py-1.5 rounded-lg border border-green-100 min-w-0">
-                            <span className="block text-sm font-black text-[#10B981] leading-none mb-0.5 italic tracking-tighter">{recommended}</span>
-                            <span className="block text-[7px] font-black text-[#1a1a2e] uppercase tracking-widest opacity-60 font-medium">Success</span>
-                          </div>
-                        </div>
-
-                        <div className="w-full h-[1px] bg-transparent my-1" />
-
-                        <Link to={`/brands/${brand.id}`} className="w-full py-2 bg-[#1a1a2e] text-white text-[9px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
-                          Visit Brand <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                        </Link>
-                      </motion.div>
+                      <div className="shrink-0">
+                        <BrandCardDesign brand={cardBrand} />
+                      </div>
                     );
-                  })}
-                </div>
+                  }}
+                />
               </div>
 
               {/* FEED SECTION C — FEATURED HOT DEALS */}
@@ -1186,12 +1169,17 @@ export function HomePage() {
                   </Link>
                 </div>
 
-                {/* Hot Deals Grid of featured Products */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left">
-                  {featuredDeals.map((product) => (
-                    <ProductCard key={product.id} product={product} variant="grid" />
-                  ))}
-                </div>
+                {/* Hot Deals Carousel of featured Products */}
+                <PremiumCarousel
+                  items={featuredDeals}
+                  itemWidth={260}
+                  gap={16}
+                  renderCard={(product) => (
+                    <div className="w-[260px] shrink-0">
+                      <ProductCard product={product} variant="grid" />
+                    </div>
+                  )}
+                />
               </div>
 
               {/* SECTION 5 — CREATOR SPOTLIGHTS */}
@@ -1211,17 +1199,19 @@ export function HomePage() {
                   </Link>
                 </div>
 
-                {/* Horizontal Carousel */}
-                <div className="flex gap-4 overflow-x-auto pb-4 pt-2 scrollbar-thin">
-                  {spotlightCreators.map((creator: any) => {
+                {/* Premium Horizontal Carousel */}
+                <PremiumCarousel
+                  items={spotlightCreators}
+                  itemWidth={280}
+                  gap={16}
+                  renderCard={(creator: any) => {
                     const primaryPlatform = creator.platforms[0] || 'YouTube';
                     const followerCount = creator.followers[primaryPlatform] || Object.values(creator.followers)[0] || '100K+';
                     
                     return (
                       <motion.div 
                         key={creator.id} 
-                        className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden shadow-xs shrink-0"
-                        style={{ width: '280px', height: '320px' }}
+                        className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden shadow-xs shrink-0 w-full h-[320px]"
                       >
                         {creator.isHot && (
                           <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">HOT</div>
@@ -1311,22 +1301,23 @@ export function HomePage() {
                         </div>
                       </motion.div>
                     );
-                  })}
-                </div>
+                  }}
+                />
 
                 {/* Bottom CTA to Creators */}
                 <div className="text-center mt-6 pt-4 border-t border-gray-50">
                   <Link 
                     to="/creators" 
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] uppercase rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-all font-medium"
+                    className="inline-flex items-center gap-1.5 text-sm font-black text-[#E8500A] hover:text-[#CF4400] transition-colors uppercase tracking-wider"
                   >
                     <span>Browse All Creators</span>
+                    <ChevronRight size={16} />
                   </Link>
                 </div>
               </div>
 
               {/* FEED SECTION E — FEATURED RECOMMENDATIONS */}
-              <div id="section-recommendations" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
+              <div id="section-recommendations" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
                 
                 {/* Section Header */}
                 <div className="text-left mb-6">
@@ -1338,188 +1329,32 @@ export function HomePage() {
                   </p>
                 </div>
 
-                {/* TAB BAR — Recommendations Section */}
-                <div className="flex gap-0 mt-5 mb-5 border-b border-[#e8edf2] overflow-x-auto">
-                  <button
-                    onClick={() => setActiveRecsTab('guides')}
-                    className={cn(
-                      "pb-3 px-5 text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-200 border-b-2 -mb-px cursor-pointer border-0 bg-transparent",
-                      activeRecsTab === 'guides'
-                        ? "text-[#E8500A] border-[#E8500A]"
-                        : "text-[#8a9bb0] border-transparent hover:text-[#1A1D4E]"
-                    )}
-                  >
-                    📖 Guides & Reviews
-                  </button>
-                  <button
-                    onClick={() => setActiveRecsTab('creators')}
-                    className={cn(
-                      "pb-3 px-5 text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-200 border-b-2 -mb-px cursor-pointer border-0 bg-transparent",
-                      activeRecsTab === 'creators'
-                        ? "text-[#E8500A] border-[#E8500A]"
-                        : "text-[#8a9bb0] border-transparent hover:text-[#1A1D4E]"
-                    )}
-                  >
-                    🎯 Creator Spotlights
-                  </button>
+                {/* Main Featured Buying Guide banner blog layout */}
+                <div className="mb-6">
+                  <FeaturedCard guide={BLOGS[0]} />
                 </div>
 
-                {activeRecsTab === 'guides' && (
-                  <>
-                    {/* Main Featured Buying Guide banner blog layout */}
-                    <div className="mb-6">
-                      <FeaturedCard guide={BLOGS[0]} />
-                    </div>
+                {/* Sub Guides Grid matching elements visually */}
+                <div 
+                  id="section-guides"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
+                  style={{ paddingTop: '0px', paddingBottom: '0px' }}
+                >
+                  <ReelCard guide={BLOGS[1]} />
+                  <HorizontalMediaCard guide={BLOGS[2]} badgeType="youtube" />
+                  <HorizontalMediaCard guide={BLOGS[3]} badgeType="blog" />
+                </div>
 
-                    {/* Sub Guides Grid matching elements visually */}
-                    <div 
-                      id="section-guides"
-                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
-                      style={{ paddingTop: '0px', paddingBottom: '0px' }}
-                    >
-                      <ReelCard guide={BLOGS[1]} />
-                      <HorizontalMediaCard guide={BLOGS[2]} badgeType="youtube" />
-                      <HorizontalMediaCard guide={BLOGS[3]} badgeType="blog" />
-                    </div>
-
-                    {/* Explore all Recommendations bottom action button */}
-                    <div className="text-center">
-                      <Link 
-                        to="/guides" 
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] uppercase rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-all font-medium"
-                      >
-                        <span>EXPLORE ALL RECOMMENDATIONS</span>
-                      </Link>
-                    </div>
-                  </>
-                )}
-
-                {activeRecsTab === 'creators' && (
-                  <div className="space-y-4">
-                    {/* Creator cards grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-max">
-                      {[
-                        {
-                          id: 'c1',
-                          name: 'Rifat Hasan',
-                          handle: '@rifat.h',
-                          category: 'Tech & Gadgets',
-                          avatar: 'https://i.pravatar.cc/150?u=rifat',
-                          bio: 'Honest reviews on the latest tech, gadgets, and mobile accessories for Bangladeshi consumers.',
-                          followers: '128K',
-                          guides: 47,
-                          badge: '🔥 Top Pick',
-                          badgeColor: 'bg-orange-50 text-[#E8500A]',
-                          featuredProduct: 'Samsung Galaxy S24 Ultra',
-                          featuredProductImg: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=200&q=80',
-                        },
-                        {
-                          id: 'c2',
-                          name: 'Nadia Islam',
-                          handle: '@nadia.style',
-                          category: 'Fashion & Lifestyle',
-                          avatar: 'https://i.pravatar.cc/150?u=nadia',
-                          bio: 'Curating the best in Bangladeshi fashion — from everyday wear to special occasion styling.',
-                          followers: '94K',
-                          guides: 62,
-                          badge: '✨ Trending',
-                          badgeColor: 'bg-purple-50 text-purple-600',
-                          featuredProduct: 'Aarong Jamdani Collection',
-                          featuredProductImg: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=200&q=80',
-                        },
-                        {
-                          id: 'c3',
-                          name: 'Karim Khan',
-                          handle: '@karimreviews',
-                          category: 'Electronics & Home',
-                          avatar: 'https://i.pravatar.cc/150?u=karim',
-                          bio: 'Deep-dive reviews on home appliances and electronics. Helping BD families buy smarter.',
-                          followers: '76K',
-                          guides: 38,
-                          badge: '⭐ Expert',
-                          badgeColor: 'bg-blue-50 text-blue-600',
-                          featuredProduct: 'Walton AC Inverter Pro',
-                          featuredProductImg: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&q=80',
-                        },
-                        {
-                          id: 'c4',
-                          name: 'Sumaiya Rahman',
-                          handle: '@sumaiya.bd',
-                          category: 'Beauty & Skincare',
-                          avatar: 'https://i.pravatar.cc/150?u=sumaiya',
-                          bio: 'Beauty insider breaking down skincare science for the Bangladeshi climate and skin tone.',
-                          followers: '112K',
-                          guides: 54,
-                          badge: '💄 Editor Pick',
-                          badgeColor: 'bg-rose-50 text-rose-600',
-                          featuredProduct: 'Himalaya Face Wash Range',
-                          featuredProductImg: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=200&q=80',
-                        },
-                      ].map(creator => (
-                        <Link
-                          key={creator.id}
-                          to={`/creators/${creator.id}`}
-                          className="bg-white border border-[#e8edf2] rounded-[5px] p-4 hover:border-[#E8500A]/30 hover:shadow-md transition-all duration-200 group flex flex-col gap-3"
-                        >
-                          {/* Creator Header */}
-                          <div className="flex items-start gap-3">
-                            <img
-                              src={creator.avatar}
-                              alt={creator.name}
-                              className="w-11 h-11 rounded-full object-cover border-2 border-[#e8edf2] group-hover:border-[#E8500A]/30 transition-colors shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                                <span className="text-[12px] font-black text-[#1a1a2e] uppercase tracking-tight group-hover:text-[#E8500A] transition-colors">
-                                  {creator.name}
-                                </span>
-                                <svg className="w-3.5 h-3.5 text-blue-600 shrink-0" viewBox="0 0 14 14" fill="none">
-                                  <circle cx="7" cy="7" r="7" fill="#2563EB" fillOpacity="0.15"/>
-                                  <path d="M4 7l2 2 4-4" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                              </div>
-                              <span className="text-[9px] font-bold text-[#8a9bb0] block">{creator.handle} · {creator.category}</span>
-                            </div>
-                            <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-full shrink-0 ${creator.badgeColor}`}>
-                              {creator.badge}
-                            </span>
-                          </div>
-
-                          {/* Bio */}
-                          <p className="text-[10px] text-[#8a9bb0] font-medium leading-relaxed line-clamp-2">
-                            {creator.bio}
-                          </p>
-
-                          {/* Stats row */}
-                          <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-wider">
-                            <span className="text-[#1a1a2e]">{creator.followers} <span className="font-normal text-[#8a9bb0]">followers</span></span>
-                            <span className="text-[#E8500A]">{creator.guides} <span className="font-normal text-[#8a9bb0]">guides</span></span>
-                          </div>
-
-                          {/* Featured product chip */}
-                          <div className="flex items-center gap-2 bg-[#F8FBFD] border border-[#e8edf2] rounded-[5px] p-2">
-                            <img src={creator.featuredProductImg} className="w-8 h-8 rounded object-cover shrink-0" alt="" />
-                            <div className="min-w-0">
-                              <span className="text-[8px] font-black uppercase tracking-wider text-[#8a9bb0] block">Latest Pick</span>
-                              <span className="text-[10px] font-bold text-[#1a1a2e] truncate block">{creator.featuredProduct}</span>
-                            </div>
-                            <ArrowUpRight size={12} className="text-[#E8500A] ml-auto shrink-0" />
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-
-                    {/* See all creators CTA */}
-                    <div className="text-center pt-2">
-                      <Link
-                        to="/creators"
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] uppercase rounded-full shadow-sm hover:scale-[1.02] active:scale-95 transition-all font-medium"
-                      >
-                        <span>EXPLORE ALL CREATORS</span>
-                      </Link>
-                    </div>
-                  </div>
-                )}
+                {/* Explore all Recommendations bottom action button */}
+                <div className="text-center">
+                  <Link 
+                    to="/guides" 
+                    className="inline-flex items-center gap-1.5 text-sm font-black text-[#E8500A] hover:text-[#CF4400] transition-colors uppercase tracking-wider"
+                  >
+                    <span>Explore All Recommendations</span>
+                    <ChevronRight size={16} />
+                  </Link>
+                </div>
               </div>
 
               {/* FEED SECTION F — POPULAR CATEGORIES */}
@@ -1929,6 +1764,212 @@ export function HomePage() {
 
     </main>
 
+    </div>
+  );
+}
+
+// PREMIUM CAROUSEL HELPER
+function PremiumCarousel({ 
+  items, 
+  renderCard, 
+  itemWidth = 280, 
+  gap = 16 
+}: {
+  items: any[];
+  renderCard: (item: any, index: number, isActive: boolean) => React.ReactNode;
+  itemWidth?: number;
+  gap?: number;
+}) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(800);
+  const [dragStartX, setDragStartX] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const lastWheelTime = React.useRef(0);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const totalItems = items.length;
+
+  const next = () => {
+    setCurrentIndex((prev) => (prev + 1) % totalItems);
+  };
+
+  const prev = () => {
+    setCurrentIndex((prev) => (prev - 1 + totalItems) % totalItems);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setDragStartX(e.touches[0].clientX);
+    setDragOffset(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (dragStartX === null) return;
+    const diff = dragStartX - e.touches[0].clientX;
+    setDragOffset(diff);
+  };
+
+  const handleTouchEnd = () => {
+    if (dragStartX === null) return;
+    if (dragOffset > 50) {
+      next();
+    } else if (dragOffset < -50) {
+      prev();
+    }
+    setDragStartX(null);
+    setDragOffset(0);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setDragStartX(e.clientX);
+    setDragOffset(0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (dragStartX === null) return;
+    setDragOffset(dragStartX - e.clientX);
+  };
+
+  const handleMouseUpOrLeave = () => {
+    if (dragStartX === null) return;
+    if (dragOffset > 50) {
+      next();
+    } else if (dragOffset < -50) {
+      prev();
+    }
+    setDragStartX(null);
+    setDragOffset(0);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    const now = Date.now();
+    if (now - lastWheelTime.current < 400) return;
+    if (Math.abs(e.deltaX) > 20 || Math.abs(e.deltaY) > 30) {
+      if (e.deltaX > 20 || e.deltaY > 30) {
+        next();
+      } else {
+        prev();
+      }
+      lastWheelTime.current = now;
+      e.preventDefault();
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        prev();
+      } else if (e.key === 'ArrowRight') {
+        next();
+      }
+    };
+
+    const container = containerRef.current;
+    let isHovered = false;
+    const onEnter = () => { isHovered = true; };
+    const onLeave = () => { isHovered = false; };
+
+    const handleKeyGlobal = (e: KeyboardEvent) => {
+      if (isHovered) {
+        handleKeyDown(e);
+      }
+    };
+
+    if (container) {
+      container.addEventListener('mouseenter', onEnter);
+      container.addEventListener('mouseleave', onLeave);
+      window.addEventListener('keydown', handleKeyGlobal);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener('mouseenter', onEnter);
+        container.removeEventListener('mouseleave', onLeave);
+      }
+      window.removeEventListener('keydown', handleKeyGlobal);
+    };
+  }, [totalItems]);
+
+  const translateX = -(currentIndex * (itemWidth + gap)) - dragOffset;
+
+  return (
+    <div className="relative w-full overflow-hidden select-none animate-fade-in" ref={containerRef}>
+      <div 
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUpOrLeave}
+        onMouseLeave={handleMouseUpOrLeave}
+        onWheel={handleWheel}
+        className="w-full active:cursor-grabbing overflow-hidden"
+      >
+        <motion.div
+          animate={{ x: translateX }}
+          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+          className="flex gap-4 items-stretch w-max h-full py-2"
+        >
+          {items.map((item, idx) => (
+            <div 
+              key={idx} 
+              style={{ width: `${itemWidth}px` }} 
+              className="shrink-0 h-full flex"
+            >
+              {renderCard(item, idx, idx === currentIndex)}
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
+      <div className="flex items-center justify-between mt-2 select-none">
+        <div className="flex gap-1.5">
+          {items.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setCurrentIndex(i)}
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-300",
+                i === currentIndex ? "w-5 bg-[#E8500A]" : "w-1.5 bg-gray-200 hover:bg-gray-300"
+              )}
+              title={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+           <button 
+             type="button"
+             onClick={prev} 
+             className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A]/30 transition-all active:scale-90 shadow-xs cursor-pointer"
+             title="Previous Slide"
+           >
+              <ChevronLeft size={16} />
+           </button>
+           <button 
+             type="button"
+             onClick={next} 
+             className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A]/30 transition-all active:scale-90 shadow-xs cursor-pointer"
+             title="Next Slide"
+           >
+              <ChevronRight size={16} />
+           </button>
+        </div>
+      </div>
     </div>
   );
 }

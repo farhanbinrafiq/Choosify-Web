@@ -7,6 +7,7 @@ import { QuickAccessCard } from '../components/QuickAccessCard';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
+import { BrandCardDesign } from '../components/BrandCardDesign';
 
 interface BrandDeal {
   id: string;
@@ -972,106 +973,8 @@ export function BrandsPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
-                {filteredFeaturedBrands.map((brand, i) => (
-                  <motion.div 
-                    layout
-                    key={brand.id} 
-                    className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
-                    style={{ width: '100%', maxWidth: '250px', height: '280px' }}
-                  >
-                    {brand.isHot && (
-                      <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">HOT</div>
-                    )}
-                    {brand.isFeatured && (
-                      <div className="absolute top-5 right-5 bg-orange-primary text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">FEATURED</div>
-                    )}
-
-                    {/* Horizontal Header System */}
-                    <div className="flex gap-3 items-start relative z-10 text-left w-full">
-                      <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 shadow-xs">
-                        {brand.logo.startsWith('http') || brand.logo.startsWith('/') ? (
-                           <img 
-                             src={brand.logo} 
-                             className="w-full h-full object-cover" 
-                             alt={brand.name} 
-                             referrerPolicy="no-referrer"
-                             onError={(e) => {
-                               // If image fails to load, hide img and show initials fallback
-                               const el = e.target as HTMLImageElement;
-                               el.style.display = 'none';
-                               const parent = el.parentElement;
-                               if (parent) {
-                                 const fallback = document.createElement('span');
-                                 fallback.className = 'text-lg font-black text-navy';
-                                 fallback.textContent = brand.name.substring(0, 2).toUpperCase();
-                                 parent.appendChild(fallback);
-                               }
-                             }}
-                           />
-                        ) : (
-                           <span className="text-xl font-black text-navy tracking-tight">{brand.logo}</span>
-                        )}
-                      </div>
-                      <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>
-                        <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
-                        <div className="flex items-center gap-1 mb-1.5 flex-wrap">
-                          {getBrandClaimStatus(brand.id) === 'verified' && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black rounded-full uppercase tracking-wider shadow-sm scale-90 origin-left">
-                              <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
-                                <circle cx="6" cy="6" r="6" fill="white" fillOpacity="0.2"/>
-                                <path d="M3 6l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              Verified
-                            </span>
-                          )}
-                          {getBrandClaimStatus(brand.id) === 'pending' && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">Ownership Verification Pending</span>
-                          )}
-                          {getBrandClaimStatus(brand.id) === 'community' && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-50 text-[7px] font-black text-gray-500 rounded-xs uppercase tracking-wider scale-90 origin-left border border-gray-200/50 border-dashed">Community Brand Profile</span>
-                          )}
-                        </div>
-                        <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
-                        <div className="flex items-center gap-1">
-                          <div className="flex gap-0.5">
-                            {[1, 2, 3, 4, 5].map(s => (
-                              <Star key={s} size={8} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(brand.rating) && "fill-gray-200 stroke-gray-200")} />
-                            ))}
-                          </div>
-                          <span className="text-[9px] font-black text-navy italic ml-0.5">{brand.rating}</span>
-                          <span className="text-[8px] font-bold text-gray-300 ml-0.5">({brand.reviews})</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Content Spacer */}
-                    <div className="flex-1" />
-
-                    <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                        <span className="block text-[7px] font-black text-navy mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
-                        <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{brand.bestFor}</span>
-                      </div>
-                      <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                        <div className="flex flex-col items-center">
-                          <span className="text-base font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{brand.priceRange}</span>
-                          <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
-                        </div>
-                      </div>
-                      <div className="text-center bg-[#E6F4EA]/80 py-1.5 rounded-lg border border-green-100 min-w-0">
-                        <span className="block text-base font-black text-[#10B981] leading-none mb-0.5 italic tracking-tighter">{brand.recommended}</span>
-                        <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60 font-medium">Success</span>
-                      </div>
-                    </div>
-
-                    <div className="w-full h-[1px] bg-transparent my-1" />
-
-                    <Link to={`/brands/${brand.id}`} className="w-full py-2 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
-                      Visit Brand <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
-                  </motion.div>
+                {filteredFeaturedBrands.map((brand) => (
+                  <BrandCardDesign key={brand.id} brand={brand} />
                 ))}
               </div>
             </div>
@@ -1085,105 +988,7 @@ export function BrandsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
                 {letterBrands.map(brand => (
-                  <motion.div 
-                    layout
-                    key={brand.id} 
-                    className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden mx-auto shadow-xs"
-                    style={{ width: '100%', maxWidth: '250px', height: '280px' }}
-                  >
-                    {brand.isHot && (
-                      <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">HOT</div>
-                    )}
-                    {brand.isFeatured && (
-                      <div className="absolute top-5 right-5 bg-orange-primary text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic font-sansLabel">FEATURED</div>
-                    )}
-
-                    {/* Horizontal Header System */}
-                    <div className="flex gap-3 items-start relative z-10 text-left w-full">
-                      <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 shadow-xs">
-                        {brand.logo.startsWith('http') || brand.logo.startsWith('/') ? (
-                           <img 
-                             src={brand.logo} 
-                             className="w-full h-full object-cover" 
-                             alt={brand.name} 
-                             referrerPolicy="no-referrer"
-                             onError={(e) => {
-                               // If image fails to load, hide img and show initials fallback
-                               const el = e.target as HTMLImageElement;
-                               el.style.display = 'none';
-                               const parent = el.parentElement;
-                               if (parent) {
-                                 const fallback = document.createElement('span');
-                                 fallback.className = 'text-lg font-black text-navy';
-                                 fallback.textContent = brand.name.substring(0, 2).toUpperCase();
-                                 parent.appendChild(fallback);
-                               }
-                             }}
-                           />
-                        ) : (
-                           <span className="text-xl font-black text-navy tracking-tight">{brand.logo}</span>
-                        )}
-                      </div>
-                      <div className={cn("flex flex-col min-w-0 flex-1", (brand.isHot || brand.isFeatured) && "pr-10")}>
-                        <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{brand.name}</h3>
-                        <div className="flex items-center gap-1 mb-1.5 flex-wrap">
-                          {getBrandClaimStatus(brand.id) === 'verified' && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black rounded-full uppercase tracking-wider shadow-sm scale-90 origin-left">
-                              <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
-                                <circle cx="6" cy="6" r="6" fill="white" fillOpacity="0.2"/>
-                                <path d="M3 6l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              Verified
-                            </span>
-                          )}
-                          {getBrandClaimStatus(brand.id) === 'pending' && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">Ownership Verification Pending</span>
-                          )}
-                          {getBrandClaimStatus(brand.id) === 'community' && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-50 text-[7px] font-black text-gray-500 rounded-xs uppercase tracking-wider scale-90 origin-left border border-gray-200/50 border-dashed">Community Brand Profile</span>
-                          )}
-                        </div>
-                        <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{brand.description}</p>
-                        <div className="flex items-center gap-1">
-                          <div className="flex gap-0.5">
-                            {[1, 2, 3, 4, 5].map(s => (
-                              <Star key={s} size={8} className={cn("fill-orange-primary stroke-orange-primary", s > Math.floor(brand.rating) && "fill-gray-200 stroke-gray-200")} />
-                            ))}
-                          </div>
-                          <span className="text-[9px] font-black text-navy italic ml-0.5">{brand.rating}</span>
-                          <span className="text-[8px] font-bold text-gray-300 ml-0.5">({brand.reviews})</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Content Spacer */}
-                    <div className="flex-1" />
-
-                    <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                        <span className="block text-[7px] font-black text-navy mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
-                        <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{brand.bestFor}</span>
-                      </div>
-                      <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                        <div className="flex flex-col items-center">
-                          <span className="text-base font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{brand.priceRange}</span>
-                          <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Price</span>
-                        </div>
-                      </div>
-                      <div className="text-center bg-[#E6F4EA]/80 py-1.5 rounded-lg border border-green-100 min-w-0">
-                        <span className="block text-base font-black text-[#10B981] leading-none mb-0.5 italic tracking-tighter">{brand.recommended}</span>
-                        <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60 font-medium">Success</span>
-                      </div>
-                    </div>
-
-                    <div className="w-full h-[1px] bg-transparent my-1" />
-
-                    <Link to={`/brands/${brand.id}`} className="w-full py-2 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1.5 uppercase tracking-widest text-center italic group/btn z-10 shrink-0">
-                      Visit Brand <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
-                  </motion.div>
+                  <BrandCardDesign key={brand.id} brand={brand} />
                 ))}
               </div>
             </div>

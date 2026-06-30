@@ -215,6 +215,173 @@ export const CREATORS_PAGE_FILTER_PROFILE: FilterProfile = {
 };
 
 // ==========================================
+// LAYER 3: DEDICATED CUSTOM PRICE FILTER COMPONENT
+// ==========================================
+
+interface CustomPriceFilterProps {
+  filter: FilterDefinition;
+  customPriceInputs?: { min: string; max: string };
+  setCustomPriceInputs?: (inputs: { min: string; max: string }) => void;
+  onCustomPriceApply?: (min: number, max: number | null) => void;
+  cardBaseStyle: string;
+}
+
+export function CustomPriceFilter({
+  filter,
+  customPriceInputs,
+  setCustomPriceInputs,
+  onCustomPriceApply,
+  cardBaseStyle
+}: CustomPriceFilterProps) {
+  const [minVal, setMinVal] = useState(customPriceInputs?.min || '');
+  const [maxVal, setMaxVal] = useState(customPriceInputs?.max || '');
+  const [rangeError, setRangeError] = useState('');
+
+  // Sync state if customPriceInputs changes externally
+  useEffect(() => {
+    if (customPriceInputs) {
+      setMinVal(customPriceInputs.min || '');
+      setMaxVal(customPriceInputs.max || '');
+    }
+  }, [customPriceInputs]);
+
+  const presets = [
+    { label: 'Under 1,000', min: 0, max: 1000 },
+    { label: '1,000 – 5,000', min: 1000, max: 5000 },
+    { label: '5,000 – 10,000', min: 5000, max: 10000 },
+    { label: '10,000 – 20,000', min: 10000, max: 20000 },
+    { label: '20,000 – 50,000', min: 20000, max: 50000 },
+    { label: '50,000+', min: 50000, max: 99999999 }
+  ];
+
+  const handlePresetClick = (p: typeof presets[0]) => {
+    setMinVal(p.min.toString());
+    setMaxVal(p.max === 99999999 ? '' : p.max.toString());
+    setRangeError('');
+    
+    if (setCustomPriceInputs) {
+      setCustomPriceInputs({
+        min: p.min.toString(),
+        max: p.max === 99999999 ? '' : p.max.toString()
+      });
+    }
+
+    if (onCustomPriceApply) {
+      onCustomPriceApply(p.min, p.max === 99999999 ? null : p.max);
+    }
+  };
+
+  const handleApply = () => {
+    const minNum = parseFloat(minVal) || 0;
+    const maxNum = maxVal ? parseFloat(maxVal) : null;
+
+    if (minNum < 0) {
+      setRangeError('Min must be positive');
+      return;
+    }
+    if (maxNum !== null && minNum > maxNum) {
+      setRangeError('Min score exceeds Max');
+      return;
+    }
+    setRangeError('');
+
+    if (setCustomPriceInputs) {
+      setCustomPriceInputs({ min: minVal, max: maxVal });
+    }
+    if (onCustomPriceApply) {
+      onCustomPriceApply(minNum, maxNum);
+    }
+  };
+
+  return (
+    <div className={cn(cardBaseStyle, "min-w-[250px] max-w-[310px]")}>
+      <div className="flex items-center justify-between pb-2 border-b border-[#e8edf2]">
+        <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">{filter.name}</h3>
+        {(minVal || maxVal) && (
+          <button
+            onClick={() => {
+              setMinVal('');
+              setMaxVal('');
+              setRangeError('');
+              if (setCustomPriceInputs) setCustomPriceInputs({ min: '', max: '' });
+              if (onCustomPriceApply) onCustomPriceApply(0, null);
+            }}
+            className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer hover:text-red-650 transition-colors border-none bg-none"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Price limit presets */}
+      <div className="grid grid-cols-2 gap-1.5 py-1">
+        {presets.map((p, idx) => {
+          const currentMin = parseFloat(minVal) || 0;
+          const currentMax = maxVal ? parseFloat(maxVal) : 99999999;
+          const isSelected = currentMin === p.min && currentMax === p.max;
+
+          return (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => handlePresetClick(p)}
+              className={cn(
+                "py-1.5 px-2 text-[9.5px] font-semibold rounded-[4px] border text-center transition-colors truncate cursor-pointer",
+                isSelected
+                  ? "bg-orange-primary/10 border-orange-primary text-orange-primary"
+                  : "bg-gray-50/50 border-[#e8edf2] text-gray-500 hover:bg-gray-100 hover:text-[#1A1D4E]"
+              )}
+            >
+              {p.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Min - Max Input Range Box */}
+      <div className="flex flex-col gap-2 pt-1 border-t border-[#e8edf2]">
+        <span className="text-[9.5px] font-bold text-gray-400 uppercase tracking-wider">Custom Price Limit</span>
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <span className="absolute left-2.5 top-[7px] text-[10px] text-gray-400 font-mono">৳</span>
+            <input
+              type="number"
+              placeholder="Min"
+              value={minVal}
+              onChange={(e) => setMinVal(e.target.value)}
+              className="w-full text-xs font-semibold h-8 pl-6 pr-2 border border-[#e8edf2] rounded-[4px] focus:outline-none focus:border-orange-primary bg-slate-50/20"
+            />
+          </div>
+          <span className="text-gray-300 text-xs">to</span>
+          <div className="relative flex-1">
+            <span className="absolute left-2.5 top-[7px] text-[10px] text-gray-400 font-mono">৳</span>
+            <input
+              type="number"
+              placeholder="Unlimited"
+              value={maxVal}
+              onChange={(e) => setMaxVal(e.target.value)}
+              className="w-full text-xs font-semibold h-8 pl-6 pr-2 border border-[#e8edf2] rounded-[4px] focus:outline-none focus:border-orange-primary bg-slate-50/20"
+            />
+          </div>
+        </div>
+
+        {rangeError && (
+          <p className="text-[9px] text-red-500 font-semibold leading-none">{rangeError}</p>
+        )}
+
+        <button
+          type="button"
+          onClick={handleApply}
+          className="w-full py-1.5 mt-1 bg-orange-primary hover:bg-orange-deep text-white rounded-[4px] text-[10px] font-bold uppercase tracking-wider transition-colors border-0 cursor-pointer text-center"
+        >
+          Apply Custom Range
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
 // LAYER 3: UNIVERSAL FILTER RENDERER COMPONENT
 // ==========================================
 
@@ -248,144 +415,15 @@ export function UniversalFilterRenderer({
       {profile.filters.map((filter) => {
         // Render custom price range filter card
         if (filter.id === 'price_custom') {
-          const [minVal, setMinVal] = useState(customPriceInputs?.min || '');
-          const [maxVal, setMaxVal] = useState(customPriceInputs?.max || '');
-          const [rangeError, setRangeError] = useState('');
-
-          const presets = [
-            { label: 'Under 1,000', min: 0, max: 1000 },
-            { label: '1,000 – 5,000', min: 1000, max: 5000 },
-            { label: '5,000 – 10,000', min: 5000, max: 10000 },
-            { label: '10,000 – 20,000', min: 10000, max: 20000 },
-            { label: '20,000 – 50,000', min: 20000, max: 50000 },
-            { label: '50,000+', min: 50000, max: 99999999 }
-          ];
-
-          const handlePresetClick = (p: typeof presets[0]) => {
-            setMinVal(p.min.toString());
-            setMaxVal(p.max === 99999999 ? '' : p.max.toString());
-            setRangeError('');
-            
-            // Sync up parent states immediately
-            if (setCustomPriceInputs) {
-              setCustomPriceInputs({
-                min: p.min.toString(),
-                max: p.max === 99999999 ? '' : p.max.toString()
-              });
-            }
-
-            if (onCustomPriceApply) {
-              onCustomPriceApply(p.min, p.max === 99999999 ? null : p.max);
-            }
-          };
-
-          const handleApply = () => {
-            const minNum = parseFloat(minVal) || 0;
-            const maxNum = maxVal ? parseFloat(maxVal) : null;
-
-            if (minNum < 0) {
-              setRangeError('Min must be positive');
-              return;
-            }
-            if (maxNum !== null && minNum > maxNum) {
-              setRangeError('Min score exceeds Max');
-              return;
-            }
-            setRangeError('');
-
-            if (setCustomPriceInputs) {
-              setCustomPriceInputs({ min: minVal, max: maxVal });
-            }
-            if (onCustomPriceApply) {
-              onCustomPriceApply(minNum, maxNum);
-            }
-          };
-
           return (
-            <div key={filter.id} className={cn(cardBaseStyle, "min-w-[250px] max-w-[310px]")}>
-              <div className="flex items-center justify-between pb-2 border-b border-[#e8edf2]">
-                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">{filter.name}</h3>
-                {(minVal || maxVal) && (
-                  <button
-                    onClick={() => {
-                      setMinVal('');
-                      setMaxVal('');
-                      setRangeError('');
-                      if (setCustomPriceInputs) setCustomPriceInputs({ min: '', max: '' });
-                      if (onCustomPriceApply) onCustomPriceApply(0, null);
-                    }}
-                    className="text-[9px] font-semibold text-red-500 uppercase cursor-pointer hover:text-red-650 transition-colors border-none bg-none"
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-
-              {/* Price limit presets */}
-              <div className="grid grid-cols-2 gap-1.5 py-1">
-                {presets.map((p, idx) => {
-                  const currentMin = parseFloat(minVal) || 0;
-                  const currentMax = maxVal ? parseFloat(maxVal) : 99999999;
-                  const isSelected = currentMin === p.min && currentMax === p.max;
-
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handlePresetClick(p)}
-                      className={cn(
-                        "py-1.5 px-2 text-[9.5px] font-semibold rounded-[4px] border text-center transition-colors truncate cursor-pointer",
-                        isSelected
-                          ? "bg-orange-primary/10 border-orange-primary text-orange-primary"
-                          : "bg-gray-50/50 border-[#e8edf2] text-gray-500 hover:bg-gray-100 hover:text-[#1A1D4E]"
-                      )}
-                    >
-                      {p.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Min - Max Input Range Box */}
-              <div className="flex flex-col gap-2 pt-1 border-t border-[#e8edf2]">
-                <span className="text-[9.5px] font-bold text-gray-400 uppercase tracking-wider">Custom Price Limit</span>
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <span className="absolute left-2.5 top-[7px] text-[10px] text-gray-400 font-mono">৳</span>
-                    <input
-                      type="number"
-                      placeholder="Min"
-                      value={minVal}
-                      onChange={(e) => setMinVal(e.target.value)}
-                      className="w-full text-xs font-semibold h-8 pl-6 pr-2 border border-[#e8edf2] rounded-[4px] focus:outline-none focus:border-orange-primary bg-slate-50/20"
-                    />
-                  </div>
-                  <span className="text-gray-300 text-xs">to</span>
-                  <div className="relative flex-1">
-                    <span className="absolute left-2.5 top-[7px] text-[10px] text-gray-400 font-mono">৳</span>
-                    <input
-                      type="number"
-                      placeholder="Unlimited"
-                      value={maxVal}
-                      onChange={(e) => setMaxVal(e.target.value)}
-                      className="w-full text-xs font-semibold h-8 pl-6 pr-2 border border-[#e8edf2] rounded-[4px] focus:outline-none focus:border-orange-primary bg-slate-50/20"
-                    />
-                  </div>
-                </div>
-
-                {rangeError && (
-                  <p className="text-[9px] text-red-500 font-semibold leading-none">{rangeError}</p>
-                )}
-
-                <button
-                  type="button"
-                  onClick={handleApply}
-                  className="w-full py-1.5 mt-1 bg-orange-primary hover:bg-orange-deep text-white rounded-[4px] text-[10px] font-bold uppercase tracking-wider transition-colors border-0 cursor-pointer text-center"
-                >
-                  Apply Custom Range
-                </button>
-              </div>
-            </div>
+            <CustomPriceFilter
+              key={filter.id}
+              filter={filter}
+              customPriceInputs={customPriceInputs}
+              setCustomPriceInputs={setCustomPriceInputs}
+              onCustomPriceApply={onCustomPriceApply}
+              cardBaseStyle={cardBaseStyle}
+            />
           );
         }
 
