@@ -689,6 +689,8 @@ export function HomePage() {
     { name: "Travel & Hospitality", count: "50 Products . 10 Brands", id: 'Food & Restaurants' },
   ];
 
+  const dominantColors = ['#1a3a3a', '#0d2233', '#2a1a0e', '#1c1c2e', '#0e2b1f', '#2b1a2a', '#1a2b3c', '#2a2a1a'];
+
   return (
     <div className="bg-choosify-feed min-h-screen text-[#1A1D4E] antialiased pb-16 font-sans overflow-x-clip">
       
@@ -831,8 +833,8 @@ export function HomePage() {
 
         {/* CENTER FEED */}
         <section 
-          className="flex flex-col gap-4 w-full min-w-0"
-          style={{ paddingTop: '0px', paddingLeft: '0px', paddingRight: '0px' }}
+          className="flex flex-col gap-5 w-full min-w-0"
+          style={{ paddingTop: '0px', paddingLeft: '0px', paddingRight: '0px', paddingBottom: '8px' }}
         >
           
 
@@ -841,214 +843,38 @@ export function HomePage() {
           {activeTab === 'FEED' ? (
             <>
               {/* FEED SECTION A — TRENDING BRANDS */}
-              <div id="section-trending-brands" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
-                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
+              <div
+                id="section-trending-brands"
+                className="rounded-[5px] border border-[#e8edf2]/20 p-5 shadow-sm overflow-hidden transition-colors duration-700 text-left"
+                style={{ backgroundColor: dominantColors[carouselIndex % dominantColors.length] }}
+              >
+                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-white/10 pb-3 mb-4 gap-4">
                   <div className="text-left">
                     <div className="flex items-center gap-1">
-                      <span className="text-base font-semibold text-[#1a1a2e]">Trending</span>
-                      <span className="text-base font-semibold text-[#E8500A]">Brands</span>
+                      <span className="text-base font-semibold text-white">Trending</span>
+                      <span className="text-base font-semibold text-[#ff7c45]">Brands</span>
                     </div>
-                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
+                    <p className="text-[12px] text-white/55 mt-1 text-left">
                       Connect with thousands of authentic shopper tests and verify brand credentials today.
                     </p>
                   </div>
-                  <Link to="/brands" className="text-[12px] font-medium text-[#FF5B00] shrink-0 hover:underline">
+                  <Link to="/brands" className="text-[12px] font-medium text-white/70 hover:text-white shrink-0 hover:underline">
                     View All Brands
                   </Link>
                 </div>
 
                 {/* ── PREMIUM EXPANDING BRAND CAROUSEL ──────────────────────── */}
-                {(() => {
-                  // We use an IIFE to add extra local helpers without new state declarations.
-                  // carouselIndex and setCarouselIndex are already declared above.
-                  const CAROUSEL_BRANDS = carouselBrands;
-
-                  const TOTAL = CAROUSEL_BRANDS.length;
-
-                  // Compute visible indices: [prev, active, next] with infinite wrap
-                  const prevIdx = (carouselIndex - 1 + TOTAL) % TOTAL;
-                  const nextIdx = (carouselIndex + 1) % TOTAL;
-
-                  // The three visible slots
-                  const visibleSlots = [
-                    { brand: CAROUSEL_BRANDS[prevIdx], slotIndex: prevIdx, position: 'prev' as const },
-                    { brand: CAROUSEL_BRANDS[carouselIndex], slotIndex: carouselIndex, position: 'active' as const },
-                    { brand: CAROUSEL_BRANDS[nextIdx], slotIndex: nextIdx, position: 'next' as const },
-                  ];
-
-                  const goNext = () => setCarouselIndex(prev => (prev + 1) % TOTAL);
-                  const goPrev = () => setCarouselIndex(prev => (prev - 1 + TOTAL) % TOTAL);
-
-                  return (
-                    <>
-                      {/* CAROUSEL TRACK */}
-                      <div
-                        className="relative w-full overflow-hidden select-none"
-                        onTouchStart={handleTouchStart}
-                        onTouchEnd={handleTouchEnd}
-                        onMouseDown={handleMouseDown}
-                        onMouseUp={handleMouseUpOrLeave}
-                        style={{ height: '480px' }}
-                      >
-                        {/* Cards container — flex row, always 3 cards */}
-                        <div className="flex items-stretch gap-3 h-full w-full">
-                          {visibleSlots.map(({ brand, slotIndex, position }) => {
-                            const isActive = position === 'active';
-
-                            return (
-                              <motion.div
-                                key={`${slotIndex}-${brand.id}`}
-                                layoutId={`brand-card-${brand.id}`}
-                                onClick={() => {
-                                  if (position === 'prev') goPrev();
-                                  else if (position === 'next') goNext();
-                                  else navigate(`/brands/${brand.id}`);
-                                }}
-                                initial={false}
-                                animate={{
-                                  flex: isActive ? 5.5 : 2,
-                                  opacity: isActive ? 1 : 0.82,
-                                  scale: isActive ? 1 : 0.97,
-                                }}
-                                transition={{
-                                  type: 'spring',
-                                  stiffness: 260,
-                                  damping: 28,
-                                  mass: 0.9,
-                                }}
-                                className="relative overflow-hidden cursor-pointer group"
-                                style={{ borderRadius: '20px', minWidth: 0, flexShrink: 0 }}
-                              >
-                                {/* Background image */}
-                                <img
-                                  src={brand.image}
-                                  alt={brand.name}
-                                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-105"
-                                  draggable={false}
-                                />
-
-                                {/* Gradient overlay */}
-                                <div
-                                  className="absolute inset-0 transition-opacity duration-500"
-                                  style={{
-                                    background: isActive
-                                      ? 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.08) 100%)'
-                                      : 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 100%)',
-                                  }}
-                                />
-
-                                {/* Category badge — top left */}
-                                <div className="absolute top-4 left-4 z-10">
-                                  <span
-                                    className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-white"
-                                    style={{ background: '#E8500A' }}
-                                  >
-                                    {brand.category}
-                                  </span>
-                                </div>
-
-                                {/* ACTIVE CARD — full content bottom left */}
-                                {isActive && (
-                                  <motion.div
-                                    initial={{ opacity: 0, y: 18 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.12, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                                    className="absolute inset-x-0 bottom-0 p-6 flex flex-col items-start gap-3 z-10"
-                                  >
-                                    <h3
-                                      className="text-3xl font-black text-white uppercase leading-none tracking-tight"
-                                      style={{ fontStyle: 'italic' }}
-                                    >
-                                      {brand.name}
-                                    </h3>
-                                    <p className="text-white/70 text-[11px] font-bold uppercase tracking-widest">
-                                      Verified Brand on Choosify
-                                    </p>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigate(`/brands/${brand.id}`);
-                                      }}
-                                      className="flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-white/25 bg-white/12 backdrop-blur-md hover:bg-white hover:text-[#E8500A] text-white transition-all duration-300 group/btn"
-                                    >
-                                      <span className="text-[10px] font-black uppercase tracking-widest">
-                                        Explore Brand
-                                      </span>
-                                      <div className="w-5 h-5 rounded-full border border-current flex items-center justify-center group-hover/btn:rotate-45 transition-transform duration-300">
-                                        <ArrowUpRight size={10} />
-                                      </div>
-                                    </button>
-                                  </motion.div>
-                                )}
-
-                                {/* INACTIVE CARD — name pill only */}
-                                {!isActive && (
-                                  <div className="absolute inset-x-0 bottom-5 flex justify-center px-3 z-10">
-                                    <span
-                                      className="text-[10px] font-black uppercase tracking-wider text-white px-4 py-2 rounded-full truncate max-w-full border border-white/10"
-                                      style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
-                                    >
-                                      {brand.name}
-                                    </span>
-                                  </div>
-                                )}
-                              </motion.div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* NAVIGATION CONTROLS */}
-                      <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4 select-none px-1">
-
-                        {/* Dot indicators */}
-                        <div className="flex items-center gap-2">
-                          {CAROUSEL_BRANDS.map((_, i) => (
-                            <button
-                              key={i}
-                              type="button"
-                              onClick={() => setCarouselIndex(i)}
-                              className="transition-all duration-500 rounded-full border-0 cursor-pointer p-0"
-                              style={{
-                                width: carouselIndex === i ? '36px' : '8px',
-                                height: '8px',
-                                background: carouselIndex === i ? '#E8500A' : '#e8edf2',
-                              }}
-                              aria-label={`Go to brand ${i + 1}`}
-                            />
-                          ))}
-                        </div>
-
-                        {/* Slide counter */}
-                        <span className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-widest tabular-nums">
-                          {String(carouselIndex + 1).padStart(2, '0')} / {String(TOTAL).padStart(2, '0')}
-                        </span>
-
-                        {/* Arrow buttons */}
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={goPrev}
-                            className="w-9 h-9 rounded-full border border-[#e8edf2] flex items-center justify-center hover:border-[#E8500A]/40 hover:bg-[#E8500A]/5 transition-all active:scale-90 cursor-pointer bg-white"
-                            title="Previous Brand"
-                          >
-                            <ChevronLeft size={16} className="text-[#1a1a2e]" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={goNext}
-                            className="w-9 h-9 rounded-full border border-[#e8edf2] flex items-center justify-center hover:border-[#E8500A]/40 hover:bg-[#E8500A]/5 transition-all active:scale-90 cursor-pointer bg-white"
-                            title="Next Brand"
-                          >
-                            <ChevronRight size={16} className="text-[#1a1a2e]" />
-                          </button>
-                        </div>
-
-                      </div>
-                    </>
-                  );
-                })()}
+                <TrendingBrandsCarousel
+                  carouselBrands={carouselBrands}
+                  carouselIndex={carouselIndex}
+                  setCarouselIndex={setCarouselIndex}
+                  navigate={navigate}
+                  handleTouchStart={handleTouchStart}
+                  handleTouchEnd={handleTouchEnd}
+                  handleMouseDown={handleMouseDown}
+                  handleMouseUpOrLeave={handleMouseUpOrLeave}
+                  dominantColors={dominantColors}
+                />
               </div>
 
               {/* SECTION 2 — NEW ON CHOOSIFY */}
@@ -1687,6 +1513,238 @@ export function HomePage() {
     </main>
 
     </div>
+  );
+}
+
+interface TrendingBrandsCarouselProps {
+  carouselBrands: any[];
+  carouselIndex: number;
+  setCarouselIndex: React.Dispatch<React.SetStateAction<number>>;
+  navigate: any;
+  handleTouchStart: (e: React.TouchEvent) => void;
+  handleTouchEnd: () => void;
+  handleMouseDown: (e: React.MouseEvent) => void;
+  handleMouseUpOrLeave: () => void;
+  dominantColors: string[];
+}
+
+function TrendingBrandsCarousel({
+  carouselBrands,
+  carouselIndex,
+  setCarouselIndex,
+  navigate,
+  handleTouchStart,
+  handleTouchEnd,
+  handleMouseDown,
+  handleMouseUpOrLeave,
+  dominantColors,
+}: TrendingBrandsCarouselProps) {
+  const TOTAL = carouselBrands.length;
+  const [ringProgress, setRingProgress] = useState(0);
+
+  // Compute visible indices: [prev, active, next] with infinite wrap
+  const prevIdx = (carouselIndex - 1 + TOTAL) % TOTAL;
+  const nextIdx = (carouselIndex + 1) % TOTAL;
+
+  // The three visible slots
+  const visibleSlots = [
+    { brand: carouselBrands[prevIdx], slotIndex: prevIdx, position: 'prev' as const },
+    { brand: carouselBrands[carouselIndex], slotIndex: carouselIndex, position: 'active' as const },
+    { brand: carouselBrands[nextIdx], slotIndex: nextIdx, position: 'next' as const },
+  ];
+
+  const goNext = () => setCarouselIndex((prev) => (prev + 1) % TOTAL);
+  const goPrev = () => setCarouselIndex((prev) => (prev - 1 + TOTAL) % TOTAL);
+
+  useEffect(() => {
+    setRingProgress(0);
+    const interval = 100; // 100ms updates
+    const duration = 5000; // 5 seconds
+    const steps = duration / interval;
+    let currentStep = 0;
+
+    const timer = setInterval(() => {
+      currentStep += 1;
+      setRingProgress(Math.min(currentStep / steps, 1));
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [carouselIndex]);
+
+  return (
+    <>
+      {/* CAROUSEL TRACK */}
+      <div
+        className="relative w-full overflow-hidden select-none"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUpOrLeave}
+        style={{ height: '500px' }}
+      >
+        {/* Cards container — flex row, always 3 cards */}
+        <div className="flex items-stretch gap-3 h-full w-full px-3">
+          {visibleSlots.map(({ brand, slotIndex, position }) => {
+            const isActive = position === 'active';
+
+            return (
+              <motion.div
+                key={`${slotIndex}-${brand.id}`}
+                initial={false}
+                animate={{
+                  flex: isActive ? 5.5 : 1.8,
+                  opacity: isActive ? 1 : 0.72,
+                }}
+                transition={{ type: 'spring', stiffness: 220, damping: 26, mass: 0.85 }}
+                onClick={() => {
+                  if (position === 'prev') goPrev();
+                  else if (position === 'next') goNext();
+                  else navigate(`/brands/${brand.id}`);
+                }}
+                className="relative overflow-hidden cursor-pointer group"
+                style={{ borderRadius: '20px', minWidth: 0, flexShrink: 0 }}
+              >
+                {/* Full-bleed background image */}
+                <img
+                  src={brand.image}
+                  alt={brand.name}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-105"
+                  draggable={false}
+                />
+
+                {/* Gradient overlay */}
+                <div
+                  className="absolute inset-0 transition-opacity duration-500"
+                  style={{
+                    background: isActive
+                      ? 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.28) 50%, rgba(0,0,0,0.04) 100%)'
+                      : 'linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.50) 100%)',
+                  }}
+                />
+
+                {/* Category badge — top-left */}
+                <div className="absolute top-4 left-4 z-10">
+                  <span
+                    className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-white"
+                    style={{ background: '#E8500A' }}
+                  >
+                    {brand.category}
+                  </span>
+                </div>
+
+                {/* Progress ring — ACTIVE CARD ONLY — mid-right edge */}
+                {isActive && (
+                  <div className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-20 w-10 h-10">
+                    <svg viewBox="0 0 40 40" className="w-full h-full -rotate-90">
+                      {/* Track */}
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2.5" />
+                      {/* Animated fill */}
+                      <circle
+                        cx="20" cy="20" r="16" fill="none"
+                        stroke="white" strokeWidth="2.5"
+                        strokeDasharray={`${2 * Math.PI * 16}`}
+                        strokeDashoffset={`${2 * Math.PI * 16 * (1 - ringProgress)}`}
+                        strokeLinecap="round"
+                        style={{ transition: 'stroke-dashoffset 0.1s linear' }}
+                      />
+                    </svg>
+                  </div>
+                )}
+
+                {/* Active card bottom content */}
+                {isActive && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute inset-x-0 bottom-0 p-5 flex flex-col items-start gap-2.5 z-10"
+                  >
+                    <h3 className="text-2xl font-black text-white uppercase leading-none tracking-tight italic">
+                      {brand.name}
+                    </h3>
+                    <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest">
+                      Verified Brand on Choosify
+                    </p>
+                    {/* Read more CTA */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/brands/${brand.id}`);
+                      }}
+                      className="mt-1 flex items-center gap-2 text-white text-[10px] font-black uppercase tracking-widest"
+                    >
+                      <div className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">
+                        <ArrowUpRight size={9} />
+                      </div>
+                      Explore Brand
+                    </button>
+                  </motion.div>
+                )}
+
+                {/* Inactive card — name pill bottom */}
+                {!isActive && (
+                  <div className="absolute inset-x-0 bottom-4 flex justify-center px-2 z-10">
+                    <span
+                      className="text-[9px] font-black uppercase tracking-wide text-white px-3 py-1.5 rounded-full truncate max-w-full border border-white/10"
+                      style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)' }}
+                    >
+                      {brand.name}
+                    </span>
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* NAVIGATION CONTROLS */}
+      <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4 select-none px-1">
+        {/* Dot indicators */}
+        <div className="flex items-center gap-2">
+          {carouselBrands.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setCarouselIndex(i)}
+              className="transition-all duration-500 rounded-full border-0 cursor-pointer p-0"
+              style={{
+                width: carouselIndex === i ? '36px' : '8px',
+                height: '8px',
+                background: carouselIndex === i ? '#E8500A' : 'rgba(255,255,255,0.25)',
+              }}
+              aria-label={`Go to brand ${i + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Slide counter */}
+        <span className="text-[10px] font-black text-white/50 uppercase tracking-widest tabular-nums">
+          {String(carouselIndex + 1).padStart(2, '0')} / {String(TOTAL).padStart(2, '0')}
+        </span>
+
+        {/* Arrow buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={goPrev}
+            className="w-9 h-9 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all active:scale-90 cursor-pointer"
+            title="Previous Brand"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={goNext}
+            className="w-9 h-9 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all active:scale-90 cursor-pointer"
+            title="Next Brand"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
 

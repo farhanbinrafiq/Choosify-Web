@@ -196,7 +196,7 @@ function ProductCardImageCarousel({ images, alt, containerClassName }: { images:
         alt={alt}
         loading="lazy"
         onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE; }}
-        className="w-full h-full object-contain transition-transform duration-500 hover:scale-105"
+        className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
       />
       
       {images.length > 1 && (
@@ -407,10 +407,10 @@ export function ProductCard({
     return (
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
-        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer group relative w-full min-h-[270px] h-full box-border animate-in fade-in"
+        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer group relative w-full min-h-[270px] md:min-h-[290px] h-full box-border animate-in fade-in"
       >
         <div 
-          className="w-full h-[140px] bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-2 select-none shrink-0"
+          className="w-full h-[140px] md:h-[160px] bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-2 select-none shrink-0"
           style={imageContainerStyle}
         >
             <div className="absolute top-2 left-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
@@ -528,7 +528,7 @@ export function ProductCard({
   if (variant === 'list') {
     return (
       <div className="bg-white rounded-[5px] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.005] transition-all duration-300 flex gap-5 p-4 group cursor-pointer text-left shadow-none" onClick={() => navigate(`/products/${product.id}`)}>
-        <div className="w-36 h-36 flex-shrink-0 bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-3 select-none">
+        <div className="w-36 md:w-40 h-36 md:h-40 flex-shrink-0 bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-3 select-none">
           <ProductCardImageCarousel 
             images={getProductCardImages(product)} 
             alt={product.title} 
@@ -638,7 +638,7 @@ export function ProductCard({
     <div 
       className={cn(
         "bg-white rounded-[5px] p-2.5 shadow-none hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer shrink-0 w-full",
-        isGuideDetail ? "min-h-[385px] h-full" : "min-h-[268px] h-full"
+        isGuideDetail ? "min-h-[385px] md:min-h-[410px] h-full" : "min-h-[273px] md:min-h-[323px] h-full"
       )}
       onClick={() => navigate(`/products/${product.id}`)}
       id={`product-${product.id}`}
@@ -648,7 +648,7 @@ export function ProductCard({
     >
       <div className={cn(
         "relative w-full bg-gray-50 overflow-hidden flex items-center justify-center rounded-[5px] shrink-0",
-        isGuideDetail ? "h-[135px] p-2.5" : "h-[105px] p-2"
+        isGuideDetail ? "h-[135px] md:h-[160px] p-2.5" : "h-[110px] md:h-[160px] p-2"
       )}>
         <ProductCardImageCarousel 
           images={getProductCardImages(product)} 
