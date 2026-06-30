@@ -439,7 +439,7 @@ export function CreatorsPage() {
         }}
       />
 
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
+      <div className="max-w-[1680px] mx-auto px-3 xl:px-6 py-5 w-full grid grid-cols-1 lg:grid-cols-[210px_minmax(0,1fr)_220px] xl:grid-cols-[230px_minmax(0,1fr)_240px] 2xl:grid-cols-[260px_minmax(0,1fr)_280px] gap-4 relative">
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
@@ -782,7 +782,7 @@ export function CreatorsPage() {
                 <div className="flex-1 h-px bg-orange-primary/20" />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
+              <div className="grid gap-5 w-full justify-center max-w-[1045px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
                 {filteredFeaturedCreators.map((creator) => (
                   <CreatorCardDesign key={creator.id} creator={creator} />
                 ))}
@@ -797,7 +797,7 @@ export function CreatorsPage() {
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{letterCreators.length} Creators</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
+              <div className="grid gap-5 w-full justify-center max-w-[1045px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
                 {letterCreators.map(creator => (
                   <CreatorCardDesign key={creator.id} creator={creator} />
                 ))}

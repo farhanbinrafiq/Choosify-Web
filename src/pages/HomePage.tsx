@@ -24,6 +24,7 @@ import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
 import { BrandCardDesign } from '../components/BrandCardDesign';
+import { CreatorCardDesign } from '../components/CreatorCardDesign';
 
 const BRAND_IMAGES: Record<string, string> = {
   "Samsung": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
@@ -1115,8 +1116,8 @@ export function HomePage() {
                 {/* Premium Horizontal Carousel */}
                 <PremiumCarousel
                   items={spotlightBrands}
-                  itemWidth={300}
-                  gap={16}
+                  itemWidth={335}
+                  gap={20}
                   renderCard={(brand) => {
                     const originalBrand = BRANDS.find(b => b.id === brand.id) || {};
                     const bestFor = (originalBrand as any).category === 'Fashion' ? 'Footwear' : 'Electronics';
@@ -1202,105 +1203,26 @@ export function HomePage() {
                 {/* Premium Horizontal Carousel */}
                 <PremiumCarousel
                   items={spotlightCreators}
-                  itemWidth={280}
-                  gap={16}
+                  itemWidth={335}
+                  gap={20}
                   renderCard={(creator: any) => {
-                    const primaryPlatform = creator.platforms[0] || 'YouTube';
-                    const followerCount = creator.followers[primaryPlatform] || Object.values(creator.followers)[0] || '100K+';
-                    
-                    return (
-                      <motion.div 
-                        key={creator.id} 
-                        className="bg-white rounded-[5px] p-5 border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden shadow-xs shrink-0 w-full h-[320px]"
-                      >
-                        {creator.isHot && (
-                          <div className="absolute top-5 right-5 bg-red-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">HOT</div>
-                        )}
-                        {creator.isFeatured && (
-                          <div className="absolute top-5 right-5 bg-orange-primary text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-[0.2em] shadow-xl z-20 italic">FEATURED</div>
-                        )}
-
-                        {/* Horizontal Header System */}
-                        <div className="flex gap-3 items-start relative z-10 text-left w-full">
-                          <div className="w-14 h-14 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 p-0 shadow-xs relative object-cover">
-                             <img src={creator.avatar} className="w-full h-full object-cover relative z-10" alt={creator.name} referrerPolicy="no-referrer" />
-                          </div>
-                          <div className={cn("flex flex-col min-w-0 flex-1", (creator.isHot || creator.isFeatured) && "pr-10")}>
-                            <h3 className="text-sm font-black text-navy leading-tight mb-0.5 group-hover:text-orange-primary transition-colors italic uppercase tracking-tighter truncate">{creator.name}</h3>
-                            <div className="flex items-center gap-1 mb-1.5 flex-wrap">
-                              {getCreatorClaimStatus(creator.id) === 'verified' && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black rounded-full uppercase tracking-wider shadow-sm scale-90 origin-left">
-                                  <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
-                                    <circle cx="6" cy="6" r="6" fill="white" fillOpacity="0.2"/>
-                                    <path d="M3 6l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                  </svg>
-                                  Verified
-                                </span>
-                              )}
-                              {getCreatorClaimStatus(creator.id) === 'pending' && (
-                                <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-55 text-[7px] font-black text-amber-700 rounded-xs uppercase tracking-wider scale-90 origin-left border border-amber-200/50 animate-pulse">● Pending Claim</span>
-                              )}
-                              {getCreatorClaimStatus(creator.id) === 'community' && (
-                                <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-55 text-[7px] font-black text-gray-500 rounded-xs uppercase tracking-wider scale-90 origin-left border border-gray-200/50 border-dashed">Community</span>
-                              )}
-                            </div>
-                            <p className="text-[9px] font-bold text-gray-400 mb-1.5 truncate uppercase tracking-wide opacity-80 leading-relaxed">{creator.handle}</p>
-                            <div className="flex items-center gap-1">
-                              <span className="text-[9px] font-black text-navy italic">★ {creator.rating}</span>
-                              <span className="text-[8px] font-bold text-gray-300 ml-0.5">({creator.reviews} reviews)</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Bio/Tagline block */}
-                        <div className="mt-3 text-left">
-                          <p className="text-[11px] text-gray-500 line-clamp-2 font-medium leading-relaxed">
-                            {creator.bio}
-                          </p>
-                        </div>
-
-                        {/* Content Spacer */}
-                        <div className="flex-1" />
-
-                        <div className="w-full h-[1px] bg-gray-50 my-3 mt-auto" />
-
-                        {/* Adapted Grid Content */}
-                        <div className="grid grid-cols-3 gap-2">
-                          <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                            <span className="block text-[7px] font-black text-navy mb-0.5 uppercase tracking-tighter opacity-60">Best For</span>
-                            <span className="block text-[8px] font-bold text-red-500 italic uppercase truncate px-0.5">{creator.bestFor}</span>
-                          </div>
-                          <div className="text-center bg-gray-50/50 py-1.5 rounded-lg border border-gray-100/50 min-w-0">
-                            <div className="flex flex-col items-center">
-                              <span className="text-sm font-black text-[#5C2AFE] leading-none mb-0.5 italic tracking-tighter">{followerCount}</span>
-                              <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest opacity-60">Audience</span>
-                            </div>
-                          </div>
-                          <div className="text-center bg-[#E1F5FE]/80 py-1.5 rounded-lg border border-blue-100 min-w-0">
-                            <span className="block text-[8px] font-black text-blue-600 truncate uppercase mt-0.5">{creator.platforms[0]}</span>
-                            <span className="block text-[7px] font-black text-navy uppercase tracking-widest opacity-60 font-medium">Platform</span>
-                          </div>
-                        </div>
-
-                        <div className="w-full h-[1px] bg-transparent my-1" />
-
-                        {/* Action Row containing Follow and View Profile */}
-                        <div className="grid grid-cols-2 gap-2 mt-2">
-                          <FollowButton 
-                            id={creator.id} 
-                            name={creator.name} 
-                            type="creator" 
-                            className="w-full h-8 rounded-lg !text-[10px]" 
-                          />
-                          <Link 
-                            to={`/creators/${creator.id}`} 
-                            className="w-full h-8 bg-navy text-white text-[10px] font-black rounded-lg shadow-md hover:bg-[#E84E0F] active:scale-95 transition-all flex items-center justify-center gap-1 uppercase tracking-widest text-center italic z-10 shrink-0"
-                          >
-                            Profile →
-                          </Link>
-                        </div>
-                      </motion.div>
-                    );
+                    // Map the spotlightCreators data shape to what CreatorCardDesign expects
+                    const cardCreator = {
+                      id: creator.id,
+                      name: creator.name,
+                      handle: creator.handle,
+                      avatar: creator.avatar,
+                      score: creator.score ?? Math.round((creator.rating || 4.5) * 20),
+                      bestFor: creator.bestFor || creator.category || 'Lifestyle',
+                      platforms: creator.platforms || ['YouTube'],
+                      rating: creator.rating || 4.8,
+                      reviews: creator.reviews || 0,
+                      isHot: creator.isHot,
+                      isFeatured: creator.isFeatured,
+                      coverImage: creator.coverImage,
+                      bio: creator.bio,
+                    };
+                    return <CreatorCardDesign key={creator.id} creator={cardCreator} />;
                   }}
                 />
 

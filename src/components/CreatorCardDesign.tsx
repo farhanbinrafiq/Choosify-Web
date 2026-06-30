@@ -51,7 +51,7 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
     <Link
       to={`/creators/${creator.id}`}
       onClick={onClick}
-      className="block w-full max-w-[340px] bg-white rounded-[12px] border border-[#e8edf2] hover:shadow-lg hover:border-[#E8500A]/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative"
+      className="block w-[335px] max-w-[335px] min-w-[335px] bg-white rounded-[12px] border border-[#e8edf2] hover:shadow-lg hover:border-[#E8500A]/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative shrink-0"
     >
       {/* FEATURED BADGE */}
       {creator.isFeatured && (
@@ -70,7 +70,7 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
       )}
 
       {/* COVER PHOTO SECTION */}
-      <div className="relative w-full h-[150px] bg-gradient-to-r from-[#1A1D4E]/10 to-[#E8500A]/10 overflow-hidden shrink-0">
+      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#1A1D4E]/10 to-[#E8500A]/10 overflow-hidden shrink-0">
         <img 
           src={coverUrl}
           alt={`${creator.name} cover`}
@@ -78,22 +78,22 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/5" />
-        
-        {/* AVATAR - overlapping cover at bottom-left */}
-        <div className="absolute bottom-0 left-4 transform translate-y-1/2 z-10">
-          <div className="w-[80px] h-[80px] rounded-[8px] border-4 border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
-            <img 
-              src={creator.avatar} 
-              className="w-full h-full object-cover" 
-              alt={creator.name}
-              loading="lazy"
-            />
-          </div>
+      </div>
+
+      {/* AVATAR - overlapping cover at bottom-left */}
+      <div className="absolute top-[96px] left-4 z-10">
+        <div className="w-[80px] h-[80px] rounded-full border-4 border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
+          <img 
+            src={creator.avatar} 
+            className="w-full h-full object-cover" 
+            alt={creator.name}
+            loading="lazy"
+          />
         </div>
       </div>
 
       {/* CREATOR INFO SECTION */}
-      <div className="px-4 pt-12 pb-3 text-left flex-1 flex flex-col justify-center min-w-0">
+      <div className="px-4 pt-14 pb-3 text-left flex-1 flex flex-col justify-center min-w-0">
         <h3 className="text-base font-black text-[#1A1D4E] uppercase line-clamp-1 mb-1 leading-tight tracking-tight">
           {creator.name}
         </h3>
@@ -137,13 +137,41 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
             </div>
           </div>
           
-          {/* Column 2: Creator Score */}
-          <div className="text-center border-l border-r border-[#e8edf2] min-w-0 px-1">
-            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
+          {/* Column 2: Creator Score — circular SVG meter */}
+          <div className="text-center border-l border-r border-[#e8edf2] min-w-0 px-1 flex flex-col items-center justify-center">
+            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1 leading-none">
               Score
             </div>
-            <div className="text-xs font-black text-[#E8500A] truncate leading-tight">
-              {score}%
+            <div className="relative w-11 h-11 shrink-0">
+              <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
+                {/* Background track */}
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="none"
+                  stroke="#E5E7EB"
+                  strokeWidth="4"
+                />
+                {/* Progress arc */}
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="none"
+                  stroke="#E8500A"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 18}`}
+                  strokeDashoffset={`${2 * Math.PI * 18 * (1 - score / 100)}`}
+                  style={{ transition: 'stroke-dashoffset 0.8s ease-out' }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[10px] font-black text-[#E8500A] leading-none">
+                  {score}%
+                </span>
+              </div>
             </div>
           </div>
           

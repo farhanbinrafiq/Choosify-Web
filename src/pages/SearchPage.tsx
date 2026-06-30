@@ -736,7 +736,7 @@ export function SearchPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
+                <div className="grid gap-5 w-full justify-center max-w-[1045px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
                   {(activeTab === 'all' ? searchResults.brands.slice(0, 3) : searchResults.brands).map((brand) => (
                     <BrandCardDesign key={brand.id} brand={brand} />
                   ))}
@@ -907,7 +907,7 @@ export function SearchPage() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center justify-center w-full">
+                  <div className="grid gap-5 w-full justify-center max-w-[1045px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
                     {(activeTab === 'all' ? searchResults.influencers.slice(0, 2) : searchResults.influencers).map((inf) => (
                       <CreatorCardDesign key={inf.id} creator={inf} />
                     ))}
