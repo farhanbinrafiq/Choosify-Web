@@ -255,7 +255,7 @@ export function ProductCard({
 }) {
   const navigate = useNavigate();
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts, setComparedProducts } = useDashboard();
-  const { mode, allBrands, addToCart } = useGlobalState();
+  const { allBrands, addToCart } = useGlobalState();
 
   const brandObj = allBrands?.find((b: any) => b.id === product.brandId);
   const brandName = brandObj ? brandObj.name : (product.brand || 'APEX');
@@ -293,8 +293,7 @@ export function ProductCard({
       toast.error(`"${product.title}" is currently out of stock.`);
       return;
     }
-    const qty = mode === 'retail' ? 1 : (product.moq || 10);
-    addToCart(product, qty);
+    addToCart(product, 1);
   };
 
   const StockProgress = ({ sm = false }: { sm?: boolean }) => (
@@ -493,14 +492,6 @@ export function ProductCard({
               </div>
             </div>
             
-            {mode === 'wholesale' && (
-              <div className="flex flex-wrap gap-1 mt-0.5">
-                <span className="bg-orange-primary/10 text-[#E8500A] text-[6.5px] font-semibold px-1 rounded uppercase tracking-wider leading-none">
-                  Wholesale Approved
-                </span>
-              </div>
-            )}
-
             <h4 className="text-[11px] font-semibold text-[#1a1a2e] leading-snug line-clamp-1 group-hover:text-orange-primary transition-colors min-h-[14px] truncate leading-none mt-1">
               {product.title}
             </h4>
@@ -509,7 +500,7 @@ export function ProductCard({
                     <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
              <div className="flex flex-col text-left min-w-0">
                 <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">
-                  {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
+                  Market Price
                 </span>
                 <div className="flex flex-col text-left justify-center">
                   <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">BDT {product.price.toLocaleString()}</span>
@@ -601,13 +592,6 @@ export function ProductCard({
                 {product.tag || 'HOT'}
               </div>
             </div>
-            {mode === 'wholesale' && (
-              <div className="flex flex-wrap gap-1 mb-2">
-                <span className="bg-orange-primary/10 text-[#E8500A] text-[7px] font-semibold px-2 py-0.5 rounded uppercase tracking-wide">
-                  WHOLESALE APPROVED
-                </span>
-              </div>
-            )}
             <h3 className="text-sm font-semibold text-[#1a1a2e] leading-snug line-clamp-1 mb-1.5 group-hover:text-orange-primary transition-colors">
               {product.title}
             </h3>
@@ -724,11 +708,6 @@ export function ProductCard({
               <Star size={7} className="fill-orange-primary text-orange-primary" />
               <span className="text-[7.5px] font-semibold text-gray-500">4.8</span>
             </div>
-            {mode === 'wholesale' && product.moq && (
-              <span className="bg-gray-100 text-gray-600 text-[6.5px] font-semibold px-1 rounded uppercase tracking-wider shrink-0 ml-1 leading-none">
-                MOQ {product.moq}
-              </span>
-            )}
           </div>
 
           <h3 className={cn(
@@ -766,7 +745,7 @@ export function ProductCard({
                 <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
           <div className="flex flex-col text-left min-w-0">
              <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">
-               {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
+               Market Price
               </span>
               <div className="flex flex-col text-left justify-center">
                 <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">

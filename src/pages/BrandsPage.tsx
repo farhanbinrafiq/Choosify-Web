@@ -266,7 +266,7 @@ export function BrandsPage() {
       rating: 4.9,
       reviews: 15,
       bestFor: 'Garment Sourcing & Buying House',
-      priceRange: 'Custom B2B',
+      priceRange: 'Custom',
       recommended: '98%',
       category: 'Sourcing',
       isHot: true
@@ -556,15 +556,9 @@ export function BrandsPage() {
         
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
           <div className="w-full flex flex-col justify-center">
-            {mode === 'wholesale' ? (
-              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
-                <span className="text-[#FF5B00]">B2B BRAND</span> <span className="text-white">DIRECTORY</span>
-              </h1>
-            ) : (
-              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
-                <span className="text-orange-primary">BRAND</span> <span className="text-white">DIRECTORY</span>
-              </h1>
-            )}
+            <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
+              <span className="text-orange-primary">BRAND</span> <span className="text-white">DIRECTORY</span>
+            </h1>
             
             {/* Text-only Carousel (PRD Requirement) */}
             <div className="w-full overflow-hidden mb-1.5 py-0.5 border-y border-white/5 relative">
@@ -811,7 +805,7 @@ export function BrandsPage() {
             <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
-                Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
+                Gain entry to deal slots, exposure metrics, and buyer engagement streams.
               </p>
               
               <Link 

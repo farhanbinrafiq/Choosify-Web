@@ -167,7 +167,7 @@ export function TermsPage() {
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-4" />
               <p className="text-gray-600 text-xs md:text-sm font-semibold">
-                Sellers who claim brand profiles, submit wholesale products, or post coupon offers on Choosify must adhere to high standards of commercial honesty:
+                Sellers who claim brand profiles, submit retail products, or post coupon offers on Choosify must adhere to high standards of commercial honesty:
               </p>
               <ul className="pl-5 list-disc text-xs md:text-sm text-gray-500 font-semibold space-y-2">
                 <li>Sellers must guarantee the authenticity of listed items. Listing replica, counterfeit, or misleadingly branded goods is strictly prohibited and subject to immediate ban.</li>

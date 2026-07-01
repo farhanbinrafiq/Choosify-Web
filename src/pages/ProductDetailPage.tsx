@@ -786,12 +786,6 @@ export function ProductDetailPage() {
   const [quoteBusinessName, setQuoteBusinessName] = useState("");
 
   const handleAddToCartClick = () => {
-    if (mode === "wholesale" && product.moq && b2bQty < product.moq) {
-      toast.error(
-        `Minimum order quantity is ${product.moq} units for wholesale.`,
-      );
-      return;
-    }
     addToCart(product, b2bQty);
     // Store selected add-ons in sessionStorage for checkout to read
     if (selectedAddons.length > 0) {
@@ -893,7 +887,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
       threadId,
       brandName,
       brandObj?.logo || "https://i.pravatar.cc/150?u=brand",
-      mode === "wholesale" ? "wholesale" : "retail",
+      "retail",
       structuredMsg,
       orderRef
     );
@@ -1202,14 +1196,14 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   </button>
                 </div>
               ) : (
-                /* B2B Wholesale channels calculator inside the dark theme wrapper as well! */
+                /* Legacy bulk panel disabled while retail-only commerce is active. */
                 <div className="w-full max-w-2xl bg-white/5 border border-white/10 rounded-[5px] p-6 relative overflow-hidden backdrop-blur-sm text-left">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#E8500A]/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl" />
 
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-white/10">
                     <div className="text-left">
                       <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic block mb-1 text-left">
-                        B2B Wholesale Channel
+                        Retail Ordering Channel
                       </span>
                       <h4 className="text-lg font-black text-white uppercase tracking-tighter italic text-left">
                         Bulk Trade Sourcing Panel
@@ -1332,7 +1326,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                       )}
                       disabled={product.moq && b2bQty < product.moq}
                     >
-                      <ShoppingBag size={14} /> Add to B2B Cart
+                      <ShoppingBag size={14} /> Add to Cart
                     </button>
                     <button
                       onClick={() => setIsQuoteModalOpen(true)}
@@ -2009,7 +2003,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     </div>
                     <div>• LIFESTYLE CREATORS REQUIRING RELIABLE WEARS</div>
                     <div>
-                      • B2B & BULK ORGANIZATIONS WITH B2B PRICE SLAB TARGETS
+                      • RETAIL TEAMS COMPARING QUALITY AND VALUE TARGETS
                     </div>
                     <div>• MODERN BANGLADESHI LIFESTYLE AND ACTIVE CIRCLES</div>
                   </div>
@@ -2207,7 +2201,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     type="submit"
                     className="w-full h-12 bg-[#FF5B00] text-white text-[11px] font-black uppercase tracking-widest italic rounded-xl shadow-lg shadow-orange-primary/20 hover:scale-[1.02] hover:brightness-110 active:scale-95 transition-all"
                   >
-                    Submit RFQ Proposal
+                    Submit Request
                   </button>
                 </div>
               </form>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { 
   ArrowLeft, 
@@ -26,20 +26,11 @@ const KNOWN_PROMOS = [
 ];
 
 export function CheckoutPage() {
-  const { mode, retailCart, wholesaleCart, addOrder, clearCart, currentUser, buyerReputations } = useGlobalState();
+  const { retailCart, addOrder, clearCart, currentUser, buyerReputations } = useGlobalState();
   const { createNewThread } = useDashboard();
   
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Find out if checking out retail or wholesale
-  const sourceMode: 'retail' | 'wholesale' =
-    (location.state as any)?.sourceMode || (location.pathname === '/cart/b2b' ? 'wholesale' : mode);
-  const isQuotationRequest = (location.state as any)?.isQuotationRequest || false;
-  const tradeLicense = (location.state as any)?.tradeLicense || localStorage.getItem('b2b_trade_license') || 'TR-2026/89412';
-  const companyName = (location.state as any)?.companyName || localStorage.getItem('b2b_company_name') || 'Apex Distributors Ltd';
-
-  const activeCart = sourceMode === 'wholesale' ? wholesaleCart : retailCart;
+  const activeCart = retailCart;
 
   // Contact States
   const [fullName, setFullName] = useState('Kamal Uddin');
@@ -89,36 +80,20 @@ export function CheckoutPage() {
 
   const sellerIds = Object.keys(groupedCart);
 
-  // Helper function to resolve dynamic unit price based on pricing tiers/slabs
-  const getSlabPrice = (product: any, qty: number) => {
-    if (sourceMode === 'retail') return product.price;
-    const tiers = product.pricingTiers || product.quantitySlabs || [];
-    if (!tiers || tiers.length === 0) return product.price;
-
-    let activeSlabPrice = product.price;
-    const sortedTiers = [...tiers].sort((a, b) => b.minQuantity - a.minQuantity);
-    
-    for (const tier of sortedTiers) {
-      if (qty >= tier.minQuantity) {
-        activeSlabPrice = tier.price;
-        break;
-      }
-    }
-    return activeSlabPrice;
-  };
+  const getUnitPrice = (product: any) => product.price;
 
   const calculateSellerSubtotal = (items: typeof activeCart) => {
     return items.reduce((sum, item) => {
-      const activePrice = getSlabPrice(item.product, item.quantity);
+      const activePrice = getUnitPrice(item.product);
       return sum + (activePrice * item.quantity);
     }, 0);
   };
 
-  const DELIVERY_FEE_PER_SELLER = sourceMode === 'wholesale' ? 500 : 120;
+  const DELIVERY_FEE_PER_SELLER = 120;
   const deliveryTotal = sellerIds.length * DELIVERY_FEE_PER_SELLER;
 
   const subtotal = activeCart.reduce((sum, item) => {
-    const activePrice = getSlabPrice(item.product, item.quantity);
+    const activePrice = getUnitPrice(item.product);
     return sum + (activePrice * item.quantity);
   }, 0);
 
@@ -131,8 +106,8 @@ export function CheckoutPage() {
     : 0;
   const finalTotal = Math.max(0, aggregateTotal - promoDiscount);
 
-  // COD support limits (retail under 150k, B2B quote allowed)
-  const isCODEligible = (sourceMode === 'retail' ? (aggregateTotal < 150000) : !isQuotationRequest) && !isCODRestricted;
+  // COD support limits (retail orders under ৳150,000)
+  const isCODEligible = aggregateTotal < 150000 && !isCODRestricted;
 
   const handlePlaceOrder = () => {
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
@@ -147,16 +122,6 @@ export function CheckoutPage() {
       toast.error('Cash on Delivery is not available for this checkout. Please select credit or prepayment.');
       return;
     }
-    if (sourceMode === 'wholesale') {
-      for (const item of activeCart) {
-        const moq = item.product.moq || 10;
-        if (item.quantity < moq) {
-          toast.error(`"${item.product.title}" requires a minimum of ${moq} units.`);
-          return;
-        }
-      }
-    }
-
     // Trigger global order engine
     const tempOrderId = 'ORD-' + Math.floor(Math.random() * 90000 + 10000);
     const splitCount = sellerIds.length;
@@ -166,7 +131,7 @@ export function CheckoutPage() {
       const items = groupedCart[sellerId];
       const sellerName = items[0].product.brand || 'Merchant partner';
       const itemsListStr = items.map(it => {
-        const up = getSlabPrice(it.product, it.quantity);
+        const up = getUnitPrice(it.product);
         return `• ${it.product.title} (${it.quantity} units @ ৳${up.toLocaleString()})`;
       }).join('\n');
 
@@ -175,18 +140,17 @@ export function CheckoutPage() {
       // Construct Thread starter messages containing products list status details
       const startMsg = `ORDER REFERENCE: ${tempOrderId}
 INVOICE ID: ${invoiceIdStr}
-MODE: ${sourceMode.toUpperCase()}
+MODE: RETAIL
 DELIVERY RECIPIENT: ${fullName}
 CONTACT PHONE: ${phone}
 DELIVERY LOCATION: ${address}, ${region}
-DELIVERY METHOD: ${sourceMode === 'wholesale' ? 'B2B Cargo Freight' : 'Standard Express Parcel'}
+DELIVERY METHOD: Standard Express Parcel
 DELIVERY FEE: ৳${DELIVERY_FEE_PER_SELLER}
 
 STAGED PRODUCTS IN LOT:
 ${itemsListStr}
 
 LOT METRIC AMOUNT: ৳${calculateSellerSubtotal(items).toLocaleString()}
-TRADE LICENSE SECURE: ${sourceMode === 'wholesale' ? tradeLicense : 'NOT APPLICABLE'}
 ORDER STATUS: PENDING_CONFIRMATION
 
 "Hello Partner! Clicking above confirms receipt of this staged ticket. Our logistics representative has started routing this package. Please review the parcel invoice."`;
@@ -196,7 +160,7 @@ ORDER STATUS: PENDING_CONFIRMATION
         `thread-${sellerId}`,
         `${sellerName} Factory Outlet`,
         `https://i.pravatar.cc/150?u=${sellerId}`,
-        sourceMode === 'wholesale' ? 'wholesale' : 'retail',
+        'retail',
         `New lot transaction initialized (${tempOrderId})`,
         tempOrderId
       );
@@ -232,7 +196,7 @@ ORDER STATUS: PENDING_CONFIRMATION
           productId: it.product.id,
           productTitle: it.product.title,
           quantity: it.quantity,
-          price: getSlabPrice(it.product, it.quantity)
+          price: getUnitPrice(it.product)
         })),
         deliveryFee: DELIVERY_FEE_PER_SELLER,
         invoiceId: invoiceIdStr,
@@ -258,12 +222,12 @@ ORDER STATUS: PENDING_CONFIRMATION
     addOrder(fullOrderObject);
 
     // Clear active cart
-    clearCart(sourceMode);
+    clearCart('retail');
 
     toast.success('Order placed successfully! Live support thread generated.');
     
     // Auto-open newly spawned buyer-seller conversation thread or show success screen
-    navigate('/order-success', { state: { order: fullOrderObject, sourceMode } });
+    navigate('/order-success', { state: { order: fullOrderObject, sourceMode: 'retail' } });
   };
 
   return (
@@ -283,16 +247,8 @@ ORDER STATUS: PENDING_CONFIRMATION
               Verification &amp; <span className="text-orange-primary">Checkout</span>
             </h1>
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest leading-none">
-              Source Stream: <span className="text-[#F96500]">{sourceMode === 'wholesale' ? 'FACTORY B2B WHOLESALE' : 'STANDARD CLIENT RETAIL'}</span>
+              Source Stream: <span className="text-[#F96500]">STANDARD CLIENT RETAIL</span>
             </p>
-          </div>
-          <div className="flex gap-4 items-center">
-            {sourceMode === 'wholesale' && (
-              <div className="bg-[#F96500]/10 border border-[#F96500]/30 px-5 py-3 rounded-[5px]">
-                <span className="text-[8px] font-black text-white uppercase tracking-widest block mb-0.5 leading-none">Registered License ID</span>
-                <span className="text-xs font-black text-[#F96500] italic font-mono uppercase">{tradeLicense}</span>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -408,7 +364,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                         <div key={it.id} className="flex justify-between items-center bg-white border border-gray-50 px-4 py-2.5 rounded-xl">
                           <span className="text-[11px] font-bold text-navy line-clamp-1">{it.product.title}</span>
                           <span className="text-[10px] font-black text-gray-400 uppercase text-right shrink-0">
-                            {it.quantity} x ৳{getSlabPrice(it.product, it.quantity).toLocaleString()}
+                            {it.quantity} x ৳{getUnitPrice(it.product).toLocaleString()}
                           </span>
                         </div>
                       ))}
@@ -540,7 +496,7 @@ ORDER STATUS: PENDING_CONFIRMATION
               onClick={handlePlaceOrder}
               className="w-full px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-between gap-2 italic"
             >
-              <span>{sourceMode === 'wholesale' ? 'Authorize Wholesale Lot' : 'Confirm & Place Retail Order'}</span>
+              <span>Confirm & Place Retail Order</span>
               <ArrowRight size={16} />
             </button>
           </div>

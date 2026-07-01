@@ -47,7 +47,7 @@ export function ContactPage() {
     },
     {
       title: 'Business Inquiries',
-      desc: 'Interested in bespoke B2B API integrations, sponsored guide campaigns, or corporate advertising plans?',
+      desc: 'Interested in sponsored guide campaigns, retail partnerships, or corporate advertising plans?',
       badge: 'BD Team'
     }
   ];

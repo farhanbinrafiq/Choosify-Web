@@ -19,7 +19,7 @@ export function FloatingOverlays() {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const { mode, retailCart, wholesaleCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo } = useGlobalState();
+  const { retailCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo } = useGlobalState();
   const { threads, threadMessages, addThreadMessage, markAllAsRead, setThreads } = useDashboard();
 
   // Active floating panel state: null | 'cart' | 'inbox' | 'profile'
@@ -63,7 +63,7 @@ export function FloatingOverlays() {
   }, [currentPath]);
 
   // Cart tracking details
-  const activeCart = mode === 'retail' ? retailCart : wholesaleCart;
+  const activeCart = retailCart;
   const totalCartItems = activeCart.reduce((sum, item) => sum + item.quantity, 0);
   const [lastCartCount, setLastCartCount] = useState(totalCartItems);
   const [cartBadgeBounce, setCartBadgeBounce] = useState(false);
@@ -174,7 +174,7 @@ export function FloatingOverlays() {
       if (lower.includes('deliver') || lower.includes('shipping') || lower.includes('when')) {
         responseText = `Regarding dispatch, your order is packaging. We secure all catalog orders instantly after confirmation.`;
       } else if (lower.includes('discount') || lower.includes('price') || lower.includes('cost')) {
-        responseText = `Our wholesale rates are highly competitive. Slabs are applied automatically in global checkouts!`;
+        responseText = `Our listed prices and active discounts are shown directly on each product before checkout.`;
       } else if (lower.includes('size') || lower.includes('color') || lower.includes('variant')) {
         responseText = `Logged and noted! We package order lots exactly as staged in the inventory parameters.`;
       } else if (lower.includes('confirm') || lower.includes('approved')) {
@@ -314,7 +314,7 @@ export function FloatingOverlays() {
                   const itemPrice = item.selectedVariant?.price || item.product.price;
                   const itemImage = item.selectedVariant?.image || item.product.image || PLACEHOLDER_IMAGE;
                   const itemTitle = item.product.title;
-                  const redirectPath = mode === 'retail' ? `/products/${item.product.id}` : `/b2b/product/${item.product.id}`;
+                  const redirectPath = `/products/${item.product.id}`;
 
                   return (
                     <div key={item.id} className="flex gap-4 items-center bg-white/[0.02] border border-white/5 hover:border-white/10 p-3.5 rounded-2xl transition-all group text-left">
@@ -390,7 +390,7 @@ export function FloatingOverlays() {
                   <button 
                     onClick={() => {
                       setActivePanel(null);
-                      navigate(mode === 'retail' ? '/cart/retail' : '/cart/b2b');
+                      navigate('/cart/retail');
                     }}
                     className="py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-white transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
                   >
@@ -399,7 +399,7 @@ export function FloatingOverlays() {
                   <button 
                     onClick={() => {
                       setActivePanel(null);
-                      navigate('/checkout', { state: { sourceMode: mode } });
+                      navigate('/checkout', { state: { sourceMode: 'retail' } });
                     }}
                     className="py-3 px-4 bg-orange-primary hover:bg-[#FF5B00] rounded-2xl text-[10px] font-bold uppercase tracking-widest text-white transition-all text-center flex items-center justify-center gap-1 shadow-[0_4px_20px_rgba(249,101,0,0.3)] font-black italic cursor-pointer animate-pulse-subtle"
                   >
@@ -947,9 +947,9 @@ export function FloatingOverlays() {
           {filterOpen && (
             <motion.div
               ref={filterDrawerRef}
-              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, scale: 0.95 }}
-              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, scale: 1 }}
-              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, scale: 0.95 }}
+              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
               transition={standardTransition}
               drag={isMobile ? "y" : false}
               dragConstraints={{ top: 0, bottom: 250 }}
@@ -963,7 +963,7 @@ export function FloatingOverlays() {
                 isMobile
                   ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
                   : isTablet
-                    ? "fixed bottom-4 left-4 w-[420px] max-h-[70vh] rounded-[24px] z-[250]"
+                    ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
                     : "absolute left-0 w-[380px] rounded-[24px] max-h-[75vh]"
               )}
             >

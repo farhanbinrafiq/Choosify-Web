@@ -182,7 +182,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     if (saved) return saved;
     return [
       { id: 'thread-general', title: 'Farhan Rafiq (Admin)', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png', lastMessage: 'Absolutely! We can ship the S24 Ultra...', time: '10:30 AM', type: 'general', unread: true },
-      { id: 'seller-samsung', title: 'Samsung Bangladesh Ltd.', avatar: 'https://i.pravatar.cc/150?u=samsung', lastMessage: 'Let us know your wholesale quantity requirements.', time: 'Yesterday', type: 'wholesale', unread: false },
+      { id: 'seller-samsung', title: 'Samsung Bangladesh Ltd.', avatar: 'https://i.pravatar.cc/150?u=samsung', lastMessage: 'Let us know which product details you need.', time: 'Yesterday', type: 'retail', unread: false },
       { id: 'seller-apple', title: 'Apple Retail BD', avatar: 'https://i.pravatar.cc/150?u=apple', lastMessage: 'Welcome to Apple Retail! Feel free to ask queries.', time: '2 days ago', type: 'retail', unread: false }
     ];
   });
@@ -195,8 +195,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       { id: 2, threadId: 'thread-general', text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', senderName: 'Me', time: '10:35 AM' },
       { id: 3, threadId: 'thread-general', text: 'Absolutely! We can ship the S24 Ultra to Banani with standard COD coverage.', sender: 'other', senderName: 'Farhan Rafiq', time: '11:00 AM', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png' },
       
-      { id: 4, threadId: 'seller-samsung', text: 'Hello! Do you offer wholesale volume pricing for bulk S24 units?', sender: 'user', senderName: 'Me', time: 'Yesterday' },
-      { id: 5, threadId: 'seller-samsung', text: 'Yes, we do! Let us know your wholesale quantity requirements.', sender: 'seller', senderName: 'Samsung Sales', time: 'Yesterday', avatar: 'https://i.pravatar.cc/150?u=samsung' }
+      { id: 4, threadId: 'seller-samsung', text: 'Hello! Can you confirm the available colors for the S24 units?', sender: 'user', senderName: 'Me', time: 'Yesterday' },
+      { id: 5, threadId: 'seller-samsung', text: 'Yes, we can help. Let us know the color and storage option you prefer.', sender: 'seller', senderName: 'Samsung Sales', time: 'Yesterday', avatar: 'https://i.pravatar.cc/150?u=samsung' }
     ];
   });
 

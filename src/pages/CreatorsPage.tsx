@@ -360,15 +360,9 @@ export function CreatorsPage() {
         
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
           <div className="w-full flex flex-col justify-center">
-            {mode === 'wholesale' ? (
-              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
-                <span className="text-[#FF5B00]">B2B CREATORS</span> <span className="text-white">DIRECTORY</span>
-              </h1>
-            ) : (
-              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
-                <span className="text-orange-primary">CREATORS</span> <span className="text-white">DIRECTORY</span>
-              </h1>
-            )}
+            <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
+              <span className="text-orange-primary">CREATORS</span> <span className="text-white">DIRECTORY</span>
+            </h1>
             
             {/* Text-only Carousel (PRD Requirement) */}
             <div className="w-full overflow-hidden mb-1.5 py-0.5 border-y border-white/5 relative">

@@ -8,7 +8,6 @@ export function OrderSuccessPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const order = (location.state as any)?.order;
-  const sourceMode = (location.state as any)?.sourceMode as 'retail' | 'wholesale' | undefined;
   const { clearCart } = useGlobalState();
 
   React.useEffect(() => {
@@ -21,10 +20,10 @@ export function OrderSuccessPage() {
     // Clear cart after successful order display
     // Small delay so the success page has time to read order data before cart clears
     const timer = setTimeout(() => {
-      if (typeof clearCart === 'function') clearCart(sourceMode);
+      if (typeof clearCart === 'function') clearCart('retail');
     }, 500);
     return () => clearTimeout(timer);
-  }, [clearCart, sourceMode]);
+  }, [clearCart]);
 
   if (!order) return null;
 

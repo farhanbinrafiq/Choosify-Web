@@ -726,15 +726,9 @@ export function CategoriesPage() {
         
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
           <div className="w-full flex flex-col justify-center">
-            {mode === 'wholesale' ? (
-              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
-                <span className="text-white not-italic">B2B Product Category</span> <span className="text-[#FF5B00] not-italic">HUB</span>
-              </h1>
-            ) : (
-              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
-                <span className="text-white not-italic">EXPLORATION</span> <span className="text-orange-primary not-italic">HUB</span>
-              </h1>
-            )}
+            <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
+              <span className="text-white not-italic">EXPLORATION</span> <span className="text-orange-primary not-italic">HUB</span>
+            </h1>
    
             {/* Product Name Marquee */}
             <div className="w-full overflow-hidden mb-1.5 py-0.5 border-y border-white/5 relative">
@@ -1014,7 +1008,7 @@ export function CategoriesPage() {
             <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
-                Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
+                Gain entry to deal slots, exposure metrics, and buyer engagement streams.
               </p>
               
               <Link 

@@ -34,7 +34,6 @@ const CreatorProfilePage = lazy(() => import('./pages/CreatorProfilePage').then(
 const SuggestBrandPage = lazy(() => import('./pages/SuggestBrandPage').then(m => ({ default: m.SuggestBrandPage })));
 const PartnershipPage = lazy(() => import('./pages/PartnershipPage').then(m => ({ default: m.PartnershipPage })));
 const AdvertisePage = lazy(() => import('./pages/AdvertisePage').then(m => ({ default: m.AdvertisePage })));
-const B2BSolutionsPage = lazy(() => import('./pages/B2BSolutionsPage').then(m => ({ default: m.B2BSolutionsPage })));
 const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
@@ -178,7 +177,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const location = useLocation();
   const isOverview = location.pathname === '/overview';
-  const { mode } = useGlobalState();
 
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
@@ -190,7 +188,6 @@ function AppContent() {
             <Route path="/overview" element={<Overview />} />
             <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
             <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
-            <Route path="/b2b/product/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
             <Route path="/brands" element={<PageWrapper><BrandsPage /></PageWrapper>} />
             <Route path="/brands/:id" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
             <Route path="/brands/:id/products" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
@@ -212,7 +209,6 @@ function AppContent() {
             <Route path="/suggest-brand" element={<PageWrapper><SuggestBrandPage /></PageWrapper>} />
             <Route path="/partnership" element={<PageWrapper><PartnershipPage /></PageWrapper>} />
             <Route path="/advertise" element={<PageWrapper><AdvertisePage /></PageWrapper>} />
-            <Route path="/b2b" element={<PageWrapper><B2BSolutionsPage /></PageWrapper>} />
             <Route path="/terms" element={<PageWrapper><TermsPage /></PageWrapper>} />
             <Route path="/privacy" element={<PageWrapper><PrivacyPage /></PageWrapper>} />
             <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
@@ -220,7 +216,6 @@ function AppContent() {
 
             <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
-            <Route path="/cart/b2b" element={<ProtectedRoute><PageWrapper><CheckoutPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/checkout" element={<ProtectedRoute><PageWrapper><CheckoutPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />

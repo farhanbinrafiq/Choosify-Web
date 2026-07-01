@@ -50,7 +50,7 @@ export function DealsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState(getInitialTab);
-  const [dealType, setDealType] = useState<'all' | 'retail' | 'wholesale'>('all');
+  const [dealType, setDealType] = useState<'all' | 'retail'>('all');
   const [minDiscount, setMinDiscount] = useState<number>(0);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const productSource: any[] = allProducts.length > 0 ? allProducts : PRODUCTS;
@@ -107,7 +107,7 @@ export function DealsPage() {
       if (saved) {
         const filters = JSON.parse(saved);
         if (filters.selectedCategory) setSelectedCategory(filters.selectedCategory);
-        if (filters.dealType) setDealType(filters.dealType);
+        if (filters.dealType === 'retail') setDealType('retail');
         if (filters.minDiscount !== undefined) setMinDiscount(filters.minDiscount);
         if (filters.activeTab) setActiveTab(filters.activeTab);
       }
@@ -183,8 +183,6 @@ export function DealsPage() {
 
     if (dealType === 'retail') {
       result = result.filter(p => (p as any).mode_type === 'retail');
-    } else if (dealType === 'wholesale') {
-      result = result.filter(p => (p as any).mode_type === 'wholesale');
     }
 
     if (minDiscount > 0) {
@@ -238,7 +236,6 @@ export function DealsPage() {
       { id: 'all-deals', label: 'All Deals', active: activeTab === 'All Deals', onClick: () => setActiveTab('All Deals') },
       { id: 'fashion-pill', label: '👗 Fashion Deals', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
       { id: 'retail-pill', label: '🛍️ Retail', active: dealType === 'retail', onClick: () => setDealType(dealType === 'retail' ? 'all' : 'retail') },
-      { id: 'wholesale-pill', label: '📦 Wholesale', active: dealType === 'wholesale', onClick: () => setDealType(dealType === 'wholesale' ? 'all' : 'wholesale') },
       { id: 'discount-25', label: '🔥 25% Off +', active: minDiscount === 25, onClick: () => setMinDiscount(minDiscount === 25 ? 0 : 25) }
     ],
     renderFilters: () => (
@@ -262,8 +259,7 @@ export function DealsPage() {
                 type: 'single_select',
                 options: [
                   { value: 'all', label: 'All Channels' },
-                  { value: 'retail', label: 'Retail Sales' },
-                  { value: 'wholesale', label: 'Wholesale Only' }
+                  { value: 'retail', label: 'Retail Sales' }
                 ]
               }
             ]
@@ -468,7 +464,6 @@ export function DealsPage() {
                       onOpenFullFilters={() => {}}
                       filters={[
                         { id: 'all-retail', label: 'Retail Only', active: dealType === 'retail', onClick: () => setDealType(dealType === 'retail' ? 'all' : 'retail') },
-                        { id: 'all-wholesale', label: 'Wholesale Only', active: dealType === 'wholesale', onClick: () => setDealType(dealType === 'wholesale' ? 'all' : 'wholesale') },
                         { id: 'savings-20', label: '🔥 20%+ Off', active: minDiscount === 20, onClick: () => setMinDiscount(minDiscount === 20 ? 0 : 20) },
                         { id: 'savings-45', label: '💥 45%+ Off', active: minDiscount === 45, onClick: () => setMinDiscount(minDiscount === 45 ? 0 : 45) }
                       ]}
@@ -547,7 +542,6 @@ export function DealsPage() {
                          options: [
                            { value: 'all', label: 'All Channels' },
                            { value: 'retail', label: 'Retail Sales' },
-                           { value: 'wholesale', label: 'Wholesale Only' }
                          ]
                        }
                      ]
@@ -592,7 +586,7 @@ export function DealsPage() {
                <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
                  <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
                  <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
-                   Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
+                   Gain entry to deal slots, exposure metrics, and buyer engagement streams.
                  </p>
                  
                  <button 

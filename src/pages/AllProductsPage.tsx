@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Calculator, Layers, Award, Flame, Clock, Sparkles, ArrowRight } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Layers, Award, Flame, Clock, Sparkles, ArrowRight } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
@@ -42,7 +42,7 @@ const SPONSORED_RECOMMENDATIONS = [
 export function AllProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchParams, setSearchParams] = useSearchParams();
-  const { allProducts, allBrands, mode } = useGlobalState();
+  const { allProducts, allBrands } = useGlobalState();
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All Products');
 
@@ -53,7 +53,7 @@ export function AllProductsPage() {
       setIsLoading(false);
     }, 600);
     return () => clearTimeout(timer);
-  }, [mode, searchParams, activeTab]);
+  }, [searchParams, activeTab]);
 
   // Active query parameters / search inputs
   const rawQuery = searchParams.get('q') || '';
@@ -120,12 +120,6 @@ export function AllProductsPage() {
     sessionStorage.setItem('choosify_products_filters', JSON.stringify(filters));
   }, [selectedCategory, selectedBrand, moqFilter, priceTierSlab, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax]);
 
-  // Reset price range when mode changes (Fix 3)
-  useEffect(() => {
-    setPriceMin(0);
-    setPriceMax(999999);
-  }, [mode]);
-
   // Sync internal state with URL query parameters initially and on changes
   useEffect(() => {
     if (rawQuery) {
@@ -188,7 +182,7 @@ export function AllProductsPage() {
           value={sidebarSearch}
           onChange={(e) => setSidebarSearch(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
-          placeholder={mode === 'retail' ? "Search retail products, brands or details..." : "Search wholesale factory suppliers, bulk slots..."}
+          placeholder="Search retail products, brands or details..."
           className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
         />
       </div>
@@ -197,15 +191,7 @@ export function AllProductsPage() {
       { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
       { id: 'trending', label: '🔥 Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
       { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'COD Ready', onClick: () => setActiveTab(activeTab === 'COD Ready' ? 'All Products' : 'COD Ready') },
-      ...(mode === 'wholesale'
-        ? [
-            { id: 'moq-low', label: 'Low MOQ (≤50)', active: moqFilter === 50, onClick: () => setMoqFilter(moqFilter === 50 ? 0 : 50) },
-            { id: 'slab-low', label: 'Under ৳5k', active: priceTierSlab === 5000, onClick: () => setPriceTierSlab(priceTierSlab === 5000 ? 100000 : 5000) }
-          ]
-        : [
-            { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
-          ]
-      )
+      { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
     ],
     renderFilters: () => (
       <div className="flex flex-col gap-4">
@@ -220,7 +206,6 @@ export function AllProductsPage() {
             <option value="price-asc">Price: Low to High</option>
             <option value="price-desc">Price: High to Low</option>
             <option value="rating-desc">Rating: High to Low</option>
-            {mode === 'wholesale' && <option value="moq-asc">Min Order Quantity: Low to High</option>}
           </select>
         </div>
 
@@ -369,30 +354,6 @@ export function AllProductsPage() {
           </div>
         </div>
 
-        {mode === 'wholesale' && (
-          <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4">
-            <div className="flex items-center gap-1.5 pb-2 border-b border-[#e8edf2]">
-              <Calculator size={14} className="text-[#E8500A]" />
-              <h3 className="text-[11px] font-black uppercase text-[#8a9bb0]">Wholesale Specs</h3>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center text-[10px] font-semibold uppercase text-gray-400">
-                <span>Max MOQ:</span>
-                <span className="text-navy bg-gray-100 px-2 py-0.5 rounded font-mono text-[10px]">{moqFilter === 0 ? 'Any MOQ' : `${moqFilter} Pcs`}</span>
-              </div>
-              <input 
-                type="range" 
-                min="0" 
-                max="150" 
-                step="10"
-                value={moqFilter} 
-                onChange={(e) => setMoqFilter(Number(e.target.value))}
-                className="w-full h-1 accent-orange-primary cursor-pointer"
-              />
-            </div>
-          </div>
-        )}
-
         <CategorySmartFilters
           category={selectedCategory}
           activeSpecs={activeSpecs}
@@ -487,25 +448,14 @@ export function AllProductsPage() {
       });
     }
 
-    // 4. B2B Specific: Filters by maximum MOQ allowed (e.g. Show items with MOQ <= user preferred MOQ)
-    if (mode === 'wholesale' && moqFilter > 0) {
-      result = result.filter(p => (p.moq || 0) <= moqFilter);
-    }
-
-    // 5. Price Target limits (Specific to Wholesale or Retail modes)
-    if (mode === 'wholesale') {
-      if (priceTierSlab < 100000) {
-        result = result.filter(p => p.price <= priceTierSlab);
-      }
+    // 4. Price target limits
+    const minVal = minPrice !== '' ? parseFloat(minPrice) : 0;
+    const maxVal = maxPrice !== '' ? parseFloat(maxPrice) : Infinity;
+    if (minVal > 0 || maxVal < Infinity) {
+      result = result.filter(p => p.price >= minVal && p.price <= maxVal);
     } else {
-      const minVal = minPrice !== '' ? parseFloat(minPrice) : 0;
-      const maxVal = maxPrice !== '' ? parseFloat(maxPrice) : Infinity;
-      if (minVal > 0 || maxVal < Infinity) {
-        result = result.filter(p => p.price >= minVal && p.price <= maxVal);
-      } else {
-        if (retailPriceLimit < 30000) {
-          result = result.filter(p => p.price <= retailPriceLimit);
-        }
+      if (retailPriceLimit < 30000) {
+        result = result.filter(p => p.price <= retailPriceLimit);
       }
     }
 
@@ -549,12 +499,10 @@ export function AllProductsPage() {
       result.sort((a, b) => a.price - b.price);
     } else if (sortOption === 'price-desc') {
       result.sort((a, b) => b.price - a.price);
-    } else if (sortOption === 'moq-asc') {
-      result.sort((a, b) => (a.moq || 0) - (b.moq || 0));
     }
 
     return result;
-  }, [allProducts, searchParams, selectedCategory, selectedBrand, mode, moqFilter, priceTierSlab, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax]);
+  }, [allProducts, searchParams, selectedCategory, selectedBrand, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax]);
 
   function handleResetFilters() {
     setSelectedCategory(null);
@@ -578,11 +526,7 @@ export function AllProductsPage() {
     <div className="flex flex-col min-h-screen bg-choosify-feed">
        {/* Header / Hero Section (Unified Design System) */}
       <div className="w-full choosify-dark-gradient relative overflow-hidden shrink-0 border-b border-white/5">
-        {mode === 'wholesale' ? (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
-        )}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
           <div className="w-full flex flex-col justify-center">
             {/* Breadcrumbs */}
@@ -591,25 +535,15 @@ export function AllProductsPage() {
               <ChevronRight size={10} className="text-white/20" />
               <span className="text-white">Products</span>
               <ChevronRight size={10} className="text-white/20" />
-              <span className="text-white">{mode === 'retail' ? 'Retail Lineup' : 'B2B Slabs'}</span>
+              <span className="text-white">Retail Lineup</span>
             </div>
 
             <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter mb-1 leading-none text-center">
-              {mode === 'retail' ? 'All Retail Products' : 'B2B Wholesale Catalog'}
+              All Retail Products
             </h1>
 
-            {mode === 'wholesale' && (
-              <div className="inline-block bg-gradient-to-r from-orange-primary/20 via-orange-deep/10 to-transparent border-l-4 border-orange-primary px-3 py-0.5 mb-1 rounded-r-lg w-fit mx-auto">
-                <p className="text-orange-primary text-[8px] font-black uppercase tracking-widest italic leading-none">
-                  Wholesale Bulk Products & Suppliers
-                </p>
-              </div>
-            )}
-
             <p className="text-gray-400 text-[9px] lg:text-[11px] font-medium leading-normal mb-1.5 max-w-2xl text-center mx-auto">
-              {mode === 'retail' 
-                ? 'Discover & Compare standard retail items with Cash on Delivery support.' 
-                : 'Direct brand inventory sourcing with customized quantity slabs & volume pricing.'}
+              Discover & compare standard retail items with Cash on Delivery support.
             </p>
 
             <div className="text-orange-primary font-black text-[8px] lg:text-[9.5px] uppercase tracking-widest shrink-0 bg-white/5 border border-white/10 backdrop-blur-md px-3 py-1 rounded-full italic mx-auto w-fit mb-4">
@@ -628,7 +562,7 @@ export function AllProductsPage() {
                     value={sidebarSearch}
                     onChange={(e) => setSidebarSearch(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
-                    placeholder={mode === 'retail' ? "Search retail products, brands or details..." : "Search wholesale factory suppliers, bulk slots..."} 
+                    placeholder="Search retail products, brands or details..." 
                     className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
                   />
                   <button 
@@ -675,7 +609,7 @@ export function AllProductsPage() {
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
-              placeholder={mode === 'retail' ? "Search retail products, brands or details..." : "Search wholesale factory suppliers, bulk slots..."}
+              placeholder="Search retail products, brands or details..."
               className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
             />
           </div>
@@ -690,7 +624,7 @@ export function AllProductsPage() {
               searchQuery={sidebarSearch}
               setSearchQuery={setSidebarSearch}
               onSearchSubmit={executeSearch}
-              searchPlaceholder={mode === 'retail' ? "Search retail products, brands or details..." : "Search wholesale factory suppliers, bulk slots..."}
+              searchPlaceholder="Search retail products, brands or details..."
               quickFilters={
                 <QuickFilterBar
                   title="Products Quick Specs"
@@ -699,15 +633,7 @@ export function AllProductsPage() {
                     { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
                     { id: 'trending', label: '🔥 Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
                     { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'COD Ready', onClick: () => setActiveTab(activeTab === 'COD Ready' ? 'All Products' : 'COD Ready') },
-                    ...(mode === 'wholesale'
-                      ? [
-                          { id: 'moq-low', label: 'Low MOQ (≤50)', active: moqFilter === 50, onClick: () => setMoqFilter(moqFilter === 50 ? 0 : 50) },
-                          { id: 'slab-low', label: 'Under ৳5k', active: priceTierSlab === 5000, onClick: () => setPriceTierSlab(priceTierSlab === 5000 ? 100000 : 5000) }
-                        ]
-                      : [
-                          { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
-                        ]
-                    )
+                    { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
                   ]}
                 />
               }
@@ -740,7 +666,6 @@ export function AllProductsPage() {
                     <option value="price-asc">Price: Low to High</option>
                     <option value="price-desc">Price: High to Low</option>
                     <option value="rating-desc">Rating: High to Low</option>
-                    {mode === 'wholesale' && <option value="moq-asc">Min Order Quantity: Low to High</option>}
                   </select>
                 </div>
               }
@@ -840,30 +765,6 @@ export function AllProductsPage() {
                       ৳{priceMin.toLocaleString()} — ৳{priceMax.toLocaleString()}
                     </div>
                   </div>
-
-                  {mode === 'wholesale' && (
-                    <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4">
-                      <div className="flex items-center gap-1.5 pb-2 border-b border-[#e8edf2]">
-                        <Calculator size={14} className="text-[#E8500A]" />
-                        <h3 className="text-[11px] font-black uppercase text-[#8a9bb0]">Wholesale Specs</h3>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center text-[10px] font-semibold uppercase text-gray-400">
-                          <span>Max MOQ:</span>
-                          <span className="text-navy bg-gray-100 px-2 py-0.5 rounded font-mono text-[10px]">{moqFilter === 0 ? 'Any MOQ' : `${moqFilter} Pcs`}</span>
-                        </div>
-                        <input 
-                          type="range" 
-                          min="0" 
-                          max="150" 
-                          step="10"
-                          value={moqFilter} 
-                          onChange={(e) => setMoqFilter(Number(e.target.value))}
-                          className="w-full h-1 accent-orange-primary cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                  )}
 
                   <CategorySmartFilters
                     category={selectedCategory}
@@ -980,13 +881,7 @@ export function AllProductsPage() {
                     <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setSelectedBrand(null)} />
                   </div>
                 )}
-                {mode === 'wholesale' && moqFilter > 0 && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-navy text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
-                    Max MOQ: {moqFilter} Units 
-                    <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setMoqFilter(0)} />
-                  </div>
-                )}
-                {mode === 'retail' && retailPriceLimit < 30000 && (
+                {retailPriceLimit < 30000 && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-150 rounded-xl text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
                     Max Price: ৳{retailPriceLimit} 
                     <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setRetailPriceLimit(30000)} />
@@ -1019,7 +914,6 @@ export function AllProductsPage() {
                       <option value="popular">Popularity</option>
                       <option value="price-asc">Price: Low to High</option>
                       <option value="price-desc">Price: High to Low</option>
-                      {mode === 'wholesale' && <option value="moq-asc">MOQ: Smallest Load</option>}
                     </select>
                     <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-navy" />
                   </div>

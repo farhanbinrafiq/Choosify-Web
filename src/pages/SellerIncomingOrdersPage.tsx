@@ -12,9 +12,9 @@ export function SellerIncomingOrdersPage() {
   const [activeMerchant, setActiveMerchant] = useState('seller-samsung');
 
   const merchantProfiles = [
-    { id: 'seller-samsung', name: 'Samsung Bangladesh Ltd.', type: 'Wholesale & Retail' },
+    { id: 'seller-samsung', name: 'Samsung Bangladesh Ltd.', type: 'Retail' },
     { id: 'seller-apple', name: 'Apple Retail BD', type: 'Retail Exclusive' },
-    { id: 'seller-apex', name: 'Apex Footwear BD Group', type: 'Wholesale & Retail' },
+    { id: 'seller-apex', name: 'Apex Footwear BD Group', type: 'Retail' },
     { id: 'seller-general', name: 'General Outlets BD', type: 'Retail Standard' }
   ];
 
@@ -111,7 +111,7 @@ export function SellerIncomingOrdersPage() {
             <div>
               <h3 className="text-base font-black uppercase text-navy italic tracking-tight mb-2">No incoming packages staged</h3>
               <p className="text-[9.5px] text-gray-400 uppercase tracking-widest leading-relaxed font-bold">
-                Orders checking out from standard retail store or wholesale palette stages will land in this dashboard queue.
+                Orders checking out from the retail store will land in this dashboard queue.
               </p>
             </div>
           </div>
