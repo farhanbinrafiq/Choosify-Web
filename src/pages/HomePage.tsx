@@ -981,7 +981,7 @@ export function HomePage() {
                 </div>
 
                 {/* 4-column, 2-row Product Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5">
                   {((allProducts.length > 0 ? allProducts : PRODUCTS) as any[])
                     .filter((p: any) => p.isNewArrival || p.id % 3 === 0)
                     .sort((a: any, b: any) => b.id - a.id)
@@ -1289,7 +1289,7 @@ export function HomePage() {
                 </div>
 
                 {/* Customer Favorites Grid of featured Products with isGuideDetail={true} */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5 text-left">
                   {viralProductsList.slice(0, 8).map((product) => (
                     <ProductCard key={product.id} product={product} variant="grid" isGuideDetail={true} />
                   ))}
@@ -1315,7 +1315,7 @@ export function HomePage() {
               </div>
 
               {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5">
                   {filteredProducts.map((p: any) => (
                     <ProductCard key={p.id} product={p} variant="compact" />
                   ))}

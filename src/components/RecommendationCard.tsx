@@ -31,6 +31,7 @@ export function RecommendationCard(props: any) {
   };
 
   const isFeatured = variant === 'featured';
+  const isDashboard = variant === 'dashboard';
   const isShorts = guide.type === 'shorts' || guide.type === 'reels';
   const isVideo = guide.type === 'video';
   const isArticle = guide.type === 'article' || !guide.type;
@@ -172,6 +173,52 @@ export function RecommendationCard(props: any) {
              <div className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-mono text-white">
                 {guide.duration || '8:10'}
              </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  if (isDashboard) {
+    return (
+      <Link
+        to={`/guides/${guide.id}`}
+        className="group cursor-pointer block bg-white rounded-[5px] overflow-hidden border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 flex flex-col w-[199.5px] h-[268.5px] shrink-0"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div className="overflow-hidden relative bg-gray-50 shrink-0 h-[158px]">
+          <img
+            src={guide.image || PLACEHOLDER_IMAGE}
+            loading="lazy"
+            onError={handleImageError}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]"
+            alt="Guide"
+          />
+          <div className="absolute top-2 left-2 z-10">
+            <div className="bg-white px-2 py-1 rounded flex items-center gap-1 border border-gray-100 w-max">
+              <BookOpen size={10} className="text-orange-primary" />
+              <span className="text-[7px] font-mono text-gray-500 leading-none">{guide.readTime || '5 MIN'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-2 flex-1 flex flex-col min-w-0 bg-white">
+          <div className="flex-1 flex flex-col text-left">
+            <h3 className="text-[10px] font-semibold uppercase text-[#1a1a2e] group-hover:text-orange-primary transition-colors leading-snug line-clamp-2 mb-1 min-h-[26px]">
+              {guide.title}
+            </h3>
+            <p className="text-gray-400 text-[8px] leading-snug line-clamp-2">
+              {guide.excerpt || "Explore our comprehensive breakdown and product guide."}
+            </p>
+          </div>
+          <div className="pt-1.5 border-t border-gray-100 flex items-center justify-between mt-auto">
+            <span className="flex items-center gap-1 text-[8px] font-mono text-gray-400">
+              <Eye size={10} /> {guide.views || '1.2k'}
+            </span>
+            <div className="w-7 h-7 rounded-full bg-gray-50 text-gray-600 group-hover:bg-orange-primary group-hover:text-white transition-colors flex items-center justify-center">
+              <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
+            </div>
           </div>
         </div>
       </Link>

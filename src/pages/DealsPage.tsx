@@ -641,9 +641,9 @@ export function DealsPage() {
                  </div>
                  
                  {/* Small Cards Row */}
-                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
+                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5 w-full text-left">
                     {(filteredProducts.length > 1 ? filteredProducts : productSource).slice(1, 5).map((product) => (
-                       <div key={product.id} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
+                       <div key={product.id} className="w-full flex justify-center">
                          <ProductCard 
                            product={{
                              ...product,
@@ -665,7 +665,7 @@ export function DealsPage() {
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic px-2 border-l-4 border-orange-primary">Browse All Handpicked Offers</p>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5 w-full text-left">
                 {activeTab === 'Promo Codes' ? (
                   promoCodes.map((promo) => (
                     <div key={promo.code} className="bg-white border border-gray-150 rounded-[5px] p-5 flex flex-col justify-between min-h-[180px] relative overflow-hidden shadow-sm group hover:border-[#E8500A]/30 transition-all duration-300">
@@ -702,7 +702,7 @@ export function DealsPage() {
                   ))
                 ) : (
                   (filteredProducts.length > 0 ? filteredProducts : productSource).slice(0, 12).map((product, idx) => (
-                    <div key={`${product.id}-${idx}`} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
+                    <div key={`${product.id}-${idx}`} className="w-full flex justify-center">
                       <ProductCard 
                         product={{
                           ...product,

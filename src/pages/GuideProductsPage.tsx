@@ -53,7 +53,7 @@ export function GuideProductsPage() {
 
       {/* Products Grid */}
       <div className="max-w-[1440px] mx-auto px-6 mt-8 relative z-20">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5">
           {guideProducts.map(product => (
             <ProductCard key={product.id} product={product} variant="grid" />
           ))}

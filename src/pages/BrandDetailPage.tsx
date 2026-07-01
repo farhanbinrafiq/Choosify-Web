@@ -2589,7 +2589,7 @@ export function BrandDetailPage() {
                     )}
                   </div>
                 ) : finalDeals.length > 0 ? (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 xl:gap-5 justify-items-center">
                     {finalDeals.map((product: any, i: number) => (
                       <ProductCard
                         key={product.id || i}
@@ -2667,7 +2667,7 @@ export function BrandDetailPage() {
                     )}
                   </div>
                 ) : filteredProducts.length > 0 ? (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 xl:gap-5 justify-items-center">
                     {paginatedProducts.map((product: any, i: number) => (
                       <ProductCard
                         key={product.id || i}

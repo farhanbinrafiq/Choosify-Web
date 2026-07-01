@@ -50,6 +50,10 @@ const COLORS = {
   green: '#059669',
 };
 
+const DASHBOARD_CARD_SIZE = 'w-[199.5px] h-[268.5px] shrink-0';
+const DASHBOARD_CARD_GRID = 'grid grid-cols-[repeat(auto-fill,199.5px)] gap-4 justify-start';
+const DASHBOARD_CARD_BASE = `${DASHBOARD_CARD_SIZE} bg-white border border-[#e8edf2] rounded-[5px] hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm overflow-hidden`;
+
 // --- SUB-COMPONENTS ---
 
 const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
@@ -146,10 +150,10 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
           </div>
           
           {recentlyViewed.length > 0 ? (
-            <div className="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-4 px-2 -mx-2">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth pb-4 px-2 -mx-2">
               {recentlyViewed.map((p, i) => (
-                <div key={i} className="min-w-[280px] sm:min-w-[320px] shrink-0">
-                  <ProductCard product={p} variant="grid" />
+                <div key={i} className={DASHBOARD_CARD_SIZE}>
+                  <ProductCard product={p} variant="dashboard" />
                 </div>
               ))}
             </div>
@@ -170,22 +174,22 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
            <h3 className="text-xl font-black text-navy italic uppercase flex items-center gap-3">
               <TrendingUp className="text-[#059669]" size={20} /> Today's Pick
             </h3>
-            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-8 relative overflow-hidden group h-[400px] flex flex-col justify-between shadow-sm">
+            <div className={cn(DASHBOARD_CARD_BASE, "p-3 relative group")}>
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#E8500A]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
               <img 
                 src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop" 
                 loading="lazy"
                 onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE; }}
-                className="w-full h-48 object-contain mb-8 group-hover:scale-110 transition-transform duration-700" 
+                className="w-full h-[150px] object-contain mb-2 group-hover:scale-110 transition-transform duration-700" 
                 alt="" 
               />
               <div className="mt-auto text-left">
-                <span className="text-[9px] font-black text-[#E8500A] uppercase tracking-[0.4em] mb-2 block font-sans">Special Recommendation</span>
-                <h4 className="text-2xl font-black text-navy uppercase italic tracking-tighter leading-none mb-4 font-sans">Apex Premium Runner Elite X</h4>
+                <span className="text-[7px] font-black text-[#E8500A] uppercase tracking-[0.25em] mb-1 block font-sans">Special Recommendation</span>
+                <h4 className="text-[11px] font-black text-navy uppercase italic tracking-tight leading-snug mb-2 font-sans line-clamp-2">Apex Premium Runner Elite X</h4>
                 <div className="flex items-center justify-between">
-                  <span className="text-xl font-black text-navy italic font-sans">BDT 4,500</span>
-                  <button className="w-10 h-10 rounded-full bg-gray-50 border border-gray-150 text-navy flex items-center justify-center hover:bg-[#E8500A] hover:text-white transition-all cursor-pointer border-none shadow-sm">
-                    <ArrowLeft className="rotate-180" size={18} />
+                  <span className="text-[12px] font-black text-navy italic font-sans">BDT 4,500</span>
+                  <button className="w-8 h-8 rounded-full bg-gray-50 border border-gray-150 text-navy flex items-center justify-center hover:bg-[#E8500A] hover:text-white transition-all cursor-pointer border-none shadow-sm">
+                    <ArrowLeft className="rotate-180" size={15} />
                   </button>
                 </div>
               </div>
@@ -218,26 +222,26 @@ const SavedProductsSection = () => {
       </div>
 
       {savedProducts.length > 0 ? (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className={DASHBOARD_CARD_GRID}>
           {savedProducts.map((p) => (
-            <div key={p.id} className="relative group">
+            <div key={p.id} className={cn("relative group", DASHBOARD_CARD_SIZE)}>
               <button 
                 onClick={() => {
                   addToCart(p, 1);
                   toast.success('Added to cart!');
                 }}
-                className="absolute top-6 right-18 z-30 w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-[#E8500A]/20 hover:bg-[#E8500A] hover:text-white cursor-pointer"
+                className="absolute top-3 right-12 z-30 w-8 h-8 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-[#E8500A]/20 hover:bg-[#E8500A] hover:text-white cursor-pointer"
                 title="Add to Cart"
               >
-                <ShoppingBag size={18} />
+                <ShoppingBag size={15} />
               </button>
               <button 
                 onClick={() => removeSavedProduct(p.id)}
-                className="absolute top-6 right-6 z-30 w-10 h-10 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-red-500/20 hover:bg-red-500 hover:text-white"
+                className="absolute top-3 right-3 z-30 w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-red-500/20 hover:bg-red-500 hover:text-white"
               >
-                <Trash2 size={18} />
+                <Trash2 size={15} />
               </button>
-              <ProductCard product={p} variant="grid" />
+              <ProductCard product={p} variant="dashboard" />
             </div>
           ))}
         </div>
@@ -269,32 +273,32 @@ const SavedBrandsSection = () => {
       </div>
 
       {savedBrands.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className={DASHBOARD_CARD_GRID}>
           {savedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
+              className={cn(DASHBOARD_CARD_BASE, "relative group p-4")}
             >
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   removeSavedBrand(brand.id);
                 }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer"
+                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer z-20"
               >
                 <X size={16} />
               </button>
               
               <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
+                <div className="w-full h-[150px] rounded-[5px] bg-gray-50 border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-3 shadow-sm overflow-hidden p-3">
                   {brand.logo && brand.logo.length > 2 ? (
                     <img src={brand.logo} className="w-full h-full object-contain" alt="" />
                   ) : (
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-lg font-black text-[#1a1a2e] uppercase italic mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
-                <div className="flex items-center justify-center gap-1.5 mb-6">
+                <h4 className="text-[11px] font-black text-[#1a1a2e] uppercase italic mb-1 line-clamp-2 group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <div className="flex items-center justify-center gap-1 mb-2">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
                   ))}
@@ -302,7 +306,7 @@ const SavedBrandsSection = () => {
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-xl text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center">
                 Visit Brand Hub
               </Link>
             </div>
@@ -333,32 +337,32 @@ const LovedBrandsSection = () => {
       </div>
 
       {lovedBrands.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className={DASHBOARD_CARD_GRID}>
           {lovedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
+              className={cn(DASHBOARD_CARD_BASE, "relative group p-4")}
             >
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleLoveBrand(brand);
                 }}
-                className="absolute top-4 right-4 text-rose-550 hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer"
+                className="absolute top-3 right-3 text-rose-550 hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer z-20"
               >
                 <Heart size={16} className="fill-current text-rose-500" />
               </button>
               
               <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
+                <div className="w-full h-[150px] rounded-[5px] bg-gray-50 border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-3 shadow-sm overflow-hidden p-3">
                   {brand.logo && brand.logo.length > 2 ? (
                     <img src={brand.logo} className="w-full h-full object-contain" alt="" />
                   ) : (
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-lg font-black text-[#1a1a2e] uppercase italic mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
-                <div className="flex items-center justify-center gap-1.5 mb-6">
+                <h4 className="text-[11px] font-black text-[#1a1a2e] uppercase italic mb-1 line-clamp-2 group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <div className="flex items-center justify-center gap-1 mb-2">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
                   ))}
@@ -366,7 +370,7 @@ const LovedBrandsSection = () => {
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-xl text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center">
                 Visit Brand Hub
               </Link>
             </div>
@@ -397,32 +401,32 @@ const FollowedBrandsSection = () => {
       </div>
 
       {followedBrands.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className={DASHBOARD_CARD_GRID}>
           {followedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
+              className={cn(DASHBOARD_CARD_BASE, "relative group p-4")}
             >
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleFollowBrand(brand);
                 }}
-                className="absolute top-4 right-4 text-orange-500 hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer font-black text-[10px] tracking-wider uppercase"
+                className="absolute top-3 right-3 text-orange-500 hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer font-black text-[8px] tracking-wider uppercase z-20"
               >
                 Unfollow
               </button>
               
               <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
+                <div className="w-full h-[150px] rounded-[5px] bg-gray-50 border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-3 shadow-sm overflow-hidden p-3">
                   {brand.logo && brand.logo.length > 2 ? (
                     <img src={brand.logo} className="w-full h-full object-contain" alt="" />
                   ) : (
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-lg font-black text-[#1a1a2e] uppercase italic mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
-                <div className="flex items-center justify-center gap-1.5 mb-6">
+                <h4 className="text-[11px] font-black text-[#1a1a2e] uppercase italic mb-1 line-clamp-2 group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <div className="flex items-center justify-center gap-1 mb-2">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
                   ))}
@@ -430,7 +434,7 @@ const FollowedBrandsSection = () => {
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/30 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center justify-between flex items-center px-4">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/30 hover:bg-[#E8500A]/5 rounded-xl text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center justify-between flex items-center px-3">
                 <span>View Updates</span>
                 <span className="bg-[#059669] text-[7px] text-white font-black px-1.5 py-0.5 rounded-full uppercase scale-90">Live</span>
               </Link>
@@ -474,10 +478,10 @@ const RecentlyViewedSection = () => {
       </div>
 
       {recentlyViewed.length > 0 ? (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className={DASHBOARD_CARD_GRID}>
           {recentlyViewed.map((p) => (
-            <div key={p.id} className="relative group">
-              <ProductCard product={p} variant="grid" />
+            <div key={p.id} className={cn("relative group", DASHBOARD_CARD_SIZE)}>
+              <ProductCard product={p} variant="dashboard" />
             </div>
           ))}
         </div>
@@ -1559,9 +1563,9 @@ export function DashboardPage() {
               <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Guides</span></h2>
               <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Knowledge bookmarks for your next big buy</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+            <div className={DASHBOARD_CARD_GRID}>
                {BLOGS.slice(0, 4).map((guide, i) => (
-                 <RecommendationCard key={guide.id} guide={guide} index={i} />
+                 <RecommendationCard key={guide.id} guide={guide} index={i} variant="dashboard" />
                ))}
             </div>
         </div>

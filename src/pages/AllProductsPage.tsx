@@ -943,7 +943,7 @@ export function AllProductsPage() {
             <div className={cn(
               "mb-20",
               viewMode === 'grid' 
-                ? "grid grid-cols-2 lg:grid-cols-4 justify-items-center justify-center gap-4 xl:gap-5" 
+                ? "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center justify-center gap-3 md:gap-4 xl:gap-5" 
                 : "flex flex-col gap-6"
             )}>
               {Array.from({ length: 8 }).map((_, i) => (
@@ -961,7 +961,7 @@ export function AllProductsPage() {
             <div className={cn(
               "mb-20",
               viewMode === 'grid' 
-                ? "grid grid-cols-2 lg:grid-cols-4 justify-items-center justify-center gap-4 xl:gap-5" 
+                ? "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center justify-center gap-3 md:gap-4 xl:gap-5" 
                 : "flex flex-col gap-6"
             )}>
               {filteredProducts.map((product, i) => (

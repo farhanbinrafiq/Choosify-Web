@@ -1033,7 +1033,7 @@ export function CustomerFavoritePage() {
                   </h2>
                 </div>
                 
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center justify-center gap-5">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center justify-center gap-3 md:gap-4 xl:gap-5">
                   {featuredViralProducts.map((p, idx) => (
                     <ProductCard
                       key={`featured-viral-${p.id}-${idx}`}
@@ -1115,7 +1115,7 @@ export function CustomerFavoritePage() {
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center justify-center gap-5">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center justify-center gap-3 md:gap-4 xl:gap-5">
                   {filteredProducts.map((p, idx) => (
                     <ProductCard 
                       key={`viral-col-${p.id}-${idx}`} 
