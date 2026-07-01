@@ -28,6 +28,12 @@ import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import { getActiveHeroBanner, getSectionItemIds, isHomeSectionVisible } from '../utils/homepageCms';
 import { orderByCatalogIds, pickByCatalogIds } from '../utils/catalogMatch';
 
+type CatalogMatchedItem = {
+  id?: string | number;
+  catalogId?: string;
+  [key: string]: any;
+};
+
 const BRAND_IMAGES: Record<string, string> = {
   "Samsung": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
   "Apple": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=1200&q=80",
@@ -523,7 +529,7 @@ export function HomePage() {
       ? homepageConfig.featuredBrandIds
       : getSectionItemIds(homepageConfig, 'featured-brands');
     if (featuredIds.length) {
-      const picked = pickByCatalogIds(rightBrandsList, featuredIds);
+      const picked = pickByCatalogIds(rightBrandsList as CatalogMatchedItem[], featuredIds);
       if (picked.length) return picked.slice(0, 8);
     }
     return rightBrandsList.filter((b: any) => b.ratings >= 4.7 || b.featuredFlag || b.sponsoredFlag).slice(0, 8);
@@ -568,7 +574,7 @@ export function HomePage() {
   }, []);
 
   const rightProductsList = React.useMemo(() => {
-    const source = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
+    const source = (allProducts && allProducts.length > 0 ? allProducts : PRODUCTS) as CatalogMatchedItem[];
     const featuredIds = homepageConfig?.featuredProductIds?.length
       ? homepageConfig.featuredProductIds
       : getSectionItemIds(homepageConfig, 'trending');
@@ -710,7 +716,7 @@ export function HomePage() {
       ? homepageConfig.featuredDealIds
       : getSectionItemIds(homepageConfig, 'deals');
     if (featuredDealIds.length) {
-      const picked = pickByCatalogIds(rightProductsList, featuredDealIds);
+      const picked = pickByCatalogIds(rightProductsList as CatalogMatchedItem[], featuredDealIds);
       if (picked.length) return picked.slice(0, 4);
     }
     const dealBackedProducts = rightProductsList.filter((p: any) => p.originalPrice || p.discount || p.isDeal);
