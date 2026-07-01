@@ -16,7 +16,8 @@ export function FeaturedCard({ guide }: { guide: any }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const { savedGuides, setSavedGuides } = useDashboard();
-  const isBookmarked = savedGuides.some((g: any) => g.id === guide.id);
+  if (!guide?.id) return null;
+  const isBookmarked = savedGuides.some((g: any) => g?.id === guide.id);
 
   const handleBookmark = () => {
     if (isBookmarked) {
@@ -155,7 +156,8 @@ export function ReelCard({ guide }: { guide: any }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const { savedGuides, setSavedGuides } = useDashboard();
-  const isBookmarked = savedGuides.some((g: any) => g.id === guide.id);
+  if (!guide?.id) return null;
+  const isBookmarked = savedGuides.some((g: any) => g?.id === guide.id);
 
   const handleBookmark = () => {
     if (isBookmarked) {
@@ -291,7 +293,8 @@ export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeTyp
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const { savedGuides, setSavedGuides } = useDashboard();
-  const isBookmarked = savedGuides.some((g: any) => g.id === guide.id);
+  if (!guide?.id) return null;
+  const isBookmarked = savedGuides.some((g: any) => g?.id === guide.id);
 
   const handleBookmark = () => {
     if (isBookmarked) {

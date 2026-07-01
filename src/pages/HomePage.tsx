@@ -721,6 +721,11 @@ export function HomePage() {
 
   const featuredBlog = homepageGuides[0] || allGuides[0];
   const sideGuides = homepageGuides.slice(1, 4);
+  const secondaryGuideSlots = [
+    { guide: sideGuides[0] || homepageGuides[1], type: 'reel' as const },
+    { guide: sideGuides[1] || homepageGuides[2], type: 'youtube' as const },
+    { guide: sideGuides[2] || homepageGuides[3], type: 'blog' as const },
+  ].filter((slot) => Boolean(slot.guide?.id));
 
   const popularCategoriesMock = [
     { name: "Fashion & Lifestyle", count: "50 Products . 10 Brands", id: 'Fashion & Lifestyle' },
@@ -1161,20 +1166,33 @@ export function HomePage() {
                 </div>
 
                 {/* Main Featured Buying Guide banner blog layout */}
+                {featuredBlog?.id && (
                 <div className="mb-6">
-                  <FeaturedCard guide={featuredBlog || homepageGuides[0]} />
+                  <FeaturedCard guide={featuredBlog} />
                 </div>
+                )}
 
                 {/* Sub Guides Grid matching elements visually */}
+                {secondaryGuideSlots.length > 0 && (
                 <div 
                   id="section-guides"
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
                   style={{ paddingTop: '0px', paddingBottom: '0px' }}
                 >
-                  <ReelCard guide={sideGuides[0] || homepageGuides[1]} />
-                  <HorizontalMediaCard guide={sideGuides[1] || homepageGuides[2]} badgeType="youtube" />
-                  <HorizontalMediaCard guide={sideGuides[2] || homepageGuides[3]} badgeType="blog" />
+                  {secondaryGuideSlots.map((slot, idx) => {
+                    if (slot.type === 'reel') {
+                      return <ReelCard key={slot.guide.id} guide={slot.guide} />;
+                    }
+                    return (
+                      <HorizontalMediaCard
+                        key={slot.guide.id}
+                        guide={slot.guide}
+                        badgeType={slot.type}
+                      />
+                    );
+                  })}
                 </div>
+                )}
 
                 {/* Explore all Recommendations bottom action button */}
                 <div className="text-center">

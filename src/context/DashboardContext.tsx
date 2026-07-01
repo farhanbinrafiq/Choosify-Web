@@ -148,7 +148,13 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [savedGuides, setSavedGuides] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('choosify_saved_guides');
-      return saved ? JSON.parse(saved) : [
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((guide) => guide && guide.id != null);
+        }
+      }
+      return [
         { id: 1, title: 'Best Budget Smartwatches 2026', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', category: 'Tech' },
         { id: 2, title: 'Top 5 Sustainable Fashion Brands', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=300&fit=crop', category: 'Fashion' }
       ];
