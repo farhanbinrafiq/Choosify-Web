@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CATEGORIES } from '../constants';
 import * as LucideIcons from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -51,7 +50,7 @@ const getCategoryIconComponent = (catName: string, iconName: string) => {
 };
 
 export function CategoriesPage() {
-  const { mode } = useGlobalState();
+  const { mode, allCategories } = useGlobalState();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState('All Categories');
@@ -337,7 +336,7 @@ export function CategoriesPage() {
     { name: "BATA SHOES", sub: "Premium Class Footwear", init: "BT", bg: "bg-[#C8102E]" }
   ];
 
-  const categoriesList: CategoryItem[] = [
+  const fallbackCategoriesList: CategoryItem[] = [
     { 
       name: 'Fashion & Lifestyle', 
       icon: 'Shirt', 
@@ -417,6 +416,19 @@ export function CategoriesPage() {
     { name: 'Health & Wellness', icon: 'Activity', count: 480, color: 'from-emerald-400 to-green-600', subcategories: [] },
     { name: 'Education & Learning', icon: 'BookOpen', count: 120, color: 'from-indigo-600 to-blue-700', subcategories: [] },
   ];
+
+  const categoriesList: CategoryItem[] = React.useMemo(() => {
+    if (allCategories && allCategories.length > 0) {
+      return allCategories.map((cat, idx) => ({
+        name: cat.name,
+        icon: cat.icon || 'Package',
+        count: 150 + idx * 25,
+        color: 'from-indigo-500 to-violet-600',
+        subcategories: [],
+      }));
+    }
+    return fallbackCategoriesList;
+  }, [allCategories]);
 
   // Dynamic filter supporting the page search system and discovery state criteria
   const filteredCategoriesList = React.useMemo(() => {

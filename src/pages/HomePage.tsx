@@ -70,7 +70,7 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, mode, addToCart, getCreatorClaimStatus } = useGlobalState();
+  const { allProducts, allBrands, allDeals, homepageConfig, mode, addToCart, getCreatorClaimStatus } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -542,7 +542,20 @@ export function HomePage() {
   }, []);
 
   // Products filters based on context & states
-  const rightProductsList = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
+  const rightProductsList = React.useMemo(() => {
+    const source = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
+    if (!homepageConfig?.featuredProductIds?.length) return source;
+
+    const featuredNumericIds = new Set(
+      homepageConfig.featuredProductIds.map((id) => Number(String(id).replace(/[^0-9]/g, ''))).filter(Boolean)
+    );
+    return [...source].sort((a: any, b: any) => {
+      const aFeatured = featuredNumericIds.has(Number(a.id));
+      const bFeatured = featuredNumericIds.has(Number(b.id));
+      if (aFeatured === bFeatured) return 0;
+      return aFeatured ? -1 : 1;
+    });
+  }, [allProducts, homepageConfig]);
 
   const sponsoredDeals = React.useMemo(() => {
     const productsList = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
@@ -673,7 +686,16 @@ export function HomePage() {
   const sailorProductList = rightProductsList.filter((p: any) => p.brand?.toLowerCase() === 'sailor' || p.category?.toLowerCase() === 'fashion & lifestyle').slice(0, 4);
 
   // Deals Sidebar calculations (with discount tags)
-  const dealsProducts = rightProductsList.filter((p: any) => p.originalPrice || p.discount).slice(0, 4);
+  const dealsProducts = React.useMemo(() => {
+    const featuredDealIds = new Set((homepageConfig?.featuredDealIds || []).map((id) => String(id)));
+    const dealBackedProducts = rightProductsList.filter((p: any) => {
+      const productId = String(p.id);
+      return featuredDealIds.has(productId) || p.originalPrice || p.discount;
+    });
+    if (dealBackedProducts.length > 0) return dealBackedProducts.slice(0, 4);
+    if (allDeals.length > 0) return rightProductsList.slice(0, 4);
+    return rightProductsList.filter((p: any) => p.originalPrice || p.discount).slice(0, 4);
+  }, [allDeals, homepageConfig, rightProductsList]);
 
   // Blog list for recommendations
   const featuredBlog = BLOGS.find(b => b.id === 2) || BLOGS[1];

@@ -1,5 +1,6 @@
 export * from './schemas';
 export * from './evaluation';
+export * from './catalog';
 
 // ─── GUIDE / RECOMMENDATION TYPES ───────────────────────
 
