@@ -407,7 +407,7 @@ export function ProductCard({
     return (
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
-        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer group relative w-full min-h-[270px] md:min-h-[290px] h-full box-border animate-in fade-in"
+        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-[#E8500A]/30 hover:shadow-md transition-all duration-300 cursor-pointer group relative w-full max-w-full min-w-0 min-h-[270px] md:min-h-[290px] h-full box-border animate-in fade-in"
       >
         <div 
           className="w-full h-[140px] md:h-[160px] bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-2 select-none shrink-0"
@@ -637,7 +637,7 @@ export function ProductCard({
   return (
     <div 
       className={cn(
-        "bg-white rounded-[5px] p-2.5 shadow-none hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer shrink-0 w-full",
+        "bg-white rounded-[5px] p-2.5 shadow-none hover:border-[#E8500A]/30 hover:shadow-md transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer w-full max-w-full min-w-0",
         isGuideDetail ? "min-h-[385px] md:min-h-[410px] h-full" : "min-h-[273px] md:min-h-[323px] h-full"
       )}
       onClick={() => navigate(`/products/${product.id}`)}

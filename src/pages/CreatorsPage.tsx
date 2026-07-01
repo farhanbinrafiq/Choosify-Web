@@ -6,7 +6,7 @@ import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
-import { CREATORS, Creator } from '../data/creators';
+import type { Creator } from '../data/creators';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
 
@@ -38,7 +38,7 @@ const CREATOR_PROMOS: CreatorPromo[] = [
 ];
 
 export function CreatorsPage() {
-  const { mode, getCreatorClaimStatus, creatorClaimStatuses } = useGlobalState();
+  const { mode, getCreatorClaimStatus, creatorClaimStatuses, allCreators } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Creators');
@@ -78,30 +78,20 @@ export function CreatorsPage() {
 
   // Model-level augmentation matching BrandsPage visual cards rating, reviews structure
   const mappedCreators = React.useMemo(() => {
-    return CREATORS.map(c => {
+    return allCreators.map(c => {
       let rating = 4.7;
       let reviews = 85;
-      let isHot = false;
-      let isFeatured = false;
+      let isHot = c.score >= 95;
+      let isFeatured = c.score >= 90;
 
-      if (c.id === 'creator-farhan') {
+      if (c.score >= 96) {
         rating = 4.9;
         reviews = 240;
         isHot = true;
-      } else if (c.id === 'creator-sarah') {
+      } else if (c.score >= 92) {
         rating = 4.8;
         reviews = 190;
         isFeatured = true;
-      } else if (c.id === 'creator-mily') {
-        rating = 4.9;
-        reviews = 150;
-        isHot = true;
-      } else if (c.id === 'creator-imtiaz') {
-        rating = 4.7;
-        reviews = 80;
-      } else if (c.id === 'creator-shakib') {
-        rating = 4.6;
-        reviews = 70;
       }
 
       return {
@@ -112,7 +102,7 @@ export function CreatorsPage() {
         isFeatured
       };
     });
-  }, []);
+  }, [allCreators]);
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 

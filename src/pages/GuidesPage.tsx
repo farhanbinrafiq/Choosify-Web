@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets, Bookmark, Eye, Share2, Play, Instagram, ChevronRight, Award, Flame, Zap, Star, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { BLOGS } from '../constants';
-import { CREATORS } from '../data/creators';
+import { useGlobalState } from '../context/GlobalStateContext';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
@@ -449,6 +448,8 @@ export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeTyp
 }
 
 export function GuidesPage() {
+  const { allGuides } = useGlobalState();
+  const guideSource = allGuides;
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
@@ -653,7 +654,7 @@ export function GuidesPage() {
 
   // Dynamic filter supporting the high-fidelity bento bento-grid
   const getFilteredBlogs = () => {
-    let result = [...BLOGS];
+    let result = [...guideSource];
 
     // Filter by Top Sticky Tabs (activeTab)
     if (activeTab === 'Featured') {
@@ -1651,19 +1652,19 @@ export function GuidesPage() {
                   ) : (
                      <div className="flex flex-col gap-12 animate-fade-in duration-500">
                         {/* Row 1: Curated Featured Guide (Segment 1) */}
-                        <FeaturedCard guide={BLOGS[0]} />
+                        <FeaturedCard guide={guideSource[0]} />
 
                         {/* Row 2: Grid of 3 Reel / Short-form Stories (Segment 2) */}
                         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-6">
-                           <ReelCard guide={BLOGS[1]} />
-                           <ReelCard guide={BLOGS[4]} />
-                           <ReelCard guide={BLOGS[6]} />
+                           <ReelCard guide={guideSource[1]} />
+                           <ReelCard guide={guideSource[4] || guideSource[1]} />
+                           <ReelCard guide={guideSource[2] || guideSource[0]} />
                         </div>
 
                         {/* Row 3: Grid of 2 Horizontal Media Stories (Segment 3) */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                           <HorizontalMediaCard guide={BLOGS[2]} badgeType="youtube" />
-                           <HorizontalMediaCard guide={BLOGS[3]} badgeType="blog" />
+                           <HorizontalMediaCard guide={guideSource[2]} badgeType="youtube" />
+                           <HorizontalMediaCard guide={guideSource[3] || guideSource[1]} badgeType="blog" />
                         </div>
                      </div>
                   )}

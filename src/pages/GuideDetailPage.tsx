@@ -135,9 +135,13 @@ const COMPARISON_DATA: ComparisonProduct[] = [
 export function GuideDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { allGuides } = useGlobalState();
 
-  // Find the blog/guide. Fallback to first if not found
-  const guide = BLOGS.find((b) => b.id === Number(id)) || BLOGS[0];
+  const guide =
+    allGuides.find((b) => String(b.id) === String(id) || (b as any).slug === id) ||
+    allGuides[0] ||
+    BLOGS.find((b) => b.id === Number(id)) ||
+    BLOGS[0];
 
   useRegisterPageFilters({
     pageName: guide ? guide.title : 'Guide Details',
@@ -152,8 +156,8 @@ export function GuideDetailPage() {
     onClearAll: null
   }, [guide]);
 
-  const guideId = Number(id);
-  const dynamicData = DYNAMIC_GUIDES[guideId] || {
+  const guideId = guide?.id;
+  const dynamicData = DYNAMIC_GUIDES[Number(guideId)] || {
     ...DEFAULT_DYNAMIC_GUIDE,
     id: guide.id,
     title: guide.title,
@@ -1442,7 +1446,7 @@ export function GuideDetailPage() {
                   RELATED GUIDES
                 </h5>
                 <div className="space-y-3">
-                  {BLOGS.filter((b) => b.id !== guide.id)
+                  {allGuides.filter((b) => String(b.id) !== String(guide.id))
                     .slice(0, 3)
                     .map((g) => (
                       <Link
@@ -1551,7 +1555,7 @@ export function GuideDetailPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {BLOGS.filter((b) => b.id !== guide.id)
+            {allGuides.filter((b) => String(b.id) !== String(guide.id))
               .slice(0, 3)
               .map((g, i) => (
                 <Link

@@ -661,10 +661,10 @@ export function AllProductsPage() {
         onClearAll={handleResetFilters}
       />
 
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative choosify-page-grid">
         
         {/* Left Sidebar */}
-        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 min-w-0 w-full max-w-full animate-fade-in text-left">
           {/* LEFT COLUMN SEARCH BAR */}
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -1047,9 +1047,9 @@ export function AllProductsPage() {
           {/* Product Grid */}
           {isLoading ? (
             <div className={cn(
-              "mb-20",
+              "mb-20 w-full",
               viewMode === 'grid' 
-                ? "grid grid-cols-2 lg:grid-cols-4 justify-items-center justify-center gap-4 xl:gap-5" 
+                ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-5" 
                 : "flex flex-col gap-6"
             )}>
               {Array.from({ length: 8 }).map((_, i) => (
@@ -1065,9 +1065,9 @@ export function AllProductsPage() {
             </div>
           ) : (
             <div className={cn(
-              "mb-20",
+              "mb-20 w-full",
               viewMode === 'grid' 
-                ? "grid grid-cols-2 lg:grid-cols-4 justify-items-center justify-center gap-4 xl:gap-5" 
+                ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-5" 
                 : "flex flex-col gap-6"
             )}>
               {filteredProducts.map((product, i) => (

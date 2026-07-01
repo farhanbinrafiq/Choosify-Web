@@ -142,6 +142,31 @@
   scrollbar-width: none;
 }
 
+/* Prevent 3-column page grids from bleeding into adjacent columns */
+.choosify-page-grid > aside,
+.choosify-page-grid > main,
+.choosify-page-grid > section,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] > aside,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] > main,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] > section {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.choosify-page-grid > main,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] > main {
+  width: 100%;
+}
+
+/* Keep product cards inside their grid tracks */
+.choosify-page-grid main [class*="grid-cols-"] > *,
+.choosify-page-grid section [class*="grid-cols-"] > *,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] main [class*="grid-cols-"] > *,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] section [class*="grid-cols-"] > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
 /* MOBILE RESPONSIVE FIXES — CHOOSIFY.BD HERO SECTION */
 @media (max-width: 768px) {
   .hero-container,
