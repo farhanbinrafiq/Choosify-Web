@@ -509,9 +509,18 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       }
     }
 
+    const onFocus = () => {
+      hydrateCatalogFromApi();
+    };
+
     hydrateCatalogFromApi();
+    window.addEventListener('focus', onFocus);
+    const interval = window.setInterval(hydrateCatalogFromApi, 60_000);
+
     return () => {
       cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      window.clearInterval(interval);
     };
   }, []);
 
