@@ -4,6 +4,7 @@ import type {
   CatalogDeal,
   CatalogProduct,
   HomepageConfig,
+  SiteConfig,
 } from '../types/catalog';
 
 const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || 'http://localhost:3000/api/v1';
@@ -50,4 +51,9 @@ export const catalogApi = {
     featuredBrands: CatalogBrand[];
     featuredDeals: CatalogDeal[];
   }> => request('/catalog/home'),
+
+  getSiteConfig: async (): Promise<SiteConfig> => {
+    const result = await request<{ site: SiteConfig }>('/catalog/site');
+    return result.site;
+  },
 };

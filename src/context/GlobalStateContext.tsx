@@ -3,7 +3,7 @@ import { ProductModeType, Product, User, Seller, Brand, Order, SubOrder, SubOrde
 import { PRODUCTS, BRANDS } from '../constants';
 import { toast } from 'react-hot-toast';
 import { catalogApi } from '../services/catalogApi';
-import type { CatalogBrand, CatalogCategory, CatalogDeal, CatalogProduct, HomepageConfig } from '../types/catalog';
+import type { CatalogBrand, CatalogCategory, CatalogDeal, CatalogProduct, HomepageConfig, SiteConfig } from '../types/catalog';
 
 declare module '../types/schemas' {
   interface Order {
@@ -65,6 +65,7 @@ export interface GlobalStateContextType {
   allCategories: CatalogCategory[];
   allDeals: CatalogDeal[];
   homepageConfig: HomepageConfig | null;
+  siteConfig: import('../types/catalog').SiteConfig | null;
   rfqs: B2BRfq[];
   submitRfq: (rfq: Omit<B2BRfq, 'id' | 'date' | 'status'>) => void;
   acceptQuotation: (rfqId: string) => void;
@@ -485,18 +486,20 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const [catalogCategories, setCatalogCategories] = useState<CatalogCategory[]>([]);
   const [catalogDeals, setCatalogDeals] = useState<CatalogDeal[]>([]);
   const [homepageConfig, setHomepageConfig] = useState<HomepageConfig | null>(null);
+  const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     async function hydrateCatalogFromApi() {
       try {
-        const [products, brands, categories, deals, homepage] = await Promise.all([
+        const [products, brands, categories, deals, homepage, site] = await Promise.all([
           catalogApi.listProducts(),
           catalogApi.listBrands(),
           catalogApi.listCategories(),
           catalogApi.listDeals(),
           catalogApi.getHomepage(),
+          catalogApi.getSiteConfig(),
         ]);
         if (cancelled) return;
         setCatalogProducts(products);
@@ -504,6 +507,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
         setCatalogCategories(categories);
         setCatalogDeals(deals);
         setHomepageConfig(homepage.homepage);
+        setSiteConfig(site);
       } catch (error) {
         console.warn('[GlobalStateContext] Catalog API unavailable, using static fallback.', error);
       }
@@ -794,6 +798,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     const status = getBrandClaimStatus(brand.id);
     return {
       id: toNumericId(brand.id, idx + 1),
+      catalogId: brand.id,
       name: brand.name,
       logo: brand.logo || brand.name.slice(0, 2).toUpperCase(),
       verifiedStatus: brand.verifiedStatus || status === 'verified',
@@ -813,6 +818,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     const modeType = product.modeType || 'retail';
     return {
       id: modeType === 'wholesale' ? normalizedId + 1000 : normalizedId,
+      catalogId: product.id,
       title: product.title,
       image: product.image || '',
       mode_type: modeType,
@@ -1151,6 +1157,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       allCategories,
       allDeals,
       homepageConfig,
+      siteConfig,
       rfqs,
       submitRfq,
       acceptQuotation,
