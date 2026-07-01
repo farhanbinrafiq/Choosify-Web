@@ -18,6 +18,13 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { useRegisterPageFilters } from '../components/FilterEngine';
 import { FollowButton } from '../components/FollowButton';
+import toast from 'react-hot-toast';
+import { motion } from 'motion/react';
+import { cn } from '../lib/utils';
+import { QuickAccessCard } from '../components/QuickAccessCard';
+import { BrandCardDesign } from '../components/BrandCardDesign';
+import { CreatorCardDesign } from '../components/CreatorCardDesign';
+import { getActiveHeroBanner, getSectionItemIds, isHomeSectionVisible } from '../utils/homepageCms';
 import { pickByCatalogIds, orderByCatalogIds } from '../utils/catalogMatch';
 import { isPlacementActive } from '../utils/editorialMappers';
 
@@ -854,11 +861,11 @@ export function HomePage() {
 
       {/* SECTION 4 — THREE COLUMN GRID */}
       <main className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-6 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative choosify-page-grid">
         
         {/* LEFT STICKY SIDEBAR */}
         <aside 
-          className="hidden lg:flex flex-col gap-3 lg:sticky lg:top-24 pb-0 flex-shrink-0"
+          className="hidden lg:flex flex-col gap-3 lg:sticky lg:top-24 pb-0 flex-shrink-0 min-w-0 w-full max-w-full"
           style={{ paddingLeft: '0px', paddingRight: '0px', paddingBottom: '0px' }}
         >
           
@@ -967,7 +974,7 @@ export function HomePage() {
                 </div>
 
                 {/* 4-column, 2-row Product Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
                   {((allProducts.length > 0 ? allProducts : PRODUCTS) as any[])
                     .filter((p: any) => p.isNewArrival || p.id % 3 === 0)
                     .sort((a: any, b: any) => b.id - a.id)
@@ -1275,7 +1282,7 @@ export function HomePage() {
                 </div>
 
                 {/* Customer Favorites Grid of featured Products with isGuideDetail={true} */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left w-full">
                   {viralProductsList.slice(0, 8).map((product) => (
                     <ProductCard key={product.id} product={product} variant="grid" isGuideDetail={true} />
                   ))}
@@ -1324,7 +1331,7 @@ export function HomePage() {
 
         {/* RIGHT SIDEBAR */}
         <aside 
-          className="hidden lg:flex flex-col gap-5 lg:sticky lg:top-24 mr-0 pl-[2px] pb-0 w-full max-w-[260px] xl:max-w-[310px] flex-shrink-0 animate-fade-in"
+          className="hidden lg:flex flex-col gap-5 lg:sticky lg:top-24 mr-0 pl-[2px] pb-0 w-full min-w-0 max-w-full xl:max-w-[310px] flex-shrink-0 animate-fade-in"
           style={{ paddingLeft: '0px', paddingBottom: '0px' }}
         >
           
