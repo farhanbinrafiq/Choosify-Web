@@ -24,7 +24,7 @@ export function Navbar() {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn, currentUser } = useGlobalState();
+  const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig } = useGlobalState();
   const { threads, notifications = [], setNotifications } = useDashboard();
 
   const unreadMsgCount = threads.filter(t => t.unread).length;
@@ -61,6 +61,31 @@ export function Navbar() {
   }, []);
 
   const activeCartCount = retailCart.length;
+
+  const navItems = siteConfig?.navigation?.length
+    ? [...siteConfig.navigation].sort((a, b) => a.order - b.order)
+    : null;
+
+  const renderNavLinks = (linkClass: (path: string) => string) =>
+    navItems ? (
+      navItems.map((item) => (
+        <Link key={item.id} to={item.path} className={linkClass(item.path)}>
+          {item.label}
+        </Link>
+      ))
+    ) : (
+      <>
+        <Link to="/" className={linkClass('/')}>Home</Link>
+        <Link to="/categories" className={linkClass('/categories')}>Categories</Link>
+        <Link to="/products" className={linkClass('/products')}>Products</Link>
+        <Link to="/brands" className={linkClass('/brands')}>Brands</Link>
+        <Link to="/guides" className={linkClass('/guides')}>Recommendations</Link>
+        <Link to="/compare" className={linkClass('/compare')}>Compare</Link>
+        <Link to="/deals" className={linkClass('/deals')}>Deals</Link>
+        <Link to="/customer-favorite" className={linkClass('/customer-favorite')}>Customer Favorite</Link>
+        <Link to="/creators" className={linkClass('/creators')}>Creators</Link>
+      </>
+    );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,15 +154,7 @@ export function Navbar() {
 
         {/* Retail Mode general navigation links */}
         <div className="hidden lg:flex items-center flex-nowrap gap-2 xl:gap-4 2xl:gap-6 text-[10px] font-bold uppercase tracking-wider xl:tracking-widest mr-auto text-gray-300 border-r border-transparent xl:border-white/5 pr-3 xl:pr-6 shrink-0">
-          <Link to="/" className={getLinkClass('/')}>Home</Link>
-          <Link to="/categories" className={getLinkClass('/categories')}>Categories</Link>
-          <Link to="/products" className={getLinkClass('/products')}>Products</Link>
-          <Link to="/brands" className={getLinkClass('/brands')}>Brands</Link>
-          <Link to="/guides" className={getLinkClass('/guides')}>Recommendations</Link>
-          <Link to="/compare" className={getLinkClass('/compare')}>Compare</Link>
-          <Link to="/deals" className={getLinkClass('/deals')}>Deals</Link>
-          <Link to="/customer-favorite" className={getLinkClass('/customer-favorite')}>Customer Favorite</Link>
-          <Link to="/creators" className={getLinkClass('/creators')}>Creators</Link>
+          {renderNavLinks(getLinkClass)}
         </div>
 
         {/* SEARCH BAR */}

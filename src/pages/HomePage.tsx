@@ -25,6 +25,8 @@ import { cn } from '../lib/utils';
 import { QuickAccessCard } from '../components/QuickAccessCard';
 import { BrandCardDesign } from '../components/BrandCardDesign';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
+import { getActiveHeroBanner, getSectionItemIds, isHomeSectionVisible } from '../utils/homepageCms';
+import { orderByCatalogIds, pickByCatalogIds } from '../utils/catalogMatch';
 
 const BRAND_IMAGES: Record<string, string> = {
   "Samsung": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
@@ -70,12 +72,30 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals, homepageConfig, mode, addToCart, getCreatorClaimStatus } = useGlobalState();
+  const { allProducts, allBrands, allDeals, allCategories, homepageConfig, siteConfig, mode, addToCart, getCreatorClaimStatus } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('FEED');
   const [carouselIndex, setCarouselIndex] = useState(1);
+
+  const activeHero = React.useMemo(() => getActiveHeroBanner(homepageConfig), [homepageConfig]);
+  const heroHeadline = activeHero?.headline || "buy ORIGINAL";
+  const heroSubtitle =
+    activeHero?.subtitle ||
+    'Weary of online counterfeiting and merchant fraud? Choosify.bd empowers your shopping with independent brand verification systems in Bangladesh.';
+  const heroSearchTerms = React.useMemo(() => {
+    const terms = (siteConfig?.popularSearches || [])
+      .filter((item) => item.isActive)
+      .sort((a, b) => a.order - b.order)
+      .map((item) => item.term)
+      .filter(Boolean);
+    return terms.length ? terms : ['Sailor', 'Aarong', 'Samsung', 'Apex'];
+  }, [siteConfig]);
+  const sectionVisible = React.useCallback(
+    (sectionId: string) => isHomeSectionVisible(homepageConfig, sectionId),
+    [homepageConfig],
+  );
 
   // Trending brands slider helper
   const rightBrandsList = allBrands && allBrands.length > 0 ? allBrands : BRANDS;
@@ -498,10 +518,16 @@ export function HomePage() {
   const gap = 16; // gap-4
   const translateX = (containerWidth / 2) - (carouselIndex * (inactiveWidth + gap) + (activeWidth / 2)) - dragOffset;
 
-  // Spotlight Brands list (6-10 maximum, let's select 8)
   const spotlightBrands = React.useMemo(() => {
+    const featuredIds = homepageConfig?.featuredBrandIds?.length
+      ? homepageConfig.featuredBrandIds
+      : getSectionItemIds(homepageConfig, 'featured-brands');
+    if (featuredIds.length) {
+      const picked = pickByCatalogIds(rightBrandsList, featuredIds);
+      if (picked.length) return picked.slice(0, 8);
+    }
     return rightBrandsList.filter((b: any) => b.ratings >= 4.7 || b.featuredFlag || b.sponsoredFlag).slice(0, 8);
-  }, [rightBrandsList]);
+  }, [rightBrandsList, homepageConfig]);
 
   // Spotlight Creators list (5-8 maximum)
   const spotlightCreators = React.useMemo(() => {
@@ -541,20 +567,13 @@ export function HomePage() {
     }).slice(0, 8);
   }, []);
 
-  // Products filters based on context & states
   const rightProductsList = React.useMemo(() => {
     const source = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
-    if (!homepageConfig?.featuredProductIds?.length) return source;
-
-    const featuredNumericIds = new Set(
-      homepageConfig.featuredProductIds.map((id) => Number(String(id).replace(/[^0-9]/g, ''))).filter(Boolean)
-    );
-    return [...source].sort((a: any, b: any) => {
-      const aFeatured = featuredNumericIds.has(Number(a.id));
-      const bFeatured = featuredNumericIds.has(Number(b.id));
-      if (aFeatured === bFeatured) return 0;
-      return aFeatured ? -1 : 1;
-    });
+    const featuredIds = homepageConfig?.featuredProductIds?.length
+      ? homepageConfig.featuredProductIds
+      : getSectionItemIds(homepageConfig, 'trending');
+    if (!featuredIds.length) return source;
+    return orderByCatalogIds(source, featuredIds);
   }, [allProducts, homepageConfig]);
 
   const sponsoredDeals = React.useMemo(() => {
@@ -687,11 +706,14 @@ export function HomePage() {
 
   // Deals Sidebar calculations (with discount tags)
   const dealsProducts = React.useMemo(() => {
-    const featuredDealIds = new Set((homepageConfig?.featuredDealIds || []).map((id) => String(id)));
-    const dealBackedProducts = rightProductsList.filter((p: any) => {
-      const productId = String(p.id);
-      return featuredDealIds.has(productId) || p.originalPrice || p.discount;
-    });
+    const featuredDealIds = homepageConfig?.featuredDealIds?.length
+      ? homepageConfig.featuredDealIds
+      : getSectionItemIds(homepageConfig, 'deals');
+    if (featuredDealIds.length) {
+      const picked = pickByCatalogIds(rightProductsList, featuredDealIds);
+      if (picked.length) return picked.slice(0, 4);
+    }
+    const dealBackedProducts = rightProductsList.filter((p: any) => p.originalPrice || p.discount || p.isDeal);
     if (dealBackedProducts.length > 0) return dealBackedProducts.slice(0, 4);
     if (allDeals.length > 0) return rightProductsList.slice(0, 4);
     return rightProductsList.filter((p: any) => p.originalPrice || p.discount).slice(0, 4);
@@ -701,7 +723,6 @@ export function HomePage() {
   const featuredBlog = BLOGS.find(b => b.id === 2) || BLOGS[1];
   const sideGuides = BLOGS.filter(b => b.id !== 2).slice(0, 3);
 
-  // Quick categories
   const popularCategoriesMock = [
     { name: "Fashion & Lifestyle", count: "50 Products . 10 Brands", id: 'Fashion & Lifestyle' },
     { name: "Tech & Electronics", count: "50 Products . 10 Brands", id: 'Mobile & Phones' },
@@ -711,6 +732,27 @@ export function HomePage() {
     { name: "Travel & Hospitality", count: "50 Products . 10 Brands", id: 'Food & Restaurants' },
   ];
 
+  const popularCategoriesList = React.useMemo(() => {
+    if (allCategories?.length) {
+      return [...allCategories]
+        .filter((category) => category.enabled)
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .slice(0, 6)
+        .map((category) => {
+          const productCount = (allProducts || []).filter(
+            (product: any) => product.category === category.name,
+          ).length;
+          const brandCount = (allBrands || []).filter((brand: any) => brand.category === category.name).length;
+          return {
+            name: category.name,
+            count: `${productCount || 0} Products · ${brandCount || 0} Brands`,
+            id: category.slug || category.id,
+          };
+        });
+    }
+    return popularCategoriesMock;
+  }, [allCategories, allProducts, allBrands]);
+
   const CAROUSEL_BG_COLORS = [
     '#0f2b2b', '#0a1e30', '#271808', '#16112b',
     '#0b2318', '#26102a', '#102333', '#22200a',
@@ -719,10 +761,15 @@ export function HomePage() {
   return (
     <div className="bg-choosify-feed min-h-screen text-[#1A1D4E] antialiased pb-16 font-sans overflow-x-clip">
       
-      {/* SECTION 2 — HERO BANNER */}
+      {sectionVisible('hero') && (
       <section 
         className="hero-section hero-container relative hero-gradient text-white overflow-hidden py-4 px-6 shadow-inner-lg flex items-center justify-center"
-        style={{ height: '303px' }}
+        style={{
+          height: '303px',
+          ...(activeHero?.backgroundImage
+            ? { backgroundImage: `url(${activeHero.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+            : {}),
+        }}
       >
         {/* Luminous dynamic background accents */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(232,80,10,0.18)_0%,_transparent_55%)] pointer-events-none" />
@@ -752,7 +799,11 @@ export function HomePage() {
             className="font-space font-extrabold text-[#FFFFFF] text-3xl sm:text-4xl md:text-5xl leading-none tracking-tight mb-2 max-w-none"
             style={{ marginBottom: '2px', paddingBottom: '2px', paddingRight: '0px', paddingTop: '2px' }}
           >
-            buy <span className="text-orange-primary italic font-black">ORIGINAL</span>
+            {activeHero?.headline ? (
+              activeHero.headline
+            ) : (
+              <>buy <span className="text-orange-primary italic font-black">ORIGINAL</span></>
+            )}
           </h1>
 
           {/* Supporting Text */}
@@ -760,7 +811,7 @@ export function HomePage() {
             className="text-xs text-gray-300 max-w-2xl mx-auto font-medium mb-3 leading-relaxed opacity-95"
             style={{ marginBottom: '4px', paddingBottom: '2px', paddingTop: '2px' }}
           >
-            Weary of online counterfeiting and merchant fraud? Choosify.bd empowers your shopping with independent brand verification systems in Bangladesh.
+            {heroSubtitle}
           </p>
 
           {/* Glassmorphic Search Container */}
@@ -780,7 +831,7 @@ export function HomePage() {
             style={{ paddingBottom: '2px', paddingTop: '2px' }}
           >
             <span className="font-mono text-gray-500 uppercase tracking-wider text-[9px]">Hot Targets:</span>
-            {['Sailor', 'Aarong', 'Yellow', 'Apex', 'Bata'].map((term) => (
+            {heroSearchTerms.map((term) => (
               <button
                 key={term}
                 type="button"
@@ -797,6 +848,7 @@ export function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* SECTION 3 — MARQUEE BANNER */}
       <div className="relative z-20 bg-gradient-to-r from-[#E8500A] via-[#FF5B00] to-[#E8500A] text-white py-4.5 overflow-hidden border-y border-[#CF4400]/40 shadow-lg font-space text-[11.5px] font-black tracking-[0.2em] uppercase leading-none">
@@ -867,7 +919,7 @@ export function HomePage() {
           {/* MAIN FEED CONTENT PORTAL */}
           {activeTab === 'FEED' ? (
             <>
-              {/* FEED SECTION A — TRENDING BRANDS */}
+              {sectionVisible('trending') && (
               <div
                 id="section-trending-brands"
                 className="rounded-[5px] border border-white/10 p-3 sm:p-5 shadow-sm overflow-hidden"
@@ -903,8 +955,9 @@ export function HomePage() {
                   handleMouseUpOrLeave={handleMouseUpOrLeave}
                 />
               </div>
+              )}
 
-              {/* SECTION 2 — NEW ON CHOOSIFY */}
+              {sectionVisible('trending') && (
               <div id="section-new-on-choosify" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
                   <div className="text-left">
@@ -943,8 +996,9 @@ export function HomePage() {
                   </Link>
                 </div>
               </div>
+              )}
 
-              {/* FEED SECTION C — SPOTLIGHT BRANDS */}
+              {sectionVisible('featured-brands') && (
               <div 
                 id="section-spotlight-brands" 
                 className="p-6 md:p-8 shadow-sm text-left bg-white rounded-[5px] border border-[#e8edf2] mt-6"
@@ -999,8 +1053,9 @@ export function HomePage() {
                   }}
                 />
               </div>
+              )}
 
-              {/* FEED SECTION C — FEATURED HOT DEALS */}
+              {sectionVisible('deals') && (
               <div id="section-hot-deals" className="bg-[#FFFFFF] border-t-2 border-[#E8500A] rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left mb-6">
                 
                 {/* Section Header */}
@@ -1035,8 +1090,9 @@ export function HomePage() {
                   )}
                 />
               </div>
+              )}
 
-              {/* SECTION 5 — CREATOR SPOTLIGHTS */}
+              {sectionVisible('creators') && (
               <div id="section-creator-spotlights" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left mb-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-100 pb-3 mb-6 gap-4">
                   <div className="text-left">
@@ -1090,8 +1146,9 @@ export function HomePage() {
                   </Link>
                 </div>
               </div>
+              )}
 
-              {/* FEED SECTION E — FEATURED RECOMMENDATIONS */}
+              {sectionVisible('recommended') && (
               <div id="section-recommendations" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
                 
                 {/* Section Header */}
@@ -1131,8 +1188,9 @@ export function HomePage() {
                   </Link>
                 </div>
               </div>
+              )}
 
-              {/* FEED SECTION F — POPULAR CATEGORIES */}
+              {sectionVisible('categories') && (
               <div id="section-categories" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 
                 {/* Section Header */}
@@ -1159,7 +1217,7 @@ export function HomePage() {
 
                 {/* Categories Grid - 6 beautiful cards exactly matching screenshot */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-left">
-                  {popularCategoriesMock.map((cat, idx) => {
+                  {popularCategoriesList.map((cat, idx) => {
                     // Custom high-fidelity category icon picker helper
                     const getCategoryMockIcon = (catName: string) => {
                       const name = catName.toLowerCase();
@@ -1199,6 +1257,7 @@ export function HomePage() {
                   })}
                 </div>
               </div>
+              )}
 
               {/* FEED SECTION H — CUSTOMER FAVORITES */}
               <div id="section-customer-favorites" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
