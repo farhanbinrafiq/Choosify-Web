@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation, Link, Navigate } from 'react
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { PageSeo } from './components/PageSeo';
+import { GoogleAnalyticsRouteTracker } from './components/GoogleAnalyticsRouteTracker';
 import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingOverlays } from './components/FloatingOverlays';
 import { DashboardProvider } from './context/DashboardContext';
@@ -263,6 +264,7 @@ export default function App() {
               }} 
             />
             <ScrollToTop />
+            <GoogleAnalyticsRouteTracker />
             <PageSeo />
             <DrawerFilterProvider>
               <FloatingFilterProvider>
