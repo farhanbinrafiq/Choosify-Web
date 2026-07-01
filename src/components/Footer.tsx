@@ -99,7 +99,6 @@ export function Footer() {
                 { label: 'Suggest a brand', url: '/suggest-brand' },
                 { label: 'Partnership', url: '/partnership' },
                 { label: 'Advertise', url: '/advertise' },
-                { label: 'b2b', url: '/b2b' },
               ]},
               { id: 'legal', title: 'LEGAL', links: [
                 { label: 'Terms', url: '/terms' },

@@ -115,7 +115,7 @@ export function MessagesPage() {
         if (lower.includes('deliver') || lower.includes('shipping') || lower.includes('when')) {
           responseText = `Regarding dispatch, order ${activeThread?.orderRef || ''} current logistics status is [${(linkedSubOrder?.trackingStatus || 'Pending confirmation').toUpperCase()}]. We pack all items under safe cargo metrics immediately after confirmation!`;
         } else if (lower.includes('discount') || lower.includes('price') || lower.includes('cost')) {
-          responseText = `Our listed wholesale rates are strictly computed with slabs. We guarantee the absolute best deals in Bangladesh!`;
+          responseText = `Our listed prices and active discounts are shown directly on each product before checkout.`;
         } else if (lower.includes('size') || lower.includes('color') || lower.includes('variant')) {
           responseText = `Yes, your preferred parameters have been logged against Invoice [${linkedSubOrder?.invoiceId || 'N/A'}]. We will package exactly as staged!`;
         } else if (lower.includes('confirm') || lower.includes('approved')) {
@@ -844,7 +844,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
 
               {/* Quantity */}
               <div>
-                <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider block mb-1.5">Wholesale Quantity (Units):</label>
+                <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider block mb-1.5">Quantity (Units):</label>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"

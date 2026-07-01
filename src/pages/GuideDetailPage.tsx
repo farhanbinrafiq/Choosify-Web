@@ -1182,7 +1182,7 @@ export function GuideDetailPage() {
                     High-tier alternative models evaluated
                   </p>
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5">
                   {displayProducts.slice(1, 4).map((product, idx) => (
                     <div
                       key={product.id}
@@ -1210,7 +1210,7 @@ export function GuideDetailPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 xl:gap-5 justify-items-center">
                   {displayProducts.map((product) => (
                     <ProductCard
                       key={product.id}

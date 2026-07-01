@@ -42,14 +42,14 @@ export function RetailCartPage() {
   const handleQtyChange = (item: any, amount: number) => {
     const newQty = item.quantity + amount;
     if (newQty <= 0) {
-      removeFromCart(item.id);
+      removeFromCart(item.id, 'retail');
     } else {
       const itemStock = item.selectedVariant && item.selectedVariant.stock !== undefined ? item.selectedVariant.stock : (item.product.stock !== undefined ? item.product.stock : 58);
       if (itemStock !== undefined && newQty > itemStock) {
         toast.error(`Only ${itemStock} units currently available for this selection.`);
         return;
       }
-      updateCartQuantity(item.id, newQty);
+      updateCartQuantity(item.id, newQty, 'retail');
     }
   };
 
@@ -160,7 +160,7 @@ export function RetailCartPage() {
                                   <Link to={`/products/${product.id}`} className="text-[13px] font-black text-navy uppercase italic tracking-tight hover:text-orange-primary transition-colors line-clamp-1">
                                     {product.title}
                                   </Link>
-                                  <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                                  <button onClick={() => removeFromCart(item.id, 'retail')} className="text-gray-300 hover:text-red-500 transition-colors">
                                     <Trash2 size={16} />
                                   </button>
                                 </div>
@@ -239,7 +239,7 @@ export function RetailCartPage() {
                 </Link>
                 <button 
                   onClick={() => {
-                    clearCart();
+                    clearCart('retail');
                     toast.success('Retail Cart Cleared successfully.');
                   }}
                   className="text-xs font-black text-red-500 hover:text-red-600 transition-colors uppercase tracking-widest italic"

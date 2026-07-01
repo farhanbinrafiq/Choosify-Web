@@ -28,6 +28,12 @@ import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import { getActiveHeroBanner, getSectionItemIds, isHomeSectionVisible } from '../utils/homepageCms';
 import { orderByCatalogIds, pickByCatalogIds } from '../utils/catalogMatch';
 
+type CatalogMatchedItem = {
+  id?: string | number;
+  catalogId?: string;
+  [key: string]: any;
+};
+
 const BRAND_IMAGES: Record<string, string> = {
   "Samsung": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
   "Apple": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=1200&q=80",
@@ -523,7 +529,7 @@ export function HomePage() {
       ? homepageConfig.featuredBrandIds
       : getSectionItemIds(homepageConfig, 'featured-brands');
     if (featuredIds.length) {
-      const picked = pickByCatalogIds(rightBrandsList, featuredIds);
+      const picked = pickByCatalogIds(rightBrandsList as CatalogMatchedItem[], featuredIds);
       if (picked.length) return picked.slice(0, 8);
     }
     return rightBrandsList.filter((b: any) => b.ratings >= 4.7 || b.featuredFlag || b.sponsoredFlag).slice(0, 8);
@@ -568,7 +574,7 @@ export function HomePage() {
   }, []);
 
   const rightProductsList = React.useMemo(() => {
-    const source = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
+    const source = (allProducts && allProducts.length > 0 ? allProducts : PRODUCTS) as CatalogMatchedItem[];
     const featuredIds = homepageConfig?.featuredProductIds?.length
       ? homepageConfig.featuredProductIds
       : getSectionItemIds(homepageConfig, 'trending');
@@ -710,7 +716,7 @@ export function HomePage() {
       ? homepageConfig.featuredDealIds
       : getSectionItemIds(homepageConfig, 'deals');
     if (featuredDealIds.length) {
-      const picked = pickByCatalogIds(rightProductsList, featuredDealIds);
+      const picked = pickByCatalogIds(rightProductsList as CatalogMatchedItem[], featuredDealIds);
       if (picked.length) return picked.slice(0, 4);
     }
     const dealBackedProducts = rightProductsList.filter((p: any) => p.originalPrice || p.discount || p.isDeal);
@@ -975,7 +981,7 @@ export function HomePage() {
                 </div>
 
                 {/* 4-column, 2-row Product Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5">
                   {((allProducts.length > 0 ? allProducts : PRODUCTS) as any[])
                     .filter((p: any) => p.isNewArrival || p.id % 3 === 0)
                     .sort((a: any, b: any) => b.id - a.id)
@@ -1283,7 +1289,7 @@ export function HomePage() {
                 </div>
 
                 {/* Customer Favorites Grid of featured Products with isGuideDetail={true} */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5 text-left">
                   {viralProductsList.slice(0, 8).map((product) => (
                     <ProductCard key={product.id} product={product} variant="grid" isGuideDetail={true} />
                   ))}
@@ -1309,7 +1315,7 @@ export function HomePage() {
               </div>
 
               {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5">
                   {filteredProducts.map((p: any) => (
                     <ProductCard key={p.id} product={p} variant="compact" />
                   ))}
@@ -1505,7 +1511,7 @@ export function HomePage() {
             <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">Boost Sales Today</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px]">
-                Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
+                Gain entry to deal slots, exposure metrics, and buyer engagement streams.
               </p>
               
               <Link 
@@ -1526,7 +1532,7 @@ export function HomePage() {
             <div className="mb-4">
               <h3 className="text-[9px] font-bold tracking-widest text-[#1a1a2e]/40 uppercase mb-1">NEWS DISPATCH</h3>
               <p className="text-[11px] text-gray-500 leading-relaxed">
-                Receive newly verified outlet approvals, scam alerts, and business wholesale deals weekly.
+                Receive newly verified outlet approvals, scam alerts, and marketplace deals weekly.
               </p>
             </div>
             

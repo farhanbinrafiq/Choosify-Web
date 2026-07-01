@@ -83,8 +83,8 @@ export function ProductCardSkeleton({
 
   if (variant === 'compact') {
     return (
-      <div className="bg-white rounded-[5px] p-3 flex flex-col gap-3 border border-[#e8edf2] h-full animate-pulse">
-        <div className="w-full aspect-square bg-gray-50 rounded-[5px] relative p-2.5 flex items-center justify-center shrink-0">
+      <div className="bg-white rounded-[5px] p-2 flex flex-col gap-2 border border-[#e8edf2] w-[210px] h-[290px] animate-pulse">
+        <div className="w-full h-[176px] bg-gray-50 rounded-[5px] relative p-1 flex items-center justify-center shrink-0">
           <Skeleton className="w-full h-full rounded-[5px]" />
         </div>
 
@@ -144,10 +144,9 @@ export function ProductCardSkeleton({
   // Default Grid layout: exactly mirrors regular card dimensions and padding
   return (
     <div 
-      className="bg-white rounded-[5px] p-2.5 border border-[#e8edf2] flex flex-col relative overflow-hidden animate-pulse shrink-0" 
-      style={{ width: '100%', maxWidth: '174px', height: '258px' }}
+      className="bg-white rounded-[5px] p-2 border border-[#e8edf2] flex flex-col relative overflow-hidden animate-pulse shrink-0 w-[210px] h-[290px]" 
     >
-      <div className="relative h-[105px] w-full bg-gray-55 rounded-[5px] shrink-0 p-2 flex items-center justify-center">
+      <div className="relative h-[176px] w-full bg-gray-55 rounded-[5px] shrink-0 p-1 flex items-center justify-center">
         <Skeleton className="w-full h-full rounded-[5px]" />
       </div>
 

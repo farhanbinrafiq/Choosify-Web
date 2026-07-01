@@ -623,7 +623,7 @@ export function SearchPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5">
                   {(activeTab === 'all' ? searchResults.products.slice(0, 6) : searchResults.products).map((product) => (
                     <div key={product.id} className="flex flex-col justify-between h-full group">
                       <ProductCard product={product} />
@@ -940,7 +940,7 @@ export function SearchPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 justify-items-center gap-3 md:gap-4 xl:gap-5">
                   {(activeTab === 'all' ? searchResults.favorites.slice(0, 6) : searchResults.favorites).map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}

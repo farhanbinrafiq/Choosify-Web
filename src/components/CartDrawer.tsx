@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Trash2, ShoppingBag, ArrowRight, ShieldCheck, FileSpreadsheet, Plus, Minus, Info, Calculator, Sparkles, Building2 } from 'lucide-react';
+import { X, Trash2, ShoppingBag, ArrowRight, Plus, Minus } from 'lucide-react';
 import { useGlobalState, CartItem } from '../context/GlobalStateContext';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '../lib/utils';
 import toast from 'react-hot-toast';
 
 interface CartDrawerProps {
@@ -14,48 +13,14 @@ interface CartDrawerProps {
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const navigate = useNavigate();
   const {
-    mode,
     retailCart,
-    wholesaleCart,
     removeFromCart,
-    updateCartQuantity,
-    clearCart,
-    createOrder
+    updateCartQuantity
   } = useGlobalState();
 
-  const [dealerCompanyName, setDealerCompanyName] = useState('Apex Distributors Ltd');
-  const [dealerTaxId, setDealerTaxId] = useState('TIN-291848123');
-  const [isQuotationFlow, setIsQuotationFlow] = useState(false);
+  const cartItems = retailCart;
 
-  const cartItems = mode === 'retail' ? retailCart : wholesaleCart;
-
-  // Calculates the price based on slabs for a given quantity
   const getSlabPrice = (item: CartItem) => {
-    const product = item.product;
-    if (mode === 'retail') {
-      if (item.selectedVariant && item.selectedVariant.price !== undefined) {
-        return item.selectedVariant.price;
-      }
-      return product.price;
-    }
-
-    const slabs = product.pricingTiers || product.quantitySlabs || [];
-    if (slabs.length === 0) return product.price;
-
-    let applicablePrice = product.price;
-    // Sort slabs descending by minQuantity
-    const sortedSlabs = [...slabs].sort((a, b) => b.minQuantity - a.minQuantity);
-    for (const slab of sortedSlabs) {
-      if (item.quantity >= slab.minQuantity) {
-        applicablePrice = slab.price;
-        break;
-      }
-    }
-    return applicablePrice;
-  };
-
-  // Calculates savings compared to base wholesale tier (first slab) or retail price
-  const getItemBasePrice = (item: CartItem) => {
     if (item.selectedVariant && item.selectedVariant.price !== undefined) {
       return item.selectedVariant.price;
     }
@@ -69,30 +34,11 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     }, 0);
   };
 
-  const calculateOriginalSubtotal = () => {
-    return cartItems.reduce((acc, item) => {
-      const basePrice = getItemBasePrice(item);
-      return acc + (basePrice * item.quantity);
-    }, 0);
-  };
-
   const subtotal = calculateSubtotal();
-  const originalSubtotal = calculateOriginalSubtotal();
-  const bulkSavings = originalSubtotal - subtotal;
-
   const handleQtyChange = (item: CartItem, newQty: number) => {
     if (newQty <= 0) {
       removeFromCart(item.id);
       return;
-    }
-    
-    // Check MOQ limit in Wholesale Mode
-    if (mode === 'wholesale') {
-      const moq = item.product.moq || 10;
-      if (newQty < moq) {
-        toast.error(`Minimum Order Quantity (MOQ) is ${moq} units.`);
-        return;
-      }
     }
 
     updateCartQuantity(item.id, newQty);
@@ -104,29 +50,18 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       return false;
     }
 
-    if (mode === 'wholesale') {
-      // Ensure all items satisfy MOQ
-      for (const item of cartItems) {
-        const moq = item.product.moq || 10;
-        if (item.quantity < moq) {
-          toast.error(`"${item.product.title}" requires a minimum of ${moq} units.`);
-          return false;
-        }
-      }
-
-      // Check business details
-      if (!dealerCompanyName.trim() || !dealerTaxId.trim()) {
-        toast.error('Dealer Business Name and Tax/TIN ID are required for B2B Wholesale checkout.');
-        return false;
-      }
-    }
-
     return true;
   };
 
   const handleCheckout = () => {
+    if (!validateCartBeforeCheckout()) return;
+
     onClose();
-    navigate('/cart/retail');
+    navigate('/checkout', {
+      state: {
+        sourceMode: 'retail',
+      },
+    });
   };
 
   return (
@@ -157,18 +92,15 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             className="fixed bottom-0 inset-x-0 rounded-t-2xl h-[85vh] sm:inset-x-auto sm:right-0 sm:top-0 sm:h-full sm:w-[480px] sm:rounded-none bg-white text-navy z-[210] flex flex-col shadow-2xl overflow-hidden border-l border-gray-100"
           >
             {/* Header */}
-            <div className={cn(
-              "p-6 flex items-center justify-between border-b text-white",
-              mode === 'wholesale' ? "bg-navy" : "bg-orange-primary"
-            )}>
+            <div className="p-6 flex items-center justify-between border-b text-white bg-orange-primary">
               <div className="flex items-center gap-3">
                 <ShoppingBag className="w-6 h-6 animate-pulse" />
                 <div>
                   <h3 className="text-lg font-black uppercase italic tracking-tight">
-                    {mode === 'retail' ? 'Retail Cart' : 'B2B Wholesale Portal'}
+                    Shopping Cart
                   </h3>
                   <p className="text-[9px] uppercase tracking-widest text-white/70 font-bold italic">
-                    {mode === 'retail' ? 'Standard Personal Checkout' : 'Business Tiered Freight Invoicing'}
+                    Standard checkout
                   </p>
                 </div>
               </div>
@@ -180,14 +112,11 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               </button>
             </div>
 
-            {/* Mode Indicator & Switcher */}
+            {/* Cart Indicator */}
             <div className="bg-[#F8FAFC] px-6 py-3 flex items-center justify-between border-b border-gray-100 text-[10px] font-black uppercase tracking-widest italic">
-              <span className="text-gray-400">Current Order Stream:</span>
-              <span className={cn(
-                "px-3 py-1 rounded-full text-white",
-                mode === 'retail' ? "bg-orange-primary" : "bg-navy"
-               )}>
-                ● {mode === 'retail' ? 'Retail' : 'Wholesale Mode Active'}
+              <span className="text-gray-400">Current Order Stream</span>
+              <span className="px-3 py-1 rounded-full text-white bg-orange-primary">
+                Retail
               </span>
             </div>
 
@@ -197,20 +126,13 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <div className="h-64 flex flex-col items-center justify-center text-center gap-4 text-gray-300">
                   <ShoppingBag size={48} className="stroke-1" />
                   <div className="text-xs font-black uppercase tracking-widest italic">
-                    You have no items in your {mode === 'retail' ? 'Retail' : 'Wholesale'} cart.
+                    You have no items in your cart.
                   </div>
-                  {mode === 'wholesale' && (
-                    <p className="text-[10px] max-w-xs leading-relaxed font-bold">
-                      Add authorized B2B items from the products lineup to configure price slabs and execute distributor requests.
-                    </p>
-                  )}
                 </div>
               ) : (
                 cartItems.map((item) => {
                   const product = item.product;
                   const itemPrice = getSlabPrice(item);
-                  const isWholesaleItem = mode === 'wholesale' && product.moq;
-                  const moq = product.moq || 10;
                   
                   return (
                     <div 
@@ -254,40 +176,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                           
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{product.brand || 'Apex'}</span>
-                            {isWholesaleItem && (
-                              <span className="bg-navy/10 text-navy text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter italic">
-                                MOQ {moq} Units
-                              </span>
-                            )}
                           </div>
                         </div>
-
-                        {/* Tiered Price Slabs Badge Overlay */}
-                        {isWholesaleItem && product.pricingTiers && (
-                          <div className="bg-[#E0F2FE] border border-blue-100 p-2 rounded-lg mb-3">
-                            <div className="flex items-center justify-between text-[8px] font-black text-blue-700 uppercase tracking-widest mb-1 italic">
-                              <span className="flex items-center gap-1"><Calculator size={10} /> Active Tier Slabs:</span>
-                              <span>Save with larger loads</span>
-                            </div>
-                            <div className="grid grid-cols-3 gap-1 text-[8px] font-mono font-bold text-blue-500">
-                              {product.pricingTiers.map((t: any, idx: number) => {
-                                const isActive = item.quantity >= t.minQuantity && 
-                                  (idx === product.pricingTiers.length - 1 || item.quantity < product.pricingTiers[idx + 1].minQuantity);
-                                return (
-                                  <div 
-                                    key={idx} 
-                                    className={cn(
-                                      "p-1 rounded text-center border transition-all",
-                                      isActive ? "bg-blue-600 text-white border-blue-600 font-extrabold shadow-sm scale-105" : "bg-white border-blue-50/55"
-                                    )}
-                                  >
-                                    Qty {t.minQuantity}+: ৳{t.price}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
 
                         <div className="flex items-end justify-between gap-4">
                           {/* Quantity selector */}
@@ -319,64 +209,6 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   );
                 })
               )}
-
-              {/* Wholesale Dealer Business Information Section */}
-              {mode === 'wholesale' && cartItems.length > 0 && (
-                <div className="p-5 bg-navy/5 rounded-[24px] border border-navy/10 space-y-4">
-                  <div className="flex items-center gap-2 mb-2 text-navy">
-                    <Building2 size={16} />
-                    <h4 className="text-[10px] font-black uppercase tracking-widest italic">Authorized Dealer Credentials</h4>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-1">Company / Business Name *</label>
-                      <input 
-                        type="text" 
-                        value={dealerCompanyName}
-                        onChange={(e) => setDealerCompanyName(e.target.value)}
-                        className="w-full h-10 px-3 bg-white text-xs font-bold rounded-xl border border-gray-200 focus:outline-none focus:border-navy text-navy focus:ring-1 focus:ring-navy" 
-                        placeholder="e.g. Apex Outlets Corp."
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-1">Tax/Trade License Number (TIN/BIN) *</label>
-                      <input 
-                        type="text" 
-                        value={dealerTaxId}
-                        onChange={(e) => setDealerTaxId(e.target.value)}
-                        className="w-full h-10 px-3 bg-white text-xs font-bold rounded-xl border border-gray-200 focus:outline-none focus:border-navy text-navy focus:ring-1 focus:ring-navy" 
-                        placeholder="e.g. BIN-291848123"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Dynamic B2B Switch options: Standard Credit Inbound Order vs PDF Request Inquiry Proposal */}
-                  <div className="pt-3 border-t border-navy/10 flex items-center justify-between">
-                    <span className="text-[9px] font-black text-navy uppercase tracking-widest italic">Order Routing Protocol:</span>
-                    <div className="flex bg-white border border-gray-200 rounded-lg p-0.5">
-                      <button 
-                        onClick={() => setIsQuotationFlow(false)}
-                        className={cn(
-                          "px-2.5 py-1 rounded text-[8px] font-black uppercase tracking-tight",
-                          !isQuotationFlow ? "bg-navy text-white" : "text-gray-400 hover:text-navy"
-                        )}
-                      >
-                        Book Dispatch
-                      </button>
-                      <button 
-                        onClick={() => setIsQuotationFlow(true)}
-                        className={cn(
-                          "px-2.5 py-1 rounded text-[8px] font-black uppercase tracking-tight flex items-center gap-1",
-                          isQuotationFlow ? "bg-navy text-white text-orange-primary" : "text-gray-400 hover:text-navy"
-                        )}
-                      >
-                        <FileSpreadsheet size={10} /> Get Quote
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Footer Summary Container */}
@@ -384,47 +216,27 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               <div className="bg-[#F8FAFC] border-t border-gray-100 p-6 space-y-4 shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
                 {/* Math breakdown */}
                 <div className="space-y-2">
-                  {mode === 'wholesale' && bulkSavings > 0 && (
-                    <div className="flex justify-between items-center bg-green-50 px-4 py-2 rounded-lg text-green-700 text-[9px] font-black uppercase tracking-widest italic">
-                      <span className="flex items-center gap-1"><Sparkles size={12} /> B2B Slabs Applied Savings:</span>
-                      <span>-৳{bulkSavings.toLocaleString()}</span>
-                    </div>
-                  )}
-
                   <div className="flex justify-between items-center text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
-                    <span>Invoiced Subtotal</span>
-                    <span className={cn(bulkSavings > 0 && "line-through")}>৳{originalSubtotal.toLocaleString()}</span>
+                    <span>Subtotal</span>
+                    <span>৳{subtotal.toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center text-navy font-black italic">
-                    <span className="text-[12px] uppercase tracking-widest">Aggregate Total</span>
+                    <span className="text-[12px] uppercase tracking-widest">Estimated Total</span>
                     <span className="text-xl tracking-tight text-orange-primary leading-none">৳{subtotal.toLocaleString()}</span>
                   </div>
 
                   <div className="text-[8px] font-bold text-gray-400 leading-tight text-right">
-                    {mode === 'retail' 
-                      ? 'Local fast parcel delivery and taxes calculated at dispatch.' 
-                      : 'B2B Cargo freight charges are integrated statically into seller master invoice.'}
+                    Delivery and taxes are calculated at checkout.
                   </div>
                 </div>
 
                 {/* Confirm Checkout Button */}
                 <button
                   onClick={handleCheckout}
-                  className={cn(
-                    "w-full h-14 rounded-2xl flex items-center justify-between px-8 text-[11px] font-black uppercase tracking-[0.2em] italic shadow-xl transition-all cursor-pointer hover:scale-[1.01] active:scale-95 text-white",
-                    mode === 'wholesale' 
-                      ? isQuotationFlow 
-                        ? "bg-blue-600 shadow-blue-500/20 hover:bg-blue-700" 
-                        : "bg-navy shadow-navy/20 hover:bg-orange-primary"
-                      : "bg-orange-primary shadow-orange-primary/20 hover:bg-navy"
-                  )}
+                  className="w-full h-14 rounded-2xl flex items-center justify-between px-8 text-[11px] font-black uppercase tracking-[0.2em] italic shadow-xl transition-all cursor-pointer hover:scale-[1.01] active:scale-95 text-white bg-orange-primary shadow-orange-primary/20 hover:bg-navy"
                 >
-                  <span>
-                    {mode === 'retail' 
-                      ? 'Proceed to Order' 
-                      : isQuotationFlow ? 'Transmit Quotation Inquiry' : 'Place Wholesale Order'}
-                  </span>
+                  <span>Proceed to Order</span>
                   <ArrowRight size={18} className="animate-bounce" />
                 </button>
               </div>

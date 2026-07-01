@@ -13,22 +13,6 @@ declare module '../types/schemas' {
   }
 }
 
-export interface B2BRfq {
-  id: string;
-  item: string;
-  category: string;
-  quantity: number;
-  targetPrice?: number;
-  status: 'pending' | 'replied' | 'ordered';
-  date: string;
-  notes: string;
-  supplierName?: string;
-  supplierAvatar?: string;
-  pricePerUnit?: number;
-  totalOfferPrice?: number;
-  responseNotes?: string;
-}
-
 export interface CartItem {
   id: number;
   product: any;
@@ -40,11 +24,10 @@ export interface GlobalStateContextType {
   mode: ProductModeType;
   setMode: (mode: ProductModeType) => void;
   retailCart: CartItem[];
-  wholesaleCart: CartItem[];
   addToCart: (product: any, quantity: number, selectedVariant?: any) => void;
-  removeFromCart: (productId: number) => void;
-  updateCartQuantity: (productId: number, quantity: number) => void;
-  clearCart: () => void;
+  removeFromCart: (productId: number, cartMode?: ProductModeType) => void;
+  updateCartQuantity: (productId: number, quantity: number, cartMode?: ProductModeType) => void;
+  clearCart: (cartMode?: ProductModeType) => void;
   orders: Order[];
   createOrder: (isCOD: boolean) => Order | null;
   cancelOrder: (orderId: string, reason: string) => void;
@@ -66,9 +49,6 @@ export interface GlobalStateContextType {
   allDeals: CatalogDeal[];
   homepageConfig: HomepageConfig | null;
   siteConfig: import('../types/catalog').SiteConfig | null;
-  rfqs: B2BRfq[];
-  submitRfq: (rfq: Omit<B2BRfq, 'id' | 'date' | 'status'>) => void;
-  acceptQuotation: (rfqId: string) => void;
   activeVideo: { url: string; title: string; isVertical?: boolean } | null;
   openVideo: (url: string, title: string, isVertical?: boolean) => void;
   closeVideo: () => void;
@@ -125,7 +105,7 @@ const INITIAL_SELLERS: Seller[] = [
       supportedRegions: ['Dhaka', 'Chittagong', 'Sylhet']
     },
     sponsoredStatus: true,
-    wholesaleEnabled: true,
+    wholesaleEnabled: false,
     disputeHistory: { totalDisputes: 5, resolvedDisputes: 5 }
   },
   {
@@ -140,7 +120,7 @@ const INITIAL_SELLERS: Seller[] = [
       supportedRegions: ['All Bangladesh']
     },
     sponsoredStatus: true,
-    wholesaleEnabled: true,
+    wholesaleEnabled: false,
     disputeHistory: { totalDisputes: 2, resolvedDisputes: 2 }
   },
   {
@@ -155,7 +135,7 @@ const INITIAL_SELLERS: Seller[] = [
       supportedRegions: ['All Bangladesh']
     },
     sponsoredStatus: false,
-    wholesaleEnabled: true,
+    wholesaleEnabled: false,
     disputeHistory: { totalDisputes: 12, resolvedDisputes: 11 }
   },
   {
@@ -175,63 +155,35 @@ const INITIAL_SELLERS: Seller[] = [
   }
 ];
 
-const INITIAL_RFQS: B2BRfq[] = [
-  {
-    id: "RFQ-5219",
-    item: "High-density custom dyed cotton Polo shirts with company logo embroidery",
-    category: "Fashion & Lifestyle",
-    quantity: 500,
-    targetPrice: 320,
-    status: "replied",
-    date: "2 hours ago",
-    notes: "We need custom sizes distributed globally. S-XXL. Split ratios: 1:2:2:1.",
-    supplierName: "Epyllion Trade Syndicate",
-    supplierAvatar: "ET",
-    pricePerUnit: 300,
-    totalOfferPrice: 150000,
-    responseNotes: "Special vendor rate offered for prompt dispatch. Bulk tax certificate invoice generated."
-  },
-  {
-    id: "RFQ-8812",
-    item: "Original Bulk Samsung A35 lots for employee rewards program",
-    category: "Mobile & Phones",
-    quantity: 35,
-    targetPrice: 35000,
-    status: "pending",
-    date: "1 day ago",
-    notes: "Require authentic BSTI verified products. Brand warranty sheets must be pre-filled."
-  }
-];
-
 const GlobalStateContext = createContext<GlobalStateContextType | undefined>(undefined);
 
 let _pendingPromo: { code: string; discount: number; type: 'flat' | 'percentage' } | null = null;
 
+function readStorageJson<T>(key: string, fallback: T): T {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) as T : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export function GlobalStateProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<ProductModeType>(() => {
-    const saved = localStorage.getItem('choosify_mode');
-    return (saved as ProductModeType) || 'retail';
+    return 'retail';
   });
 
-  const [retailCart, setRetailCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('choosify_retail_cart');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [retailCart, setRetailCart] = useState<CartItem[]>(() =>
+    readStorageJson<CartItem[]>('choosify_retail_cart', [])
+  );
 
-  const [wholesaleCart, setWholesaleCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('choosify_wholesale_cart');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [reports, setReports] = useState<Report[]>(() =>
+    readStorageJson<Report[]>('choosify_reports', [])
+  );
 
-  const [reports, setReports] = useState<Report[]>(() => {
-    const saved = localStorage.getItem('choosify_reports');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem('choosify_orders');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [orders, setOrders] = useState<Order[]>(() =>
+    readStorageJson<Order[]>('choosify_orders', [])
+  );
 
   const [currentUser, setCurrentUser] = useState<User>(() => {
     try {
@@ -407,60 +359,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     return () => window.removeEventListener('choosify-promo-applied', handlePromo as EventListener);
   }, []);
 
-  const [rfqs, setRfqs] = useState<B2BRfq[]>(() => {
-    const saved = localStorage.getItem('choosify_b2b_rfqs');
-    return saved ? JSON.parse(saved) : INITIAL_RFQS;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('choosify_b2b_rfqs', JSON.stringify(rfqs));
-  }, [rfqs]);
-
-  const submitRfq = (newRfqData: Omit<B2BRfq, 'id' | 'date' | 'status'>) => {
-    const rfqId = `RFQ-${Math.floor(1000 + Math.random() * 9000)}`;
-    const newRfq: B2BRfq = {
-      ...newRfqData,
-      id: rfqId,
-      date: 'Just now',
-      status: 'pending'
-    };
-    setRfqs(prev => [newRfq, ...prev]);
-    toast.success(`Broadcasting RFQ ${rfqId} to verified South Asian Wholesalers!`);
-
-    // Dynamic reply simulation
-    setTimeout(() => {
-      setRfqs(prev => 
-        prev.map(q => {
-          if (q.id === rfqId) {
-            const calculatedPerUnit = q.targetPrice ? Math.round(Number(q.targetPrice) * 0.95) : 340;
-            return {
-              ...q,
-              status: 'replied',
-              supplierName: q.category.includes('Tech') || q.category.includes('Mobile') ? 'Bengal Tech Distributors' : 'Epyllion Trade Syndicate',
-              supplierAvatar: q.category.includes('Tech') || q.category.includes('Mobile') ? 'BT' : 'ET',
-              pricePerUnit: calculatedPerUnit,
-              totalOfferPrice: calculatedPerUnit * q.quantity,
-              responseNotes: 'Verified commercial wholesale catalog rate authorized direct dispatch.'
-            };
-          }
-          return q;
-        })
-      );
-      toast.success(`You received a direct seller quote for ${rfqId}! Check 'Live RFQs' tab.`);
-    }, 4500);
-  };
-
-  const acceptQuotation = (rfqId: string) => {
-    setRfqs(prev => 
-      prev.map(q => q.id === rfqId ? { ...q, status: 'ordered' } : q)
-    );
-    toast.success('Quota offer accepted and invoice dispatched to Wholesale Settlement!');
-  };
-
   const setMode = (newMode: ProductModeType) => {
-    setModeState(newMode);
-    localStorage.setItem('choosify_mode', newMode);
-    toast.success(`Switched to ${newMode === 'retail' ? 'Retail' : 'Wholesale / B2B'} Mode`, {
+    setModeState('retail');
+    localStorage.setItem('choosify_mode', 'retail');
+    toast.success('Retail mode active', {
       id: 'mode-switch-toast'
     });
   };
@@ -470,8 +372,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   }, [retailCart]);
 
   useEffect(() => {
-    localStorage.setItem('choosify_wholesale_cart', JSON.stringify(wholesaleCart));
-  }, [wholesaleCart]);
+    localStorage.removeItem('choosify_wholesale_cart');
+    localStorage.removeItem('choosify_b2b_rfqs');
+    localStorage.setItem('choosify_mode', 'retail');
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('choosify_reports', JSON.stringify(reports));
@@ -540,14 +444,13 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       ratings: b.rating,
       sponsoredFlag: b.id === 1 || b.id === 2 || b.id === 10,
       featuredFlag: b.id === 3 || b.id === 11,
-      wholesaleSupport: b.id !== 9, // Everything except Pickaboo aggregates wholesale
+      wholesaleSupport: false,
       category: b.category,
       claimStatus: status
     };
   });
 
-  // Map products statically into retail catalog and wholesale catalog
-  // Map products statically into retail catalog and wholesale catalog
+  // Map products statically into the retail catalog.
   const getVariantsForProduct = (productId: number, basePrice: number, baseImage: string): any[] | undefined => {
     if (productId === 1) {
       // Samsung Galaxy S24 Ultra
@@ -758,37 +661,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     });
   });
 
-  // Create Wholesale Products (ID mapping shifted upwards by 1000 to keep unique)
-  PRODUCTS.forEach(p => {
-    const cleanPrice = parseFloat(p.price.replace(/,/g, '')) || 5000;
-    const moq = p.category === 'Fashion & Lifestyle' ? 100 : 10;
-    const pricingTiers = [
-      { minQuantity: moq, price: Math.floor(cleanPrice * 0.85) },
-      { minQuantity: moq * 3, price: Math.floor(cleanPrice * 0.78) },
-      { minQuantity: moq * 10, price: Math.floor(cleanPrice * 0.70) }
-    ];
-
-    mappedProducts.push({
-      id: p.id + 1000, // Unique wholesale IDs
-      title: `[BULK] ${p.title}`,
-      image: p.image,
-      brand: p.brand,
-      mode_type: 'wholesale',
-      moq: moq,
-      quantitySlabs: pricingTiers,
-      bulkPricing: true,
-      codSupport: true,
-      quotationSupport: true,
-      stock: 5000,
-      sellerId: p.brand === 'Samsung' ? 'seller-samsung' : p.brand === 'Apple' ? 'seller-apple' : p.brand === 'Apex' ? 'seller-apex' : 'seller-general',
-      brandId: p.brand === 'Samsung' ? 1 : p.brand === 'Apple' ? 2 : p.brand === 'Apex' ? 3 : 4,
-      pricingTiers: pricingTiers,
-      price: pricingTiers[0].price,
-      description: `Premium Wholesale B2B offering for ${p.title}. Standard business invoices generated automatically. Standard COD logistics available.`,
-      category: p.category
-    });
-  });
-
   const toNumericId = (value: string, fallback: number): number => {
     const numeric = Number(value.replace(/[^0-9]/g, ''));
     return Number.isFinite(numeric) && numeric > 0 ? numeric : fallback;
@@ -806,26 +678,24 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       ratings: brand.ratings || 0,
       sponsoredFlag: brand.sponsoredFlag,
       featuredFlag: brand.featuredFlag,
-      wholesaleSupport: true,
+      wholesaleSupport: false,
       category: brand.category,
       claimStatus: status,
     };
   });
 
-  const apiProducts: Product[] = (catalogProducts || []).map((product, idx) => {
+  const apiProducts: Product[] = (catalogProducts || []).filter((product) => (product.modeType || 'retail') === 'retail').map((product, idx) => {
     const normalizedId = toNumericId(product.id, idx + 1);
     const normalizedBrandId = toNumericId(product.brandId, idx + 1);
-    const modeType = product.modeType || 'retail';
     return {
-      id: modeType === 'wholesale' ? normalizedId + 1000 : normalizedId,
+      id: normalizedId,
       catalogId: product.id,
       title: product.title,
       image: product.image || '',
-      mode_type: modeType,
-      moq: modeType === 'wholesale' ? 10 : undefined,
-      bulkPricing: modeType === 'wholesale',
-      codSupport: modeType !== 'wholesale',
-      quotationSupport: modeType === 'wholesale',
+      mode_type: 'retail',
+      bulkPricing: false,
+      codSupport: true,
+      quotationSupport: false,
       stock: typeof product.stock === 'number' ? product.stock : 0,
       sellerId: `seller-${(product.brandName || 'platform').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
       brandId: normalizedBrandId,
@@ -852,75 +722,73 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const allDeals: CatalogDeal[] = catalogDeals;
 
   const addToCart = (product: any, quantity: number, selectedVariant?: any) => {
-    if (mode === 'retail') {
-      setRetailCart(prev => {
-        // Find existing with same product ID and exact same variant combination
-        const existing = prev.find(item => 
-          item.product.id === product.id && 
-          ((!item.selectedVariant && !selectedVariant) || 
-           (item.selectedVariant?.sku === selectedVariant?.sku))
-        );
-        if (existing) {
-          return prev.map(item => 
-            (item.product.id === product.id && 
-             ((!item.selectedVariant && !selectedVariant) || 
-              (item.selectedVariant?.sku === selectedVariant?.sku)))
-              ? { ...item, quantity: item.quantity + quantity }
-              : item
-          );
-        }
-        // Save unique composite ID for this cart item row
-        const uniqueCartItemId = Date.now() + Math.floor(Math.random() * 1000);
-        return [...prev, { id: uniqueCartItemId, product, quantity, selectedVariant }];
-      });
-    } else {
-      // MOQ validation for Wholesale
-      const minQty = product.moq || 10;
-      if (quantity < minQty) {
-        toast.error(`Minimum Order Quantity (MOQ) for this B2B product is ${minQty} units.`);
+    const availableStock = selectedVariant?.stock ?? product.stock;
+    if (typeof availableStock === 'number') {
+      if (availableStock <= 0) {
+        toast.error(`"${product.title}" is currently out of stock.`);
         return;
       }
-      setWholesaleCart(prev => {
-        const existing = prev.find(item => item.id === product.id);
-        if (existing) {
-          return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item);
-        }
-        return [...prev, { id: product.id, product, quantity }];
-      });
+      if (quantity > availableStock) {
+        toast.error(`Only ${availableStock} units are available for "${product.title}".`);
+        return;
+      }
+
+      const existing = retailCart.find(item =>
+        item.product.id === product.id &&
+        ((!item.selectedVariant && !selectedVariant) ||
+          item.selectedVariant?.sku === selectedVariant?.sku)
+      );
+      const requestedTotal = (existing?.quantity || 0) + quantity;
+      if (requestedTotal > availableStock) {
+        toast.error(`Only ${availableStock} units are available for "${product.title}".`);
+        return;
+      }
     }
-    toast.success(`Added ${quantity} units to your ${mode === 'retail' ? 'Retail' : 'Wholesale'} Cart`);
+
+    setRetailCart(prev => {
+      // Find existing with same product ID and exact same variant combination
+      const existing = prev.find(item => 
+        item.product.id === product.id && 
+        ((!item.selectedVariant && !selectedVariant) || 
+         (item.selectedVariant?.sku === selectedVariant?.sku))
+      );
+      if (existing) {
+        return prev.map(item => 
+          (item.product.id === product.id && 
+           ((!item.selectedVariant && !selectedVariant) || 
+            (item.selectedVariant?.sku === selectedVariant?.sku)))
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      }
+      // Save unique composite ID for this cart item row
+      const uniqueCartItemId = Date.now() + Math.floor(Math.random() * 1000);
+      return [...prev, { id: uniqueCartItemId, product, quantity, selectedVariant }];
+    });
+    toast.success(`Added ${quantity} units to your cart`);
   };
 
-  const removeFromCart = (productId: number) => {
-    if (mode === 'retail') {
-      setRetailCart(prev => prev.filter(item => item.id !== productId));
-    } else {
-      setWholesaleCart(prev => prev.filter(item => item.id !== productId));
-    }
+  const removeFromCart = (productId: number, cartMode: ProductModeType = mode) => {
+    setRetailCart(prev => prev.filter(item => item.id !== productId));
     toast.success('Removed from cart');
   };
 
-  const updateCartQuantity = (productId: number, quantity: number) => {
-    if (mode === 'retail') {
-      setRetailCart(prev => prev.map(item => item.id === productId ? { ...item, quantity } : item));
-    } else {
-      const item = wholesaleCart.find(i => i.id === productId);
-      const minQty = item?.product?.moq || 10;
-      if (quantity < minQty) {
-        toast.error(`Cannot set quantity below Minimum Order Quantity (${minQty}) in Wholesale Mode.`);
-        return;
-      }
-      setWholesaleCart(prev => prev.map(item => item.id === productId ? { ...item, quantity } : item));
+  const updateCartQuantity = (productId: number, quantity: number, cartMode: ProductModeType = mode) => {
+    const item = retailCart.find(i => i.id === productId);
+    const availableStock = item?.selectedVariant?.stock ?? item?.product?.stock;
+    if (typeof availableStock === 'number' && quantity > availableStock) {
+      toast.error(`Only ${availableStock} units are currently available.`);
+      return;
     }
+    setRetailCart(prev => prev.map(item => item.id === productId ? { ...item, quantity } : item));
   };
 
-  const clearCart = () => {
-    if (mode === 'retail') setRetailCart([]);
-    else setWholesaleCart([]);
+  const clearCart = (cartMode: ProductModeType = mode) => {
+    setRetailCart([]);
   };
 
   const createOrder = (isCOD: boolean): Order | null => {
-    const currentCart = mode === 'retail' ? retailCart : wholesaleCart;
+    const currentCart = retailCart;
     if (currentCart.length === 0) {
       toast.error('Your cart is empty');
       return null;
@@ -940,24 +808,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       }
     }
 
-    // Dynamic Slabs calculations for wholesale prices
     const processItemPrice = (item: CartItem) => {
-      const baseProduct = item.product;
-      if (mode === 'retail') return baseProduct.price;
-      
-      const slabs = baseProduct.pricingTiers || baseProduct.quantitySlabs || [];
-      if (slabs.length === 0) return baseProduct.price;
-      
-      // Fine-tune pricing based on slab
-      let applicablePrice = baseProduct.price;
-      const sortedSlabs = [...slabs].sort((a,b) => b.minQuantity - a.minQuantity);
-      for (const slab of sortedSlabs) {
-        if (item.quantity >= slab.minQuantity) {
-          applicablePrice = slab.price;
-          break;
-        }
-      }
-      return applicablePrice;
+      return item.product.price;
     };
 
     // Group items by seller
@@ -988,7 +840,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       });
 
       const subTotal = subItems.reduce((acc, it) => acc + (it.price * it.quantity), 0);
-      const deliveryFee = mode === 'retail' ? 120 : 1500; // Wholesale is heavier freight shipping
+      const deliveryFee = 120;
       
       overallTotal += subTotal + deliveryFee;
 
@@ -1070,6 +922,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   const addOrder = (order: Order) => {
     setOrders(prev => [order, ...prev]);
+    window.dispatchEvent(new CustomEvent('choosify-order-placed', { detail: { orderId: order.orderId } }));
   };
 
   const updateSubOrderStatus = (parentOrderId: string, sellerId: string, nextStatus: 'pending' | 'dispatched' | 'transit' | 'delivered') => {
@@ -1115,7 +968,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   // Filter products by active mode to ensure data separation
   const productSource = apiProducts.length > 0 ? apiProducts : mappedProducts;
-  const allProducts = productSource.filter(p => p.mode_type === mode);
+  const allProducts = productSource.filter(p => p.mode_type === 'retail');
 
   const [activeVideo, setActiveVideo] = useState<{ url: string; title: string; isVertical?: boolean } | null>(null);
 
@@ -1132,7 +985,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       mode,
       setMode,
       retailCart,
-      wholesaleCart,
       addToCart,
       removeFromCart,
       updateCartQuantity,
@@ -1158,9 +1010,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       allDeals,
       homepageConfig,
       siteConfig,
-      rfqs,
-      submitRfq,
-      acceptQuotation,
       activeVideo,
       openVideo,
       closeVideo,

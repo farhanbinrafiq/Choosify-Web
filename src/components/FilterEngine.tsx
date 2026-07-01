@@ -158,12 +158,11 @@ export const DEALS_PAGE_FILTER_PROFILE: FilterProfile = {
     },
     {
       id: 'deal_channel',
-      name: 'Wholesale vs Retail',
+      name: 'Deal Channel',
       type: 'single_select',
       options: [
         { value: 'all', label: 'All Channels' },
-        { value: 'retail', label: 'Retail Only' },
-        { value: 'wholesale', label: 'Wholesale Only' }
+        { value: 'retail', label: 'Retail Only' }
       ]
     },
     {

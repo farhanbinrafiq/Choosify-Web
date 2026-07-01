@@ -20,7 +20,7 @@ export function OrderSuccessPage() {
     // Clear cart after successful order display
     // Small delay so the success page has time to read order data before cart clears
     const timer = setTimeout(() => {
-      if (typeof clearCart === 'function') clearCart();
+      if (typeof clearCart === 'function') clearCart('retail');
     }, 500);
     return () => clearTimeout(timer);
   }, [clearCart]);

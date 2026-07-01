@@ -1030,7 +1030,7 @@ export function BrandDetailPage() {
           "VERIFIED OUTLET REVIEWS & INSIGHTS",
           "ACTIVE PROMO CODES & CAMPAIGNS",
           "INFLUENCER INSIGHTS & EXPERIENCES",
-          "B2B WHOLESALE COORDINATION ENGINE",
+          "RETAIL PARTNER COORDINATION",
           "REAL-TIME PRICE HISTORY TRACKER",
         ],
         tags: [
@@ -1053,7 +1053,7 @@ export function BrandDetailPage() {
         map: "https://www.google.com/maps",
         email: "sourcing@fff.com.bd",
         phone: "+8801711223344",
-        priceRange: "BDT - B2B SERVICE SLAB",
+        priceRange: "BDT - CUSTOM SERVICE",
         ageRange: "AGE: 18 - 60",
         audience: "INTERNATIONAL FASHION BRANDS, RETAILERS, IMPORTERS",
         services: [
@@ -2589,7 +2589,7 @@ export function BrandDetailPage() {
                     )}
                   </div>
                 ) : finalDeals.length > 0 ? (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 xl:gap-5 justify-items-center">
                     {finalDeals.map((product: any, i: number) => (
                       <ProductCard
                         key={product.id || i}
@@ -2667,7 +2667,7 @@ export function BrandDetailPage() {
                     )}
                   </div>
                 ) : filteredProducts.length > 0 ? (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 xl:gap-5 justify-items-center">
                     {paginatedProducts.map((product: any, i: number) => (
                       <ProductCard
                         key={product.id || i}

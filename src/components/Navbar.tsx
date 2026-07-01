@@ -24,7 +24,7 @@ export function Navbar() {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig } = useGlobalState();
+  const { retailCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig } = useGlobalState();
   const { threads, notifications = [], setNotifications } = useDashboard();
 
   const unreadMsgCount = threads.filter(t => t.unread).length;
@@ -60,7 +60,7 @@ export function Navbar() {
     };
   }, []);
 
-  const activeCartCount = retailCart.length;
+  const activeCartCount = retailCart.reduce((sum, item) => sum + item.quantity, 0);
 
   const navItems = siteConfig?.navigation?.length
     ? [...siteConfig.navigation].sort((a, b) => a.order - b.order)
@@ -178,7 +178,7 @@ export function Navbar() {
             <button 
               type="button"
               onClick={() => {
-                navigate('/cart/retail');
+                setIsCartOpen(true);
               }}
               className="relative text-white/60 hover:text-white transition-colors mr-1"
               title="Shopping Cart"
@@ -186,7 +186,7 @@ export function Navbar() {
               <ShoppingBag size={20} className="transition-colors" />
               {activeCartCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 text-white text-[8px] font-black bg-orange-primary rounded-full flex items-center justify-center border-2 border-[#0A0A1F] animate-bounce">
-                  {activeCartCount}
+                  {activeCartCount > 9 ? '9+' : activeCartCount}
                 </span>
               )}
             </button>
@@ -291,7 +291,7 @@ export function Navbar() {
                         />
                         <div className="min-w-0">
                           <p className="text-[11px] font-black text-white italic uppercase truncate">{currentUser?.name || "Farhan Bin Rafiq"}</p>
-                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">Corporate Sourcing Desk</p>
+                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">Choosify Member</p>
                         </div>
                       </div>
 
@@ -410,7 +410,7 @@ export function Navbar() {
               <div className="flex flex-col gap-6">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <span className="text-sm font-black uppercase tracking-widest text-[#FF5B00] italic">Sourcing Menu</span>
+                  <span className="text-sm font-black uppercase tracking-widest text-[#FF5B00] italic">Menu</span>
                   <button 
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="p-2 text-white/60 hover:text-white hover:bg-white/5 rounded-full transition-all"
@@ -419,7 +419,7 @@ export function Navbar() {
                   </button>
                 </div>
 
-                {/* Sourcing/Search on Mobile */}
+                {/* Search on Mobile */}
                 <div className="w-full">
                   <GlobalSearchBar 
                     initialValue={searchQuery}

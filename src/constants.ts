@@ -179,12 +179,12 @@ export const PRODUCTS = [
     rating: 4.9,
     reviews: 15,
     image: 'https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=400&h=400&fit=crop',
-    tag: 'B2B SOURCING',
+    tag: 'APPAREL SOURCING',
     stores: [
       { name: 'FFF Sourcing', price: 'Contact for Quote', delivery: 'Custom Lead Time', rating: 4.9, link: 'https://fff.com.bd' }
     ],
     category: 'Sourcing',
-    description: 'End-to-end B2B apparel sourcing, quality assurance, vendor compliance coordination, and custom fabric development for international retail brands.',
+    description: 'End-to-end apparel sourcing, quality assurance, vendor compliance coordination, and custom fabric development for retail brands.',
     pros: ['100% compliant local manufacturers', 'Rigorous multi-stage quality control audits', 'Dedicated English-speaking merchant support'],
     cons: ['MOQ (Minimum Order Quantity) of 1,000 units per style'],
     bestForTags: ['Garment Manufacturing', 'Quality Control', 'Buying House Services'],
