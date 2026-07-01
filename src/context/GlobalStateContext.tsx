@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ProductModeType, Product, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
-import { PRODUCTS, BRANDS } from '../constants';
+import { PRODUCTS, BRANDS, BLOGS } from '../constants';
+import { CREATORS } from '../data/creators';
 import { toast } from 'react-hot-toast';
 import { catalogApi } from '../services/catalogApi';
-import type { CatalogBrand, CatalogCategory, CatalogDeal, CatalogProduct, HomepageConfig, SiteConfig } from '../types/catalog';
+import type { CatalogBrand, CatalogCategory, CatalogCreator, CatalogDeal, CatalogGuide, CatalogPlacement, CatalogProduct, CatalogProductDetail, HomepageConfig, SiteConfig } from '../types/catalog';
+import { mapCatalogCreator, mapCatalogGuide } from '../utils/editorialMappers';
+import type { Creator } from '../data/creators';
 
 declare module '../types/schemas' {
   interface Order {
@@ -64,6 +67,10 @@ export interface GlobalStateContextType {
   allProducts: Product[];
   allCategories: CatalogCategory[];
   allDeals: CatalogDeal[];
+  allCreators: Creator[];
+  allGuides: ReturnType<typeof mapCatalogGuide>[];
+  allPlacements: CatalogPlacement[];
+  productDetailsById: Record<string, CatalogProductDetail>;
   homepageConfig: HomepageConfig | null;
   siteConfig: import('../types/catalog').SiteConfig | null;
   rfqs: B2BRfq[];
@@ -485,6 +492,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[] | null>(null);
   const [catalogCategories, setCatalogCategories] = useState<CatalogCategory[]>([]);
   const [catalogDeals, setCatalogDeals] = useState<CatalogDeal[]>([]);
+  const [catalogCreators, setCatalogCreators] = useState<CatalogCreator[]>([]);
+  const [catalogGuides, setCatalogGuides] = useState<CatalogGuide[]>([]);
+  const [catalogPlacements, setCatalogPlacements] = useState<CatalogPlacement[]>([]);
+  const [productDetailsById, setProductDetailsById] = useState<Record<string, CatalogProductDetail>>({});
   const [homepageConfig, setHomepageConfig] = useState<HomepageConfig | null>(null);
   const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null);
 
@@ -493,21 +504,39 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
     async function hydrateCatalogFromApi() {
       try {
-        const [products, brands, categories, deals, homepage, site] = await Promise.all([
+        const [products, brands, categories, deals, homepage, site, creators, guides, placements] = await Promise.all([
           catalogApi.listProducts(),
           catalogApi.listBrands(),
           catalogApi.listCategories(),
           catalogApi.listDeals(),
           catalogApi.getHomepage(),
           catalogApi.getSiteConfig(),
+          catalogApi.listCreators(),
+          catalogApi.listGuides(),
+          catalogApi.listPlacements(),
         ]);
         if (cancelled) return;
         setCatalogProducts(products);
         setCatalogBrands(brands);
         setCatalogCategories(categories);
         setCatalogDeals(deals);
+        setCatalogCreators(creators.length ? creators : homepage.featuredCreators || []);
+        setCatalogGuides(guides.length ? guides : homepage.featuredGuides || []);
+        setCatalogPlacements(placements);
         setHomepageConfig(homepage.homepage);
         setSiteConfig(site);
+
+        const detailEntries = await Promise.all(
+          products.slice(0, 12).map(async (product) => {
+            const detail = await catalogApi.getProductDetail(product.id);
+            return detail ? ([product.id, detail] as const) : null;
+          }),
+        );
+        const detailsMap: Record<string, CatalogProductDetail> = {};
+        detailEntries.forEach((entry) => {
+          if (entry) detailsMap[entry[0]] = entry[1];
+        });
+        setProductDetailsById(detailsMap);
       } catch (error) {
         console.warn('[GlobalStateContext] Catalog API unavailable, using static fallback.', error);
       }
@@ -850,6 +879,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const allBrands: Brand[] = apiBrands.length > 0 ? apiBrands : fallbackBrands;
   const allCategories: CatalogCategory[] = catalogCategories;
   const allDeals: CatalogDeal[] = catalogDeals;
+  const allCreators: Creator[] = catalogCreators.length > 0 ? catalogCreators.map(mapCatalogCreator) : CREATORS;
+  const allGuides = catalogGuides.length > 0 ? catalogGuides.map(mapCatalogGuide) : BLOGS;
+  const allPlacements: CatalogPlacement[] = catalogPlacements;
 
   const addToCart = (product: any, quantity: number, selectedVariant?: any) => {
     if (mode === 'retail') {
@@ -1156,6 +1188,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       allProducts,
       allCategories,
       allDeals,
+      allCreators,
+      allGuides,
+      allPlacements,
+      productDetailsById,
       homepageConfig,
       siteConfig,
       rfqs,

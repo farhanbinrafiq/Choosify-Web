@@ -331,12 +331,34 @@ export function ProductDetailPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const { allProducts, allBrands, addToCart: globalAddToCart, mode, isLoggedIn, currentUser } = useGlobalState();
+  const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, mode, isLoggedIn, currentUser } = useGlobalState();
   
-  const product: any =
+  const baseProduct: any =
     allProducts.find((p: any) => p.id === Number(id)) ||
+    allProducts.find((p: any) => String(p.catalogId) === String(id)) ||
     allProducts.find((p: any) => p.id === Number(id) + 1000) ||
     allProducts[0];
+
+  const product = React.useMemo(() => {
+    const catalogKey = String(baseProduct?.catalogId || '');
+    const detail = productDetailsById[catalogKey];
+    if (!detail) return baseProduct;
+    return {
+      ...baseProduct,
+      about: detail.about || baseProduct?.description,
+      specs: detail.specs?.length ? detail.specs : baseProduct?.specs,
+      pros: detail.pros,
+      cons: detail.cons,
+      bestForTags: detail.bestForTags,
+      storeComparisonList: detail.storeComparisonList,
+      physicalStores: detail.physicalStores,
+      overviewBlocks: detail.overviewBlocks,
+      creatorContent: detail.creatorContent,
+      seoTitle: detail.seoTitle,
+      seoDescription: detail.seoDescription,
+      seoKeywords: detail.seoKeywords,
+    };
+  }, [baseProduct, productDetailsById]);
 
   // ── Optional Add-ons State ───────────────────────────────────────
   const [selectedAddonIds, setSelectedAddonIds] = useState<Set<string>>(new Set());

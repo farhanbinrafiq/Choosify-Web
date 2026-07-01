@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Link, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { PageSeo } from './components/PageSeo';
 import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingOverlays } from './components/FloatingOverlays';
 import { DashboardProvider } from './context/DashboardContext';
@@ -262,6 +263,7 @@ export default function App() {
               }} 
             />
             <ScrollToTop />
+            <PageSeo />
             <DrawerFilterProvider>
               <FloatingFilterProvider>
                 <AppContent />

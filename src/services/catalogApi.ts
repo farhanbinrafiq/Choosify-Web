@@ -1,8 +1,12 @@
 import type {
   CatalogBrand,
   CatalogCategory,
+  CatalogCreator,
   CatalogDeal,
+  CatalogGuide,
+  CatalogPlacement,
   CatalogProduct,
+  CatalogProductDetail,
   HomepageConfig,
   SiteConfig,
 } from '../types/catalog';
@@ -50,10 +54,45 @@ export const catalogApi = {
     featuredProducts: CatalogProduct[];
     featuredBrands: CatalogBrand[];
     featuredDeals: CatalogDeal[];
+    featuredCreators: CatalogCreator[];
+    featuredGuides: CatalogGuide[];
   }> => request('/catalog/home'),
 
   getSiteConfig: async (): Promise<SiteConfig> => {
     const result = await request<{ site: SiteConfig }>('/catalog/site');
     return result.site;
+  },
+
+  listCreators: async (): Promise<CatalogCreator[]> => {
+    const result = await request<{ data: CatalogCreator[] }>('/catalog/creators?status=live');
+    return result.data;
+  },
+
+  listGuides: async (): Promise<CatalogGuide[]> => {
+    const result = await request<{ data: CatalogGuide[] }>('/catalog/guides?status=live');
+    return result.data;
+  },
+
+  getGuide: async (id: string): Promise<CatalogGuide | null> => {
+    try {
+      return await request<CatalogGuide>(`/catalog/guides/${id}`);
+    } catch {
+      return null;
+    }
+  },
+
+  listPlacements: async (placement?: string): Promise<CatalogPlacement[]> => {
+    const query = new URLSearchParams({ active: 'true' });
+    if (placement) query.set('placement', placement);
+    const result = await request<{ data: CatalogPlacement[] }>(`/catalog/placements?${query.toString()}`);
+    return result.data;
+  },
+
+  getProductDetail: async (productId: string): Promise<CatalogProductDetail | null> => {
+    try {
+      return await request<CatalogProductDetail>(`/catalog/product-details/${productId}`);
+    } catch {
+      return null;
+    }
   },
 };

@@ -12,21 +12,14 @@ import {
 import { ProductCard } from '../components/ProductCard';
 import { CampaignBannerCarousel } from '../components/CampaignBannerCarousel';
 import { GlobalSearchBar } from '../components/GlobalSearchBar';
-import { PRODUCTS, BRANDS, BLOGS } from '../constants';
+import { PRODUCTS, BRANDS } from '../constants';
 import { FeaturedCard, ReelCard, HorizontalMediaCard } from './GuidesPage';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { useRegisterPageFilters } from '../components/FilterEngine';
-import { CREATORS } from '../data/creators';
 import { FollowButton } from '../components/FollowButton';
-import toast from 'react-hot-toast';
-import { motion } from 'motion/react';
-import { cn } from '../lib/utils';
-import { QuickAccessCard } from '../components/QuickAccessCard';
-import { BrandCardDesign } from '../components/BrandCardDesign';
-import { CreatorCardDesign } from '../components/CreatorCardDesign';
-import { getActiveHeroBanner, getSectionItemIds, isHomeSectionVisible } from '../utils/homepageCms';
-import { orderByCatalogIds, pickByCatalogIds } from '../utils/catalogMatch';
+import { pickByCatalogIds, orderByCatalogIds } from '../utils/catalogMatch';
+import { isPlacementActive } from '../utils/editorialMappers';
 
 const BRAND_IMAGES: Record<string, string> = {
   "Samsung": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
@@ -72,7 +65,7 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals, allCategories, homepageConfig, siteConfig, mode, addToCart, getCreatorClaimStatus } = useGlobalState();
+  const { allProducts, allBrands, allDeals, allCategories, allCreators, allGuides, allPlacements, homepageConfig, siteConfig, mode, addToCart, getCreatorClaimStatus } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -529,43 +522,26 @@ export function HomePage() {
     return rightBrandsList.filter((b: any) => b.ratings >= 4.7 || b.featuredFlag || b.sponsoredFlag).slice(0, 8);
   }, [rightBrandsList, homepageConfig]);
 
-  // Spotlight Creators list (5-8 maximum)
   const spotlightCreators = React.useMemo(() => {
-    return CREATORS.map(c => {
+    const featuredIds = homepageConfig?.featuredCreatorIds?.length
+      ? homepageConfig.featuredCreatorIds
+      : getSectionItemIds(homepageConfig, 'creators');
+    const source = featuredIds.length ? pickByCatalogIds(allCreators, featuredIds) : allCreators;
+    return source.map((c) => {
       let rating = 4.7;
       let reviews = 85;
-      let isHot = false;
-      let isFeatured = false;
-
-      if (c.id === 'creator-farhan') {
+      let isHot = c.score >= 95;
+      let isFeatured = c.score >= 90;
+      if (c.score >= 96) {
         rating = 4.9;
         reviews = 240;
-        isHot = true;
-      } else if (c.id === 'creator-sarah') {
+      } else if (c.score >= 92) {
         rating = 4.8;
         reviews = 190;
-        isFeatured = true;
-      } else if (c.id === 'creator-mily') {
-        rating = 4.9;
-        reviews = 150;
-        isHot = true;
-      } else if (c.id === 'creator-imtiaz') {
-        rating = 4.7;
-        reviews = 80;
-      } else if (c.id === 'creator-shakib') {
-        rating = 4.6;
-        reviews = 70;
       }
-
-      return {
-        ...c,
-        rating,
-        reviews,
-        isHot,
-        isFeatured
-      };
+      return { ...c, rating, reviews, isHot, isFeatured };
     }).slice(0, 8);
-  }, []);
+  }, [allCreators, homepageConfig]);
 
   const rightProductsList = React.useMemo(() => {
     const source = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
@@ -577,6 +553,12 @@ export function HomePage() {
   }, [allProducts, homepageConfig]);
 
   const sponsoredDeals = React.useMemo(() => {
+    const placementProducts = allPlacements
+      .filter((placement) => isPlacementActive(placement) && placement.placement === 'deals_section')
+      .map((placement) => allProducts.find((p: any) => String(p.catalogId || p.id) === placement.entityId))
+      .filter(Boolean);
+    if (placementProducts.length > 0) return placementProducts;
+
     const productsList = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
     return productsList.filter((p: any) => {
       // Check direct product flags
@@ -593,7 +575,7 @@ export function HomePage() {
       
       return false;
     });
-  }, [allProducts, allBrands]);
+  }, [allProducts, allBrands, allPlacements]);
 
   const styledSponsoredDeals = React.useMemo(() => {
     return sponsoredDeals.map((p: any, idx: number) => {
@@ -719,9 +701,19 @@ export function HomePage() {
     return rightProductsList.filter((p: any) => p.originalPrice || p.discount).slice(0, 4);
   }, [allDeals, homepageConfig, rightProductsList]);
 
-  // Blog list for recommendations
-  const featuredBlog = BLOGS.find(b => b.id === 2) || BLOGS[1];
-  const sideGuides = BLOGS.filter(b => b.id !== 2).slice(0, 3);
+  const homepageGuides = React.useMemo(() => {
+    const featuredIds = homepageConfig?.featuredGuideIds?.length
+      ? homepageConfig.featuredGuideIds
+      : getSectionItemIds(homepageConfig, 'recommended');
+    if (featuredIds.length) {
+      const picked = pickByCatalogIds(allGuides, featuredIds);
+      if (picked.length) return picked;
+    }
+    return allGuides;
+  }, [allGuides, homepageConfig]);
+
+  const featuredBlog = homepageGuides[0] || allGuides[0];
+  const sideGuides = homepageGuides.slice(1, 4);
 
   const popularCategoriesMock = [
     { name: "Fashion & Lifestyle", count: "50 Products . 10 Brands", id: 'Fashion & Lifestyle' },
@@ -1163,7 +1155,7 @@ export function HomePage() {
 
                 {/* Main Featured Buying Guide banner blog layout */}
                 <div className="mb-6">
-                  <FeaturedCard guide={BLOGS[0]} />
+                  <FeaturedCard guide={featuredBlog || homepageGuides[0]} />
                 </div>
 
                 {/* Sub Guides Grid matching elements visually */}
@@ -1172,9 +1164,9 @@ export function HomePage() {
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
                   style={{ paddingTop: '0px', paddingBottom: '0px' }}
                 >
-                  <ReelCard guide={BLOGS[1]} />
-                  <HorizontalMediaCard guide={BLOGS[2]} badgeType="youtube" />
-                  <HorizontalMediaCard guide={BLOGS[3]} badgeType="blog" />
+                  <ReelCard guide={sideGuides[0] || homepageGuides[1]} />
+                  <HorizontalMediaCard guide={sideGuides[1] || homepageGuides[2]} badgeType="youtube" />
+                  <HorizontalMediaCard guide={sideGuides[2] || homepageGuides[3]} badgeType="blog" />
                 </div>
 
                 {/* Explore all Recommendations bottom action button */}
