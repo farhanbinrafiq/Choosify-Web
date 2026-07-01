@@ -1563,6 +1563,36 @@ function TrendingBrandsCarousel({
 }: TrendingBrandsCarouselProps) {
   const TOTAL = carouselBrands.length;
   const [ringProgress, setRingProgress] = useState(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width);
+    });
+
+    observer.observe(node);
+    setContainerWidth(node.getBoundingClientRect().width);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const getCardWidths = () => {
+    // Desktop feed column is narrower than tablet (sidebars visible), so bias
+    // more width to the active card to match the tablet carousel proportions.
+    if (containerWidth < 560) {
+      return { active: '74%', side: '13%' };
+    }
+    if (containerWidth < 850) {
+      return { active: '70%', side: '15%' };
+    }
+    return { active: '62%', side: '19%' };
+  };
+
+  const cardWidths = getCardWidths();
 
   // Compute visible indices: [prev, active, next] with infinite wrap
   const prevIdx = (carouselIndex - 1 + TOTAL) % TOTAL;
@@ -1597,6 +1627,7 @@ function TrendingBrandsCarousel({
     <>
       {/* CAROUSEL TRACK */}
       <div
+        ref={containerRef}
         className="relative w-full overflow-hidden select-none"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -1605,16 +1636,17 @@ function TrendingBrandsCarousel({
         style={{ height: '500px' }}
       >
         {/* Cards container — flex row, always 3 cards */}
-        <div className="flex items-stretch gap-3 h-full w-full px-3">
+        <div className="flex items-stretch gap-3 h-full w-full px-1 sm:px-3">
           {visibleSlots.map(({ brand, slotIndex, position }) => {
             const isActive = position === 'active';
+            const cardWidth = isActive ? cardWidths.active : cardWidths.side;
 
             return (
               <motion.div
                 key={`${slotIndex}-${brand.id}`}
                 initial={false}
                 animate={{
-                  flex: isActive ? 5.5 : 1.8,
+                  width: cardWidth,
                   opacity: isActive ? 1 : 0.72,
                 }}
                 transition={{ type: 'spring', stiffness: 220, damping: 26, mass: 0.85 }}
@@ -1623,8 +1655,8 @@ function TrendingBrandsCarousel({
                   else if (position === 'next') goNext();
                   else navigate(`/brands/${brand.id}`);
                 }}
-                className="relative overflow-hidden cursor-pointer group"
-                style={{ borderRadius: '20px', minWidth: 0, flexShrink: 0 }}
+                className="relative overflow-hidden cursor-pointer group shrink-0"
+                style={{ borderRadius: '20px', flex: '0 0 auto' }}
               >
                 {/* Full-bleed background image */}
                 <img
