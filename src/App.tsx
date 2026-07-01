@@ -226,7 +226,7 @@ function AppContent() {
             <Route path="/seller/orders" element={<ProtectedRoute><PageWrapper><SellerIncomingOrdersPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/seller/orders/:id" element={<ProtectedRoute><PageWrapper><SellerOrderDetailsPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/cashbook*" element={<Navigate to="/" replace />} />
+            <Route path="/cashbook/*" element={<Navigate to="/" replace />} />
             <Route path="/messages" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/messages/:threadId" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/profile/orders" element={<ProtectedRoute><PageWrapper><CustomerOrdersPage /></PageWrapper></ProtectedRoute>} />
