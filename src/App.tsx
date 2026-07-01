@@ -190,6 +190,7 @@ function AppContent() {
             <Route path="/overview" element={<Overview />} />
             <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
             <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
+            <Route path="/b2b/product/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
             <Route path="/brands" element={<PageWrapper><BrandsPage /></PageWrapper>} />
             <Route path="/brands/:id" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
             <Route path="/brands/:id/products" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
@@ -219,6 +220,7 @@ function AppContent() {
 
             <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
+            <Route path="/cart/b2b" element={<ProtectedRoute><PageWrapper><CheckoutPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/checkout" element={<ProtectedRoute><PageWrapper><CheckoutPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />

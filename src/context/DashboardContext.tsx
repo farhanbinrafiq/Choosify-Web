@@ -109,6 +109,15 @@ interface DashboardContextType {
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
+function readStorageJson<T>(key: string, fallback: T): T {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) as T : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [savedProducts, setSavedProducts] = useState<any[]>(() => {
     try {
@@ -169,8 +178,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
   // Threaded Messaging States with Localstorage persistence
   const [threads, setThreads] = useState<MessageThread[]>(() => {
-    const saved = localStorage.getItem('choosify_threads');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorageJson<MessageThread[] | null>('choosify_threads', null);
+    if (saved) return saved;
     return [
       { id: 'thread-general', title: 'Farhan Rafiq (Admin)', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png', lastMessage: 'Absolutely! We can ship the S24 Ultra...', time: '10:30 AM', type: 'general', unread: true },
       { id: 'seller-samsung', title: 'Samsung Bangladesh Ltd.', avatar: 'https://i.pravatar.cc/150?u=samsung', lastMessage: 'Let us know your wholesale quantity requirements.', time: 'Yesterday', type: 'wholesale', unread: false },
@@ -179,8 +188,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const [threadMessages, setThreadMessages] = useState<ThreadMessage[]>(() => {
-    const saved = localStorage.getItem('choosify_thread_messages');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorageJson<ThreadMessage[] | null>('choosify_thread_messages', null);
+    if (saved) return saved;
     return [
       { id: 1, threadId: 'thread-general', text: 'Hello! I am interested in the Samsung S24 Ultra you posted. Is it still available?', sender: 'other', senderName: 'Rahat Hossain', time: '10:30 AM', avatar: 'https://i.pravatar.cc/150?u=1' },
       { id: 2, threadId: 'thread-general', text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', senderName: 'Me', time: '10:35 AM' },
@@ -230,8 +239,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
-    const saved = localStorage.getItem('choosify_campaigns');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorageJson<Campaign[] | null>('choosify_campaigns', null);
+    if (saved) return saved;
     return [
       {
         id: 'camp-1',
@@ -313,8 +322,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const [customOverviews, setCustomOverviews] = useState<CustomOverview[]>(() => {
-    const saved = localStorage.getItem('choosify_custom_overviews');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorageJson<CustomOverview[] | null>('choosify_custom_overviews', null);
+    if (saved) return saved;
     return [
       {
         id: 'co-sample-1',
@@ -493,35 +502,18 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     const handleReturnRequest = (e: CustomEvent) => {
       addNotification(`Return request submitted for order ${e.detail?.orderId || ''}.`, 'order');
     };
+    const handleOrderCancelled = (e: CustomEvent) => {
+      const orderId = e.detail?.orderId;
+      const reason = e.detail?.reason || 'No reason provided';
+      addNotification(`Order ${orderId} has been cancelled. Reason: ${reason}`, 'order');
+    };
     window.addEventListener('choosify-order-placed', handleOrderPlaced as EventListener);
     window.addEventListener('choosify-return-request', handleReturnRequest as EventListener);
+    window.addEventListener('choosify-order-cancelled', handleOrderCancelled as EventListener);
     return () => {
       window.removeEventListener('choosify-order-placed', handleOrderPlaced as EventListener);
       window.removeEventListener('choosify-return-request', handleReturnRequest as EventListener);
-    };
-  }, []);
-
-  // Listen to order actions from GlobalStateContext
-  useEffect(() => {
-    const handleOrderPlaced = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      const orderId = customEvent.detail?.orderId;
-      addNotification(`New split shipment order ${orderId} was successfully initialized for Farhan!`, 'order');
-    };
-
-    const handleOrderCancelled = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      const orderId = customEvent.detail?.orderId;
-      const reason = customEvent.detail?.reason || 'No reason provided';
-      addNotification(`Order ${orderId} has been cancelled. Reason: ${reason}`, 'order');
-    };
-
-    window.addEventListener('choosify-order-placed', handleOrderPlaced);
-    window.addEventListener('choosify-order-cancelled', handleOrderCancelled);
-
-    return () => {
-      window.removeEventListener('choosify-order-placed', handleOrderPlaced);
-      window.removeEventListener('choosify-order-cancelled', handleOrderCancelled);
+      window.removeEventListener('choosify-order-cancelled', handleOrderCancelled as EventListener);
     };
   }, []);
 

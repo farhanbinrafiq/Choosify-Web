@@ -279,8 +279,23 @@ export function ProductCard({
     addToCompare(product);
   };
 
-  const stock = product.stock || 12;
+  const stock = typeof product.stock === 'number' ? product.stock : 12;
+  const isOutOfStock = stock <= 0;
   const soldPercent = product.soldPercent || 85;
+
+  const handlePrimaryAction = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isGuideDetail) {
+      navigate(`/products/${product.id}`);
+      return;
+    }
+    if (isOutOfStock) {
+      toast.error(`"${product.title}" is currently out of stock.`);
+      return;
+    }
+    const qty = mode === 'retail' ? 1 : (product.moq || 10);
+    addToCart(product, qty);
+  };
 
   const StockProgress = ({ sm = false }: { sm?: boolean }) => (
     <div className={cn("flex flex-col gap-1.5", sm ? "w-full mb-3" : "w-full mb-6")}>
@@ -390,8 +405,9 @@ export function ProductCard({
                
                <button 
                  type="button" 
-                 onClick={(e) => { e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); } else { const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); } }} 
-                 className="w-10 h-10 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+                 onClick={handlePrimaryAction} 
+                 disabled={!isGuideDetail && isOutOfStock}
+                 className="w-10 h-10 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                  aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
                  title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
                >
@@ -507,13 +523,9 @@ export function ProductCard({
              
              <button 
                 type="button" 
-                onClick={(e) => { 
-                  e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
-                  const qty = mode === 'retail' ? 1 : (product.moq || 10); 
-                  addToCart(product, qty); 
-                  toast.success(`Successfully added ${product.title} to your cart!`);
-                }} 
-                className="w-8 h-8 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+                onClick={handlePrimaryAction} 
+                disabled={!isGuideDetail && isOutOfStock}
+                className="w-8 h-8 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                 aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
                 title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
              >
@@ -616,13 +628,9 @@ export function ProductCard({
             </div>
             <button 
               type="button"
-              onClick={(e) => {
-                e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
-                const qty = mode === 'retail' ? 1 : (product.moq || 10);
-                addToCart(product, qty);
-                toast.success(`Successfully added ${product.title} to your cart!`);
-              }}
-              className="w-10 h-10 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+              onClick={handlePrimaryAction}
+              disabled={!isGuideDetail && isOutOfStock}
+              className="w-10 h-10 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
               aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
               title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
             >
@@ -778,13 +786,9 @@ export function ProductCard({
           
           <button 
             type="button"
-            onClick={(e) => {
-              e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
-              const qty = mode === 'retail' ? 1 : (product.moq || 10);
-              addToCart(product, qty);
-              toast.success(`Successfully added ${product.title} to your cart!`);
-            }}
-            className="w-8 h-8 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+            onClick={handlePrimaryAction}
+            disabled={!isGuideDetail && isOutOfStock}
+            className="w-8 h-8 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
             aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
             title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
           >

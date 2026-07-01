@@ -399,7 +399,7 @@ export function FloatingOverlays() {
                   <button 
                     onClick={() => {
                       setActivePanel(null);
-                      navigate('/checkout');
+                      navigate('/checkout', { state: { sourceMode: mode } });
                     }}
                     className="py-3 px-4 bg-orange-primary hover:bg-[#FF5B00] rounded-2xl text-[10px] font-bold uppercase tracking-widest text-white transition-all text-center flex items-center justify-center gap-1 shadow-[0_4px_20px_rgba(249,101,0,0.3)] font-black italic cursor-pointer animate-pulse-subtle"
                   >

@@ -60,7 +60,8 @@ export function Navbar() {
     };
   }, []);
 
-  const activeCartCount = retailCart.length;
+  const activeCart = mode === 'retail' ? retailCart : wholesaleCart;
+  const activeCartCount = activeCart.reduce((sum, item) => sum + item.quantity, 0);
 
   const navItems = siteConfig?.navigation?.length
     ? [...siteConfig.navigation].sort((a, b) => a.order - b.order)
@@ -178,7 +179,7 @@ export function Navbar() {
             <button 
               type="button"
               onClick={() => {
-                navigate('/cart/retail');
+                setIsCartOpen(true);
               }}
               className="relative text-white/60 hover:text-white transition-colors mr-1"
               title="Shopping Cart"
@@ -186,7 +187,7 @@ export function Navbar() {
               <ShoppingBag size={20} className="transition-colors" />
               {activeCartCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 text-white text-[8px] font-black bg-orange-primary rounded-full flex items-center justify-center border-2 border-[#0A0A1F] animate-bounce">
-                  {activeCartCount}
+                  {activeCartCount > 9 ? '9+' : activeCartCount}
                 </span>
               )}
             </button>

@@ -42,9 +42,9 @@ export interface GlobalStateContextType {
   retailCart: CartItem[];
   wholesaleCart: CartItem[];
   addToCart: (product: any, quantity: number, selectedVariant?: any) => void;
-  removeFromCart: (productId: number) => void;
-  updateCartQuantity: (productId: number, quantity: number) => void;
-  clearCart: () => void;
+  removeFromCart: (productId: number, cartMode?: ProductModeType) => void;
+  updateCartQuantity: (productId: number, quantity: number, cartMode?: ProductModeType) => void;
+  clearCart: (cartMode?: ProductModeType) => void;
   orders: Order[];
   createOrder: (isCOD: boolean) => Order | null;
   cancelOrder: (orderId: string, reason: string) => void;
@@ -207,31 +207,40 @@ const GlobalStateContext = createContext<GlobalStateContextType | undefined>(und
 
 let _pendingPromo: { code: string; discount: number; type: 'flat' | 'percentage' } | null = null;
 
+function readStorageJson<T>(key: string, fallback: T): T {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) as T : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export function GlobalStateProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<ProductModeType>(() => {
-    const saved = localStorage.getItem('choosify_mode');
-    return (saved as ProductModeType) || 'retail';
+    try {
+      const saved = localStorage.getItem('choosify_mode');
+      return saved === 'wholesale' ? 'wholesale' : 'retail';
+    } catch {
+      return 'retail';
+    }
   });
 
-  const [retailCart, setRetailCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('choosify_retail_cart');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [retailCart, setRetailCart] = useState<CartItem[]>(() =>
+    readStorageJson<CartItem[]>('choosify_retail_cart', [])
+  );
 
-  const [wholesaleCart, setWholesaleCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('choosify_wholesale_cart');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [wholesaleCart, setWholesaleCart] = useState<CartItem[]>(() =>
+    readStorageJson<CartItem[]>('choosify_wholesale_cart', [])
+  );
 
-  const [reports, setReports] = useState<Report[]>(() => {
-    const saved = localStorage.getItem('choosify_reports');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [reports, setReports] = useState<Report[]>(() =>
+    readStorageJson<Report[]>('choosify_reports', [])
+  );
 
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem('choosify_orders');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [orders, setOrders] = useState<Order[]>(() =>
+    readStorageJson<Order[]>('choosify_orders', [])
+  );
 
   const [currentUser, setCurrentUser] = useState<User>(() => {
     try {
@@ -407,10 +416,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     return () => window.removeEventListener('choosify-promo-applied', handlePromo as EventListener);
   }, []);
 
-  const [rfqs, setRfqs] = useState<B2BRfq[]>(() => {
-    const saved = localStorage.getItem('choosify_b2b_rfqs');
-    return saved ? JSON.parse(saved) : INITIAL_RFQS;
-  });
+  const [rfqs, setRfqs] = useState<B2BRfq[]>(() =>
+    readStorageJson<B2BRfq[]>('choosify_b2b_rfqs', INITIAL_RFQS)
+  );
 
   useEffect(() => {
     localStorage.setItem('choosify_b2b_rfqs', JSON.stringify(rfqs));
@@ -852,6 +860,32 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const allDeals: CatalogDeal[] = catalogDeals;
 
   const addToCart = (product: any, quantity: number, selectedVariant?: any) => {
+    const availableStock = selectedVariant?.stock ?? product.stock;
+    if (typeof availableStock === 'number') {
+      if (availableStock <= 0) {
+        toast.error(`"${product.title}" is currently out of stock.`);
+        return;
+      }
+      if (quantity > availableStock) {
+        toast.error(`Only ${availableStock} units are available for "${product.title}".`);
+        return;
+      }
+
+      const currentCart = mode === 'retail' ? retailCart : wholesaleCart;
+      const existing = currentCart.find(item =>
+        mode === 'retail'
+          ? item.product.id === product.id &&
+            ((!item.selectedVariant && !selectedVariant) ||
+              item.selectedVariant?.sku === selectedVariant?.sku)
+          : item.id === product.id
+      );
+      const requestedTotal = (existing?.quantity || 0) + quantity;
+      if (requestedTotal > availableStock) {
+        toast.error(`Only ${availableStock} units are available for "${product.title}".`);
+        return;
+      }
+    }
+
     if (mode === 'retail') {
       setRetailCart(prev => {
         // Find existing with same product ID and exact same variant combination
@@ -891,8 +925,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     toast.success(`Added ${quantity} units to your ${mode === 'retail' ? 'Retail' : 'Wholesale'} Cart`);
   };
 
-  const removeFromCart = (productId: number) => {
-    if (mode === 'retail') {
+  const removeFromCart = (productId: number, cartMode: ProductModeType = mode) => {
+    if (cartMode === 'retail') {
       setRetailCart(prev => prev.filter(item => item.id !== productId));
     } else {
       setWholesaleCart(prev => prev.filter(item => item.id !== productId));
@@ -900,22 +934,33 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     toast.success('Removed from cart');
   };
 
-  const updateCartQuantity = (productId: number, quantity: number) => {
-    if (mode === 'retail') {
+  const updateCartQuantity = (productId: number, quantity: number, cartMode: ProductModeType = mode) => {
+    if (cartMode === 'retail') {
+      const item = retailCart.find(i => i.id === productId);
+      const availableStock = item?.selectedVariant?.stock ?? item?.product?.stock;
+      if (typeof availableStock === 'number' && quantity > availableStock) {
+        toast.error(`Only ${availableStock} units are currently available.`);
+        return;
+      }
       setRetailCart(prev => prev.map(item => item.id === productId ? { ...item, quantity } : item));
     } else {
       const item = wholesaleCart.find(i => i.id === productId);
       const minQty = item?.product?.moq || 10;
+      const availableStock = item?.selectedVariant?.stock ?? item?.product?.stock;
       if (quantity < minQty) {
         toast.error(`Cannot set quantity below Minimum Order Quantity (${minQty}) in Wholesale Mode.`);
+        return;
+      }
+      if (typeof availableStock === 'number' && quantity > availableStock) {
+        toast.error(`Only ${availableStock} units are currently available.`);
         return;
       }
       setWholesaleCart(prev => prev.map(item => item.id === productId ? { ...item, quantity } : item));
     }
   };
 
-  const clearCart = () => {
-    if (mode === 'retail') setRetailCart([]);
+  const clearCart = (cartMode: ProductModeType = mode) => {
+    if (cartMode === 'retail') setRetailCart([]);
     else setWholesaleCart([]);
   };
 
@@ -1070,6 +1115,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   const addOrder = (order: Order) => {
     setOrders(prev => [order, ...prev]);
+    window.dispatchEvent(new CustomEvent('choosify-order-placed', { detail: { orderId: order.orderId } }));
   };
 
   const updateSubOrderStatus = (parentOrderId: string, sellerId: string, nextStatus: 'pending' | 'dispatched' | 'transit' | 'delivered') => {

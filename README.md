@@ -15,6 +15,6 @@ View your app in AI Studio: https://ai.studio/apps/be493b60-1fec-408a-b6b9-e86fc
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Optional: set `VITE_API_BASE_URL` in `.env.local` if you want to point the catalog sync at a backend API.
 3. Run the app:
    `npm run dev`

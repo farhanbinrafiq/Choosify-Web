@@ -18,9 +18,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     retailCart,
     wholesaleCart,
     removeFromCart,
-    updateCartQuantity,
-    clearCart,
-    createOrder
+    updateCartQuantity
   } = useGlobalState();
 
   const [dealerCompanyName, setDealerCompanyName] = useState('Apex Distributors Ltd');
@@ -125,8 +123,22 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   };
 
   const handleCheckout = () => {
+    if (!validateCartBeforeCheckout()) return;
+
+    if (mode === 'wholesale') {
+      localStorage.setItem('b2b_company_name', dealerCompanyName.trim());
+      localStorage.setItem('b2b_trade_license', dealerTaxId.trim());
+    }
+
     onClose();
-    navigate('/cart/retail');
+    navigate('/checkout', {
+      state: {
+        sourceMode: mode,
+        isQuotationRequest: mode === 'wholesale' && isQuotationFlow,
+        companyName: dealerCompanyName.trim(),
+        tradeLicense: dealerTaxId.trim(),
+      },
+    });
   };
 
   return (

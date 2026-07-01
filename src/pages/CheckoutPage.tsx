@@ -26,14 +26,15 @@ const KNOWN_PROMOS = [
 ];
 
 export function CheckoutPage() {
-  const { mode, retailCart, wholesaleCart, createOrder, addOrder, clearCart, currentUser, buyerReputations } = useGlobalState();
+  const { mode, retailCart, wholesaleCart, addOrder, clearCart, currentUser, buyerReputations } = useGlobalState();
   const { createNewThread } = useDashboard();
   
   const navigate = useNavigate();
   const location = useLocation();
 
   // Find out if checking out retail or wholesale
-  const sourceMode: 'retail' | 'wholesale' = (location.state as any)?.sourceMode || mode;
+  const sourceMode: 'retail' | 'wholesale' =
+    (location.state as any)?.sourceMode || (location.pathname === '/cart/b2b' ? 'wholesale' : mode);
   const isQuotationRequest = (location.state as any)?.isQuotationRequest || false;
   const tradeLicense = (location.state as any)?.tradeLicense || localStorage.getItem('b2b_trade_license') || 'TR-2026/89412';
   const companyName = (location.state as any)?.companyName || localStorage.getItem('b2b_company_name') || 'Apex Distributors Ltd';
@@ -138,6 +139,23 @@ export function CheckoutPage() {
       toast.error('Please deliver all shipping credentials!');
       return;
     }
+    if (activeCart.length === 0) {
+      toast.error('Your checkout cart is empty.');
+      return;
+    }
+    if (paymentMethod === 'cod' && !isCODEligible) {
+      toast.error('Cash on Delivery is not available for this checkout. Please select credit or prepayment.');
+      return;
+    }
+    if (sourceMode === 'wholesale') {
+      for (const item of activeCart) {
+        const moq = item.product.moq || 10;
+        if (item.quantity < moq) {
+          toast.error(`"${item.product.title}" requires a minimum of ${moq} units.`);
+          return;
+        }
+      }
+    }
 
     // Trigger global order engine
     const tempOrderId = 'ORD-' + Math.floor(Math.random() * 90000 + 10000);
@@ -224,30 +242,28 @@ ORDER STATUS: PENDING_CONFIRMATION
 
     const fullOrderObject = {
       orderId: tempOrderId,
-      buyerId: 'user-standard',
+      buyerId: currentUser.id,
       isCOD: paymentMethod === 'cod',
       isSplit: splitCount > 1,
       overallTotal: finalTotal,
       subOrders: generatedSubOrders,
       createdAt: new Date().toISOString(),
       promoCode: appliedPromo?.code,
-      promoDiscount: promoDiscount
+      promoDiscount: promoDiscount,
+      promoType: appliedPromo?.type,
+      status: 'active' as const,
     };
-
-    if (appliedPromo) {
-      window.dispatchEvent(new CustomEvent('choosify-promo-applied', { detail: appliedPromo }));
-    }
 
     // Add to global state (which automatically updates localStorage and triggers reactivity)
     addOrder(fullOrderObject);
 
     // Clear active cart
-    clearCart();
+    clearCart(sourceMode);
 
     toast.success('Order placed successfully! Live support thread generated.');
     
     // Auto-open newly spawned buyer-seller conversation thread or show success screen
-    navigate('/order-success', { state: { order: fullOrderObject } });
+    navigate('/order-success', { state: { order: fullOrderObject, sourceMode } });
   };
 
   return (
