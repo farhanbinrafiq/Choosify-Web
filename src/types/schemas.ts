@@ -47,6 +47,7 @@ export interface Seller {
 export interface Brand {
   id: number;
   catalogId?: string;
+  slug?: string;
   name: string;
   logo: string;
   verifiedStatus: boolean;
@@ -69,6 +70,7 @@ export interface BulkPriceSlab {
 export interface Product {
   id: number;
   catalogId?: string;
+  slug?: string;
   title: string;
   image: string;
   mode_type: ProductModeType;
