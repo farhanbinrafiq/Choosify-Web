@@ -332,12 +332,15 @@ export function ProductDetailPage() {
   }, []);
 
   const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, mode, isLoggedIn, currentUser } = useGlobalState();
+
+  const productList = allProducts.length > 0 ? allProducts : PRODUCTS;
+  const brandList = allBrands.length > 0 ? allBrands : BRANDS;
   
   const baseProduct: any =
-    allProducts.find((p: any) => p.id === Number(id)) ||
-    allProducts.find((p: any) => String(p.catalogId) === String(id)) ||
-    allProducts.find((p: any) => p.id === Number(id) + 1000) ||
-    allProducts[0];
+    productList.find((p: any) => p.id === Number(id)) ||
+    productList.find((p: any) => String(p.catalogId) === String(id)) ||
+    productList.find((p: any) => p.id === Number(id) + 1000) ||
+    productList[0];
 
   const product = React.useMemo(() => {
     const catalogKey = String(baseProduct?.catalogId || '');
@@ -477,7 +480,8 @@ export function ProductDetailPage() {
     setComparedProducts((prev: any[]) => [product, ...prev]);
     toast.success('Added to comparison!');
   };
-  const brandObj = allBrands.find((b: any) => b.id === product.brandId);
+  const brandObj = brandList.find((b: any) => b.id === product.brandId) ||
+    brandList.find((b: any) => b.name?.toLowerCase() === product.brand?.toLowerCase());
   const brandId = brandObj ? brandObj.id : 1;
   const brandName = brandObj ? brandObj.name : "Apex";
 

@@ -4,6 +4,7 @@ import { Search, Folder, User, Check, Clock, ArrowRight, Sparkles, X } from 'luc
 import { PRODUCTS, BRANDS, CATEGORIES } from '../constants';
 import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
+import { useGlobalState } from '../context/GlobalStateContext';
 import { getBrandOverviews, getProductOverviews } from '../utils/overviewRegistry';
 import { toast } from 'react-hot-toast';
 
@@ -39,6 +40,16 @@ export function GlobalSearchBar({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const { customOverviews } = useDashboard();
+  const { allProducts, allBrands, allCategories, allCreators } = useGlobalState();
+
+  const productSource = allProducts.length > 0 ? allProducts : PRODUCTS;
+  const brandSource = allBrands.length > 0
+    ? allBrands.map((b) => ({ ...b, products: (b as any).followers ?? (b as any).products ?? 0, rating: (b as any).ratings ?? (b as any).rating ?? 0 }))
+    : BRANDS;
+  const creatorSource = allCreators.length > 0 ? allCreators : CREATORS;
+  const categorySource = allCategories.length > 0
+    ? allCategories.map((c) => ({ id: c.id, name: c.name, icon: c.icon }))
+    : CATEGORIES;
   
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -167,7 +178,7 @@ export function GlobalSearchBar({
       }));
 
     // 2.2 Products Matching (Check title, brand, category, description, and overviews)
-    const matchedProducts: SuggestionItem[] = PRODUCTS.filter(p => {
+    const matchedProducts: SuggestionItem[] = productSource.filter(p => {
       const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews || []);
       const matchedOverview = Object.values(pOverviews).some(val => 
         typeof val === 'string' && val.toLowerCase().includes(q)
@@ -191,7 +202,7 @@ export function GlobalSearchBar({
     }));
 
     // 2.3 Brands Matching (Check name, category, and overviews)
-    const matchedBrands: SuggestionItem[] = BRANDS.filter(b => {
+    const matchedBrands: SuggestionItem[] = brandSource.filter(b => {
       const bOverviews = getBrandOverviews(b.name, customOverviews || []);
       const matchedOverview = Object.values(bOverviews).some(val => 
         typeof val === 'string' && val.toLowerCase().includes(q)
@@ -212,7 +223,7 @@ export function GlobalSearchBar({
     }));
 
     // 2.4 Creators Matching (Check name, handle, bio, bestFor)
-    const matchedCreators: SuggestionItem[] = CREATORS.filter(c => {
+    const matchedCreators: SuggestionItem[] = creatorSource.filter(c => {
       return c.name.toLowerCase().includes(q) ||
              c.handle.toLowerCase().includes(q) ||
              c.bio.toLowerCase().includes(q) ||
@@ -229,7 +240,7 @@ export function GlobalSearchBar({
     }));
 
     // 2.5 Categories Matching (Check name)
-    const matchedCategories: SuggestionItem[] = CATEGORIES.filter(c => {
+    const matchedCategories: SuggestionItem[] = categorySource.filter(c => {
       return c.name.toLowerCase().includes(q);
     })
     .slice(0, 3)

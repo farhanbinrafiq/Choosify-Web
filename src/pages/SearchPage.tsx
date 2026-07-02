@@ -15,6 +15,7 @@ import { toast } from 'react-hot-toast';
 import { mockGuides } from '../data/mockGuides';
 import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
+import { useGlobalState } from '../context/GlobalStateContext';
 import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '../utils/overviewRegistry';
 import { useRegisterPageFilters } from '../components/FilterEngine';
 
@@ -122,6 +123,16 @@ export function SearchPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'products' | 'brands' | 'deals' | 'guides' | 'coupons' | 'categories' | 'influencers' | 'favorites' | 'compares'>('all');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const { customOverviews } = useDashboard();
+  const { allProducts, allBrands, allCategories, allCreators, allGuides } = useGlobalState();
+  const productSource = allProducts.length > 0 ? allProducts : PRODUCTS;
+  const brandSource = allBrands.length > 0
+    ? allBrands.map((b) => ({ ...b, products: (b as any).followers ?? (b as any).products ?? 0, rating: (b as any).ratings ?? (b as any).rating ?? 0 }))
+    : BRANDS;
+  const categorySource = allCategories.length > 0
+    ? allCategories.map((c) => ({ id: c.id, name: c.name, icon: c.icon }))
+    : CATEGORIES;
+  const guideSource = allGuides.length > 0 ? allGuides : mockGuides;
+  const creatorSource = allCreators.length > 0 ? allCreators : (Array.isArray(CREATORS) ? CREATORS : Object.values(CREATORS));
 
   useRegisterPageFilters({
     pageName: 'Search',
@@ -183,17 +194,17 @@ export function SearchPage() {
   };
 
   const filteredGuides = useMemo(() => {
-    if (!rawQuery.trim()) return mockGuides;
+    if (!rawQuery.trim()) return guideSource;
     const q = rawQuery.toLowerCase();
-    return mockGuides.filter((g: any) =>
+    return guideSource.filter((g: any) =>
       g.title?.toLowerCase().includes(q) ||
       g.author?.toLowerCase().includes(q) ||
       g.tags?.some((t: any) => String(t).toLowerCase().includes(q))
     );
-  }, [rawQuery]);
+  }, [rawQuery, guideSource]);
 
   const filteredCreators = useMemo(() => {
-    const creatorList = Array.isArray(CREATORS) ? CREATORS : Object.values(CREATORS);
+    const creatorList = creatorSource;
     if (!rawQuery.trim()) return creatorList;
     const q = rawQuery.toLowerCase();
     return creatorList.filter((c: any) =>
@@ -201,18 +212,18 @@ export function SearchPage() {
       c.handle?.toLowerCase().includes(q) ||
       c.bio?.toLowerCase().includes(q)
     );
-  }, [rawQuery]);
+  }, [rawQuery, creatorSource]);
 
   const filteredProducts = useMemo(() => {
-    if (!rawQuery.trim()) return PRODUCTS;
+    if (!rawQuery.trim()) return productSource;
     const q = rawQuery.toLowerCase();
-    return PRODUCTS.filter(p =>
+    return productSource.filter(p =>
       p.title.toLowerCase().includes(q) || 
       p.brand.toLowerCase().includes(q) || 
       p.category.toLowerCase().includes(q) || 
       (p.description || '').toLowerCase().includes(q)
     );
-  }, [rawQuery]);
+  }, [rawQuery, productSource]);
 
   const combinedCreators = useMemo(() => {
     const uniqueCreatorsMap = new Map<string, any>();
@@ -315,7 +326,7 @@ export function SearchPage() {
     // SEARCH DATABASES & CALCULATE INDIVIDUAL SCORES
     
     // 1. PRODUCTS
-    const matchedProducts = PRODUCTS.map(p => {
+    const matchedProducts = productSource.map(p => {
       const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews);
       const matchedOverview = matchOverviewContent(pOverviews, q);
 
@@ -335,7 +346,7 @@ export function SearchPage() {
     }).filter(Boolean) as any[];
 
     // 2. BRANDS
-    const matchedBrands = BRANDS.map(b => {
+    const matchedBrands = brandSource.map(b => {
       const bOverviews = getBrandOverviews(b.name, customOverviews);
       const matchedOverview = matchOverviewContent(bOverviews, q);
 
@@ -352,7 +363,7 @@ export function SearchPage() {
     }).filter(Boolean) as any[];
 
     // 3. DEALS
-    const productDeals = PRODUCTS.filter(p => p.originalPrice || p.tag === 'SALE' || p.tag === 'HOT').map(p => {
+    const productDeals = productSource.filter(p => p.originalPrice || p.tag === 'SALE' || p.tag === 'HOT').map(p => {
       const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews);
       const matchedOverview = matchOverviewContent(pOverviews, q);
 
@@ -414,7 +425,7 @@ export function SearchPage() {
     }).filter(Boolean) as any[];
 
     // 6. CATEGORIES
-    const matchedCategories = CATEGORIES.map(c => {
+    const matchedCategories = categorySource.map(c => {
       const match = c.name.toLowerCase().includes(q);
       if (!match) return null;
       return {
@@ -432,7 +443,7 @@ export function SearchPage() {
     });
 
     // 8. CUSTOMER FAVORITES (Products with tag === '❤️ Customer Favorite' / idx % 5 === 1)
-    const matchedFavorites = PRODUCTS.map((p, idx) => {
+    const matchedFavorites = productSource.map((p, idx) => {
       const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews);
       const matchedOverview = matchOverviewContent(pOverviews, q);
 
@@ -493,7 +504,7 @@ export function SearchPage() {
       compares: matchedCompares,
       total
     };
-  }, [rawQuery, filteredGuides, combinedCreators, customOverviews]);
+  }, [rawQuery, filteredGuides, combinedCreators, customOverviews, productSource, brandSource, categorySource]);
 
   // Tab configurations
   const tabConfig = [
