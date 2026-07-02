@@ -51,7 +51,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="aspect-[16/9] md:aspect-[2.2/1] w-full relative overflow-hidden bg-slate-950 rounded-xl">
+      <div className="aspect-[16/9] md:aspect-[2.2/1] w-full relative overflow-hidden bg-slate-950 rounded-[5px]">
         {guide.videoUrl ? (
           <video
             ref={videoRef}
@@ -76,7 +76,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
 
         {/* Badge: Featured Story */}
         <div className="absolute top-5 left-5 z-20">
-          <div className="bg-[#E8500A] px-3.5 py-1.5 rounded-[8px] flex items-center justify-center border border-white/10 shadow-sm">
+          <div className="bg-orange-primary px-3.5 py-1.5 rounded-[8px] flex items-center justify-center border border-white/10 shadow-sm">
             <span className="text-[10px] font-black tracking-wider text-white uppercase leading-none">★ FEATURED</span>
           </div>
         </div>
@@ -94,7 +94,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
           "absolute inset-0 flex items-center justify-center z-10 transition-all duration-300",
           isHovering ? "opacity-0 scale-[1.1]" : "opacity-100 scale-100"
         )}>
-          <div className="w-16 h-16 rounded-full bg-[#E02424] flex items-center justify-center border border-white/20 shadow-lg">
+          <div className="w-16 h-16 rounded-full bg-play-red flex items-center justify-center border border-white/20 shadow-lg">
             <Play className="text-white fill-white ml-1" size={24} />
           </div>
         </div>
@@ -107,7 +107,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
 
       {/* Content Section below Media */}
       <div className="pt-5 flex flex-col gap-2.5">
-        <h3 className="font-sans text-xl md:text-3xl font-black italic uppercase tracking-tighter text-[#0c133c] leading-tight hover:text-orange-primary transition-colors text-left">
+        <h3 className="font-sans text-xl md:text-3xl font-black italic uppercase tracking-tighter text-heading leading-tight hover:text-orange-primary transition-colors text-left">
           {guide.title}
         </h3>
         

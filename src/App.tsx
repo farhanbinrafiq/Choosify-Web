@@ -186,7 +186,7 @@ function AppContent() {
 
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
-      {showSiteChrome && <Navbar />}
+      {showSiteChrome && !isCompactShell && <Navbar />}
       <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
           <Routes location={location}>
@@ -207,7 +207,7 @@ function AppContent() {
             <Route path="/recommendations" element={<PageWrapper><GuidesPage /></PageWrapper>} />
             <Route path="/recommendations/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
-            <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
+            <Route path="/login" element={<LoginSignUpPage />} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/customer-favorite" element={<PageWrapper><CustomerFavoritePage /></PageWrapper>} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
