@@ -25,7 +25,7 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig } = useGlobalState();
-  const { threads, notifications = [], setNotifications } = useDashboard();
+  const { threads, notifications = [], setNotifications, savedProducts } = useDashboard();
 
   const unreadMsgCount = threads.filter(t => t.unread).length;
   const unreadNotifCount = notifications.filter((n: any) => !n.read).length;
@@ -197,7 +197,11 @@ export function Navbar() {
               title="Saved Vault"
             >
               <Bookmark size={20} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary/30 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">3</span>
+              {savedProducts.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary/30 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">
+                  {savedProducts.length > 9 ? '9+' : savedProducts.length}
+                </span>
+              )}
             </button>
             <button 
               type="button"
@@ -206,7 +210,7 @@ export function Navbar() {
               title="Secure Support Chats"
             >
               <div className="relative">
-                <MessageSquare size={19} className="text-orange-primary animate-pulse" />
+                <MessageSquare size={19} className={cn("text-orange-primary", unreadMsgCount > 0 && "animate-pulse")} />
                 {unreadMsgCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
                     {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
@@ -278,7 +282,7 @@ export function Navbar() {
                       initial={{ opacity: 0, scale: 0.95, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute right-0 mt-4 w-6 coordinate choosify-dark-gradient border border-white/10 rounded-2xl shadow-2xl p-4 z-50 overflow-hidden min-w-[240px]"
+                      className="absolute right-0 mt-4 choosify-dark-gradient border border-white/10 rounded-2xl shadow-2xl p-4 z-50 overflow-hidden min-w-[240px]"
                     >
                       <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 blur-2xl rounded-full" />
                       

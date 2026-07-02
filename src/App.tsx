@@ -181,11 +181,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const location = useLocation();
   const isOverview = location.pathname === '/overview';
-  const { mode } = useGlobalState();
+  const isCompactShell = location.pathname === '/login';
+  const showSiteChrome = !isOverview;
 
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
-      {!isOverview && <Navbar />}
+      {showSiteChrome && <Navbar />}
       <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
           <Routes location={location}>
@@ -239,8 +240,8 @@ function AppContent() {
           </Routes>
         </Suspense>
       </AnimatePresence>
-      {!isOverview && <FloatingOverlays />}
-      {!isOverview && <Footer />}
+      {!isOverview && !isCompactShell && <FloatingOverlays />}
+      {showSiteChrome && !isCompactShell && <Footer />}
     </div>
   );
 }
@@ -305,10 +306,22 @@ function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = React.useState(false);
 
   React.useEffect(() => {
+    const dismissed = localStorage.getItem('pwa-prompt-dismissed');
+    if (dismissed) {
+      const daysSince =
+        (Date.now() - Number(dismissed)) / (1000 * 60 * 60 * 24);
+      if (daysSince < 7) return;
+    }
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Only show after 30 seconds to not interrupt initial browse
+      const dismissedAgain = localStorage.getItem('pwa-prompt-dismissed');
+      if (dismissedAgain) {
+        const daysSinceDismiss =
+          (Date.now() - Number(dismissedAgain)) / (1000 * 60 * 60 * 24);
+        if (daysSinceDismiss < 7) return;
+      }
       setTimeout(() => setShowPrompt(true), 30000);
     };
     window.addEventListener('beforeinstallprompt', handler);
@@ -329,22 +342,11 @@ function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    // Don't show again for 7 days
     localStorage.setItem(
-      'pwa-prompt-dismissed', 
+      'pwa-prompt-dismissed',
       String(Date.now())
     );
   };
-
-  // Check if dismissed recently
-  React.useEffect(() => {
-    const dismissed = localStorage.getItem('pwa-prompt-dismissed');
-    if (dismissed) {
-      const daysSince = 
-        (Date.now() - Number(dismissed)) / (1000 * 60 * 60 * 24);
-      if (daysSince < 7) setShowPrompt(false);
-    }
-  }, []);
 
   // Don't show if already installed as PWA
   if (window.matchMedia('(display-mode: standalone)').matches) {
