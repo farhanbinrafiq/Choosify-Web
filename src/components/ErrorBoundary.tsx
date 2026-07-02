@@ -33,28 +33,28 @@ class ErrorBoundary extends React.Component<Props, State> {
 
     if (hasError) {
       return (
-        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mb-8">
-            <AlertTriangle size={48} className="text-red-500" />
+        <div className="min-h-screen choosify-dark-gradient flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-24 h-24 bg-orange-primary/10 border border-orange-primary/20 rounded-full flex items-center justify-center mb-8">
+            <AlertTriangle size={48} className="text-orange-primary" />
           </div>
-          <h1 className="text-4xl font-black text-navy uppercase tracking-tighter italic mb-4">Something went wrong</h1>
-          <p className="text-gray-500 max-w-md mb-12 font-bold italic uppercase text-[11px] tracking-widest leading-relaxed">
-            The discovery matrix has encountered an anomaly. Our experts have been notified.
+          <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic mb-4">Something went wrong</h1>
+          <p className="text-white/50 max-w-md mb-12 font-bold italic uppercase text-[11px] tracking-widest leading-relaxed">
+            The discovery matrix has encountered an anomaly. Try refreshing or return home.
             <br />
-            <span className="text-red-400 mt-2 block">{error?.message}</span>
+            <span className="text-orange-primary/80 mt-2 block normal-case tracking-normal font-medium">{error?.message}</span>
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <button 
               onClick={() => window.location.reload()}
-              className="px-10 py-4 bg-navy text-white text-[11px] font-black uppercase tracking-widest rounded-full flex items-center gap-2 hover:bg-orange-primary hover:scale-105 transition-all italic shadow-xl"
+              className="px-10 py-4 bg-orange-primary text-white text-[11px] font-black uppercase tracking-widest rounded-full flex items-center gap-2 hover:opacity-90 transition-all italic shadow-xl"
             >
               <RefreshCcw size={16} /> Re-initialize
             </button>
             <a 
               href="/"
-              className="px-10 py-4 bg-white border-2 border-navy text-navy text-[11px] font-black uppercase tracking-widest rounded-full flex items-center gap-2 hover:bg-navy hover:text-white hover:scale-105 transition-all italic shadow-xl"
+              className="px-10 py-4 bg-white/5 border border-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-full flex items-center gap-2 hover:bg-white/10 transition-all italic shadow-xl"
             >
-              <Home size={16} /> Return Base
+              <Home size={16} /> Return Home
             </a>
           </div>
         </div>

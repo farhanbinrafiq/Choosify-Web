@@ -56,14 +56,20 @@ export function FAQPage() {
                   <h2 className="text-base font-black text-[#1A1D4E] md:text-lg">{item.question}</h2>
                   <ChevronRight
                     size={18}
-                    className={`shrink-0 text-orange-primary transition-transform ${isOpen ? 'rotate-90' : ''}`}
+                    className={`shrink-0 text-orange-primary transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`}
                   />
                 </button>
-                {isOpen && (
-                  <div className="border-t border-gray-100 px-6 pb-6 pt-2 text-sm leading-relaxed text-gray-600">
-                    {item.answer}
+                <div
+                  className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+                    isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="border-t border-gray-100 px-6 pb-6 pt-2 text-sm leading-relaxed text-gray-600">
+                      {item.answer}
+                    </div>
                   </div>
-                )}
+                </div>
               </article>
             );
           })}
