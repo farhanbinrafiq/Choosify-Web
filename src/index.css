@@ -268,6 +268,13 @@
   }
 }
 
+/* Mobile FAB clearance for single action hub */
+@media (max-width: 640px) {
+  .mobile-fab-safe {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
 /* Prevent general page horizontal overflow issues on mobile */
 @media (max-width: 768px) {
   html, body, #root {

@@ -292,7 +292,7 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="pb-0"
+      className="pb-0 mobile-fab-safe sm:pb-0"
     >
       {children}
     </motion.div>
@@ -356,7 +356,8 @@ function PWAInstallPrompt() {
   if (!showPrompt) return null;
 
   return (
-    <div className="fixed bottom-[120px] left-3 right-3 
+    <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] left-3 right-3 
+                    sm:bottom-[120px]
                     lg:left-auto lg:right-6 lg:bottom-[200px] 
                     lg:w-80 z-[150] 
                     choosify-dark-gradient border border-white/10 

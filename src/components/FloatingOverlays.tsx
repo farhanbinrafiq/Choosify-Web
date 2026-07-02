@@ -12,7 +12,8 @@ import { useDashboard } from '../context/DashboardContext';
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { cn } from '../lib/utils';
 import { toast } from 'react-hot-toast';
-import { useFloatingFilter } from './FilterEngine';
+import { useFloatingFilter, useFloatingFilters } from './FilterEngine';
+import { MobileActionHub, type MobileHubAction } from './MobileActionHub';
 
 export function FloatingOverlays() {
   const navigate = useNavigate();
@@ -25,10 +26,16 @@ export function FloatingOverlays() {
   // Active floating panel state: null | 'cart' | 'inbox' | 'profile'
   const [activePanel, setActivePanel] = useState<'cart' | 'inbox' | 'profile' | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [mobileHubOpen, setMobileHubOpen] = useState(false);
   const filterDrawerRef = useRef<HTMLDivElement>(null);
+  const mobileHubRef = useRef<HTMLDivElement>(null);
 
   const { config: filterConfig } = useFloatingFilter();
-  const hasFilters = filterConfig.renderFilters !== null || (filterConfig.quickFilters && filterConfig.quickFilters.length > 0);
+  const { activeFiltersData: drawerFiltersData, setIsOpen: setDrawerFilterOpen, isOpen: drawerFilterOpen } = useFloatingFilters();
+  const hasFilters =
+    !drawerFiltersData &&
+    (filterConfig.renderFilters !== null || (filterConfig.quickFilters && filterConfig.quickFilters.length > 0));
+  const showFiltersAction = !!drawerFiltersData || hasFilters;
   
   // Selected thread inside mini message board for real-time nested chatting
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
@@ -56,10 +63,23 @@ export function FloatingOverlays() {
     };
   }, []);
 
-  // Close active panel upon route transition
-  useEffect(() => {
+  const closeAllOverlays = () => {
     setActivePanel(null);
     setFilterOpen(false);
+    setDrawerFilterOpen(false);
+    setMobileHubOpen(false);
+  };
+
+  const openFromMobileHub = (action: () => void) => {
+    setMobileHubOpen(false);
+    setFilterOpen(false);
+    setDrawerFilterOpen(false);
+    action();
+  };
+
+  // Close active panel upon route transition
+  useEffect(() => {
+    closeAllOverlays();
   }, [currentPath]);
 
   // Cart tracking details
@@ -81,13 +101,22 @@ export function FloatingOverlays() {
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (
+        mobileHubOpen &&
+        mobileHubRef.current &&
+        !mobileHubRef.current.contains(event.target as Node)
+      ) {
+        setMobileHubOpen(false);
+        return;
+      }
+
+      if (
         activePanel &&
         panelRef.current &&
         !panelRef.current.contains(event.target as Node) &&
         containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        !containerRef.current.contains(event.target as Node) &&
+        (!mobileHubRef.current || !mobileHubRef.current.contains(event.target as Node))
       ) {
-        // Only close if we are not clicking a route transition
         setActivePanel(null);
       }
 
@@ -102,19 +131,32 @@ export function FloatingOverlays() {
 
     document.addEventListener('mousedown', handleOutsideClick);
     return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [activePanel, filterOpen]);
+  }, [activePanel, filterOpen, mobileHubOpen]);
 
   // Close handler on ESC keypress
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setActivePanel(null);
-        setFilterOpen(false);
+        if (mobileHubOpen) {
+          setMobileHubOpen(false);
+          return;
+        }
+        if (activePanel) {
+          setActivePanel(null);
+          return;
+        }
+        if (filterOpen) {
+          setFilterOpen(false);
+          return;
+        }
+        if (drawerFilterOpen) {
+          setDrawerFilterOpen(false);
+        }
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [mobileHubOpen, activePanel, filterOpen, drawerFilterOpen, setDrawerFilterOpen]);
 
   // Trigger bounce on cart changes
   useEffect(() => {
@@ -246,13 +288,54 @@ export function FloatingOverlays() {
   // Custom motion transitions matching standard Choosify velocity
   const standardTransition = { type: "spring" as const, damping: 25, stiffness: 350 };
 
+  const mobileHubActions: MobileHubAction[] = [
+    ...(showFiltersAction
+      ? [{
+          id: 'filters',
+          label: 'Filters & Search',
+          description: filterConfig.pageName || 'Refine results',
+          icon: SlidersHorizontal,
+          badge: filterConfig.activeFilterCount > 0 ? filterConfig.activeFilterCount : undefined,
+          onClick: () => openFromMobileHub(() => {
+            if (drawerFiltersData) setDrawerFilterOpen(true);
+            else setFilterOpen(true);
+          }),
+        }]
+      : []),
+    {
+      id: 'profile',
+      label: 'Your Profile',
+      description: 'Account & settings',
+      icon: User,
+      onClick: () => openFromMobileHub(() => setActivePanel('profile')),
+    },
+    {
+      id: 'cart',
+      label: 'Quick Cart',
+      description: totalCartItems > 0 ? `${totalCartItems} item${totalCartItems === 1 ? '' : 's'}` : 'Empty cart',
+      icon: ShoppingCart,
+      badge: totalCartItems > 0 ? totalCartItems : undefined,
+      onClick: () => openFromMobileHub(() => setActivePanel('cart')),
+    },
+    {
+      id: 'messages',
+      label: 'Messages',
+      description: unreadCount > 0 ? `${unreadCount} unread` : 'Inbox',
+      icon: MessageSquare,
+      badge: unreadCount > 0 ? unreadCount : undefined,
+      onClick: () => openFromMobileHub(() => setActivePanel('inbox')),
+    },
+  ];
+
   return (
     <>
       <div 
         ref={containerRef}
         className={cn(
-          "fixed z-[220] flex flex-col items-end text-[#1A1D4E] font-sans",
-          isMobile ? "bottom-4 left-4 right-4 gap-3" : "bottom-6 right-6 lg:bottom-8 lg:right-8 gap-3 sm:gap-3.5"
+          "fixed z-[220] text-[#1A1D4E] font-sans",
+          isMobile
+            ? "inset-0 pointer-events-none"
+            : "bottom-6 right-6 lg:bottom-8 lg:right-8 flex flex-col items-end gap-3 sm:gap-3.5",
         )}
       >
       
@@ -271,7 +354,7 @@ export function FloatingOverlays() {
             className={cn(
               "bg-[#0A0B1E]/95 backdrop-blur-xl border border-white/10 overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] text-white flex flex-col",
               isMobile
-                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto"
                 : isTablet
                   ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
                   : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
@@ -431,7 +514,7 @@ export function FloatingOverlays() {
             className={cn(
               "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
               isMobile
-                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto"
                 : isTablet
                   ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
                   : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
@@ -577,7 +660,7 @@ export function FloatingOverlays() {
             className={cn(
               "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
               isMobile
-                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto"
                 : isTablet
                   ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
                   : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
@@ -737,13 +820,16 @@ export function FloatingOverlays() {
       </AnimatePresence>
 
       
-      {/* COORDINTED FLOATING ACTION TRIGGER STACK (No overlapping, consistent width) */}
-      <div className="flex flex-col-reverse items-end gap-3 w-[185px]">
+      {/* Desktop / tablet pill stack — hidden on mobile (replaced by MobileActionHub) */}
+      <div className="hidden sm:flex flex-col-reverse items-end gap-3 w-[185px]">
 
         {/* BUTTON 1: THE PROFILE PILL (Always visible, always matching width & borders) */}
         <motion.button
           id="floating-profile-dock-pill"
-          onClick={() => setActivePanel(activePanel === 'profile' ? null : 'profile')}
+          onClick={() => {
+            setActivePanel(activePanel === 'profile' ? null : 'profile');
+            if (activePanel !== 'profile') setFilterOpen(false);
+          }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className={cn(
@@ -937,19 +1023,19 @@ export function FloatingOverlays() {
 
     </div>
 
-    {/* FILTER LAUNCHER — BOTTOM LEFT — mirrors right-side profile stack position */}
-    {hasFilters && (
+    {/* FILTER LAUNCHER — desktop only; mobile uses action hub + DrawerFilterProvider */}
+    {hasFilters && !isMobile && (
       <div className={cn(
-        "fixed z-[219] flex flex-col items-start gap-3",
-        isMobile ? "bottom-4 left-4" : "bottom-6 left-6 lg:bottom-8 lg:left-8"
+        "fixed z-[219] flex flex-col items-start",
+        isMobile ? "bottom-4 left-4 right-4" : "bottom-6 left-6 lg:bottom-8 lg:left-8"
       )}>
         <AnimatePresence>
           {filterOpen && (
             <motion.div
               ref={filterDrawerRef}
-              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, scale: 0.95 }}
-              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, scale: 1 }}
-              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, scale: 0.95 }}
+              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
               transition={standardTransition}
               drag={isMobile ? "y" : false}
               dragConstraints={{ top: 0, bottom: 250 }}
@@ -957,13 +1043,13 @@ export function FloatingOverlays() {
               onDragEnd={(_e: any, info: any) => {
                 if (info.offset.y > 120) setFilterOpen(false);
               }}
-              style={isMobile ? undefined : { bottom: '100%', marginBottom: '12px' }}
+              style={isMobile || isTablet ? undefined : { bottom: '64px' }}
               className={cn(
                 "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
                 isMobile
-                  ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                  ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto"
                   : isTablet
-                    ? "fixed bottom-4 left-4 w-[420px] max-h-[70vh] rounded-[24px] z-[250]"
+                    ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
                     : "absolute left-0 w-[380px] rounded-[24px] max-h-[75vh]"
               )}
             >
@@ -1073,7 +1159,10 @@ export function FloatingOverlays() {
 
         {/* The pill button */}
         <motion.button
-          onClick={() => setFilterOpen(!filterOpen)}
+          onClick={() => {
+            setFilterOpen(!filterOpen);
+            if (!filterOpen) setActivePanel(null);
+          }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className={cn(
@@ -1109,6 +1198,25 @@ export function FloatingOverlays() {
           />
         </motion.button>
       </div>
+    )}
+
+    {isMobile && (
+      <MobileActionHub
+        isOpen={mobileHubOpen}
+        onToggle={() => {
+          if (mobileHubOpen) {
+            setMobileHubOpen(false);
+            return;
+          }
+          setActivePanel(null);
+          setFilterOpen(false);
+          setDrawerFilterOpen(false);
+          setMobileHubOpen(true);
+        }}
+        onClose={() => setMobileHubOpen(false)}
+        actions={mobileHubActions}
+        hubRef={mobileHubRef}
+      />
     )}
   </>
 );

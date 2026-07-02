@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, createContext, useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
-import { Star, ShieldCheck, HelpCircle, Check, Sparkles, Flame, Tag, DollarSign, Filter, Search, X, ChevronRight } from 'lucide-react';
+import { Star, ShieldCheck, HelpCircle, Check, Sparkles, Flame, Tag, DollarSign, Filter, Search, X, ChevronRight, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 // ==========================================
@@ -957,18 +958,20 @@ export function FullSidebarFilterPanel({
       footerActions: (
         <>
           <button
+            type="button"
             onClick={() => setIsOpen(false)}
-            className="flex-1 py-3 bg-[#E8500A] text-white hover:bg-[#CF4400] font-sans text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs border-none"
+            className="flex-1 py-3 bg-orange-primary text-white hover:bg-orange-deep font-sans text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs border-none"
           >
             Apply Filters
           </button>
           {onReset && (
             <button
+              type="button"
               onClick={() => {
                 onReset();
                 setIsOpen(false);
               }}
-              className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-sans text-[10px] font-black uppercase tracking-wider rounded-lg border border-white/15 flex items-center justify-center transition-all cursor-pointer"
+              className="flex-1 py-3 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-sans text-[10px] font-black uppercase tracking-wider rounded-lg border border-[#e8edf2] hover:border-rose-200 flex items-center justify-center transition-all cursor-pointer"
             >
               Reset All
             </button>
@@ -1064,17 +1067,30 @@ interface DrawerFilterContextType {
 const DrawerFilterContext = createContext<DrawerFilterContextType | undefined>(undefined);
 
 export function DrawerFilterProvider({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
   const [activeFiltersMap, setActiveFiltersMap] = useState<Record<string, FloatingFilterData>>({});
   const [activePageId, setActivePageId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const filterDrawerRef = useRef<HTMLDivElement>(null);
+  const filterContainerRef = useRef<HTMLDivElement>(null);
+
+  const standardTransition = { type: 'spring' as const, damping: 25, stiffness: 350 };
 
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 768px)");
-    setIsMobile(media.matches);
-    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
+    const mobileMedia = window.matchMedia('(max-width: 640px)');
+    const tabletMedia = window.matchMedia('(min-width: 641px) and (max-width: 1023px)');
+    setIsMobile(mobileMedia.matches);
+    setIsTablet(tabletMedia.matches);
+    const onMobile = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    const onTablet = (e: MediaQueryListEvent) => setIsTablet(e.matches);
+    mobileMedia.addEventListener('change', onMobile);
+    tabletMedia.addEventListener('change', onTablet);
+    return () => {
+      mobileMedia.removeEventListener('change', onMobile);
+      tabletMedia.removeEventListener('change', onTablet);
+    };
   }, []);
 
   const registerPageFilters = (id: string, data: FloatingFilterData) => {
@@ -1101,6 +1117,22 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!isOpen) return;
+      const target = event.target as Node;
+      if (filterDrawerRef.current?.contains(target)) return;
+      if (!isMobile && filterContainerRef.current?.contains(target)) return;
+      setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [isOpen, isMobile]);
+
   return (
     <DrawerFilterContext.Provider
       value={{
@@ -1113,172 +1145,186 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
     >
       {children}
 
-      {/* FLOATING LAUNCHER BUTTON ON BOTTOM LEFT */}
-      <AnimatePresence>
-        {activeFiltersData && !isOpen && (
-          <div className={cn(
-            "fixed z-[220] flex flex-col items-start font-sans",
-            isMobile ? "bottom-4 left-4" : "bottom-6 left-6 lg:bottom-8 lg:left-8"
-          )}>
-            <motion.button
-              id="floating-filters-launcher"
-              onClick={() => setIsOpen(true)}
-              initial={{ scale: 0, opacity: 0, y: 15 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0, opacity: 0, y: 15 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 cursor-pointer bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40 focus:outline-none group"
-              title="Filters & Search"
-            >
-              <div className="flex items-center gap-2">
-                <Filter size={15} className="text-[#8a9bb0] group-hover:text-[#E8500A] transition-colors" />
-                <span className="text-[10px] font-black uppercase tracking-wider">
-                  Filters & Search
-                </span>
-              </div>
-              <ChevronRight size={14} className="text-[#8a9bb0] group-hover:text-[#E8500A] group-hover:translate-x-1 transition-all" />
-            </motion.button>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* FILTER DRAWER / BOTTOM SHEET */}
-      <AnimatePresence>
-        {isOpen && activeFiltersData && (
-          <>
-            {/* Backdrop Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 z-[240]"
-              onClick={() => setIsOpen(false)}
-            />
-
-            {/* Drawer */}
-            <motion.div
-              id="floating-filter-drawer"
-              initial={isMobile ? { y: '100%' } : { x: '-100%' }}
-              animate={isMobile ? { y: 0 } : { x: 0 }}
-              exit={isMobile ? { y: '100%' } : { x: '-100%' }}
-              transition={{ type: "spring", damping: 25, stiffness: 350 }}
-              className={cn(
-                "bg-[#0A0B1E]/95 backdrop-blur-xl border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] text-white flex flex-col z-[250]",
-                isMobile
-                  ? "fixed bottom-0 left-0 right-0 h-[85vh] rounded-t-[32px] w-full border-t border-white/10"
-                  : "fixed left-0 top-0 bottom-0 w-[420px] max-w-full border-r border-white/10"
-              )}
-            >
-              {/* Drawer Header */}
-              <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02] shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
-                    <Filter size={16} />
-                  </div>
-                  <div>
-                    <div className="text-[10px] uppercase tracking-widest text-[#E8500A] font-extrabold text-left">Consolidated discovery</div>
-                    <h3 className="text-sm font-black uppercase italic tracking-wider text-left">Filter & Search Panel</h3>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/15 hover:border-white/20 transition-all text-white shrink-0 cursor-pointer"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-
-              {/* Drawer Scrollable Body with Clean light theme style for perfect high-contrast filter rendering */}
-              <div className="flex-1 overflow-y-auto bg-[#F8FBFD] text-navy scroll-smooth p-6 space-y-6 text-left">
-                {/* 1. Page Search */}
-                {(activeFiltersData.searchQuery !== undefined || activeFiltersData.onSearchSubmit) && (
-                  <div className="flex flex-col gap-2">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Page Directory Search</div>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        if (activeFiltersData.onSearchSubmit) {
-                          activeFiltersData.onSearchSubmit(activeFiltersData.searchQuery || '');
-                        }
-                      }}
-                      className="relative w-full bg-[#0A0B1E]/5 p-1 rounded-full border border-gray-200 focus-within:border-[#E8500A]/40 transition-all duration-300"
-                    >
-                      <div className="flex items-center bg-white rounded-full overflow-hidden">
-                        <div className="pl-4 text-[#E8500A] shrink-0">
-                          <Search className="w-4 h-4" />
-                        </div>
-                        <input
-                          type="text"
-                          value={activeFiltersData.searchQuery || ''}
-                          onChange={(e) => {
-                            if (activeFiltersData.setSearchQuery) {
-                              activeFiltersData.setSearchQuery(e.target.value);
-                            }
-                          }}
-                          placeholder={activeFiltersData.searchPlaceholder || "Search catalog..."}
-                          className="w-full h-10 bg-transparent outline-none pl-3 pr-20 text-navy text-xs font-semibold placeholder-gray-400 focus:outline-none focus:ring-0 border-none"
-                        />
-                        <button
-                          type="submit"
-                          className="absolute right-1.5 top-1.5 bottom-1.5 px-4 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                        >
-                          Search
-                        </button>
-                      </div>
-                    </form>
-                  </div>
+      {activeFiltersData && (
+        <div
+          ref={filterContainerRef}
+          className={cn(
+            'fixed z-[219] flex flex-col items-start',
+            isMobile ? 'pointer-events-none' : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
+          )}
+        >
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                ref={filterDrawerRef}
+                id="floating-filter-drawer"
+                initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+                animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+                transition={standardTransition}
+                drag={isMobile ? 'y' : false}
+                dragConstraints={{ top: 0, bottom: 250 }}
+                dragElastic={{ top: 0.1, bottom: 0.8 }}
+                onDragEnd={(_e, info) => {
+                  if (info.offset.y > 120) setIsOpen(false);
+                }}
+                style={isMobile || isTablet ? undefined : { bottom: '64px' }}
+                className={cn(
+                  'bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden',
+                  isMobile
+                    ? 'fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto'
+                    : isTablet
+                      ? 'fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]'
+                      : 'absolute left-0 w-[380px] rounded-[24px] max-h-[75vh]',
+                )}
+              >
+                {isMobile && (
+                  <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
                 )}
 
-                {/* 2. Quick Filters */}
-                {activeFiltersData.quickFilters && (
-                  <div className="flex flex-col gap-2">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Quick Filters</div>
-                    <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3 shadow-sm">
-                      {activeFiltersData.quickFilters}
+                <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-3 text-left">
+                    <div className="w-11 h-11 rounded-full bg-orange-primary/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
+                      <SlidersHorizontal size={18} className="text-orange-primary" />
                     </div>
-                  </div>
-                )}
-
-                {/* 3. Active Chips */}
-                {activeFiltersData.activeChips && (
-                  <div className="flex flex-col gap-2">
-                    {activeFiltersData.activeChips}
-                  </div>
-                )}
-
-                {/* 4. Full Filter Architecture V2 */}
-                {activeFiltersData.fullFilters && (
-                  <div className="flex flex-col gap-2">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Advanced Refinements</div>
                     <div>
-                      {activeFiltersData.fullFilters}
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-orange-primary">
+                        Consolidated Discovery
+                      </div>
+                      <h3 className="text-xs font-black text-heading leading-tight uppercase">
+                        Filters & Search
+                      </h3>
                     </div>
                   </div>
-                )}
-
-                {/* 5. Sorting */}
-                {activeFiltersData.sorting && (
-                  <div className="flex flex-col gap-2">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Sorting & Display</div>
-                    <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm">
-                      {activeFiltersData.sorting}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 6. Footer Actions */}
-              {activeFiltersData.footerActions && (
-                <div className="p-4 border-t border-white/5 bg-white/[0.02] flex gap-2 shrink-0">
-                  {activeFiltersData.footerActions}
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-heading transition-all border border-[#e8edf2] cursor-pointer"
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
+
+                <div className="flex-1 overflow-y-auto bg-[#F8FBFD] text-navy scroll-smooth p-5 space-y-5 text-left no-scrollbar">
+                  {(activeFiltersData.searchQuery !== undefined || activeFiltersData.onSearchSubmit) && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">Page Search</div>
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (activeFiltersData.onSearchSubmit) {
+                            activeFiltersData.onSearchSubmit(activeFiltersData.searchQuery || '');
+                          }
+                        }}
+                        className="relative w-full"
+                      >
+                        <div className="flex items-center bg-white rounded-xl border border-[#e8edf2] overflow-hidden focus-within:border-orange-primary/40 transition-all">
+                          <div className="pl-4 text-orange-primary shrink-0">
+                            <Search className="w-4 h-4" />
+                          </div>
+                          <input
+                            type="text"
+                            value={activeFiltersData.searchQuery || ''}
+                            onChange={(e) => {
+                              if (activeFiltersData.setSearchQuery) {
+                                activeFiltersData.setSearchQuery(e.target.value);
+                              }
+                            }}
+                            placeholder={activeFiltersData.searchPlaceholder || 'Search catalog...'}
+                            className="w-full h-11 bg-transparent outline-none pl-3 pr-4 text-heading text-xs font-semibold placeholder-gray-400 border-none"
+                          />
+                        </div>
+                      </form>
+                    </div>
+                  )}
+
+                  {activeFiltersData.quickFilters && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">Quick Filters</div>
+                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3 shadow-sm">
+                        {activeFiltersData.quickFilters}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeFiltersData.activeChips && (
+                    <div className="flex flex-col gap-2">{activeFiltersData.activeChips}</div>
+                  )}
+
+                  {activeFiltersData.fullFilters && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">All Filters</div>
+                      <div>{activeFiltersData.fullFilters}</div>
+                    </div>
+                  )}
+
+                  {activeFiltersData.sorting && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">Sorting & Display</div>
+                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-4 shadow-sm">
+                        {activeFiltersData.sorting}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {activeFiltersData.footerActions && (
+                  <div className="p-4 border-t border-[#e8edf2] bg-gray-50 flex gap-2 shrink-0">
+                    {activeFiltersData.footerActions}
+                  </div>
+                )}
+
+                {isMobile && !activeFiltersData.footerActions && (
+                  <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setIsOpen(false)}
+                      className="w-full py-3.5 bg-orange-primary hover:bg-orange-deep text-white text-[11px] font-black uppercase tracking-widest rounded-[8px] transition-colors cursor-pointer border-0"
+                    >
+                      Show Results
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {!isMobile && (
+          <motion.button
+            id="floating-filters-launcher"
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={cn(
+              'w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none',
+              isOpen
+                ? 'bg-surface-selected border-orange-primary text-orange-primary'
+                : 'bg-white border-[#e8edf2] text-heading hover:border-orange-primary/40',
+            )}
+            title="Filters & Search"
+          >
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal
+                size={15}
+                className={cn(
+                  'transition-colors',
+                  isOpen ? 'text-orange-primary' : 'text-[#8a9bb0] group-hover:text-orange-primary',
+                )}
+              />
+              <span className="text-[10px] font-black uppercase tracking-wider">Filters & Search</span>
+            </div>
+            <ChevronRight
+              size={14}
+              className={cn(
+                'transition-transform duration-300',
+                isOpen ? 'text-orange-primary rotate-90' : 'text-[#8a9bb0] group-hover:text-orange-primary group-hover:translate-x-1',
               )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+            />
+          </motion.button>
+          )}
+        </div>
+      )}
     </DrawerFilterContext.Provider>
   );
 }
