@@ -104,6 +104,7 @@ export function Footer() {
               { id: 'legal', title: 'LEGAL', links: [
                 { label: 'Terms', url: '/terms' },
                 { label: 'Policy', url: '/privacy' },
+                { label: 'FAQ', url: '/faq' },
                 { label: 'Contact us', url: '/contact' },
                 { label: 'About', url: '/about' },
               ]},

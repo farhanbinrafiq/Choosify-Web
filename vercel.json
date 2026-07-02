@@ -5,6 +5,10 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/robots.txt",
+      "destination": "/api/robots"
+    },
+    {
       "source": "/api/v1/:path*",
       "destination": "https://dashboard.choosify.bd/api/v1/:path*"
     },

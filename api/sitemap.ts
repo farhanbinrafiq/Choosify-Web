@@ -1,34 +1,9 @@
-const SITE_URL = 'https://www.choosify.bd';
-const CATALOG_API =
-  process.env.CATALOG_API_BASE_URL?.replace(/\/$/, '') ||
-  'https://dashboard.choosify.bd/api/v1';
-
-const STATIC_PATHS: Array<{
-  path: string;
-  changeFrequency: string;
-  priority: number;
-}> = [
-  { path: '/', changeFrequency: 'daily', priority: 1.0 },
-  { path: '/products', changeFrequency: 'daily', priority: 0.9 },
-  { path: '/brands', changeFrequency: 'daily', priority: 0.9 },
-  { path: '/categories', changeFrequency: 'weekly', priority: 0.8 },
-  { path: '/deals', changeFrequency: 'daily', priority: 0.85 },
-  { path: '/compare', changeFrequency: 'weekly', priority: 0.7 },
-  { path: '/guides', changeFrequency: 'daily', priority: 0.85 },
-  { path: '/recommendations', changeFrequency: 'daily', priority: 0.8 },
-  { path: '/creators', changeFrequency: 'weekly', priority: 0.75 },
-  { path: '/search', changeFrequency: 'weekly', priority: 0.5 },
-  { path: '/about', changeFrequency: 'monthly', priority: 0.5 },
-  { path: '/contact', changeFrequency: 'monthly', priority: 0.5 },
-  { path: '/terms', changeFrequency: 'yearly', priority: 0.3 },
-  { path: '/privacy', changeFrequency: 'yearly', priority: 0.3 },
-  { path: '/partnership', changeFrequency: 'monthly', priority: 0.5 },
-  { path: '/advertise', changeFrequency: 'monthly', priority: 0.5 },
-  { path: '/b2b', changeFrequency: 'monthly', priority: 0.5 },
-  { path: '/suggest-brand', changeFrequency: 'monthly', priority: 0.4 },
-  { path: '/customer-favorite', changeFrequency: 'weekly', priority: 0.6 },
-  { path: '/brand-deals', changeFrequency: 'daily', priority: 0.7 },
-];
+import {
+  CATALOG_API_BASE_URL,
+  NOINDEX_PATH_PREFIXES,
+  SITE_URL,
+  SITEMAP_STATIC_PATHS,
+} from '../lib/seoShared';
 
 type SitemapEntry = {
   loc: string;
@@ -41,7 +16,7 @@ type CatalogListResponse<T> = { data: T[] };
 
 async function fetchCatalog<T>(path: string): Promise<T[]> {
   try {
-    const response = await fetch(`${CATALOG_API}${path}`, {
+    const response = await fetch(`${CATALOG_API_BASE_URL}${path}`, {
       headers: { Accept: 'application/json' },
     });
     if (!response.ok) return [];
@@ -85,6 +60,10 @@ function buildXml(entries: SitemapEntry[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
+function routeId(record: { id: string; slug?: string }): string {
+  return encodeURIComponent(record.slug || record.id);
+}
+
 export default async function handler(
   _req: unknown,
   res: {
@@ -93,32 +72,37 @@ export default async function handler(
   },
 ) {
   const now = new Date().toISOString();
-  const entries: SitemapEntry[] = STATIC_PATHS.map((item) => ({
+  const entries: SitemapEntry[] = SITEMAP_STATIC_PATHS.map((item) => ({
     loc: `${SITE_URL}${item.path}`,
     lastmod: now,
     changefreq: item.changeFrequency,
     priority: item.priority,
   }));
 
-  const [products, brands, categories, guides, creators] = await Promise.all([
+  const [products, brands, categories, guides, creators, deals] = await Promise.all([
     fetchCatalog<{ id: string; slug?: string; updatedAt?: string; status?: string }>(
       '/catalog/products',
     ),
     fetchCatalog<{ id: string; slug?: string; updatedAt?: string }>('/catalog/brands'),
-    fetchCatalog<{ id: string; slug?: string; updatedAt?: string }>('/catalog/categories'),
+    fetchCatalog<{ id: string; slug?: string; updatedAt?: string; enabled?: boolean }>(
+      '/catalog/categories',
+    ),
     fetchCatalog<{ id: string; slug?: string; updatedAt?: string; status?: string }>(
       '/catalog/guides?status=live',
     ),
     fetchCatalog<{ id: string; slug?: string; updatedAt?: string; status?: string }>(
       '/catalog/creators?status=live',
     ),
+    fetchCatalog<{ id: string; slug?: string; updatedAt?: string; status?: string }>(
+      '/catalog/deals',
+    ),
   ]);
 
   for (const product of products) {
     if (product.status && product.status !== 'live') continue;
-    const id = product.slug || product.id;
+    const id = routeId(product);
     entries.push({
-      loc: `${SITE_URL}/products/${encodeURIComponent(id)}`,
+      loc: `${SITE_URL}/products/${id}`,
       lastmod: toIsoDate(product.updatedAt) || now,
       changefreq: 'weekly',
       priority: 0.8,
@@ -126,49 +110,85 @@ export default async function handler(
   }
 
   for (const brand of brands) {
-    const id = brand.slug || brand.id;
+    const id = routeId(brand);
     entries.push({
-      loc: `${SITE_URL}/brands/${encodeURIComponent(id)}`,
+      loc: `${SITE_URL}/brands/${id}`,
       lastmod: toIsoDate(brand.updatedAt) || now,
       changefreq: 'weekly',
       priority: 0.75,
     });
-  }
-
-  for (const category of categories) {
-    if (category.slug) {
-      entries.push({
-        loc: `${SITE_URL}/categories?category=${encodeURIComponent(category.slug)}`,
-        lastmod: toIsoDate(category.updatedAt) || now,
-        changefreq: 'weekly',
-        priority: 0.65,
-      });
-    }
-  }
-
-  for (const guide of guides) {
-    const id = guide.slug || guide.id;
     entries.push({
-      loc: `${SITE_URL}/guides/${encodeURIComponent(id)}`,
-      lastmod: toIsoDate(guide.updatedAt) || now,
+      loc: `${SITE_URL}/brands/${id}/products`,
+      lastmod: toIsoDate(brand.updatedAt) || now,
       changefreq: 'weekly',
       priority: 0.7,
     });
+  }
+
+  for (const category of categories) {
+    if (category.enabled === false) continue;
+    const slug = category.slug || category.id;
     entries.push({
-      loc: `${SITE_URL}/recommendations/${encodeURIComponent(id)}`,
-      lastmod: toIsoDate(guide.updatedAt) || now,
+      loc: `${SITE_URL}/categories?category=${encodeURIComponent(slug)}`,
+      lastmod: toIsoDate(category.updatedAt) || now,
+      changefreq: 'weekly',
+      priority: 0.65,
+    });
+    entries.push({
+      loc: `${SITE_URL}/products?category=${encodeURIComponent(slug)}`,
+      lastmod: toIsoDate(category.updatedAt) || now,
       changefreq: 'weekly',
       priority: 0.65,
     });
   }
 
-  for (const creator of creators) {
-    const id = creator.slug || creator.id;
+  for (const guide of guides) {
+    const id = routeId(guide);
+    const lastmod = toIsoDate(guide.updatedAt) || now;
     entries.push({
-      loc: `${SITE_URL}/creators/${encodeURIComponent(id)}`,
+      loc: `${SITE_URL}/guides/${id}`,
+      lastmod,
+      changefreq: 'weekly',
+      priority: 0.7,
+    });
+    entries.push({
+      loc: `${SITE_URL}/blogs/${id}`,
+      lastmod,
+      changefreq: 'weekly',
+      priority: 0.68,
+    });
+    entries.push({
+      loc: `${SITE_URL}/recommendations/${id}`,
+      lastmod,
+      changefreq: 'weekly',
+      priority: 0.65,
+    });
+    entries.push({
+      loc: `${SITE_URL}/guides/${id}/products`,
+      lastmod,
+      changefreq: 'weekly',
+      priority: 0.6,
+    });
+  }
+
+  for (const creator of creators) {
+    const id = routeId(creator);
+    entries.push({
+      loc: `${SITE_URL}/creators/${id}`,
       lastmod: toIsoDate(creator.updatedAt) || now,
       changefreq: 'monthly',
       priority: 0.6,
+    });
+  }
+
+  for (const deal of deals) {
+    if (deal.status && deal.status !== 'live') continue;
+    const id = routeId(deal);
+    entries.push({
+      loc: `${SITE_URL}/deals#${id}`,
+      lastmod: toIsoDate(deal.updatedAt) || now,
+      changefreq: 'daily',
+      priority: 0.7,
     });
   }
 
@@ -181,3 +201,6 @@ export default async function handler(
   res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
   res.status(200).send(buildXml([...unique.values()]));
 }
+
+// Exported for tests and reuse
+export { NOINDEX_PATH_PREFIXES };

@@ -828,6 +828,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     return {
       id: toNumericId(brand.id, idx + 1),
       catalogId: brand.id,
+      slug: brand.slug,
       name: brand.name,
       logo: brand.logo || brand.name.slice(0, 2).toUpperCase(),
       verifiedStatus: brand.verifiedStatus || status === 'verified',
@@ -848,6 +849,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     return {
       id: modeType === 'wholesale' ? normalizedId + 1000 : normalizedId,
       catalogId: product.id,
+      slug: product.slug,
       title: product.title,
       image: product.image || '',
       mode_type: modeType,

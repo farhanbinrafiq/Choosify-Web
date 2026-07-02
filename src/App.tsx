@@ -41,6 +41,7 @@ const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
 const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
+const FAQPage = lazy(() => import('./pages/FAQPage').then(m => ({ default: m.FAQPage })));
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const BrandDealsPage = lazy(() => import('./pages/BrandDealsPage').then(m => ({ default: m.BrandDealsPage })));
@@ -199,6 +200,8 @@ function AppContent() {
             <Route path="/deals" element={<PageWrapper><DealsPage /></PageWrapper>} />
             <Route path="/compare" element={<PageWrapper><ComparePage /></PageWrapper>} />
             <Route path="/guides" element={<PageWrapper><GuidesPage /></PageWrapper>} />
+            <Route path="/blogs" element={<Navigate to="/guides" replace />} />
+            <Route path="/blogs/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
             <Route path="/guides/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
             <Route path="/recommendations" element={<PageWrapper><GuidesPage /></PageWrapper>} />
             <Route path="/recommendations/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
@@ -218,6 +221,7 @@ function AppContent() {
             <Route path="/privacy" element={<PageWrapper><PrivacyPage /></PageWrapper>} />
             <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
             <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
+            <Route path="/faq" element={<PageWrapper><FAQPage /></PageWrapper>} />
 
             <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
