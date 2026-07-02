@@ -1,34 +1,47 @@
-import {
-  CATALOG_API_BASE_URL,
-  NOINDEX_PATH_PREFIXES,
-  SITE_URL,
-  SITEMAP_STATIC_PATHS,
-} from '../lib/seoShared';
+const SITE_URL = 'https://www.choosify.bd';
+const CATALOG_API =
+  (process.env.CATALOG_API_BASE_URL || 'https://dashboard.choosify.bd/api/v1').replace(/\/$/, '');
 
-type SitemapEntry = {
-  loc: string;
-  lastmod?: string;
-  changefreq?: string;
-  priority?: number;
-};
+const STATIC_PATHS = [
+  { path: '/', changeFrequency: 'daily', priority: 1.0 },
+  { path: '/products', changeFrequency: 'daily', priority: 0.9 },
+  { path: '/brands', changeFrequency: 'daily', priority: 0.9 },
+  { path: '/categories', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/deals', changeFrequency: 'daily', priority: 0.85 },
+  { path: '/compare', changeFrequency: 'weekly', priority: 0.7 },
+  { path: '/guides', changeFrequency: 'daily', priority: 0.85 },
+  { path: '/blogs', changeFrequency: 'daily', priority: 0.85 },
+  { path: '/recommendations', changeFrequency: 'daily', priority: 0.8 },
+  { path: '/creators', changeFrequency: 'weekly', priority: 0.75 },
+  { path: '/search', changeFrequency: 'weekly', priority: 0.5 },
+  { path: '/about', changeFrequency: 'monthly', priority: 0.5 },
+  { path: '/contact', changeFrequency: 'monthly', priority: 0.5 },
+  { path: '/faq', changeFrequency: 'monthly', priority: 0.55 },
+  { path: '/terms', changeFrequency: 'yearly', priority: 0.3 },
+  { path: '/privacy', changeFrequency: 'yearly', priority: 0.3 },
+  { path: '/partnership', changeFrequency: 'monthly', priority: 0.5 },
+  { path: '/advertise', changeFrequency: 'monthly', priority: 0.5 },
+  { path: '/b2b', changeFrequency: 'monthly', priority: 0.5 },
+  { path: '/suggest-brand', changeFrequency: 'monthly', priority: 0.4 },
+  { path: '/customer-favorite', changeFrequency: 'weekly', priority: 0.6 },
+  { path: '/brand-deals', changeFrequency: 'daily', priority: 0.7 },
+];
 
-type CatalogListResponse<T> = { data: T[] };
-
-async function fetchCatalog<T>(path: string): Promise<T[]> {
+async function fetchCatalog(path) {
   try {
-    const response = await fetch(`${CATALOG_API_BASE_URL}${path}`, {
+    const response = await fetch(`${CATALOG_API}${path}`, {
       headers: { Accept: 'application/json' },
     });
     if (!response.ok) return [];
-    const json = (await response.json()) as CatalogListResponse<T>;
+    const json = await response.json();
     return json.data ?? [];
   } catch {
     return [];
   }
 }
 
-function escapeXml(value: string): string {
-  return value
+function escapeXml(value) {
+  return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -36,13 +49,17 @@ function escapeXml(value: string): string {
     .replace(/'/g, '&apos;');
 }
 
-function toIsoDate(value?: string): string | undefined {
+function toIsoDate(value) {
   if (!value) return undefined;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
-function buildXml(entries: SitemapEntry[]): string {
+function routeId(record) {
+  return encodeURIComponent(record.slug || record.id);
+}
+
+function buildXml(entries) {
   const urls = entries
     .map((entry) => {
       const parts = [
@@ -60,49 +77,27 @@ function buildXml(entries: SitemapEntry[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
-function routeId(record: { id: string; slug?: string }): string {
-  return encodeURIComponent(record.slug || record.id);
-}
-
-export default async function handler(
-  _req: unknown,
-  res: {
-    setHeader: (name: string, value: string) => void;
-    status: (code: number) => { send: (body: string) => void };
-  },
-) {
+module.exports = async function handler(_req, res) {
   const now = new Date().toISOString();
-  const entries: SitemapEntry[] = SITEMAP_STATIC_PATHS.map((item) => ({
+  const entries = STATIC_PATHS.map((item) => ({
     loc: `${SITE_URL}${item.path}`,
     lastmod: now,
     changefreq: item.changeFrequency,
     priority: item.priority,
   }));
 
-  const [products, brands, categories, guides, creators, deals] = await Promise.all([
-    fetchCatalog<{ id: string; slug?: string; updatedAt?: string; status?: string }>(
-      '/catalog/products',
-    ),
-    fetchCatalog<{ id: string; slug?: string; updatedAt?: string }>('/catalog/brands'),
-    fetchCatalog<{ id: string; slug?: string; updatedAt?: string; enabled?: boolean }>(
-      '/catalog/categories',
-    ),
-    fetchCatalog<{ id: string; slug?: string; updatedAt?: string; status?: string }>(
-      '/catalog/guides?status=live',
-    ),
-    fetchCatalog<{ id: string; slug?: string; updatedAt?: string; status?: string }>(
-      '/catalog/creators?status=live',
-    ),
-    fetchCatalog<{ id: string; slug?: string; updatedAt?: string; status?: string }>(
-      '/catalog/deals',
-    ),
+  const [products, brands, categories, guides, creators] = await Promise.all([
+    fetchCatalog('/catalog/products'),
+    fetchCatalog('/catalog/brands'),
+    fetchCatalog('/catalog/categories'),
+    fetchCatalog('/catalog/guides?status=live'),
+    fetchCatalog('/catalog/creators?status=live'),
   ]);
 
   for (const product of products) {
     if (product.status && product.status !== 'live') continue;
-    const id = routeId(product);
     entries.push({
-      loc: `${SITE_URL}/products/${id}`,
+      loc: `${SITE_URL}/products/${routeId(product)}`,
       lastmod: toIsoDate(product.updatedAt) || now,
       changefreq: 'weekly',
       priority: 0.8,
@@ -145,18 +140,8 @@ export default async function handler(
   for (const guide of guides) {
     const id = routeId(guide);
     const lastmod = toIsoDate(guide.updatedAt) || now;
-    entries.push({
-      loc: `${SITE_URL}/guides/${id}`,
-      lastmod,
-      changefreq: 'weekly',
-      priority: 0.7,
-    });
-    entries.push({
-      loc: `${SITE_URL}/blogs/${id}`,
-      lastmod,
-      changefreq: 'weekly',
-      priority: 0.68,
-    });
+    entries.push({ loc: `${SITE_URL}/guides/${id}`, lastmod, changefreq: 'weekly', priority: 0.7 });
+    entries.push({ loc: `${SITE_URL}/blogs/${id}`, lastmod, changefreq: 'weekly', priority: 0.68 });
     entries.push({
       loc: `${SITE_URL}/recommendations/${id}`,
       lastmod,
@@ -172,35 +157,18 @@ export default async function handler(
   }
 
   for (const creator of creators) {
-    const id = routeId(creator);
     entries.push({
-      loc: `${SITE_URL}/creators/${id}`,
+      loc: `${SITE_URL}/creators/${routeId(creator)}`,
       lastmod: toIsoDate(creator.updatedAt) || now,
       changefreq: 'monthly',
       priority: 0.6,
     });
   }
 
-  for (const deal of deals) {
-    if (deal.status && deal.status !== 'live') continue;
-    const id = routeId(deal);
-    entries.push({
-      loc: `${SITE_URL}/deals#${id}`,
-      lastmod: toIsoDate(deal.updatedAt) || now,
-      changefreq: 'daily',
-      priority: 0.7,
-    });
-  }
-
-  const unique = new Map<string, SitemapEntry>();
-  for (const entry of entries) {
-    unique.set(entry.loc, entry);
-  }
+  const unique = new Map();
+  for (const entry of entries) unique.set(entry.loc, entry);
 
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
   res.status(200).send(buildXml([...unique.values()]));
-}
-
-// Exported for tests and reuse
-export { NOINDEX_PATH_PREFIXES };
+};
