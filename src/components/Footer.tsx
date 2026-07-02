@@ -1,7 +1,77 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Facebook, Instagram, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
+import type { SiteFooterColumn } from '../types/catalog';
+
+const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
+  {
+    id: 'discover',
+    title: 'DISCOVER',
+    links: [
+      { label: 'Top Brands', url: '/brands' },
+      { label: 'New Arrival', url: '/products' },
+      { label: 'Compare Tool', url: '/compare' },
+      { label: 'Best Deals', url: '/deals' },
+    ],
+  },
+  {
+    id: 'company',
+    title: 'COMPANY',
+    links: [
+      { label: 'Suggest a brand', url: '/suggest-brand' },
+      { label: 'Partnership', url: '/partnership' },
+      { label: 'Advertise', url: '/advertise' },
+      { label: 'b2b', url: '/b2b' },
+    ],
+  },
+  {
+    id: 'legal',
+    title: 'LEGAL',
+    links: [
+      { label: 'Terms', url: '/terms' },
+      { label: 'Policy', url: '/privacy' },
+      { label: 'FAQ', url: '/faq' },
+      { label: 'Contact us', url: '/contact' },
+      { label: 'About', url: '/about' },
+    ],
+  },
+];
+
+const REQUIRED_FOOTER_LINKS: Array<{ label: string; url: string; columnId?: string }> = [
+  { label: 'FAQ', url: '/faq', columnId: 'legal' },
+];
+
+function ensureFooterLinks(columns: SiteFooterColumn[]): SiteFooterColumn[] {
+  const nextColumns = columns.map((column) => ({
+    ...column,
+    links: [...column.links],
+  }));
+
+  for (const required of REQUIRED_FOOTER_LINKS) {
+    const targetColumn =
+      nextColumns.find((column) => column.id === required.columnId) ||
+      nextColumns.find((column) => column.id.toLowerCase().includes('legal')) ||
+      nextColumns[nextColumns.length - 1];
+
+    if (!targetColumn) continue;
+
+    const alreadyPresent = targetColumn.links.some(
+      (link) => link.url === required.url || link.label.toLowerCase() === required.label.toLowerCase(),
+    );
+
+    if (!alreadyPresent) {
+      const policyIndex = targetColumn.links.findIndex((link) => link.url === '/privacy');
+      if (policyIndex >= 0) {
+        targetColumn.links.splice(policyIndex + 1, 0, { label: required.label, url: required.url });
+      } else {
+        targetColumn.links.push({ label: required.label, url: required.url });
+      }
+    }
+  }
+
+  return nextColumns;
+}
 
 // Perfect inline SVG for TikTok
 function TikTokIcon({ size = 20 }: { size?: number }) {
@@ -31,6 +101,11 @@ export function Footer() {
     if (normalized.includes('youtube')) return <Youtube size={20} />;
     return <Facebook size={20} />;
   };
+
+  const footerColumns = useMemo(
+    () => ensureFooterLinks(footer?.columns?.length ? footer.columns : DEFAULT_FOOTER_COLUMNS),
+    [footer?.columns],
+  );
 
   return (
     <footer 
@@ -88,27 +163,7 @@ export function Footer() {
 
           {/* Right Section containing Columns 2, 3, 4 */}
           <div className="md:col-span-7 lg:col-span-6 grid grid-cols-2 sm:grid-cols-3 gap-8 md:gap-12">
-            {(footer?.columns?.length ? footer.columns : [
-              { id: 'discover', title: 'DISCOVER', links: [
-                { label: 'Top Brands', url: '/brands' },
-                { label: 'New Arrival', url: '/products' },
-                { label: 'Compare Tool', url: '/compare' },
-                { label: 'Best Deals', url: '/deals' },
-              ]},
-              { id: 'company', title: 'COMPANY', links: [
-                { label: 'Suggest a brand', url: '/suggest-brand' },
-                { label: 'Partnership', url: '/partnership' },
-                { label: 'Advertise', url: '/advertise' },
-                { label: 'b2b', url: '/b2b' },
-              ]},
-              { id: 'legal', title: 'LEGAL', links: [
-                { label: 'Terms', url: '/terms' },
-                { label: 'Policy', url: '/privacy' },
-                { label: 'FAQ', url: '/faq' },
-                { label: 'Contact us', url: '/contact' },
-                { label: 'About', url: '/about' },
-              ]},
-            ]).map((column, idx) => (
+            {footerColumns.map((column, idx) => (
             <div key={column.id} className={`flex flex-col ${idx === 2 ? 'col-span-2 sm:col-span-1' : ''}`}>
               <h4 className="text-white font-semibold uppercase tracking-[0.1em] text-[13px] mb-[20px]">
                 {column.title}
