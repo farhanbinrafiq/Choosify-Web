@@ -186,7 +186,7 @@ function AppContent() {
 
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
-      {showSiteChrome && <Navbar />}
+      {showSiteChrome && !isCompactShell && <Navbar />}
       <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
           <Routes location={location}>
@@ -207,7 +207,7 @@ function AppContent() {
             <Route path="/recommendations" element={<PageWrapper><GuidesPage /></PageWrapper>} />
             <Route path="/recommendations/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
-            <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
+            <Route path="/login" element={<LoginSignUpPage />} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/customer-favorite" element={<PageWrapper><CustomerFavoritePage /></PageWrapper>} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
@@ -292,7 +292,7 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="pb-0"
+      className="pb-0 mobile-fab-safe sm:pb-0"
     >
       {children}
     </motion.div>
@@ -356,7 +356,8 @@ function PWAInstallPrompt() {
   if (!showPrompt) return null;
 
   return (
-    <div className="fixed bottom-[120px] left-3 right-3 
+    <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] left-3 right-3 
+                    sm:bottom-[120px]
                     lg:left-auto lg:right-6 lg:bottom-[200px] 
                     lg:w-80 z-[150] 
                     choosify-dark-gradient border border-white/10 

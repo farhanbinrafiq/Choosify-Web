@@ -45,8 +45,8 @@ export function QuickAccessCard() {
               className={cn(
                 "flex items-center justify-between py-2 px-3 rounded-[5px] transition-all duration-300 group",
                 isActive 
-                  ? "bg-[#FFF0E8] text-[#E8500A] font-black" 
-                  : "bg-transparent text-[#1A1A2E] hover:bg-orange-primary/5 hover:text-[#E8500A] font-semibold"
+                  ? "bg-surface-selected text-orange-primary font-black" 
+                  : "bg-transparent text-[#1A1A2E] hover:bg-orange-primary/5 hover:text-orange-primary font-semibold"
               )}
             >
               <div className="flex items-center gap-3">
@@ -54,7 +54,7 @@ export function QuickAccessCard() {
                   size={16} 
                   className={cn(
                     "transition-transform duration-300 group-hover:scale-110",
-                    isActive ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A]"
+                    isActive ? "text-orange-primary" : "text-[#8a9bb0] group-hover:text-orange-primary"
                   )} 
                 />
                 <span className="font-sans text-xs uppercase tracking-wide">
@@ -62,7 +62,7 @@ export function QuickAccessCard() {
                 </span>
               </div>
               {isActive && (
-                <span className="w-1.5 h-1.5 rounded-full bg-[#E8500A]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-primary" />
               )}
             </Link>
           );

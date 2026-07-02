@@ -227,7 +227,7 @@ function ProductCardImageCarousel({ images, alt, containerClassName }: { images:
               onClick={(e) => handleDotClick(e, i)}
               className={cn(
                 "h-1 rounded-full transition-all duration-300 border-none p-0 cursor-pointer",
-                idx === i ? "w-2.5 bg-[#FF5B00]" : "w-1 bg-white/60 hover:bg-white"
+                idx === i ? "w-2.5 bg-orange-primary" : "w-1 bg-white/60 hover:bg-white"
               )}
             />
           ))}
@@ -298,7 +298,7 @@ export function ProductCard({
     return (
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
-        className="bg-white rounded-[5px] p-5 md:p-6 h-full flex flex-col md:flex-row gap-6 relative overflow-hidden group border border-[#e8edf2] hover:border-[#E8500A]/30 transition-all duration-300 cursor-pointer"
+        className="bg-white rounded-[5px] p-5 md:p-6 h-full flex flex-col md:flex-row gap-6 relative overflow-hidden group border border-[#e8edf2] hover:border-orange-primary/30 transition-all duration-300 cursor-pointer"
       >
          {/* Background accent */}
          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-xl group-hover:scale-125 transition-transform duration-500" />
@@ -309,7 +309,7 @@ export function ProductCard({
                   onClick={toggleSave}
                   className={cn(
                     "w-8 h-8 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-none",
-                    isSaved ? "bg-[#E8500A] border-[#E8500A] text-white" : "border-gray-200 text-[#E8500A] bg-white"
+                    isSaved ? "bg-orange-primary border-orange-primary text-white" : "border-gray-200 text-orange-primary bg-white"
                   )}
                 >
                    <Bookmark size={14} className={isSaved ? "fill-current" : ""} />
@@ -362,8 +362,8 @@ export function ProductCard({
             <div className="flex items-center justify-between mb-4">
                <div className="flex items-center gap-2">
                   <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{brandName}</span>
-                  <div className="bg-[#E8500A]/10 text-[#E8500A] text-[9.5px] font-semibold px-2.5 py-1 rounded flex items-center gap-1 uppercase tracking-wide leading-none">
-                     <Star size={11} className="fill-current text-[#E8500A]" /> FEATURED
+                  <div className="bg-orange-primary/10 text-orange-primary text-[9.5px] font-semibold px-2.5 py-1 rounded flex items-center gap-1 uppercase tracking-wide leading-none">
+                     <Star size={11} className="fill-current text-orange-primary" /> FEATURED
                   </div>
                </div>
                {product.discount && (
@@ -385,13 +385,13 @@ export function ProductCard({
             <div className="flex items-end justify-between gap-4 pt-4 border-t border-gray-150 select-none shrink-0 w-full">
                <div className="flex flex-col text-left min-w-0">
                   <span className="text-[9px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">SPECIAL VALUE</span>
-                  <span className="text-2xl font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">BDT {product.price}</span>
+                  <span className="text-2xl font-mono font-bold text-orange-primary leading-none whitespace-nowrap">BDT {product.price}</span>
                </div>
                
                <button 
                  type="button" 
                  onClick={(e) => { e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); } else { const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); } }} 
-                 className="w-10 h-10 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+                 className="w-10 h-10 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
                  aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
                  title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
                >
@@ -407,7 +407,7 @@ export function ProductCard({
     return (
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
-        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-[#E8500A]/30 hover:shadow-md transition-all duration-300 cursor-pointer group relative w-full max-w-full min-w-0 min-h-[270px] md:min-h-[290px] h-full box-border animate-in fade-in"
+        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-orange-primary/30 hover:shadow-md transition-all duration-300 cursor-pointer group relative w-full max-w-full min-w-0 min-h-[270px] md:min-h-[290px] h-full box-border animate-in fade-in"
       >
         <div 
           className="w-full h-[140px] md:h-[160px] bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-2 select-none shrink-0"
@@ -418,7 +418,7 @@ export function ProductCard({
                  onClick={toggleSave}
                  className={cn(
                     "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
-                    isSaved ? "text-[#E8500A]" : "text-gray-400 hover:text-[#E8500A]"
+                    isSaved ? "text-orange-primary" : "text-gray-400 hover:text-orange-primary"
                  )}
                >
                   <Bookmark size={10} className={isSaved ? "fill-current" : ""} />
@@ -479,7 +479,7 @@ export function ProductCard({
             
             {mode === 'wholesale' && (
               <div className="flex flex-wrap gap-1 mt-0.5">
-                <span className="bg-orange-primary/10 text-[#E8500A] text-[6.5px] font-semibold px-1 rounded uppercase tracking-wider leading-none">
+                <span className="bg-orange-primary/10 text-orange-primary text-[6.5px] font-semibold px-1 rounded uppercase tracking-wider leading-none">
                   Wholesale Approved
                 </span>
               </div>
@@ -496,7 +496,7 @@ export function ProductCard({
                   {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
                 </span>
                 <div className="flex flex-col text-left justify-center">
-                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">BDT {product.price.toLocaleString()}</span>
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-orange-primary leading-none whitespace-nowrap">BDT {product.price.toLocaleString()}</span>
                   {product.originalPrice ? (
                     <span className="text-[8px] font-mono text-gray-400 line-through leading-none mt-0.5 whitespace-nowrap">৳{product.originalPrice}</span>
                   ) : (
@@ -513,7 +513,7 @@ export function ProductCard({
                   addToCart(product, qty); 
                   toast.success(`Successfully added ${product.title} to your cart!`);
                 }} 
-                className="w-8 h-8 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+                className="w-8 h-8 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
                 aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
                 title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
              >
@@ -527,7 +527,7 @@ export function ProductCard({
 
   if (variant === 'list') {
     return (
-      <div className="bg-white rounded-[5px] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.005] transition-all duration-300 flex gap-5 p-4 group cursor-pointer text-left shadow-none" onClick={() => navigate(`/products/${product.id}`)}>
+      <div className="bg-white rounded-[5px] border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.005] transition-all duration-300 flex gap-5 p-4 group cursor-pointer text-left shadow-none" onClick={() => navigate(`/products/${product.id}`)}>
         <div className="w-36 md:w-40 h-36 md:h-40 flex-shrink-0 bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-3 select-none">
           <ProductCardImageCarousel 
             images={getProductCardImages(product)} 
@@ -539,7 +539,7 @@ export function ProductCard({
               onClick={toggleSave}
               className={cn(
                 "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
-                isSaved ? "text-[#E8500A]" : "text-gray-400 hover:text-[#E8500A]"
+                isSaved ? "text-orange-primary" : "text-gray-400 hover:text-orange-primary"
               )}
             >
                <Bookmark size={11} className={isSaved ? "fill-current" : ""} />
@@ -585,13 +585,13 @@ export function ProductCard({
           <div>
             <div className="flex items-center justify-between gap-2 mb-1.5">
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">{brandName}</span>
-              <div className={cn("text-[8px] font-semibold text-white px-2 py-0.5 rounded uppercase leading-none bg-[#E8500A]", product.tagColor)}>
+              <div className={cn("text-[8px] font-semibold text-white px-2 py-0.5 rounded uppercase leading-none bg-orange-primary", product.tagColor)}>
                 {product.tag || 'HOT'}
               </div>
             </div>
             {mode === 'wholesale' && (
               <div className="flex flex-wrap gap-1 mb-2">
-                <span className="bg-orange-primary/10 text-[#E8500A] text-[7px] font-semibold px-2 py-0.5 rounded uppercase tracking-wide">
+                <span className="bg-orange-primary/10 text-orange-primary text-[7px] font-semibold px-2 py-0.5 rounded uppercase tracking-wide">
                   WHOLESALE APPROVED
                 </span>
               </div>
@@ -601,7 +601,7 @@ export function ProductCard({
             </h3>
             <div className="flex items-center gap-1 select-none">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} size={10} className={cn(i < Math.floor(product.rating || 4) ? "fill-[#E8500A] text-[#E8500A]" : "text-gray-100")} />
+                <Star key={i} size={10} className={cn(i < Math.floor(product.rating || 4) ? "fill-orange-primary text-orange-primary" : "text-gray-100")} />
               ))}
               <span className="text-[9px] text-gray-400 font-medium ml-1.5 uppercase tracking-wide">( {product.reviews || 0} REVIEWS )</span>
             </div>
@@ -609,7 +609,7 @@ export function ProductCard({
 
                     <div className="flex items-center justify-between mt-auto gap-4 pt-3.5 border-t border-gray-100">
             <div className="flex flex-col text-left">
-              <span className="text-lg font-bold text-[#E8500A] font-mono leading-none">BDT {product.price.toLocaleString()}</span>
+              <span className="text-lg font-bold text-orange-primary font-mono leading-none">BDT {product.price.toLocaleString()}</span>
               {product.originalPrice && (
                 <span className="text-[11px] text-gray-300 line-through font-mono mt-0.5 leading-none">BDT {product.originalPrice}</span>
               )}
@@ -622,7 +622,7 @@ export function ProductCard({
                 addToCart(product, qty);
                 toast.success(`Successfully added ${product.title} to your cart!`);
               }}
-              className="w-10 h-10 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+              className="w-10 h-10 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
               aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
               title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
             >
@@ -637,7 +637,7 @@ export function ProductCard({
   return (
     <div 
       className={cn(
-        "bg-white rounded-[5px] p-2.5 shadow-none hover:border-[#E8500A]/30 hover:shadow-md transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer w-full max-w-full min-w-0",
+        "bg-white rounded-[5px] p-2.5 shadow-none hover:border-orange-primary/30 hover:shadow-md transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer w-full max-w-full min-w-0",
         isGuideDetail ? "min-h-[385px] md:min-h-[410px] h-full" : "min-h-[273px] md:min-h-[323px] h-full"
       )}
       onClick={() => navigate(`/products/${product.id}`)}
@@ -660,7 +660,7 @@ export function ProductCard({
             onClick={toggleSave}
             className={cn(
               "w-5 h-5 rounded-full border flex items-center justify-center bg-white border-gray-100 shadow-none transition-transform hover:scale-105",
-              isSaved ? "text-[#E8500A]" : "text-gray-400 hover:text-[#E8500A]"
+              isSaved ? "text-orange-primary" : "text-gray-400 hover:text-orange-primary"
             )}
           >
              <Bookmark size={9} className={isSaved ? "fill-current" : ""} />
@@ -702,7 +702,7 @@ export function ProductCard({
           </button>
         </div>
         {product.tag && (
-          <div className={cn("absolute top-1.5 right-1.5 text-white text-[7px] font-semibold px-1.5 py-0.5 rounded uppercase z-25 leading-none", product.tagColor || "bg-[#E8500A]")}>
+          <div className={cn("absolute top-1.5 right-1.5 text-white text-[7px] font-semibold px-1.5 py-0.5 rounded uppercase z-25 leading-none", product.tagColor || "bg-orange-primary")}>
             {product.tag}
           </div>
         )}
@@ -711,7 +711,7 @@ export function ProductCard({
       <div className="pt-1.5 flex flex-col flex-grow min-h-0 text-left justify-between">
         <div>
           <div className="flex items-center gap-1.5 mb-1 w-full justify-between leading-none">
-            <span className="text-[#E8500A] font-medium uppercase text-[7.5px] tracking-wider truncate max-w-[80px]">{brandName}</span>
+            <span className="text-orange-primary font-medium uppercase text-[7.5px] tracking-wider truncate max-w-[80px]">{brandName}</span>
             <div className="flex items-center gap-0.5 shrink-0 ml-auto bg-gray-50 px-1 py-0.5 rounded leading-none">
               <Star size={7} className="fill-orange-primary text-orange-primary" />
               <span className="text-[7.5px] font-semibold text-gray-500">4.8</span>
@@ -735,12 +735,12 @@ export function ProductCard({
              const recData = getRecommendationData(product);
              return (
                 <div className="mt-2 pt-1.5 border-t border-dashed border-gray-150 text-left">
-                   <div className="text-[7.5px] font-black text-[#E8500A] uppercase tracking-wider mb-1 leading-none font-mono">
+                   <div className="text-[7.5px] font-black text-orange-primary uppercase tracking-wider mb-1 leading-none font-mono">
                       RECOMMENDATION ON THIS
                    </div>
                    <div className="flex flex-wrap gap-1 max-h-[30px] overflow-hidden leading-none">
                       {recData.tags.map((tag) => (
-                         <span key={tag} className="px-1 py-0.5 text-[6.5px] font-bold bg-[#E8500A]/5 text-[#E8500A] rounded-full uppercase tracking-wider font-sans border border-[#E8500A]/10 whitespace-nowrap inline-block">
+                         <span key={tag} className="px-1 py-0.5 text-[6.5px] font-bold bg-orange-primary/5 text-orange-primary rounded-full uppercase tracking-wider font-sans border border-orange-primary/10 whitespace-nowrap inline-block">
                             {tag}
                          </span>
                       ))}
@@ -761,7 +761,7 @@ export function ProductCard({
                {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
               </span>
               <div className="flex flex-col text-left justify-center">
-                <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">
+                <span className="text-[10px] sm:text-[11px] font-mono font-bold text-orange-primary leading-none whitespace-nowrap">
                   BDT {product.price.toLocaleString()}
                 </span>
                 {product.originalPrice ? (
@@ -784,7 +784,7 @@ export function ProductCard({
               addToCart(product, qty);
               toast.success(`Successfully added ${product.title} to your cart!`);
             }}
-            className="w-8 h-8 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+            className="w-8 h-8 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
             aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
             title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
           >

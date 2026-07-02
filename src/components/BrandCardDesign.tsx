@@ -88,7 +88,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
     <Link
       to={`/brands/${brand.id}`}
       onClick={onClick}
-      className="block w-[335px] max-w-[335px] min-w-[335px] bg-white rounded-[12px] border border-[#e8edf2] hover:shadow-lg hover:border-[#E8500A]/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative shrink-0"
+      className="block w-[335px] max-w-[335px] min-w-[335px] bg-white rounded-[12px] border border-[#e8edf2] hover:shadow-lg hover:border-orange-primary/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative shrink-0"
     >
       {/* FEATURED BADGE */}
       {brand.isFeatured && (
@@ -100,14 +100,14 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
       )}
       {brand.isHot && !brand.isFeatured && (
         <div className="absolute top-3 right-3 z-20">
-          <span className="bg-orange-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
+          <span className="bg-orange-deep text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
             Hot
           </span>
         </div>
       )}
 
       {/* COVER PHOTO SECTION */}
-      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#1A1D4E]/10 to-[#E8500A]/10 overflow-hidden shrink-0">
+      <div className="relative w-full h-[136px] bg-gradient-to-r from-heading/10 to-orange-primary/10 overflow-hidden shrink-0">
         <img 
           src={coverUrl}
           alt={`${brand.name} cover`}
@@ -128,14 +128,14 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
               loading="lazy"
             />
           ) : (
-            <span className="text-2xl font-black text-[#1A1D4E] tracking-tight">{brand.logo}</span>
+            <span className="text-2xl font-black text-heading tracking-tight">{brand.logo}</span>
           )}
         </div>
       </div>
 
       {/* BRAND INFO SECTION */}
       <div className="px-4 pt-14 pb-3 text-left flex-1 flex flex-col justify-center min-w-0">
-        <h3 className="text-base font-black text-[#1A1D4E] uppercase line-clamp-1 mb-1 leading-tight tracking-tight">
+        <h3 className="text-base font-black text-heading uppercase line-clamp-1 mb-1 leading-tight tracking-tight">
           {brand.name}
         </h3>
         
@@ -156,7 +156,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
               />
             ))}
           </div>
-          <span className="text-xs font-bold text-[#1A1D4E]">
+          <span className="text-xs font-bold text-heading">
             {brand.rating.toFixed(1)}
           </span>
           <span className="text-[11px] text-gray-400">
@@ -173,7 +173,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
             <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
               Best For
             </div>
-            <div className="text-xs font-black text-[#1A1D4E] truncate leading-tight">
+            <div className="text-xs font-black text-heading truncate leading-tight">
               {bestForText}
             </div>
           </div>
@@ -183,7 +183,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
             <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
               Price Range
             </div>
-            <div className="text-xs font-black text-[#E8500A] truncate leading-tight">
+            <div className="text-xs font-black text-orange-primary truncate leading-tight">
               {priceText}
             </div>
           </div>
@@ -232,7 +232,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
       <div className="px-4 py-3 shrink-0 bg-white">
         <button 
           type="button"
-          className="w-full py-2.5 bg-[#1A1D4E] hover:bg-[#0F0F2E] text-white text-[11px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group"
+          className="w-full py-2.5 bg-heading hover:bg-navy text-white text-[11px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group"
         >
           Visit Brand
           <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>

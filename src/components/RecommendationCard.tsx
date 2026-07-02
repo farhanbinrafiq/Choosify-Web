@@ -85,7 +85,7 @@ export function RecommendationCard(props: any) {
             "absolute inset-0 flex items-center justify-center z-10 transition-all duration-500",
             isHovering ? "opacity-0 scale-[1.2]" : "opacity-100 scale-100"
           )}>
-            <div className="w-16 h-16 rounded-full bg-[#E02424] flex items-center justify-center border-2 border-white/20">
+            <div className="w-16 h-16 rounded-full bg-play-red flex items-center justify-center border-2 border-white/20">
               <Play className="text-white fill-white ml-1" size={24} />
             </div>
           </div>
@@ -158,7 +158,7 @@ export function RecommendationCard(props: any) {
             "absolute inset-0 flex items-center justify-center z-10 transition-all duration-500",
             isHovering ? "opacity-0 scale-[1.2]" : "opacity-100 scale-100"
           )}>
-            <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center border border-white/20">
+            <div className="w-12 h-12 rounded-full bg-play-red flex items-center justify-center border border-white/20">
               <Play className="text-white fill-white ml-0.5" size={18} />
             </div>
           </div>
@@ -202,7 +202,7 @@ export function RecommendationCard(props: any) {
               "absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-transparent transition-all duration-500",
               isHovering ? "opacity-0" : "opacity-100"
             )}>
-              <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center border border-white/20">
+              <div className="w-14 h-14 rounded-full bg-play-red flex items-center justify-center border border-white/20">
                 <Play className="text-white fill-white ml-0.5" size={20} />
               </div>
             </div>

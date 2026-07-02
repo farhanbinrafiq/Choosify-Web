@@ -8,6 +8,8 @@
   --font-dm-sans: "DM Sans", sans-serif;
   
   --color-navy: #000435;
+  --color-ink: #0A0A1F;
+  --color-heading: #1A1D4E;
   --color-green-accent: #07DD05;
   --color-orange-primary: #FF5B00;
   --color-orange-deep: #EB4501;
@@ -15,6 +17,8 @@
   --color-ice-blue: #F0F8FF;
   --color-choosify-feed: #F0F8FF;
   --color-alert-red: #FF000D;
+  --color-play-red: #E02424;
+  --color-surface-selected: #FFF0E8;
   --color-royal-blue: #2323FF;
 
   @keyframes marquee {
@@ -85,7 +89,7 @@
 }
 
 .card-primary:hover {
-  border-color: rgba(232, 80, 10, 0.3);
+  border-color: color-mix(in srgb, var(--color-orange-primary) 30%, transparent);
   box-shadow: 0 10px 30px rgba(0, 4, 53, 0.08);
 }
 
@@ -99,7 +103,7 @@
 }
 
 .card-secondary:hover {
-  border-color: rgba(232, 80, 10, 0.25);
+  border-color: color-mix(in srgb, var(--color-orange-primary) 25%, transparent);
   box-shadow: 0 6px 18px rgba(0, 4, 53, 0.05);
 }
 
@@ -261,6 +265,13 @@
     position: relative !important;
     right: auto !important;
     margin-right: 16px !important;
+  }
+}
+
+/* Mobile FAB clearance for single action hub */
+@media (max-width: 640px) {
+  .mobile-fab-safe {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
