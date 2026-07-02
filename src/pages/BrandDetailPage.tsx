@@ -212,16 +212,19 @@ export function BrandDetailPage() {
   }, []);
 
   // Dynamically resolve brand or fallback to Sailor/fashion-oriented layout
+  const brandSource = allBrands.length > 0 ? allBrands : BRANDS;
+  const productSource = allProducts.length > 0 ? allProducts : PRODUCTS;
+
   const brand =
-    allBrands.find(
+    brandSource.find(
       (b) =>
         String(b.id) === id ||
         b.name.toLowerCase().replace(/\s+/g, "-") ===
           String(id).toLowerCase() ||
         b.name.toLowerCase() === String(id).toLowerCase(),
     ) ||
-    allBrands.find((b) => b.name === "Sailor") ||
-    allBrands[2];
+    brandSource.find((b) => b.name === "Sailor") ||
+    brandSource[2];
 
   const [localClaimStatus, setLocalClaimStatus] = useState<
     "verified" | "pending" | "community"
@@ -263,7 +266,7 @@ export function BrandDetailPage() {
 
   // Resolve products listed under this brand
   const brandNameLower = brand.name.toLowerCase();
-  const brandProducts = allProducts.filter(
+  const brandProducts = productSource.filter(
     (p: any) =>
       p.brandId === brand.id ||
       (p.brand && p.brand.toLowerCase() === brandNameLower),
