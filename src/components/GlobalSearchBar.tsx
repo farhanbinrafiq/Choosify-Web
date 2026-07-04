@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Folder, User, Check, Clock, ArrowRight, Sparkles, X } from 'lucide-react';
+import { Search, Folder, User, Clock, ArrowRight, Sparkles, X } from 'lucide-react';
 import { PRODUCTS, BRANDS, CATEGORIES } from '../constants';
 import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { getBrandOverviews, getProductOverviews } from '../utils/overviewRegistry';
-import { toast } from 'react-hot-toast';
 
 interface GlobalSearchBarProps {
   initialValue?: string;
@@ -14,6 +14,12 @@ interface GlobalSearchBarProps {
   className?: string;
   onSubmit?: (query: string) => void;
   variant?: 'hero' | 'navbar' | 'standard';
+  /** Controlled value for page-local filtering (disables internal query state when set) */
+  value?: string;
+  onValueChange?: (query: string) => void;
+  /** Show autocomplete dropdown — off for catalog filter bars */
+  enableSuggestions?: boolean;
+  submitLabel?: string;
 }
 
 interface SuggestionItem {
@@ -26,16 +32,29 @@ interface SuggestionItem {
   badge?: string;
 }
 
+const matchSearchText = (value: unknown, query: string) =>
+  typeof value === 'string' && value.toLowerCase().includes(query);
+
 export function GlobalSearchBar({
   initialValue = '',
   placeholder = "Search authentic Fashion hubs, Smart Gadgets & verified outlets...",
   className = '',
   onSubmit,
-  variant = 'standard'
+  variant = 'standard',
+  value,
+  onValueChange,
+  enableSuggestions = true,
+  submitLabel = 'DISCOVER',
 }: GlobalSearchBarProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isControlled = value !== undefined;
   const [query, setQuery] = useState(initialValue || searchParams.get('q') || '');
+  const queryValue = isControlled ? value : query;
+  const setQueryValue = (next: string) => {
+    if (isControlled) onValueChange?.(next);
+    else setQuery(next);
+  };
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -52,17 +71,20 @@ export function GlobalSearchBar({
     : CATEGORIES;
   
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({ visibility: 'hidden' });
 
-  // Sync with searchParams or initial value
+  // Sync with searchParams or initial value (uncontrolled mode only)
   useEffect(() => {
+    if (isControlled) return;
     const qParam = searchParams.get('q') || '';
     if (initialValue) {
       setQuery(initialValue);
     } else if (qParam) {
       setQuery(qParam);
     }
-  }, [searchParams, initialValue]);
+  }, [searchParams, initialValue, isControlled]);
 
   // Load recent searches on mount
   useEffect(() => {
@@ -103,16 +125,53 @@ export function GlobalSearchBar({
     }
   };
 
-  // Close suggestions dropdown on click outside
+  // Close suggestions dropdown on click outside (input + portaled panel)
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
+      const target = e.target as Node;
+      if (containerRef.current?.contains(target)) return;
+      if (dropdownRef.current?.contains(target)) return;
+      setIsOpen(false);
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Pin dropdown to the search field — escapes navbar color/overflow clipping
+  useLayoutEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+
+    const updatePosition = () => {
+      const rect = containerRef.current!.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const minWidth = 300;
+      const maxWidth = Math.min(420, viewportWidth - 16);
+      const width = Math.min(Math.max(rect.width, minWidth), maxWidth);
+      let left = rect.left;
+      if (left + width > viewportWidth - 8) {
+        left = viewportWidth - width - 8;
+      }
+      left = Math.max(8, left);
+
+      setDropdownStyle({
+        position: 'fixed',
+        top: rect.bottom + 8,
+        left,
+        width,
+        maxHeight: 385,
+        visibility: 'visible',
+        zIndex: 300,
+      });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [isOpen, queryValue, variant]);
 
   // Static Preset Lists
   const popularSearches = ['iPhone 15', 'Apex', 'Yellow', 'Sony WH-1000XM5'];
@@ -126,7 +185,7 @@ export function GlobalSearchBar({
 
   // Dynamically compute suggestions list
   const suggestionsGrouped = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = queryValue.trim().toLowerCase();
     
     // 1. BEFORE TYPING STATE
     if (!q) {
@@ -184,10 +243,10 @@ export function GlobalSearchBar({
         typeof val === 'string' && val.toLowerCase().includes(q)
       );
 
-      return p.title.toLowerCase().includes(q) ||
-             p.brand.toLowerCase().includes(q) ||
-             p.category.toLowerCase().includes(q) ||
-             (p.description || '').toLowerCase().includes(q) ||
+      return matchSearchText(p.title, q) ||
+             matchSearchText(p.brand, q) ||
+             matchSearchText(p.category, q) ||
+             matchSearchText(p.description, q) ||
              matchedOverview;
     })
     .slice(0, 3)
@@ -208,8 +267,8 @@ export function GlobalSearchBar({
         typeof val === 'string' && val.toLowerCase().includes(q)
       );
 
-      return b.name.toLowerCase().includes(q) ||
-             b.category.toLowerCase().includes(q) ||
+      return matchSearchText(b.name, q) ||
+             matchSearchText(b.category, q) ||
              matchedOverview;
     })
     .slice(0, 3)
@@ -217,32 +276,30 @@ export function GlobalSearchBar({
       id: `brand-${b.id}`,
       type: 'brand',
       title: b.name,
-      subtitle: `${b.category} • ${b.products} Products`,
+      subtitle: `${b.category || 'Brand'} • ${b.products ?? 0} Products`,
       route: `/brands/${b.id}`,
       badge: b.rating >= 4.8 ? 'Verified' : undefined
     }));
 
     // 2.4 Creators Matching (Check name, handle, bio, bestFor)
     const matchedCreators: SuggestionItem[] = creatorSource.filter(c => {
-      return c.name.toLowerCase().includes(q) ||
-             c.handle.toLowerCase().includes(q) ||
-             c.bio.toLowerCase().includes(q) ||
-             c.bestFor.toLowerCase().includes(q);
+      return matchSearchText(c.name, q) ||
+             matchSearchText(c.handle, q) ||
+             matchSearchText(c.bio, q) ||
+             matchSearchText(c.bestFor, q);
     })
     .slice(0, 3)
     .map(c => ({
       id: `creator-${c.id}`,
       type: 'creator',
       title: c.name,
-      subtitle: `${c.handle} • ${c.bestFor} Expert`,
+      subtitle: `${c.handle || '@creator'} • ${c.bestFor || 'Creator'} Expert`,
       image: c.avatar,
       route: `/creators/${c.id}`
     }));
 
     // 2.5 Categories Matching (Check name)
-    const matchedCategories: SuggestionItem[] = categorySource.filter(c => {
-      return c.name.toLowerCase().includes(q);
-    })
+    const matchedCategories: SuggestionItem[] = categorySource.filter(c => matchSearchText(c.name, q))
     .slice(0, 3)
     .map(c => ({
       id: `category-${c.id}`,
@@ -265,13 +322,13 @@ export function GlobalSearchBar({
       categories: matchedCategories,
       totalCount
     };
-  }, [query, recentSearches, customOverviews]);
+  }, [queryValue, recentSearches, customOverviews, productSource, brandSource, creatorSource, categorySource]);
 
   // Create flat suggestion list for arrow-key keyboard navigation
   const flatSuggestions = useMemo(() => {
     const list: SuggestionItem[] = [];
     
-    if (!query.trim()) {
+    if (!queryValue.trim()) {
       list.push(...suggestionsGrouped.recent);
       list.push(...suggestionsGrouped.popular);
       list.push(...suggestionsGrouped.trending);
@@ -284,7 +341,7 @@ export function GlobalSearchBar({
     }
     
     return list;
-  }, [query, suggestionsGrouped]);
+  }, [queryValue, suggestionsGrouped]);
 
   // Keyboard controls
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -316,7 +373,7 @@ export function GlobalSearchBar({
 
   const handleSelectSuggestion = (item: SuggestionItem) => {
     saveRecentSearch(item.type === 'query' || item.type === 'recent' || item.type === 'popular' || item.type === 'trending' ? item.title : item.title);
-    setQuery(item.title);
+    setQueryValue(item.title);
     setIsOpen(false);
     navigate(item.route);
     if (onSubmit) {
@@ -326,7 +383,7 @@ export function GlobalSearchBar({
 
   const handleSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const trimmed = query.trim();
+    const trimmed = queryValue.trim();
     if (!trimmed) return;
     
     saveRecentSearch(trimmed);
@@ -345,33 +402,36 @@ export function GlobalSearchBar({
       {variant === 'navbar' ? (
         <form 
           onSubmit={handleSearchSubmit} 
-          className="relative w-full bg-white/5 hover:bg-white/10 focus-within:bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 focus-within:border-white/20 transition-all duration-300 flex items-center"
+          className="relative w-full bg-white/5 hover:bg-white/10 focus-within:bg-white/10 backdrop-blur-md px-2 py-1 lg:px-2.5 lg:py-1.5 xl:px-3 xl:py-1.5 rounded-full border border-white/10 focus-within:border-white/20 transition-all duration-300 flex items-center min-w-0"
         >
           <div className="text-gray-400 shrink-0">
-            <Search className="w-3.5 h-3.5" />
+            <Search className="w-3 h-3 lg:w-3.5 lg:h-3.5" />
           </div>
           <input 
             ref={inputRef}
             type="text" 
-            value={query}
+            value={queryValue}
             onChange={(e) => {
-              setQuery(e.target.value);
-              setIsOpen(true);
-              setActiveIndex(-1);
+              setQueryValue(e.target.value);
+              if (enableSuggestions) {
+                setIsOpen(true);
+                setActiveIndex(-1);
+              }
             }}
             onFocus={() => {
+              if (!enableSuggestions) return;
               setIsOpen(true);
               setActiveIndex(-1);
             }}
             onKeyDown={handleKeyDown}
             placeholder={placeholder} 
-            className="w-full bg-transparent outline-none pl-2.5 pr-2 text-white text-[10px] font-semibold placeholder-gray-400 focus:outline-none focus:ring-0 border-none" 
+            className="w-full min-w-0 bg-transparent outline-none pl-1.5 lg:pl-2 pr-1 text-white text-[8.5px] lg:text-[9px] xl:text-[10px] font-semibold placeholder-gray-400 focus:outline-none focus:ring-0 border-none" 
           />
-          {query && (
+          {queryValue && (
             <button
               type="button"
               onClick={() => {
-                setQuery('');
+                setQueryValue('');
                 inputRef.current?.focus();
               }}
               className="text-gray-400 hover:text-white shrink-0 p-0.5 cursor-pointer bg-transparent border-none"
@@ -385,20 +445,23 @@ export function GlobalSearchBar({
           onSubmit={handleSearchSubmit} 
           className="relative w-full bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300"
         >
-          <div className="flex items-center bg-white rounded-full">
+          <div className="flex items-center bg-white rounded-full relative">
             <div className="pl-4 text-[#E8500A] shrink-0">
               <Search className="w-4 h-4" />
             </div>
             <input 
               ref={inputRef}
               type="text" 
-              value={query}
+              value={queryValue}
               onChange={(e) => {
-                setQuery(e.target.value);
-                setIsOpen(true);
-                setActiveIndex(-1);
+                setQueryValue(e.target.value);
+                if (enableSuggestions) {
+                  setIsOpen(true);
+                  setActiveIndex(-1);
+                }
               }}
               onFocus={() => {
+                if (!enableSuggestions) return;
                 setIsOpen(true);
                 setActiveIndex(-1);
               }}
@@ -410,19 +473,21 @@ export function GlobalSearchBar({
               type="submit"
               className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
             >
-              DISCOVER
+              {submitLabel}
             </button>
           </div>
         </form>
       )}
 
       {/* Intelligent Live Suggestions Dropdown */}
-      {isOpen && (
-        <div 
-          className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-150 rounded-[5px] shadow-sm z-50 overflow-hidden font-sans text-left max-h-[385px] overflow-y-auto no-scrollbar"
+      {enableSuggestions && isOpen && createPortal(
+        <div
+          ref={dropdownRef}
+          style={dropdownStyle}
+          className="choosify-omni-search-dropdown bg-white border border-gray-200 rounded-lg shadow-[0_18px_40px_rgba(0,4,53,0.14)] font-sans text-left text-[#1A1A2E] overflow-y-auto overflow-x-hidden no-scrollbar"
         >
           {/* A. BEFORE TYPING STATE */}
-          {!query.trim() ? (
+          {!queryValue.trim() ? (
             <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-gray-100">
               
               {/* Recent Searches */}
@@ -444,7 +509,7 @@ export function GlobalSearchBar({
                           onClick={() => handleSelectSuggestion(item)}
                           onMouseEnter={() => setActiveIndex(flatIdx)}
                           className={`group flex items-center justify-between px-2.5 py-1.5 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors ${
-                            isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                            isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
                           }`}
                         >
                           <span className="truncate">{item.title}</span>
@@ -478,7 +543,7 @@ export function GlobalSearchBar({
                         onClick={() => handleSelectSuggestion(item)}
                         onMouseEnter={() => setActiveIndex(flatIdx)}
                         className={`px-2.5 py-1.5 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
-                          isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                          isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
                         }`}
                       >
                         <span className="text-[#FF5B00]">•</span>
@@ -505,7 +570,7 @@ export function GlobalSearchBar({
                         onClick={() => handleSelectSuggestion(item)}
                         onMouseEnter={() => setActiveIndex(flatIdx)}
                         className={`px-2.5 py-1.5 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
-                          isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                          isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
                         }`}
                       >
                         <span className="text-[#E8500A] font-black">↑</span>
@@ -543,7 +608,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center gap-2.5 px-3 py-2 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
                             <Search size={12} className="opacity-40" />
@@ -569,7 +634,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center gap-3 px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
                             {item.image ? (
@@ -580,8 +645,8 @@ export function GlobalSearchBar({
                               </div>
                             )}
                             <div className="flex-1 min-w-0 text-left">
-                              <h4 className="text-[11.5px] font-bold truncate leading-snug">{item.title}</h4>
-                              <p className="text-[9.5px] text-gray-400 font-semibold truncate mt-0.5">{item.subtitle}</p>
+                              <h4 className="text-[11.5px] font-bold truncate leading-snug text-inherit">{item.title}</h4>
+                              <p className="text-[9.5px] text-gray-500 font-semibold truncate mt-0.5">{item.subtitle}</p>
                             </div>
                             {item.badge && (
                               <span className="text-[8px] font-black uppercase tracking-wider bg-orange-primary text-white px-1.5 py-0.5 rounded-full shrink-0 scale-90">
@@ -609,7 +674,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center justify-between px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 text-left">
@@ -623,7 +688,7 @@ export function GlobalSearchBar({
                                     <span className="text-[#E8500A] text-[9px]" title="Verified Brand">🛡️</span>
                                   )}
                                 </h4>
-                                <p className="text-[9.5px] text-gray-400 font-semibold truncate mt-0.5">{item.subtitle}</p>
+                                <p className="text-[9.5px] text-gray-500 font-semibold truncate mt-0.5">{item.subtitle}</p>
                               </div>
                             </div>
                             <span className="text-[8px] font-black uppercase tracking-widest border border-gray-200 text-gray-400 px-2 py-0.5 rounded-full scale-90">
@@ -650,20 +715,20 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center justify-between px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 text-left">
                               {item.image ? (
                                 <img src={item.image} className="w-8 h-8 rounded-full object-cover shrink-0 border border-gray-100" alt={item.title} />
                               ) : (
-                                <div className="w-8 h-8 rounded-full bg-gray-150 flex items-center justify-center shrink-0 text-gray-500">
+                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0 text-gray-500">
                                   <User size={12} />
                                 </div>
                               )}
                               <div className="min-w-0">
                                 <h4 className="text-[11.5px] font-bold truncate leading-snug">{item.title}</h4>
-                                <p className="text-[9.5px] text-gray-400 font-semibold truncate mt-0.5">{item.subtitle}</p>
+                                <p className="text-[9.5px] text-gray-500 font-semibold truncate mt-0.5">{item.subtitle}</p>
                               </div>
                             </div>
                             <span className="text-[8.5px] font-black uppercase tracking-widest text-orange-primary bg-orange-primary/5 border border-orange-primary/10 px-2 py-0.5 rounded-full scale-90">
@@ -690,7 +755,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center justify-between px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex items-center gap-2.5 text-left min-w-0">
@@ -710,7 +775,8 @@ export function GlobalSearchBar({
 
             </div>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

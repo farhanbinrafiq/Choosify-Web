@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BadgeCheck,
   ChevronRight,
@@ -87,13 +87,20 @@ function AuthField({
 }
 
 export function LoginSignUpPage() {
-  const [activeTab, setActiveTab] = useState<AuthTab>('sign-up');
+  const [activeTab, setActiveTab] = useState<AuthTab>('sign-in');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { setIsLoggedIn } = useGlobalState();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const requestedTab = (location.state as { tab?: AuthTab } | null)?.tab;
+    if (requestedTab === 'sign-in' || requestedTab === 'sign-up') {
+      setActiveTab(requestedTab);
+    }
+  }, [location.state]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

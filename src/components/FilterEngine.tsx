@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, createContext, useContext } from 'react';
+import React, { useRef, useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { Star, ShieldCheck, HelpCircle, Check, Sparkles, Flame, Tag, DollarSign, Filter, Search, X, ChevronRight, SlidersHorizontal, RotateCcw } from 'lucide-react';
@@ -37,44 +37,103 @@ export interface FilterProfile {
 // ==========================================
 // DRAG SCROLL HELPER HOOK FOR HORIZONTAL SCROLL
 // ==========================================
-export function useDragScroll() {
+const DRAG_SCROLL_SWIPE_THRESHOLD_PX = 6;
+
+export function useDragScroll(options?: { grabCursor?: boolean }) {
+  const grabCursor = options?.grabCursor ?? true;
   const ref = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const dragState = useRef({
+    pointerDown: false,
+    moved: false,
+    startX: 0,
+    scrollLeft: 0,
+  });
+
+  const endPointer = () => {
+    dragState.current.pointerDown = false;
+    setIsDragging(false);
+  };
 
   const onMouseDown = (e: React.MouseEvent) => {
     if (!ref.current) return;
+    dragState.current.pointerDown = true;
+    dragState.current.moved = false;
+    dragState.current.startX = e.pageX - ref.current.offsetLeft;
+    dragState.current.scrollLeft = ref.current.scrollLeft;
     setIsDragging(true);
-    setStartX(e.pageX - ref.current.offsetLeft);
-    setScrollLeft(ref.current.scrollLeft);
-  };
-
-  const onMouseLeave = () => {
-    setIsDragging(false);
-  };
-
-  const onMouseUp = () => {
-    setIsDragging(false);
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !ref.current) return;
+    if (!dragState.current.pointerDown || !ref.current) return;
     e.preventDefault();
     const x = e.pageX - ref.current.offsetLeft;
-    const walk = (x - startX) * 1.5; // scroll speed multiplier
-    ref.current.scrollLeft = scrollLeft - walk;
+    const walk = (x - dragState.current.startX) * 1.5;
+    if (Math.abs(walk) > DRAG_SCROLL_SWIPE_THRESHOLD_PX) {
+      dragState.current.moved = true;
+    }
+    ref.current.scrollLeft = dragState.current.scrollLeft - walk;
   };
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      dragState.current.pointerDown = true;
+      dragState.current.moved = false;
+      dragState.current.startX = e.touches[0]?.pageX ?? 0;
+      dragState.current.scrollLeft = el.scrollLeft;
+      setIsDragging(true);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!dragState.current.pointerDown) return;
+      const x = e.touches[0]?.pageX ?? dragState.current.startX;
+      const walk = dragState.current.startX - x;
+      if (Math.abs(walk) > DRAG_SCROLL_SWIPE_THRESHOLD_PX) {
+        dragState.current.moved = true;
+      }
+      el.scrollLeft = dragState.current.scrollLeft + walk;
+    };
+
+    const onTouchEnd = () => {
+      endPointer();
+    };
+
+    const suppressClickAfterSwipe = (e: MouseEvent) => {
+      if (!dragState.current.moved) return;
+      e.preventDefault();
+      e.stopPropagation();
+      dragState.current.moved = false;
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    el.addEventListener('touchend', onTouchEnd);
+    el.addEventListener('touchcancel', onTouchEnd);
+    el.addEventListener('click', suppressClickAfterSwipe, true);
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
+      el.removeEventListener('click', suppressClickAfterSwipe, true);
+    };
+  }, []);
 
   return {
     ref,
     props: {
       onMouseDown,
-      onMouseLeave,
-      onMouseUp,
+      onMouseLeave: endPointer,
+      onMouseUp: endPointer,
       onMouseMove,
-      style: { cursor: isDragging ? 'grabbing' : 'grab' }
-    }
+      style: grabCursor
+        ? ({ cursor: isDragging ? 'grabbing' : 'grab' } as React.CSSProperties)
+        : undefined,
+    },
   };
 }
 
@@ -98,7 +157,7 @@ export function DragScrollContainer({ children, className, ...props }: ScrollCon
         ref={ref}
         {...dragProps}
         className={cn(
-          "flex flex-row items-stretch gap-4 overflow-x-auto no-scrollbar scroll-smooth select-none pb-1 py-1 w-full -webkit-overflow-scrolling-touch",
+          "flex flex-row items-stretch gap-4 overflow-x-auto no-scrollbar scroll-smooth select-none pb-1 py-1 w-full choosify-touch-scroll-row",
           className
         )}
         {...props}
@@ -1337,6 +1396,41 @@ export function useFloatingFilters() {
   return context;
 }
 
+/** Opens the page floating filter drawer (DrawerFilterProvider or legacy FloatingOverlays panel). */
+export function useOpenPageFilters() {
+  const { config } = useFloatingFilter();
+  const { activeFiltersData, setIsOpen, isOpen: drawerOpen } = useFloatingFilters();
+
+  const hasDrawerFilters = !!activeFiltersData;
+  const hasLegacyFilters =
+    !hasDrawerFilters &&
+    Boolean(
+      config.renderFilters ||
+        config.renderSearch ||
+        (config.quickFilters && config.quickFilters.length > 0),
+    );
+
+  const canOpenFilters = hasDrawerFilters || hasLegacyFilters;
+  const activeFilterCount = config.activeFilterCount ?? 0;
+
+  const openFilters = useCallback(() => {
+    if (hasDrawerFilters) {
+      setIsOpen(true);
+      return;
+    }
+    if (hasLegacyFilters) {
+      window.dispatchEvent(new CustomEvent('choosify:open-filters'));
+    }
+  }, [hasDrawerFilters, hasLegacyFilters, setIsOpen]);
+
+  return {
+    canOpenFilters,
+    openFilters,
+    isFiltersOpen: drawerOpen,
+    activeFilterCount,
+  };
+}
+
 export function RegisterPageFilters({
   id,
   searchQuery,
@@ -1461,14 +1555,18 @@ export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[
     if (shouldUpdate) {
       setConfig(config);
     }
-    
-    prevConfigRef.current = config;
 
+    prevConfigRef.current = config;
+  }); // Runs on every render to manually check dependency/config updates safely
+
+  // Reset config only on true unmount — a per-render cleanup would wipe the
+  // registration whenever the page re-renders without config changes.
+  useEffect(() => {
     return () => {
-      // When the component unmounts, reset config to default
       setConfig(defaultConfig);
     };
-  }); // Runs on every render to manually check dependency/config updates safely
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 }
 
 

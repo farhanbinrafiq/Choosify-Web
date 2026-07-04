@@ -10,40 +10,63 @@ export interface MediaItem {
 }
 
 export function getGuideMedia(guide: any): MediaItem[] {
-  const items: MediaItem[] = [];
-  
+  const mainImg = guide.image || PLACEHOLDER_IMAGE;
+  const category = (guide.category || 'general').toLowerCase();
+
   if (guide.videoUrl) {
-    items.push({ type: 'video', url: guide.videoUrl });
-  }
-  
-  if (guide.image) {
-    items.push({ type: 'image', url: guide.image });
-  } else {
-    items.push({ type: 'image', url: PLACEHOLDER_IMAGE });
+    return [
+      { type: 'video', url: guide.videoUrl },
+      { type: 'image', url: mainImg },
+      ...(category.includes('mobile') || category.includes('tech') || category.includes('gaming')
+        ? [
+            { type: 'image' as const, url: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=1200&h=800&fit=crop' },
+            { type: 'image' as const, url: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1200&h=800&fit=crop' },
+            { type: 'video' as const, url: 'https://assets.mixkit.co/videos/preview/mixkit-young-man-wearing-virtual-reality-glasses-4384-large.mp4' },
+          ]
+        : category.includes('fashion') || category.includes('lifestyle') || category.includes('beauty')
+          ? [
+              { type: 'image' as const, url: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&h=800&fit=crop' },
+              { type: 'image' as const, url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&h=800&fit=crop' },
+              { type: 'video' as const, url: 'https://assets.mixkit.co/videos/preview/mixkit-man-putting-on-designer-sneakers-42998-large.mp4' },
+            ]
+          : [
+              { type: 'image' as const, url: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1200&h=800&fit=crop' },
+              { type: 'image' as const, url: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=1200&h=800&fit=crop' },
+              { type: 'video' as const, url: 'https://assets.mixkit.co/videos/preview/mixkit-coffee-maker-dripping-fresh-beverage-41224-large.mp4' },
+            ]),
+    ];
   }
 
-  const category = (guide.category || 'general').toLowerCase();
   if (category.includes('mobile') || category.includes('tech') || category.includes('gaming')) {
-    items.push(
-      { type: 'image', url: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=800&fit=crop' },
+    return [
+      { type: 'video', url: 'https://assets.mixkit.co/videos/preview/mixkit-taking-photos-with-a-smartphone-34356-large.mp4' },
+      { type: 'image', url: mainImg },
       { type: 'image', url: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=1200&h=800&fit=crop' },
-      { type: 'image', url: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1200&h=800&fit=crop' }
-    );
-  } else if (category.includes('fashion') || category.includes('lifestyle') || category.includes('beauty')) {
-    items.push(
+      { type: 'image', url: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1200&h=800&fit=crop' },
+      { type: 'video', url: 'https://assets.mixkit.co/videos/preview/mixkit-young-man-wearing-virtual-reality-glasses-4384-large.mp4' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=800&fit=crop' },
+    ];
+  }
+
+  if (category.includes('fashion') || category.includes('lifestyle') || category.includes('beauty')) {
+    return [
+      { type: 'video', url: 'https://assets.mixkit.co/videos/preview/mixkit-holding-a-pair-of-new-athletic-shoes-42999-large.mp4' },
+      { type: 'image', url: mainImg },
       { type: 'image', url: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&h=800&fit=crop' },
       { type: 'image', url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&h=800&fit=crop' },
-      { type: 'image', url: 'https://images.unsplash.com/photo-1445205170230-053b830c6050?w=1200&h=800&fit=crop' }
-    );
-  } else {
-    items.push(
-      { type: 'image', url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&h=800&fit=crop' },
-      { type: 'image', url: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1200&h=800&fit=crop' },
-      { type: 'image', url: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=1200&h=800&fit=crop' }
-    );
+      { type: 'video', url: 'https://assets.mixkit.co/videos/preview/mixkit-man-putting-on-designer-sneakers-42998-large.mp4' },
+      { type: 'image', url: 'https://images.unsplash.com/photo-1445205170230-053b830c6050?w=1200&h=800&fit=crop' },
+    ];
   }
 
-  return items;
+  return [
+    { type: 'video', url: 'https://assets.mixkit.co/videos/preview/mixkit-serving-coffee-from-a-french-press-coffee-maker-41223-large.mp4' },
+    { type: 'image', url: mainImg },
+    { type: 'image', url: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1200&h=800&fit=crop' },
+    { type: 'image', url: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=1200&h=800&fit=crop' },
+    { type: 'video', url: 'https://assets.mixkit.co/videos/preview/mixkit-coffee-maker-dripping-fresh-beverage-41224-large.mp4' },
+    { type: 'image', url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&h=800&fit=crop' },
+  ];
 }
 
 interface RecommendationMediaGalleryProps {
@@ -107,12 +130,12 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
   const currentMedia = mediaItems[carouselIndex] || mediaItems[0];
 
   return (
-    <div className="w-full flex flex-col bg-black">
-      {/* 1. THEATER CONTAINER: width: 100%; background: #000; height: 608px on desktop, proportional 16:9 on mobile */}
-      <div className="w-full bg-[#000000] xl:h-[608px] h-auto aspect-video xl:aspect-auto overflow-hidden relative flex items-center justify-center select-none">
+    <div className="w-full flex flex-col bg-transparent">
+      {/* 1. THEATER CONTAINER: width: 100%; background: transparent; height: 608px on desktop, proportional 16:9 on mobile */}
+      <div className="w-full bg-transparent xl:h-[608px] h-auto aspect-video xl:aspect-auto overflow-hidden relative flex items-center justify-center select-none">
         
         {/* 2. CENTER MEDIA AREA: max-width: 1080px; width: 100%; aspect-ratio: 16 / 9; margin: 0 auto; */}
-        <div className="max-w-[1080px] w-full aspect-video mx-auto h-full relative flex items-center justify-center bg-black">
+        <div className="max-w-[1080px] w-full aspect-video mx-auto h-full relative flex items-center justify-center bg-transparent">
           <AnimatePresence mode="wait">
             <motion.div
               key={carouselIndex}
@@ -123,7 +146,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
               className="w-full h-full relative flex items-center justify-center"
             >
               {currentMedia.type === 'video' ? (
-                <div className="w-full h-full flex items-center justify-center relative bg-black">
+                <div className="w-full h-full flex items-center justify-center relative bg-transparent">
                   <video
                     ref={videoRef}
                     src={currentMedia.url}
@@ -143,7 +166,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
                     {isMuted ? (
                       <>
                         <VolumeX size={14} className="text-rose-500 animate-pulse" />
-                        <span>UNMUTE PREVIEW VIDEO</span>
+                        <span>UNMUTE GUIDE VIDEO</span>
                       </>
                     ) : (
                       <>
@@ -208,11 +231,11 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
       </div>
 
       {/* 3. THUMBNAILS & INDICATORS: horizontal row centered inside 1080px area */}
-      <div className="w-full bg-[#0B0C1E] py-4 border-b border-white/5">
+      <div className="w-full bg-transparent py-4">
         <div className="max-w-[1080px] mx-auto px-6 flex flex-col gap-4">
           
           {/* Thumbnails */}
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none items-center justify-start max-w-full">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none items-center justify-start max-w-full font-sans">
             {mediaItems.map((media, i) => {
               const isActive = i === carouselIndex;
               return (
@@ -257,7 +280,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
           </div>
 
           {/* Indicators Dots */}
-          <div className="flex justify-center items-center gap-1.5">
+          <div className="flex justify-center items-center gap-1.5 font-sans">
             {mediaItems.map((_, i) => (
               <button
                 key={i}

@@ -37,6 +37,7 @@ const PAGE_ID_BY_PATH: Record<string, string> = {
   '/products': 'products',
   '/brands': 'brands',
   '/deals': 'deals',
+  '/whats-on': 'whats-on',
   '/categories': 'categories',
 };
 

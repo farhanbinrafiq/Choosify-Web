@@ -38,7 +38,11 @@ import { BRANDS, PRODUCTS } from "../constants";
 import { ProductCard } from "../components/ProductCard";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
-import { QuickAccessCard } from "../components/QuickAccessCard";
+import { DETAIL_SINGLE_FEED, DETAIL_FEED_GRID_5 } from "../lib/pageLayout";
+import { StickySectionNav } from "../components/StickySectionNav";
+import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
+import { BrandPostCarouselSection } from "../components/BrandPostCarouselSection";
+import { getBrandPostsByBrandId } from "../lib/brandPosts";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import { useCarousel } from "../hooks/useCarousel";
 import { ReportModal } from "../components/ReportModal";
@@ -50,9 +54,7 @@ import { ClaimProfileModal } from "../components/ClaimProfileModal";
 import {
   DragScrollContainer,
   UniversalFilterRenderer,
-  QuickFilterBar,
   ActiveFilterChips,
-  FullSidebarFilterPanel,
   FilterProfile,
   CategorySmartFilters,
   useRegisterPageFilters,
@@ -131,6 +133,7 @@ function WithInfluencerReviews({
       subtitle={`CREATOR EXPERIENCES WITH ${brandName.toUpperCase()}`}
       featuredReview={featuredReview}
       reviews={reviews}
+      fullWidth
     />
   );
 }
@@ -155,7 +158,6 @@ export function BrandDetailPage() {
   const [activeFilter, setActiveFilter] = useState("Full Experience"); // Show Component View Selector
   const [searchFilter, setSearchFilter] = useState("");
   const [currentSearchInput, setCurrentSearchInput] = useState("");
-  const [activeSection, setActiveSection] = useState("all");
 
   // New Filter V2 States
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -226,12 +228,17 @@ export function BrandDetailPage() {
     brandSource.find((b) => b.name === "Sailor") ||
     brandSource[2];
 
+  const brandWhatsOnPosts = useMemo(
+    () => getBrandPostsByBrandId(Number(brand.id)).slice(0, 6),
+    [brand.id],
+  );
+
   const [localClaimStatus, setLocalClaimStatus] = useState<
     "verified" | "pending" | "community"
   >(() => getBrandClaimStatus(brand.id));
 
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 8;
+  const productsPerPage = 10;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -889,6 +896,12 @@ export function BrandDetailPage() {
   const finalDeals =
     filteredDeals.length > 0 ? filteredDeals : sortedProducts.slice(0, 3);
 
+  const hasCatalogProducts = filteredProducts.length > 0;
+  const hasCatalogDeals = finalDeals.length > 0;
+  const showProductCatalogSection =
+    localClaimStatus !== "verified" || hasCatalogProducts;
+  const showDealsSection = localClaimStatus !== "verified" || hasCatalogDeals;
+
   // Counts
   const totalDealsFound = finalDeals.length;
   const totalProductsFound = sortedProducts.length || brandProducts.length;
@@ -919,69 +932,6 @@ export function BrandDetailPage() {
     setSearchFilter("");
     setCurrentSearchInput("");
   }
-
-  // ScrollSpy Active Section Detection
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 220; // safe offset matching navbar + sticky selectors
-
-      const sections = [
-        { id: "deals-section", name: "deals" },
-        { id: "products-section", name: "products" },
-        { id: "influencer-reviews-section", name: "influencer" },
-        { id: "public-reviews-section", name: "public" },
-        { id: "brand-overview-section", name: "overview" },
-      ];
-
-      if (window.scrollY < 200) {
-        setActiveSection("all");
-        return;
-      }
-
-      let currentSection = "all";
-      for (const section of sections) {
-        const el = document.getElementById(section.id);
-        if (el) {
-          const top = el.getBoundingClientRect().top + window.pageYOffset;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            currentSection = section.name;
-          }
-        }
-      }
-      setActiveSection(currentSection);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToSection = (id: string) => {
-    if (id === "all") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      setActiveSection("all");
-    } else {
-      const el = document.getElementById(id);
-      if (el) {
-        const offset = 180; // Offset for navbar + sticky selectors
-        const elementPosition = el.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth",
-        });
-
-        const nameMap: { [key: string]: string } = {
-          "deals-section": "deals",
-          "products-section": "products",
-          "influencer-reviews-section": "influencer",
-          "public-reviews-section": "public",
-          "brand-overview-section": "overview",
-        };
-        setActiveSection(nameMap[id] || "all");
-      }
-    }
-  };
 
   const [productLineIndex, setProductLineIndex] = useState(1);
 
@@ -1154,7 +1104,64 @@ export function BrandDetailPage() {
     };
   };
 
+  const brandPromos = [
+    {
+      title: "First Order Gift",
+      discount: "BDT 500 FLAT",
+      code: `${brand.name.toUpperCase()}500`,
+      expiry: "Valid till June 30",
+    },
+    {
+      title: "Eid Celebration Offer",
+      discount: "BDT 1,000 FLAT",
+      code: "EID26",
+      expiry: "Minimum purchase BDT 4,000",
+    },
+    {
+      title: "Limited VIP Discount",
+      discount: "20% FLAT OFF",
+      code: `${brand.name.toUpperCase()}20`,
+      expiry: "For New Registries",
+    },
+  ];
+
   const overviewData = getBrandOverviews(brand.name);
+
+  const sectionNavItems = useMemo(
+    () => [
+      {
+        id: "deals-section",
+        label: "Deals",
+        icon: <Gift size={13} />,
+        hidden: !showDealsSection,
+      },
+      {
+        id: "products-section",
+        label: "Catalog",
+        icon: <Package size={13} />,
+        hidden: !showProductCatalogSection,
+      },
+      {
+        id: "discovery-section",
+        label: "Discovery",
+        icon: <Sparkles size={13} />,
+      },
+      {
+        id: "public-reviews-section",
+        label: "Reviews",
+        icon: <MessageCircle size={13} />,
+      },
+      {
+        id: "brand-overview-section",
+        label: "Overview",
+        icon: <Info size={13} />,
+      },
+    ],
+    [showDealsSection, showProductCatalogSection],
+  );
+
+  const { activeId: activeSectionId, scrollToSection } =
+    useSectionScrollSpy(sectionNavItems);
 
   const getPopularCategoryPreviews = () => {
     const cat = (brand.category || "").toLowerCase();
@@ -1930,527 +1937,17 @@ export function BrandDetailPage() {
         onClearAll={clearAllFilters}
       />
 
+      <StickySectionNav
+        sections={sectionNavItems}
+        activeId={activeSectionId}
+        onNavigate={scrollToSection}
+        allLabel="Brand"
+        profileLabel="Brand profile"
+      />
+
       {/* 4. Unified Scrollable Body Wrapper */}
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-16">
-        {/* EXCLUSIVE DEALS & PRODUCT CATALOG THREE COLUMN SPLIT GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
-          {/* COLUMN 1: LEFT COLUMN */}
-          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
-            {/* LEFT COLUMN SEARCH BAR */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <Search size={13} className="text-[#E8500A]" />
-              </div>
-              <input
-                type="text"
-                value={currentSearchInput}
-                onChange={(e) => setCurrentSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") setSearchFilter(currentSearchInput);
-                }}
-                placeholder="Search products of this brand..."
-                className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
-              />
-            </div>
-
-            <QuickAccessCard />
-            <div
-              id="brand-sidebar-filters"
-              className="transition-all duration-300 rounded-[5px] w-full"
-            >
-              <FullSidebarFilterPanel
-                title="Filter Catalog"
-                onReset={clearAllFilters}
-                searchQuery={currentSearchInput}
-                setSearchQuery={setCurrentSearchInput}
-                onSearchSubmit={(q) => setSearchFilter(q)}
-                searchPlaceholder="Search products of this brand..."
-                quickFilters={
-                  <QuickFilterBar
-                    title="Brand Catalog Quick Specs"
-                    onOpenFullFilters={() => {}}
-                    filters={[
-                      {
-                        id: "all-products",
-                        label: "All Products",
-                        active:
-                          !dealsOnlyFilter &&
-                          !couponsOnlyFilter &&
-                          !verifiedOnlyFilter &&
-                          !inStockOnlyFilter &&
-                          !featuredOnlyFilter,
-                        onClick: () => {
-                          setDealsOnlyFilter(false);
-                          setCouponsOnlyFilter(false);
-                          setVerifiedOnlyFilter(false);
-                          setInStockOnlyFilter(false);
-                          setFeaturedOnlyFilter(false);
-                        },
-                      },
-                      {
-                        id: "deals-only",
-                        label: "Deals",
-                        active: dealsOnlyFilter,
-                        onClick: () => setDealsOnlyFilter(!dealsOnlyFilter),
-                      },
-                      {
-                        id: "coupons-only",
-                        label: "Coupons Available",
-                        active: couponsOnlyFilter,
-                        onClick: () => setCouponsOnlyFilter(!couponsOnlyFilter),
-                      },
-                      {
-                        id: "verified",
-                        label: "Verified Store",
-                        active: verifiedOnlyFilter,
-                        onClick: () =>
-                          setVerifiedOnlyFilter(!verifiedOnlyFilter),
-                      },
-                      {
-                        id: "in-stock",
-                        label: "In Stock",
-                        active: inStockOnlyFilter,
-                        onClick: () => setInStockOnlyFilter(!inStockOnlyFilter),
-                      },
-                      {
-                        id: "featured",
-                        label: "Featured",
-                        active: featuredOnlyFilter,
-                        onClick: () =>
-                          setFeaturedOnlyFilter(!featuredOnlyFilter),
-                      },
-                      {
-                        id: "sort",
-                        label:
-                          sortOption === "default"
-                            ? "Sort Selection"
-                            : `Sort: ${
-                                sortOption === "price-asc"
-                                  ? "৳ Low to High"
-                                  : sortOption === "price-desc"
-                                    ? "৳ High to Low"
-                                    : sortOption === "rating-desc"
-                                      ? "Top Rating"
-                                      : "Best Discount"
-                              }`,
-                        active: sortOption !== "default",
-                        onClick: () => {
-                          setSortOption((prev) => {
-                            if (prev === "default") return "price-asc";
-                            if (prev === "price-asc") return "price-desc";
-                            if (prev === "price-desc") return "rating-desc";
-                            if (prev === "rating-desc") return "discount-desc";
-                            return "default";
-                          });
-                        },
-                      },
-                    ]}
-                  />
-                }
-                activeChips={
-                  <ActiveFilterChips
-                    chips={
-                      [
-                        selectedCategory
-                          ? {
-                              id: "category",
-                              label: `Category: ${selectedCategory}`,
-                              onRemove: () => setSelectedCategory(null),
-                            }
-                          : null,
-                        priceRangeV2[0] > 0 || priceRangeV2[1] !== null
-                          ? {
-                              id: "price",
-                              label: `Price: ৳${priceRangeV2[0].toLocaleString()}–${priceRangeV2[1] !== null ? `৳${priceRangeV2[1].toLocaleString()}` : "Max"}`,
-                              onRemove: () => {
-                                setCustomPriceInputs({ min: "", max: "" });
-                                setPriceRangeV2([0, null]);
-                              },
-                            }
-                          : null,
-                        availabilityFilter
-                          ? {
-                              id: "availability",
-                              label: `Stock: ${availabilityFilter}`,
-                              onRemove: () => setAvailabilityFilter(null),
-                            }
-                          : null,
-                        ratingFilter
-                          ? {
-                              id: "rating",
-                              label: `Min Rating: ${ratingFilter}★`,
-                              onRemove: () => setRatingFilter(null),
-                            }
-                          : null,
-                        votesFilter
-                          ? {
-                              id: "votes",
-                              label: `Min Votes: ${votesFilter}♥`,
-                              onRemove: () => setVotesFilter(null),
-                            }
-                          : null,
-                        warrantyFilter
-                          ? {
-                              id: "warranty",
-                              label: `Warranty: ${warrantyFilter}`,
-                              onRemove: () => setWarrantyFilter(null),
-                            }
-                          : null,
-                        deliveryFilter
-                          ? {
-                              id: "delivery",
-                              label: `Delivery: ${deliveryFilter}`,
-                              onRemove: () => setDeliveryFilter(null),
-                            }
-                          : null,
-                        discountFilter
-                          ? {
-                              id: "discount",
-                              label: `Min Discount: ${discountFilter}%`,
-                              onRemove: () => setDiscountFilter(null),
-                            }
-                          : null,
-                        couponFilter
-                          ? {
-                              id: "coupon",
-                              label: `Coupons: ${couponFilter}`,
-                              onRemove: () => setCouponFilter(null),
-                            }
-                          : null,
-                        expiryFilter
-                          ? {
-                              id: "expiry",
-                              label: `Expiry: ${expiryFilter}`,
-                              onRemove: () => setExpiryFilter(null),
-                            }
-                          : null,
-                        productLineFilter
-                          ? {
-                              id: "product_line",
-                              label: `Line: ${productLineFilter}`,
-                              onRemove: () => setProductLineFilter(null),
-                            }
-                          : null,
-                        featuredCollectionFilter
-                          ? {
-                              id: "featured_collection",
-                              label: `Collection: ${featuredCollectionFilter}`,
-                              onRemove: () => setFeaturedCollectionFilter(null),
-                            }
-                          : null,
-                        officialStoreFilter
-                          ? {
-                              id: "official_store",
-                              label: `Official: ${officialStoreFilter}`,
-                              onRemove: () => setOfficialStoreFilter(null),
-                            }
-                          : null,
-                        countryFilter
-                          ? {
-                              id: "country",
-                              label: `Origin: ${countryFilter}`,
-                              onRemove: () => setCountryFilter(null),
-                            }
-                          : null,
-                        dealsOnlyFilter
-                          ? {
-                              id: "deals_only",
-                              label: "Deals Only",
-                              onRemove: () => setDealsOnlyFilter(false),
-                            }
-                          : null,
-                        couponsOnlyFilter
-                          ? {
-                              id: "coupons_only",
-                              label: "Coupons Only",
-                              onRemove: () => setCouponsOnlyFilter(false),
-                            }
-                          : null,
-                        verifiedOnlyFilter
-                          ? {
-                              id: "verified_only",
-                              label: "Verified Only",
-                              onRemove: () => setVerifiedOnlyFilter(false),
-                            }
-                          : null,
-                        inStockOnlyFilter
-                          ? {
-                              id: "instock_only",
-                              label: "In Stock Only",
-                              onRemove: () => setInStockOnlyFilter(false),
-                            }
-                          : null,
-                        featuredOnlyFilter
-                          ? {
-                              id: "featured_only",
-                              label: "Featured Only",
-                              onRemove: () => setFeaturedOnlyFilter(false),
-                            }
-                          : null,
-                        ...Object.entries(smartSpecs).map(([key, val]) =>
-                          val
-                            ? {
-                                id: `smart-${key}`,
-                                label: `${key.toUpperCase()}: ${val}`,
-                                onRemove: () =>
-                                  setSmartSpecs((prev) => ({
-                                    ...prev,
-                                    [key]: null as any,
-                                  })),
-                              }
-                            : null,
-                        ),
-                      ].filter(Boolean) as any[]
-                    }
-                    onClearAll={clearAllFilters}
-                  />
-                }
-                advancedSection={
-                  <div className="flex flex-col gap-4">
-                    {/* Dynamic Smart Filters depending on the brand category */}
-                    <CategorySmartFilters
-                      category={brand.category || "Fashion & Clothing"}
-                      activeSpecs={smartSpecs}
-                      onSpecChange={(specKey, val) => {
-                        setSmartSpecs((prev) => ({
-                          ...prev,
-                          [specKey]: val || "",
-                        }));
-                      }}
-                    />
-
-                    {/* Rendering Advanced Deal and Brand filters */}
-                    <UniversalFilterRenderer
-                      profile={{
-                        entity: "products",
-                        filters: [
-                          {
-                            id: "warranty",
-                            name: "Warranty Scope",
-                            type: "single_select",
-                            options: [
-                              { value: "all", label: "Any Warranty" },
-                              {
-                                value: "standard",
-                                label: "Standard Brand Warranty",
-                              },
-                              {
-                                value: "extended",
-                                label: "Extended Merchant Warranty",
-                              },
-                              { value: "none", label: "No Warranty" },
-                            ],
-                          },
-                          {
-                            id: "delivery",
-                            name: "Delivery Channel",
-                            type: "single_select",
-                            options: [
-                              { value: "all", label: "All Delivery options" },
-                              { value: "free", label: "Free Delivery" },
-                              { value: "paid", label: "Standard Delivery" },
-                              {
-                                value: "express",
-                                label: "Express (Dhaka Metro)",
-                              },
-                            ],
-                          },
-                          {
-                            id: "discount",
-                            name: "Minimum Discount",
-                            type: "single_select",
-                            options: [
-                              { value: "all", label: "Any Discount" },
-                              { value: "10", label: "10% Off or More" },
-                              { value: "25", label: "25% Off or More" },
-                              { value: "55", label: "55% Off or More" },
-                            ],
-                          },
-                          {
-                            id: "coupon",
-                            name: "Coupon Available",
-                            type: "single_select",
-                            options: [
-                              { value: "all", label: "Display All" },
-                              { value: "yes", label: "Coupons Available" },
-                              { value: "no", label: "No Coupons" },
-                            ],
-                          },
-                          {
-                            id: "expiry",
-                            name: "Deal Expiry Status",
-                            type: "single_select",
-                            options: [
-                              { value: "all", label: "All Statuses" },
-                              { value: "active", label: "Active Deals Only" },
-                              { value: "expired", label: "Expired Deals" },
-                            ],
-                          },
-                          {
-                            id: "product_line",
-                            name: "Product Line Type",
-                            type: "single_select",
-                            options: [
-                              { value: "all", label: "All Lines" },
-                              { value: "premium", label: "Premium Class" },
-                              { value: "standard", label: "Standard Class" },
-                              { value: "budget", label: "Budget/Crucial" },
-                            ],
-                          },
-                          {
-                            id: "featured_collection",
-                            name: "Featured Collections",
-                            type: "single_select",
-                            options: [
-                              { value: "all", label: "All Collections" },
-                              { value: "summer", label: "Summer Air" },
-                              { value: "winter", label: "Winter Cozy" },
-                              {
-                                value: "festive",
-                                label: "Festive / Eid Special",
-                              },
-                            ],
-                          },
-                          {
-                            id: "official_store",
-                            name: "Official Outlet Sourced",
-                            type: "single_select",
-                            options: [
-                              { value: "all", label: "All Stores" },
-                              { value: "yes", label: "Official Store Only" },
-                              { value: "no", label: "Third-party Retailer" },
-                            ],
-                          },
-                          {
-                            id: "country",
-                            name: "Country of Origin",
-                            type: "single_select",
-                            options: [
-                              { value: "all", label: "All Countries" },
-                              { value: "Bangladesh", label: "Bangladesh" },
-                              { value: "China", label: "China" },
-                              { value: "Vietnam", label: "Vietnam" },
-                              { value: "India", label: "India" },
-                            ],
-                          },
-                        ],
-                      }}
-                      activeFilters={{
-                        warranty: warrantyFilter,
-                        delivery: deliveryFilter,
-                        discount: discountFilter,
-                        coupon: couponFilter,
-                        expiry: expiryFilter,
-                        product_line: productLineFilter,
-                        featured_collection: featuredCollectionFilter,
-                        official_store: officialStoreFilter,
-                        country: countryFilter,
-                      }}
-                      onFilterChange={(filterId, val) => {
-                        const cleanVal = val === "all" ? null : val;
-                        if (filterId === "warranty")
-                          setWarrantyFilter(cleanVal);
-                        if (filterId === "delivery")
-                          setDeliveryFilter(cleanVal);
-                        if (filterId === "discount")
-                          setDiscountFilter(cleanVal);
-                        if (filterId === "coupon") setCouponFilter(cleanVal);
-                        if (filterId === "expiry") setExpiryFilter(cleanVal);
-                        if (filterId === "product_line")
-                          setProductLineFilter(cleanVal);
-                        if (filterId === "featured_collection")
-                          setFeaturedCollectionFilter(cleanVal);
-                        if (filterId === "official_store")
-                          setOfficialStoreFilter(cleanVal);
-                        if (filterId === "country") setCountryFilter(cleanVal);
-                      }}
-                    />
-                  </div>
-                }
-              >
-                <UniversalFilterRenderer
-                  profile={{
-                    entity: "products",
-                    filters: [
-                      {
-                        id: "price_custom",
-                        name: "Price Scope (BDT)",
-                        type: "price_custom",
-                      },
-                      {
-                        id: "category",
-                        name: "Categories",
-                        type: "single_select",
-                        options: [
-                          { value: "all", label: "All Categories" },
-                          ...finalCategoriesList.map((cat) => ({
-                            value: cat.name,
-                            label: cat.name,
-                            count: cat.count,
-                          })),
-                        ],
-                      },
-                      {
-                        id: "availability",
-                        name: "Availability",
-                        type: "single_select",
-                        options: [
-                          { value: "all", label: "All Items" },
-                          { value: "in-stock", label: "In Stock" },
-                          { value: "out-of-stock", label: "Out of Stock" },
-                        ],
-                      },
-                      {
-                        id: "rating",
-                        name: "Average Rating",
-                        type: "single_select",
-                        options: [
-                          { value: "all", label: "All Ratings" },
-                          { value: "4.8", label: "4.8★ & Up" },
-                          { value: "4.5", label: "4.5★ & Up" },
-                          { value: "4.0", label: "4.0★ & Up" },
-                        ],
-                      },
-                      {
-                        id: "votes",
-                        name: "Audience Votes",
-                        type: "single_select",
-                        options: [
-                          { value: "all", label: "Any Vote Count" },
-                          { value: "500", label: "500+ Votes" },
-                          { value: "300", label: "300+ Votes" },
-                          { value: "100", label: "100+ Votes" },
-                        ],
-                      },
-                    ],
-                  }}
-                  activeFilters={{
-                    price_custom: true,
-                    category: selectedCategory,
-                    availability: availabilityFilter,
-                    rating: ratingFilter,
-                    votes: votesFilter,
-                  }}
-                  onFilterChange={(filterId, val) => {
-                    const cleanVal = val === "all" ? null : val;
-                    if (filterId === "category") setSelectedCategory(cleanVal);
-                    if (filterId === "availability")
-                      setAvailabilityFilter(cleanVal);
-                    if (filterId === "rating") setRatingFilter(cleanVal);
-                    if (filterId === "votes") setVotesFilter(cleanVal);
-                  }}
-                  customPriceInputs={customPriceInputs}
-                  setCustomPriceInputs={setCustomPriceInputs}
-                  onCustomPriceApply={(min, max) => {
-                    setPriceRangeV2([min, max]);
-                  }}
-                />
-              </FullSidebarFilterPanel>
-            </div>
-          </aside>
-
-          {/* COLUMN 2: EXCLUSIVE DEALS & PRODUCTS CATALOG (Center scroll) */}
-          <main className="scroll-mt-36 min-w-0 pb-10 flex flex-col gap-12">
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-8">
+        <div className={`${DETAIL_SINGLE_FEED}`}>
             {/* Brand Claim Acquisition Card (Part 6) */}
             {(localClaimStatus === "community" ||
               localClaimStatus === "pending") && (
@@ -2541,15 +2038,14 @@ export function BrandDetailPage() {
             )}
 
             {/* A. DEALS SECTION */}
-            {(activeFilter === "Full Experience" ||
-              activeFilter === "Exclusive Deals Only") && (
+            {showDealsSection && (
               <div id="deals-section" className="scroll-mt-36">
                 <div className="mb-6 text-left">
                   <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
                     Exclusive Deals
                   </h2>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                    Deals found matching current selections
+                    Deals, promo codes & exclusive offers
                   </p>
                 </div>
 
@@ -2591,8 +2087,8 @@ export function BrandDetailPage() {
                       </div>
                     )}
                   </div>
-                ) : finalDeals.length > 0 ? (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                ) : (
+                  <div className={DETAIL_FEED_GRID_5}>
                     {finalDeals.map((product: any, i: number) => (
                       <ProductCard
                         key={product.id || i}
@@ -2600,18 +2096,47 @@ export function BrandDetailPage() {
                         variant="grid"
                       />
                     ))}
-                  </div>
-                ) : (
-                  <div className="p-10 text-center bg-white border border-gray-100 rounded-3xl text-gray-400 text-xs font-black uppercase">
-                    No Active Deals Found Match Current Filters.
+                    {brandPromos.map((promo, idx) => (
+                      <div
+                        key={`promo-${idx}`}
+                        className="bg-white border border-[#e8edf2] p-3.5 rounded-[5px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all shadow-sm h-full"
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
+                          <Gift size={14} />
+                        </div>
+                        <h4 className="text-xs font-semibold text-[#1A1D4E] uppercase tracking-wider mb-0.5">
+                          {promo.title}
+                        </h4>
+                        <div className="text-sm font-semibold text-[#E8500A] uppercase mb-3 leading-none">
+                          {promo.discount}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(promo.code);
+                            toast.success(
+                              `Promo Code "${promo.code}" copied to clipboard!`,
+                            );
+                          }}
+                          className="w-full py-2 bg-white rounded-lg border border-dashed border-[#e8edf2] hover:border-[#E8500A] font-mono text-xs font-semibold text-[#1A1D4E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer shadow-xs"
+                        >
+                          <span className="text-[8px] text-gray-400 font-sans tracking-wide uppercase font-semibold">
+                            PROMO CODE
+                          </span>
+                          <span>{promo.code}</span>
+                        </button>
+                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2 block">
+                          {promo.expiry}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             )}
 
             {/* B. PRODUCTS SECTION */}
-            {(activeFilter === "Full Experience" ||
-              activeFilter === "Product Catalogs Only") && (
+            {showProductCatalogSection && (
               <div id="products-section" className="scroll-mt-36">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 text-left">
                   <div>
@@ -2670,7 +2195,7 @@ export function BrandDetailPage() {
                     )}
                   </div>
                 ) : filteredProducts.length > 0 ? (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 justify-items-center">
+                  <div className={DETAIL_FEED_GRID_5}>
                     {paginatedProducts.map((product: any, i: number) => (
                       <ProductCard
                         key={product.id || i}
@@ -2748,231 +2273,136 @@ export function BrandDetailPage() {
                 )}
               </div>
             )}
-          </main>
 
-          {/* COLUMN 3: PROMO CODES & ADS (Right column) */}
-          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-            <div className="flex flex-col gap-6">
-              {/* Promo Coupons Cards list */}
-              {localClaimStatus === "verified" && (
-                <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm">
-                  <div className="flex justify-between items-center pb-3 mb-4 border-b border-[#e8edf2] px-0.5 text-left">
-                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5">
-                      <span className="w-1.5 h-3 bg-[#E8500A] rounded-full inline-block" />
-                      Promo Codes
-                    </h3>
-                    <span className="text-[9px] font-semibold text-[#8a9bb0]">
-                      3 Verified
-                    </span>
-                  </div>
-
-                  <div className="space-y-4 text-left">
-                    {[
-                      {
-                        title: "First Order Gift",
-                        discount: "BDT 500 FLAT",
-                        code: `${brand.name.toUpperCase()}500`,
-                        expiry: "Valid till June 30",
-                      },
-                      {
-                        title: "Eid Celebration Offer",
-                        discount: "BDT 1,000 FLAT",
-                        code: "EID26",
-                        expiry: "Minimum purchase BDT 4,000",
-                      },
-                      {
-                        title: "Limited VIP Discount",
-                        discount: "20% FLAT OFF",
-                        code: `${brand.name.toUpperCase()}20`,
-                        expiry: "For New Registries",
-                      },
-                    ].map((promo, idx) => (
-                      <div
-                        key={idx}
-                        className="bg-white border border-[#e8edf2] p-3.5 rounded-[5px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all"
-                      >
-                        <div className="w-7 h-7 rounded-lg bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
-                          <Gift size={14} />
-                        </div>
-                        <h4 className="text-xs font-semibold text-[#1A1D4E] uppercase tracking-wider mb-0.5">
-                          {promo.title}
-                        </h4>
-                        <div className="text-sm font-semibold text-[#E8500A] uppercase mb-3 leading-none">
-                          {promo.discount}
-                        </div>
-
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(promo.code);
-                            toast.success(
-                              `Promo Code "${promo.code}" copied to clipboard!`,
-                            );
-                          }}
-                          className="w-full py-2 bg-white rounded-lg border border-dashed border-[#e8edf2] hover:border-[#E8500A] font-mono text-xs font-semibold text-[#1A1D4E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer shadow-xs"
-                        >
-                          <span className="text-[8px] text-gray-400 font-sans tracking-wide uppercase font-semibold">
-                            PROMO CODE
-                          </span>
-                          <span>{promo.code}</span>
-                        </button>
-
-                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2 block">
-                          {promo.expiry}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {localClaimStatus !== "verified" && (
-                <div className="bg-white rounded-[5px] p-6 border border-[#e8edf2] shadow-sm text-center flex flex-col items-center justify-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
-                    <Lock size={16} />
-                  </div>
-                  <h4 className="text-[11px] font-black text-navy uppercase tracking-tight">
-                    Promo Codes Locked
-                  </h4>
-                  <p className="text-[10px] text-gray-500 font-bold leading-normal">
-                    Official merchant promotions and exclusive coupons are
-                    hidden for unclaimed brand profiles.
-                  </p>
-                  {localClaimStatus === "community" && (
-                    <button
-                      onClick={() => {
-                        toast.loading(
-                          "Initiating secure brand verification link...",
-                          { duration: 1500 },
-                        );
-                        setTimeout(() => {
-                          updateBrandClaimStatus(brand.id, "pending");
-                          toast.success(
-                            "Verification submission parsed! Ready for credential matching review.",
-                          );
-                        }, 1500);
-                      }}
-                      className="text-[9px] bg-[#E8500A] hover:bg-[#ff5d14] text-white py-2 px-5 rounded-full font-black uppercase tracking-wider italic mt-1 cursor-pointer border-none shadow-md"
-                    >
-                      Claim Brand
-                    </button>
-                  )}
-                  {localClaimStatus === "pending" && (
-                    <div className="text-[9px] font-black text-amber-600 uppercase italic tracking-widest mt-1">
-                      Verification Under Review
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Platform Compliance Verified Sourcing badge card */}
-              <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left font-sans">
-                <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <ShieldCheck size={14} className="text-green-500 shrink-0" />
-                  Verified Sourcing
-                </h4>
-                <p className="text-[10px] text-gray-400 leading-relaxed font-semibold">
-                  Each listed bargain point is validated against native brand
-                  catalogs. Rest assured, checkout is immediate, safe, and
-                  transparent.
-                </p>
-              </div>
-            </div>
-          </aside>
-        </div>
-
-        {/* FULL WIDTH INFLUENCER REVIEWS SECTION */}
-        <div id="influencer-reviews-section" className="scroll-mt-36 w-full">
-          {localClaimStatus !== "verified" ? (
-            <div className="bg-white rounded-[5px] p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-sm border border-gray-100/80 py-12">
-              <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
-                <Lock className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-black text-navy uppercase tracking-tight">
-                Creator Collaborations & Reviews Locked
-              </h3>
-              <p className="text-xs text-gray-500 font-bold max-w-sm mb-1">
-                Professional influencer reviews, creator campaign
-                collaborations, and brand ambassadorship metrics are locked
-                until ownership is verified.
+          {/* Discovery & sponsored content */}
+          <div id="discovery-section" className="scroll-mt-36 w-full space-y-8">
+            <div className="text-left">
+              <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
+                Discovery & Sponsored
+              </h2>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
+                Creator reviews, guides & official brand announcements
               </p>
             </div>
-          ) : (
-            <WithInfluencerReviews
-              brandName={brand.name}
-              brandLogo={brand.logo}
-            />
-          )}
-        </div>
 
-        {/* FULL WIDTH PUBLIC REVIEWS SECTION */}
-        <div
-          id="public-reviews-section"
-          className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80"
-        >
-          <div className="text-center mb-8 border-b border-gray-100 pb-5">
-            <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
-              Public Reviews
-            </h3>
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
-              Verified Customer Experiences
+          <div className="scroll-mt-36 w-full">
+            {localClaimStatus !== "verified" ? (
+              <div className="bg-white rounded-[5px] p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-sm border border-gray-100/80 py-12">
+                <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <h3 className="text-sm font-black text-navy uppercase tracking-tight">
+                  Creator Collaborations & Reviews Locked
+                </h3>
+                <p className="text-xs text-gray-500 font-bold max-w-sm mb-1">
+                  Professional influencer reviews, creator campaign
+                  collaborations, and brand ambassadorship metrics are locked
+                  until ownership is verified.
+                </p>
+              </div>
+            ) : (
+              <WithInfluencerReviews
+                brandName={brand.name}
+                brandLogo={brand.logo}
+                fullWidth
+              />
+            )}
+          </div>
+
+          {brandWhatsOnPosts.length > 0 && (
+            <div id="brand-whats-on-section" className="scroll-mt-36 w-full">
+              <BrandPostCarouselSection
+                posts={brandWhatsOnPosts}
+                title={`Upcoming from ${brand.name}`}
+                subtitle="Official brand events, launches, and festival announcements."
+                viewAllHref="/whats-on"
+                viewAllLabel="Explore all What's On"
+              />
+            </div>
+          )}
+
+          </div>
+
+          <div
+            id="public-reviews-section"
+            className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80"
+          >
+            <div className="text-center mb-8 border-b border-gray-100 pb-5">
+              <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
+                Public Reviews
+              </h3>
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
+                Verified Customer Experiences
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              {[
+                {
+                  name: "Tanvir Hasan",
+                  date: "2 weeks ago",
+                  purchaseDate: "April 2024",
+                  comment: `The material quality of the new ${brand.name} collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect.`,
+                  rating: 5,
+                  verified: true,
+                  productImages: [
+                    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
+                    "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop",
+                  ],
+                  dp: "https://i.pravatar.cc/150?u=tanvir",
+                  helpful: 124,
+                },
+                {
+                  name: "Nusrat Jahan",
+                  date: "1 month ago",
+                  purchaseDate: "March 2024",
+                  comment:
+                    "Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the collection.",
+                  rating: 4.8,
+                  verified: true,
+                  productImages: [
+                    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop",
+                  ],
+                  dp: "https://i.pravatar.cc/150?u=nusrat",
+                  helpful: 89,
+                },
+              ].map((review, i) => (
+                <PublicReviewCard
+                  key={i}
+                  review={review}
+                  onHelpfulClick={() => toast.success("Marked as helpful!")}
+                />
+              ))}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              <button
+                onClick={() => toast.success("Loading all customer reviews...")}
+                className="px-10 py-3.5 border border-[#1A1D4E] text-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white transition-all text-[9.5px] font-black uppercase tracking-widest rounded-full italic cursor-pointer"
+              >
+                Load More Reviews
+              </button>
+            </div>
+          </div>
+
+          <BrandOverviewSection
+            brandName={brand.name}
+            overviewData={overviewData}
+            claimStatus={brand.claimStatus}
+          />
+
+          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left font-sans w-full">
+            <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <ShieldCheck size={14} className="text-green-500 shrink-0" />
+              Verified Sourcing
+            </h4>
+            <p className="text-[10px] text-gray-400 leading-relaxed font-semibold">
+              Each listed bargain point is validated against native brand
+              catalogs. Rest assured, checkout is immediate, safe, and
+              transparent.
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-            {[
-              {
-                name: "Tanvir Hasan",
-                date: "2 weeks ago",
-                purchaseDate: "April 2024",
-                comment: `The material quality of the new ${brand.name} collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect.`,
-                rating: 5,
-                verified: true,
-                productImages: [
-                  "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
-                  "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop",
-                ],
-                dp: "https://i.pravatar.cc/150?u=tanvir",
-                helpful: 124,
-              },
-              {
-                name: "Nusrat Jahan",
-                date: "1 month ago",
-                purchaseDate: "March 2024",
-                comment:
-                  "Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the collection.",
-                rating: 4.8,
-                verified: true,
-                productImages: [
-                  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop",
-                ],
-                dp: "https://i.pravatar.cc/150?u=nusrat",
-                helpful: 89,
-              },
-            ].map((review, i) => (
-              <PublicReviewCard
-                key={i}
-                review={review}
-                onHelpfulClick={() => toast.success("Marked as helpful!")}
-              />
-            ))}
-          </div>
-
-          <div className="mt-8 flex justify-center">
-            <button
-              onClick={() => toast.success("Loading all customer reviews...")}
-              className="px-10 py-3.5 border border-[#1A1D4E] text-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white transition-all text-[9.5px] font-black uppercase tracking-widest rounded-full italic cursor-pointer"
-            >
-              Load More Reviews
-            </button>
-          </div>
         </div>
-
-        {/* FULL WIDTH BRAND OVERVIEW SECTION */}
-        <BrandOverviewSection
-          brandName={brand.name}
-          overviewData={overviewData}
-          claimStatus={brand.claimStatus}
-        />
 
         {/* TRUST STATEMENT BACKGROUND BANNER */}
         <div className="w-full hero-gradient rounded-[5px] p-8 md:p-12 text-center text-white relative overflow-hidden shadow-lg border border-white/5">

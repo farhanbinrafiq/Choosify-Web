@@ -35,6 +35,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
+import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
 import { RecommendationCard } from '../components/RecommendationCard';
 import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
@@ -218,7 +219,7 @@ const SavedProductsSection = () => {
       </div>
 
       {savedProducts.length > 0 ? (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className={PRODUCT_CARD_GRID}>
           {savedProducts.map((p) => (
             <div key={p.id} className="relative group">
               <button 
@@ -474,7 +475,7 @@ const RecentlyViewedSection = () => {
       </div>
 
       {recentlyViewed.length > 0 ? (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className={PRODUCT_CARD_GRID}>
           {recentlyViewed.map((p) => (
             <div key={p.id} className="relative group">
               <ProductCard product={p} variant="grid" />

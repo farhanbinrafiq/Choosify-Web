@@ -268,6 +268,22 @@ export interface CatalogPlacement {
   updatedAt: string;
 }
 
+export interface CatalogProductSizeGuideRow {
+  size: string;
+  [measurement: string]: string;
+}
+
+export interface CatalogProductSizeGuide {
+  /** Set true in CMS to expose the size guide on the product detail page */
+  enabled: boolean;
+  title?: string;
+  description?: string;
+  imageUrl?: string;
+  unitLabel?: string;
+  columnHeaders?: string[];
+  rows?: CatalogProductSizeGuideRow[];
+}
+
 export interface CatalogProductDetail {
   productId: string;
   about?: string;
@@ -321,6 +337,7 @@ export interface CatalogProductDetail {
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string;
+  sizeGuide?: CatalogProductSizeGuide;
   updatedAt: string;
 }
 

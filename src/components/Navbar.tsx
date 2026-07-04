@@ -5,18 +5,18 @@ import {
   FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { SignInModal } from './SignInModal';
 import { GlobalSearchBar } from './GlobalSearchBar';
+import { useDragScroll } from './FilterEngine';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { CartDrawer } from './CartDrawer';
 import { cn } from '../lib/utils';
+import { PRIMARY_NAV_ITEMS } from '../lib/navigation';
 import toast from 'react-hot-toast';
 
 export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -27,10 +27,35 @@ export function Navbar() {
   const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig } = useGlobalState();
   const { threads, notifications = [], setNotifications, savedProducts } = useDashboard();
 
-  const unreadMsgCount = threads.filter(t => t.unread).length;
-  const unreadNotifCount = notifications.filter((n: any) => !n.read).length;
+  const unreadMsgCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
+  const unreadNotifCount = isLoggedIn ? notifications.filter((n: any) => !n.read).length : 0;
+  const savedCount = isLoggedIn ? savedProducts.length : 0;
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const { ref: categoryStripRef, props: categoryStripProps } = useDragScroll({ grabCursor: false });
+
+  // Publish live navbar height for sticky page chrome (section nav, sidebars)
+  useEffect(() => {
+    const header = document.getElementById('main-navbar');
+    if (!header) return;
+
+    const syncNavbarHeight = () => {
+      document.documentElement.style.setProperty(
+        '--choosify-navbar-height',
+        `${header.offsetHeight}px`,
+      );
+    };
+
+    syncNavbarHeight();
+    const observer = new ResizeObserver(syncNavbarHeight);
+    observer.observe(header);
+    window.addEventListener('resize', syncNavbarHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', syncNavbarHeight);
+    };
+  }, []);
 
   // Mark notifications as read when user opens the notifications tab
   useEffect(() => {
@@ -75,15 +100,18 @@ export function Navbar() {
       ))
     ) : (
       <>
-        <Link to="/" className={linkClass('/')}>Home</Link>
-        <Link to="/categories" className={linkClass('/categories')}>Categories</Link>
-        <Link to="/products" className={linkClass('/products')}>Products</Link>
-        <Link to="/brands" className={linkClass('/brands')}>Brands</Link>
-        <Link to="/guides" className={linkClass('/guides')}>Recommendations</Link>
-        <Link to="/compare" className={linkClass('/compare')}>Compare</Link>
-        <Link to="/deals" className={linkClass('/deals')}>Deals</Link>
-        <Link to="/customer-favorite" className={linkClass('/customer-favorite')}>Customer Favorite</Link>
-        <Link to="/creators" className={linkClass('/creators')}>Creators</Link>
+        {PRIMARY_NAV_ITEMS.map((item) => (
+          <Link key={item.id} to={item.path} className={linkClass(item.path)}>
+            {item.labelWide ? (
+              <>
+                <span className="2xl:hidden">{item.label}</span>
+                <span className="hidden 2xl:inline">{item.labelWide}</span>
+              </>
+            ) : (
+              item.label
+            )}
+          </Link>
+        ))}
       </>
     );
 
@@ -92,6 +120,11 @@ export function Navbar() {
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
+  };
+
+  const goToLogin = (tab: 'sign-in' | 'sign-up' = 'sign-in') => {
+    setIsMobileMenuOpen(false);
+    navigate('/login', { state: { tab, from: location.pathname } });
   };
 
   const dashboardMiniMenu: Array<{ label: string; path: string; icon: any; tab?: string; dividerAbove?: boolean }> = [
@@ -127,17 +160,19 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="w-full text-white h-20 flex items-center justify-between lg:justify-start px-3 lg:px-4 xl:px-8 z-50 sticky top-0 border-b shadow-2xl backdrop-blur-md transition-all duration-300 choosify-dark-gradient border-white/5" id="main-navbar">
+      <header className="w-full min-w-0 z-50 sticky top-0 shadow-2xl" id="main-navbar">
+        {/* Row 1 — Logo, prominent search, account actions (Amazon-style top bar) */}
+        <nav className="choosify-dark-gradient text-white h-14 sm:h-16 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 xl:px-8 border-b border-white/5">
         
         {/* LOGO SECTOR */}
-        <div className="flex items-center gap-3 mr-3 lg:mr-5 xl:mr-10 scale-100 shrink-0">
+        <div className="flex items-center shrink-0">
           <Link to="/" className="flex flex-col items-center group" aria-label="Choosify Home">
             <svg 
               id="Layer_1" 
               data-name="Layer 1" 
               xmlns="http://www.w3.org/2000/svg" 
               viewBox="0 0 3311.76 744.41"
-              className="h-10 sm:h-11 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+              className="h-8 sm:h-9 lg:h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
             >
               <path className="fill-white" d="M0,391.36c0-127.52,86.85-224.74,219.95-224.74,113.18,0,183.35,64.55,198.44,156.98h-121.1c-8.75-39.05-34.26-63.76-75.68-63.76-63,0-94.85,51.8-94.85,131.52s31.84,129.89,94.85,129.89c46.18,0,74.1-27.88,79.68-76.51h120.35c-4,96.43-80.51,171.36-198.44,171.36C87.68,616.1,0,518.09,0,391.36Z"/>
               <path className="fill-white" d="M605.22,602.56h-125.18V9.6h125.18v163.4c0,3.96,0,38.26-.83,66.14h2.41c25.5-45.42,68.51-72.51,127.52-72.51,93.19,0,147.44,62.14,147.44,156.98v278.95h-124.35v-255.04c0-46.22-24.67-77.3-70.93-77.3-48.59,0-81.26,39.05-81.26,93.26v239.08Z"/>
@@ -152,35 +187,35 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Retail Mode general navigation links */}
-        <div className="hidden lg:flex items-center flex-nowrap gap-2 xl:gap-4 2xl:gap-6 text-[10px] font-bold uppercase tracking-wider xl:tracking-widest mr-auto text-gray-300 border-r border-transparent xl:border-white/5 pr-3 xl:pr-6 shrink-0">
-          {renderNavLinks(getLinkClass)}
-        </div>
-
-        {/* SEARCH BAR */}
-        <div className="flex-1 max-w-xs mx-4 hidden xl:block">
-          <GlobalSearchBar 
-            initialValue={searchQuery}
-            placeholder="Search Products, Brands, Reviews..."
-            onSubmit={(val) => {
-              setSearchQuery(val);
-              navigate(`/search?q=${encodeURIComponent(val)}`);
-            }}
-            variant="navbar"
-          />
+        {/* Search — capped width so cart / saved / messages stay visible */}
+        <div className="flex-1 min-w-0 flex items-center justify-center px-1.5 sm:px-2 lg:px-3 overflow-hidden">
+          <div className="w-full min-w-[7.5rem] max-w-[11rem] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg relative z-[55]">
+            <GlobalSearchBar
+              initialValue={searchQuery}
+              placeholder="Search products, brands..."
+              onSubmit={(val) => {
+                setSearchQuery(val);
+                navigate(`/search?q=${encodeURIComponent(val)}`);
+              }}
+              variant="hero"
+              enableSuggestions
+              className="w-full choosify-navbar-hero-search"
+              submitLabel="Search"
+            />
+          </div>
         </div>
 
         {/* ACTIONS & MESSAGES */}
-        <div className="flex items-center gap-3 xl:gap-5 ml-auto nav-actions shrink-0">
+        <div className="flex items-center gap-1 sm:gap-1.5 xl:gap-2 shrink-0 nav-actions">
           
-          {/* CART SECTIONS DEPENDENT ON STATE */}
-          <div className="hidden sm:flex items-center gap-3 xl:gap-4 border-r border-[#ffffff1a] pr-3 xl:pr-5">
+          {/* CART + ACCOUNT ACTIONS (messages/saved/alerts only when logged in) */}
+          <div className="hidden sm:flex items-center gap-2 xl:gap-4 border-r border-[#ffffff1a] pr-2 xl:pr-5 shrink-0">
             <button 
               type="button"
               onClick={() => {
                 navigate('/cart/retail');
               }}
-              className="relative text-white/60 hover:text-white transition-colors mr-1"
+              className="relative text-white/60 hover:text-white transition-colors"
               title="Shopping Cart"
             >
               <ShoppingBag size={20} className="transition-colors" />
@@ -190,53 +225,57 @@ export function Navbar() {
                 </span>
               )}
             </button>
-            <button 
-              type="button"
-              onClick={() => navigate('/dashboard', { state: { activeTab: 'saved-products' } })}
-              className="relative text-white/60 hover:text-white transition-colors"
-              title="Saved Vault"
-            >
-              <Bookmark size={20} />
-              {savedProducts.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary/30 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">
-                  {savedProducts.length > 9 ? '9+' : savedProducts.length}
-                </span>
-              )}
-            </button>
-            <button 
-              type="button"
-              onClick={() => navigate('/messages')}
-              className="relative text-white/60 hover:text-white transition-colors"
-              title="Secure Support Chats"
-            >
-              <div className="relative">
-                <MessageSquare size={19} className={cn("text-orange-primary", unreadMsgCount > 0 && "animate-pulse")} />
-                {unreadMsgCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
-                    {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
-                  </span>
-                )}
-              </div>
-            </button>
-            <Link
-              to="/dashboard?tab=notifications"
-              className="relative flex items-center justify-center w-9 h-9 rounded-xl hover:bg-white/5 transition-colors"
-              title="Notifications"
-            >
-              <Bell size={18} className="text-white/70 hover:text-white transition-colors" />
-              {unreadNotifCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
-                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                </span>
-              )}
-            </Link>
+            {isLoggedIn && (
+              <>
+                <button 
+                  type="button"
+                  onClick={() => navigate('/dashboard', { state: { activeTab: 'saved-products' } })}
+                  className="relative text-white/60 hover:text-white transition-colors"
+                  title="Saved Vault"
+                >
+                  <Bookmark size={20} />
+                  {savedCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary/30 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">
+                      {savedCount > 9 ? '9+' : savedCount}
+                    </span>
+                  )}
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => navigate('/messages')}
+                  className="relative text-white/60 hover:text-white transition-colors"
+                  title="Secure Support Chats"
+                >
+                  <div className="relative">
+                    <MessageSquare size={19} className={cn("text-orange-primary", unreadMsgCount > 0 && "animate-pulse")} />
+                    {unreadMsgCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                        {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
+                      </span>
+                    )}
+                  </div>
+                </button>
+                <Link
+                  to="/dashboard?tab=notifications"
+                  className="relative flex items-center justify-center w-9 h-9 rounded-xl hover:bg-white/5 transition-colors"
+                  title="Notifications"
+                >
+                  <Bell size={18} className="text-white/70 hover:text-white transition-colors" />
+                  {unreadNotifCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                      {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                    </span>
+                  )}
+                </Link>
+              </>
+            )}
           </div>
 
           {/* POST YOUR DEAL BUTTON FOR VISITORS */}
           {!isLoggedIn && (
-            <Link to="/post-offer" className="hidden md:block">
-              <button className="h-10 px-6 bg-white/5 border border-white/10 text-white text-[10px] uppercase font-black rounded-full tracking-widest hover:bg-white/10 transition-all flex items-center gap-2 italic">
-                Post Deal <ChevronRight size={14} className="text-orange-primary" />
+            <Link to="/post-offer" className="hidden xl:block shrink-0">
+              <button className="h-9 px-4 bg-white/5 border border-white/10 text-white text-[9px] uppercase font-black rounded-full tracking-widest hover:bg-white/10 transition-all flex items-center gap-1.5 italic whitespace-nowrap">
+                Post Deal <ChevronRight size={12} className="text-orange-primary" />
               </button>
             </Link>
           )}
@@ -355,22 +394,20 @@ export function Navbar() {
               </AnimatePresence>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              <div 
-                onClick={() => navigate('/login')}
-                className="w-11 h-11 lg:w-10 lg:h-10 rounded-full border border-white/10 overflow-hidden cursor-pointer nav-avatar hover:opacity-100 flex items-center justify-center bg-white/5 profile-icon transition-opacity opacity-75 md:flex"
-                role="button"
-                aria-label="Log in to my account"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter') navigate('/login'); }}
+            <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => goToLogin('sign-in')}
+                className="h-8 xl:h-9 px-2.5 xl:px-4 text-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic border border-white/15 bg-white/5 hover:bg-white/10 whitespace-nowrap"
               >
-                <User size={18} className="text-white/60" />
-              </div>
-              <button 
-                onClick={() => setIsSignInOpen(true)}
-                className="h-10 px-6 text-white text-[10px] uppercase font-black rounded-full tracking-widest transition-all flex items-center gap-2 italic bg-[#FF6B00] hover:bg-orange-deep"
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => goToLogin('sign-up')}
+                className="h-8 xl:h-9 px-2.5 xl:px-4 text-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic bg-[#FF6B00] hover:bg-orange-deep whitespace-nowrap"
               >
-                Sign Up <LogIn size={14} />
+                Sign Up <LogIn size={12} className="xl:w-[13px] xl:h-[13px]" />
               </button>
             </div>
           )}
@@ -379,16 +416,45 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden w-11 h-11 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all relative z-50 shrink-0 hamburger"
+            className="lg:hidden w-11 h-11 flex shrink-0 items-center justify-center text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all relative z-[60] hamburger"
             aria-label="Toggle navigation menu"
           >
             <Menu size={22} className={cn("transition-transform duration-300", isMobileMenuOpen && "rotate-90")} />
           </button>
         </div>
         
-      </nav>
+        </nav>
 
-      <SignInModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
+        {/* Row 2 — Category / section strip below navbar (Amazon-style) */}
+        <div className="choosify-navbar-categories choosify-dark-gradient border-b border-white/5 text-white">
+          <div
+            ref={categoryStripRef}
+            {...categoryStripProps}
+            className="choosify-touch-scroll-row flex items-center gap-0 overflow-x-auto no-scrollbar px-2 sm:px-4 lg:px-6 xl:px-8 max-w-[100vw]"
+          >
+            <Link
+              to="/categories"
+              className="inline-flex items-center gap-1.5 shrink-0 px-3 py-2.5 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white/90 hover:text-white hover:bg-white/5 border-r border-white/10 transition-colors"
+            >
+              <Menu size={14} className="text-[#FF6B00]" />
+              <span className="hidden sm:inline">All</span>
+            </Link>
+            {renderNavLinks((path) => {
+              const isActive =
+                path === '/'
+                  ? location.pathname === '/'
+                  : location.pathname.startsWith(path);
+              return cn(
+                'inline-flex shrink-0 px-3 sm:px-4 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide transition-colors whitespace-nowrap border-r border-white/5 last:border-r-0',
+                isActive
+                  ? 'text-[#FF6B00] bg-white/5'
+                  : 'text-gray-300 hover:text-white hover:bg-white/5',
+              );
+            })}
+          </div>
+        </div>
+      </header>
+
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
       {/* MOBILE / TABLET SLIDE-OUT HAMBURGER MENU */}
@@ -423,61 +489,39 @@ export function Navbar() {
                   </button>
                 </div>
 
-                {/* Sourcing/Search on Mobile */}
-                <div className="w-full">
-                  <GlobalSearchBar 
-                    initialValue={searchQuery}
-                    placeholder="Search products, brands..."
-                    onSubmit={(val) => {
-                      setSearchQuery(val);
-                      setIsMobileMenuOpen(false);
-                      navigate(`/search?q=${encodeURIComponent(val)}`);
-                    }}
-                    variant="navbar"
-                  />
+                {/* Sourcing/Search on Mobile — primary search lives in top navbar */}
+                <div className="w-full lg:hidden">
+                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-2">
+                    Use the search bar above to find products & brands
+                  </p>
                 </div>
 
                 {/* Quick links stream */}
                 <div className="flex flex-col gap-3">
                   <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Explore Sections</span>
-                  <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/')}>
-                    <span className="italic">Home</span>
-                  </Link>
-                  <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/products')}>
-                    <span className="italic">Products Library</span>
-                  </Link>
-                  <Link to="/brands" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/brands')}>
-                    <span className="italic">Explore Brands</span>
-                  </Link>
-                  <Link to="/guides" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/guides')}>
-                    <span className="italic">Recommendations</span>
-                  </Link>
-                  <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/deals')}>
-                    <span className="italic">Flash Deals</span>
-                  </Link>
-                  <Link to="/customer-favorite" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/customer-favorite')}>
-                    <span className="italic">Customer Favorite</span>
-                  </Link>
-                  <Link to="/compare" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/compare')}>
-                    <span className="italic">Compare Engine</span>
-                  </Link>
-                  <Link to="/dashboard?tab=notifications" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/dashboard')}>
-                    <div className="flex items-center gap-3 w-full">
-                      <Bell size={16} />
-                      <span className="italic flex-1">Notifications</span>
-                      {unreadNotifCount > 0 && (
-                        <span className="w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
-                          {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                        </span>
-                      )}
-                    </div>
-                  </Link>
-                  <Link to="/categories" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/categories')}>
-                    <span className="italic">All Categories</span>
-                  </Link>
-                  <Link to="/creators" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/creators')}>
-                    <span className="italic">Creators</span>
-                  </Link>
+                  {PRIMARY_NAV_ITEMS.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={item.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={getMobileLinkClass(item.path)}
+                    >
+                      <span className="italic">{item.label}</span>
+                    </Link>
+                  ))}
+                  {isLoggedIn && (
+                    <Link to="/dashboard?tab=notifications" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/dashboard')}>
+                      <div className="flex items-center gap-3 w-full">
+                        <Bell size={16} />
+                        <span className="italic flex-1">Notifications</span>
+                        {unreadNotifCount > 0 && (
+                          <span className="w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                            {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  )}
                   
                   <div className="h-px bg-white/10 my-1" />
                   
@@ -557,10 +601,8 @@ export function Navbar() {
                       Join Choosify Bangladesh
                     </p>
                     <button
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        setIsSignInOpen(true);
-                      }}
+                      type="button"
+                      onClick={() => goToLogin('sign-in')}
                       className="w-full py-3.5 bg-orange-primary hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors cursor-pointer border-0 flex items-center justify-center gap-2"
                     >
                       <LogIn size={14} />

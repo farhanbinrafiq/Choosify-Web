@@ -61,6 +61,8 @@ export interface InfluencerReviewsProps {
   featuredReview?: InfluencerFeaturedReview;
   reviews?: InfluencerReviewCard[];
   allowAdd?: boolean;
+  /** Use full container width on detail pages (default: centered 680px card) */
+  fullWidth?: boolean;
 }
 
 // Converts standard video links into embeddable iframe-safe URLs
@@ -316,6 +318,7 @@ export function InfluencerReviews({
   featuredReview,
   reviews,
   allowAdd = false,
+  fullWidth = false,
 }: InfluencerReviewsProps) {
   const { currentUser } = useGlobalState();
   const canAddCreatorReview = allowAdd && currentUser?.role === 'admin';
@@ -483,7 +486,9 @@ export function InfluencerReviews({
   return (
     <section 
       id="influencer-reviews-section" 
-      className="font-['DM_Sans',_sans-serif] hero-gradient text-[#F0F6FC] p-4 sm:p-6 md:p-8 rounded-[5px] border border-[#21262D]/60 w-full max-w-[680px] mx-auto text-left flex flex-col justify-start shadow-xl my-6 relative overflow-hidden"
+      className={`font-['DM_Sans',_sans-serif] hero-gradient text-[#F0F6FC] p-4 sm:p-6 md:p-8 rounded-[5px] border border-[#21262D]/60 text-left flex flex-col justify-start shadow-xl relative overflow-hidden ${
+        fullWidth ? 'w-full max-w-none my-0' : 'w-full max-w-[680px] mx-auto my-6'
+      }`}
     >
       {/* PART 1 — SECTION HEADER */}
       <div className="text-center mb-6 border-0 p-0 bg-transparent flex flex-col items-center">

@@ -1,0 +1,67 @@
+import { MOCK_BRAND_POSTS } from '../data/mockBrandPosts';
+import type { BrandPost, BrandPostKind } from '../types/brandPost';
+
+const now = () => Date.now();
+
+function isVisible(post: BrandPost): boolean {
+  if (post.status === 'expired') return false;
+  if (post.endDate && new Date(post.endDate).getTime() < now()) return false;
+  return post.status === 'live' || post.status === 'scheduled';
+}
+
+export function getAllBrandPosts(): BrandPost[] {
+  return MOCK_BRAND_POSTS.filter(isVisible);
+}
+
+export function getBrandPostBySlug(slug: string): BrandPost | undefined {
+  return MOCK_BRAND_POSTS.find((p) => p.slug === slug);
+}
+
+export function getBrandPostsByBrandId(brandId: number): BrandPost[] {
+  return getAllBrandPosts()
+    .filter((p) => p.brandId === brandId)
+    .sort((a, b) => {
+      const aTime = a.startDate ? new Date(a.startDate).getTime() : 0;
+      const bTime = b.startDate ? new Date(b.startDate).getTime() : 0;
+      return aTime - bTime;
+    });
+}
+
+export function filterBrandPosts(options?: {
+  kind?: BrandPostKind | 'all';
+  query?: string;
+  brandId?: number;
+}): BrandPost[] {
+  const q = options?.query?.trim().toLowerCase() ?? '';
+  return getAllBrandPosts()
+    .filter((post) => {
+      if (options?.brandId != null && post.brandId !== options.brandId) return false;
+      if (options?.kind && options.kind !== 'all' && post.kind !== options.kind) return false;
+      if (!q) return true;
+      return (
+        post.title.toLowerCase().includes(q) ||
+        post.excerpt.toLowerCase().includes(q) ||
+        post.brandName.toLowerCase().includes(q) ||
+        post.location?.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+}
+
+export function formatBrandPostDate(iso?: string): string {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+export function formatBrandPostDateRange(start?: string, end?: string): string {
+  if (!start && !end) return '';
+  if (start && !end) return formatBrandPostDate(start);
+  if (start && end) {
+    return `${formatBrandPostDate(start)} – ${formatBrandPostDate(end)}`;
+  }
+  return formatBrandPostDate(end);
+}

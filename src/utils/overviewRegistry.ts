@@ -82,6 +82,39 @@ export function getBrandOverviews(brandName: string, customOverviews: CustomOver
   return baseOverview;
 }
 
+export function normalizeExternalUrl(website: string): string {
+  const trimmed = website.trim();
+  if (!trimmed) return 'https://choosify.com';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/\//, '')}`;
+}
+
+export function getBrandOfficialWebsite(brandName: string): string {
+  const name = brandName.toLowerCase();
+
+  if (name.includes('choosify')) return normalizeExternalUrl('choosify.com');
+  if (name.includes('fff')) return normalizeExternalUrl('fff.com.bd');
+  if (name.includes('samsung')) return normalizeExternalUrl('www.samsung.com');
+  if (name.includes('apple')) return normalizeExternalUrl('www.apple.com');
+  if (name.includes('sony')) return normalizeExternalUrl('www.sony.com');
+  if (name.includes('bata')) return normalizeExternalUrl('www.batabd.com');
+  if (name.includes('apex')) return normalizeExternalUrl('www.apex4u.com');
+  if (name.includes('aarong')) return normalizeExternalUrl('www.aarong.com');
+  if (
+    name.includes('sailor') ||
+    name.includes('la reve') ||
+    name.includes('yellow') ||
+    name.includes('ethnic') ||
+    name.includes('fashion') ||
+    name.includes('lotto')
+  ) {
+    return normalizeExternalUrl('www.website.com');
+  }
+
+  const slug = name.replace(/[^a-z0-9]/g, '');
+  return normalizeExternalUrl(`www.${slug || 'brand'}.com.bd`);
+}
+
 export function getProductOverviews(productId: number | string, productTitle: string, productCategory: string, customOverviews: CustomOverview[] = []) {
   // Base default product overview data
   const baseOverview: Record<string, any> = {

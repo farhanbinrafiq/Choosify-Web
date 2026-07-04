@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, ArrowRight, ShoppingBag } from 'lucide-react';
 import { BLOGS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
+import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
 
 export function GuideProductsPage() {
   const { id } = useParams();
@@ -53,7 +54,7 @@ export function GuideProductsPage() {
 
       {/* Products Grid */}
       <div className="max-w-[1440px] mx-auto px-6 mt-8 relative z-20">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={PRODUCT_CARD_GRID}>
           {guideProducts.map(product => (
             <ProductCard key={product.id} product={product} variant="grid" />
           ))}

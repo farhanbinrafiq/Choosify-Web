@@ -75,7 +75,22 @@ export const PRODUCTS = [
     image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
     tag: 'SALE',
     stores: ['Daraz'],
-    category: 'Fashion & Lifestyle'
+    category: 'Fashion & Lifestyle',
+    sizes: ['UK 7', 'UK 8', 'UK 9', 'UK 10', 'UK 11'],
+    sizeGuide: {
+      enabled: true,
+      title: 'Nike Footwear Size Chart',
+      description: 'Measure your foot length and match it to the closest size below for the best fit.',
+      unitLabel: 'cm',
+      columnHeaders: ['Size', 'US', 'UK', 'Foot Length'],
+      rows: [
+        { size: 'UK 7', US: '8', UK: '7', 'Foot Length': '25.0' },
+        { size: 'UK 8', US: '9', UK: '8', 'Foot Length': '26.0' },
+        { size: 'UK 9', US: '10', UK: '9', 'Foot Length': '27.0' },
+        { size: 'UK 10', US: '11', UK: '10', 'Foot Length': '28.0' },
+        { size: 'UK 11', US: '12', UK: '11', 'Foot Length': '29.0' },
+      ],
+    },
   },
   {
     id: 5,

@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
+import { StickySectionNav } from '../components/StickySectionNav';
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, ShieldCheck, Tag, Zap, Star, Search, Shirt, Sparkles, AlertCircle, ChevronRight, Filter, X } from 'lucide-react';
 import { BRANDS } from '../constants';
 import { cn } from '../lib/utils';
-import { QuickAccessCard } from '../components/QuickAccessCard';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
+import { PageHeroBanner } from '../components/PageHeroBanner';
 
 export function BrandDealsPage() {
   const navigate = useNavigate();
@@ -205,62 +208,15 @@ export function BrandDealsPage() {
     },
   }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter]);
 
+  const sectionNavItems = useMemo(
+    () => [{ id: 'brand-deals-main', label: 'Deals', icon: <Tag size={13} /> }],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      {/* Hero Section */}
-      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
-        {/* Background Gradients */}
-        <div className="absolute inset-0 hero-gradient" />
-        
-        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in font-sans">
-          <div className="w-full flex flex-col justify-center">
-            {/* Breadcrumbs */}
-            <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 w-full">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <ChevronRight size={10} className="text-white/20" />
-              <span className="text-white">Brand Deals</span>
-            </div>
-
-            <div className="flex items-center justify-center gap-4 flex-wrap">
-              <div className="bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-full mb-1 uppercase tracking-[0.2em] shadow-md shadow-orange-primary/30 italic inline-block w-fit">
-                EXCLUSIVE PARTNER OFFERS
-              </div>
-              
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter mb-1 leading-none text-center">
-                BRAND WISE <span className="text-orange-primary">DEALS</span>
-              </h1>
-            </div>
-
-            <p className="text-white/60 text-[9px] lg:text-[11px] max-w-2xl font-bold uppercase tracking-[0.15em] italic leading-relaxed mx-auto">
-              Directly sourced offers from official brand outlets and authorized retailers.
-            </p>
-
-            {/* SEARCH BAR — placed inside hero section at bottom */}
-            <div className="relative w-full max-w-2xl mx-auto mt-6">
-              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-                <div className="flex items-center bg-white rounded-full">
-                  <div className="pl-4 text-[#E8500A] shrink-0">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input 
-                    type="text" 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search brand deals, promo codes or specific brands..." 
-                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
-                  />
-                  <button 
-                    onClick={() => setSearchQuery(searchQuery)}
-                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                  >
-                    Search
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeroBanner pageKey="brand-deals" />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -281,9 +237,17 @@ export function BrandDealsPage() {
         }}
       />
 
+      <StickySectionNav
+        sections={sectionNavItems}
+        activeId={activeSectionId}
+        onNavigate={scrollToSection}
+        allLabel="Brand Deals"
+        profileLabel="Brand deal hub"
+      />
+
       {/* CORE THREE-COLUMN SYSTEM LAYOUT INTEGRATION */}
       <div className="w-full bg-[#F3F9FF]/30 min-h-screen py-8">
-        <div id="brand-deals-main" className="scroll-mt-36 max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start relative">
+        <div id="brand-deals-main" className={`scroll-mt-36 max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
           
           {/* Left Sidebar */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
@@ -300,8 +264,6 @@ export function BrandDealsPage() {
                 className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
               />
             </div>
-
-            <QuickAccessCard />
 
             {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
             <div id="brand-deals-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
@@ -471,7 +433,7 @@ export function BrandDealsPage() {
           </aside>
 
           {/* B. MIDDLE COLUMN - BRAND WISE LISTINGS */}
-          <main className="min-w-0 space-y-8 font-sans">
+          <main className="choosify-middle-feed min-w-0 space-y-8 font-sans">
             
             {/* Tablet/Mobile Collapsible Filter Card */}
             <div id="brand-deals-mobile-filters" className="lg:hidden bg-white rounded-[5px] p-4 border border-[#e8edf2] shadow-sm mb-6 font-sans">

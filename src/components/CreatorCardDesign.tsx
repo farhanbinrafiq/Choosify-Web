@@ -51,7 +51,7 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
     <Link
       to={`/creators/${creator.id}`}
       onClick={onClick}
-      className="block w-[335px] max-w-[335px] min-w-[335px] bg-white rounded-[12px] border border-[#e8edf2] hover:shadow-lg hover:border-orange-primary/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative shrink-0"
+      className="block w-full min-w-0 h-full bg-white rounded-[10px] border border-[#e8edf2] hover:shadow-lg hover:border-orange-primary/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative"
     >
       {/* FEATURED BADGE */}
       {creator.isFeatured && (
@@ -70,7 +70,7 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
       )}
 
       {/* COVER PHOTO SECTION */}
-      <div className="relative w-full h-[136px] bg-gradient-to-r from-heading/10 to-orange-primary/10 overflow-hidden shrink-0">
+      <div className="relative w-full h-[112px] bg-gradient-to-r from-heading/10 to-orange-primary/10 overflow-hidden shrink-0">
         <img 
           src={coverUrl}
           alt={`${creator.name} cover`}
@@ -81,8 +81,8 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
       </div>
 
       {/* AVATAR - overlapping cover at bottom-left */}
-      <div className="absolute top-[96px] left-4 z-10">
-        <div className="w-[80px] h-[80px] rounded-full border-4 border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
+      <div className="absolute top-[72px] left-3 z-10">
+        <div className="w-16 h-16 rounded-full border-[3px] border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
           <img 
             src={creator.avatar} 
             className="w-full h-full object-cover" 
@@ -93,12 +93,12 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
       </div>
 
       {/* CREATOR INFO SECTION */}
-      <div className="px-4 pt-14 pb-3 text-left flex-1 flex flex-col justify-center min-w-0">
-        <h3 className="text-base font-black text-heading uppercase line-clamp-1 mb-1 leading-tight tracking-tight">
+      <div className="px-3 pt-11 pb-2.5 text-left flex-1 flex flex-col justify-center min-w-0">
+        <h3 className="text-sm font-black text-heading uppercase line-clamp-1 mb-1 leading-tight tracking-tight">
           {creator.name}
         </h3>
         
-        <p className="text-xs text-gray-500 mb-2 line-clamp-1 leading-normal font-medium">
+        <p className="text-[11px] text-gray-500 mb-1.5 line-clamp-1 leading-normal font-medium">
           {creator.handle} • {bioText}
         </p>
         
@@ -125,7 +125,7 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
       </div>
 
       {/* STATS SECTION - 3 COLUMNS */}
-      <div className="border-t border-b border-[#e8edf2] px-4 py-3 bg-[#F8FBFD] shrink-0">
+      <div className="border-t border-b border-[#e8edf2] px-3 py-2.5 bg-[#F8FBFD] shrink-0">
         <div className="grid grid-cols-3 gap-1">
           {/* Column 1: Best For */}
           <div className="text-center min-w-0">
@@ -142,8 +142,8 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
             <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1 leading-none">
               Score
             </div>
-            <div className="relative w-11 h-11 shrink-0">
-              <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
+            <div className="relative w-9 h-9 shrink-0">
+              <svg viewBox="0 0 44 44" className="w-9 h-9 -rotate-90">
                 {/* Background track */}
                 <circle
                   cx="22"
@@ -189,10 +189,10 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
       </div>
 
       {/* CTA BUTTON */}
-      <div className="px-4 py-3 shrink-0 bg-white">
+      <div className="px-3 py-2.5 shrink-0 bg-white">
         <button 
           type="button"
-          className="w-full py-2.5 bg-heading hover:bg-navy text-white text-[11px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group"
+          className="w-full py-2 bg-heading hover:bg-navy text-white text-[10px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group"
         >
           View Profile
           <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>

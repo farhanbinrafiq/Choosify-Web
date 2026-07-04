@@ -1,15 +1,56 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { PAGE_LISTING_SINGLE_SHELL, GUIDE_MEDIA_GRID } from "../lib/pageLayout";
+import { StickySectionNav } from '../components/StickySectionNav';
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets, Bookmark, Eye, Share2, Play, Instagram, ChevronRight, Award, Flame, Zap, Star, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
-import { QuickAccessCard } from '../components/QuickAccessCard';
-import { RecommendationCard } from '../components/RecommendationCard';
 import { RecommendationCardSkeleton } from '../components/Skeleton';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
+import { PageHeroBanner } from '../components/PageHeroBanner';
 import { useDashboard } from '../context/DashboardContext';
 import toast from 'react-hot-toast';
+
+function takeGuideSlots(guides: any[], count = 4): any[] {
+  if (guides.length === 0) return [];
+  return Array.from({ length: count }, (_, i) => guides[i % guides.length]);
+}
+
+function GuideSectionHeader({
+  icon,
+  title,
+  accent,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  accent: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 pb-1 border-b border-gray-100">
+      <div className="w-9 h-9 rounded-[5px] bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center shrink-0">
+        {icon}
+      </div>
+      <h3 className="font-sans text-sm md:text-base font-black uppercase tracking-tight italic text-[#1A1D4E]">
+        {title}
+        <span className="text-[#E8500A]"> {accent}</span>
+      </h3>
+    </div>
+  );
+}
+
+function renderGuideMediaCard(guide: any) {
+  if (guide.type === 'reels' || guide.type === 'shorts') {
+    return <ReelCard guide={guide} />;
+  }
+  return (
+    <HorizontalMediaCard
+      guide={guide}
+      badgeType={guide.type === 'video' ? 'youtube' : 'blog'}
+    />
+  );
+}
 
 // Sub-component for Featured Story (Segment 1 of reference image)
 export function FeaturedCard({ guide }: { guide: any }) {
@@ -453,6 +494,26 @@ export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeTyp
 export function GuidesPage() {
   const { allGuides } = useGlobalState();
   const guideSource = allGuides;
+
+  const youtubeGuides = useMemo(
+    () => takeGuideSlots(guideSource.filter((g) => g.type === 'video')),
+    [guideSource],
+  );
+  const reelGuides = useMemo(
+    () =>
+      takeGuideSlots(
+        guideSource.filter((g) => g.type === 'reels' || g.type === 'shorts'),
+      ),
+    [guideSource],
+  );
+  const blogGuides = useMemo(
+    () =>
+      takeGuideSlots(
+        guideSource.filter((g) => g.type === 'article' || !g.type),
+      ),
+    [guideSource],
+  );
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
@@ -844,6 +905,20 @@ export function GuidesPage() {
     productCategory || productPriceRange || productAvailability || selectedReadingTime ||
     selectedViews || selectedUploadDate || selectedMusic || sortOption !== 'default' || searchQuery
   );
+
+  const guideSectionNavItems = useMemo(
+    () =>
+      isAnyFilterActive
+        ? [{ id: 'guides-filtered-results', label: 'Results', icon: <Search size={13} /> }]
+        : [
+            { id: 'guides-youtube-section', label: 'YouTube', icon: <Youtube size={13} />, hidden: youtubeGuides.length === 0 },
+            { id: 'guides-reels-section', label: 'Reels', icon: <Instagram size={13} />, hidden: reelGuides.length === 0 },
+            { id: 'guides-blogs-section', label: 'Blogs', icon: <BookOpen size={13} />, hidden: blogGuides.length === 0 },
+          ],
+    [isAnyFilterActive, youtubeGuides.length, reelGuides.length, blogGuides.length],
+  );
+
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(guideSectionNavItems);
 
   const renderFilterPanel = () => {
     return (
@@ -1474,95 +1549,25 @@ export function GuidesPage() {
 
   return (
     <div id="guides-root" className="flex flex-col min-h-screen bg-choosify-feed">
-      {/* Hero Section - Standardized Centered Alignment */}
-      <div id="guides-hero" className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
-        {/* Background Gradients */}
-        <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
-        
-        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
-          <div className="w-full flex flex-col justify-center">
-            {/* Breadcrumbs */}
-            <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 w-full">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <ChevronRight size={10} className="text-white/20" />
-              <span className="text-white">Guides & Recommendations</span>
-            </div>
+      <PageHeroBanner pageKey="guides" />
 
-            <div className="flex items-center justify-center gap-3.5 flex-wrap">
-              <h1 id="hero-title" className="text-xl md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter mb-1 leading-none text-center">
-                RECOMMENDATIONS
-              </h1>
-              {/* Action Button Centered underneath */}
-              <button className="h-6 px-4 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-black rounded-full shadow-md flex items-center gap-1.5 whitespace-nowrap uppercase tracking-widest text-[8px] italic hover:scale-105 active:scale-95 transition-all text-center shrink-0 cursor-pointer">
-                 <LucidePenTool size={9} className="text-[#FF5B00]" /> Post Recommendation
-              </button>
-            </div>
-
-            <p className="text-gray-400 text-[9px] lg:text-[11px] font-medium leading-normal mb-1.5 max-w-2xl text-center mx-auto">
-              Discover expert guides, buying advice, and the latest tech recommendations curated by real shoppers.
-            </p>
-
-            {/* SEARCH BAR — placed inside hero section at bottom */}
-            <div className="relative w-full max-w-2xl mx-auto mt-6">
-              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-                <div className="flex items-center bg-white rounded-full">
-                  <div className="pl-4 text-[#E8500A] shrink-0">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input 
-                    type="text" 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search guides and recommendations..." 
-                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
-                  />
-                  <button 
-                    onClick={() => setSearchQuery(searchQuery)}
-                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                  >
-                    Search
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-          {/* Article Titles Marquee */}
-          <div className="w-full overflow-hidden py-1.5 border-y border-white/5 relative">
-            <motion.div 
-               animate={{ x: [0, -2000] }}
-               transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-               className="flex whitespace-nowrap gap-8"
-            >
-               {recommendationTitles.map((title, i) => (
-                 <span 
-                   key={i} 
-                   className={cn(
-                     "text-xl md:text-2xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
-                     "text-white/10",
-                     "hover:text-orange-primary hover:scale-110"
-                   )}
-                 >
-                       {title}
-                 </span>
-               ))}
-               {recommendationTitles.map((title, i) => (
-                 <span 
-                   key={`dup-${i}`} 
-                   className={cn(
-                     "text-xl md:text-2xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
-                     "text-white/10",
-                     "hover:text-orange-primary hover:scale-110"
-                   )}
-                 >
-                       {title}
-                 </span>
-               ))}
-            </motion.div>
-          </div>
-        </div>
+      {/* Article titles ticker below banner */}
+      <div id="guides-hero" className="w-full overflow-hidden py-2 border-b border-white/5 bg-[#000435] relative">
+        <motion.div 
+           animate={{ x: [0, -2000] }}
+           transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+           className="flex whitespace-nowrap gap-8 px-6"
+        >
+           {[...recommendationTitles, ...recommendationTitles].map((title, i) => (
+             <span 
+               key={i} 
+               className="text-xl md:text-2xl font-black text-white/10 italic uppercase tracking-tighter"
+             >
+                   {title}
+             </span>
+           ))}
+        </motion.div>
+      </div>
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -1591,7 +1596,15 @@ export function GuidesPage() {
         onClearAll={handleClearAllFilters}
       />
 
-      <main className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
+      <StickySectionNav
+        sections={guideSectionNavItems}
+        activeId={activeSectionId}
+        onNavigate={scrollToSection}
+        allLabel="Guides"
+        profileLabel="Guide library"
+      />
+
+      <main className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
          {/* Left Sidebar Navigation - migrated to Full Filter Panel */}
          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
             {/* LEFT COLUMN SEARCH BAR */}
@@ -1607,27 +1620,27 @@ export function GuidesPage() {
                 className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
               />
             </div>
-            <QuickAccessCard />
             <div id="guides-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
               {renderFilterPanel()}
             </div>
          </aside>
 
-         <div id="guides-main-display" className="scroll-mt-36 min-w-0 pb-10">
+         <div id="guides-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10">
             {isLoading ? (
-               <div className="flex flex-col gap-12">
-                  <div className="mb-16">
-                     <RecommendationCardSkeleton variant="featured" />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 md:gap-10 auto-rows-min">
-                     {Array.from({ length: 4 }).map((_, i) => (
-                        <RecommendationCardSkeleton 
-                           key={i} 
-                           variant={i % 3 === 0 ? "shorts" : "default"} 
-                        />
-                     ))}
-                  </div>
+               <div className="flex flex-col gap-14">
+                  {['YouTube', 'Reels', 'Blogs'].map((label) => (
+                    <div key={label} className="flex flex-col gap-5">
+                      <div className="h-9 w-48 bg-gray-100 rounded-[5px] animate-pulse" />
+                      <div className={GUIDE_MEDIA_GRID}>
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <RecommendationCardSkeleton
+                            key={i}
+                            variant={label === 'Reels' ? 'shorts' : 'default'}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                  </div>
              ) : (
                 <>
@@ -1640,35 +1653,70 @@ export function GuidesPage() {
                        <p className="text-gray-400 text-xs font-semibold leading-relaxed max-w-sm">We couldn't find any guides matching your criteria. Try adjusting your search query or category.</p>
                      </div>
                   ) : isAnyFilterActive ? (
-                     <div className="flex flex-col gap-10">
+                     <div id="guides-filtered-results" className="flex flex-col gap-10 scroll-mt-36">
                         <h4 className="font-sans text-xs font-black uppercase tracking-[0.25em] text-[#8a92a6] italic text-left">Filtered Results ({filteredBlogs.length})</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                           {filteredBlogs.map(guide => (
-                              <HorizontalMediaCard 
-                                 key={guide.id} 
-                                 guide={guide} 
-                                 badgeType={guide.type === 'video' ? 'youtube' : 'blog'} 
-                              />
+                        <div className={GUIDE_MEDIA_GRID}>
+                           {filteredBlogs.map((guide, i) => (
+                              <React.Fragment key={`${guide.id}-${i}`}>
+                                 {renderGuideMediaCard(guide)}
+                              </React.Fragment>
                            ))}
                         </div>
                      </div>
                   ) : (
-                     <div className="flex flex-col gap-12 animate-fade-in duration-500">
-                        {/* Row 1: Curated Featured Guide (Segment 1) */}
-                        <FeaturedCard guide={guideSource[0]} />
+                     <div className="flex flex-col gap-14 animate-fade-in duration-500">
+                        {youtubeGuides.length > 0 && (
+                          <section id="guides-youtube-section" className="flex flex-col gap-5 scroll-mt-36">
+                            <GuideSectionHeader
+                              icon={<Youtube size={18} />}
+                              title="Featured"
+                              accent="YouTube"
+                            />
+                            <div className={GUIDE_MEDIA_GRID}>
+                              {youtubeGuides.map((guide, i) => (
+                                <HorizontalMediaCard
+                                  key={`yt-${guide.id}-${i}`}
+                                  guide={guide}
+                                  badgeType="youtube"
+                                />
+                              ))}
+                            </div>
+                          </section>
+                        )}
 
-                        {/* Row 2: Grid of 3 Reel / Short-form Stories (Segment 2) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-6">
-                           <ReelCard guide={guideSource[1]} />
-                           <ReelCard guide={guideSource[4] || guideSource[1]} />
-                           <ReelCard guide={guideSource[2] || guideSource[0]} />
-                        </div>
+                        {reelGuides.length > 0 && (
+                          <section id="guides-reels-section" className="flex flex-col gap-5 scroll-mt-36">
+                            <GuideSectionHeader
+                              icon={<Instagram size={18} />}
+                              title="Trending"
+                              accent="Reels"
+                            />
+                            <div className={GUIDE_MEDIA_GRID}>
+                              {reelGuides.map((guide, i) => (
+                                <ReelCard key={`reel-${guide.id}-${i}`} guide={guide} />
+                              ))}
+                            </div>
+                          </section>
+                        )}
 
-                        {/* Row 3: Grid of 2 Horizontal Media Stories (Segment 3) */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                           <HorizontalMediaCard guide={guideSource[2]} badgeType="youtube" />
-                           <HorizontalMediaCard guide={guideSource[3] || guideSource[1]} badgeType="blog" />
-                        </div>
+                        {blogGuides.length > 0 && (
+                          <section id="guides-blogs-section" className="flex flex-col gap-5 scroll-mt-36">
+                            <GuideSectionHeader
+                              icon={<BookOpen size={18} />}
+                              title="Editorial"
+                              accent="Blogs"
+                            />
+                            <div className={GUIDE_MEDIA_GRID}>
+                              {blogGuides.map((guide, i) => (
+                                <HorizontalMediaCard
+                                  key={`blog-${guide.id}-${i}`}
+                                  guide={guide}
+                                  badgeType="blog"
+                                />
+                              ))}
+                            </div>
+                          </section>
+                        )}
                      </div>
                   )}
                </>

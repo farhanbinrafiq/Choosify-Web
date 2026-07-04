@@ -215,7 +215,7 @@ export function ProductMediaGallery({ product, selectedVariantImage, isB2B = fal
       </div>
 
       {/* 3. THUMBNAILS & INDICATORS: horizontal row centered inside 1080px area */}
-      <div className="w-full bg-[#0B0C1E] py-4 border-b border-white/5">
+      <div className="w-full bg-transparent py-4">
         <div className="max-w-[1080px] mx-auto px-6 flex flex-col gap-4">
           
           {/* Thumbnails */}

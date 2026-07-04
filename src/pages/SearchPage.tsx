@@ -8,7 +8,9 @@ import {
 } from 'lucide-react';
 import { PRODUCTS, BRANDS, BLOGS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
-import { GlobalSearchBar } from '../components/GlobalSearchBar';
+import { PageHeroBanner } from '../components/PageHeroBanner';
+import { PRODUCT_CARD_GRID, BRAND_CARD_GRID, CREATOR_CARD_GRID } from '../lib/pageLayout';
+import { StickySectionNav } from '../components/StickySectionNav';
 import { BrandCardDesign } from '../components/BrandCardDesign';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import { toast } from 'react-hot-toast';
@@ -18,6 +20,8 @@ import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '../utils/overviewRegistry';
 import { useRegisterPageFilters } from '../components/FilterEngine';
+import { filterBrandPosts } from '../lib/brandPosts';
+import { BrandPostCard } from '../components/BrandPostCard';
 
 // Promo Codes & Brand Deals data
 const BRAND_DEALS = [
@@ -120,7 +124,7 @@ export function SearchPage() {
   const navigate = useNavigate();
   const rawQuery = searchParams.get('q') || '';
   const [localInput, setLocalInput] = useState(rawQuery);
-  const [activeTab, setActiveTab] = useState<'all' | 'products' | 'brands' | 'deals' | 'guides' | 'coupons' | 'categories' | 'influencers' | 'favorites' | 'compares'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'products' | 'brands' | 'deals' | 'guides' | 'coupons' | 'categories' | 'influencers' | 'whats-on' | 'compares'>('all');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const { customOverviews } = useDashboard();
   const { allProducts, allBrands, allCategories, allCreators, allGuides } = useGlobalState();
@@ -273,7 +277,7 @@ export function SearchPage() {
         coupons: [],
         categories: [],
         influencers: [],
-        favorites: [],
+        whatsOn: [],
         compares: [],
         total: 0
       };
@@ -442,29 +446,12 @@ export function SearchPage() {
       };
     });
 
-    // 8. CUSTOMER FAVORITES (Products with tag === '❤️ Customer Favorite' / idx % 5 === 1)
-    const matchedFavorites = productSource.map((p, idx) => {
-      const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews);
-      const matchedOverview = matchOverviewContent(pOverviews, q);
+    // 8. WHAT'S ON — brand sponsored posts
+    const matchedWhatsOn = filterBrandPosts({ query: q }).map((post) => ({
+      ...post,
+      score: getPriorityScore(post, post.title, true, post.brandName) + 100,
+    }));
 
-      const match = p.title.toLowerCase().includes(q) || 
-                    p.brand.toLowerCase().includes(q) || 
-                    p.category.toLowerCase().includes(q) || 
-                    (p.description || '').toLowerCase().includes(q) ||
-                    !!matchedOverview;
-
-      const isFav = idx % 5 === 1;
-      if (!isFav || !match) return null;
-      return {
-        ...p,
-        matchOverview: matchedOverview,
-        tag: '❤️ Customer Favorite',
-        tagColor: 'bg-rose-500',
-        score: getPriorityScore(p, p.title, true, p.category, '❤️ Customer Favorite', matchedOverview) + 120
-      };
-    }).filter(Boolean) as any[];
-
-    // 9. COMPARE RESULTS
     const matchedCompares = COMPARE_DATABASES.map(c => {
       const match = c.title.toLowerCase().includes(q) || 
                     c.category.toLowerCase().includes(q) ||
@@ -485,12 +472,11 @@ export function SearchPage() {
     matchedCoupons.sort(sortFn);
     matchedCategories.sort(sortFn);
     matchedInfluencers.sort(sortFn);
-    matchedFavorites.sort(sortFn);
     matchedCompares.sort(sortFn);
 
     const total = matchedProducts.length + matchedBrands.length + matchedDeals.length + 
                   matchedGuides.length + matchedCoupons.length + matchedCategories.length + 
-                  matchedInfluencers.length + matchedFavorites.length + matchedCompares.length;
+                  matchedInfluencers.length + matchedWhatsOn.length + matchedCompares.length;
 
     return {
       products: matchedProducts,
@@ -500,7 +486,7 @@ export function SearchPage() {
       coupons: matchedCoupons,
       categories: matchedCategories,
       influencers: matchedInfluencers,
-      favorites: matchedFavorites,
+      whatsOn: matchedWhatsOn,
       compares: matchedCompares,
       total
     };
@@ -512,7 +498,7 @@ export function SearchPage() {
     { key: 'products', label: 'Products', count: filteredProducts.length },
     { key: 'brands', label: 'Brand Profiles', count: searchResults.brands.length },
     { key: 'deals', label: 'Deals', count: searchResults.deals.length },
-    { key: 'favorites', label: 'Customer Favorites', count: searchResults.favorites.length },
+    { key: 'whats-on', label: "What's On", count: searchResults.whatsOn.length },
     { key: 'compares', label: 'Compare Results', count: searchResults.compares.length },
     { key: 'guides', label: 'Buying Guides', count: filteredGuides.length },
     { key: 'coupons', label: 'Coupons / Promos', count: searchResults.coupons.length },
@@ -520,70 +506,64 @@ export function SearchPage() {
     { key: 'influencers', label: 'Creator Profiles', count: filteredCreators.length }
   ];
 
+  const searchNavItems = useMemo(
+    () => [
+      { key: 'products', label: 'Products', icon: <ShoppingBag size={13} /> },
+      { key: 'brands', label: 'Brands', icon: <Award size={13} /> },
+      { key: 'deals', label: 'Deals', icon: <Tag size={13} /> },
+      { key: 'whats-on', label: "What's On", icon: <Sparkles size={13} /> },
+      { key: 'guides', label: 'Guides', icon: <BookOpen size={13} /> },
+      { key: 'coupons', label: 'Coupons', icon: <Percent size={13} /> },
+      { key: 'categories', label: 'Categories', icon: <LayoutGrid size={13} /> },
+      { key: 'influencers', label: 'Creators', icon: <Users size={13} /> },
+      { key: 'compares', label: 'Compare', icon: <Layers size={13} /> },
+    ]
+      .map((item) => {
+        const tab = tabConfig.find((t) => t.key === item.key);
+        return {
+          id: item.key,
+          label: item.label,
+          icon: item.icon,
+          hidden: !tab || tab.count === 0,
+        };
+      }),
+    [tabConfig],
+  );
+
+  const handleSearchNav = (id: string) => {
+    setActiveTab(id as typeof activeTab);
+    const resultsEl = document.getElementById('search-results');
+    if (resultsEl) {
+      const top = resultsEl.getBoundingClientRect().top + window.pageYOffset - 168;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="bg-choosify-feed min-h-screen text-[#1A1A2E] pb-24 font-sans antialiased">
-      {/* Search Header Banner */}
-      <div className="w-full relative overflow-hidden flex flex-col items-center justify-center border-b border-white/5 h-[303px] px-6">
-        <div className="absolute inset-0 hero-gradient" />
-        
-        <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full">
-          <div className="bg-orange-primary/10 text-orange-primary text-[8px] font-black px-3 py-1 rounded-full mb-3 uppercase tracking-[0.2em] italic inline-block w-fit">
-            OMNI SEARCH ENGINE v1.1
-          </div>
-          <h1 className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-4">
-            Unified Global Search
-          </h1>
-          <p className="text-white/60 text-xs md:text-sm max-w-lg mb-8 leading-relaxed font-medium">
-            Search across authorized brands, verified products, active discount campaigns, professional recommendations, and influencer insights.
-          </p>
+      <PageHeroBanner pageKey="search" />
 
-          <div className="w-full max-w-xl relative">
-            <GlobalSearchBar 
-              initialValue={localInput}
-              placeholder="Search products, brands, promo codes, influencers..."
-              onSubmit={(val) => {
-                setLocalInput(val);
-                setSearchParams({ q: val.trim() });
-              }}
-            />
-          </div>
-
-          {rawQuery && (
-            <p className="text-white/40 text-[10px] font-mono mt-4">
-              Showing {searchResults.total} matches for "{rawQuery}"
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Tabs navigation row */}
       {rawQuery && (
-        <div className="w-full border-b border-gray-200 bg-white sticky top-20 z-40 shadow-sm overflow-x-auto no-scrollbar scroll-smooth">
-          <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-start gap-1.5">
-            {tabConfig.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
-                className={`h-11 px-4 rounded-full text-[10px] font-black tracking-widest uppercase transition-all whitespace-nowrap inline-flex items-center gap-1.5 ${
-                  activeTab === tab.key 
-                    ? 'bg-[#0A0A1F] text-white' 
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-800'
-                }`}
-              >
-                {tab.label}
-                <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-full ${
-                  activeTab === tab.key ? 'bg-[#E8500A] text-white' : 'bg-gray-250 text-gray-500'
-                }`}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
+        <div className="bg-[#000435] border-b border-white/5 py-2 px-6 text-center">
+          <p className="text-white/60 text-[10px] font-mono">
+            Showing {searchResults.total} matches for &quot;{rawQuery}&quot;
+          </p>
         </div>
       )}
 
+      {/* Sticky result-type navigation */}
+      {rawQuery && searchResults.total > 0 && (
+        <StickySectionNav
+          sections={searchNavItems}
+          activeId={activeTab}
+          onNavigate={handleSearchNav}
+          allLabel="All matches"
+          profileLabel="Search results"
+        />
+      )}
+
       {/* Search results container */}
-      <div className="max-w-7xl mx-auto px-6 py-10">
+      <div id="search-results" className="max-w-7xl mx-auto px-6 py-10 scroll-mt-36">
         {!rawQuery ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
@@ -634,10 +614,12 @@ export function SearchPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div className={PRODUCT_CARD_GRID}>
                   {(activeTab === 'all' ? searchResults.products.slice(0, 6) : searchResults.products).map((product) => (
-                    <div key={product.id} className="flex flex-col justify-between h-full group">
-                      <ProductCard product={product} />
+                    <div key={product.id} className="flex flex-col group min-w-0 h-full">
+                      <div className="flex-1 min-h-0 flex">
+                        <ProductCard product={product} />
+                      </div>
                       {product.matchOverview && (
                         <div className="mt-2.5 p-2 bg-orange-primary/5 border border-orange-primary/10 rounded-[4px] text-left">
                           <p className="text-[7.5px] font-black uppercase text-[#E8500A] tracking-wider mb-0.5">
@@ -747,7 +729,7 @@ export function SearchPage() {
                   )}
                 </div>
 
-                <div className="grid gap-5 w-full justify-center max-w-[1045px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
+                <div className={BRAND_CARD_GRID}>
                   {(activeTab === 'all' ? searchResults.brands.slice(0, 3) : searchResults.brands).map((brand) => (
                     <BrandCardDesign key={brand.id} brand={brand} />
                   ))}
@@ -918,7 +900,7 @@ export function SearchPage() {
                     )}
                   </div>
 
-                  <div className="grid gap-5 w-full justify-center max-w-[1045px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
+                  <div className={CREATOR_CARD_GRID}>
                     {(activeTab === 'all' ? searchResults.influencers.slice(0, 2) : searchResults.influencers).map((inf) => (
                       <CreatorCardDesign key={inf.id} creator={inf} />
                     ))}
@@ -934,26 +916,26 @@ export function SearchPage() {
               ) : null
             )}
 
-            {/* 8. CUSTOMER FAVORITES SECTION */}
-            {(activeTab === 'all' || activeTab === 'favorites') && searchResults.favorites.length > 0 && (
+            {/* 8. WHAT'S ON SECTION */}
+            {(activeTab === 'all' || activeTab === 'whats-on') && searchResults.whatsOn.length > 0 && (
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                   <div className="flex items-center gap-2">
-                    <Heart size={15} className="text-[#E8500A] fill-[#E8500A]" />
+                    <Sparkles size={15} className="text-[#E8500A]" />
                     <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
-                      Customer Favorites ({searchResults.favorites.length})
+                      What&apos;s On ({searchResults.whatsOn.length})
                     </h2>
                   </div>
-                  {activeTab === 'all' && searchResults.favorites.length > 4 && (
-                    <button onClick={() => setActiveTab('favorites')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
-                      See All Favorites <ChevronRight size={12} />
+                  {activeTab === 'all' && searchResults.whatsOn.length > 3 && (
+                    <button onClick={() => setActiveTab('whats-on')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                      See All <ChevronRight size={12} />
                     </button>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {(activeTab === 'all' ? searchResults.favorites.slice(0, 6) : searchResults.favorites).map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {(activeTab === 'all' ? searchResults.whatsOn.slice(0, 3) : searchResults.whatsOn).map((post) => (
+                    <BrandPostCard key={post.id} post={post} />
                   ))}
                 </div>
               </div>

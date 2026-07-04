@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
+import { StickySectionNav } from '../components/StickySectionNav';
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'motion/react';
@@ -89,73 +92,27 @@ export function CreatorProfilePage() {
   // Submit Outcome Status
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // Active section for sticky navigation scrollspy
-  const [activeSection, setActiveSection] = useState('all');
   const [searchFilter, setSearchFilter] = useState('');
   const [currentSearchInput, setCurrentSearchInput] = useState('');
 
-  // Auto-scrollspy effect
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 220;
+  const creatorSectionNavItems = useMemo(
+    () => [
+      { id: 'videos-section', label: 'Videos', icon: <Youtube size={13} /> },
+      { id: 'reels-section', label: 'Reels', icon: <Instagram size={13} /> },
+      { id: 'blogs-section', label: 'Blogs', icon: <BookOpen size={13} /> },
+      {
+        id: 'brand-reviews-section',
+        label: 'Reviews',
+        icon: <ShieldCheck size={13} />,
+      },
+      { id: 'creator-overview-section', label: 'Overview', icon: <Award size={13} /> },
+    ],
+    [],
+  );
 
-      const sections = [
-        { id: 'videos-section', name: 'videos' },
-        { id: 'reels-section', name: 'reels' },
-        { id: 'blogs-section', name: 'blogs' },
-        { id: 'brand-reviews-section', name: 'reviews' },
-        { id: 'creator-overview-section', name: 'overview' }
-      ];
-
-      if (window.scrollY < 200) {
-        setActiveSection('all');
-        return;
-      }
-
-      let currentSection = 'all';
-      for (const section of sections) {
-        const el = document.getElementById(section.id);
-        if (el) {
-          const top = el.getBoundingClientRect().top + window.pageYOffset;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            currentSection = section.name;
-          }
-        }
-      }
-      setActiveSection(currentSection);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToSection = (idStr: string) => {
-    if (idStr === 'all') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setActiveSection('all');
-    } else {
-      const el = document.getElementById(idStr);
-      if (el) {
-        const offset = 180;
-        const elementPosition = el.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-        
-        const nameMap: { [key: string]: string } = {
-          'videos-section': 'videos',
-          'reels-section': 'reels',
-          'blogs-section': 'blogs',
-          'brand-reviews-section': 'reviews',
-          'creator-overview-section': 'overview'
-        };
-        setActiveSection(nameMap[idStr] || 'all');
-      }
-    }
-  };
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(
+    creatorSectionNavItems,
+  );
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -640,77 +597,18 @@ export function CreatorProfilePage() {
          </div>
       </div>
 
+      <StickySectionNav
+        sections={creatorSectionNavItems}
+        activeId={activeSectionId}
+        onNavigate={scrollToSection}
+        allLabel="Creator"
+        profileLabel="Creator profile"
+      />
+
       {/* 4. UNIFIED SCROLLABLE BODY WRAPPER */}
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-16">
-         
-         <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
-            
-            {/* COLUMN 1: SIDEBAR FILTERS (Adaptation Of Brand design filtering columns) */}
-            <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in text-left">
-               <div className="flex flex-col gap-6">
-                  {/* Active selection helper */}
-                  {searchFilter && (
-                     <div className="bg-white rounded-[5px] p-4.5 shadow-sm border border-[#e8edf2]">
-                        <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-4 flex items-center justify-between">
-                           Active Selection
-                           <button onClick={() => {setSearchFilter(''); setCurrentSearchInput('');}} className="text-orange-primary hover:underline text-[9px] font-black uppercase cursor-pointer border-0 bg-transparent">Clear</button>
-                        </h3>
-                        <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-[#e8edf2] rounded-lg text-[10px] font-semibold text-gray-600 uppercase tracking-wide hover:bg-gray-100 transition-all cursor-pointer">
-                          <span>Search: {searchFilter}</span>
-                          <X size={10} className="text-[#E8500A]" />
-                        </div>
-                     </div>
-                  )}
-
-                  {/* Specialty quick stats filters */}
-                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm font-sans flex flex-col gap-2.5">
-                     <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-1.5">Strategic Focus</h3>
-                     <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-xs font-semibold text-navy">
-                           <span>Category:</span>
-                           <span className="text-orange-primary font-bold italic uppercase">{creator.bestFor}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs font-semibold text-navy">
-                           <span>Base Region:</span>
-                           <span className="text-gray-500 font-bold uppercase">Bangladesh</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs font-semibold text-navy">
-                           <span>Hub Channels:</span>
-                           <span className="text-gray-500 font-bold uppercase">{creator.platforms.length} PLATFORMS</span>
-                        </div>
-                     </div>
-                  </div>
-
-                  {/* POST OFFER BRIEFING AD */}
-                  <div className="bg-[#0A0A1F] text-white rounded-[5px] p-5 border border-white/5 relative overflow-hidden flex flex-col justify-between h-96 relative">
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/10 rounded-full blur-2xl pointer-events-none" />
-                     
-                     <div className="flex flex-col items-start relative z-10">
-                        <div className="w-9 h-9 rounded-full bg-white/15 text-orange-primary flex items-center justify-center mb-4">
-                           <Award className="w-4 h-4" />
-                        </div>
-                        <h4 className="font-sans text-xs font-semibold uppercase tracking-wider mb-1">Direct Brand Outreach</h4>
-                        <p className="text-[10px] text-gray-400 font-semibold leading-relaxed mb-4">
-                           Skip platform fees. Choosify facilitates structured brand discovery with direct email responses.
-                        </p>
-                     </div>
-
-                     <div className="border border-dashed border-white/10 rounded-xl p-3 text-center my-1 relative z-10 bg-white/5">
-                        <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest block mb-2">FINALIZED OUTREACH STATUS</span>
-                        <p className="text-[11px] font-bold text-[#E8500A] uppercase tracking-wide mb-3">Structured collaboration request briefs</p>
-                        <button 
-                          onClick={() => { if (localClaimStatus !== "verified") { toast.error("Collaboration request is locked for unclaimed creator profiles."); return; } setIsModalOpen(true); }}
-                          className="w-full py-2 bg-orange-primary hover:bg-[#CF4400] text-white text-[9px] font-black rounded-lg uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer border-0"
-                        >
-                          PROPOSE BRIEFING <Sparkles size={11} />
-                        </button>
-                     </div>
-                  </div>
-               </div>
-            </aside>
-
-            {/* COLUMN 2: MIDDLE FEED (Dedicated content rows) */}
-            <main className="min-w-0 pb-10 space-y-16 lg:col-span-1">
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full">
+         <div className={`${DETAIL_SINGLE_FEED}`}>
+            <main className="w-full pb-10 space-y-16">
                
                {/* Search Active Notification indicator */}
                {searchFilter && (
@@ -966,46 +864,6 @@ export function CreatorProfilePage() {
 
             </main>
 
-            {/* COLUMN 3: RIGHT PANEL ACCENTS (Campaign promo widgets) */}
-            <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in text-left">
-               {/* REACH EXCELLENCE HIGHLIGHT */}
-               <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm space-y-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-primary/10 text-orange-primary flex items-center justify-center p-0 mb-1">
-                     <Award size={20} />
-                  </div>
-                  <h4 className="text-sm font-black text-[#1A1D4E] uppercase tracking-wider italic leading-none">Reach Excellence</h4>
-                  <p className="text-[11px] text-gray-400 font-semibold leading-relaxed">
-                     Verified digital advocate highlighting niche specialties, custom content metrics, and strategic target alignment.
-                  </p>
-                  <div className="p-3 bg-gray-50/50 rounded-[5px] border border-[#e8edf2]/80 flex flex-col gap-1.5 font-mono text-[9.5px]">
-                     <div className="flex items-center justify-between text-[#1A1D4E]">
-                        <span>Campaign Response:</span>
-                        <span className="font-extrabold text-orange-primary">~24 HOURS</span>
-                     </div>
-                     <div className="flex items-center justify-between text-[#1A1D4E]">
-                        <span>Completion Rate:</span>
-                        <span className="font-extrabold text-green-500">98% SUCCESS</span>
-                     </div>
-                  </div>
-               </div>
-
-               {/* CREATOR COLLAB BANNER */}
-               <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-center relative overflow-hidden">
-                  <span className="text-[8px] font-bold text-orange-primary bg-[#FFF0E8] border border-[#FFF0E8] px-3.5 py-1.5 rounded-full uppercase tracking-widest block mx-auto w-fit mb-4">ACTIVE DISCOVERY</span>
-                  <p className="text-gray-400 text-[10px] font-semibold uppercase leading-relaxed mb-4">
-                     Click to submit a structured strategic collaboration request directly to {creator.name}.
-                  </p>
-                  <button 
-                     onClick={() => setIsModalOpen(true)}
-                     className="w-full py-2.5 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-orange-primary transform hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest border-0 cursor-pointer"
-                  >
-                     ASK FOR BRANDING
-                  </button>
-               </div>
-            </aside>
-
-         </div>
-
          {/* SECTION 5 — BRAND REVIEWS */}
          <div id="brand-reviews-section" className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80 text-left">
             <div className="text-center mb-8 border-b border-gray-100 pb-5">
@@ -1238,6 +1096,7 @@ export function CreatorProfilePage() {
             )}
          </div>
 
+         </div>
       </div>
 
       {/* =======================================================

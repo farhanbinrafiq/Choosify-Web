@@ -20,8 +20,8 @@ export function FloatingOverlays() {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const { mode, retailCart, wholesaleCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo } = useGlobalState();
-  const { threads, threadMessages, addThreadMessage, markAllAsRead, setThreads } = useDashboard();
+  const { mode, retailCart, wholesaleCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo, isLoggedIn, currentUser, setIsLoggedIn, logout } = useGlobalState();
+  const { threads, threadMessages, addThreadMessage, markAllAsRead, setThreads, savedProducts, notifications } = useDashboard();
 
   // Active floating panel state: null | 'cart' | 'inbox' | 'profile'
   const [activePanel, setActivePanel] = useState<'cart' | 'inbox' | 'profile' | null>(null);
@@ -82,14 +82,34 @@ export function FloatingOverlays() {
     closeAllOverlays();
   }, [currentPath]);
 
+  // Sticky nav "Filter" shortcut opens the legacy floating filter panel
+  useEffect(() => {
+    const handleOpenFilters = () => {
+      setFilterOpen(true);
+      setActivePanel(null);
+      setDrawerFilterOpen(false);
+    };
+    window.addEventListener('choosify:open-filters', handleOpenFilters);
+    return () => window.removeEventListener('choosify:open-filters', handleOpenFilters);
+  }, [setDrawerFilterOpen]);
+
+  // Close auth-only panels when user logs out
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setActivePanel((panel) => (panel === 'inbox' || panel === 'profile' ? null : panel));
+      setActiveThreadId(null);
+    }
+  }, [isLoggedIn]);
+
   // Cart tracking details
   const activeCart = mode === 'retail' ? retailCart : wholesaleCart;
   const totalCartItems = activeCart.reduce((sum, item) => sum + item.quantity, 0);
   const [lastCartCount, setLastCartCount] = useState(totalCartItems);
   const [cartBadgeBounce, setCartBadgeBounce] = useState(false);
 
-  // Unread messages tracking
-  const unreadCount = threads.filter(t => t.unread).length;
+  // Unread messages tracking (only meaningful when logged in)
+  const unreadCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
+  const unreadNotifCount = isLoggedIn ? notifications.filter((n: any) => !n.read).length : 0;
   const [lastUnreadCount, setLastUnreadCount] = useState(unreadCount);
   const [inboxBadgeBounce, setInboxBadgeBounce] = useState(false);
 
@@ -230,58 +250,59 @@ export function FloatingOverlays() {
   const activeMessages = threadMessages.filter(m => m.threadId === activeThreadId);
   const activeThreadObj = threads.find(t => t.id === activeThreadId);
 
-  // Accordion lists mapping perfectly to instructed Groups
-  const accordionGroups = [
-    {
-      id: 'account',
-      title: 'ACCOUNT SECTION',
-      items: [
-        { to: '/dashboard', label: 'My Profile', icon: User, badge: 'FARHAN' },
-        { to: '/dashboard', label: 'Edit Profile', icon: Settings },
-        { to: '/dashboard', label: 'Account Settings', icon: Settings },
-        { to: '/dashboard', label: 'Security Settings', icon: Shield },
+  const accordionGroups = isLoggedIn
+    ? [
+        {
+          id: 'account',
+          title: 'ACCOUNT SECTION',
+          items: [
+            { to: '/dashboard', label: 'My Profile', icon: User, badge: currentUser?.name?.split(' ')[0]?.toUpperCase() },
+            { to: '/dashboard', label: 'Edit Profile', icon: Settings },
+            { to: '/dashboard', label: 'Account Settings', icon: Settings },
+            { to: '/dashboard', label: 'Security Settings', icon: Shield },
+          ]
+        },
+        {
+          id: 'activity',
+          title: 'ACTIVITY SECTION',
+          items: [
+            { to: '/dashboard', label: 'Orders / Activity', icon: ShoppingCart },
+            { to: '/dashboard', label: 'Saved Items', icon: Bookmark, badge: savedProducts.length > 0 ? String(savedProducts.length) : undefined },
+            { to: '/dashboard', label: 'Recently Viewed', icon: Clock },
+            { to: '/dashboard', label: 'Purchase History', icon: Package },
+          ]
+        },
+        {
+          id: 'social',
+          title: 'SOCIAL & CONNECTIONS',
+          items: [
+            { to: '/brands', label: 'Followed Brands', icon: Heart },
+            { to: '/creators', label: 'Followed Creators', icon: Radio },
+            { to: '/dashboard', label: 'Saved Products', icon: Heart, badge: savedProducts.length > 0 ? String(savedProducts.length) : undefined },
+          ]
+        },
+        {
+          id: 'messagesGroup',
+          title: 'MESSAGES & ALERTS',
+          items: [
+            { to: '/messages', label: 'Messages', icon: MessageSquare, badge: unreadCount > 0 ? String(unreadCount) : undefined },
+            { to: '/dashboard?tab=notifications', label: 'Notifications', icon: Bell, badge: unreadNotifCount > 0 ? String(unreadNotifCount) : undefined },
+            { to: '/messages', label: 'Alerts', icon: Shield },
+          ]
+        },
+        {
+          id: 'supportGroup',
+          title: 'SUPPORT',
+          items: [
+            { to: '/messages', label: 'Help Center', icon: HelpCircle },
+            { to: '/messages', label: 'Contact Support', icon: MessageSquare },
+          ]
+        }
       ]
-    },
-    {
-      id: 'activity',
-      title: 'ACTIVITY SECTION',
-      items: [
-        { to: '/dashboard', label: 'Orders / Activity', icon: ShoppingCart, badge: '35' },
-        { to: '/dashboard', label: 'Saved Items', icon: Bookmark, badge: '550' },
-        { to: '/dashboard', label: 'Recently Viewed', icon: Clock, badge: '15' },
-        { to: '/dashboard', label: 'Purchase History', icon: Package },
-      ]
-    },
-    {
-      id: 'social',
-      title: 'SOCIAL & CONNECTIONS',
-      items: [
-        { to: '/brands', label: 'Followed Brands', icon: Heart, badge: '8' },
-        { to: '/creators', label: 'Followed Creators', icon: Radio, badge: '12' },
-        { to: '/customer-favorite', label: 'Favorites / Wishlist', icon: Heart },
-      ]
-    },
-    {
-      id: 'messagesGroup',
-      title: 'MESSAGES & ALERTS',
-      items: [
-        { to: '/messages', label: 'Messages', icon: MessageSquare, badge: '20' },
-        { to: '/messages', label: 'Notifications', icon: Bell, badge: 'New' },
-        { to: '/messages', label: 'Alerts', icon: Shield },
-      ]
-    },
-    {
-      id: 'supportGroup',
-      title: 'SUPPORT',
-      items: [
-        { to: '/messages', label: 'Help Center', icon: HelpCircle },
-        { to: '/messages', label: 'Contact Support', icon: MessageSquare },
-      ]
-    }
-  ];
+    : [];
 
   // Stack calculation based on active item volumes
-  const visibleButtonsCount = 1 + (unreadCount > 0 ? 1 : 0) + (totalCartItems > 0 ? 1 : 0);
+  const visibleButtonsCount = (isLoggedIn ? 1 : 0) + (isLoggedIn && unreadCount > 0 ? 1 : 0) + (totalCartItems > 0 ? 1 : 0);
   // Each trigger is h-12 (48px) and equal spacing is gap-3 (12px)
   const triggerStackHeight = visibleButtonsCount * 48 + (visibleButtonsCount - 1) * 12;
 
@@ -302,13 +323,15 @@ export function FloatingOverlays() {
           }),
         }]
       : []),
-    {
-      id: 'profile',
-      label: 'Your Profile',
-      description: 'Account & settings',
-      icon: User,
-      onClick: () => openFromMobileHub(() => setActivePanel('profile')),
-    },
+    ...(isLoggedIn
+      ? [{
+          id: 'profile',
+          label: 'Your Profile',
+          description: 'Account & settings',
+          icon: User,
+          onClick: () => openFromMobileHub(() => setActivePanel('profile')),
+        } satisfies MobileHubAction]
+      : []),
     {
       id: 'cart',
       label: 'Quick Cart',
@@ -317,14 +340,16 @@ export function FloatingOverlays() {
       badge: totalCartItems > 0 ? totalCartItems : undefined,
       onClick: () => openFromMobileHub(() => setActivePanel('cart')),
     },
-    {
-      id: 'messages',
-      label: 'Messages',
-      description: unreadCount > 0 ? `${unreadCount} unread` : 'Inbox',
-      icon: MessageSquare,
-      badge: unreadCount > 0 ? unreadCount : undefined,
-      onClick: () => openFromMobileHub(() => setActivePanel('inbox')),
-    },
+    ...(isLoggedIn
+      ? [{
+          id: 'messages',
+          label: 'Messages',
+          description: unreadCount > 0 ? `${unreadCount} unread` : 'Inbox',
+          icon: MessageSquare,
+          badge: unreadCount > 0 ? unreadCount : undefined,
+          onClick: () => openFromMobileHub(() => setActivePanel('inbox')),
+        } satisfies MobileHubAction]
+      : []),
   ];
 
   return (
@@ -494,8 +519,8 @@ export function FloatingOverlays() {
           </motion.div>
         )}
 
-        {/* PANEL 2: MINI FLOATING INBOX */}
-        {activePanel === 'inbox' && (
+        {/* PANEL 2: MINI FLOATING INBOX (logged-in only) */}
+        {isLoggedIn && activePanel === 'inbox' && (
           <motion.div
             ref={panelRef}
             initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
@@ -641,7 +666,7 @@ export function FloatingOverlays() {
         )}
 
         {/* PANEL 3: YOUR PROFILE DRAWER (Slide Up bottom->top dock system) */}
-        {activePanel === 'profile' && (
+        {isLoggedIn && activePanel === 'profile' && (
           <motion.div
             ref={panelRef}
             initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
@@ -675,23 +700,27 @@ export function FloatingOverlays() {
             {/* Profile Header Block */}
             <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3.5 text-left">
-                <div className="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md shrink-0">
-                  <img 
-                    src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" 
-                    className="w-full h-full object-cover" 
-                    alt="Farhan Bin Rafiq" 
-                    referrerPolicy="no-referrer"
-                  />
+                <div className="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md shrink-0 bg-orange-primary/10 flex items-center justify-center">
+                  {isLoggedIn && currentUser?.avatar ? (
+                    <img 
+                      src={currentUser.avatar} 
+                      className="w-full h-full object-cover" 
+                      alt={currentUser.name || 'Profile'} 
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <User size={18} className="text-orange-primary" />
+                  )}
                 </div>
                 <div>
                   <h3 className="text-xs md:text-sm font-black text-[#1A1A2E] leading-tight uppercase">
-                    Farhan Bin Rafiq
+                    {isLoggedIn ? (currentUser?.name || 'My Account') : 'Guest User'}
                   </h3>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="inline-block bg-[#E8500A]/10 text-[#E8500A] text-[7.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
-                      PREMIUM CONSUMER
+                      {isLoggedIn ? 'CHOOSIFY MEMBER' : 'SIGN IN TO CONTINUE'}
                     </span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    {isLoggedIn && <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />}
                   </div>
                 </div>
               </div>
@@ -704,6 +733,8 @@ export function FloatingOverlays() {
               </button>
             </div>
 
+            {isLoggedIn ? (
+            <>
             {/* Accordion List Body */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2.5 no-scrollbar text-left select-none">
               {accordionGroups.map((group) => {
@@ -780,11 +811,9 @@ export function FloatingOverlays() {
                                   {item.badge && (
                                     <span className={cn(
                                       "px-2 py-0.5 text-[8px] font-mono font-black rounded-full leading-none shrink-0",
-                                      item.badge === 'New' || item.badge === 'FARHAN'
-                                        ? "bg-[#E8500A] text-white"
-                                        : isRouteActive 
-                                          ? "bg-[#E8500A]/10 text-[#E8500A]"
-                                          : "bg-gray-100 text-gray-400 group-hover:bg-[#FFF0E8] group-hover:text-[#E8500A]"
+                                      isRouteActive 
+                                        ? "bg-[#E8500A]/10 text-[#E8500A]"
+                                        : "bg-gray-100 text-gray-400 group-hover:bg-[#FFF0E8] group-hover:text-[#E8500A]"
                                     )}>
                                       {item.badge}
                                     </span>
@@ -805,6 +834,7 @@ export function FloatingOverlays() {
             <div className="p-4 border-t border-[#e8edf2] bg-gray-50 flex gap-2 shrink-0">
               <button
                 onClick={() => {
+                  logout();
                   toast.success("Successfully logged out!", { icon: '👋' });
                   setActivePanel(null);
                 }}
@@ -814,6 +844,32 @@ export function FloatingOverlays() {
                 <span>Log Out Session</span>
               </button>
             </div>
+            </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">
+                <p className="text-sm font-semibold text-[#1A1A2E]">Sign in to access your profile, messages, and saved items.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActivePanel(null);
+                    navigate('/login', { state: { tab: 'sign-in' } });
+                  }}
+                  className="w-full max-w-xs py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-colors"
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActivePanel(null);
+                    navigate('/login', { state: { tab: 'sign-up' } });
+                  }}
+                  className="w-full max-w-xs py-3 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[10px] font-black uppercase tracking-widest rounded-full border border-[#e8edf2] transition-colors"
+                >
+                  Create Account
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
 
@@ -823,7 +879,8 @@ export function FloatingOverlays() {
       {/* Desktop / tablet pill stack — hidden on mobile (replaced by MobileActionHub) */}
       <div className="hidden sm:flex flex-col-reverse items-end gap-3 w-[185px]">
 
-        {/* BUTTON 1: THE PROFILE PILL (Always visible, always matching width & borders) */}
+        {/* BUTTON 1: PROFILE PILL — logged-in users only */}
+        {isLoggedIn && (
         <motion.button
           id="floating-profile-dock-pill"
           onClick={() => {
@@ -842,12 +899,16 @@ export function FloatingOverlays() {
         >
           <div className="flex items-center gap-2 max-w-[130px]">
             <div className="w-6 h-6 rounded-full overflow-hidden bg-orange-primary/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
-              <img 
-                src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" 
-                className="w-full h-full object-cover" 
-                alt="Ava" 
-                referrerPolicy="no-referrer"
-              />
+              {currentUser?.avatar ? (
+                <img 
+                  src={currentUser.avatar} 
+                  className="w-full h-full object-cover" 
+                  alt={currentUser.name || 'Profile'} 
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <User size={12} className="text-orange-primary" />
+              )}
             </div>
             <span className="text-[10px] font-black uppercase tracking-wider truncate">
               YOUR PROFILE
@@ -861,6 +922,7 @@ export function FloatingOverlays() {
             )} 
           />
         </motion.button>
+        )}
 
 
         {/* BUTTON 2: THE SHOPPING CART PILL (Visible only if cart contains items) */}
@@ -913,9 +975,9 @@ export function FloatingOverlays() {
         </AnimatePresence>
 
 
-        {/* BUTTON 3: THE MESSAGES PILL (Visible only if unread messages exist > 0) */}
+        {/* BUTTON 3: THE MESSAGES PILL (logged-in users with unread messages only) */}
         <AnimatePresence>
-          {unreadCount > 0 && (
+          {isLoggedIn && unreadCount > 0 && (
             <motion.button
               key="dock-messages-trigger"
               initial={{ scale: 0, opacity: 0, y: 15 }}
@@ -1023,12 +1085,9 @@ export function FloatingOverlays() {
 
     </div>
 
-    {/* FILTER LAUNCHER — desktop only; mobile uses action hub + DrawerFilterProvider */}
-    {hasFilters && !isMobile && (
-      <div className={cn(
-        "fixed z-[219] flex flex-col items-start",
-        isMobile ? "bottom-4 left-4 right-4" : "bottom-6 left-6 lg:bottom-8 lg:left-8"
-      )}>
+    {/* FILTER LAUNCHER — legacy useRegisterPageFilters pages; drawer on all sizes, pill desktop-only */}
+    {hasFilters && (
+      <>
         <AnimatePresence>
           {filterOpen && (
             <motion.div
@@ -1037,20 +1096,19 @@ export function FloatingOverlays() {
               animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
               exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
               transition={standardTransition}
-              drag={isMobile ? "y" : false}
+              drag={isMobile ? 'y' : false}
               dragConstraints={{ top: 0, bottom: 250 }}
               dragElastic={{ top: 0.1, bottom: 0.8 }}
               onDragEnd={(_e: any, info: any) => {
                 if (info.offset.y > 120) setFilterOpen(false);
               }}
-              style={isMobile || isTablet ? undefined : { bottom: '64px' }}
               className={cn(
-                "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
+                'bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden z-[250]',
                 isMobile
-                  ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto"
+                  ? 'fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] w-full pointer-events-auto'
                   : isTablet
-                    ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
-                    : "absolute left-0 w-[380px] rounded-[24px] max-h-[75vh]"
+                    ? 'fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px]'
+                    : 'fixed bottom-[88px] left-6 lg:left-8 w-[380px] rounded-[24px] max-h-[75vh]',
               )}
             >
               {/* Mobile drag indicator */}
@@ -1157,6 +1215,8 @@ export function FloatingOverlays() {
           )}
         </AnimatePresence>
 
+        {!isMobile && (
+        <div className="fixed z-[219] bottom-6 left-6 lg:bottom-8 lg:left-8 flex flex-col items-start">
         {/* The pill button */}
         <motion.button
           onClick={() => {
@@ -1197,7 +1257,9 @@ export function FloatingOverlays() {
             )}
           />
         </motion.button>
-      </div>
+        </div>
+        )}
+      </>
     )}
 
     {isMobile && (

@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard';
 import { PRODUCTS } from '../constants';
 import { CompareEngine } from '../components/CompareEngine';
+import { PageHeroBanner } from '../components/PageHeroBanner';
 
 export function ComparePage() {
   const navigate = useNavigate();
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
+      <PageHeroBanner pageKey="compare" />
       <main className="w-full">
         <CompareEngine />
       </main>

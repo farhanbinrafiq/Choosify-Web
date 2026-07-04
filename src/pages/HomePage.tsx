@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Search, ShoppingCart, MessageSquare, Bookmark, ChevronDown, ChevronRight, 
@@ -7,26 +7,52 @@ import {
   Shirt, Smartphone, Gem, Gamepad2, Monitor, Utensils, Cpu, Tv, Home, Baby,
   Palette, Luggage,
   Flame, Sparkles, Send, Users, ShieldAlert, BadgeCheck, Zap, Clock,
-  Gift, Package
+  Gift, Package, BookOpen, Store, LayoutGrid, Megaphone
 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
-import { CampaignBannerCarousel } from '../components/CampaignBannerCarousel';
-import { GlobalSearchBar } from '../components/GlobalSearchBar';
+import { PageHeroBanner } from '../components/PageHeroBanner';
 import { PRODUCTS, BRANDS } from '../constants';
-import { FeaturedCard, ReelCard, HorizontalMediaCard } from './GuidesPage';
+import { ReelCard, HorizontalMediaCard } from './GuidesPage';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { useRegisterPageFilters } from '../components/FilterEngine';
-import { FollowButton } from '../components/FollowButton';
 import toast from 'react-hot-toast';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
-import { QuickAccessCard } from '../components/QuickAccessCard';
-import { BrandCardDesign } from '../components/BrandCardDesign';
-import { CreatorCardDesign } from '../components/CreatorCardDesign';
-import { getActiveHeroBanner, getSectionItemIds, isHomeSectionVisible } from '../utils/homepageCms';
+import { BrandCardDesign, mapBrandToCardDesign } from '../components/BrandCardDesign';
+import { BrandPostCarouselSection } from '../components/BrandPostCarouselSection';
+import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL, HOME_POPULAR_CATEGORY_GRID } from "../lib/pageLayout";
+import { StickySectionNav } from '../components/StickySectionNav';
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
+import { getAllBrandPosts } from '../lib/brandPosts';
+import { getSectionItemIds, isHomeSectionVisible } from '../utils/homepageCms';
 import { pickByCatalogIds, orderByCatalogIds } from '../utils/catalogMatch';
 import { isPlacementActive } from '../utils/editorialMappers';
+
+type HomeGuideCarouselKind = 'youtube' | 'reels' | 'blog';
+
+type HomeGuideCarouselSlide = {
+  guide: any;
+  kind: HomeGuideCarouselKind;
+};
+
+function getHomeGuideKind(guide: any): HomeGuideCarouselKind {
+  if (guide?.type === 'reels' || guide?.type === 'shorts') return 'reels';
+  if (guide?.type === 'video') return 'youtube';
+  return 'blog';
+}
+
+function renderHomeGuideCarouselCard(slide: HomeGuideCarouselSlide) {
+  if (slide.kind === 'reels') {
+    return <ReelCard guide={slide.guide} />;
+  }
+  return (
+    <HorizontalMediaCard
+      guide={slide.guide}
+      badgeType={slide.kind === 'youtube' ? 'youtube' : 'blog'}
+    />
+  );
+}
 
 const BRAND_IMAGES: Record<string, string> = {
   "Samsung": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
@@ -72,18 +98,12 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals, allCategories, allCreators, allGuides, allPlacements, homepageConfig, siteConfig, mode, addToCart, getCreatorClaimStatus } = useGlobalState();
+  const { allProducts, allBrands, allDeals, allCategories, allGuides, allPlacements, homepageConfig, siteConfig, mode, addToCart } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('FEED');
   const [carouselIndex, setCarouselIndex] = useState(1);
 
-  const activeHero = React.useMemo(() => getActiveHeroBanner(homepageConfig), [homepageConfig]);
-  const heroHeadline = activeHero?.headline || "buy ORIGINAL";
-  const heroSubtitle =
-    activeHero?.subtitle ||
-    'Weary of online counterfeiting and merchant fraud? Choosify.bd empowers your shopping with independent brand verification systems in Bangladesh.';
   const heroSearchTerms = React.useMemo(() => {
     const terms = (siteConfig?.popularSearches || [])
       .filter((item) => item.isActive)
@@ -114,14 +134,25 @@ export function HomePage() {
   const CAROUSEL_BRANDS = carouselBrands;
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [showAllFollowed, setShowAllFollowed] = useState(false);
-  const [activeStickySection, setActiveStickySection] = useState('all');
-  const [activeRecsTab, setActiveRecsTab] = useState<'guides' | 'creators'>('guides');
   const [activeBrandsTab, setActiveBrandsTab] = useState<'brands' | 'products'>('brands');
+
+  const jumpToHomeSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.pageYOffset - 200;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  };
 
   useRegisterPageFilters({
     pageName: 'Home',
-    renderSearch: null, // home has its own hero search
-    quickFilters: [], // no quick filters on homepage
+    renderSearch: null, // global search lives in the navbar
+    quickFilters: [
+      { id: 'home-brands', label: '🏬 Trending Brands', active: false, onClick: () => jumpToHomeSection('section-trending-brands') },
+      { id: 'home-products', label: '🛍️ New Products', active: false, onClick: () => jumpToHomeSection('section-new-on-choosify') },
+      { id: 'home-deals', label: '🔥 Hot Deals', active: false, onClick: () => jumpToHomeSection('section-hot-deals') },
+      { id: 'home-picks', label: '✨ Editor Picks', active: false, onClick: () => jumpToHomeSection('section-recommendations') },
+      { id: 'home-categories', label: '🗂️ Categories', active: false, onClick: () => jumpToHomeSection('section-categories') },
+    ],
     renderFilters: null, // no sidebar filters on homepage
     activeFilterCount: 0,
     onClearAll: null,
@@ -250,67 +281,6 @@ export function HomePage() {
       }
       lastWheelTime.current = now;
       e.preventDefault();
-    }
-  };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = [
-        { id: 'section-trending-brands', name: 'brands' },
-        { id: 'section-popular-products', name: 'products' },
-        { id: 'section-hot-deals', name: 'deals' },
-        { id: 'section-recommendations', name: 'recommendations' },
-        { id: 'section-categories', name: 'categories' },
-        { id: 'section-customer-favorites', name: 'favorites' }
-      ];
-      
-      const scrollPosition = window.scrollY + 220;
-      let currentSection = 'all';
-      
-      for (const section of sections) {
-        const el = document.getElementById(section.id);
-        if (el) {
-          const top = el.getBoundingClientRect().top + window.pageYOffset;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            currentSection = section.name;
-          }
-        }
-      }
-      setActiveStickySection(currentSection);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToSection = (id: string) => {
-    if (id === 'all') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setActiveStickySection('all');
-    } else {
-      const el = document.getElementById(id);
-      if (el) {
-        const offset = 180; // Offset for navbar + sticky selectors
-        const elementPosition = el.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-        
-        const nameMap: { [key: string]: string } = {
-          'section-trending-brands': 'brands',
-          'section-popular-products': 'products',
-          'section-hot-deals': 'deals',
-          'section-recommendations': 'recommendations',
-          'section-categories': 'categories',
-          'section-customer-favorites': 'favorites'
-        };
-        if (nameMap[id]) {
-          setActiveStickySection(nameMap[id]);
-        }
-      }
     }
   };
 
@@ -485,17 +455,6 @@ export function HomePage() {
     ? initialFollowedBrands 
     : initialFollowedBrands.slice(0, 3);
 
-  // Search Submission
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) {
-      toast.error('Please specify what brand/type you seek!');
-      return;
-    }
-    toast.success(`Scouting verified stores for: "${searchQuery}"`);
-    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-  };
-
   // Newsletter subscription
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -528,27 +487,6 @@ export function HomePage() {
     }
     return rightBrandsList.filter((b: any) => b.ratings >= 4.7 || b.featuredFlag || b.sponsoredFlag).slice(0, 8);
   }, [rightBrandsList, homepageConfig]);
-
-  const spotlightCreators = React.useMemo(() => {
-    const featuredIds = homepageConfig?.featuredCreatorIds?.length
-      ? homepageConfig.featuredCreatorIds
-      : getSectionItemIds(homepageConfig, 'creators');
-    const source = featuredIds.length ? pickByCatalogIds(allCreators, featuredIds) : allCreators;
-    return source.map((c) => {
-      let rating = 4.7;
-      let reviews = 85;
-      let isHot = c.score >= 95;
-      let isFeatured = c.score >= 90;
-      if (c.score >= 96) {
-        rating = 4.9;
-        reviews = 240;
-      } else if (c.score >= 92) {
-        rating = 4.8;
-        reviews = 190;
-      }
-      return { ...c, rating, reviews, isHot, isFeatured };
-    }).slice(0, 8);
-  }, [allCreators, homepageConfig]);
 
   const rightProductsList = React.useMemo(() => {
     const source = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
@@ -719,13 +657,61 @@ export function HomePage() {
     return allGuides;
   }, [allGuides, homepageConfig]);
 
-  const featuredBlog = homepageGuides[0] || allGuides[0];
-  const sideGuides = homepageGuides.slice(1, 4);
-  const secondaryGuideSlots = [
-    { guide: sideGuides[0] || homepageGuides[1], type: 'reel' as const },
-    { guide: sideGuides[1] || homepageGuides[2], type: 'youtube' as const },
-    { guide: sideGuides[2] || homepageGuides[3], type: 'blog' as const },
-  ].filter((slot) => Boolean(slot.guide?.id));
+  const homeFeaturedGuideSlides = useMemo(() => {
+    const youtube = homepageGuides.filter((g: any) => g?.type === 'video');
+    const reels = homepageGuides.filter(
+      (g: any) => g?.type === 'reels' || g?.type === 'shorts',
+    );
+    const blogs = homepageGuides.filter(
+      (g: any) => g?.type === 'article' || !g?.type,
+    );
+
+    const lanes: Array<{ list: any[]; kind: HomeGuideCarouselKind }> = [
+      { list: youtube, kind: 'youtube' },
+      { list: reels, kind: 'reels' },
+      { list: blogs, kind: 'blog' },
+    ];
+
+    const seen = new Set<string | number>();
+    const slides: HomeGuideCarouselSlide[] = [];
+    const maxRounds = Math.max(...lanes.map((lane) => lane.list.length), 0);
+
+    for (let round = 0; round < maxRounds && slides.length < 12; round += 1) {
+      for (const lane of lanes) {
+        const guide = lane.list[round];
+        if (!guide?.id || seen.has(guide.id)) continue;
+        seen.add(guide.id);
+        slides.push({ guide, kind: lane.kind });
+        if (slides.length >= 12) break;
+      }
+    }
+
+    if (slides.length === 0) {
+      homepageGuides.slice(0, 8).forEach((guide: any) => {
+        if (!guide?.id || seen.has(guide.id)) return;
+        slides.push({ guide, kind: getHomeGuideKind(guide) });
+      });
+    }
+
+    return slides;
+  }, [homepageGuides]);
+
+  const whatsOnPosts = React.useMemo(() => getAllBrandPosts().slice(0, 8), []);
+
+  const homeSectionNavItems = useMemo(
+    () => [
+      { id: 'section-trending-brands', label: 'Brands', icon: <Store size={13} />, hidden: !sectionVisible('trending') },
+      { id: 'section-new-on-choosify', label: 'Products', icon: <ShoppingBag size={13} />, hidden: !sectionVisible('trending') },
+      { id: 'section-hot-deals', label: 'Deals', icon: <Flame size={13} />, hidden: !sectionVisible('deals') },
+      { id: 'section-recommendations', label: 'Picks', icon: <Sparkles size={13} />, hidden: !sectionVisible('recommended') || homeFeaturedGuideSlides.length === 0 },
+      { id: 'section-categories', label: 'Categories', icon: <LayoutGrid size={13} />, hidden: !sectionVisible('categories') },
+      { id: 'section-whats-on', label: "What's On", icon: <Megaphone size={13} />, hidden: whatsOnPosts.length === 0 },
+    ],
+    [sectionVisible, homeFeaturedGuideSlides.length, whatsOnPosts.length],
+  );
+
+  const { activeId: homeActiveSectionId, scrollToSection: scrollToHomeSection } =
+    useSectionScrollSpy(homeSectionNavItems);
 
   const popularCategoriesMock = [
     { name: "Fashion & Lifestyle", count: "50 Products . 10 Brands", id: 'Fashion & Lifestyle' },
@@ -733,7 +719,6 @@ export function HomePage() {
     { name: "Family & Kids", count: "50 Products . 10 Brands", id: 'Fashion & Lifestyle' },
     { name: "Jewelry & Accessories", count: "50 Products . 10 Brands", id: 'Jewelry & Accessories' },
     { name: "Hobbies & Creativity", count: "50 Products . 10 Brands", id: 'Jewelry & Accessories' },
-    { name: "Travel & Hospitality", count: "50 Products . 10 Brands", id: 'Food & Restaurants' },
   ];
 
   const popularCategoriesList = React.useMemo(() => {
@@ -741,7 +726,7 @@ export function HomePage() {
       return [...allCategories]
         .filter((category) => category.enabled)
         .sort((a, b) => a.displayOrder - b.displayOrder)
-        .slice(0, 6)
+        .slice(0, 5)
         .map((category) => {
           const productCount = (allProducts || []).filter(
             (product: any) => product.category === category.name,
@@ -766,92 +751,29 @@ export function HomePage() {
     <div className="bg-choosify-feed min-h-screen text-[#1A1D4E] antialiased pb-16 font-sans overflow-x-clip">
       
       {sectionVisible('hero') && (
-      <section 
-        className="hero-section hero-container relative hero-gradient text-white overflow-hidden py-4 px-6 shadow-inner-lg flex items-center justify-center"
-        style={{
-          height: '303px',
-          ...(activeHero?.backgroundImage
-            ? { backgroundImage: `url(${activeHero.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-            : {}),
-        }}
-      >
-        {/* Luminous dynamic background accents */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(232,80,10,0.18)_0%,_transparent_55%)] pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#EEF1F8]/10 to-transparent pointer-events-none" />
-        
-        {/* Subtle grid pattern helper */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+        <PageHeroBanner pageKey="home" />
+      )}
 
-        <div 
-          className="hero-content max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center justify-center w-full"
-        >
-          
-          {/* Tagline Badge */}
-          <div 
-            className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-[9px] tracking-widest text-[#E8500A] font-extrabold uppercase mb-2 shadow-glow hover:border-white/25 transition-all duration-300"
-            style={{ marginBottom: '6px', paddingLeft: '14px', paddingRight: '14px', paddingBottom: '3px', paddingTop: '3px' }}
-          >
-            <span className="flex h-1.5 w-1.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
-            </span>
-            <span className="font-space">Bangladesh's #1 Premium Brand Discovery Shield</span>
-          </div>
-
-          {/* Main Typography Header Section */}
-          <h1 
-            className="font-space font-extrabold text-[#FFFFFF] text-3xl sm:text-4xl md:text-5xl leading-none tracking-tight mb-2 max-w-none"
-            style={{ marginBottom: '2px', paddingBottom: '2px', paddingRight: '0px', paddingTop: '2px' }}
-          >
-            {activeHero?.headline ? (
-              activeHero.headline
-            ) : (
-              <>buy <span className="text-orange-primary italic font-black">ORIGINAL</span></>
-            )}
-          </h1>
-
-          {/* Supporting Text */}
-          <p 
-            className="text-xs text-gray-300 max-w-2xl mx-auto font-medium mb-3 leading-relaxed opacity-95"
-            style={{ marginBottom: '4px', paddingBottom: '2px', paddingTop: '2px' }}
-          >
-            {heroSubtitle}
-          </p>
-
-          {/* Glassmorphic Search Container */}
-          <div className="relative w-full max-w-2xl mx-auto mb-3" style={{ width: '100%', maxWidth: '640px' }}>
-            <GlobalSearchBar 
-              placeholder="Search authentic Fashion hubs, Smart Gadgets & verified outlets..." 
-              onSubmit={(val) => {
-                setSearchQuery(val);
-                navigate(`/search?q=${encodeURIComponent(val)}`);
+      {/* Hot target shortcuts — below campaign banner */}
+      {sectionVisible('hero') && (
+      <div className="bg-[#000435]/90 border-b border-white/5 px-4 py-2">
+        <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-center gap-2 text-[10px] text-gray-400 font-semibold">
+          <span className="font-mono text-gray-500 uppercase tracking-wider text-[9px]">Hot Targets:</span>
+          {heroSearchTerms.map((term) => (
+            <button
+              key={term}
+              type="button"
+              onClick={() => {
+                toast.success(`Scouting verified stores for: "${term}"`);
+                navigate(`/products?q=${encodeURIComponent(term)}`);
               }}
-            />
-          </div>
-
-          {/* Quick Shortcuts / Suggested */}
-          <div 
-            className="flex flex-wrap items-center justify-center gap-2 text-[10px] text-gray-400 font-semibold mb-0"
-            style={{ paddingBottom: '2px', paddingTop: '2px' }}
-          >
-            <span className="font-mono text-gray-500 uppercase tracking-wider text-[9px]">Hot Targets:</span>
-            {heroSearchTerms.map((term) => (
-              <button
-                key={term}
-                type="button"
-                onClick={() => {
-                  setSearchQuery(term);
-                  toast.success(`Scouting verified stores for: "${term}"`);
-                  navigate(`/products?q=${encodeURIComponent(term)}`);
-                }}
-                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-full border border-white/5 hover:border-white/10 transition-all cursor-pointer text-[10px]"
-              >
-                #{term}
-              </button>
-            ))}
-          </div>
+              className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-full border border-white/5 hover:border-white/10 transition-all cursor-pointer text-[10px]"
+            >
+              #{term}
+            </button>
+          ))}
         </div>
-      </section>
+      </div>
       )}
 
       {/* SECTION 3 — MARQUEE BANNER */}
@@ -864,9 +786,17 @@ export function HomePage() {
         </div>
       </div>
 
+      <StickySectionNav
+        sections={homeSectionNavItems}
+        activeId={homeActiveSectionId}
+        onNavigate={scrollToHomeSection}
+        allLabel="Home"
+        profileLabel="Home feed"
+      />
+
       {/* SECTION 4 — THREE COLUMN GRID */}
       <main className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-6 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative choosify-page-grid">
+        <div className={`${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* LEFT STICKY SIDEBAR */}
         <aside 
@@ -874,8 +804,6 @@ export function HomePage() {
           style={{ paddingLeft: '0px', paddingRight: '0px', paddingBottom: '0px' }}
         >
           
-          <QuickAccessCard />
-
           {/* BRANDS FOLLOWED */}
           <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
@@ -914,7 +842,7 @@ export function HomePage() {
 
         {/* CENTER FEED */}
         <section 
-          className="flex flex-col gap-5 w-full min-w-0"
+          className="choosify-middle-feed flex flex-col gap-5 w-full min-w-0"
           style={{ paddingTop: '0px', paddingLeft: '0px', paddingRight: '0px', paddingBottom: '8px' }}
         >
           
@@ -947,7 +875,6 @@ export function HomePage() {
                   </Link>
                 </div>
 
-                {/* ── PREMIUM EXPANDING BRAND CAROUSEL ──────────────────────── */}
                 <TrendingBrandsCarousel
                   carouselBrands={carouselBrands}
                   carouselIndex={carouselIndex}
@@ -979,7 +906,7 @@ export function HomePage() {
                 </div>
 
                 {/* 4-column, 2-row Product Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
+                <div className={PRODUCT_CARD_GRID}>
                   {((allProducts.length > 0 ? allProducts : PRODUCTS) as any[])
                     .filter((p: any) => p.isNewArrival || p.id % 3 === 0)
                     .sort((a: any, b: any) => b.id - a.id)
@@ -1027,31 +954,13 @@ export function HomePage() {
                 {/* Premium Horizontal Carousel */}
                 <PremiumCarousel
                   items={spotlightBrands}
-                  itemWidth={335}
+                  itemWidth={280}
                   gap={20}
                   renderCard={(brand) => {
-                    const originalBrand = BRANDS.find(b => b.id === brand.id) || {};
-                    const bestFor = (originalBrand as any).category === 'Fashion' ? 'Footwear' : 'Electronics';
-                    const priceRange = (originalBrand as any).category === 'Fashion' ? '৳1200' : '৳15000';
-                    const recommended = '94';
-
-                    const cardBrand = {
-                      id: brand.id,
-                      name: brand.name,
-                      logo: brand.logo,
-                      category: brand.category || (originalBrand as any).category || 'Fashion',
-                      bestFor: bestFor,
-                      priceRange: priceRange,
-                      rating: brand.rating || brand.ratings || 4.8,
-                      reviewCount: Math.floor((brand.followers || 8400) * 0.1) || 840,
-                      isFeatured: !!brand.featuredFlag,
-                      successScore: parseInt(recommended) || 94,
-                      tagline: (originalBrand as any).description || 'Traditional & contemporary clothing'
-                    };
-
+                    const fallback = BRANDS.find(b => b.id === brand.id);
                     return (
-                      <div className="shrink-0">
-                        <BrandCardDesign brand={cardBrand} />
+                      <div className="shrink-0 w-[280px]">
+                        <BrandCardDesign brand={mapBrandToCardDesign(brand, fallback)} />
                       </div>
                     );
                   }}
@@ -1096,114 +1005,36 @@ export function HomePage() {
               </div>
               )}
 
-              {sectionVisible('creators') && (
-              <div id="section-creator-spotlights" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left mb-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-100 pb-3 mb-6 gap-4">
+              {sectionVisible('recommended') && homeFeaturedGuideSlides.length > 0 && (
+              <div id="section-recommendations" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4 pb-3 border-b border-gray-100">
                   <div className="text-left">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base font-semibold text-[#1a1a2e]">CREATOR</span>
-                      <span className="text-base font-semibold text-[#E8500A]">SPOTLIGHT</span>
-                    </div>
-                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
-                      Discover verified, featured, and sponsored creators producing trusted reviews, recommendations, and buying insights.
+                    <h2 className="text-base font-semibold text-[#1a1a2e]">
+                      FEATURED <span className="text-[#E8500A]">RECOMMENDATIONS</span>
+                    </h2>
+                    <p className="text-[12px] text-[#8a9bb0] mt-1">
+                      Swipe through YouTube guides, reels, and buying blogs in one feed.
                     </p>
                   </div>
-                  <Link to="/creators" className="text-[12px] font-medium text-[#FF5B00] shrink-0 hover:underline">
-                    View All Creators
+                  <Link
+                    to="/guides"
+                    className="inline-flex items-center gap-1.5 border border-[#e8edf2] hover:border-[#E8500A]/30 text-[#1a1a2e] hover:text-[#E8500A] text-[10px] font-medium uppercase tracking-wider rounded-lg px-4 py-2 bg-white transition-all shrink-0"
+                  >
+                    View All Guides
+                    <ChevronRight size={14} />
                   </Link>
                 </div>
 
-                {/* Premium Horizontal Carousel */}
                 <PremiumCarousel
-                  items={spotlightCreators}
-                  itemWidth={335}
-                  gap={20}
-                  renderCard={(creator: any) => {
-                    // Map the spotlightCreators data shape to what CreatorCardDesign expects
-                    const cardCreator = {
-                      id: creator.id,
-                      name: creator.name,
-                      handle: creator.handle,
-                      avatar: creator.avatar,
-                      score: creator.score ?? Math.round((creator.rating || 4.5) * 20),
-                      bestFor: creator.bestFor || creator.category || 'Lifestyle',
-                      platforms: creator.platforms || ['YouTube'],
-                      rating: creator.rating || 4.8,
-                      reviews: creator.reviews || 0,
-                      isHot: creator.isHot,
-                      isFeatured: creator.isFeatured,
-                      coverImage: creator.coverImage,
-                      bio: creator.bio,
-                    };
-                    return <CreatorCardDesign key={creator.id} creator={cardCreator} />;
-                  }}
+                  items={homeFeaturedGuideSlides}
+                  itemWidth={252}
+                  gap={16}
+                  renderCard={(slide: HomeGuideCarouselSlide) => (
+                    <div className="w-full h-full flex items-start">
+                      {renderHomeGuideCarouselCard(slide)}
+                    </div>
+                  )}
                 />
-
-                {/* Bottom CTA to Creators */}
-                <div className="text-center mt-6 pt-4 border-t border-gray-50">
-                  <Link 
-                    to="/creators" 
-                    className="inline-flex items-center gap-1.5 text-sm font-black text-[#E8500A] hover:text-[#CF4400] transition-colors uppercase tracking-wider"
-                  >
-                    <span>Browse All Creators</span>
-                    <ChevronRight size={16} />
-                  </Link>
-                </div>
-              </div>
-              )}
-
-              {sectionVisible('recommended') && (
-              <div id="section-recommendations" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
-                
-                {/* Section Header */}
-                <div className="text-left mb-6">
-                  <h2 className="text-base font-semibold text-[#1a1a2e]">
-                    FEATURED <span className="text-[#E8500A]">RECOMMENDATIONS</span>
-                  </h2>
-                  <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
-                    Connect with millions of shoppers and boost your brand visibility today.
-                  </p>
-                </div>
-
-                {/* Main Featured Buying Guide banner blog layout */}
-                {featuredBlog?.id && (
-                <div className="mb-6">
-                  <FeaturedCard guide={featuredBlog} />
-                </div>
-                )}
-
-                {/* Sub Guides Grid matching elements visually */}
-                {secondaryGuideSlots.length > 0 && (
-                <div 
-                  id="section-guides"
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"
-                  style={{ paddingTop: '0px', paddingBottom: '0px' }}
-                >
-                  {secondaryGuideSlots.map((slot, idx) => {
-                    if (slot.type === 'reel') {
-                      return <ReelCard key={slot.guide.id} guide={slot.guide} />;
-                    }
-                    return (
-                      <HorizontalMediaCard
-                        key={slot.guide.id}
-                        guide={slot.guide}
-                        badgeType={slot.type}
-                      />
-                    );
-                  })}
-                </div>
-                )}
-
-                {/* Explore all Recommendations bottom action button */}
-                <div className="text-center">
-                  <Link 
-                    to="/guides" 
-                    className="inline-flex items-center gap-1.5 text-sm font-black text-[#E8500A] hover:text-[#CF4400] transition-colors uppercase tracking-wider"
-                  >
-                    <span>Explore All Recommendations</span>
-                    <ChevronRight size={16} />
-                  </Link>
-                </div>
               </div>
               )}
 
@@ -1232,8 +1063,8 @@ export function HomePage() {
                   </div>
                 </div>
 
-                {/* Categories Grid - 6 beautiful cards exactly matching screenshot */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-left">
+                {/* Categories Grid — shared category card grid so cards match the Categories page */}
+                <div className={cn(HOME_POPULAR_CATEGORY_GRID, "text-left")}>
                   {popularCategoriesList.map((cat, idx) => {
                     // Custom high-fidelity category icon picker helper
                     const getCategoryMockIcon = (catName: string) => {
@@ -1254,7 +1085,7 @@ export function HomePage() {
                           setActiveTab(cat.id);
                           toast.success(`Active Category: ${cat.id}`);
                         }}
-                        className="bg-white border border-[#e8edf2] rounded-[5px] p-4 flex flex-col items-start hover:border-gray-200/90 hover:scale-[1.01] transition-all duration-200 cursor-pointer group"
+                        className="choosify-category-card bg-white border border-[#e8edf2] rounded-[5px] p-4 flex flex-col items-start hover:border-gray-200/90 hover:scale-[1.01] transition-all duration-200 cursor-pointer group"
                       >
                         {/* Perfect white circle around the icon styled like mockup */}
                         <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
@@ -1276,36 +1107,17 @@ export function HomePage() {
               </div>
               )}
 
-              {/* FEED SECTION H — CUSTOMER FAVORITES */}
-              <div id="section-customer-favorites" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
-                {/* Section Title Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-4 mb-5 gap-3">
-                  <div className="text-left">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-base font-bold text-[#1a1a2e] uppercase tracking-tight">Customer</span>
-                      <span className="text-base font-bold text-[#E8500A] uppercase tracking-tight">Favorites</span>
-                      <span className="bg-rose-100 text-rose-600 text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">Loved</span>
-                    </div>
-                    <p className="text-[11px] text-[#8a9bb0] mt-1 text-left">
-                      Trending products loved by Choosify editors and verified customers.
-                    </p>
-                  </div>
-
-                  <Link 
-                    to="/customer-favorite" 
-                    className="inline-flex items-center gap-1.5 hover:bg-gray-50 text-[#E8500A] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider rounded-lg transition-all"
-                  >
-                    View All Customer Favorites <ChevronRight size={14} />
-                  </Link>
-                </div>
-
-                {/* Customer Favorites Grid of featured Products with isGuideDetail={true} */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 text-left w-full">
-                  {viralProductsList.slice(0, 8).map((product) => (
-                    <ProductCard key={product.id} product={product} variant="grid" isGuideDetail={true} />
-                  ))}
-                </div>
-              </div>
+              {whatsOnPosts.length > 0 && (
+              <BrandPostCarouselSection
+                id="section-whats-on"
+                posts={whatsOnPosts}
+                title="What's On"
+                subtitle="Upcoming launches, festivals, and brand events from verified shops."
+                viewAllHref="/whats-on"
+                viewAllLabel="View All What's On"
+                className="mt-6"
+              />
+              )}
             </>
           ) : (
             /* NON-FEED CATEGORY DISPLAY GRID */
@@ -1326,7 +1138,7 @@ export function HomePage() {
               </div>
 
               {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className={PRODUCT_CARD_GRID}>
                   {filteredProducts.map((p: any) => (
                     <ProductCard key={p.id} product={p} variant="compact" />
                   ))}
@@ -1659,7 +1471,7 @@ function TrendingBrandsCarousel({
   const getIdx = (offset: number) =>
     (carouselIndex + offset + TOTAL * 10) % TOTAL;
 
-  type SlotPosition = 'farPrev' | 'prev' | 'active' | 'next' | 'farNext';
+  type SlotPosition = 'farPrev' | 'prev' | 'active' | 'next';
 
   const slots: { brand: typeof carouselBrands[0]; position: SlotPosition }[] =
     viewportSize === 'mobile'
@@ -1667,26 +1479,26 @@ function TrendingBrandsCarousel({
       : viewportSize === 'tablet'
       ? [
           { brand: carouselBrands[getIdx(-1)], position: 'prev' },
-          { brand: carouselBrands[getIdx( 0)], position: 'active' },
-          { brand: carouselBrands[getIdx( 1)], position: 'next' },
+          { brand: carouselBrands[getIdx(0)], position: 'active' },
+          { brand: carouselBrands[getIdx(1)], position: 'next' },
         ]
       : [
           { brand: carouselBrands[getIdx(-2)], position: 'farPrev' },
           { brand: carouselBrands[getIdx(-1)], position: 'prev' },
-          { brand: carouselBrands[getIdx( 0)], position: 'active' },
-          { brand: carouselBrands[getIdx( 1)], position: 'next' },
-          { brand: carouselBrands[getIdx( 2)], position: 'farNext' },
+          { brand: carouselBrands[getIdx(0)], position: 'active' },
+          { brand: carouselBrands[getIdx(1)], position: 'next' },
         ];
 
+  // Side cards taper in width: narrow → narrower → very narrow (center is always widest)
   const flexMap: Record<SlotPosition, number> =
     viewportSize === 'tablet'
-      ? { farPrev: 0, prev: 1.4, active: 6, next: 1.4, farNext: 0 }
-      : { farPrev: 0.9, prev: 2.2, active: 8, next: 2.2, farNext: 0.9 };
+      ? { farPrev: 0, prev: 2.4, active: 7.2, next: 1.6 }
+      : { farPrev: 1.05, prev: 2.35, active: 7.4, next: 1.55 };
 
   const opacityMap: Record<SlotPosition, number> =
     viewportSize === 'tablet'
-      ? { farPrev: 0, prev: 0.75, active: 1, next: 0.75, farNext: 0 }
-      : { farPrev: 0.5, prev: 0.78, active: 1, next: 0.78, farNext: 0.5 };
+      ? { farPrev: 0, prev: 0.76, active: 1, next: 0.62 }
+      : { farPrev: 0.42, prev: 0.74, active: 1, next: 0.58 };
 
   const trackHeight =
     viewportSize === 'mobile' ? '360px'
@@ -1797,12 +1609,12 @@ function TrendingBrandsCarousel({
 
             const flexVal = flexMap[position];
             const opacityVal = opacityMap[position];
-            const showBadge = isActive || (position === 'prev' || position === 'next');
-            const showNamePill = !isActive && (position === 'prev' || position === 'next');
+            const showBadge = isActive;
+            const showNamePill = !isActive;
 
             return (
               <motion.div
-                key={`${position}-${brand.id}`}
+                key={`${position}-${brand.id}-${carouselIndex}`}
                 initial={false}
                 animate={{
                   flex: flexVal,
@@ -1811,11 +1623,11 @@ function TrendingBrandsCarousel({
                 transition={{ type: 'spring', stiffness: 220, damping: 26, mass: 0.85 }}
                 onClick={() => {
                   if (position === 'farPrev' || position === 'prev') goPrev();
-                  else if (position === 'farNext' || position === 'next') goNext();
+                  else if (position === 'next') goNext();
                   else navigate(`/brands/${brand.id}`);
                 }}
-                className="relative overflow-hidden cursor-pointer group"
-                style={{ borderRadius: '20px', minWidth: 0, flexShrink: 0 }}
+                className="relative overflow-hidden cursor-pointer group h-full"
+                style={{ borderRadius: isActive ? '20px' : '16px', minWidth: 0, flexShrink: 0 }}
               >
                 {/* a) Background image */}
                 <img
@@ -1879,9 +1691,14 @@ function TrendingBrandsCarousel({
 
                 {/* e) Inactive card — name pill bottom */}
                 {showNamePill && (
-                  <div className="absolute inset-x-0 bottom-4 flex justify-center px-2 z-10">
+                  <div className="absolute inset-x-0 bottom-3 flex justify-center px-1.5 z-10">
                     <span
-                      className="text-[9px] font-black uppercase tracking-wide text-white px-3 py-1.5 rounded-full truncate max-w-full border border-white/10"
+                      className={cn(
+                        'font-black uppercase tracking-wide text-white rounded-full truncate max-w-full border border-white/10',
+                        position === 'farPrev' && 'text-[7px] px-2 py-1',
+                        position === 'prev' && 'text-[8px] px-2.5 py-1',
+                        position === 'next' && 'text-[7.5px] px-2 py-1',
+                      )}
                       style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)' }}
                     >
                       {brand.name}
@@ -2103,13 +1920,13 @@ function PremiumCarousel({
         <motion.div
           animate={{ x: translateX }}
           transition={{ type: "spring", stiffness: 120, damping: 20 }}
-          className="flex gap-4 items-stretch w-max h-full py-2"
+          className="flex gap-4 items-start w-max h-full py-2"
         >
           {items.map((item, idx) => (
-            <div 
-              key={idx} 
-              style={{ width: `${itemWidth}px` }} 
-              className="shrink-0 h-full flex"
+            <div
+              key={(item as HomeGuideCarouselSlide)?.guide?.id ?? (item as { id?: string | number })?.id ?? idx}
+              style={{ width: `${itemWidth}px` }}
+              className="shrink-0 flex"
             >
               {renderCard(item, idx, idx === currentIndex)}
             </div>

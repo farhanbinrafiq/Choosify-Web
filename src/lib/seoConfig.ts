@@ -119,9 +119,9 @@ export const STATIC_PAGE_SEO: Record<string, SeoMeta> = {
     title: 'Suggest a Brand | Choosify',
     description: 'Suggest a brand to be listed and verified on Choosify.',
   },
-  '/customer-favorite': {
-    title: 'Customer Favorites | Choosify',
-    description: 'See what Choosify customers love most.',
+  '/whats-on': {
+    title: "What's On | Choosify",
+    description: 'Discover upcoming brand events, product launches, festivals, and sponsored campaigns from verified shops.',
   },
   '/brand-deals': {
     title: 'Brand Deals | Choosify',

@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Calculator, Layers, Award, Flame, Clock, Sparkles, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Calculator, Layers, Award, Flame, Clock, Sparkles, ArrowRight, Package } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
-import { QuickAccessCard } from '../components/QuickAccessCard';
 import { motion } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
 import { ProductCardSkeleton } from '../components/Skeleton';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
+import { PageHeroBanner } from '../components/PageHeroBanner';
+import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
+import { StickySectionNav } from '../components/StickySectionNav';
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 
 const SPONSORED_RECOMMENDATIONS = [
   {
@@ -136,6 +139,13 @@ export function AllProductsPage() {
       setSelectedCategory(categoryParam);
     }
   }, [rawQuery, searchParams]);
+
+  // Category / filter links often keep pathname /products — scroll to top on query change
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    document.documentElement.scrollTo(0, 0);
+    document.body.scrollTo(0, 0);
+  }, [searchParams.toString()]);
 
   // Handle local text search execute
   function executeSearch(term: string) {
@@ -574,75 +584,15 @@ export function AllProductsPage() {
     setSearchParams(new URLSearchParams());
   }
 
+  const sectionNavItems = useMemo(
+    () => [{ id: 'all-products-display', label: 'Catalog', icon: <Package size={13} /> }],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-       {/* Header / Hero Section (Unified Design System) */}
-      <div className="w-full choosify-dark-gradient relative overflow-hidden shrink-0 border-b border-white/5">
-        {mode === 'wholesale' ? (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/30 via-[#EB4501]/10 to-[#0A0A1F] opacity-90" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#4A1D1D] via-[#0A0A1F] to-[#0A0A1F] opacity-80" />
-        )}
-        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
-          <div className="w-full flex flex-col justify-center">
-            {/* Breadcrumbs */}
-            <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 w-full">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <ChevronRight size={10} className="text-white/20" />
-              <span className="text-white">Products</span>
-              <ChevronRight size={10} className="text-white/20" />
-              <span className="text-white">{mode === 'retail' ? 'Retail Lineup' : 'B2B Slabs'}</span>
-            </div>
-
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter mb-1 leading-none text-center">
-              {mode === 'retail' ? 'All Retail Products' : 'B2B Wholesale Catalog'}
-            </h1>
-
-            {mode === 'wholesale' && (
-              <div className="inline-block bg-gradient-to-r from-orange-primary/20 via-orange-deep/10 to-transparent border-l-4 border-orange-primary px-3 py-0.5 mb-1 rounded-r-lg w-fit mx-auto">
-                <p className="text-orange-primary text-[8px] font-black uppercase tracking-widest italic leading-none">
-                  Wholesale Bulk Products & Suppliers
-                </p>
-              </div>
-            )}
-
-            <p className="text-gray-400 text-[9px] lg:text-[11px] font-medium leading-normal mb-1.5 max-w-2xl text-center mx-auto">
-              {mode === 'retail' 
-                ? 'Discover & Compare standard retail items with Cash on Delivery support.' 
-                : 'Direct brand inventory sourcing with customized quantity slabs & volume pricing.'}
-            </p>
-
-            <div className="text-orange-primary font-black text-[8px] lg:text-[9.5px] uppercase tracking-widest shrink-0 bg-white/5 border border-white/10 backdrop-blur-md px-3 py-1 rounded-full italic mx-auto w-fit mb-4">
-              {filteredProducts.length} Listings Found
-            </div>
-
-            {/* SEARCH BAR — placed inside hero section at bottom */}
-            <div className="relative w-full max-w-2xl mx-auto mt-2">
-              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-                <div className="flex items-center bg-white rounded-full">
-                  <div className="pl-4 text-[#E8500A] shrink-0">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input 
-                    type="text" 
-                    value={sidebarSearch}
-                    onChange={(e) => setSidebarSearch(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
-                    placeholder={mode === 'retail' ? "Search retail products, brands or details..." : "Search wholesale factory suppliers, bulk slots..."} 
-                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
-                  />
-                  <button 
-                    onClick={() => executeSearch(sidebarSearch)}
-                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                  >
-                    Search
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeroBanner pageKey="products" />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -661,7 +611,15 @@ export function AllProductsPage() {
         onClearAll={handleResetFilters}
       />
 
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative choosify-page-grid">
+      <StickySectionNav
+        sections={sectionNavItems}
+        activeId={activeSectionId}
+        onNavigate={scrollToSection}
+        allLabel="Products"
+        profileLabel="Product catalog"
+      />
+
+      <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 min-w-0 w-full max-w-full animate-fade-in text-left">
@@ -680,8 +638,6 @@ export function AllProductsPage() {
             />
           </div>
           
-          <QuickAccessCard />
-
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
           <div id="global-sidebar-filters" className="transition-all duration-300 rounded-[5px]">
             <FullSidebarFilterPanel
@@ -962,7 +918,7 @@ export function AllProductsPage() {
         </aside>
 
         {/* Main Content Area */}
-        <main id="all-products-display" className="scroll-mt-36 min-w-0 pb-10">
+        <main id="all-products-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10">
           {/* Top Bar / Sorting */}
           <div className="flex flex-col gap-6 mb-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -1049,7 +1005,7 @@ export function AllProductsPage() {
             <div className={cn(
               "mb-20 w-full",
               viewMode === 'grid' 
-                ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-5" 
+                ? PRODUCT_CARD_GRID
                 : "flex flex-col gap-6"
             )}>
               {Array.from({ length: 8 }).map((_, i) => (
@@ -1067,7 +1023,7 @@ export function AllProductsPage() {
             <div className={cn(
               "mb-20 w-full",
               viewMode === 'grid' 
-                ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-5" 
+                ? PRODUCT_CARD_GRID
                 : "flex flex-col gap-6"
             )}>
               {filteredProducts.map((product, i) => (

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 export function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, search, hash } = useLocation();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -14,7 +14,7 @@ export function ScrollToTop() {
     scrollables.forEach((el) => {
       el.scrollTo({ top: 0, behavior: 'auto' });
     });
-  }, [pathname]);
+  }, [pathname, search, hash]);
 
   return null;
 }

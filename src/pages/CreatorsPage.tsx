@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { PAGE_LISTING_SINGLE_SHELL, CREATOR_CARD_GRID } from "../lib/pageLayout";
+import { StickySectionNav } from '../components/StickySectionNav';
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
-import { QuickAccessCard } from '../components/QuickAccessCard';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
 import type { Creator } from '../data/creators';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
+import { PageHeroBanner } from '../components/PageHeroBanner';
 
 interface CreatorCollab {
   id: string;
@@ -340,75 +343,28 @@ export function CreatorsPage() {
     },
   }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter]);
 
+  const sectionNavItems = useMemo(
+    () => [{ id: 'creators-main-display', label: 'Creators', icon: <Users size={13} /> }],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      {/* Hero Section */}
-      <div className="w-full bg-[#0A0A1F] relative overflow-hidden shrink-0 border-b border-white/5">
-        {/* Background Gradients */}
-        <div className="absolute inset-0 hero-gradient opacity-95" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-        
-        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
-          <div className="w-full flex flex-col justify-center">
-            {mode === 'wholesale' ? (
-              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
-                <span className="text-[#FF5B00]">B2B CREATORS</span> <span className="text-white">DIRECTORY</span>
-              </h1>
-            ) : (
-              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black italic uppercase tracking-tighter mb-1 leading-none">
-                <span className="text-orange-primary">CREATORS</span> <span className="text-white">DIRECTORY</span>
-              </h1>
-            )}
-            
-            {/* Text-only Carousel (PRD Requirement) */}
-            <div className="w-full overflow-hidden mb-1.5 py-0.5 border-y border-white/5 relative">
-              <motion.div 
-                 animate={{ x: [0, -1000] }}
-                 transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-                 className="flex whitespace-nowrap gap-8"
-              >
-                 {['Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha', 'Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha'].map((name, i) => (
-                   <span key={i} className="text-base lg:text-xl font-black text-white/5 italic uppercase tracking-tighter hover:text-orange-primary transition-all cursor-default">
-                      {name}
-                   </span>
-                 ))}
-                 {['Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha', 'Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha'].map((name, i) => (
-                   <span key={i} className="text-base lg:text-xl font-black text-white/5 italic uppercase tracking-tighter hover:text-orange-primary transition-all cursor-default">
-                      {name}
-                   </span>
-                 ))}
-              </motion.div>
-            </div>
+      <PageHeroBanner pageKey="creators" />
 
-            <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8px] lg:text-[9.5px] mb-0 uppercase tracking-wide opacity-80 leading-tight">
-              Discover verified local experts & digital curators in Bangladesh. Send structured briefs directly—no platform middleman.
-            </p>
-
-            {/* SEARCH BAR — placed inside hero section at bottom */}
-            <div className="relative w-full max-w-2xl mx-auto mt-6">
-              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-                <div className="flex items-center bg-white rounded-full">
-                  <div className="pl-4 text-[#E8500A] shrink-0">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input 
-                    type="text" 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search creators..." 
-                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
-                  />
-                  <button 
-                    onClick={() => setSearchQuery(searchQuery)}
-                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                  >
-                    Search
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="w-full overflow-hidden py-2 border-b border-white/5 bg-[#000435] relative">
+        <motion.div 
+           animate={{ x: [0, -1000] }}
+           transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+           className="flex whitespace-nowrap gap-8 px-6"
+        >
+           {['Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha', 'Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha'].map((name, i) => (
+             <span key={i} className="text-base lg:text-xl font-black text-white/10 italic uppercase tracking-tighter">
+                {name}
+             </span>
+           ))}
+        </motion.div>
       </div>
 
       {/* ACTIVE FILTER CHIPS ROW */}
@@ -429,7 +385,15 @@ export function CreatorsPage() {
         }}
       />
 
-      <div className="max-w-[1680px] mx-auto px-3 xl:px-6 py-5 w-full grid grid-cols-1 lg:grid-cols-[210px_minmax(0,1fr)_220px] xl:grid-cols-[230px_minmax(0,1fr)_240px] 2xl:grid-cols-[260px_minmax(0,1fr)_280px] gap-4 relative">
+      <StickySectionNav
+        sections={sectionNavItems}
+        activeId={activeSectionId}
+        onNavigate={scrollToSection}
+        allLabel="Creators"
+        profileLabel="Creator directory"
+      />
+
+      <div className={`max-w-[1680px] mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
@@ -446,8 +410,6 @@ export function CreatorsPage() {
               className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
             />
           </div>
-
-          <QuickAccessCard />
 
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
           <div id="creators-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
@@ -634,7 +596,7 @@ export function CreatorsPage() {
         </aside>
 
         {/* Main Content Area */}
-        <main id="creators-main-display" className="scroll-mt-36 min-w-0 pb-10 space-y-6">
+        <main id="creators-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 space-y-6">
           {/* Header info bar (Unified list view) */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8edf2] font-sans">
             <div>
@@ -755,15 +717,12 @@ export function CreatorsPage() {
           {filteredFeaturedCreators.length > 0 && (
             <div className="mb-12">
               <div className="flex items-center gap-4 mb-8 overflow-hidden">
-                <div className="flex items-center gap-3 choosify-dark-gradient px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/10 flex-shrink-0 border border-white/10">
+                <div className="flex items-center gap-2.5 bg-gradient-to-r from-[#FF5B00] via-[#E8500A] to-[#CF4400] px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/30 flex-shrink-0 border border-orange-primary/40">
+                   <Sparkles size={14} className="text-white shrink-0" />
                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
-                   <div className="flex gap-0.5">
-                      <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
-                         <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                      </div>
-                      <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
-                         <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                      </div>
+                   <div className="flex gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white/90 animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
                    </div>
                 </div>
                 <span className="text-[10px] font-black text-[#5C2AFE] uppercase tracking-widest whitespace-nowrap">
@@ -772,7 +731,7 @@ export function CreatorsPage() {
                 <div className="flex-1 h-px bg-orange-primary/20" />
               </div>
 
-              <div className="grid gap-5 w-full justify-center max-w-[1045px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
+              <div className={CREATOR_CARD_GRID}>
                 {filteredFeaturedCreators.map((creator) => (
                   <CreatorCardDesign key={creator.id} creator={creator} />
                 ))}
@@ -787,7 +746,7 @@ export function CreatorsPage() {
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{letterCreators.length} Creators</span>
               </div>
 
-              <div className="grid gap-5 w-full justify-center max-w-[1045px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
+              <div className={CREATOR_CARD_GRID}>
                 {letterCreators.map(creator => (
                   <CreatorCardDesign key={creator.id} creator={creator} />
                 ))}

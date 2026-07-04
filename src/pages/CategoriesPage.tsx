@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
-import { QuickAccessCard } from '../components/QuickAccessCard';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
+import { PageHeroBanner } from '../components/PageHeroBanner';
+import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
+import { StickySectionNav } from '../components/StickySectionNav';
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 
 interface Subcategory {
   name: string;
@@ -222,7 +225,7 @@ export function CategoriesPage() {
                   { value: 'brands', label: 'Has Brands' },
                   { value: 'creators', label: 'Has Creators' },
                   { value: 'recs', label: 'Has Recommendations' },
-                  { value: 'favorites', label: 'Has Customer Favorites' }
+                  { value: 'whats-on', label: "Has What's On Posts" }
                 ].map(opt => (
                   <button
                     key={opt.value}
@@ -483,7 +486,7 @@ export function CategoriesPage() {
         if (norm === 'recs') {
           return cat.count > 200;
         }
-        if (norm === 'favorites') {
+        if (norm === 'whats-on') {
           return cat.count > 500;
         }
         return true;
@@ -596,7 +599,7 @@ export function CategoriesPage() {
               { value: 'brands', label: 'Has Brands' },
               { value: 'creators', label: 'Has Creators' },
               { value: 'recs', label: 'Has Recommendations' },
-              { value: 'favorites', label: 'Has Customer Favorites' }
+              { value: 'whats-on', label: "Has What's On Posts" }
             ].map(opt => (
               <button
                 key={opt.value}
@@ -718,96 +721,36 @@ export function CategoriesPage() {
     selectedContent
   ]);
 
+  const sectionNavItems = useMemo(
+    () => [{ id: 'categories-main-display', label: 'Browse', icon: <LucideIcons.LayoutGrid size={13} /> }],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
-        {/* Background Gradients */}
-        <div className="absolute inset-0 hero-gradient" />
-        
-        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
-          <div className="w-full flex flex-col justify-center">
-            {mode === 'wholesale' ? (
-              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
-                <span className="text-white not-italic">B2B Product Category</span> <span className="text-[#FF5B00] not-italic">HUB</span>
-              </h1>
-            ) : (
-              <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black uppercase tracking-tighter mb-1.5 leading-none">
-                <span className="text-white not-italic">EXPLORATION</span> <span className="text-orange-primary not-italic">HUB</span>
-              </h1>
-            )}
-   
-            {/* Product Name Marquee */}
-            <div className="w-full overflow-hidden mb-1.5 py-0.5 border-y border-white/5 relative">
-              <motion.div 
-                 animate={{ x: [0, -1500] }}
-                 transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-                 className="flex whitespace-nowrap gap-8"
-              >
-                 {[
-                   'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
-                   '4K Drone', 'Mechanical Keyboard', 'DSLR Camera', 'Portable Speaker', 
-                   'Fitness Tracker', 'Power Bank'
-                 ].map((name, i) => (
-                   <span 
-                     key={i} 
-                     className={cn(
-                       "text-base lg:text-xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
-                       "text-white/10",
-                       "hover:text-orange-primary hover:scale-110"
-                     )}
-                   >
-                      {name}
-                   </span>
-                 ))}
-                 {/* Loop Duplicate */}
-                 {[
-                   'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
-                   '4K Drone', 'Mechanical Keyboard', 'DSLR Camera', 'Portable Speaker', 
-                   'Fitness Tracker', 'Power Bank'
-                 ].map((name, i) => (
-                   <span 
-                     key={`dup-${i}`} 
-                     className={cn(
-                       "text-base lg:text-xl font-black italic uppercase tracking-tighter transition-all duration-500 cursor-default",
-                       "text-white/10",
-                       "hover:text-orange-primary hover:scale-110"
-                     )}
-                   >
-                      {name}
-                   </span>
-                 ))}
-              </motion.div>
-            </div>
-   
-            <p className="text-white/70 max-w-2xl mx-auto font-bold italic text-[8px] lg:text-[9.5px] mb-0 uppercase tracking-[0.2em] opacity-80 leading-normal mb-4">
-              DISCOVER PREMIUM PRODUCTS, OFFICIAL STORES, AND BEST DEALS ACROSS BANGLADESH.
-            </p>
+      <PageHeroBanner pageKey="categories" />
 
-            {/* SEARCH BAR — placed inside hero section at bottom */}
-            <div className="relative w-full max-w-2xl mx-auto mt-2">
-              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-                <div className="flex items-center bg-white rounded-full">
-                  <div className="pl-4 text-[#E8500A] shrink-0">
-                    <LucideIcons.Search className="w-4 h-4" />
-                  </div>
-                  <input 
-                    type="text" 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by Brand Name or Category..." 
-                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
-                  />
-                  <button 
-                    onClick={() => setSearchQuery(searchQuery)}
-                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                  >
-                    Search
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Product name ticker below banner */}
+      <div className="w-full overflow-hidden py-2 border-b border-white/5 bg-[#000435] relative">
+        <motion.div 
+           animate={{ x: [0, -1500] }}
+           transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+           className="flex whitespace-nowrap gap-8 px-6"
+        >
+           {[
+             'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
+             '4K Drone', 'Mechanical Keyboard', 'DSLR Camera', 'Portable Speaker', 
+             'Fitness Tracker', 'Power Bank',
+             'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
+             '4K Drone', 'Mechanical Keyboard', 'DSLR Camera', 'Portable Speaker', 
+             'Fitness Tracker', 'Power Bank',
+           ].map((name, i) => (
+             <span key={i} className="text-base lg:text-xl font-black text-white/10 italic uppercase tracking-tighter">
+                {name}
+             </span>
+           ))}
+        </motion.div>
       </div>
 
       {/* ACTIVE FILTER CHIPS ROW */}
@@ -823,7 +766,15 @@ export function CategoriesPage() {
         onClearAll={handleClearAllFilters}
       />
 
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
+      <StickySectionNav
+        sections={sectionNavItems}
+        activeId={activeSectionId}
+        onNavigate={scrollToSection}
+        allLabel="Categories"
+        profileLabel="Category browse"
+      />
+
+      <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         {/* LEFT COLUMN: FULL FILTER PANEL */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           {/* LEFT COLUMN SEARCH BAR */}
@@ -840,125 +791,118 @@ export function CategoriesPage() {
             />
           </div>
 
-          <QuickAccessCard />
           <div id="categories-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
             {renderFilterPanel()}
           </div>
         </aside>
 
-        <div id="categories-main-display" className="scroll-mt-36 min-w-0 pb-10">
+        <div id="categories-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10">
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center justify-center w-full">
+            <div className={CATEGORY_CARD_GRID}>
               {Array.from({ length: 12 }).map((_, idx) => (
                 <CategoryCardSkeleton key={idx} />
               ))}
             </div>
           ) : (
-            <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center justify-center w-full">
-              {filteredCategoriesList.map((cat, i) => {
-                const IconComponent = (LucideIcons as any)[cat.icon] || LucideIcons.Package;
+            <div className={CATEGORY_CARD_GRID}>
+              {filteredCategoriesList.map((cat) => {
                 const isExpanded = expandedCategory === cat.name;
-                
+
                 return (
                   <React.Fragment key={cat.name}>
-                    <motion.div 
-                      layout="position"
+                    <motion.div
                       onClick={() => handleCategoryClick(cat.name)}
                       className={cn(
-                        "bg-white border rounded-[5px] p-4 flex flex-col items-start transition-all duration-200 cursor-pointer group relative overflow-hidden w-full lg:w-[237.328px]",
-                        isExpanded 
-                          ? "border-[#E8500A] ring-4 ring-[#E8500A]/5 z-20 shadow-sm" 
-                          : "border-[#e8edf2] hover:border-gray-200/90 hover:scale-[1.01]"
+                        'choosify-category-card bg-white border rounded-[5px] p-4 flex flex-col items-start transition-[border-color,box-shadow] duration-200 cursor-pointer group relative overflow-hidden',
+                        isExpanded
+                          ? 'border-[#E8500A] ring-4 ring-[#E8500A]/5 z-20 shadow-sm'
+                          : 'border-[#e8edf2] hover:border-gray-200/90',
                       )}
+                      whileTap={{ scale: 0.99 }}
+                      transition={{ duration: 0.12 }}
                     >
-                      {/* Perfect white circle around the icon styled like mockup */}
                       <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
                         {getCategoryIconComponent(cat.name, cat.icon)}
                       </div>
-                      
+
                       <div className="w-full text-left">
-                        <h4 className="font-medium text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-tight mb-1 uppercase tracking-tight">
+                        <h4 className="font-medium text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-tight mb-1 uppercase tracking-tight line-clamp-2">
                           {cat.name}
                         </h4>
                         <p className="text-[10px] text-red-500 font-semibold leading-none uppercase font-mono">
                           {cat.count} Products
                         </p>
                       </div>
-                    
-                    {isExpanded && (
-                      <motion.div 
-                        layoutId="arrow"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-r border-b border-[#e8edf2]"
-                      />
-                    )}
-                  </motion.div>
 
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        layout
-                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                        animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
-                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                        transition={{ 
-                          height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] },
-                          opacity: { duration: 0.3 }
-                        }}
-                        className="col-span-1 sm:col-span-2 lg:col-span-full xl:col-span-full bg-white shadow-md rounded-[5px] p-6 md:p-8 border border-[#e8edf2] overflow-hidden z-10 text-left"
-                      >
-                        <motion.div 
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.1 }}
-                          className="flex items-center justify-between pb-4 mb-6 border-b border-gray-100"
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.85 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.15, ease: 'easeOut' }}
+                          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-r border-b border-[#e8edf2]"
+                        />
+                      )}
+                    </motion.div>
+
+                    <AnimatePresence mode="sync">
+                      {isExpanded && (
+                        <motion.div
+                          key={`subpanel-${cat.name}`}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 4 }}
+                          transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+                          className="col-span-full bg-white shadow-md rounded-[5px] p-6 md:p-8 border border-[#e8edf2] overflow-hidden z-10 text-left mt-4"
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
-                              {getCategoryIconComponent(cat.name, cat.icon)}
-                            </div>
-                            <div className="text-left">
-                              <h2 className="text-base font-semibold text-[#1a1a2e] uppercase tracking-tight">
-                                {cat.name} <span className="text-[#E8500A]">SUBCATEGORIES</span>
-                              </h2>
-                              <p className="text-[10px] text-[#8a9bb0] font-semibold uppercase tracking-[0.2em] mt-1">
-                                {cat.count} Products Across {Math.floor(cat.count/15)} Brands - Curated Recommendations
-                              </p>
-                            </div>
-                          </div>
-                          
-                          {/* Easy closing interactive trigger */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setExpandedCategory(null);
-                            }}
-                            className="w-8 h-8 rounded-full border border-[#e8edf2] hover:border-[#E8500A]/30 flex items-center justify-center text-gray-400 hover:text-[#E8500A] transition-all hover:scale-105 active:scale-95 cursor-pointer bg-white"
-                            aria-label="Close subcategories"
+                          <motion.div
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.16, delay: 0.03, ease: 'easeOut' }}
+                            className="flex items-center justify-between pb-4 mb-6 border-b border-gray-100"
                           >
-                            <LucideIcons.X className="w-4 h-4" />
-                          </button>
-                        </motion.div>
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
+                                {getCategoryIconComponent(cat.name, cat.icon)}
+                              </div>
+                              <div className="text-left">
+                                <h2 className="text-base font-semibold text-[#1a1a2e] uppercase tracking-tight">
+                                  {cat.name} <span className="text-[#E8500A]">SUBCATEGORIES</span>
+                                </h2>
+                                <p className="text-[10px] text-[#8a9bb0] font-semibold uppercase tracking-[0.2em] mt-1">
+                                  {cat.count} Products Across {Math.floor(cat.count / 15)} Brands - Curated Recommendations
+                                </p>
+                              </div>
+                            </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                          {cat.subcategories.length > 0 ? (
-                            cat.subcategories.map((sub, j) => {
-                              return (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedCategory(null);
+                              }}
+                              className="w-8 h-8 rounded-full border border-[#e8edf2] hover:border-[#E8500A]/30 flex items-center justify-center text-gray-400 hover:text-[#E8500A] transition-all active:scale-95 cursor-pointer bg-white"
+                              aria-label="Close subcategories"
+                            >
+                              <LucideIcons.X className="w-4 h-4" />
+                            </button>
+                          </motion.div>
+
+                          <div className={CATEGORY_CARD_GRID}>
+                            {cat.subcategories.length > 0 ? (
+                              cat.subcategories.map((sub, j) => (
                                 <motion.div
-                                  initial={{ opacity: 0, scale: 0.95 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  transition={{ delay: 0.1 + (j * 0.03), duration: 0.3 }}
                                   key={sub.name}
-                                  className="bg-white border border-[#e8edf2] rounded-[5px] p-4 flex flex-col items-start hover:border-gray-200/90 hover:scale-[1.01] transition-all duration-200 cursor-pointer group text-left"
+                                  initial={{ opacity: 0, y: 6 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.14, delay: j * 0.012, ease: 'easeOut' }}
+                                  className="choosify-category-card bg-white border border-[#e8edf2] rounded-[5px] p-4 flex flex-col items-start hover:border-gray-200/90 transition-[border-color] duration-200 cursor-pointer group text-left"
                                 >
-                                  {/* Redesigned to use identical radius, borders, and rounded circular icons as popular categories */}
                                   <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
                                     {getCategoryIconComponent(sub.name, sub.icon)}
                                   </div>
-                                  
+
                                   <div className="w-full text-left">
-                                    <h4 className="font-medium text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-tight mb-1 uppercase tracking-tight">
+                                    <h4 className="font-medium text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-tight mb-1 uppercase tracking-tight line-clamp-2">
                                       {sub.name}
                                     </h4>
                                     <p className="text-[10px] text-red-500 font-semibold leading-none uppercase font-mono mt-1">
@@ -969,23 +913,22 @@ export function CategoriesPage() {
                                     </p>
                                   </div>
                                 </motion.div>
-                              );
-                            })
-                          ) : (
-                            <div className="col-span-full py-12 text-center">
-                              <LucideIcons.Construction className="mx-auto text-gray-200 mb-4" size={48} />
-                              <p className="text-gray-400 font-bold uppercase text-[10px] tracking-[0.4em]">Subcategories coming soon</p>
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </React.Fragment>
-              );
-            })}
-          </motion.div>
-        )}
+                              ))
+                            ) : (
+                              <div className="col-span-full py-12 text-center">
+                                <LucideIcons.Construction className="mx-auto text-gray-200 mb-4" size={48} />
+                                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-[0.4em]">Subcategories coming soon</p>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* RIGHT COLUMN: FOR BUSINESS & SELLERS CARD & SPONSORED AD */}

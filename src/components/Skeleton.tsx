@@ -141,13 +141,12 @@ export function ProductCardSkeleton({
     );
   }
 
-  // Default Grid layout: exactly mirrors regular card dimensions and padding
+  // Default Grid layout: mirrors regular card proportions in responsive grid
   return (
     <div 
-      className="bg-white rounded-[5px] p-2.5 border border-[#e8edf2] flex flex-col relative overflow-hidden animate-pulse shrink-0" 
-      style={{ width: '100%', maxWidth: '174px', height: '258px' }}
+      className="bg-white rounded-[5px] p-2.5 border border-[#e8edf2] flex flex-col relative overflow-hidden animate-pulse w-full max-w-full min-w-0 h-full self-stretch" 
     >
-      <div className="relative h-[105px] w-full bg-gray-55 rounded-[5px] shrink-0 p-2 flex items-center justify-center">
+      <div className="relative w-full aspect-[4/3] bg-gray-55 rounded-[5px] shrink-0 p-2 flex items-center justify-center">
         <Skeleton className="w-full h-full rounded-[5px]" />
       </div>
 
@@ -258,7 +257,7 @@ export function RecommendationCardSkeleton({
 
 export function CategoryCardSkeleton() {
   return (
-    <div className="bg-white border rounded-[5px] p-4 flex flex-col items-start relative overflow-hidden animate-pulse w-full lg:w-[237.328px] border-[#e8edf2]">
+    <div className="choosify-category-card bg-white border rounded-[5px] p-4 flex flex-col items-start relative overflow-hidden animate-pulse w-full border-[#e8edf2]">
       {/* Circle placeholder around icon */}
       <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center mb-4 shrink-0">
         <Skeleton className="w-4 h-4 rounded-full" />

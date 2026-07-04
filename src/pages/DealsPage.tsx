@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ProductCard } from '../components/ProductCard';
-import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ExternalLink, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle, ShieldCheck } from 'lucide-react';
+import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ExternalLink, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle, ShieldCheck, Flame } from 'lucide-react';
 import { PRODUCTS, BRANDS } from '../constants';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
-import { QuickAccessCard } from '../components/QuickAccessCard';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { PageHeroBanner } from '../components/PageHeroBanner';
+import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
+import { StickySectionNav } from '../components/StickySectionNav';
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 
 const PROMO_CODES = [
   { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
@@ -127,35 +130,7 @@ export function DealsPage() {
     sessionStorage.setItem('choosify_deals_filters', JSON.stringify(filters));
   }, [selectedCategory, dealType, minDiscount, activeTab]);
 
-  // ScrollSpy Active section detection for DealsPage major sections
-  React.useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 220; // Safe position matching offsets
-      
-      const brandDealsEl = document.getElementById('featured-brand-deals-section');
-      if (brandDealsEl) {
-        const top = brandDealsEl.getBoundingClientRect().top + window.pageYOffset;
-        const height = brandDealsEl.offsetHeight;
-        if (scrollPosition >= top && scrollPosition < top + height) {
-          setActiveTab('Brand Deals');
-          return;
-        }
-      }
-
-      const allDealsEl = document.getElementById('all-deals');
-      if (allDealsEl) {
-        const top = allDealsEl.getBoundingClientRect().top + window.pageYOffset;
-        const height = allDealsEl.offsetHeight;
-        if (scrollPosition >= top && scrollPosition < top + height) {
-          // If we scroll back up into all-deals, fallback to "All Deals" if user is currently on Brand Deals
-          setActiveTab(prev => prev === 'Brand Deals' ? 'All Deals' : prev);
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // ScrollSpy removed — section navigation handled by StickySectionNav
 
   const filteredProducts = React.useMemo(() => {
     let result = [...productSource];
@@ -219,7 +194,7 @@ export function DealsPage() {
   ];
 
   useRegisterPageFilters({
-    pageName: 'Brand Deals',
+    pageName: 'Deals',
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -324,83 +299,40 @@ export function DealsPage() {
     },
   }, [searchQuery, activeTab, selectedCategory, dealType, minDiscount]);
 
+  const dealsSectionNavItems = useMemo(
+    () => [
+      { id: 'all-deals', label: 'All Deals', icon: <Flame size={13} /> },
+      { id: 'featured-brand-deals-section', label: 'Brand Deals', icon: <Award size={13} /> },
+    ],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(dealsSectionNavItems);
+
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Standardized Centered Alignment */}
-      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
-        {/* Background Gradients matching other directory pages */}
-        <div className="absolute inset-0 hero-gradient" />
-        
-        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-center text-center relative z-10 animate-fade-in">
-          <div className="w-full flex flex-col justify-center">
-            {/* Breadcrumbs */}
-            <div className="flex items-center justify-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest mb-1 w-full">
-              <Link to="/" className="hover:text-white transition-colors">Home</Link>
-              <ChevronRight size={10} className="text-white/20" />
-              <span className="text-white">Deals & Promotions</span>
+      <PageHeroBanner pageKey="deals" />
+
+      {/* Flash sale countdown strip below banner */}
+      <div className="w-full bg-[#000435] border-b border-white/5 py-2 px-6">
+        <div className="max-w-[1440px] mx-auto flex flex-row items-center justify-center gap-4 md:gap-6 flex-wrap">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[12px] py-1 px-2.5 flex items-center gap-3.5 shadow-lg shrink-0">
+            <div className="flex items-center gap-1.5">
+              <Zap size={10} className="text-orange-primary fill-orange-primary animate-pulse" />
+              <span className="text-[7px] font-black text-orange-primary uppercase tracking-[0.15em] italic">ENDS IN</span>
             </div>
-
-            <div className="flex items-center justify-center gap-4 flex-wrap">
-              <div className="bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-full mb-1 uppercase tracking-[0.2em] shadow-md shadow-orange-primary/30 italic inline-block w-fit">
-                FLASH SALE EVENT
-              </div>
-              
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter mb-1 leading-none text-center">
-                HOTTEST <span className="text-orange-primary">DEALS</span> TODAY
-              </h1>
-            </div>
-
-            <p className="text-gray-400 text-[9px] lg:text-[11px] font-medium leading-normal mb-1.5 max-w-2xl text-center mx-auto">
-              Discover verified limited-time promotions, exclusive seller invoice discounts, and real-time flash sales happening right now across Bangladesh.
-            </p>
-
-            {/* Statistics/Timer Row - Centered inside Hero container */}
-            <div className="flex flex-row items-center justify-center gap-4 md:gap-6 w-full mt-0.5">
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[12px] py-1 px-2.5 flex items-center gap-3.5 shadow-lg shrink-0">
-                <div className="flex items-center gap-1.5">
-                  <Zap size={10} className="text-orange-primary fill-orange-primary animate-pulse" />
-                  <span className="text-[7px] font-black text-orange-primary uppercase tracking-[0.15em] italic">ENDS IN</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <FlashDealCountdown validUntil={(filteredProducts[0] as any)?.dealValidUntil} />
-                </div>
-              </div>
-
-              <button 
-                onClick={() => navigate('/post-offer')}
-                className="group flex items-center gap-1.5 px-3 py-1 bg-white rounded-full transition-all hover:scale-105 hover:shadow-md active:scale-95 text-navy cursor-pointer"
-              >
-                <div className="w-4 h-4 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
-                  <ExternalLink size={8} />
-                </div>
-                <span className="text-[8px] font-black text-navy uppercase tracking-[0.12em] italic">Post Your Deals</span>
-              </button>
-            </div>
-
-            {/* SEARCH BAR — placed inside hero section at bottom */}
-            <div className="relative w-full max-w-2xl mx-auto mt-6">
-              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
-                <div className="flex items-center bg-white rounded-full">
-                  <div className="pl-4 text-[#E8500A] shrink-0">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input 
-                    type="text" 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search deals, brands, categories..." 
-                    className="w-full h-10 bg-transparent outline-none pl-3 pr-24 text-navy text-xs font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none animate-none" 
-                  />
-                  <button 
-                    onClick={() => setSearchQuery(searchQuery)}
-                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                  >
-                    Search
-                  </button>
-                </div>
-              </div>
+            <div className="flex items-center gap-1.5">
+              <FlashDealCountdown validUntil={(filteredProducts[0] as any)?.dealValidUntil} />
             </div>
           </div>
+          <button 
+            onClick={() => navigate('/post-offer')}
+            className="group flex items-center gap-1.5 px-3 py-1 bg-white rounded-full transition-all hover:scale-105 hover:shadow-md active:scale-95 text-navy cursor-pointer"
+          >
+            <div className="w-4 h-4 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
+              <ExternalLink size={8} />
+            </div>
+            <span className="text-[8px] font-black text-navy uppercase tracking-[0.12em] italic">Post Your Deals</span>
+          </button>
         </div>
       </div>
 
@@ -434,8 +366,16 @@ export function DealsPage() {
           }}
         />
 
+        <StickySectionNav
+          sections={dealsSectionNavItems}
+          activeId={activeSectionId}
+          onNavigate={scrollToSection}
+          allLabel="Deals"
+          profileLabel="Deal hub"
+        />
+
         {/* Master Flex Column Structure below sticky bar */}
-        <div className="max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 relative">
+        <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
           
           {/* Left Sidebar */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
@@ -453,8 +393,6 @@ export function DealsPage() {
                />
              </div>
              
-             <QuickAccessCard />
-
              {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
              <div id="deals-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
                <FullSidebarFilterPanel
@@ -611,7 +549,7 @@ export function DealsPage() {
           </aside>
 
           {/* LEFT MAIN AREA */}
-          <div className="scroll-mt-36 min-w-0 pb-10 flex flex-col gap-10">
+          <div className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 flex flex-col gap-10">
             
             {/* Featured Deals Showcase Grid */}
             <section className="w-full">
@@ -647,9 +585,9 @@ export function DealsPage() {
                  </div>
                  
                  {/* Small Cards Row */}
-                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
+                 <div className={cn(PRODUCT_CARD_GRID, "text-left")}>
                     {(filteredProducts.length > 1 ? filteredProducts : productSource).slice(1, 5).map((product) => (
-                       <div key={product.id} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
+                       <div key={product.id} className="w-full h-full">
                          <ProductCard 
                            product={{
                              ...product,
@@ -671,7 +609,7 @@ export function DealsPage() {
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic px-2 border-l-4 border-orange-primary">Browse All Handpicked Offers</p>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full text-left">
+              <div className={cn(PRODUCT_CARD_GRID, "text-left")}>
                 {activeTab === 'Promo Codes' ? (
                   promoCodes.map((promo) => (
                     <div key={promo.code} className="bg-white border border-gray-150 rounded-[5px] p-5 flex flex-col justify-between min-h-[180px] relative overflow-hidden shadow-sm group hover:border-[#E8500A]/30 transition-all duration-300">
@@ -708,7 +646,7 @@ export function DealsPage() {
                   ))
                 ) : (
                   (filteredProducts.length > 0 ? filteredProducts : productSource).slice(0, 12).map((product, idx) => (
-                    <div key={`${product.id}-${idx}`} className="w-full max-w-sm flex flex-col min-h-[270px] h-full">
+                    <div key={`${product.id}-${idx}`} className="w-full h-full">
                       <ProductCard 
                         product={{
                           ...product,
@@ -779,7 +717,7 @@ export function DealsPage() {
                 </div>
              </div>
              
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+             <div className={PRODUCT_CARD_GRID}>
                 {[brandSource[0], brandSource[1], brandSource[2], brandSource[8]].filter(Boolean).map((brand, i) => {
                   return (
                     <div 

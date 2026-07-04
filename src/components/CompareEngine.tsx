@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { 
   Zap, Info, Star, ShieldCheck, ShoppingBag, 
   ChevronDown, ChevronUp, Plus, X, Sparkles,
@@ -8,7 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel } from './FilterEngine';
+import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from './FilterEngine';
 import { useDashboard } from '../context/DashboardContext';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
@@ -856,70 +857,63 @@ export function CompareEngine() {
     selectedAIChoice, selectedRiskRating
   ]);
 
+  useRegisterPageFilters(
+    {
+      pageName: 'Compare',
+      renderSearch: null,
+      quickFilters: quickFiltersList,
+      renderFilters: null, // full filters live in the compare sidebar
+      activeFilterCount: activeChips.length,
+      onClearAll: handleClearAllFilters,
+    },
+    [quickFiltersList, activeChips.length],
+  );
+
   return (
     <div className="w-full bg-[#F8FAFC]">
-      {/* Compare Engine Elegant Hero Section */}
-      <div className="relative px-6 overflow-hidden text-center flex flex-col justify-center items-center h-[303px] border-b border-white/5">
-         <div className="absolute inset-0 hero-gradient" />
-         
-         <motion.div 
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative z-10 w-full max-w-7xl flex flex-col justify-center h-full"
-          >
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <span className="px-3 py-1 bg-orange-primary/10 border border-orange-primary/20 text-orange-primary text-[10px] font-black uppercase tracking-widest rounded-full flex items-center gap-1.5 animate-pulse">
-                <Sparkles size={12} /> Decision-Intelligence V2 Active
-              </span>
-            </div>
+      {/* Unified Compare Hero — title, matched columns, and decision profile in one section */}
+      <section className="relative w-full overflow-hidden choosify-dark-gradient border-b border-white/5">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.18),transparent_42%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
 
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white italic uppercase tracking-tighter leading-none mb-3">
-               COMPARE <span className="text-orange-primary">ENGINE</span>
-            </h2>
-            <p className="text-white/40 text-[9.5px] font-black uppercase tracking-[0.25em] italic max-w-2xl mx-auto mb-0">
-               State-of-the-art multi-dimensional matrix. Pivot parameters, analyze risk models, and compare verified choices.
-            </p>
-         </motion.div>
-      </div>
-
-      {/* Smart Reactive Columns Display below hero */}
-      {evaluatedMatchingColumns.length > 0 && (
-        <div className="w-full bg-[#05051A]/60 py-8 px-6 border-b border-white/5">
-          <div className={cn("grid grid-cols-1 gap-6 max-w-5xl mx-auto",
-            evaluatedMatchingColumns.length === 1 && "md:grid-cols-1 max-w-md",
-            evaluatedMatchingColumns.length === 2 && "md:grid-cols-2 max-w-3xl",
-            evaluatedMatchingColumns.length === 3 && "md:grid-cols-3",
-            evaluatedMatchingColumns.length >= 4 && "md:grid-cols-4 max-w-7xl"
-          )}>
-             {evaluatedMatchingColumns.map((p, idx) => (
-                <div key={p.id} className="relative">
-                   <div className={cn(
-                     "bg-[#0A0A26] border rounded-[5px] p-6 text-left group transition-all duration-300 flex flex-col justify-between h-44 relative overflow-hidden",
-                     p.matchesCriteria 
-                      ? p.isWinner 
-                        ? "border-orange-primary shadow-lg shadow-orange-primary/10" 
-                        : "border-white/10 hover:border-orange-primary/30"
-                      : "border-white/5 opacity-40 grayscale"
-                   )}>
+        <div className="relative z-10">
+          {evaluatedMatchingColumns.length > 0 && (
+            <div className="px-6 pt-8 pb-8">
+              <div className={cn("grid grid-cols-1 gap-6 max-w-5xl mx-auto",
+                evaluatedMatchingColumns.length === 1 && "md:grid-cols-1 max-w-md",
+                evaluatedMatchingColumns.length === 2 && "md:grid-cols-2 max-w-3xl",
+                evaluatedMatchingColumns.length === 3 && "md:grid-cols-3",
+                evaluatedMatchingColumns.length >= 4 && "md:grid-cols-4 max-w-7xl"
+              )}>
+                {evaluatedMatchingColumns.map((p) => (
+                  <div key={p.id} className="relative">
+                    <div className={cn(
+                      "bg-white/5 backdrop-blur-sm border rounded-[5px] p-6 text-left group transition-all duration-300 flex flex-col justify-between h-44 relative overflow-hidden",
+                      p.matchesCriteria
+                        ? p.isWinner
+                          ? "border-orange-primary shadow-lg shadow-orange-primary/10"
+                          : "border-white/10 hover:border-orange-primary/30"
+                        : "border-white/5 opacity-40 grayscale"
+                    )}>
                       {p.isWinner && (
-                         <div className="absolute -top-1.5 right-4 bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-b-[4px] uppercase tracking-widest z-20 shadow-md">
-                            AI Winner
-                         </div>
+                        <div className="absolute -top-1.5 right-4 bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-b-[4px] uppercase tracking-widest z-20 shadow-md">
+                          AI Winner
+                        </div>
                       )}
                       {!p.matchesCriteria && (
-                         <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 text-[8px] font-black px-2 py-0.5 rounded-[3px] uppercase tracking-wider z-20">
-                            Filtered Out
-                         </div>
+                        <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 text-[8px] font-black px-2 py-0.5 rounded-[3px] uppercase tracking-wider z-20">
+                          Filtered Out
+                        </div>
                       )}
-                      
+
                       <div className="flex items-center gap-4 mb-4">
-                         <div className="w-14 h-14 rounded overflow-hidden bg-white/5 border border-white/10 p-1 shrink-0 flex items-center justify-center">
-                            <img src={p.image} className="w-full h-full object-cover rounded-[3px]" alt={p.name} />
-                         </div>
-                         <div className="min-w-0">
-                            <span className="text-orange-primary text-[8px] font-black uppercase italic tracking-widest block leading-none mb-1">{p.brand}</span>
-                            <h4 className="text-white text-xs font-bold italic line-clamp-2 leading-snug">{p.name}</h4>
-                         </div>
+                        <div className="w-14 h-14 rounded overflow-hidden bg-white/5 border border-white/10 p-1 shrink-0 flex items-center justify-center">
+                          <img src={p.image} className="w-full h-full object-cover rounded-[3px]" alt={p.name} />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-orange-primary text-[8px] font-black uppercase italic tracking-widest block leading-none mb-1">{p.brand}</span>
+                          <h4 className="text-white text-xs font-bold italic line-clamp-2 leading-snug">{p.name}</h4>
+                        </div>
                       </div>
 
                       <div>
@@ -928,54 +922,53 @@ export function CompareEngine() {
                           💡 {p.highlightText || 'Algorithmic assessment matched.'}
                         </p>
                       </div>
-                   </div>
-                </div>
-             ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="choosify-sticky-section-nav sticky z-40 select-none border-t border-white/10 bg-[#000435]/85 backdrop-blur-md">
+            <div className="max-w-[1440px] mx-auto px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 whitespace-nowrap">DECISION PROFILE:</span>
+                <div className="w-2 h-2 rounded-full bg-orange-primary animate-pulse" />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { id: 'product', label: 'Product Compare', icon: <ShoppingBag size={13} /> },
+                  { id: 'brand', label: 'Brand Compare', icon: <ShieldCheck size={13} /> },
+                  { id: 'creator', label: 'Creator Intel', icon: <Users size={13} /> },
+                  { id: 'guide', label: 'Buying Guides', icon: <BookOpen size={13} /> },
+                  { id: 'ai', label: 'AI Smart Mode', icon: <Sparkles size={13} /> }
+                ].map(modeOpt => {
+                  const isActive = compareMode === modeOpt.id;
+                  return (
+                    <button
+                      key={modeOpt.id}
+                      onClick={() => {
+                        setCompareMode(modeOpt.id as CompareMode);
+                        triggerSoftLoading();
+                      }}
+                      className={cn(
+                        "px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer",
+                        isActive
+                          ? "bg-orange-primary text-white shadow-md shadow-orange-primary/20 scale-105"
+                          : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white"
+                      )}
+                    >
+                      {modeOpt.icon}
+                      <span>{modeOpt.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
-      )}
-
-      {/* ==========================================
-          LAYER 1: DECISION FILTER CONTROL BAR (NEW CORE LAYER)
-          ========================================== */}
-      <div className="w-full bg-[#05051A] border-y border-white/5 sticky top-16 z-40 select-none">
-        <div className="max-w-[1440px] mx-auto px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 whitespace-nowrap">DECISION PROFILE:</span>
-            <div className="w-2 h-2 rounded-full bg-orange-primary animate-pulse" />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {[
-              { id: 'product', label: 'Product Compare', icon: <ShoppingBag size={13} /> },
-              { id: 'brand', label: 'Brand Compare', icon: <ShieldCheck size={13} /> },
-              { id: 'creator', label: 'Creator Intel', icon: <Users size={13} /> },
-              { id: 'guide', label: 'Buying Guides', icon: <BookOpen size={13} /> },
-              { id: 'ai', label: 'AI Smart Mode', icon: <Sparkles size={13} /> }
-            ].map(modeOpt => {
-              const isActive = compareMode === modeOpt.id;
-              return (
-                <button
-                  key={modeOpt.id}
-                  onClick={() => {
-                    setCompareMode(modeOpt.id as CompareMode);
-                    triggerSoftLoading();
-                  }}
-                  className={cn(
-                    "px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer",
-                    isActive 
-                      ? "bg-orange-primary text-white shadow-md shadow-orange-primary/20 scale-105" 
-                      : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white"
-                  )}
-                >
-                  {modeOpt.icon}
-                  <span>{modeOpt.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      </section>
 
       {/* QUICK FILTER BAR Short-cuts */}
       <QuickFilterBar
@@ -990,7 +983,7 @@ export function CompareEngine() {
       />
 
       {/* CORE THREE-COLUMN PERFORMANCE LAYOUT */}
-      <div className="max-w-[1440px] mx-auto px-6 py-8 w-full grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_285px] xl:grid-cols-[300px_minmax(0,1fr)_320px] gap-6 items-start relative">
+      <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-8 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
          
          {/* LEFT COLUMN: SYSTEM ADVANCED DECISION PANEL */}
          <aside className="lg:sticky lg:top-36 bg-transparent h-auto pb-10 flex flex-col gap-4">
@@ -1311,7 +1304,7 @@ export function CompareEngine() {
          </aside>
 
          {/* MIDDLE COLUMN: COMPARATIVE CORE (Side-by-side matrices table) */}
-         <div className="space-y-6 relative">
+         <div className="choosify-middle-feed space-y-6 relative min-w-0">
             
             {isLoading && (
               <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] z-50 flex items-center justify-center rounded-[32px] h-96">

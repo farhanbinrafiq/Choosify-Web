@@ -28,7 +28,8 @@ const GuideDetailPage = lazy(() => import('./pages/GuideDetailPage').then(m => (
 const GuideProductsPage = lazy(() => import('./pages/GuideProductsPage').then(m => ({ default: m.GuideProductsPage })));
 const LoginSignUpPage = lazy(() => import('./pages/LoginSignUpPage').then(m => ({ default: m.LoginSignUpPage })));
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
-const CustomerFavoritePage = lazy(() => import('./pages/CustomerFavoritePage').then(m => ({ default: m.CustomerFavoritePage })));
+const WhatsOnPage = lazy(() => import('./pages/WhatsOnPage').then(m => ({ default: m.WhatsOnPage })));
+const BrandPostDetailPage = lazy(() => import('./pages/BrandPostDetailPage').then(m => ({ default: m.BrandPostDetailPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
 const CreatorsPage = lazy(() => import('./pages/CreatorsPage').then(m => ({ default: m.CreatorsPage })));
 const CreatorProfilePage = lazy(() => import('./pages/CreatorProfilePage').then(m => ({ default: m.CreatorProfilePage })));
@@ -209,7 +210,9 @@ function AppContent() {
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
             <Route path="/login" element={<LoginSignUpPage />} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/customer-favorite" element={<PageWrapper><CustomerFavoritePage /></PageWrapper>} />
+            <Route path="/whats-on" element={<PageWrapper><WhatsOnPage /></PageWrapper>} />
+            <Route path="/whats-on/:slug" element={<PageWrapper><BrandPostDetailPage /></PageWrapper>} />
+            <Route path="/customer-favorite" element={<Navigate to="/whats-on" replace />} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
             <Route path="/creators" element={<PageWrapper><CreatorsPage /></PageWrapper>} />
             <Route path="/creators/:id" element={<PageWrapper><CreatorProfilePage /></PageWrapper>} />
