@@ -257,14 +257,10 @@ export function RecommendationCardSkeleton({
 
 export function CategoryCardSkeleton() {
   return (
-    <div className="choosify-category-card bg-white border rounded-[5px] p-4 flex flex-col items-start relative overflow-hidden animate-pulse w-full border-[#e8edf2]">
-      {/* Circle placeholder around icon */}
-      <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center mb-4 shrink-0">
-        <Skeleton className="w-4 h-4 rounded-full" />
-      </div>
-      
-      <div className="w-full text-left space-y-2">
-        <Skeleton className="h-3 w-2/3 rounded-sm" />
+    <div className="choosify-category-photo-card choosify-category-card bg-white border rounded-[5px] flex flex-col overflow-hidden animate-pulse w-full border-[#e8edf2] p-0">
+      <div className="w-full aspect-[4/3] bg-gray-100" />
+      <div className="w-full px-3 py-3 border-t border-[#e8edf2] space-y-2">
+        <Skeleton className="h-3 w-4/5 rounded-sm" />
         <Skeleton className="h-2 w-1/3 rounded-sm" />
       </div>
     </div>

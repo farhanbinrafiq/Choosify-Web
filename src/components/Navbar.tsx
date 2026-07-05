@@ -19,8 +19,10 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartAnchorEl, setCartAnchorEl] = useState<HTMLElement | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,9 +69,12 @@ export function Navbar() {
     }
   }, [location, setNotifications]);
 
-  // Close mobile menu on route change
+  // Close mobile menus on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsMobileProfileOpen(false);
+    setIsUserMenuOpen(false);
+    setIsCartOpen(false);
   }, [location.pathname]);
 
   // Handle clicking outside profile menu dropdown
@@ -85,7 +90,14 @@ export function Navbar() {
     };
   }, []);
 
-  const activeCartCount = retailCart.length;
+  const activeCartCount = retailCart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const openCartPreview = (e: React.MouseEvent<HTMLButtonElement>) => {
+    closeAllMobileOverlays();
+    setIsUserMenuOpen(false);
+    setCartAnchorEl(e.currentTarget);
+    setIsCartOpen((open) => !open);
+  };
 
   const navItems = siteConfig?.navigation?.length
     ? [...siteConfig.navigation].sort((a, b) => a.order - b.order)
@@ -124,7 +136,25 @@ export function Navbar() {
 
   const goToLogin = (tab: 'sign-in' | 'sign-up' = 'sign-in') => {
     setIsMobileMenuOpen(false);
+    setIsMobileProfileOpen(false);
     navigate('/login', { state: { tab, from: location.pathname } });
+  };
+
+  const closeAllMobileOverlays = () => {
+    setIsMobileMenuOpen(false);
+    setIsMobileProfileOpen(false);
+  };
+
+  const openMobileNavMenu = () => {
+    setIsMobileProfileOpen(false);
+    setIsUserMenuOpen(false);
+    setIsMobileMenuOpen((open) => !open);
+  };
+
+  const openMobileProfileMenu = () => {
+    setIsMobileMenuOpen(false);
+    setIsUserMenuOpen(false);
+    setIsMobileProfileOpen((open) => !open);
   };
 
   const dashboardMiniMenu: Array<{ label: string; path: string; icon: any; tab?: string; dividerAbove?: boolean }> = [
@@ -135,6 +165,22 @@ export function Navbar() {
     { label: 'Notifications', path: '/dashboard', tab: 'notifications', icon: Bell },
     { label: 'Settings', path: '/dashboard', tab: 'settings', icon: Settings },
   ];
+
+  const navigateProfileItem = (item: (typeof dashboardMiniMenu)[number]) => {
+    setIsUserMenuOpen(false);
+    setIsMobileProfileOpen(false);
+    if (item.tab === 'notifications') {
+      navigate('/dashboard?tab=notifications');
+    } else if (item.tab) {
+      navigate(item.path, { state: { activeTab: item.tab } });
+    } else {
+      navigate(item.path);
+    }
+  };
+
+  const profilePrimaryLinks = dashboardMiniMenu.slice(0, 3);
+  const profileSecondaryLinks = dashboardMiniMenu.slice(3);
+  const defaultAvatar = 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png';
 
   const getLinkClass = (path: string) => {
     const isActive = path === '/' 
@@ -162,8 +208,18 @@ export function Navbar() {
     <>
       <header className="w-full min-w-0 z-50 sticky top-0 shadow-2xl" id="main-navbar">
         {/* Row 1 — Logo, prominent search, account actions (Amazon-style top bar) */}
-        <nav className="choosify-dark-gradient text-white h-14 sm:h-16 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 xl:px-8 border-b border-white/5">
+        <nav className="choosify-dark-gradient text-white h-14 sm:h-16 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 xl:px-8 border-b border-white/5 lg:border-b-0">
         
+        {/* Mobile hamburger — left side */}
+        <button
+          type="button"
+          onClick={openMobileNavMenu}
+          className="lg:hidden w-10 h-10 flex shrink-0 items-center justify-center text-white/70 hover:text-white hover:bg-white/5 rounded-full border border-white/10 bg-white/5 transition-all relative z-[60] hamburger"
+          aria-label="Toggle navigation menu"
+        >
+          <Menu size={20} className={cn("transition-transform duration-300", isMobileMenuOpen && "rotate-90")} />
+        </button>
+
         {/* LOGO SECTOR */}
         <div className="flex items-center shrink-0">
           <Link to="/" className="flex flex-col items-center group" aria-label="Choosify Home">
@@ -187,21 +243,40 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Search — capped width so cart / saved / messages stay visible */}
-        <div className="flex-1 min-w-0 flex items-center justify-center px-1.5 sm:px-2 lg:px-3 overflow-hidden">
-          <div className="w-full min-w-[7.5rem] max-w-[11rem] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg relative z-[55]">
+        {/* Search + mobile cart */}
+        <div className="flex-1 min-w-0 flex items-center justify-end sm:justify-stretch px-1 sm:px-3 md:px-4 lg:px-5">
+          <div className="flex items-center gap-1.5 sm:flex-1 sm:min-w-0 sm:gap-0">
             <GlobalSearchBar
               initialValue={searchQuery}
-              placeholder="Search products, brands..."
+              placeholder="Search products, brands, creators..."
               onSubmit={(val) => {
                 setSearchQuery(val);
                 navigate(`/search?q=${encodeURIComponent(val)}`);
               }}
               variant="hero"
+              layout="navbar-fluid"
               enableSuggestions
-              className="w-full choosify-navbar-hero-search"
+              className="min-w-0 sm:w-full choosify-navbar-hero-search relative z-[55]"
               submitLabel="Search"
+              onMobileExpandedChange={(expanded) => {
+                if (expanded) closeAllMobileOverlays();
+              }}
             />
+            <button
+              type="button"
+              onClick={openCartPreview}
+              className="sm:hidden relative w-10 h-10 shrink-0 flex items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+              aria-label="Shopping cart"
+              aria-expanded={isCartOpen}
+              title="Shopping Cart"
+            >
+              <ShoppingBag size={20} />
+              {activeCartCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 text-white text-[8px] font-black bg-orange-primary rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">
+                  {activeCartCount > 9 ? '9+' : activeCartCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
@@ -212,10 +287,10 @@ export function Navbar() {
           <div className="hidden sm:flex items-center gap-2 xl:gap-4 border-r border-[#ffffff1a] pr-2 xl:pr-5 shrink-0">
             <button 
               type="button"
-              onClick={() => {
-                navigate('/cart/retail');
-              }}
+              onClick={openCartPreview}
               className="relative text-white/60 hover:text-white transition-colors"
+              aria-label="Shopping cart"
+              aria-expanded={isCartOpen}
               title="Shopping Cart"
             >
               <ShoppingBag size={20} className="transition-colors" />
@@ -282,27 +357,21 @@ export function Navbar() {
           
           {isLoggedIn ? (
             <div className="relative profile-avatar" ref={profileMenuRef}>
-              <div 
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} 
-                className="flex items-center gap-3 group cursor-pointer animate-in fade-in"
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.matchMedia('(min-width: 1024px)').matches) {
+                    setIsUserMenuOpen(!isUserMenuOpen);
+                    return;
+                  }
+                  openMobileProfileMenu();
+                }}
+                className="flex items-center gap-3 group cursor-pointer animate-in fade-in bg-transparent border-0 p-0"
+                aria-label="Open account menu"
               >
-                <div 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (isLoggedIn) {
-                      navigate('/dashboard');
-                    } else {
-                      navigate('/login');
-                    }
-                  }}
-                  className="w-11 h-11 lg:w-10 lg:h-10 rounded-full border-2 border-orange-primary overflow-hidden group-hover:scale-105 transition-all cursor-pointer nav-avatar hover:opacity-80 flex items-center justify-center bg-white/5"
-                  role="button"
-                  aria-label="Go to my dashboard"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { if (isLoggedIn) navigate('/dashboard'); else navigate('/login'); } }}
-                >
+                <div className="w-10 h-10 rounded-full border-2 border-orange-primary overflow-hidden group-hover:scale-105 transition-all cursor-pointer nav-avatar hover:opacity-80 flex items-center justify-center bg-white/5 shrink-0">
                   <img 
-                    src={currentUser?.avatar || "https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png"} 
+                    src={currentUser?.avatar || defaultAvatar} 
                     className="w-full h-full object-cover" 
                     alt="Profile" 
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -311,23 +380,23 @@ export function Navbar() {
                 <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block italic text-white/70 group-hover:text-white transition-colors">
                   Hi, {currentUser?.name?.split(' ')[0] || 'You'}
                 </span>
-              </div>
+              </button>
 
               <AnimatePresence>
                 {isUserMenuOpen && (
                   <>
-                    <div className="fixed inset-0 z-[-1]" onClick={() => setIsUserMenuOpen(false)} />
+                    <div className="fixed inset-0 z-[-1] hidden lg:block" onClick={() => setIsUserMenuOpen(false)} />
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute right-0 mt-4 choosify-dark-gradient border border-white/10 rounded-2xl shadow-2xl p-4 z-50 overflow-hidden min-w-[240px]"
+                      className="absolute right-0 mt-4 choosify-dark-gradient border border-white/10 rounded-2xl shadow-2xl p-4 z-50 overflow-hidden min-w-[240px] hidden lg:block"
                     >
                       <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 blur-2xl rounded-full" />
                       
                       <div className="flex items-center gap-3 p-3 mb-4 bg-white/5 rounded-xl border border-white/5">
                         <img 
-                          src={currentUser?.avatar || "https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png"} 
+                          src={currentUser?.avatar || defaultAvatar} 
                           className="w-10 h-10 rounded-full object-cover border border-orange-primary/30" 
                           alt="" 
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -345,16 +414,7 @@ export function Navbar() {
                               <div className="my-1 border-t border-white/5" />
                             )}
                             <button
-                              onClick={() => {
-                                setIsUserMenuOpen(false);
-                                if (item.tab === 'notifications') {
-                                  navigate('/dashboard?tab=notifications');
-                                } else if (item.tab) {
-                                  navigate(item.path, { state: { activeTab: item.tab } });
-                                } else {
-                                  navigate(item.path);
-                                }
-                              }}
+                              onClick={() => navigateProfileItem(item)}
                               className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-white hover:bg-white/5 rounded-xl transition-all group"
                             >
                               <div className="relative flex items-center justify-center">
@@ -412,33 +472,17 @@ export function Navbar() {
             </div>
           )}
 
-          {/* MODERN MOBILE HAMBURGER BUTTON (lg:hidden, far right) */}
-          <button
-            type="button"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden w-11 h-11 flex shrink-0 items-center justify-center text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all relative z-[60] hamburger"
-            aria-label="Toggle navigation menu"
-          >
-            <Menu size={22} className={cn("transition-transform duration-300", isMobileMenuOpen && "rotate-90")} />
-          </button>
         </div>
         
         </nav>
 
-        {/* Row 2 — Category / section strip below navbar (Amazon-style) */}
-        <div className="choosify-navbar-categories choosify-dark-gradient border-b border-white/5 text-white">
+        {/* Row 2 — Category strip (desktop only) */}
+        <div className="choosify-navbar-categories choosify-dark-gradient border-b border-white/5 text-white hidden lg:block">
           <div
             ref={categoryStripRef}
             {...categoryStripProps}
             className="choosify-touch-scroll-row flex items-center gap-0 overflow-x-auto no-scrollbar px-2 sm:px-4 lg:px-6 xl:px-8 max-w-[100vw]"
           >
-            <Link
-              to="/categories"
-              className="inline-flex items-center gap-1.5 shrink-0 px-3 py-2.5 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white/90 hover:text-white hover:bg-white/5 border-r border-white/10 transition-colors"
-            >
-              <Menu size={14} className="text-[#FF6B00]" />
-              <span className="hidden sm:inline">All</span>
-            </Link>
             {renderNavLinks((path) => {
               const isActive =
                 path === '/'
@@ -455,147 +499,84 @@ export function Navbar() {
         </div>
       </header>
 
-      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        anchorEl={cartAnchorEl}
+      />
 
-      {/* MOBILE / TABLET SLIDE-OUT HAMBURGER MENU */}
+      {/* MOBILE NAV — left slide (sections / categories) */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm lg:hidden"
             />
-            {/* Slide-out Menu Panel */}
             <motion.div
-              initial={{ x: '100%' }}
+              initial={{ x: '-100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '100%' }}
+              exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] h-full z-[101] shadow-2xl p-6 flex flex-col justify-between overflow-y-auto border-l choosify-dark-gradient border-white/5 text-white"
+              className="fixed top-0 left-0 bottom-0 w-80 max-w-[85vw] h-full z-[101] shadow-2xl p-6 flex flex-col justify-between overflow-y-auto border-r choosify-dark-gradient border-white/5 text-white lg:hidden"
             >
-              <div className="flex flex-col gap-6">
-                {/* Header */}
+              <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <span className="text-sm font-black uppercase tracking-widest text-[#FF5B00] italic">Sourcing Menu</span>
-                  <button 
+                  <span className="text-sm font-black uppercase tracking-widest text-[#FF5B00] italic">Browse</span>
+                  <button
+                    type="button"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 text-white/60 hover:text-white hover:bg-white/5 rounded-full transition-all"
+                    className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5 rounded-full border border-white/10 transition-all"
+                    aria-label="Close menu"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
-                {/* Sourcing/Search on Mobile — primary search lives in top navbar */}
-                <div className="w-full lg:hidden">
-                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-2">
-                    Use the search bar above to find products & brands
-                  </p>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Sections</span>
+                  {navItems ? (
+                    navItems.map((item) => (
+                      <Link
+                        key={item.id}
+                        to={item.path}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={getMobileLinkClass(item.path)}
+                      >
+                        <span className="italic">{item.label}</span>
+                      </Link>
+                    ))
+                  ) : (
+                    PRIMARY_NAV_ITEMS.map((item) => (
+                      <Link
+                        key={item.id}
+                        to={item.path}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={getMobileLinkClass(item.path)}
+                      >
+                        <span className="italic">{item.labelWide || item.label}</span>
+                      </Link>
+                    ))
+                  )}
                 </div>
 
-                {/* Quick links stream */}
-                <div className="flex flex-col gap-3">
-                  <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Explore Sections</span>
-                  {PRIMARY_NAV_ITEMS.map((item) => (
-                    <Link
-                      key={item.id}
-                      to={item.path}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={getMobileLinkClass(item.path)}
-                    >
-                      <span className="italic">{item.label}</span>
-                    </Link>
-                  ))}
-                  {isLoggedIn && (
-                    <Link to="/dashboard?tab=notifications" onClick={() => setIsMobileMenuOpen(false)} className={getMobileLinkClass('/dashboard')}>
-                      <div className="flex items-center gap-3 w-full">
-                        <Bell size={16} />
-                        <span className="italic flex-1">Notifications</span>
-                        {unreadNotifCount > 0 && (
-                          <span className="w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
-                            {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                          </span>
-                        )}
-                      </div>
-                    </Link>
-                  )}
-                  
-                  <div className="h-px bg-white/10 my-1" />
-                  
-                  <Link to="/post-offer" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all justify-center">
-                    <span className="italic">Post Your Deal</span>
-                    <ChevronRight size={14} className="text-orange-primary" />
-                  </Link>
-                </div>
+                <div className="h-px bg-white/10" />
+
+                <Link
+                  to="/post-offer"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all justify-center"
+                >
+                  <span className="italic">Post Your Deal</span>
+                  <ChevronRight size={14} className="text-orange-primary" />
+                </Link>
               </div>
 
               <div className="pt-6 border-t border-white/10 flex flex-col gap-3">
-                {isLoggedIn ? (
-                  <>
-                    {/* User info row */}
-                    <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
-                      <img
-                        src="https://i.pravatar.cc/150?u=me"
-                        className="w-10 h-10 rounded-full object-cover border border-orange-primary/30 shrink-0"
-                        alt="Profile"
-                      />
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-black text-white italic uppercase truncate">
-                          {currentUser?.name || 'My Account'}
-                        </p>
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">
-                          Choosify Member
-                        </p>
-                      </div>
-                    </div>
-                    {/* Quick links */}
-                    <Link
-                      to="/dashboard"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
-                    >
-                      <User size={14} className="text-orange-primary" />
-                      <span className="italic">My Dashboard</span>
-                    </Link>
-                    <Link
-                      to="/profile/orders"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
-                    >
-                      <Package size={14} className="text-orange-primary" />
-                      <span className="italic">My Orders</span>
-                    </Link>
-                    <Link
-                      to="/messages"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
-                    >
-                      <MessageSquare size={14} className="text-orange-primary" />
-                      <span className="italic">Messages</span>
-                      {unreadMsgCount > 0 && (
-                        <span className="ml-auto w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center">
-                          {unreadMsgCount}
-                        </span>
-                      )}
-                    </Link>
-                    {/* Sign out */}
-                    <button
-                      onClick={() => {
-                        setIsLoggedIn(false);
-                        setIsMobileMenuOpen(false);
-                        toast.success('Successfully logged out.');
-                        navigate('/');
-                      }}
-                      className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-red-400 hover:text-red-300 hover:bg-red-500/5 border border-red-500/10 transition-all cursor-pointer w-full text-left"
-                    >
-                      <LogIn size={14} className="rotate-180" />
-                      <span className="italic">Sign Out</span>
-                    </button>
-                  </>
-                ) : (
+                {!isLoggedIn && (
                   <>
                     <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest text-center">
                       Join Choosify Bangladesh
@@ -610,6 +591,122 @@ export function Navbar() {
                     </button>
                   </>
                 )}
+                <div className="text-center pt-2">
+                  <span className="text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest">
+                    Choosify Bangladesh • v1.0
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* MOBILE PROFILE — right slide (account) */}
+      <AnimatePresence>
+        {isMobileProfileOpen && isLoggedIn && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileProfileOpen(false)}
+              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm lg:hidden"
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] h-full z-[101] shadow-2xl p-6 flex flex-col justify-between overflow-y-auto border-l choosify-dark-gradient border-white/5 text-white lg:hidden"
+            >
+              <div className="flex flex-col gap-5">
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <span className="text-sm font-black uppercase tracking-widest text-[#FF5B00] italic">My Account</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileProfileOpen(false)}
+                    className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5 rounded-full border border-white/10 transition-all"
+                    aria-label="Close account menu"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                  <img
+                    src={currentUser?.avatar || defaultAvatar}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-orange-primary shrink-0"
+                    alt={currentUser?.name || 'Profile'}
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-white italic uppercase leading-tight truncate">
+                      {currentUser?.name || 'My Account'}
+                    </p>
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate mt-0.5">
+                      Choosify Member
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  {profilePrimaryLinks.map((item) => (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => navigateProfileItem(item)}
+                      className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/5 border border-white/5 transition-all cursor-pointer w-full text-left"
+                    >
+                      <item.icon size={14} className="text-orange-primary shrink-0" />
+                      <span className="italic flex-1">{item.label}</span>
+                      {item.icon === MessageSquare && unreadMsgCount > 0 && (
+                        <span className="w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                          {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="h-px bg-white/10" />
+
+                <div className="flex flex-col gap-2">
+                  {profileSecondaryLinks.map((item) => (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => navigateProfileItem(item)}
+                      className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/5 border border-white/5 transition-all cursor-pointer w-full text-left"
+                    >
+                      <div className="relative flex items-center justify-center shrink-0">
+                        <item.icon size={14} className="text-orange-primary" />
+                        {item.icon === Bell && unreadNotifCount > 0 && (
+                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-orange-primary text-white text-[7px] font-black rounded-full flex items-center justify-center leading-none">
+                            {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                          </span>
+                        )}
+                      </div>
+                      <span className="italic flex-1">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/10 flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLoggedIn(false);
+                    setIsMobileProfileOpen(false);
+                    toast.success('Successfully logged out.');
+                    navigate('/');
+                  }}
+                  className="flex items-center gap-3 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-red-400 hover:text-red-300 hover:bg-red-500/5 border border-red-500/10 transition-all cursor-pointer w-full text-left"
+                >
+                  <LogIn size={14} className="rotate-180" />
+                  <span className="italic">Sign Out</span>
+                </button>
                 <div className="text-center pt-2">
                   <span className="text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest">
                     Choosify Bangladesh • v1.0

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, HelpCircle } from 'lucide-react';
 import { FAQ_ITEMS } from '../data/faq';
+import { StaticPageHero } from '../components/StaticPageHero';
 
 export function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -12,7 +13,7 @@ export function FAQPage() {
 
   return (
     <div className="min-h-screen bg-[#F0F8FF] font-sans text-left">
-      <section className="relative flex h-[280px] items-center overflow-hidden border-b border-white/5 choosify-dark-gradient text-white">
+      <StaticPageHero className="h-[280px]">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30" />
         <div className="relative z-10 mx-auto w-full max-w-[1440px] px-6 md:px-[64px]">
           <div className="mb-6 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/40">
@@ -36,7 +37,7 @@ export function FAQPage() {
             </div>
           </div>
         </div>
-      </section>
+      </StaticPageHero>
 
       <section className="mx-auto max-w-[900px] px-6 py-12 md:px-[64px] md:py-16">
         <div className="space-y-4">

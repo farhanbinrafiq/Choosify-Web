@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
 import {
   BadgeCheck,
   ChevronRight,
@@ -132,12 +133,19 @@ export function LoginSignUpPage() {
   };
 
   const isSignUp = activeTab === 'sign-up';
+  const loginHeroRef = useRef<HTMLElement>(null);
 
   return (
     <div className="min-h-screen bg-white font-sans text-heading">
       <div className="grid min-h-[min(760px,72vh)] grid-cols-1 lg:grid-cols-2">
         {/* Left marketing panel */}
-        <section className="relative flex min-h-[420px] items-center overflow-hidden choosify-dark-gradient px-8 py-14 md:px-12 lg:px-16 lg:py-16">
+        <section
+          ref={loginHeroRef}
+          className={cn(
+            'relative flex min-h-[420px] items-center choosify-dark-gradient px-8 py-14 md:px-12 lg:px-16 lg:py-16',
+            HERO_SCROLL_CUE_PADDING,
+          )}
+        >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.2),transparent_45%)]" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.35),transparent_50%)]" />
 
@@ -170,6 +178,7 @@ export function LoginSignUpPage() {
               ))}
             </ul>
           </div>
+          <HeroScrollCue anchorRef={loginHeroRef} scrollTargetId="login-trust-section" />
         </section>
 
         {/* Right auth panel */}
@@ -287,7 +296,7 @@ export function LoginSignUpPage() {
       </div>
 
       {/* Bottom trust section */}
-      <section className="border-t border-[#E5E7EB] bg-white px-6 py-14 md:px-10 lg:px-16">
+      <section id="login-trust-section" className="border-t border-[#E5E7EB] bg-white px-6 py-14 md:px-10 lg:px-16">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 md:grid-cols-3 md:gap-10">
           {TRUST_COLUMNS.map((column) => {
             const Icon = column.icon;

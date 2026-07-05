@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -18,6 +18,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { ClaimProfileModal } from '../components/ClaimProfileModal';
 import { FollowButton } from '../components/FollowButton';
 import { useRegisterPageFilters } from '../components/FilterEngine';
+import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
@@ -33,6 +34,7 @@ function TikTokIcon({ size = 20 }: { size?: number }) {
 }
 
 export function CreatorProfilePage() {
+  const creatorHeroRef = useRef<HTMLElement>(null);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses } = useGlobalState();
@@ -298,25 +300,19 @@ export function CreatorProfilePage() {
       
       {/* 1. CREATOR HERO SECTION */}
       <motion.section 
+        ref={creatorHeroRef}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="hero-gradient relative pt-10 pb-12 overflow-hidden border-b border-white/5"
+        className={cn(
+          "hero-gradient relative pt-10 pb-12 border-b border-white/5",
+          HERO_SCROLL_CUE_PADDING,
+        )}
       >
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
         </div>
 
-        {/* Global Breadcrumbs in Hero Area */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full mb-6 text-left">
-          <div className="flex items-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <Link to="/creators" className="hover:text-white transition-colors">Creators</Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">{creator.name}</span>
-          </div>
-        </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
             <div className="flex flex-col lg:grid lg:grid-cols-[1.5fr_1fr] xl:grid-cols-[1.6fr_1fr] gap-8 xl:gap-12 lg:items-stretch w-full">
@@ -575,6 +571,7 @@ export function CreatorProfilePage() {
 
             </div>
         </div>
+        <HeroScrollCue anchorRef={creatorHeroRef} />
       </motion.section>
 
       {/* 2. SECTION SUMMARY BAR */}

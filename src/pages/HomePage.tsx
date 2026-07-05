@@ -4,8 +4,7 @@ import {
   Search, ShoppingCart, MessageSquare, Bookmark, ChevronDown, ChevronRight, 
   ChevronLeft, Award, ShoppingBag, Check, ArrowUpRight, Heart, Eye, Share2, 
   Play, ShieldCheck, DollarSign, Star, AlertCircle, PenTool, Award as Trophy,
-  Shirt, Smartphone, Gem, Gamepad2, Monitor, Utensils, Cpu, Tv, Home, Baby,
-  Palette, Luggage,
+  Shirt, Smartphone, Gamepad2, Monitor, Utensils, Cpu, Tv, Home, Baby,
   Flame, Sparkles, Send, Users, ShieldAlert, BadgeCheck, Zap, Clock,
   Gift, Package, BookOpen, Store, LayoutGrid, Megaphone
 } from 'lucide-react';
@@ -21,6 +20,7 @@ import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { BrandCardDesign, mapBrandToCardDesign } from '../components/BrandCardDesign';
 import { BrandPostCarouselSection } from '../components/BrandPostCarouselSection';
+import { CategoryPhotoCard } from '../components/CategoryPhotoCard';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL, HOME_POPULAR_CATEGORY_GRID } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -98,20 +98,12 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals, allCategories, allGuides, allPlacements, homepageConfig, siteConfig, mode, addToCart } = useGlobalState();
+  const { allProducts, allBrands, allDeals, allCategories, allGuides, allPlacements, homepageConfig, mode, addToCart } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [activeTab, setActiveTab] = useState('FEED');
   const [carouselIndex, setCarouselIndex] = useState(1);
 
-  const heroSearchTerms = React.useMemo(() => {
-    const terms = (siteConfig?.popularSearches || [])
-      .filter((item) => item.isActive)
-      .sort((a, b) => a.order - b.order)
-      .map((item) => item.term)
-      .filter(Boolean);
-    return terms.length ? terms : ['Sailor', 'Aarong', 'Samsung', 'Apex'];
-  }, [siteConfig]);
   const sectionVisible = React.useCallback(
     (sectionId: string) => isHomeSectionVisible(homepageConfig, sectionId),
     [homepageConfig],
@@ -714,11 +706,11 @@ export function HomePage() {
     useSectionScrollSpy(homeSectionNavItems);
 
   const popularCategoriesMock = [
-    { name: "Fashion & Lifestyle", count: "50 Products . 10 Brands", id: 'Fashion & Lifestyle' },
-    { name: "Tech & Electronics", count: "50 Products . 10 Brands", id: 'Mobile & Phones' },
-    { name: "Family & Kids", count: "50 Products . 10 Brands", id: 'Fashion & Lifestyle' },
-    { name: "Jewelry & Accessories", count: "50 Products . 10 Brands", id: 'Jewelry & Accessories' },
-    { name: "Hobbies & Creativity", count: "50 Products . 10 Brands", id: 'Jewelry & Accessories' },
+    { name: 'Fashion & Lifestyle', productCount: 50, id: 'Fashion & Lifestyle' },
+    { name: 'Tech & Electronics', productCount: 50, id: 'Mobile & Phones' },
+    { name: 'Family & Kids', productCount: 50, id: 'Fashion & Lifestyle' },
+    { name: 'Jewelry & Accessories', productCount: 50, id: 'Jewelry & Accessories' },
+    { name: 'Hobbies & Creativity', productCount: 50, id: 'Jewelry & Accessories' },
   ];
 
   const popularCategoriesList = React.useMemo(() => {
@@ -731,16 +723,15 @@ export function HomePage() {
           const productCount = (allProducts || []).filter(
             (product: any) => product.category === category.name,
           ).length;
-          const brandCount = (allBrands || []).filter((brand: any) => brand.category === category.name).length;
           return {
             name: category.name,
-            count: `${productCount || 0} Products · ${brandCount || 0} Brands`,
+            productCount: productCount || 0,
             id: category.slug || category.id,
           };
         });
     }
     return popularCategoriesMock;
-  }, [allCategories, allProducts, allBrands]);
+  }, [allCategories, allProducts]);
 
   const CAROUSEL_BG_COLORS = [
     '#0f2b2b', '#0a1e30', '#271808', '#16112b',
@@ -752,28 +743,6 @@ export function HomePage() {
       
       {sectionVisible('hero') && (
         <PageHeroBanner pageKey="home" />
-      )}
-
-      {/* Hot target shortcuts — below campaign banner */}
-      {sectionVisible('hero') && (
-      <div className="bg-[#000435]/90 border-b border-white/5 px-4 py-2">
-        <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-center gap-2 text-[10px] text-gray-400 font-semibold">
-          <span className="font-mono text-gray-500 uppercase tracking-wider text-[9px]">Hot Targets:</span>
-          {heroSearchTerms.map((term) => (
-            <button
-              key={term}
-              type="button"
-              onClick={() => {
-                toast.success(`Scouting verified stores for: "${term}"`);
-                navigate(`/products?q=${encodeURIComponent(term)}`);
-              }}
-              className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-full border border-white/5 hover:border-white/10 transition-all cursor-pointer text-[10px]"
-            >
-              #{term}
-            </button>
-          ))}
-        </div>
-      </div>
       )}
 
       {/* SECTION 3 — MARQUEE BANNER */}
@@ -1063,46 +1032,16 @@ export function HomePage() {
                   </div>
                 </div>
 
-                {/* Categories Grid — shared category card grid so cards match the Categories page */}
-                <div className={cn(HOME_POPULAR_CATEGORY_GRID, "text-left")}>
-                  {popularCategoriesList.map((cat, idx) => {
-                    // Custom high-fidelity category icon picker helper
-                    const getCategoryMockIcon = (catName: string) => {
-                      const name = catName.toLowerCase();
-                      if (name.includes('fashion')) return <Shirt className="w-5 h-5 text-blue-600 stroke-[2]" />;
-                      if (name.includes('tech') || name.includes('electronics')) return <Cpu className="w-5 h-5 text-[#1A73E8] stroke-[2]" />;
-                      if (name.includes('family') || name.includes('kids')) return <Baby className="w-5 h-5 text-blue-500 stroke-[2]" />;
-                      if (name.includes('jewelry') || name.includes('accessories')) return <Gem className="w-5 h-5 text-yellow-500 stroke-[2]" />;
-                      if (name.includes('hobby') || name.includes('creativity') || name.includes('hobbies')) return <Palette className="w-5 h-5 text-orange-500 stroke-[2]" />;
-                      if (name.includes('travel') || name.includes('hospitality')) return <Luggage className="w-5 h-5 text-rose-500 stroke-[2]" />;
-                      return <ShoppingBag className="w-5 h-5 text-gray-500 stroke-[2]" />;
-                    };
-
-                    return (
-                      <div 
-                        key={idx}
-                        onClick={() => {
-                          setActiveTab(cat.id);
-                          toast.success(`Active Category: ${cat.id}`);
-                        }}
-                        className="choosify-category-card bg-white border border-[#e8edf2] rounded-[5px] p-4 flex flex-col items-start hover:border-gray-200/90 hover:scale-[1.01] transition-all duration-200 cursor-pointer group"
-                      >
-                        {/* Perfect white circle around the icon styled like mockup */}
-                        <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
-                          {getCategoryMockIcon(cat.name)}
-                        </div>
-                        
-                        <div className="w-full">
-                          <h4 className="font-medium text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-tight mb-1 uppercase tracking-tight">
-                            {cat.name}
-                          </h4>
-                          <p className="text-[10px] text-red-500 font-semibold leading-none uppercase font-mono">
-                            {cat.count}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                {/* Categories Grid — photo-first tiles matching Categories page */}
+                <div className={cn(HOME_POPULAR_CATEGORY_GRID, 'text-left')}>
+                  {popularCategoriesList.map((cat) => (
+                    <CategoryPhotoCard
+                      key={cat.id || cat.name}
+                      name={cat.name}
+                      productCount={cat.productCount}
+                      href="/categories"
+                    />
+                  ))}
                 </div>
               </div>
               )}

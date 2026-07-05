@@ -13,6 +13,10 @@ export const MOCK_BRAND_POSTS: BrandPost[] = [
       'Experience handcrafted Eid collections, live artisan demos, and exclusive early access to limited festive pieces across Dhaka outlets.',
     heroImage:
       'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=1200&h=700&fit=crop',
+    bannerImages: [
+      'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=1920&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1920&h=800&fit=crop',
+    ],
     body: [
       'Aarong invites you to the Eid Carnival 2026 — a celebration of Bangladeshi craftsmanship with curated heritage collections, trunk shows, and live weaving demonstrations.',
       'Visit participating outlets in Gulshan, Dhanmondi, and Bashundhara City for styling sessions, gift wrapping, and members-only preview hours before the public launch.',
@@ -191,6 +195,11 @@ export const MOCK_BRAND_POSTS: BrandPost[] = [
       'Join authorized Samsung partners for the global Unpacked livestream with pre-order incentives.',
     heroImage:
       'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=700&fit=crop',
+    bannerImages: [
+      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1920&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1610945415295-d9bbfbe99f95?w=1920&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1556656793-08538906a9f8?w=1920&h=800&fit=crop',
+    ],
     body: [
       'Authorized Samsung outlets host watch parties with live Q&A, trade-in assessments, and pre-order bundles for Choosify-verified shoppers.',
       'Registration opens one week before the event. Sponsored launch awareness by Samsung.',

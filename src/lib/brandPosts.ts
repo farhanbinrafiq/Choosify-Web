@@ -65,3 +65,10 @@ export function formatBrandPostDateRange(start?: string, end?: string): string {
   }
   return formatBrandPostDate(end);
 }
+
+/** Resolve edge-to-edge detail banners — supports one or many sponsor photos */
+export function getBrandPostBannerImages(post: BrandPost): string[] {
+  const fromBanners = post.bannerImages?.filter(Boolean) ?? [];
+  if (fromBanners.length > 0) return fromBanners;
+  return post.heroImage ? [post.heroImage] : [];
+}

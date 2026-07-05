@@ -5,6 +5,7 @@ import {
   ChevronRight, Users, Handshake, Briefcase, Award, Zap, 
   MessageSquare, ArrowRight, ShieldCheck, CheckCircle2
 } from 'lucide-react';
+import { StaticPageHero } from '../components/StaticPageHero';
 
 export function PartnershipPage() {
   useEffect(() => {
@@ -60,16 +61,9 @@ export function PartnershipPage() {
   return (
     <div className="min-h-screen bg-[#F0F8FF] font-sans">
       {/* 1. HERO SECTION */}
-      <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
+      <StaticPageHero>
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
         <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full">
-          {/* Breadcrumbs */}
-          <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-black uppercase tracking-widest mb-6">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">Partnership</span>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column */}
             <div className="lg:col-span-7 space-y-4 text-left">
@@ -80,7 +74,7 @@ export function PartnershipPage() {
                 Partnership Opportunities
               </h1>
               <p className="text-gray-300 text-sm md:text-base font-medium leading-relaxed max-w-xl">
-                Partner with Choosify, Bangladesh’s leading product discovery platform. Join forces with us to accelerate growth, enhance brand transparency, and empower consumers.
+                Partner with Choosify, Bangladeshâ€™s leading product discovery platform. Join forces with us to accelerate growth, enhance brand transparency, and empower consumers.
               </p>
             </div>
 
@@ -95,7 +89,7 @@ export function PartnershipPage() {
                 <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-purple-600/10 rounded-full blur-2xl pointer-events-none" />
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-lg">
-                    🤝
+                    ðŸ¤
                   </div>
                   <div>
                     <h3 className="text-white text-xs font-black uppercase tracking-wider">Synergetic Ecosystem</h3>
@@ -109,7 +103,7 @@ export function PartnershipPage() {
             </div>
           </div>
         </div>
-      </section>
+      </StaticPageHero>
 
       {/* 2. BODY CONTENT SECTION */}
       <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] py-16">
@@ -159,7 +153,7 @@ export function PartnershipPage() {
                 Durable Platform Credibility
               </h4>
               <p className="text-gray-500 text-xs leading-relaxed font-semibold">
-                By aligning with Choosify, partners leverage Bangladesh’s premier, scam-free discovery database. Our unified pricing engine and brand verified claim statuses ensure that customer trust is maintained at every touchpoint.
+                By aligning with Choosify, partners leverage Bangladeshâ€™s premier, scam-free discovery database. Our unified pricing engine and brand verified claim statuses ensure that customer trust is maintained at every touchpoint.
               </p>
             </div>
 
@@ -263,7 +257,7 @@ export function PartnershipPage() {
                     className="py-12 px-2 text-center flex flex-col items-center justify-center space-y-6"
                   >
                     <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-500 flex items-center justify-center text-3xl">
-                      ✓
+                      âœ“
                     </div>
                     <div>
                       <h3 className="text-base font-black text-navy uppercase tracking-widest italic mb-1">Proposal Logged</h3>

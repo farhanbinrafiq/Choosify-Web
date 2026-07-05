@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
@@ -214,7 +215,9 @@ ORDER STATUS: PENDING_CONFIRMATION
           productId: it.product.id,
           productTitle: it.product.title,
           quantity: it.quantity,
-          price: getSlabPrice(it.product, it.quantity)
+          price: getSlabPrice(it.product, it.quantity),
+          image: it.product.image,
+          brand: it.product.brand,
         })),
         deliveryFee: DELIVERY_FEE_PER_SELLER,
         invoiceId: invoiceIdStr,
@@ -228,15 +231,32 @@ ORDER STATUS: PENDING_CONFIRMATION
       isCOD: paymentMethod === 'cod',
       isSplit: splitCount > 1,
       overallTotal: finalTotal,
+      subtotal,
+      deliveryTotal,
       subOrders: generatedSubOrders,
       createdAt: new Date().toISOString(),
       promoCode: appliedPromo?.code,
-      promoDiscount: promoDiscount
+      promoDiscount: promoDiscount,
+      promoType: appliedPromo?.type,
+      sourceMode,
+      paymentMethod,
+      shipping: {
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        region,
+        deliveryNotes: deliveryNotes.trim() || undefined,
+      },
+      ...(sourceMode === 'wholesale'
+        ? { tradeLicense, companyName, isQuotationRequest }
+        : {}),
     };
 
     if (appliedPromo) {
       window.dispatchEvent(new CustomEvent('choosify-promo-applied', { detail: appliedPromo }));
     }
+
+    sessionStorage.setItem('choosify_last_order_id', tempOrderId);
 
     // Add to global state (which automatically updates localStorage and triggers reactivity)
     addOrder(fullOrderObject);
@@ -253,8 +273,8 @@ ORDER STATUS: PENDING_CONFIRMATION
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Checkout Header */}
-      <div className="choosify-dark-gradient text-white h-[303px] flex items-center px-4 md:px-8 border-b border-white/5 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+      <PageHeroHeader variant="gradient" className="h-[303px] flex items-center px-4 md:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 w-full">
           <div className="space-y-2">
             <button 
               onClick={() => navigate(-1)} 
@@ -279,7 +299,7 @@ ORDER STATUS: PENDING_CONFIRMATION
             )}
           </div>
         </div>
-      </div>
+      </PageHeroHeader>
 
       <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
         {/* Input Forms */}

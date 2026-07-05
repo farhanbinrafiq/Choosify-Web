@@ -11,7 +11,10 @@ export interface BrandPost {
   kind: BrandPostKind;
   title: string;
   excerpt: string;
+  /** Primary thumbnail for cards and listings */
   heroImage: string;
+  /** Optional full-width edge-to-edge banners on the detail page (falls back to heroImage) */
+  bannerImages?: string[];
   body: string[];
   startDate?: string;
   endDate?: string;

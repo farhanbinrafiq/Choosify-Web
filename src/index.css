@@ -143,6 +143,22 @@
   background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
 }
 
+@keyframes hero-scroll-cue-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(5px);
+    opacity: 1;
+  }
+}
+
+.choosify-hero-scroll-cue {
+  animation: hero-scroll-cue-bounce 1.6s ease-in-out infinite;
+}
+
 .button-gradient {
   background: linear-gradient(90deg, #B4411C 0%, #D15E32 100%);
 }
@@ -186,13 +202,12 @@
   background: #000435;
 }
 
-/* Navbar search — fluid width scales with viewport; categories keep priority */
-.navbar-search-fluid {
-  width: clamp(4.5rem, 9vw, 12rem);
-  transition: width 0.2s ease;
+/* Navbar search — fills space between logo and actions */
+.choosify-navbar-hero-search {
+  width: 100%;
+  max-width: none;
 }
 
-/* Amazon-style navbar hero search — compact height in top bar */
 .choosify-navbar-hero-search form {
   padding: 2px;
 }
@@ -201,23 +216,19 @@
   min-height: 2.25rem;
 }
 
+@media (min-width: 768px) {
+  .choosify-navbar-hero-search form .bg-white {
+    min-height: 2.5rem;
+  }
+}
+
 .choosify-navbar-hero-search form input {
   height: 2.25rem !important;
-  font-size: 0.6875rem;
 }
 
-.choosify-navbar-hero-search form button[type='submit'] {
-  top: 3px;
-  bottom: 3px;
-  padding-left: 0.65rem;
-  padding-right: 0.65rem;
-  font-size: 8px;
-}
-
-@media (min-width: 1024px) {
-  .choosify-navbar-hero-search form button[type='submit'] {
-    padding-left: 0.85rem;
-    padding-right: 0.85rem;
+@media (min-width: 768px) {
+  .choosify-navbar-hero-search form input {
+    height: 2.5rem !important;
   }
 }
 
@@ -228,18 +239,6 @@
 /* Sticky page section nav sits flush below the two-row navbar */
 .choosify-sticky-section-nav {
   top: var(--choosify-navbar-height, 6.5rem);
-}
-
-@media (min-width: 1280px) {
-  .navbar-search-fluid {
-    width: clamp(8rem, 11vw, 16rem);
-  }
-}
-
-@media (min-width: 1536px) {
-  .navbar-search-fluid {
-    width: clamp(12rem, 13vw, 20rem);
-  }
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -525,6 +524,22 @@
   box-sizing: border-box;
 }
 
+/* Photo-first category tiles — image fills top, label below (Categories page) */
+.choosify-category-photo-card {
+  min-height: 0;
+  height: auto;
+}
+
+.choosify-category-photo-card .aspect-\[4\/3\] {
+  min-height: 7rem;
+}
+
+@media (min-width: 768px) {
+  .choosify-category-photo-card .aspect-\[4\/3\] {
+    min-height: 8.5rem;
+  }
+}
+
 /* Brand, creator & guide media cards — max 4 columns */
 .choosify-brand-grid,
 .choosify-creator-grid,
@@ -565,13 +580,41 @@
   }
 }
 
+/* What's On feed — max 4 cards per row; columns scale down on smaller viewports */
+.choosify-whats-on-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: clamp(0.65rem, 1vw, 1rem);
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+@media (min-width: 520px) {
+  .choosify-whats-on-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .choosify-whats-on-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-whats-on-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .choosify-product-grid > *,
 .choosify-detail-feed-grid > *,
 .choosify-category-grid > *,
 .choosify-home-category-grid > *,
 .choosify-brand-grid > *,
 .choosify-creator-grid > *,
-.choosify-guide-media-grid > * {
+.choosify-guide-media-grid > *,
+.choosify-whats-on-grid > * {
   min-width: 0;
   max-width: 100%;
   width: 100%;
@@ -583,7 +626,8 @@
 .choosify-category-grid > *,
 .choosify-home-category-grid > *,
 .choosify-brand-grid > *,
-.choosify-creator-grid > * {
+.choosify-creator-grid > *,
+.choosify-whats-on-grid > * {
   height: 100%;
 }
 

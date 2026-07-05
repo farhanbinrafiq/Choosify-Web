@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -40,7 +41,7 @@ export function CustomerOrdersPage() {
 
   const handleDownloadInvoice = (order: any, sub: any) => {
     const content = `
-CHOOSIFY.BD — OFFICIAL INVOICE
+CHOOSIFY.BD â€” OFFICIAL INVOICE
 ================================
 Order ID: ${order.orderId}
 Invoice ID: ${sub.invoiceId}
@@ -49,11 +50,11 @@ Seller: ${sub.sellerBusinessName}
 Payment: ${order.isCOD ? 'Cash on Delivery' : 'Online Payment'}
 
 ITEMS:
-${sub.items.map((it: any) => `- ${it.productTitle} x${it.quantity} @ ৳${it.price.toLocaleString()} = ৳${(it.price * it.quantity).toLocaleString()}`).join('\n')}
+${sub.items.map((it: any) => `- ${it.productTitle} x${it.quantity} @ à§³${it.price.toLocaleString()} = à§³${(it.price * it.quantity).toLocaleString()}`).join('\n')}
 
-Subtotal: ৳${sub.items.reduce((a: number, it: any) => a + it.price * it.quantity, 0).toLocaleString()}
-Delivery: ৳${sub.deliveryFee}
-TOTAL: ৳${(sub.items.reduce((a: number, it: any) => a + it.price * it.quantity, 0) + sub.deliveryFee).toLocaleString()}
+Subtotal: à§³${sub.items.reduce((a: number, it: any) => a + it.price * it.quantity, 0).toLocaleString()}
+Delivery: à§³${sub.deliveryFee}
+TOTAL: à§³${(sub.items.reduce((a: number, it: any) => a + it.price * it.quantity, 0) + sub.deliveryFee).toLocaleString()}
 
 Thank you for shopping with Choosify.bd
     `.trim();
@@ -74,8 +75,7 @@ Thank you for shopping with Choosify.bd
   return (
     <div className="flex flex-col min-h-screen bg-[#0A0A1F] text-white">
       {/* Visual Workspace Hero */}
-      <div className="w-full bg-[#050514] relative overflow-hidden shrink-0 border-b border-white/5">
-        <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
+      <PageHeroHeader className="bg-[#050514]">
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex flex-col justify-center">
             <Link to="/dashboard" className="text-[10px] font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1.5 mb-1">
@@ -99,7 +99,7 @@ Thank you for shopping with Choosify.bd
             </Link>
           </div>
         </div>
-      </div>
+      </PageHeroHeader>
 
       {/* Orders container */}
       <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-10 flex-1">
@@ -158,7 +158,7 @@ Thank you for shopping with Choosify.bd
                         </div>
                         <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase">
                           <span>Staged On: {orderDate}</span>
-                          <span>•</span>
+                          <span>â€¢</span>
                           <span>Total Items: {totalItemCount} Units</span>
                         </div>
                       </div>
@@ -166,7 +166,7 @@ Thank you for shopping with Choosify.bd
                       <div className="md:text-right">
                         <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest block leading-none mb-1">AGGREGATE SETTLEMENT VALUE</span>
                         <p className="text-xl font-black text-[#07DD05] font-sans italic leading-none">
-                          ৳{(order.overallTotal ?? 0).toLocaleString()}
+                          à§³{(order.overallTotal ?? 0).toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -200,7 +200,7 @@ Thank you for shopping with Choosify.bd
                                         {it.productTitle}
                                       </h4>
                                       <span className="text-[9px] text-gray-500 font-bold block mt-1 uppercase font-mono">
-                                        {(it.quantity ?? 1)} x ৳{(it.price ?? 0).toLocaleString()}
+                                        {(it.quantity ?? 1)} x à§³{(it.price ?? 0).toLocaleString()}
                                       </span>
                                     </div>
                                   </div>
@@ -215,7 +215,7 @@ Thank you for shopping with Choosify.bd
                               <div className="text-left md:text-right">
                                 <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block leading-none mb-1">Lot Total</span>
                                 <p className="text-sm font-black text-[#F96500] italic leading-none mb-2">
-                                  ৳{((subTotal ?? 0) + (sub.deliveryFee ?? 0)).toLocaleString()}
+                                  à§³{((subTotal ?? 0) + (sub.deliveryFee ?? 0)).toLocaleString()}
                                 </p>
                                 
                                 {/* Live dispatch tracker steps */}

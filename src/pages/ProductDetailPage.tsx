@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Star,
@@ -53,7 +53,10 @@ import { SizeGuideModal } from "../components/SizeGuideModal";
 import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
 import { ProductSpecsOverview } from "../components/ProductSpecsOverview";
 import { StickySectionNav } from "../components/StickySectionNav";
+import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from "../components/HeroScrollCue";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
+import { usePageBreadcrumbs } from "../context/BreadcrumbContext";
+import { slugifyPathSegment } from "../lib/seoHelpers";
 
 function hasActiveSizeGuide(sizeGuide?: CatalogProductSizeGuide | null): boolean {
   if (!sizeGuide?.enabled) return false;
@@ -335,6 +338,7 @@ export function OptionalAddonsModule({
 }
 
 export function ProductDetailPage() {
+  const productHeroRef = useRef<HTMLDivElement>(null);
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -378,6 +382,20 @@ export function ProductDetailPage() {
       sizeGuide: detail.sizeGuide ?? baseProduct?.sizeGuide,
     };
   }, [baseProduct, productDetailsById]);
+
+  usePageBreadcrumbs(
+    {
+      insertBeforeLast: product?.category
+        ? [
+            {
+              name: product.category,
+              path: `/categories?category=${encodeURIComponent(slugifyPathSegment(product.category))}`,
+            },
+          ]
+        : [],
+    },
+    [product?.category, product?.title, product?.id],
+  );
 
   const showSizeGuideButton = hasActiveSizeGuide(product?.sizeGuide);
 
@@ -996,28 +1014,14 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      {/* Breadcrumb & Meta Info */}
-      <div className="max-w-7xl mx-auto px-6 py-6 border-b border-gray-100 font-sans">
-        <div className="flex items-center justify-start gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 italic">
-          <Link to="/" className="hover:text-[#E8500A] transition-colors">
-            Home
-          </Link>
-          <ChevronRight size={12} />
-          <Link
-            to="/products"
-            className="hover:text-[#E8500A] transition-colors"
-          >
-            Products
-          </Link>
-          <ChevronRight size={12} />
-          <span className="text-gray-500">{product.category}</span>
-          <ChevronRight size={12} />
-          <span className="text-[#E8500A]">{product.title}</span>
-        </div>
-      </div>
-
       {/* Continuous Hero Wrapper with Unified Choosify Gradient */}
-      <div className="choosify-dark-gradient w-full relative overflow-hidden">
+      <div
+        ref={productHeroRef}
+        className={cn(
+          "choosify-dark-gradient w-full relative",
+          HERO_SCROLL_CUE_PADDING,
+        )}
+      >
         {/* Layer 1 Base & ambient accents matching home hero */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(232,80,10,0.18)_0%,_transparent_55%)] pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#EEF1F8]/10 to-transparent pointer-events-none" />
@@ -1510,6 +1514,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
             </div>
           </div>
         </div>
+        <HeroScrollCue anchorRef={productHeroRef} />
       </div>
 
       <StickySectionNav

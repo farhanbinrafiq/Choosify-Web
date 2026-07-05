@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard, Campaign } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { cn } from '../lib/utils';
-
+import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from './HeroScrollCue';
 export type PageHeroBannerKey =
   | 'home'
   | 'products'
@@ -178,6 +178,17 @@ function getActiveCampaigns(campaigns: Campaign[]): Campaign[] {
     .sort((a, b) => (b.priority || 0) - (a.priority || 0));
 }
 
+function isExternalBannerLink(link: string): boolean {
+  const trimmed = link.trim();
+  return /^https?:\/\//i.test(trimmed) || trimmed.startsWith('//');
+}
+
+function normalizeBannerLink(link: string): string {
+  const trimmed = link.trim();
+  if (trimmed.startsWith('//')) return `https:${trimmed}`;
+  return trimmed;
+}
+
 interface PageHeroBannerProps {
   pageKey: PageHeroBannerKey;
   className?: string;
@@ -188,10 +199,10 @@ interface PageHeroBannerProps {
 export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroBannerProps) {
   const { campaigns } = useDashboard();
   const { homepageConfig } = useGlobalState();
-  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
   const autoplayTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
   const slides = useMemo<HeroBannerSlide[]>(() => {
     const activeCampaigns = getActiveCampaigns(campaigns).map(campaignToSlide);
@@ -247,26 +258,22 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
     setCurrentIndex((prev) => (prev + 1) % slides.length);
   };
 
-  const handleCta = () => {
-    if (!current.ctaLink) return;
-    if (current.ctaLink.startsWith('http')) {
-      window.open(current.ctaLink, '_blank', 'noopener,noreferrer');
-    } else {
-      navigate(current.ctaLink);
-    }
-  };
+  const slideLink = current.ctaLink?.trim();
+  const slideLinkIsExternal = slideLink ? isExternalBannerLink(slideLink) : false;
 
   return (
     <section
+      ref={sectionRef}
       className={cn(
-        'relative w-full overflow-hidden border-b border-black/10 select-none bg-[#0a0a1f]',
+        'relative w-full border-b border-black/10 select-none bg-[#0a0a1f]',
+        HERO_SCROLL_CUE_PADDING,
         className,
       )}
       aria-label="Campaign banner"
       onMouseEnter={() => setAutoplay(false)}
       onMouseLeave={() => setAutoplay(true)}
     >
-      <div className="relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[360px]">
+      <div className="relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[360px] overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={current.id}
@@ -296,7 +303,24 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
             <div className="absolute inset-0 bg-gradient-to-r from-[#000435]/85 via-[#000435]/45 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#000435]/40 via-transparent to-transparent" />
 
-            <div className="relative z-10 h-full max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 flex flex-col justify-center items-start text-left">
+            {slideLink && slideLinkIsExternal && (
+              <a
+                href={normalizeBannerLink(slideLink)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute inset-0 z-[5] cursor-pointer"
+                aria-label={`Open ${current.title}`}
+              />
+            )}
+            {slideLink && !slideLinkIsExternal && (
+              <Link
+                to={slideLink.startsWith('/') ? slideLink : `/${slideLink}`}
+                className="absolute inset-0 z-[5] cursor-pointer"
+                aria-label={`Go to ${current.title}`}
+              />
+            )}
+
+            <div className="relative z-10 h-full max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 flex flex-col justify-center items-start text-left pointer-events-none">
               {current.sponsorBadge && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E8500A]/20 text-[#FF8A50] text-[9px] font-bold uppercase tracking-wider border border-[#E8500A]/30 mb-2">
                   <Sparkles className="w-3 h-3" />
@@ -320,15 +344,6 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
                   {current.subtitle}
                 </p>
               )}
-              {current.ctaLink && (
-                <button
-                  type="button"
-                  onClick={handleCta}
-                  className="mt-4 sm:mt-5 px-5 py-2.5 bg-[#FF6B00] hover:bg-[#E8500A] text-white text-[10px] sm:text-[11px] font-black uppercase tracking-widest rounded-[5px] transition-colors shadow-lg"
-                >
-                  {current.ctaText || 'Explore'}
-                </button>
-              )}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -351,7 +366,7 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
             >
               <ChevronRight className="w-5 h-5" />
             </button>
-            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+            <div className="absolute bottom-10 sm:bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
               {slides.map((slide, idx) => (
                 <button
                   key={slide.id}
@@ -373,6 +388,8 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
           </>
         )}
       </div>
+
+      <HeroScrollCue anchorRef={sectionRef} resetKey={pageKey} />
     </section>
   );
 }

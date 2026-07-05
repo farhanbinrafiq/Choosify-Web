@@ -5,6 +5,7 @@ import {
   ChevronRight, Mail, MessageCircle, Share2, Phone, MapPin, 
   HelpCircle, ArrowRight, ShieldCheck, CheckCircle
 } from 'lucide-react';
+import { StaticPageHero } from '../components/StaticPageHero';
 
 export function ContactPage() {
   useEffect(() => {
@@ -42,7 +43,7 @@ export function ContactPage() {
     },
     {
       title: 'Creator Support',
-      desc: 'Encountered issues syncing your TikTok profile or updating your directory portfolio? Let’s resolve it.',
+      desc: 'Encountered issues syncing your TikTok profile or updating your directory portfolio? Letâ€™s resolve it.',
       badge: 'Creators Desk'
     },
     {
@@ -76,16 +77,9 @@ export function ContactPage() {
   return (
     <div className="min-h-screen bg-[#F0F8FF] font-sans">
       {/* 1. HERO SECTION */}
-      <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
+      <StaticPageHero>
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
         <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full">
-          {/* Breadcrumbs */}
-          <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-black uppercase tracking-widest mb-6">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">Contact Us</span>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column */}
             <div className="lg:col-span-7 space-y-4 text-left">
@@ -120,7 +114,7 @@ export function ContactPage() {
             </div>
           </div>
         </div>
-      </section>
+      </StaticPageHero>
 
       {/* 2. BODY CONTENT SECTION */}
       <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] py-16">
@@ -277,7 +271,7 @@ export function ContactPage() {
                     className="py-12 px-2 text-center flex flex-col items-center justify-center space-y-6"
                   >
                     <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-500 flex items-center justify-center text-3xl">
-                      ✓
+                      âœ“
                     </div>
                     <div>
                       <h3 className="text-base font-black text-navy uppercase tracking-widest italic mb-1">Message Logged</h3>

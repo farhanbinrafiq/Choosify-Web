@@ -12,12 +12,12 @@ import {
   type SeoMeta,
 } from '../lib/seoConfig';
 import {
-  buildBreadcrumbItems,
   buildCanonicalPath,
   buildCanonicalUrl,
   matchesRouteParam,
   resolveOgType,
 } from '../lib/seoHelpers';
+import { useBreadcrumbItems } from '../hooks/useBreadcrumbItems';
 import {
   articleJsonLd,
   brandJsonLd,
@@ -214,51 +214,7 @@ export function PageSeo() {
   const canonical = buildCanonicalUrl(pathname, search);
   const ogType = meta.ogType || resolveOgType(pathname);
 
-  const breadcrumbLabels = useMemo(() => {
-    const labels: Record<string, string> = {};
-    const segments = pathname.split('/').filter(Boolean);
-    const [section, id] = segments;
-
-    if (section === 'products' && id) {
-      const product = state.allProducts.find((p) => matchesRouteParam(p, id));
-      if (product) {
-        labels[`/products/${id}`] =
-          (product as { title?: string; name?: string }).title ||
-          (product as { name?: string }).name ||
-          'Product';
-      }
-    }
-
-    if (section === 'brands' && id) {
-      const brand = state.allBrands.find((b) => matchesRouteParam(b, id));
-      if (brand) labels[`/brands/${id}`] = brand.name;
-    }
-
-    if ((section === 'guides' || section === 'blogs' || section === 'recommendations') && id) {
-      const guide = state.allGuides.find((g) => matchesRouteParam(g, id));
-      if (guide) labels[`/${section}/${id}`] = guide.title;
-    }
-
-    if (section === 'creators' && id) {
-      const creator = state.allCreators.find((c) => matchesRouteParam(c, id));
-      if (creator) labels[`/creators/${id}`] = creator.name;
-    }
-
-    const categorySlug = new URLSearchParams(search).get('category');
-    if (categorySlug) {
-      const category = state.allCategories.find(
-        (item) => item.slug === categorySlug || item.id === categorySlug,
-      );
-      if (category) labels[`category:${categorySlug}`] = category.name;
-    }
-
-    return labels;
-  }, [pathname, search, state.allProducts, state.allBrands, state.allGuides, state.allCreators, state.allCategories]);
-
-  const breadcrumbs = useMemo(
-    () => buildBreadcrumbItems(pathname, search, breadcrumbLabels),
-    [pathname, search, breadcrumbLabels],
-  );
+  const breadcrumbs = useBreadcrumbItems();
 
   useEffect(() => {
     document.title = meta.title;

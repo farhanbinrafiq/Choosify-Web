@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -26,7 +27,7 @@ export function RetailCartPage() {
     }, 0);
   };
 
-  // Base Delivery fee: ৳120 per seller as they are separate deliveries and packages
+  // Base Delivery fee: à§³120 per seller as they are separate deliveries and packages
   const DELIVERY_FEE_PER_SELLER = 120;
   const deliveryTotal = sellerIds.length * DELIVERY_FEE_PER_SELLER;
 
@@ -36,7 +37,7 @@ export function RetailCartPage() {
   }, 0);
   const aggregateTotal = subtotal + deliveryTotal;
 
-  // COD is eligible for retail orders under ৳150,000
+  // COD is eligible for retail orders under à§³150,000
   const isCODEligible = aggregateTotal < 150000;
 
   const handleQtyChange = (item: any, amount: number) => {
@@ -74,8 +75,7 @@ export function RetailCartPage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Hero Header */}
-      <div className="w-full bg-[#0A0B1E] relative overflow-hidden shrink-0 border-b border-white/5">
-        <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
+      <PageHeroHeader>
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-2 text-gray-400 text-[9px] font-black uppercase tracking-widest mb-1 pointer-events-none">
@@ -91,7 +91,7 @@ export function RetailCartPage() {
             </p>
           </div>
         </div>
-      </div>
+      </PageHeroHeader>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-12 flex-1">
@@ -129,12 +129,12 @@ export function RetailCartPage() {
                         </div>
                         <div>
                           <h3 className="text-xs font-black text-navy uppercase tracking-widest italic">{sellerName} Outlet</h3>
-                          <span className="text-[9px] font-bold text-gray-400 uppercase">Fulfillment Stream • Dhaka Warehouse</span>
+                          <span className="text-[9px] font-bold text-gray-400 uppercase">Fulfillment Stream â€¢ Dhaka Warehouse</span>
                         </div>
                       </div>
                       <div className="text-right">
                         <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block leading-none mb-1">Seller Subtotal</span>
-                        <span className="text-sm font-black text-navy italic">৳{sellerSubtotal.toLocaleString()}</span>
+                        <span className="text-sm font-black text-navy italic">à§³{sellerSubtotal.toLocaleString()}</span>
                       </div>
                     </div>
 
@@ -213,8 +213,8 @@ export function RetailCartPage() {
                                 {/* Extended Price */}
                                 <div className="text-right">
                                   <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest block leading-none mb-1">EXT. TOTAL</span>
-                                  <span className="text-[14px] font-black text-orange-primary italic font-mono">৳{(itemPrice * item.quantity).toLocaleString()}</span>
-                                  <span className="text-[9px] text-gray-400 block font-mono mt-0.5">৳{itemPrice.toLocaleString()} / pc</span>
+                                  <span className="text-[14px] font-black text-orange-primary italic font-mono">à§³{(itemPrice * item.quantity).toLocaleString()}</span>
+                                  <span className="text-[9px] text-gray-400 block font-mono mt-0.5">à§³{itemPrice.toLocaleString()} / pc</span>
                                 </div>
                               </div>
                             </div>
@@ -226,7 +226,7 @@ export function RetailCartPage() {
                     {/* Group Delivery Breakdown */}
                     <div className="bg-[#F8FAFC]/55 border-t border-gray-100 px-6 py-4 flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
                       <Truck size={14} className="text-navy" />
-                      <span>Delivery Option: Paperfly Dispatch (৳{DELIVERY_FEE_PER_SELLER})</span>
+                      <span>Delivery Option: Paperfly Dispatch (à§³{DELIVERY_FEE_PER_SELLER})</span>
                     </div>
                   </div>
                 );
@@ -235,7 +235,7 @@ export function RetailCartPage() {
               {/* Action utilities */}
               <div className="flex items-center justify-between pt-4">
                 <Link to="/products" className="text-xs font-black text-navy hover:text-orange-primary transition-colors uppercase tracking-widest italic flex items-center gap-1">
-                  ← Continue Shopping
+                  â† Continue Shopping
                 </Link>
                 <button 
                   onClick={() => {
@@ -258,7 +258,7 @@ export function RetailCartPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
                     <span>Retail Card Subtotal</span>
-                    <span className="text-navy">৳{subtotal.toLocaleString()}</span>
+                    <span className="text-navy">à§³{subtotal.toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-start text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
@@ -266,7 +266,7 @@ export function RetailCartPage() {
                       <span>Parcel Freight Shipping</span>
                       <p className="text-[8px] text-gray-300 font-bold lowercase italic tracking-normal">Grouped per seller ({sellerIds.length} Packages)</p>
                     </div>
-                    <span className="text-navy">৳{deliveryTotal.toLocaleString()}</span>
+                    <span className="text-navy">à§³{deliveryTotal.toLocaleString()}</span>
                   </div>
 
                   {/* Cash on Delivery Eligibility */}
@@ -287,7 +287,7 @@ export function RetailCartPage() {
                         <AlertCircle size={18} className="shrink-0 text-red-500" />
                         <div>
                           <span>COD High Value Limit Exceeded</span>
-                          <p className="text-[7.5px] font-bold text-red-500/80 tracking-normal lowercase italic">Orders over ৳150,000 require business prepayment or manual confirmation.</p>
+                          <p className="text-[7.5px] font-bold text-red-500/80 tracking-normal lowercase italic">Orders over à§³150,000 require business prepayment or manual confirmation.</p>
                         </div>
                       </>
                     )}
@@ -295,7 +295,7 @@ export function RetailCartPage() {
 
                   <div className="border-t pt-4 flex justify-between items-center font-black italic">
                     <span className="text-xs uppercase tracking-widest text-[#0A0A1F]">Grand Total</span>
-                    <span className="text-2xl text-orange-primary tracking-tight">৳{aggregateTotal.toLocaleString()}</span>
+                    <span className="text-2xl text-orange-primary tracking-tight">à§³{aggregateTotal.toLocaleString()}</span>
                   </div>
                 </div>
 

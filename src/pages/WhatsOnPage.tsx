@@ -1,20 +1,17 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, ChevronRight, Search, Megaphone } from 'lucide-react';
+import { CalendarDays, ChevronRight, Search, Rocket, PartyPopper, Megaphone, Store } from 'lucide-react';
 import { PageHeroBanner } from '../components/PageHeroBanner';
 import { BrandPostCard } from '../components/BrandPostCard';
 import {
-  QuickFilterBar,
   ActiveFilterChips,
   UniversalFilterRenderer,
   useRegisterPageFilters,
-  useOpenPageFilters,
 } from '../components/FilterEngine';
 import { filterBrandPosts, getAllBrandPosts } from '../lib/brandPosts';
 import { BRAND_POST_KIND_LABELS, type BrandPostKind } from '../types/brandPost';
-import { PAGE_SHELL_WRAPPER, PAGE_LISTING_SINGLE_SHELL } from '../lib/pageLayout';
+import { PAGE_SHELL_WRAPPER, PAGE_LISTING_SINGLE_SHELL, WHATS_ON_CARD_GRID } from '../lib/pageLayout';
 import { StickySectionNav } from '../components/StickySectionNav';
-import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { cn } from '../lib/utils';
 
 const KIND_TABS: Array<{ id: BrandPostKind | 'all'; label: string }> = [
@@ -72,52 +69,6 @@ export function WhatsOnPage() {
     setStatusFilter('all');
   };
 
-  const quickFilterItems = useMemo(
-    () => [
-      {
-        id: 'all',
-        label: 'All posts',
-        active: activeKind === 'all' && statusFilter === 'all' && selectedBrandId == null,
-        onClick: () => {
-          setActiveKind('all');
-          setStatusFilter('all');
-          setSelectedBrandId(null);
-        },
-      },
-      {
-        id: 'event',
-        label: '📅 Events',
-        active: activeKind === 'event',
-        onClick: () => setActiveKind(activeKind === 'event' ? 'all' : 'event'),
-      },
-      {
-        id: 'launch',
-        label: '🚀 Launches',
-        active: activeKind === 'launch',
-        onClick: () => setActiveKind(activeKind === 'launch' ? 'all' : 'launch'),
-      },
-      {
-        id: 'festival',
-        label: '🎉 Festivals',
-        active: activeKind === 'festival',
-        onClick: () => setActiveKind(activeKind === 'festival' ? 'all' : 'festival'),
-      },
-      {
-        id: 'campaign',
-        label: '📣 Campaigns',
-        active: activeKind === 'campaign',
-        onClick: () => setActiveKind(activeKind === 'campaign' ? 'all' : 'campaign'),
-      },
-      {
-        id: 'live',
-        label: '🔴 Live now',
-        active: statusFilter === 'live',
-        onClick: () => setStatusFilter(statusFilter === 'live' ? 'all' : 'live'),
-      },
-    ],
-    [activeKind, statusFilter, selectedBrandId],
-  );
-
   const activeChips = useMemo(
     () =>
       [
@@ -166,7 +117,7 @@ export function WhatsOnPage() {
           />
         </div>
       ),
-      quickFilters: quickFilterItems,
+      quickFilters: [],
       renderFilters: () => (
         <div className="flex flex-col gap-4">
           <UniversalFilterRenderer
@@ -224,44 +175,32 @@ export function WhatsOnPage() {
               }
             }}
           />
-
-          <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-            <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">
-              Quick type picks
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {KIND_TABS.filter((tab) => tab.id !== 'all').map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveKind(activeKind === tab.id ? 'all' : (tab.id as BrandPostKind))}
-                  className={cn(
-                    'px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer',
-                    activeKind === tab.id
-                      ? 'bg-[#E8500A] text-white border-[#E8500A]'
-                      : 'bg-white text-[#1A1D4E] border-[#e8edf2] hover:border-[#E8500A]/30',
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       ),
       activeFilterCount,
       onClearAll: handleClearAll,
     },
-    [query, activeKind, selectedBrandId, statusFilter, activeFilterCount, brandOptions, quickFilterItems],
+    [query, activeKind, selectedBrandId, statusFilter, activeFilterCount, brandOptions],
   );
 
-  const { openFilters } = useOpenPageFilters();
-
-  const sectionNavItems = useMemo(
-    () => [{ id: 'whats-on-feed', label: 'Feed', icon: <Megaphone size={13} /> }],
+  const categoryNavItems = useMemo(
+    () => [
+      { id: 'event', label: 'Events', icon: <CalendarDays size={13} /> },
+      { id: 'launch', label: 'Launches', icon: <Rocket size={13} /> },
+      { id: 'festival', label: 'Festivals', icon: <PartyPopper size={13} /> },
+      { id: 'campaign', label: 'Campaigns', icon: <Megaphone size={13} /> },
+      { id: 'store_moment', label: 'Store Moments', icon: <Store size={13} /> },
+    ],
     [],
   );
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
+  const handleCategoryNavigate = useCallback((id: string) => {
+    setActiveKind(id === 'all' ? 'all' : (id as BrandPostKind));
+    const el = document.getElementById('whats-on-feed');
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.pageYOffset - 200;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  }, []);
 
   return (
     <div className="bg-choosify-feed min-h-screen pb-16">
@@ -270,17 +209,12 @@ export function WhatsOnPage() {
       <ActiveFilterChips chips={activeChips} onClearAll={handleClearAll} />
 
       <StickySectionNav
-        sections={sectionNavItems}
-        activeId={activeSectionId}
-        onNavigate={scrollToSection}
-        allLabel="What's On"
+        sections={categoryNavItems}
+        activeId={activeKind}
+        onNavigate={handleCategoryNavigate}
+        allLabel="All"
+        allId="all"
         profileLabel="Event feed"
-      />
-
-      <QuickFilterBar
-        title="What's On Quick Specs"
-        filters={quickFilterItems}
-        onOpenFullFilters={openFilters}
       />
 
       <div className={cn(PAGE_SHELL_WRAPPER, PAGE_LISTING_SINGLE_SHELL)}>
@@ -294,24 +228,6 @@ export function WhatsOnPage() {
         </aside>
 
         <section id="whats-on-feed" className="choosify-middle-feed flex flex-col gap-5 min-w-0 scroll-mt-36">
-          <div className="flex flex-wrap gap-2">
-            {KIND_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveKind(tab.id)}
-                className={cn(
-                  'px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all',
-                  activeKind === tab.id
-                    ? 'bg-[#E8500A] text-white border-[#E8500A]'
-                    : 'bg-white text-[#1A1D4E] border-[#e8edf2] hover:border-[#E8500A]/30',
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
           {posts.length === 0 ? (
             <div className="bg-white rounded-[5px] border border-[#e8edf2] p-12 text-center">
               <CalendarDays className="w-10 h-10 text-gray-300 mx-auto mb-3" />
@@ -319,9 +235,9 @@ export function WhatsOnPage() {
               <p className="text-xs text-gray-400">Try another filter or search term.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className={WHATS_ON_CARD_GRID}>
               {posts.map((post) => (
-                <BrandPostCard key={post.id} post={post} />
+                <BrandPostCard key={post.id} post={post} compact />
               ))}
             </div>
           )}

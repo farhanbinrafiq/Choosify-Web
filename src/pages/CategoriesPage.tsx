@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
+import { CategoryPhotoCard } from '../components/CategoryPhotoCard';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PageHeroBanner } from '../components/PageHeroBanner';
 import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
@@ -23,6 +24,7 @@ interface CategoryItem {
   icon: string;
   count: number;
   color: string;
+  image?: string;
   subcategories: Subcategory[];
 }
 
@@ -810,39 +812,13 @@ export function CategoriesPage() {
 
                 return (
                   <React.Fragment key={cat.name}>
-                    <motion.div
+                    <CategoryPhotoCard
+                      name={cat.name}
+                      productCount={cat.count}
+                      image={cat.image}
                       onClick={() => handleCategoryClick(cat.name)}
-                      className={cn(
-                        'choosify-category-card bg-white border rounded-[5px] p-4 flex flex-col items-start transition-[border-color,box-shadow] duration-200 cursor-pointer group relative overflow-hidden',
-                        isExpanded
-                          ? 'border-[#E8500A] ring-4 ring-[#E8500A]/5 z-20 shadow-sm'
-                          : 'border-[#e8edf2] hover:border-gray-200/90',
-                      )}
-                      whileTap={{ scale: 0.99 }}
-                      transition={{ duration: 0.12 }}
-                    >
-                      <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
-                        {getCategoryIconComponent(cat.name, cat.icon)}
-                      </div>
-
-                      <div className="w-full text-left">
-                        <h4 className="font-medium text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-tight mb-1 uppercase tracking-tight line-clamp-2">
-                          {cat.name}
-                        </h4>
-                        <p className="text-[10px] text-red-500 font-semibold leading-none uppercase font-mono">
-                          {cat.count} Products
-                        </p>
-                      </div>
-
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.85 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.15, ease: 'easeOut' }}
-                          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-r border-b border-[#e8edf2]"
-                        />
-                      )}
-                    </motion.div>
+                      isExpanded={isExpanded}
+                    />
 
                     <AnimatePresence mode="sync">
                       {isExpanded && (

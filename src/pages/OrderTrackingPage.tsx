@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { Truck, CheckCircle, ShieldAlert, ArrowLeft, ChevronRight, Clock, MapPin, Package, Settings } from 'lucide-react';
@@ -65,8 +66,7 @@ export function OrderTrackingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Header Panel */}
-      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
-        <div className="absolute inset-0 hero-gradient pointer-events-none" />
+      <PageHeroHeader>
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-1 text-[9px] text-gray-500 uppercase tracking-widest font-black italic mb-1">
@@ -99,7 +99,7 @@ export function OrderTrackingPage() {
             </div>
           )}
         </div>
-      </div>
+      </PageHeroHeader>
 
       {/* Main Track Grid */}
       <div className="max-w-4xl mx-auto w-full px-4 py-12 flex-1">
@@ -290,7 +290,7 @@ export function OrderTrackingPage() {
 
                       <div className="text-[10px] font-medium text-navy space-y-0.5 pt-1 border-t border-gray-100/50">
                         {sub.items.map((it: any, iIdx: number) => (
-                          <div key={iIdx}>• {it.productTitle} x {it.quantity} units</div>
+                          <div key={iIdx}>â€¢ {it.productTitle} x {it.quantity} units</div>
                         ))}
                       </div>
                     </div>
@@ -301,7 +301,7 @@ export function OrderTrackingPage() {
                       </div>
                       <div className="pt-2 text-right">
                         <span className="text-[8px] font-black text-gray-400 block leading-none">SPLIT CARRIER PRICE</span>
-                        <span className="text-sm font-black text-navy italic">৳{(sub.items.reduce((sum: number, x: any) => sum + (x.price * x.quantity), 0) + sub.deliveryFee).toLocaleString()}</span>
+                        <span className="text-sm font-black text-navy italic">à§³{(sub.items.reduce((sum: number, x: any) => sum + (x.price * x.quantity), 0) + sub.deliveryFee).toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -314,7 +314,7 @@ export function OrderTrackingPage() {
         {/* Continue routing */}
         <div className="text-center pt-8">
           <Link to="/" className="text-xs font-black text-navy uppercase tracking-widest italic hover:text-orange-primary transition-all">
-            ← Settle back to Catalog Feed
+            â† Settle back to Catalog Feed
           </Link>
         </div>
       </div>

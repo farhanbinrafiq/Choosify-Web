@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { FileText, ArrowLeft, Mail, Phone, Calendar, MapPin, Printer, ShieldCheck, CreditCard, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -23,8 +24,7 @@ export function SellerOrderDetailsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Header Panel */}
-      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
-        <div className="absolute inset-0 hero-gradient pointer-events-none" />
+      <PageHeroHeader>
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex flex-col justify-center">
             <button 
@@ -50,7 +50,7 @@ export function SellerOrderDetailsPage() {
             Print Waybill
           </button>
         </div>
-      </div>
+      </PageHeroHeader>
 
       {/* Invoice Staging Block */}
       <div className="max-w-4xl mx-auto w-full px-4 py-12 flex-1">
@@ -98,7 +98,7 @@ export function SellerOrderDetailsPage() {
                 <div key={idx} className="px-6 py-4 grid grid-cols-4 text-xs font-bold text-navy items-center hover:bg-gray-50/40 transition-colors">
                   <div className="col-span-2 uppercase font-black tracking-tight italic text-[11px] text-navy">{it.productTitle}</div>
                   <div className="text-center text-[#F96500] text-sm font-black font-mono italic">{it.quantity}</div>
-                  <div className="text-right text-[11px] font-black italic">৳{it.price.toLocaleString()}</div>
+                  <div className="text-right text-[11px] font-black italic">à§³{it.price.toLocaleString()}</div>
                 </div>
               ))}
             </div>
@@ -116,9 +116,9 @@ export function SellerOrderDetailsPage() {
             <div className="sm:text-right shrink-0">
               <span className="text-[8px] font-black text-gray-400 block leading-none mb-1 uppercase tracking-widest">NET TRANSACTION EARNING</span>
               <p className="text-2xl font-black text-[#F96500] font-sans italic leading-none">
-                ৳{sub.price ? (sub.price * sub.quantity).toLocaleString() : sub.items.reduce((sum: number, x: any) => sum + (x.price * x.quantity), 0).toLocaleString()}
+                à§³{sub.price ? (sub.price * sub.quantity).toLocaleString() : sub.items.reduce((sum: number, x: any) => sum + (x.price * x.quantity), 0).toLocaleString()}
               </p>
-              <span className="text-[8.5px] font-bold text-gray-300 block">Freight Charge Included: ৳{sub.deliveryFee}</span>
+              <span className="text-[8.5px] font-bold text-gray-300 block">Freight Charge Included: à§³{sub.deliveryFee}</span>
             </div>
           </div>
 

@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ShoppingCart, MessageSquare, X, Trash2, ArrowRight, Send, 
-  Clock, Heart, ShoppingBag, ExternalLink, ChevronRight, CheckCircle, 
-  Package, User, Shield, Bell, HelpCircle, LogOut, Settings, Radio, Bookmark,
-  SlidersHorizontal, Search, X as XIcon, RotateCcw, ChevronDown
+  ShoppingCart, MessageSquare, X, Trash2, ArrowRight, 
+  ShoppingBag, ExternalLink, ChevronRight, CheckCircle, 
+  Package, SlidersHorizontal, X as XIcon, RotateCcw
 } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
@@ -13,22 +12,19 @@ import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { cn } from '../lib/utils';
 import { toast } from 'react-hot-toast';
 import { useFloatingFilter, useFloatingFilters } from './FilterEngine';
-import { MobileActionHub, type MobileHubAction } from './MobileActionHub';
 
 export function FloatingOverlays() {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const { mode, retailCart, wholesaleCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo, isLoggedIn, currentUser, setIsLoggedIn, logout } = useGlobalState();
-  const { threads, threadMessages, addThreadMessage, markAllAsRead, setThreads, savedProducts, notifications } = useDashboard();
+  const { mode, retailCart, wholesaleCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo, isLoggedIn } = useGlobalState();
+  const { threads } = useDashboard();
 
-  // Active floating panel state: null | 'cart' | 'inbox' | 'profile'
-  const [activePanel, setActivePanel] = useState<'cart' | 'inbox' | 'profile' | null>(null);
+  // Active floating panel state: cart preview only
+  const [activePanel, setActivePanel] = useState<'cart' | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [mobileHubOpen, setMobileHubOpen] = useState(false);
   const filterDrawerRef = useRef<HTMLDivElement>(null);
-  const mobileHubRef = useRef<HTMLDivElement>(null);
 
   const { config: filterConfig } = useFloatingFilter();
   const { activeFiltersData: drawerFiltersData, setIsOpen: setDrawerFilterOpen, isOpen: drawerFilterOpen } = useFloatingFilters();
@@ -36,13 +32,6 @@ export function FloatingOverlays() {
     !drawerFiltersData &&
     (filterConfig.renderFilters !== null || (filterConfig.quickFilters && filterConfig.quickFilters.length > 0));
   const showFiltersAction = !!drawerFiltersData || hasFilters;
-  
-  // Selected thread inside mini message board for real-time nested chatting
-  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
-  const [chatInput, setChatInput] = useState('');
-  
-  // Profile sliding panel active accordion group
-  const [activeAccordion, setActiveAccordion] = useState<string | null>('account');
 
   // Tracking responsive media
   const [isMobile, setIsMobile] = useState(false);
@@ -67,14 +56,12 @@ export function FloatingOverlays() {
     setActivePanel(null);
     setFilterOpen(false);
     setDrawerFilterOpen(false);
-    setMobileHubOpen(false);
   };
 
-  const openFromMobileHub = (action: () => void) => {
-    setMobileHubOpen(false);
-    setFilterOpen(false);
-    setDrawerFilterOpen(false);
-    action();
+  const openMobileFilters = () => {
+    setActivePanel(null);
+    if (drawerFiltersData) setDrawerFilterOpen(true);
+    else setFilterOpen(true);
   };
 
   // Close active panel upon route transition
@@ -96,8 +83,7 @@ export function FloatingOverlays() {
   // Close auth-only panels when user logs out
   useEffect(() => {
     if (!isLoggedIn) {
-      setActivePanel((panel) => (panel === 'inbox' || panel === 'profile' ? null : panel));
-      setActiveThreadId(null);
+      setActivePanel((panel) => (panel === 'cart' ? panel : null));
     }
   }, [isLoggedIn]);
 
@@ -109,11 +95,9 @@ export function FloatingOverlays() {
 
   // Unread messages tracking (only meaningful when logged in)
   const unreadCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
-  const unreadNotifCount = isLoggedIn ? notifications.filter((n: any) => !n.read).length : 0;
   const [lastUnreadCount, setLastUnreadCount] = useState(unreadCount);
   const [inboxBadgeBounce, setInboxBadgeBounce] = useState(false);
 
-  const miniChatBottomRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -121,21 +105,11 @@ export function FloatingOverlays() {
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (
-        mobileHubOpen &&
-        mobileHubRef.current &&
-        !mobileHubRef.current.contains(event.target as Node)
-      ) {
-        setMobileHubOpen(false);
-        return;
-      }
-
-      if (
         activePanel &&
         panelRef.current &&
         !panelRef.current.contains(event.target as Node) &&
         containerRef.current &&
-        !containerRef.current.contains(event.target as Node) &&
-        (!mobileHubRef.current || !mobileHubRef.current.contains(event.target as Node))
+        !containerRef.current.contains(event.target as Node)
       ) {
         setActivePanel(null);
       }
@@ -151,16 +125,12 @@ export function FloatingOverlays() {
 
     document.addEventListener('mousedown', handleOutsideClick);
     return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [activePanel, filterOpen, mobileHubOpen]);
+  }, [activePanel, filterOpen]);
 
   // Close handler on ESC keypress
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        if (mobileHubOpen) {
-          setMobileHubOpen(false);
-          return;
-        }
         if (activePanel) {
           setActivePanel(null);
           return;
@@ -176,7 +146,7 @@ export function FloatingOverlays() {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [mobileHubOpen, activePanel, filterOpen, drawerFilterOpen, setDrawerFilterOpen]);
+  }, [activePanel, filterOpen, drawerFilterOpen, setDrawerFilterOpen]);
 
   // Trigger bounce on cart changes
   useEffect(() => {
@@ -198,14 +168,7 @@ export function FloatingOverlays() {
     setLastUnreadCount(unreadCount);
   }, [unreadCount, lastUnreadCount]);
 
-  // Scroll to bottom of mini chat
-  useEffect(() => {
-    if (miniChatBottomRef.current) {
-      miniChatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [threadMessages, activeThreadId]);
-
-  // Auto-close drawers if records drop to zero
+  // Auto-close cart drawer if empty
   useEffect(() => {
     if (activePanel === 'cart' && totalCartItems === 0) {
       setActivePanel(null);
@@ -220,137 +183,15 @@ export function FloatingOverlays() {
   }, 0);
 
   const formatPrice = (p: number) => p.toLocaleString('en-US');
-
-  const handleMiniSend = () => {
-    if (!chatInput.trim() || !activeThreadId) return;
-
-    addThreadMessage(activeThreadId, chatInput.trim(), 'user', 'Me');
-    const userMsg = chatInput.trim();
-    setChatInput('');
-
-    setTimeout(() => {
-      const activeThreadObj = threads.find(t => t.id === activeThreadId);
-      let responseText = `Thank you for your message! Our representative logged your query. We will update you shortly on this request.`;
-      
-      const lower = userMsg.toLowerCase();
-      if (lower.includes('deliver') || lower.includes('shipping') || lower.includes('when')) {
-        responseText = `Regarding dispatch, your order is packaging. We secure all catalog orders instantly after confirmation.`;
-      } else if (lower.includes('discount') || lower.includes('price') || lower.includes('cost')) {
-        responseText = `Our wholesale rates are highly competitive. Slabs are applied automatically in global checkouts!`;
-      } else if (lower.includes('size') || lower.includes('color') || lower.includes('variant')) {
-        responseText = `Logged and noted! We package order lots exactly as staged in the inventory parameters.`;
-      } else if (lower.includes('confirm') || lower.includes('approved')) {
-        responseText = `Perfect! Your confirmation log is resolved inside our supply ecosystem. Thank you for choosing Choosify!`;
-      }
-
-      addThreadMessage(activeThreadId, responseText, 'seller', activeThreadObj?.title || 'Partner Support');
-    }, 1500);
-  };
-
-  const activeMessages = threadMessages.filter(m => m.threadId === activeThreadId);
-  const activeThreadObj = threads.find(t => t.id === activeThreadId);
-
-  const accordionGroups = isLoggedIn
-    ? [
-        {
-          id: 'account',
-          title: 'ACCOUNT SECTION',
-          items: [
-            { to: '/dashboard', label: 'My Profile', icon: User, badge: currentUser?.name?.split(' ')[0]?.toUpperCase() },
-            { to: '/dashboard', label: 'Edit Profile', icon: Settings },
-            { to: '/dashboard', label: 'Account Settings', icon: Settings },
-            { to: '/dashboard', label: 'Security Settings', icon: Shield },
-          ]
-        },
-        {
-          id: 'activity',
-          title: 'ACTIVITY SECTION',
-          items: [
-            { to: '/dashboard', label: 'Orders / Activity', icon: ShoppingCart },
-            { to: '/dashboard', label: 'Saved Items', icon: Bookmark, badge: savedProducts.length > 0 ? String(savedProducts.length) : undefined },
-            { to: '/dashboard', label: 'Recently Viewed', icon: Clock },
-            { to: '/dashboard', label: 'Purchase History', icon: Package },
-          ]
-        },
-        {
-          id: 'social',
-          title: 'SOCIAL & CONNECTIONS',
-          items: [
-            { to: '/brands', label: 'Followed Brands', icon: Heart },
-            { to: '/creators', label: 'Followed Creators', icon: Radio },
-            { to: '/dashboard', label: 'Saved Products', icon: Heart, badge: savedProducts.length > 0 ? String(savedProducts.length) : undefined },
-          ]
-        },
-        {
-          id: 'messagesGroup',
-          title: 'MESSAGES & ALERTS',
-          items: [
-            { to: '/messages', label: 'Messages', icon: MessageSquare, badge: unreadCount > 0 ? String(unreadCount) : undefined },
-            { to: '/dashboard?tab=notifications', label: 'Notifications', icon: Bell, badge: unreadNotifCount > 0 ? String(unreadNotifCount) : undefined },
-            { to: '/messages', label: 'Alerts', icon: Shield },
-          ]
-        },
-        {
-          id: 'supportGroup',
-          title: 'SUPPORT',
-          items: [
-            { to: '/messages', label: 'Help Center', icon: HelpCircle },
-            { to: '/messages', label: 'Contact Support', icon: MessageSquare },
-          ]
-        }
-      ]
-    : [];
+  const onMessagesPage = currentPath.startsWith('/messages');
 
   // Stack calculation based on active item volumes
-  const visibleButtonsCount = (isLoggedIn ? 1 : 0) + (isLoggedIn && unreadCount > 0 ? 1 : 0) + (totalCartItems > 0 ? 1 : 0);
+  const visibleButtonsCount = (isLoggedIn && !onMessagesPage ? 1 : 0) + (totalCartItems > 0 ? 1 : 0);
   // Each trigger is h-12 (48px) and equal spacing is gap-3 (12px)
   const triggerStackHeight = visibleButtonsCount * 48 + (visibleButtonsCount - 1) * 12;
 
   // Custom motion transitions matching standard Choosify velocity
   const standardTransition = { type: "spring" as const, damping: 25, stiffness: 350 };
-
-  const mobileHubActions: MobileHubAction[] = [
-    ...(showFiltersAction
-      ? [{
-          id: 'filters',
-          label: 'Filters & Search',
-          description: filterConfig.pageName || 'Refine results',
-          icon: SlidersHorizontal,
-          badge: filterConfig.activeFilterCount > 0 ? filterConfig.activeFilterCount : undefined,
-          onClick: () => openFromMobileHub(() => {
-            if (drawerFiltersData) setDrawerFilterOpen(true);
-            else setFilterOpen(true);
-          }),
-        }]
-      : []),
-    ...(isLoggedIn
-      ? [{
-          id: 'profile',
-          label: 'Your Profile',
-          description: 'Account & settings',
-          icon: User,
-          onClick: () => openFromMobileHub(() => setActivePanel('profile')),
-        } satisfies MobileHubAction]
-      : []),
-    {
-      id: 'cart',
-      label: 'Quick Cart',
-      description: totalCartItems > 0 ? `${totalCartItems} item${totalCartItems === 1 ? '' : 's'}` : 'Empty cart',
-      icon: ShoppingCart,
-      badge: totalCartItems > 0 ? totalCartItems : undefined,
-      onClick: () => openFromMobileHub(() => setActivePanel('cart')),
-    },
-    ...(isLoggedIn
-      ? [{
-          id: 'messages',
-          label: 'Messages',
-          description: unreadCount > 0 ? `${unreadCount} unread` : 'Inbox',
-          icon: MessageSquare,
-          badge: unreadCount > 0 ? unreadCount : undefined,
-          onClick: () => openFromMobileHub(() => setActivePanel('inbox')),
-        } satisfies MobileHubAction]
-      : []),
-  ];
 
   return (
     <>
@@ -450,7 +291,7 @@ export function FloatingOverlays() {
                         )}
                         <div className="flex items-center justify-between">
                           <span className="text-[11px] font-mono font-black text-orange-primary">
-                            ৳{formatPrice(itemPrice)}
+                            à§³{formatPrice(itemPrice)}
                           </span>
                           
                           {/* Compact Qty Stepper */}
@@ -491,7 +332,7 @@ export function FloatingOverlays() {
               <div className="p-6 border-t border-white/5 bg-white/[0.01] space-y-4 shrink-0">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-black uppercase tracking-widest text-[#A0A5C0]">Estimated Subtotal</span>
-                  <span className="text-lg font-mono font-black text-white">৳{formatPrice(subtotal)}</span>
+                  <span className="text-lg font-mono font-black text-white">à§³{formatPrice(subtotal)}</span>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">
@@ -519,413 +360,13 @@ export function FloatingOverlays() {
           </motion.div>
         )}
 
-        {/* PANEL 2: MINI FLOATING INBOX (logged-in only) */}
-        {isLoggedIn && activePanel === 'inbox' && (
-          <motion.div
-            ref={panelRef}
-            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
-            animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
-            transition={standardTransition}
-            style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
-            drag={isMobile ? "y" : false}
-            dragConstraints={{ top: 0, bottom: 250 }}
-            dragElastic={{ top: 0.1, bottom: 0.8 }}
-            onDragEnd={(e, info) => {
-              if (info.offset.y > 120) {
-                setActivePanel(null);
-              }
-            }}
-            className={cn(
-              "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
-              isMobile
-                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto"
-                : isTablet
-                  ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
-                  : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
-            )}
-            id="floating-mini-inbox-drawer"
-          >
-            {/* Drawer Drag Indicator on Mobile */}
-            {isMobile && (
-              <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
-            )}
-
-            {/* Inbox Header Block */}
-            <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3.5 text-left">
-                <div className="w-9 h-9 rounded-full bg-orange-primary/10 flex items-center justify-center text-orange-primary shrink-0">
-                  <MessageSquare size={16} />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-widest text-[#E8500A] font-extrabold text-left">Quick Connect</div>
-                  <h3 className="text-xs md:text-sm font-black text-[#1A1A2E] leading-tight uppercase">
-                    Merchant Inbox
-                  </h3>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => { setActivePanel(null); navigate('/messages'); }}
-                  className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider hover:underline cursor-pointer border-0 bg-transparent"
-                >
-                  Open Full ↗
-                </button>
-                <button 
-                  onClick={() => setActivePanel(null)}
-                  className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#1A1A2E] transition-all border border-[#e8edf2] cursor-pointer"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            </div>
-
-            {/* Panel Body */}
-            {activeThreadId === null ? (
-              <div className="flex-1 overflow-y-auto no-scrollbar divide-y divide-[#e8edf2]">
-                {threads.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                    <MessageSquare size={28} className="text-gray-300 mb-3" />
-                    <p className="text-[11px] font-bold text-gray-400">No conversations yet</p>
-                  </div>
-                ) : threads.map(thread => {
-                  const displayName = thread.title;
-                  return (
-                    <button
-                      key={thread.id}
-                      onClick={() => setActiveThreadId(thread.id)}
-                      className="w-full flex items-start gap-3 p-4 hover:bg-gray-50 transition-colors text-left font-sans"
-                    >
-                      <div className="w-9 h-9 rounded-full bg-orange-primary/10 flex items-center justify-center shrink-0 text-[10px] font-black text-orange-primary">
-                        {displayName?.substring(0, 2) || '??'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-[11px] font-black text-[#1A1A2E] truncate uppercase">{displayName}</span>
-                          {thread.unread && <span className="w-2 h-2 rounded-full bg-orange-primary shrink-0 ml-2" />}
-                        </div>
-                        <p className="text-[10px] text-gray-400 truncate font-medium">{thread.lastMessage}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Chat view */
-              <div className="flex flex-col flex-1 overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-[#e8edf2] shrink-0 bg-gray-50">
-                  <button onClick={() => setActiveThreadId(null)} className="text-gray-400 hover:text-[#1A1A2E] p-1 cursor-pointer bg-transparent border-0 text-[12px] font-bold">
-                    ←
-                  </button>
-                  <span className="text-[11px] font-black text-[#1A1A2E] uppercase">
-                    {threads.find(t => t.id === activeThreadId)?.title}
-                  </span>
-                </div>
-                <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-3">
-                  {(activeMessages || []).map((msg: any, i: number) => {
-                    const isOutgoing = msg.sender === 'user';
-                    return (
-                      <div key={i} className={`flex ${isOutgoing ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[75%] px-3 py-2 rounded-2xl text-[11px] font-medium ${isOutgoing ? 'bg-orange-primary text-white rounded-br-sm' : 'bg-gray-100 text-[#1A1A2E] rounded-bl-sm'}`}>
-                          {msg.text || msg.content || msg.message}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div ref={miniChatBottomRef} />
-                </div>
-                <div className="p-3 border-t border-[#e8edf2] flex gap-2 shrink-0">
-                  <input
-                    value={chatInput}
-                    onChange={e => setChatInput(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' && chatInput.trim()) {
-                        addThreadMessage(activeThreadId, chatInput.trim(), 'user', 'Me');
-                        setChatInput('');
-                      }
-                    }}
-                    placeholder="Type a message..."
-                    className="flex-1 px-3 py-2 bg-gray-50 border border-[#e8edf2] rounded-full text-[11px] font-medium outline-none focus:border-orange-primary text-[#1A1A2E]"
-                  />
-                  <button
-                    onClick={() => {
-                      if (chatInput.trim()) {
-                        addThreadMessage(activeThreadId, chatInput.trim(), 'user', 'Me');
-                        setChatInput('');
-                      }
-                    }}
-                    className="w-9 h-9 rounded-full bg-orange-primary text-white flex items-center justify-center shrink-0 cursor-pointer border-0 hover:bg-[#CF4400] transition-colors"
-                  >
-                    <Send size={13} />
-                  </button>
-                </div>
-              </div>
-            )}
-          </motion.div>
-        )}
-
-        {/* PANEL 3: YOUR PROFILE DRAWER (Slide Up bottom->top dock system) */}
-        {isLoggedIn && activePanel === 'profile' && (
-          <motion.div
-            ref={panelRef}
-            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
-            animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
-            transition={standardTransition}
-            style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
-            drag={isMobile ? "y" : false}
-            dragConstraints={{ top: 0, bottom: 250 }}
-            dragElastic={{ top: 0.1, bottom: 0.8 }}
-            onDragEnd={(e, info) => {
-              if (info.offset.y > 120) {
-                setActivePanel(null);
-              }
-            }}
-            className={cn(
-              "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
-              isMobile
-                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto"
-                : isTablet
-                  ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
-                  : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
-            )}
-            id="floating-profile-dock-drawer"
-          >
-            {/* Drawer Drag Indicator on Mobile */}
-            {isMobile && (
-              <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
-            )}
-
-            {/* Profile Header Block */}
-            <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3.5 text-left">
-                <div className="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md shrink-0 bg-orange-primary/10 flex items-center justify-center">
-                  {isLoggedIn && currentUser?.avatar ? (
-                    <img 
-                      src={currentUser.avatar} 
-                      className="w-full h-full object-cover" 
-                      alt={currentUser.name || 'Profile'} 
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <User size={18} className="text-orange-primary" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-xs md:text-sm font-black text-[#1A1A2E] leading-tight uppercase">
-                    {isLoggedIn ? (currentUser?.name || 'My Account') : 'Guest User'}
-                  </h3>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="inline-block bg-[#E8500A]/10 text-[#E8500A] text-[7.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
-                      {isLoggedIn ? 'CHOOSIFY MEMBER' : 'SIGN IN TO CONTINUE'}
-                    </span>
-                    {isLoggedIn && <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />}
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                onClick={() => setActivePanel(null)}
-                className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#1A1A2E] transition-all border border-[#e8edf2] cursor-pointer"
-              >
-                <X size={14} />
-              </button>
-            </div>
-
-            {isLoggedIn ? (
-            <>
-            {/* Accordion List Body */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2.5 no-scrollbar text-left select-none">
-              {accordionGroups.map((group) => {
-                const isExpanded = activeAccordion === group.id;
-
-                return (
-                  <div 
-                    key={group.id} 
-                    className={cn(
-                      "border border-[#e8edf2] rounded-[10px] overflow-hidden transition-all duration-300",
-                      isExpanded ? "bg-white border-[#E8500A]/15 shadow-sm" : "bg-white hover:bg-[#FFF8F5]/30"
-                    )}
-                  >
-                    <button
-                      onClick={() => setActiveAccordion(isExpanded ? null : group.id)}
-                      className="w-full px-4 py-3 flex items-center justify-between font-sans text-[10px] font-black uppercase tracking-wider text-left text-[#1A1A2E] bg-transparent outline-none focus:outline-none cursor-pointer"
-                    >
-                      <span className={cn("transition-colors duration-200", isExpanded && "text-[#E8500A]")}>
-                        {group.title}
-                      </span>
-                      {isExpanded ? (
-                        <ChevronRight size={13} className="text-[#E8500A] transform rotate-90 transition-transform duration-200" />
-                      ) : (
-                        <ChevronRight size={13} className="text-[#8a9bb0] transition-transform duration-200" />
-                      )}
-                    </button>
-
-                    {/* Collapsible item stack */}
-                    <AnimatePresence initial={false}>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2, ease: 'easeInOut' }}
-                          className="border-t border-[#f4f7f9] bg-[#FDFDFD]"
-                        >
-                          <div className="py-1.5 px-2 space-y-0.5">
-                            {group.items.map((item, idx) => {
-                              const Icon = item.icon;
-                              // Highlight active routes
-                              const isRouteActive = item.to === '/' 
-                                ? currentPath === '/' 
-                                : currentPath === item.to || currentPath.startsWith(item.to + '/');
-
-                              return (
-                                <Link
-                                  key={idx}
-                                  to={item.to}
-                                  onClick={() => {
-                                    // Minimize panel on navigation if user selects a link
-                                    setActivePanel(null);
-                                  }}
-                                  id={`floating-profile-dock-${group.id}-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                                  className={cn(
-                                    "flex items-center justify-between py-2 px-3 rounded-[6px] transition-all group duration-200",
-                                    isRouteActive 
-                                      ? "bg-[#FFF0E8] text-[#E8500A] font-black"
-                                      : "hover:bg-[#FFF0E8]/45 text-[#1A1A2E] hover:text-[#E8500A]"
-                                  )}
-                                >
-                                  <div className="flex items-center gap-2.5">
-                                    <Icon 
-                                      size={13} 
-                                      className={cn(
-                                        "transition-colors shrink-0",
-                                        isRouteActive ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A]"
-                                      )} 
-                                    />
-                                    <span className="font-sans text-[10.5px] font-semibold uppercase tracking-wide">
-                                      {item.label}
-                                    </span>
-                                  </div>
-                                  {item.badge && (
-                                    <span className={cn(
-                                      "px-2 py-0.5 text-[8px] font-mono font-black rounded-full leading-none shrink-0",
-                                      isRouteActive 
-                                        ? "bg-[#E8500A]/10 text-[#E8500A]"
-                                        : "bg-gray-100 text-gray-400 group-hover:bg-[#FFF0E8] group-hover:text-[#E8500A]"
-                                    )}>
-                                      {item.badge}
-                                    </span>
-                                  )}
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Logout Session Action Box */}
-            <div className="p-4 border-t border-[#e8edf2] bg-gray-50 flex gap-2 shrink-0">
-              <button
-                onClick={() => {
-                  logout();
-                  toast.success("Successfully logged out!", { icon: '👋' });
-                  setActivePanel(null);
-                }}
-                className="flex-1 py-3 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-sans text-[10px] font-black uppercase tracking-wider rounded-lg border border-[#e8edf2] hover:border-rose-200 flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
-              >
-                <LogOut size={12} />
-                <span>Log Out Session</span>
-              </button>
-            </div>
-            </>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">
-                <p className="text-sm font-semibold text-[#1A1A2E]">Sign in to access your profile, messages, and saved items.</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActivePanel(null);
-                    navigate('/login', { state: { tab: 'sign-in' } });
-                  }}
-                  className="w-full max-w-xs py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-colors"
-                >
-                  Sign In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActivePanel(null);
-                    navigate('/login', { state: { tab: 'sign-up' } });
-                  }}
-                  className="w-full max-w-xs py-3 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[10px] font-black uppercase tracking-widest rounded-full border border-[#e8edf2] transition-colors"
-                >
-                  Create Account
-                </button>
-              </div>
-            )}
-          </motion.div>
-        )}
-
       </AnimatePresence>
 
       
-      {/* Desktop / tablet pill stack — hidden on mobile (replaced by MobileActionHub) */}
+      {/* Desktop / tablet pill stack â€” cart + messages only */}
       <div className="hidden sm:flex flex-col-reverse items-end gap-3 w-[185px]">
 
-        {/* BUTTON 1: PROFILE PILL — logged-in users only */}
-        {isLoggedIn && (
-        <motion.button
-          id="floating-profile-dock-pill"
-          onClick={() => {
-            setActivePanel(activePanel === 'profile' ? null : 'profile');
-            if (activePanel !== 'profile') setFilterOpen(false);
-          }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className={cn(
-            "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
-            activePanel === 'profile'
-              ? "bg-[#FFF0E8] border-[#E8500A] text-[#E8500A]"
-              : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40"
-          )}
-          title="Account Profile Quick Dock"
-        >
-          <div className="flex items-center gap-2 max-w-[130px]">
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-orange-primary/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
-              {currentUser?.avatar ? (
-                <img 
-                  src={currentUser.avatar} 
-                  className="w-full h-full object-cover" 
-                  alt={currentUser.name || 'Profile'} 
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <User size={12} className="text-orange-primary" />
-              )}
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-wider truncate">
-              YOUR PROFILE
-            </span>
-          </div>
-          <ArrowRight 
-            size={14} 
-            className={cn(
-              "transition-transform duration-300",
-              activePanel === 'profile' ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A] group-hover:translate-x-1"
-            )} 
-          />
-        </motion.button>
-        )}
-
-
-        {/* BUTTON 2: THE SHOPPING CART PILL (Visible only if cart contains items) */}
+        {/* BUTTON 2: QUICK CART (visible when cart has items) */}
         <AnimatePresence>
           {totalCartItems > 0 && (
             <motion.button
@@ -975,21 +416,24 @@ export function FloatingOverlays() {
         </AnimatePresence>
 
 
-        {/* BUTTON 3: THE MESSAGES PILL (logged-in users with unread messages only) */}
+        {/* MESSAGES PILL — hidden while on messages page */}
         <AnimatePresence>
-          {isLoggedIn && unreadCount > 0 && (
+          {isLoggedIn && !onMessagesPage && (
             <motion.button
               key="dock-messages-trigger"
               initial={{ scale: 0, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0, opacity: 0, y: 15 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              onClick={() => setActivePanel(activePanel === 'inbox' ? null : 'inbox')}
+              onClick={() => {
+                setActivePanel(null);
+                navigate('/messages');
+              }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
                 "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
-                activePanel === 'inbox'
+                currentPath.startsWith('/messages')
                   ? "bg-[#FFF0E8] border-[#E8500A] text-[#E8500A]"
                   : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40"
               )}
@@ -1000,7 +444,7 @@ export function FloatingOverlays() {
                   size={15} 
                   className={cn(
                     "transition-colors",
-                    activePanel === 'inbox' ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A]"
+                    currentPath.startsWith('/messages') ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A]"
                   )} 
                 />
                 <span className="text-[10px] font-black uppercase tracking-wider">
@@ -1012,13 +456,15 @@ export function FloatingOverlays() {
                 animate={inboxBadgeBounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
                 className={cn(
-                  "font-mono text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center leading-none",
-                  activePanel === 'inbox' 
+                  "font-mono text-[9px] font-black min-w-[1.25rem] h-5 px-1 rounded-full flex items-center justify-center leading-none",
+                  currentPath.startsWith('/messages')
                     ? "bg-[#E8500A] text-white"
-                    : "bg-gradient-to-br from-[#FF6A00] to-[#FF9E2C] text-white animate-pulse"
+                    : unreadCount > 0
+                      ? "bg-gradient-to-br from-[#FF6A00] to-[#FF9E2C] text-white animate-pulse"
+                      : "bg-[#e8edf2] text-[#8a9bb0]"
                 )}
               >
-                {unreadCount > 99 ? '99+' : unreadCount}
+                {unreadCount > 99 ? '99+' : unreadCount > 0 ? unreadCount : '•'}
               </motion.span>
             </motion.button>
           )}
@@ -1085,7 +531,7 @@ export function FloatingOverlays() {
 
     </div>
 
-    {/* FILTER LAUNCHER — legacy useRegisterPageFilters pages; drawer on all sizes, pill desktop-only */}
+    {/* FILTER LAUNCHER â€” legacy useRegisterPageFilters pages; drawer on all sizes, pill desktop-only */}
     {hasFilters && (
       <>
         <AnimatePresence>
@@ -1262,23 +708,27 @@ export function FloatingOverlays() {
       </>
     )}
 
-    {isMobile && (
-      <MobileActionHub
-        isOpen={mobileHubOpen}
-        onToggle={() => {
-          if (mobileHubOpen) {
-            setMobileHubOpen(false);
-            return;
-          }
-          setActivePanel(null);
-          setFilterOpen(false);
-          setDrawerFilterOpen(false);
-          setMobileHubOpen(true);
-        }}
-        onClose={() => setMobileHubOpen(false)}
-        actions={mobileHubActions}
-        hubRef={mobileHubRef}
-      />
+    {isMobile && showFiltersAction && (
+      <motion.button
+        type="button"
+        onClick={openMobileFilters}
+        whileTap={{ scale: 0.95 }}
+        className={cn(
+          'fixed z-[220] bottom-4 right-4 w-14 h-14 rounded-full border shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-colors pointer-events-auto sm:hidden',
+          filterOpen || drawerFilterOpen
+            ? 'bg-heading border-heading text-white'
+            : 'bg-orange-primary border-orange-primary text-white',
+        )}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        aria-label="Open filters"
+      >
+        <SlidersHorizontal size={22} />
+        {filterConfig.activeFilterCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-white text-orange-primary text-[9px] font-black border-2 border-orange-primary flex items-center justify-center">
+            {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
+          </span>
+        )}
+      </motion.button>
     )}
   </>
 );

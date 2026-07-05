@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Plus, ChevronRight, Info, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
+import { cn } from '../lib/utils';
 
 export function PostOfferPage() {
   const [step, setStep] = useState(1);
@@ -30,6 +32,7 @@ export function PostOfferPage() {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
 
   // Load draft on mount
   useEffect(() => {
@@ -183,20 +186,30 @@ export function PostOfferPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen choosify-dark-gradient py-12 px-8">
-      <div className="max-w-4xl mx-auto w-full">
-         <div className="mb-12">
-            <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 italic">Post Your Offer</h1>
-            <div className="flex items-center gap-4">
-               <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full button-gradient transition-all duration-300" style={{ width: `${(step / 4) * 100}%` }} />
-               </div>
-               <span className="text-orange-primary font-black uppercase text-[10px] tracking-widest whitespace-nowrap">
-                 Step {step} of 4 — {['Basic Info', 'Media Upload', 'Pricing & Details', 'Seller Info'][step - 1]}
-               </span>
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
+      <section
+        ref={heroRef}
+        className={cn(
+          'relative choosify-dark-gradient px-8 pt-12 pb-10 border-b border-white/5',
+          HERO_SCROLL_CUE_PADDING,
+        )}
+      >
+        <div className="max-w-4xl mx-auto w-full">
+          <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 italic">Post Your Offer</h1>
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full button-gradient transition-all duration-300" style={{ width: `${(step / 4) * 100}%` }} />
             </div>
-         </div>
+            <span className="text-orange-primary font-black uppercase text-[10px] tracking-widest whitespace-nowrap">
+              Step {step} of 4 — {['Basic Info', 'Media Upload', 'Pricing & Details', 'Seller Info'][step - 1]}
+            </span>
+          </div>
+        </div>
+        <HeroScrollCue anchorRef={heroRef} scrollTargetId="post-offer-form" resetKey={step} />
+      </section>
 
+      <div id="post-offer-form" className="px-8 py-12">
+        <div className="max-w-4xl mx-auto w-full">
          <div className="bg-white rounded-[5px] p-12 shadow-2xl space-y-16">
             {draftRestored && (
               <div className="flex items-center justify-between bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-wider px-4 py-3 rounded-xl mb-4">
@@ -481,6 +494,7 @@ export function PostOfferPage() {
                </div>
             </section>
          </div>
+        </div>
       </div>
     </div>
   );

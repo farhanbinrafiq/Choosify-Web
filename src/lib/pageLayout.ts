@@ -159,3 +159,6 @@ export const CATEGORY_CARD_GRID = 'choosify-category-grid w-full';
 
 /** Home popular categories — always 5 cards per row from lg+ (mobile stays 2 cols) */
 export const HOME_POPULAR_CATEGORY_GRID = 'choosify-home-category-grid w-full';
+
+/** What's On brand post cards — 1 → 2 → 3 → 4 cols by breakpoint; max 4 per row */
+export const WHATS_ON_CARD_GRID = 'choosify-whats-on-grid w-full';

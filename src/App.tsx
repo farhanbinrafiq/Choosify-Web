@@ -6,6 +6,8 @@ import { PageSeo } from './components/PageSeo';
 import { GoogleAnalyticsRouteTracker } from './components/GoogleAnalyticsRouteTracker';
 import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingOverlays } from './components/FloatingOverlays';
+import { PageBreadcrumbsBar } from './components/PageBreadcrumbs';
+import { BreadcrumbProvider } from './context/BreadcrumbContext';
 import { DashboardProvider } from './context/DashboardContext';
 import { GlobalStateProvider } from './context/GlobalStateContext';
 import { DrawerFilterProvider, FloatingFilterProvider } from './components/FilterEngine';
@@ -183,6 +185,7 @@ function AppContent() {
   const location = useLocation();
   const isOverview = location.pathname === '/overview';
   const isCompactShell = location.pathname === '/login';
+  const isMessagesShell = location.pathname.startsWith('/messages');
   const showSiteChrome = !isOverview;
 
   return (
@@ -244,7 +247,7 @@ function AppContent() {
         </Suspense>
       </AnimatePresence>
       {!isOverview && !isCompactShell && <FloatingOverlays />}
-      {showSiteChrome && !isCompactShell && <Footer />}
+      {showSiteChrome && !isCompactShell && !isMessagesShell && <Footer />}
     </div>
   );
 }
@@ -276,7 +279,9 @@ export default function App() {
             <PageSeo />
             <DrawerFilterProvider>
               <FloatingFilterProvider>
-                <AppContent />
+                <BreadcrumbProvider>
+                  <AppContent />
+                </BreadcrumbProvider>
               </FloatingFilterProvider>
             </DrawerFilterProvider>
             <PWAInstallPrompt />
@@ -297,6 +302,7 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
       transition={{ duration: 0.3 }}
       className="pb-0 mobile-fab-safe sm:pb-0"
     >
+      <PageBreadcrumbsBar />
       {children}
     </motion.div>
   );

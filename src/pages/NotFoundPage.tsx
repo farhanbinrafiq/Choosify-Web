@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home, Search } from 'lucide-react';
+import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
+import { cn } from '../lib/utils';
 
 export default function NotFoundPage() {
   const navigate = useNavigate();
+  const heroRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
@@ -14,9 +17,15 @@ export default function NotFoundPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] choosify-dark-gradient flex items-center justify-center p-8 text-center overflow-hidden relative">
+    <div
+      ref={heroRef}
+      className={cn(
+        'min-h-[calc(100vh-5rem)] choosify-dark-gradient flex flex-col items-center justify-center p-8 text-center relative',
+        HERO_SCROLL_CUE_PADDING,
+      )}
+    >
 
-      <div className="max-w-xl relative z-10 animate-in fade-in zoom-in duration-700">
+      <div className="max-w-xl relative z-10 animate-in fade-in zoom-in duration-700 flex-1 flex flex-col items-center justify-center">
         <h1 className="text-[120px] sm:text-[180px] font-black text-white/5 leading-none mb-[-40px] italic tracking-tighter">404</h1>
         
         <div className="space-y-6">
@@ -47,7 +56,7 @@ export default function NotFoundPage() {
           </div>
         </div>
 
-        <div className="mt-20 pt-10 border-t border-white/5">
+        <div id="not-found-search" className="mt-20 pt-10 border-t border-white/5 w-full">
           <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.5em] italic mb-6">Try searching instead</p>
           <form onSubmit={handleSearch} className="relative max-w-md mx-auto">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" size={18} />
@@ -61,6 +70,8 @@ export default function NotFoundPage() {
           </form>
         </div>
       </div>
+
+      <HeroScrollCue anchorRef={heroRef} scrollTargetId="not-found-search" />
     </div>
   );
 }

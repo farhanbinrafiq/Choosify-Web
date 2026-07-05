@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, ArrowRight, ShoppingBag } from 'lucide-react';
 import { BLOGS, PRODUCTS } from '../constants';
@@ -28,8 +29,7 @@ export function GuideProductsPage() {
   return (
     <div className="bg-choosify-feed min-h-screen pb-32">
       {/* Header Section */}
-      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
-        <div className="absolute inset-0 hero-gradient pointer-events-none" />
+      <PageHeroHeader>
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex items-center gap-6">
             <Link 
@@ -50,7 +50,7 @@ export function GuideProductsPage() {
             </div>
           </div>
         </div>
-      </div>
+      </PageHeroHeader>
 
       {/* Products Grid */}
       <div className="max-w-[1440px] mx-auto px-6 mt-8 relative z-20">

@@ -3,7 +3,6 @@ import {
   LayoutDashboard, 
   Heart, 
   Bookmark, 
-  Layers, 
   MessageSquare, 
   Star, 
   Settings, 
@@ -21,15 +20,10 @@ import {
   MoreVertical,
   CheckCircle2,
   Clock,
-  ExternalLink,
   ShieldCheck,
   TrendingUp,
   Filter,
-  X,
-  Truck,
-  FileText,
-  Briefcase,
-  Sparkles
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard } from '../context/DashboardContext';
@@ -37,7 +31,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
 import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
 import { RecommendationCard } from '../components/RecommendationCard';
-import { PRODUCTS, BRANDS, BLOGS } from '../constants';
+import { PRODUCTS, BLOGS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
@@ -102,7 +96,7 @@ const StatCard = ({ icon: Icon, label, value, color, onClick }: any) => (
 // --- SECTIONS ---
 
 const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void }) => {
-  const { savedProducts, savedBrands, lovedBrands, followedBrands, recentlyViewed, comparedProducts } = useDashboard();
+  const { savedProducts, savedBrands, lovedBrands, followedBrands, recentlyViewed } = useDashboard();
   
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
@@ -265,7 +259,7 @@ const SavedBrandsSection = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
           <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Brands</span> <span className="text-gray-450 text-2xl">({savedBrands.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">☆ Bookmarked partners for later reference</p>
+          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">â˜† Bookmarked partners for later reference</p>
         </div>
       </div>
 
@@ -329,7 +323,7 @@ const LovedBrandsSection = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
           <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Loved <span className="text-[#E8500A]">Brands</span> <span className="text-gray-400 text-2xl">({lovedBrands.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">♥ Brands you reacted to with love</p>
+          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">â™¥ Brands you reacted to with love</p>
         </div>
       </div>
 
@@ -393,7 +387,7 @@ const FollowedBrandsSection = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
           <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Followed <span className="text-[#E8500A]">Partners</span> <span className="text-gray-400 text-2xl">({followedBrands.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">⚡ Subscribed to receive updates and deals</p>
+          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">âš¡ Subscribed to receive updates and deals</p>
         </div>
       </div>
 
@@ -462,7 +456,7 @@ const RecentlyViewedSection = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
           <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Recently <span className="text-[#E8500A]">Viewed</span> <span className="text-gray-400 text-2xl">({recentlyViewed.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">🕒 Products you recently browsed</p>
+          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">ðŸ•’ Products you recently browsed</p>
         </div>
         {recentlyViewed.length > 0 && (
           <button 
@@ -494,81 +488,6 @@ const RecentlyViewedSection = () => {
   );
 };
 
-const CompareToolSection = () => {
-  const { comparedProducts, removeFromCompare } = useDashboard();
-  
-  return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Compare <span className="text-[#059669]">Matrix</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Side-by-side analysis for smart decisions</p>
-        </div>
-        <div className="flex items-center gap-4">
-           <button className="px-8 py-3 bg-white border border-gray-200 text-navy rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 flex items-center gap-2 cursor-pointer shadow-sm">
-              <Send size={14} /> Share Link
-           </button>
-           <Link to="/compare" className="px-8 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#E8500A]/10 hover:scale-105 active:scale-95 transition-all animate-none">Full View</Link>
-        </div>
-      </div>
-
-      <div className="bg-white border border-[#e8edf2] rounded-[5px] overflow-hidden shadow-sm">
-        <div className="overflow-x-auto no-scrollbar">
-          <div className="min-w-[800px]">
-            <div className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-gray-150 border-b border-gray-150">
-               <div className="p-8 flex flex-col justify-center bg-gray-50/50">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic mb-2">Active Slots</span>
-                  <h4 className="text-xl font-black text-navy italic uppercase leading-none">{comparedProducts.length}/4 Models</h4>
-               </div>
-               {[...comparedProducts, ...Array(4 - comparedProducts.length).fill(null)].slice(0, 3).map((p, i) => (
-                 <div key={i} className="p-8 group relative min-h-[200px] flex flex-col items-center justify-center">
-                   {p ? (
-                     <>
-                       <button 
-                         onClick={() => removeFromCompare(p.id)}
-                         className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all font-sans bg-transparent border-none cursor-pointer"
-                       >
-                         <X size={16} />
-                       </button>
-                       <img src={p.image} className="w-20 h-20 object-contain mb-6" alt="" />
-                       <h5 className="text-[11px] font-black text-[#1a1a2e ] italic uppercase text-center line-clamp-1">{p.title}</h5>
-                       <span className="text-[10px] font-bold text-[#E8500A] mt-1 italic">BDT {p.price}</span>
-                     </>
-                   ) : (
-                     <button className="w-16 h-16 rounded-full border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 hover:border-gray-400 hover:text-gray-500 transition-all bg-transparent cursor-pointer">
-                        <Plus size={24} />
-                     </button>
-                   )}
-                 </div>
-               ))}
-            </div>
-            
-            {/* Comparison Table (Simplified) */}
-            <div className="divide-y divide-gray-150">
-                {[
-                  { label: 'Rating', values: comparedProducts.map(p => p.rating + '/5.0') },
-                  { label: 'Market Value', values: comparedProducts.map(() => 'Premium') },
-                  { label: 'In Stock', values: comparedProducts.map(() => 'Yes (Dhaka)'), color: 'text-[#059669]' },
-                  { label: 'Expert Score', values: comparedProducts.map(() => '92/100'), color: 'text-[#E8500A]' }
-                ].map((row, i) => (
-                  <div key={i} className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-gray-150">
-                     <div className="p-6 bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase italic tracking-widest">{row.label}</div>
-                     {row.values.map((val, vidx) => (
-                       <div key={vidx} className={cn("p-6 text-center text-xs font-bold italic", row.color || "text-navy")}>{val}</div>
-                     ))}
-                     {/* Empty slot fillers */}
-                     {Array(3 - row.values.length).fill(null).map((_, fidx) => (
-                       <div key={`f-${fidx}`} className="p-6 text-center text-gray-300">-</div>
-                     ))}
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Legacy MessagesSection removed in favor of modern /messages page
 const MessagesSection = () => {
@@ -650,7 +569,7 @@ const MessagesSection = () => {
                  )}>
                     {m.text}
                  </div>
-                 <span className="text-[8px] font-black text-gray-400 uppercase italic px-2">{m.senderName || 'Farhan'} • {m.time}</span>
+                 <span className="text-[8px] font-black text-gray-400 uppercase italic px-2">{m.senderName || 'Farhan'} â€¢ {m.time}</span>
               </div>
             ))}
          </div>
@@ -786,7 +705,7 @@ const SettingsSection = () => {
                    </div>
                 </div>
                 <h4 className="text-xl font-black text-navy italic uppercase mb-1">{name}</h4>
-                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator • ID: 89BD-001</p>
+                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator â€¢ ID: 89BD-001</p>
               </div>
 
              <div className="space-y-6">
@@ -873,605 +792,7 @@ const SettingsSection = () => {
   );
 };
 
-const AdminOverviewsSection = () => {
-  const { customOverviews, addCustomOverview, deleteCustomOverview } = useDashboard();
-  const [targetType, setTargetType] = useState<'brand' | 'product'>('product');
-  const [targetId, setTargetId] = useState('');
-  const [sectionName, setSectionName] = useState('');
-  const [bulletText, setBulletText] = useState('');
 
-  // Set default targetId when targetType changes
-  useEffect(() => {
-    if (targetType === 'brand') {
-      setTargetId(BRANDS[0]?.name.toLowerCase() || '');
-    } else {
-      setTargetId(String(PRODUCTS[0]?.id) || '');
-    }
-  }, [targetType]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!targetId || !sectionName || !bulletText) {
-      toast.error('Please fill in all fields.');
-      return;
-    }
-
-    // Process textarea lines into non-empty bullet points
-    const content = bulletText
-      .split('\n')
-      .map(line => line.trim().replace(/^•\s*/, ''))
-      .filter(line => line.length > 0);
-
-    if (content.length === 0) {
-      toast.error('Please write at least one bullet point.');
-      return;
-    }
-
-    addCustomOverview({
-      targetType,
-      targetId,
-      sectionName: sectionName.trim(),
-      content
-    });
-
-    // Reset form
-    setSectionName('');
-    setBulletText('');
-  };
-
-  return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700 text-left">
-      <div>
-        <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">
-          Overviews <span className="text-[#E8500A]">Manager</span>
-        </h2>
-        <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">
-          Add dynamic overview sections to brands or products in real-time
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Form Column */}
-        <div className="lg:col-span-1 bg-white border border-gray-150 rounded-[5px] p-6 shadow-sm">
-          <h3 className="text-sm font-black text-navy uppercase tracking-wider mb-4 border-b border-gray-150 pb-2 flex items-center gap-2">
-            <span className="text-[#E8500A]">✦</span> Create Section
-          </h3>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Target Type selector */}
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
-                Target Entity Type
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTargetType('product')}
-                  className={`py-2 text-[10px] font-black uppercase tracking-wider border rounded cursor-pointer ${
-                    targetType === 'product'
-                      ? 'bg-navy text-white border-navy'
-                      : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
-                  }`}
-                >
-                  Product
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTargetType('brand')}
-                  className={`py-2 text-[10px] font-black uppercase tracking-wider border rounded cursor-pointer ${
-                    targetType === 'brand'
-                      ? 'bg-navy text-white border-navy'
-                      : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
-                  }`}
-                >
-                  Brand
-                </button>
-              </div>
-            </div>
-
-            {/* Target selection dropdown */}
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
-                Select {targetType === 'product' ? 'Product' : 'Brand'}
-              </label>
-              <select
-                value={targetId}
-                onChange={(e) => setTargetId(e.target.value)}
-                className="w-full text-[11px] font-bold border border-gray-200 rounded p-2.5 bg-gray-50 uppercase tracking-wide focus:outline-none focus:border-orange-primary"
-              >
-                {targetType === 'product'
-                  ? PRODUCTS.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.title} (ID: {p.id})
-                      </option>
-                    ))
-                  : BRANDS.map(b => (
-                      <option key={b.name} value={b.name.toLowerCase()}>
-                        {b.name}
-                      </option>
-                    ))}
-              </select>
-            </div>
-
-            {/* Section Name */}
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
-                Section Name (Dynamic Header)
-              </label>
-              <input
-                type="text"
-                value={sectionName}
-                onChange={(e) => setSectionName(e.target.value)}
-                placeholder="e.g. Sustainability, Certifications"
-                className="w-full text-[11px] font-bold border border-gray-200 rounded p-2.5 bg-gray-50 uppercase tracking-wide focus:outline-none focus:border-orange-primary"
-                required
-              />
-            </div>
-
-            {/* Content Textarea */}
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
-                Content (One bullet point per line)
-              </label>
-              <textarea
-                value={bulletText}
-                onChange={(e) => setBulletText(e.target.value)}
-                placeholder="• 100% Recycled titanium frame&#10;• Certified organic cotton weave&#10;• Zero plastic packaging used"
-                rows={5}
-                className="w-full text-[11px] font-bold border border-gray-200 rounded p-2.5 bg-gray-50 tracking-wide focus:outline-none focus:border-orange-primary leading-relaxed"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white py-3 rounded text-[11px] font-black uppercase tracking-widest cursor-pointer select-none shadow-md transition-colors"
-            >
-              Add Section
-            </button>
-          </form>
-        </div>
-
-        {/* Existing Sections Column */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white border border-gray-150 rounded-[5px] p-6 shadow-sm">
-            <h3 className="text-sm font-black text-navy uppercase tracking-wider mb-4 border-b border-gray-150 pb-2 flex items-center gap-2">
-              <span className="text-[#E8500A]">✦</span> Active Custom Sections ({customOverviews?.length || 0})
-            </h3>
-
-            {customOverviews?.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 border border-dashed border-gray-200 rounded flex flex-col items-center justify-center gap-2">
-                <p className="text-xs font-bold text-gray-450 uppercase tracking-wider italic">
-                  No custom overview sections have been created yet.
-                </p>
-                <p className="text-[10px] text-gray-400 font-medium">
-                  Use the form to add a section for a brand or product.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4 max-h-[500px] overflow-y-auto no-scrollbar pr-1">
-                {customOverviews?.map((co) => {
-                  let targetName = co.targetId;
-                  if (co.targetType === 'product') {
-                    const prod = PRODUCTS.find(p => String(p.id) === String(co.targetId));
-                    targetName = prod ? prod.title : `Product ID: ${co.targetId}`;
-                  } else {
-                    const brand = BRANDS.find(b => b.name.toLowerCase() === co.targetId.toLowerCase());
-                    targetName = brand ? brand.name : co.targetId;
-                  }
-
-                  return (
-                    <div
-                      key={co.id}
-                      className="border border-[#e8edf2] rounded-[5px] p-4.5 bg-white hover:shadow-soft transition-all flex justify-between items-start gap-4"
-                    >
-                      <div className="space-y-2 min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                            co.targetType === 'product'
-                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                              : 'bg-purple-100 text-purple-800 border border-purple-200'
-                          }`}>
-                            {co.targetType}
-                          </span>
-                          <span className="text-[10px] font-black uppercase text-navy italic tracking-wide truncate max-w-[200px] sm:max-w-[300px]">
-                            {targetName}
-                          </span>
-                        </div>
-                        <h4 className="font-space font-black text-xs uppercase text-[#1A1D4E] tracking-tight">
-                          {co.sectionName}
-                        </h4>
-                        <div className="space-y-1 pl-2 border-l-2 border-orange-primary/20">
-                          {co.content.map((bullet, idx) => (
-                            <p key={idx} className="text-[10px] font-medium text-gray-500 leading-relaxed uppercase tracking-wider">
-                              • {bullet}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => deleteCustomOverview(co.id)}
-                        className="px-6 py-3 bg-white hover:bg-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-red-200 hover:border-red-300"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const AdminCampaignsSection = () => {
-  const { campaigns, addCampaign, updateCampaign, deleteCampaign } = useDashboard();
-  const [formMode, setFormMode] = useState<'list' | 'create' | 'edit'>('list');
-  const [editingId, setEditingId] = useState<string | null>(null);
-
-  // Form states
-  const [title, setTitle] = useState('');
-  const [tagline, setTagline] = useState('');
-  const [ctaText, setCtaText] = useState('EXPLORE');
-  const [ctaLink, setCtaLink] = useState('/deals');
-  const [image, setImage] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [priority, setPriority] = useState(1);
-  const [active, setActive] = useState(true);
-  const [sponsorBadge, setSponsorBadge] = useState('');
-  const [countdownEnd, setCountdownEnd] = useState('');
-
-  const imagePresets = [
-    { name: 'Black Friday Gold', url: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?w=1600&q=80' },
-    { name: 'Summer Sunset', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80' },
-    { name: 'Tech Neon', url: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1600&q=80' },
-    { name: 'Fashion Boutique', url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&q=80' },
-    { name: 'Stadium & Arena', url: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1600&q=80' }
-  ];
-
-  const handleEdit = (c: any) => {
-    setEditingId(c.id);
-    setTitle(c.title);
-    setTagline(c.tagline);
-    setCtaText(c.ctaText || 'EXPLORE');
-    setCtaLink(c.ctaLink || '/deals');
-    setImage(c.image);
-    setStartDate(c.startDate || '');
-    setEndDate(c.endDate || '');
-    setPriority(c.priority || 1);
-    setActive(c.active);
-    setSponsorBadge(c.sponsorBadge || '');
-    setCountdownEnd(c.countdownEnd || '');
-    setFormMode('edit');
-  };
-
-  const handleCreateNew = () => {
-    setEditingId(null);
-    setTitle('');
-    setTagline('');
-    setCtaText('EXPLORE');
-    setCtaLink('/deals');
-    setImage('');
-    setStartDate('');
-    setEndDate('');
-    setPriority(1);
-    setActive(true);
-    setSponsorBadge('');
-    setCountdownEnd('');
-    setFormMode('create');
-  };
-
-  const handleSave = () => {
-    if (!title.trim() || !tagline.trim() || !image.trim()) {
-      toast.error('Please fill in Title, Tagline and Banner Image URL');
-      return;
-    }
-
-    const campaignData: any = {
-      title,
-      tagline,
-      ctaText,
-      ctaLink,
-      image,
-      startDate,
-      endDate,
-      priority: Number(priority),
-      active,
-      sponsorBadge: sponsorBadge.trim() || undefined,
-      countdownEnd: countdownEnd.trim() || undefined
-    };
-
-    if (formMode === 'edit' && editingId) {
-      updateCampaign({ ...campaignData, id: editingId });
-    } else {
-      addCampaign(campaignData);
-    }
-    setFormMode('list');
-  };
-
-  const toggleCampaignActive = (c: any) => {
-    updateCampaign({ ...c, active: !c.active });
-  };
-
-  return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700 text-white">
-      {formMode === 'list' ? (
-        <>
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Campaigns <span className="text-[#F96500]">Manager</span></h2>
-              <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Curate and schedule edge-to-edge promotional banners</p>
-            </div>
-            
-            <button
-              onClick={handleCreateNew}
-              className="px-6 py-2.5 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white rounded-full text-[10px] font-black tracking-widest uppercase transition-all shadow-md italic cursor-pointer animate-pulse"
-            >
-              + Create Campaign
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {campaigns && campaigns.map((c) => {
-              const isPast = c.endDate && new Date(c.endDate) < new Date();
-              const isFuture = c.startDate && new Date(c.startDate) > new Date();
-              
-              return (
-                <div key={c.id} className="bg-white/5 border border-white/10 rounded-[5px] p-6 flex flex-col justify-between relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none" style={{ backgroundImage: `url(${c.image})` }} />
-                  
-                  <div className="relative z-10 flex flex-col gap-3">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider ${
-                        !c.active ? 'bg-red-950/80 border border-red-500/25 text-red-400' :
-                        isPast ? 'bg-amber-950/80 border border-amber-500/25 text-amber-400' :
-                        isFuture ? 'bg-blue-950/80 border border-blue-500/25 text-blue-400' :
-                        'bg-green-950/80 border border-green-500/25 text-green-400'
-                      }`}>
-                        {!c.active ? 'Inactive' : isPast ? 'Expired' : isFuture ? 'Upcoming' : 'Active'}
-                      </span>
-                      <span className="text-[10px] font-mono text-gray-400 font-extrabold">Priority: {c.priority}</span>
-                    </div>
-
-                    <div>
-                      <h4 className="text-lg font-black text-white italic uppercase tracking-tight">{c.title}</h4>
-                      <p className="text-xs text-gray-300 font-medium line-clamp-2 mt-1">{c.tagline}</p>
-                    </div>
-
-                    <div className="space-y-1 text-[10px] text-gray-400 font-semibold border-t border-white/5 pt-3">
-                      <div><span className="text-gray-500 uppercase">CTA:</span> <span className="text-[#FF5B00] font-mono">{c.ctaText}</span> → <span className="text-gray-300 font-mono italic">{c.ctaLink}</span></div>
-                      {c.startDate && <div><span className="text-gray-500 uppercase font-mono">Runs:</span> <span className="text-gray-300 font-mono">{c.startDate} to {c.endDate || 'Forever'}</span></div>}
-                      {c.sponsorBadge && <div><span className="text-gray-500 uppercase">Sponsor Badge:</span> <span className="text-emerald-400">{c.sponsorBadge}</span></div>}
-                      {c.countdownEnd && <div><span className="text-gray-500 uppercase">Countdown:</span> <span className="text-purple-400 font-mono">{c.countdownEnd}</span></div>}
-                    </div>
-                  </div>
-
-                  <div className="relative z-10 flex items-center justify-between gap-3 mt-6 border-t border-white/5 pt-4">
-                    <button
-                      onClick={() => toggleCampaignActive(c)}
-                      className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase cursor-pointer tracking-wider border transition-all ${
-                        c.active 
-                          ? 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white' 
-                          : 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-400 hover:text-black'
-                      }`}
-                    >
-                      {c.active ? 'Deactivate' : 'Activate'}
-                    </button>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(c)}
-                        className="px-4 py-1.5 rounded-full text-[9px] font-black uppercase cursor-pointer tracking-wider bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all text-white"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteCampaign(c.id)}
-                        className="p-1.5 rounded-full bg-red-950/40 text-red-400 hover:bg-red-600 hover:text-white border border-red-900 hover:border-red-500 transition-all cursor-pointer"
-                        title="Delete"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      ) : (
-        <div className="max-w-4xl space-y-10">
-          <div>
-            <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">
-              {formMode === 'edit' ? 'Edit' : 'Create New'} <span className="text-[#FF5B00]">Campaign</span>
-            </h2>
-            <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Configure promotional parameters for Choosify home delivery shield</p>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-[5px] p-8 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Campaign Title</label>
-                <input
-                  type="text"
-                  placeholder="e.g. BLACK FRIDAY"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Short Tagline (Curated & Premium)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. UP TO 70% OFF SELECT PRODUCTS"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={tagline}
-                  onChange={(e) => setTagline(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">CTA Button Text</label>
-                <input
-                  type="text"
-                  placeholder="e.g. EXPLORE DEALS"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={ctaText}
-                  onChange={(e) => setCtaText(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">CTA Destination Page</label>
-                <select
-                  className="w-full h-11 bg-[#0b0c1e] border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={ctaLink}
-                  onChange={(e) => setCtaLink(e.target.value)}
-                >
-                  <option value="/deals">Deals Hub Page (/deals)</option>
-                  <option value="/products">All Products Feed (/products)</option>
-                  <option value="/brands">Brands Page (/brands)</option>
-                  <option value="/categories?cat=fashion">Fashion Category (/categories?cat=fashion)</option>
-                  <option value="/categories?cat=tech">Tech Category (/categories?cat=tech)</option>
-                  <option value="/dashboard">User Personal Dashboard (/dashboard)</option>
-                </select>
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Campaign Banner Background Image URL</label>
-                  <span className="text-[9px] text-[#FF5B00] font-black uppercase tracking-wider">Fast Presets</span>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Paste direct photographic banner URL"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50 font-mono"
-                  value={image}
-                  onChange={(e) => setImage(e.target.value)}
-                />
-                
-                {/* Visual Presets list */}
-                <div className="flex flex-wrap gap-2 pt-1.5">
-                  {imagePresets.map((preset) => (
-                    <button
-                      key={preset.name}
-                      type="button"
-                      onClick={() => {
-                        setImage(preset.url);
-                        toast.success(`Banner presets chosen: ${preset.name}`);
-                      }}
-                      className="px-3 py-1 text-[9px] font-black uppercase rounded-lg border bg-white/5 hover:bg-[#FF5B00]/20 text-gray-300 border-white/5 hover:border-[#FF5B00]/40 transition-all cursor-pointer"
-                    >
-                      {preset.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Start Date</label>
-                <input
-                  type="date"
-                  className="w-full h-11 bg-[#0b0c1e] border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">End Date (Expiry)</label>
-                <input
-                  type="date"
-                  className="w-full h-11 bg-[#0b0c1e] border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Display Priority (larger numbers shown first, e.g. 10)</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={priority}
-                  onChange={(e) => setPriority(Number(e.target.value))}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Countdown End Date (optional e.g. 2026-11-28T12:00:00Z)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 2026-11-28T12:00:00Z"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50 font-mono"
-                  value={countdownEnd}
-                  onChange={(e) => setCountdownEnd(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Sponsor Label / Badge text (optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Platform Special, Sponsored, Apex exclusive"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={sponsorBadge}
-                  onChange={(e) => setSponsorBadge(e.target.value)}
-                />
-              </div>
-
-              <div className="flex items-center gap-3 pt-6 pl-1 select-none">
-                <button
-                  type="button"
-                  onClick={() => setActive(!active)}
-                  className={cn(
-                    "w-12 h-6 rounded-full transition-all relative p-1",
-                    active ? "bg-[#07DD05]" : "bg-white/10"
-                  )}
-                >
-                  <div className={cn("w-4 h-4 rounded-full bg-white transition-all shadow-md", active ? "translate-x-6" : "translate-x-0")} />
-                </button>
-                <div>
-                  <h5 className="text-[11px] font-black uppercase italic tracking-tighter">Publish immediately</h5>
-                  <p className="text-[9px] font-bold text-gray-500 italic uppercase">Make campaign visible on platform immediately</p>
-                </div>
-              </div>
-
-            </div>
-
-            <div className="flex items-center justify-end gap-4 border-t border-white/5 pt-6 mt-4">
-              <button
-                type="button"
-                onClick={() => setFormMode('list')}
-                className="px-6 py-3 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-[#e8edf2] hover:border-[#1A1D4E]/20"
-              >
-                Cancel
-              </button>
-              
-              <button
-                type="button"
-                onClick={handleSave}
-                className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
-              >
-                Save Campaign
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
 // --- MAIN PAGE ---
 
@@ -1483,15 +804,10 @@ export function DashboardPage() {
     lovedBrands, 
     followedBrands, 
     recentlyViewed,
-    comparedProducts,
     messages,
     notifications,
-    campaigns,
     reviews,
     setReviews,
-    customOverviews,
-    addCustomOverview,
-    deleteCustomOverview
   } = useDashboard();
   const location = useLocation();
   const navigate = useNavigate();
@@ -1499,12 +815,15 @@ export function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    // TODO: addToRecentlyViewed called from ProductDetailPage — see Prompt 6
+    // TODO: addToRecentlyViewed called from ProductDetailPage â€” see Prompt 6
   }, []);
 
+  const REMOVED_TABS = new Set(['my-comparisons', 'admin-campaigns', 'admin-overviews']);
+
   useEffect(() => {
-    if (location.state && location.state.activeTab) {
-      setActiveTab(location.state.activeTab);
+    if (location.state?.activeTab) {
+      const tab = location.state.activeTab as string;
+      setActiveTab(REMOVED_TABS.has(tab) ? 'overview' : tab);
     }
   }, [location.state]);
 
@@ -1526,9 +845,6 @@ export function DashboardPage() {
     { id: 'followed-brands', label: `Followed Brands (${followedBrands.length})`, icon: CheckCircle2 },
     { id: 'recently-viewed', label: `Recently Viewed (${recentlyViewed.length})`, icon: Clock },
     { id: 'saved-recommendations', label: 'Saved Guides', icon: Bookmark },
-    { id: 'my-comparisons', label: `My Comparisons (${comparedProducts.length})`, icon: Layers },
-    { id: 'admin-campaigns', label: `Campaigns Manager (Admin) (${campaigns?.length || 0})`, icon: Sparkles },
-    { id: 'admin-overviews', label: `Overviews Manager (Admin) (${customOverviews?.length || 0})`, icon: Settings },
     { id: 'messages', label: `Messages (${messages.length})`, icon: MessageSquare, href: '/messages' },
     { id: 'notifications', label: `Notifications (${notifications.filter(n => !n.read).length})`, icon: Bell },
     { id: 'my-reviews', label: 'My Reviews', icon: Star },
@@ -1536,7 +852,7 @@ export function DashboardPage() {
   ];
 
   const controlItems = menuItems.filter(item => 
-    ['overview', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations', 'my-comparisons', 'admin-campaigns', 'admin-overviews'].includes(item.id)
+    ['overview', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations'].includes(item.id)
   );
 
   const accountItems = menuItems.filter(item => 
@@ -1552,8 +868,6 @@ export function DashboardPage() {
       case 'loved-brands': return <LovedBrandsSection />;
       case 'followed-brands': return <FollowedBrandsSection />;
       case 'recently-viewed': return <RecentlyViewedSection />;
-      case 'admin-campaigns': return <AdminCampaignsSection />;
-      case 'admin-overviews': return <AdminOverviewsSection />;
       case 'saved-recommendations': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
            <div>
@@ -1567,7 +881,6 @@ export function DashboardPage() {
             </div>
         </div>
       );
-      case 'my-comparisons': return <CompareToolSection />;
       case 'messages': return (
         <div className="flex flex-col items-center justify-center p-12 text-center max-w-lg mx-auto h-[500px]">
           <div className="w-16 h-16 bg-[#F96500]/10 text-orange-primary rounded-full flex items-center justify-center mb-4">
@@ -1729,7 +1042,7 @@ export function DashboardPage() {
                 </div>
                 <span className="text-xl font-bold tracking-tight lowercase">choosify.bd</span>
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em]">SECURE CURATOR TERMINAL • v2.6.0</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em]">SECURE CURATOR TERMINAL â€¢ v2.6.0</p>
            </div>
         </main>
       </div>

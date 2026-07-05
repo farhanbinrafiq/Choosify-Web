@@ -13,6 +13,20 @@ declare module '../types/schemas' {
     promoCode?: string;
     promoDiscount?: number;
     promoType?: string;
+    sourceMode?: 'retail' | 'wholesale';
+    subtotal?: number;
+    deliveryTotal?: number;
+    paymentMethod?: 'cod' | 'credit';
+    shipping?: {
+      fullName: string;
+      phone: string;
+      address: string;
+      region: string;
+      deliveryNotes?: string;
+    };
+    tradeLicense?: string;
+    companyName?: string;
+    isQuotationRequest?: boolean;
   }
 }
 

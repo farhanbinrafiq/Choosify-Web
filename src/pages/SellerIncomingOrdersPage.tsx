@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Store, ArrowRight, Eye, Tag, FileText, CheckCircle, Package, ArrowLeft, RefreshCw, MessageSquare } from 'lucide-react';
@@ -46,8 +47,7 @@ export function SellerIncomingOrdersPage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Merchant Header */}
-      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
-        <div className="absolute inset-0 hero-gradient pointer-events-none" />
+      <PageHeroHeader>
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex flex-col justify-center">
             <Link to="/dashboard" className="text-[10px] font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest italic flex items-center gap-1 mb-1">
@@ -69,7 +69,7 @@ export function SellerIncomingOrdersPage() {
             Sync Ledger
           </button>
         </div>
-      </div>
+      </PageHeroHeader>
 
       {/* Profile Selector */}
       <div className="max-w-7xl mx-auto w-full px-4 md:px-8 pt-8">
@@ -148,7 +148,7 @@ export function SellerIncomingOrdersPage() {
                       <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block leading-none mb-1">Lot Products List</span>
                       <div className="text-[10px] text-navy font-bold leading-relaxed">
                         {sub.items.map((it: any, iIdx: number) => (
-                          <div key={iIdx} className="truncate">• {it.productTitle} <span className="text-[#F96500]">x {it.quantity}</span></div>
+                          <div key={iIdx} className="truncate">â€¢ {it.productTitle} <span className="text-[#F96500]">x {it.quantity}</span></div>
                         ))}
                       </div>
                     </div>
@@ -157,7 +157,7 @@ export function SellerIncomingOrdersPage() {
                     <div className="space-y-1">
                       <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block leading-none mb-1">Lot Earnings Metric</span>
                       <p className="text-base font-black text-[#F96500] italic leading-none mb-1">
-                        ৳{subTotal.toLocaleString()}
+                        à§³{subTotal.toLocaleString()}
                       </p>
                       <span className="text-[8.5px] text-gray-405 font-bold uppercase">
                         Settle: {sub.isCOD ? 'Cash Collection' : 'Corporate Ledger'}

@@ -18,8 +18,7 @@ export function MessagesPage() {
   const [inputText, setInputText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Interactive Perspective and Modal states
-  const [perspective, setPerspective] = useState<'buyer' | 'seller'>('buyer');
+  // Interactive Modal states
   const [showSourcingModal, setShowSourcingModal] = useState(false);
   
   // Sourcing Modal field states
@@ -53,14 +52,18 @@ export function MessagesPage() {
   // Filter messages for active thread
   const activeMessages = threadMessages.filter(m => m.threadId === activeThreadId);
 
-  // Ref to automatically scroll chat to bottom
-  const chatBottomRef = useRef<HTMLDivElement>(null);
+  // Ref to scroll only the chat viewport (not the whole page)
+  const chatViewportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (chatBottomRef.current) {
-      chatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [activeMessages]);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [threadId]);
+
+  useEffect(() => {
+    const viewport = chatViewportRef.current;
+    if (!viewport) return;
+    viewport.scrollTop = viewport.scrollHeight;
+  }, [activeMessages, activeThreadId]);
 
   // Find linked order for active thread
   const linkedOrder = orders.find(o => o.orderId === activeThread?.orderRef);
@@ -101,43 +104,27 @@ export function MessagesPage() {
   const handleSendMessage = () => {
     if (!inputText.trim() || !activeThreadId) return;
 
-    if (perspective === 'buyer') {
-      // Send customer message
-      addThreadMessage(activeThreadId, inputText.trim(), 'user', 'Me');
-      const userMsg = inputText.trim();
-      setInputText('');
+    addThreadMessage(activeThreadId, inputText.trim(), 'user', 'Me');
+    const userMsg = inputText.trim();
+    setInputText('');
 
-      // Simulated merchant response delay to show active engagement
-      setTimeout(() => {
-        let responseText = `Thank you for your message. Our sales representative has received your ping about order reference ${activeThread?.orderRef || 'general inquiry'}. We will review this and respond shortly!`;
-        
-        const lower = userMsg.toLowerCase();
-        if (lower.includes('deliver') || lower.includes('shipping') || lower.includes('when')) {
-          responseText = `Regarding dispatch, order ${activeThread?.orderRef || ''} current logistics status is [${(linkedSubOrder?.trackingStatus || 'Pending confirmation').toUpperCase()}]. We pack all items under safe cargo metrics immediately after confirmation!`;
-        } else if (lower.includes('discount') || lower.includes('price') || lower.includes('cost')) {
-          responseText = `Our listed wholesale rates are strictly computed with slabs. We guarantee the absolute best deals in Bangladesh!`;
-        } else if (lower.includes('size') || lower.includes('color') || lower.includes('variant')) {
-          responseText = `Yes, your preferred parameters have been logged against Invoice [${linkedSubOrder?.invoiceId || 'N/A'}]. We will package exactly as staged!`;
-        } else if (lower.includes('confirm') || lower.includes('approved')) {
-          responseText = `Perfect! Your order logs have been successfully synced inside our supply terminal. Thank you for placing your secure trust in Choosify.bd!`;
-        }
+    setTimeout(() => {
+      let responseText = `Thank you for your message. Our sales representative has received your ping about order reference ${activeThread?.orderRef || 'general inquiry'}. We will review this and respond shortly!`;
+      
+      const lower = userMsg.toLowerCase();
+      if (lower.includes('deliver') || lower.includes('shipping') || lower.includes('when')) {
+        responseText = `Regarding dispatch, order ${activeThread?.orderRef || ''} current logistics status is [${(linkedSubOrder?.trackingStatus || 'Pending confirmation').toUpperCase()}]. We pack all items under safe cargo metrics immediately after confirmation!`;
+      } else if (lower.includes('discount') || lower.includes('price') || lower.includes('cost')) {
+        responseText = `Our listed wholesale rates are strictly computed with slabs. We guarantee the absolute best deals in Bangladesh!`;
+      } else if (lower.includes('size') || lower.includes('color') || lower.includes('variant')) {
+        responseText = `Yes, your preferred parameters have been logged against Invoice [${linkedSubOrder?.invoiceId || 'N/A'}]. We will package exactly as staged!`;
+      } else if (lower.includes('confirm') || lower.includes('approved')) {
+        responseText = `Perfect! Your order logs have been successfully synced inside our supply terminal. Thank you for placing your secure trust in Choosify.bd!`;
+      }
 
-        addThreadMessage(activeThreadId, responseText, 'seller', activeThread?.title || 'Merchant Partner');
-        toast.success('New reply received from factory representative!');
-      }, 1500);
-    } else {
-      // Seller sends message
-      addThreadMessage(activeThreadId, inputText.trim(), 'seller', activeThread?.title || 'Merchant Representative');
-      const sellerMsg = inputText.trim();
-      setInputText('');
-
-      // Simulated customer reply
-      setTimeout(() => {
-        const responseText = `Received! Thank you for the update on our order request. Let's make sure the packaging is robust.`;
-        addThreadMessage(activeThreadId, responseText, 'user', 'Me');
-        toast.success('New reply received from the buyer!');
-      }, 1500);
-    }
+      addThreadMessage(activeThreadId, responseText, 'seller', activeThread?.title || 'Merchant Partner');
+      toast.success('New reply received from factory representative!');
+    }, 1500);
   };
 
   const handleCreateSourcingRequest = () => {
@@ -195,9 +182,9 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
   };
 
   return (
-    <div className="min-h-screen bg-choosify-feed text-gray-900 flex flex-col">
+    <div className="flex flex-col bg-choosify-feed text-gray-900 h-[calc(100dvh-var(--choosify-navbar-height,4rem))] max-h-[calc(100dvh-var(--choosify-navbar-height,4rem))] overflow-hidden">
       {/* Messages Header bar */}
-      <div className="w-full border-b border-[#D6E1EC] bg-[#000435] text-white sticky top-0 z-40 backdrop-blur px-6 py-4 flex items-center justify-between">
+      <div className="w-full border-b border-[#D6E1EC] bg-[#000435] text-white shrink-0 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button 
             type="button" 
@@ -262,12 +249,12 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
         </div>
       </div>
 
-      {/* Main container */}
-      <div className="flex flex-1 overflow-hidden h-[calc(100vh-130px)]">
+      {/* Main container — fills viewport below navbar + page header */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Sidebar: list of chat threads */}
-        <aside className={`w-full md:w-[320px] lg:w-[380px] bg-white border-r border-[#D6E1EC] flex flex-col shrink-0 ${threadId ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-6 border-b border-gray-100 space-y-4 bg-white">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block italic">ACTIVE TRANSMISSION CHANNELS</span>
+        <aside className={`w-full md:w-[320px] lg:w-[380px] bg-white border-r border-[#D6E1EC] flex flex-col shrink-0 min-h-0 ${threadId ? 'hidden md:flex' : 'flex'}`}>
+          <div className="p-4 sm:p-6 border-b border-gray-100 space-y-4 bg-white shrink-0">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block italic">Your conversations</span>
             <div className="relative">
               <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input 
@@ -279,7 +266,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-gray-100 bg-white no-scrollbar">
+          <div className="flex-1 overflow-y-auto divide-y divide-gray-100 bg-white no-scrollbar min-h-0">
             {filteredThreads.length === 0 ? (
               <div className="p-8 text-center text-gray-500 text-[11px] font-bold uppercase tracking-wider">
                 No messaging threads resolved
@@ -291,24 +278,54 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                   <button
                     key={t.id}
                     onClick={() => navigate(`/messages/${t.id}`)}
-                    className={`w-full p-6 flex gap-4 text-left transition-all hover:bg-gray-50 relative ${isActive ? 'bg-[#F0F8FF]/80' : ''}`}
+                    aria-current={isActive ? 'true' : undefined}
+                    className={`w-full p-4 sm:p-5 flex gap-4 text-left transition-all relative border-l-4 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#FFF5F0] via-[#FFFAF7] to-white border-l-[#E8500A] shadow-[inset_0_0_0_1px_rgba(232,80,10,0.1)]'
+                        : 'border-l-transparent hover:bg-gray-50'
+                    } ${t.unread && !isActive ? 'bg-[#FFFBF8]' : ''}`}
                   >
-                    {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#F96500]" />}
                     <div className="relative shrink-0">
-                      <img src={t.avatar} className="w-12 h-12 rounded-full object-cover border border-gray-200" alt="" />
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+                      <img
+                        src={t.avatar}
+                        className={`w-12 h-12 rounded-full object-cover border-2 ${
+                          isActive ? 'border-[#E8500A] ring-2 ring-[#E8500A]/20' : 'border-gray-200'
+                        }`}
+                        alt=""
+                      />
+                      {isActive && (
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#E8500A] border-2 border-white rounded-full" />
+                      )}
+                      {!isActive && t.unread && (
+                        <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-[#E8500A] border-2 border-white rounded-full" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-black text-gray-900 uppercase italic truncate pr-2">{t.title}</span>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className={`text-xs uppercase italic truncate pr-2 ${
+                          isActive ? 'font-black text-[#E8500A]' : 'font-bold text-gray-900'
+                        }`}>
+                          {t.title}
+                        </span>
                         <span className="text-[8px] font-bold text-gray-500 tracking-wider shrink-0">{t.time}</span>
                       </div>
-                      <p className="text-[10px] text-gray-500 line-clamp-1 italic mb-1">{t.lastMessage}</p>
-                      {t.orderRef && (
-                        <span className="inline-flex text-[8px] font-black bg-[#F0F8FF] border border-[#D6E1EC] text-orange-primary px-1.5 py-0.5 rounded uppercase tracking-wider">
-                          ORDER: {t.orderRef}
-                        </span>
-                      )}
+                      <p className={`text-[10px] line-clamp-1 italic mb-1.5 ${
+                        isActive ? 'text-gray-700 font-semibold' : 'text-gray-500'
+                      }`}>
+                        {t.lastMessage}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {isActive && (
+                          <span className="inline-flex text-[8px] font-black bg-[#E8500A] text-white px-2 py-0.5 rounded uppercase tracking-wider">
+                            Active chat
+                          </span>
+                        )}
+                        {t.orderRef && (
+                          <span className="inline-flex text-[8px] font-black bg-[#F0F8FF] border border-[#D6E1EC] text-[#E8500A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                            ORDER: {t.orderRef}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </button>
                 );
@@ -318,7 +335,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
         </aside>
 
         {/* Messaging / Conversation content viewport */}
-        <main className={`flex-1 flex flex-col bg-choosify-feed ${threadId ? 'flex' : 'hidden md:flex'}`}>
+        <main className={`flex-1 flex flex-col bg-choosify-feed min-h-0 min-w-0 ${threadId ? 'flex' : 'hidden md:flex'}`}>
           {threadId && (
             <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-[#D6E1EC] flex-shrink-0">
               <Link
@@ -332,19 +349,30 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
           )}
           {activeThread ? (
             <>
-              {/* Header inside open thread Chat */}
-              <div className="p-6 border-b border-[#D6E1EC] bg-white flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <img src={activeThread.avatar} className="w-11 h-11 rounded-full object-cover border border-gray-200" alt="" />
-                  <div>
-                    <h2 className="text-sm font-black text-gray-900 italic uppercase tracking-wider leading-none mb-1">{activeThread.title}</h2>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-bold text-green-600 uppercase italic font-black flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                        Active Stream
+              {/* Header inside open thread chat */}
+              <div className="p-4 sm:p-6 border-b border-[#E8500A]/20 bg-gradient-to-r from-[#FFF5F0] to-white flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-4 min-w-0">
+                  <img
+                    src={activeThread.avatar}
+                    className="w-11 h-11 rounded-full object-cover border-2 border-[#E8500A] ring-2 ring-[#E8500A]/15 shrink-0"
+                    alt=""
+                  />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="inline-flex text-[8px] font-black bg-[#E8500A] text-white px-2 py-0.5 rounded uppercase tracking-wider">
+                        Current thread
+                      </span>
+                    </div>
+                    <h2 className="text-sm font-black text-[#1A1D4E] italic uppercase tracking-wider leading-none mb-1 truncate">
+                      {activeThread.title}
+                    </h2>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[9px] font-bold text-green-600 uppercase italic flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        Live chat
                       </span>
                       {activeThread.orderRef && (
-                        <span className="text-[8px] font-black bg-orange-50 border border-orange-200 text-orange-primary px-2 py-0.5 rounded-md uppercase tracking-wider">
+                        <span className="text-[8px] font-black bg-orange-50 border border-orange-200 text-[#E8500A] px-2 py-0.5 rounded-md uppercase tracking-wider">
                           {activeThread.orderRef}
                         </span>
                       )}
@@ -362,48 +390,11 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 </div>
               </div>
 
-              {/* 🎭 INTERACTIVE ROLE PERSPECTIVE TOGGLER */}
-              <div className="bg-gradient-to-r from-gray-50 to-slate-100 border-b border-[#D6E1EC] px-6 py-3 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block italic">Chat Perspective:</span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider italic border shadow-xs flex items-center gap-1
-                    ${perspective === 'buyer' 
-                      ? 'bg-orange-500/10 border-orange-500/30 text-orange-600' 
-                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600'}`}>
-                    <Sparkles size={10} className="animate-spin" />
-                    {perspective === 'buyer' ? 'Viewing as Buyer (Me)' : 'Viewing as Seller (Merchant)'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 bg-white border border-gray-200 p-0.5 rounded-xl shadow-xs">
-                  <button
-                    onClick={() => {
-                      setPerspective('buyer');
-                      toast.success("Switched view to Buyer perspective");
-                    }}
-                    className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer border-none
-                      ${perspective === 'buyer'
-                        ? 'bg-orange-primary text-white shadow-xs'
-                        : 'text-gray-500 hover:text-gray-900 bg-transparent hover:bg-gray-50'}`}
-                  >
-                    Buyer View
-                  </button>
-                  <button
-                    onClick={() => {
-                      setPerspective('seller');
-                      toast.success("Switched view to Seller (Merchant) perspective");
-                    }}
-                    className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer border-none
-                      ${perspective === 'seller'
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'text-gray-500 hover:text-gray-900 bg-transparent hover:bg-gray-50'}`}
-                  >
-                    Seller View
-                  </button>
-                </div>
-              </div>
-
-              {/* Chat Viewport Area with support for linked order cards inside the stream */}
-              <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6 no-scrollbar relative">
+              {/* Chat viewport — scroll contained here only */}
+              <div
+                ref={chatViewportRef}
+                className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto space-y-6 no-scrollbar relative min-h-0"
+              >
                 {/* 🚨 ORDER OVERVIEW CARD INSIDE CHAT (CRITICAL REQUIREMENT) */}
                 {linkedSubOrder && (
                   <div className="max-w-2xl mx-auto bg-white border border-[#D6E1EC] rounded-3xl p-6 shadow-sm relative overflow-hidden transition-all duration-300">
@@ -499,11 +490,8 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 {/* Messages Listing thread */}
                 <div className="space-y-6">
                   {activeMessages.map((m) => {
-                    // Determine alignment based on perspective role
-                    const isOutgoing = (perspective === 'buyer' && m.sender === 'user') || 
-                                       (perspective === 'seller' && m.sender === 'seller');
-                    
-                    const senderLabel = m.sender === 'user' ? 'Buyer (You)' : (activeThread?.title || 'Merchant Representative');
+                    const isOutgoing = m.sender === 'user';
+                    const senderLabel = m.sender === 'user' ? 'You' : (activeThread?.title || 'Merchant');
 
                     return (
                       <div 
@@ -592,85 +580,46 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                               </div>
                             </div>
 
-                            {/* 🛠️ SHARED INTERACTIVE CONTROLS (BUYER & SELLER AGENT PERSPECTIVE) */}
+                            {/* Buyer sourcing card actions */}
                             <div className="p-3 bg-gray-50 border-t border-gray-100 flex flex-col gap-2">
-                              {/* 1. Buyer interactive perspective buttons */}
-                              {perspective === 'buyer' && (
-                                <div className="w-full flex flex-wrap gap-1.5 justify-end">
-                                  {(m.productCard.status || 'pending') === 'pending' && (
+                              <div className="w-full flex flex-wrap gap-1.5 justify-end">
+                                {(m.productCard.status || 'pending') === 'pending' && (
+                                  <button
+                                    onClick={() => {
+                                      updateProductCard(m.id, { status: 'canceled' });
+                                      addThreadMessage(activeThreadId, `🚫 Buyer has withdrawn the sourcing request for ${m.productCard.name}.`, 'user', 'Me');
+                                      toast.success('Sourcing request withdrawn!');
+                                    }}
+                                    className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
+                                  >
+                                    Withdraw Card
+                                  </button>
+                                )}
+                                {m.productCard.status === 'countered' && (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        updateProductCard(m.id, { status: 'approved', price: m.productCard.counterPrice });
+                                        addThreadMessage(activeThreadId, `✅ Buyer accepted the supplier counter offer of BDT ${m.productCard.counterPrice?.toLocaleString()} per unit! Sourcing transaction locked.`, 'user', 'Me');
+                                        toast.success('Supplier counter offer accepted! Sourcing order verified.');
+                                      }}
+                                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
+                                    >
+                                      Accept Counter Deal
+                                    </button>
                                     <button
                                       onClick={() => {
                                         updateProductCard(m.id, { status: 'canceled' });
-                                        addThreadMessage(activeThreadId, `🚫 Buyer has withdrawn the sourcing request for ${m.productCard.name}.`, 'user', 'Me');
-                                        toast.success('Sourcing request withdrawn!');
+                                        addThreadMessage(activeThreadId, `❌ Buyer declined the counter offer. Sourcing request cancelled.`, 'user', 'Me');
+                                        toast.error('Deal declined.');
                                       }}
-                                      className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
+                                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
                                     >
-                                      Withdraw Card
+                                      Decline Deal
                                     </button>
-                                  )}
-                                  {m.productCard.status === 'countered' && (
-                                    <>
-                                      <button
-                                        onClick={() => {
-                                          updateProductCard(m.id, { status: 'approved', price: m.productCard.counterPrice });
-                                          addThreadMessage(activeThreadId, `✅ Buyer accepted the supplier counter offer of BDT ${m.productCard.counterPrice?.toLocaleString()} per unit! Sourcing transaction locked.`, 'user', 'Me');
-                                          toast.success('Supplier counter offer accepted! Sourcing order verified.');
-                                        }}
-                                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
-                                      >
-                                        Accept Counter Deal
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          updateProductCard(m.id, { status: 'canceled' });
-                                          addThreadMessage(activeThreadId, `❌ Buyer declined the counter offer. Sourcing request cancelled.`, 'user', 'Me');
-                                          toast.error('Deal declined.');
-                                        }}
-                                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
-                                      >
-                                        Decline Deal
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* 2. Seller interactive perspective buttons */}
-                              {perspective === 'seller' && (
-                                <div className="w-full flex flex-wrap gap-1.5 justify-end">
-                                  {(m.productCard.status || 'pending') === 'pending' && (
-                                    <>
-                                      <button
-                                        onClick={() => {
-                                          updateProductCard(m.id, { status: 'approved' });
-                                          addThreadMessage(activeThreadId, `🟢 Factory approved custom parameters for ${m.productCard.name}! Generating proforma invoice.`, 'seller', activeThread.title);
-                                          toast.success('Custom sourcing parameters approved!');
-                                        }}
-                                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
-                                      >
-                                        Approve Custom parameters
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          const discountPrice = Math.round(m.productCard.price * 0.90);
-                                          updateProductCard(m.id, { status: 'countered', counterPrice: discountPrice });
-                                          addThreadMessage(activeThreadId, `🔵 Supplier counter proposal active! We offer 10% volumetric discount. Unit rate BDT ${discountPrice.toLocaleString()}`, 'seller', activeThread.title);
-                                          toast.success('10% volumetric discount counter proposed!');
-                                        }}
-                                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
-                                      >
-                                        Propose 10% discount
-                                      </button>
-                                    </>
-                                  )}
-                                  {m.productCard.status === 'countered' && (
-                                    <span className="text-[8px] font-bold text-gray-500 italic block py-1">
-                                      Waiting for buyer response on counter proposal...
-                                    </span>
-                                  )}
-                                </div>
-                              )}
+                                  </>
+                                )}
+                              </div>
 
                               <div className="flex justify-end pt-1.5 border-t border-gray-100">
                                 <Link 
@@ -686,7 +635,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
 
                         <div className={`px-5 py-3 md:px-6 md:py-4 rounded-[20px] mb-2 text-[11px] md:text-sm font-bold leading-relaxed shadow-sm
                           ${isOutgoing 
-                            ? (perspective === 'buyer' ? 'bg-[#F96500] text-white rounded-tr-none italic' : 'bg-emerald-600 text-white rounded-tr-none italic') 
+                            ? 'bg-[#F96500] text-white rounded-tr-none italic' 
                             : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
                           }
                         `}>
@@ -698,12 +647,11 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                       </div>
                     );
                   })}
-                  <div ref={chatBottomRef} />
                 </div>
               </div>
 
-              {/* Chat Send Input Box footer */}
-              <div className="p-6 md:p-8 bg-white border-t border-gray-200 flex flex-col gap-3">
+              {/* Chat send input */}
+              <div className="p-4 sm:p-6 md:p-8 bg-white border-t border-gray-200 flex flex-col gap-3 shrink-0">
                 
                 {/* 🛒 QUICK SOURCING DEMO ACTION PILLS */}
                 <div className="flex flex-wrap gap-2 justify-start max-w-4xl mx-auto w-full">
@@ -723,9 +671,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                   </button>
                   <button
                     onClick={() => {
-                      setInputText(perspective === 'buyer' 
-                        ? "Hi! Do you have this specific product variant fully prepared for bulk dispatch?" 
-                        : "Yes! Our factory line has prepared this specific configuration. Ready to ship.");
+                      setInputText("Hi! Do you have this specific product variant fully prepared for bulk dispatch?");
                     }}
                     className="px-3.5 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[10px] font-bold text-gray-600 transition-all cursor-pointer"
                   >
@@ -733,9 +679,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                   </button>
                   <button
                     onClick={() => {
-                      setInputText(perspective === 'buyer'
-                        ? "Could we request premium safe wooden-box packaging for the entire lot?"
-                        : "Absolutely, we pack in custom padded export crates for complete safe metrics.");
+                      setInputText("Could we request premium safe wooden-box packaging for the entire lot?");
                     }}
                     className="px-3.5 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[10px] font-bold text-gray-600 transition-all cursor-pointer"
                   >
@@ -749,7 +693,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     className="w-full h-14 bg-gray-50 border border-gray-200 rounded-2xl pl-6 pr-16 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-orange-primary focus:bg-white transition-all" 
-                    placeholder={perspective === 'buyer' ? "Type message to seller/factory logistics coordinator..." : "Type merchant reply to customer..."}
+                    placeholder="Type your message to the seller or support team..."
                   />
                   <button 
                     onClick={handleSendMessage}

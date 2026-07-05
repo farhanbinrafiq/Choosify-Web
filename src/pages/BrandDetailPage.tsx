@@ -40,6 +40,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
 import { DETAIL_SINGLE_FEED, DETAIL_FEED_GRID_5 } from "../lib/pageLayout";
 import { StickySectionNav } from "../components/StickySectionNav";
+import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from "../components/HeroScrollCue";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { BrandPostCarouselSection } from "../components/BrandPostCarouselSection";
 import { getBrandPostsByBrandId } from "../lib/brandPosts";
@@ -139,6 +140,7 @@ function WithInfluencerReviews({
 }
 
 export function BrandDetailPage() {
+  const brandHeroRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
   const { id } = useParams();
   const {
@@ -1340,29 +1342,19 @@ export function BrandDetailPage() {
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* 1. Brand Hero Section */}
       <motion.section
+        ref={brandHeroRef}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="hero-gradient relative pt-10 pb-12 overflow-hidden border-b border-white/5"
+        className={cn(
+          "hero-gradient relative pt-10 pb-12 border-b border-white/5",
+          HERO_SCROLL_CUE_PADDING,
+        )}
       >
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
         </div>
 
-        {/* Global Breadcrumbs in Hero Area */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full mb-6">
-          <div className="flex items-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest">
-            <Link to="/" className="hover:text-white transition-colors">
-              Home
-            </Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <Link to="/brands" className="hover:text-white transition-colors">
-              Brands
-            </Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">{brand.name}</span>
-          </div>
-        </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
           <div className="flex flex-col lg:grid lg:grid-cols-[1.5fr_1fr] xl:grid-cols-[1.6fr_1fr] gap-8 xl:gap-12 lg:items-stretch w-full">
@@ -1751,6 +1743,7 @@ export function BrandDetailPage() {
 
           </div>
         </div>
+        <HeroScrollCue anchorRef={brandHeroRef} />
       </motion.section>
 
       {/* 2. SECTION SUMMARY BAR */}

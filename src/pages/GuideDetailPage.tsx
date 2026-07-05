@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -44,8 +44,10 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { BLOGS, PRODUCTS } from "../constants";
 import { cn } from "../lib/utils";
-import { PRODUCT_CARD_GRID, DETAIL_SINGLE_FEED } from "../lib/pageLayout";
+import { PRODUCT_CARD_GRID, DETAIL_SINGLE_FEED, GUIDE_MEDIA_GRID } from "../lib/pageLayout";
+import { renderGuideMediaCard } from "./GuidesPage";
 import { StickySectionNav } from "../components/StickySectionNav";
+import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from "../components/HeroScrollCue";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { EvaluationData, ComparisonProduct } from "../types/evaluation";
 import evaluationsData from "../data/evaluations.json";
@@ -136,6 +138,7 @@ const COMPARISON_DATA: ComparisonProduct[] = [
 ];
 
 export function GuideDetailPage() {
+  const heroRef = useRef<HTMLElement>(null);
   const { id } = useParams();
   const navigate = useNavigate();
   const { allGuides } = useGlobalState();
@@ -178,6 +181,7 @@ export function GuideDetailPage() {
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
+  const [activeProductIdx, setActiveProductIdx] = useState(0);
 
   const [interactions, setInteractions] = useState({
     loved: 1000,
@@ -267,6 +271,7 @@ export function GuideDetailPage() {
       { id: "takeaways", label: "Takeaways", icon: <Sparkles size={13} /> },
       { id: "top-3", label: "Top 3", icon: <Star size={13} /> },
       { id: "all-products", label: "Products", icon: <ShoppingBag size={13} /> },
+      { id: "review-context", label: "Reviewed", icon: <Package size={13} /> },
       { id: "reviewer-profile", label: "Reviewer", icon: <User size={13} /> },
     ],
     [],
@@ -286,38 +291,25 @@ export function GuideDetailPage() {
   return (
     <div className="bg-white min-h-screen">
       {/* Unified Guide Hero — breadcrumbs, media, guide info, and summary in one section */}
-      <section className="relative w-full overflow-hidden choosify-dark-gradient border-b border-white/5">
+      <section
+        ref={heroRef}
+        className={cn(
+          "relative w-full choosify-dark-gradient border-b border-white/5",
+          HERO_SCROLL_CUE_PADDING,
+        )}
+      >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.18),transparent_42%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
 
         <div className="relative z-10">
           <div className="max-w-7xl mx-auto px-6 pt-8 pb-4">
-            <div className="flex flex-wrap items-center justify-between gap-6">
-              <div className="flex items-center gap-3 text-[10px] font-black text-white/40 uppercase tracking-widest italic">
-                <Link
-                  to="/"
-                  className="hover:text-orange-primary transition-colors"
-                >
-                  Home
-                </Link>
-                <ChevronRight size={12} />
-                <Link
-                  to="/guides"
-                  className="hover:text-orange-primary transition-colors"
-                >
-                  Recommendations
-                </Link>
-                <ChevronRight size={12} />
-                <span className="text-white text-left">{guide.title}</span>
+            <div className="flex flex-wrap items-center justify-end gap-6">
+              <div className="flex items-center gap-2 text-[10px] font-black text-white/80 uppercase tracking-widest italic bg-white/5 border border-white/10 px-4 py-2 rounded-full">
+                <CalendarDays size={14} className="text-orange-primary" />
+                Published May 12, 2026
               </div>
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 text-[10px] font-black text-white/80 uppercase tracking-widest italic bg-white/5 border border-white/10 px-4 py-2 rounded-full">
-                  <CalendarDays size={14} className="text-orange-primary" />
-                  Published May 12, 2026
-                </div>
-                <div className="flex items-center gap-2 text-[10px] font-black text-orange-primary uppercase tracking-widest italic bg-orange-primary/10 px-4 py-2 rounded-full border border-orange-primary/20">
-                  <BookOpen size={14} className="text-orange-primary" />8 Min Read
-                </div>
+              <div className="flex items-center gap-2 text-[10px] font-black text-orange-primary uppercase tracking-widest italic bg-orange-primary/10 px-4 py-2 rounded-full border border-orange-primary/20">
+                <BookOpen size={14} className="text-orange-primary" />8 Min Read
               </div>
             </div>
           </div>
@@ -446,6 +438,7 @@ export function GuideDetailPage() {
             </div>
           </div>
         </div>
+        <HeroScrollCue anchorRef={heroRef} />
       </section>
 
       <StickySectionNav
@@ -1008,10 +1001,107 @@ export function GuideDetailPage() {
                   </div>
                 )}
 
-                {/* SECTION: REVIEWER PROFILE */}
+                {/* What was reviewed + how this review was made — above reviewer profile */}
+                <div
+                  id="review-context"
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-5 scroll-mt-36 mt-12"
+                >
+                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
+                    <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
+                      <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
+                        <span className="w-1.5 h-3 bg-[#E8500A] rounded-full inline-block" />
+                        What Was Reviewed
+                      </h3>
+                      <span className="text-[9px] font-black text-[#E8500A] uppercase tracking-widest">
+                        {displayProducts.length} items
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-2 max-h-[320px] overflow-y-auto no-scrollbar">
+                      {displayProducts.map((p, idx) => {
+                        const isActive = activeProductIdx === idx;
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => {
+                              const el = document.getElementById(`prod-sec-${idx}`);
+                              if (el) {
+                                const top =
+                                  el.getBoundingClientRect().top + window.pageYOffset - 200;
+                                window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+                                setActiveProductIdx(idx);
+                              }
+                            }}
+                            className={cn(
+                              "w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left cursor-pointer",
+                              isActive
+                                ? "bg-[#E8500A]/5 border-[#E8500A]/30 text-[#E8500A] shadow-sm"
+                                : "bg-white border-gray-100 text-navy hover:border-gray-200",
+                            )}
+                          >
+                            <span className="text-xs font-black tracking-tight shrink-0 w-5">
+                              {idx + 1}.
+                            </span>
+                            <div className="w-8 h-8 rounded bg-gray-50 border border-[#e8edf2] p-0.5 shrink-0 overflow-hidden flex items-center justify-center">
+                              <img
+                                src={p.image}
+                                className="w-full h-full object-contain"
+                                alt=""
+                              />
+                            </div>
+                            <span className="text-[11px] font-semibold uppercase truncate tracking-tight">
+                              {p.brand} {p.title}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
+                    <h4 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none pb-3 mb-3 border-b border-[#e8edf2]">
+                      <span className="w-1.5 h-3 bg-[#1B5CFF] rounded-full inline-block" />
+                      How This Review Was Made
+                    </h4>
+                    <div className="space-y-2">
+                      {[
+                        {
+                          label: "Tested For 30 Days",
+                          icon: <CalendarDays size={13} className="text-[#E8500A]" />,
+                        },
+                        {
+                          label: `Compared With ${Math.max(displayProducts.length, 3)} Competitors`,
+                          icon: <Layers size={13} className="text-[#1B5CFF]" />,
+                        },
+                        {
+                          label: "Real World Usage",
+                          icon: <Globe size={13} className="text-emerald-500" />,
+                        },
+                        {
+                          label: "No Sponsored Placement",
+                          icon: <ShieldCheck size={13} className="text-purple-500" />,
+                        },
+                      ].map((item, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 p-2.5 bg-gray-50 rounded-lg text-[10px] font-semibold text-navy uppercase tracking-wider border border-gray-100"
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-4 text-[11px] text-gray-500 leading-relaxed font-semibold">
+                      Choosify editorial reviews combine hands-on testing, verified retail pricing,
+                      and creator field notes before any product earns a ranking.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Reviewer profile */}
                 <div
                   id="reviewer-profile"
-                  className="bg-white border border-[#e8edf2] rounded-[5px] p-6 shadow-sm flex flex-col items-center text-center scroll-mt-36 mt-12 animate-in fade-in duration-300"
+                  className="bg-white border border-[#e8edf2] rounded-[5px] p-6 shadow-sm flex flex-col items-center text-center scroll-mt-36 mt-8 animate-in fade-in duration-300"
                 >
                   <div className="w-20 h-20 rounded-full border-2 border-orange-primary/20 p-0.5 mb-4 shrink-0">
                     <img
@@ -1089,103 +1179,32 @@ export function GuideDetailPage() {
         </div>
       </div>
 
-      {/* Action Call for help */}
-      <div className="max-w-[1440px] mx-auto px-6 w-full mb-12">
-        <div className="bg-[#1A1A2E] rounded-[10px] p-20 text-center relative overflow-hidden group shadow-3xl">
-          <div className="absolute top-0 right-0 w-[400px] h-full bg-blue-600/10 blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-full bg-orange-primary/10 blur-[100px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-
-          <div className="relative z-10 max-w-2xl mx-auto">
-            <span className="text-[10px] font-black text-orange-primary italic tracking-[0.5em] mb-8 block uppercase">
-              NEED PERSONAL HELP?
-            </span>
-            <h2 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter leading-none mb-8 uppercase">
-              Let our experts find the perfect match for you.
-            </h2>
-            <p className="text-white/40 text-sm font-bold uppercase tracking-widest italic mb-12">
-              Message us directly on Facebook or WhatsApp for free consultation.
-            </p>
-
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-              <button className="px-12 py-5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-[0.2em] italic rounded-[10px] shadow-2xl shadow-orange-primary/20 hover:scale-105 transition-all flex items-center gap-3 cursor-pointer border-0 font-bold">
-                Contact On WhatsApp <ArrowRight size={16} />
-              </button>
-              <button className="px-12 py-5 bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-[0.2em] italic rounded-[10px] hover:bg-white/10 transition-all cursor-pointer">
-                Community Forum
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Related Recommendations (End of Page) */}
       <div className="max-w-[1440px] mx-auto px-6 w-full mb-32">
         <section className="pt-20 border-t border-gray-100">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 text-left">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10 text-left">
             <div>
-              <h3 className="text-5xl font-black text-navy italic tracking-tighter uppercase mb-4">
+              <h3 className="text-3xl md:text-4xl font-black text-navy italic tracking-tighter uppercase mb-3">
                 You May Also Like
               </h3>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic leading-relaxed">
-                More expert recommendations to help you decide wisely.
+                More expert recommendations — YouTube, Reels, and blog guides.
               </p>
             </div>
             <Link
               to="/guides"
-              className="px-10 py-5 bg-navy text-white rounded-full text-[11px] font-black uppercase tracking-widest italic hover:bg-[#E8500A] transition-all shadow-xl font-bold"
+              className="px-8 py-3.5 bg-navy text-white rounded-full text-[10px] font-black uppercase tracking-widest italic hover:bg-[#E8500A] transition-all shadow-lg shrink-0"
             >
               View All Recommendations
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {allGuides.filter((b) => String(b.id) !== String(guide.id))
-              .slice(0, 3)
-              .map((g, i) => (
-                <Link
-                  key={i}
-                  to={`/guides/${g.id}`}
-                  className="group cursor-pointer block bg-[#FDFDFD] rounded-[5px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-500 shadow-xl shadow-gray-100/50"
-                >
-                  <div className="aspect-[16/10] overflow-hidden relative font-bold">
-                    <img
-                      src={g.image}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      alt="Guide"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
-                        <BookOpen size={12} className="text-[#E8500A]" />
-                        <span className="text-[10px] font-black text-navy uppercase tracking-widest italic">
-                          {g.readTime || "5 min read"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-8 text-left">
-                    <h3 className="text-lg font-black text-navy uppercase tracking-tighter mb-4 group-hover:text-orange-primary transition-colors leading-tight italic line-clamp-2">
-                      {g.title}
-                    </h3>
-                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest italic line-clamp-2 mb-8">
-                      {g.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between pt-6 border-t border-gray-50">
-                      <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
-                        <span className="flex items-center gap-1.5">
-                          <Heart size={12} className="text-pink-500" />{" "}
-                          {g.views || "12k"}
-                        </span>
-                        <span className="flex items-center gap-1.5 opacity-50 font-bold">
-                          • {g.shares || "450"} Shared
-                        </span>
-                      </div>
-                      <ArrowRight
-                        size={16}
-                        className="text-[#E8500A] group-hover:translate-x-2 transition-transform"
-                      />
-                    </div>
-                  </div>
-                </Link>
+          <div className={GUIDE_MEDIA_GRID}>
+            {allGuides
+              .filter((b) => String(b.id) !== String(guide.id))
+              .slice(0, 4)
+              .map((g) => (
+                <div key={g.id}>{renderGuideMediaCard(g)}</div>
               ))}
           </div>
         </section>

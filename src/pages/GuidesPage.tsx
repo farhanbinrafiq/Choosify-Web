@@ -40,7 +40,7 @@ function GuideSectionHeader({
   );
 }
 
-function renderGuideMediaCard(guide: any) {
+export function renderGuideMediaCard(guide: any) {
   if (guide.type === 'reels' || guide.type === 'shorts') {
     return <ReelCard guide={guide} />;
   }
