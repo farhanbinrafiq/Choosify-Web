@@ -99,7 +99,6 @@ const SECTION_LABELS: Record<string, string> = {
   privacy: 'Privacy Policy',
   partnership: 'Partnership',
   advertise: 'Advertise',
-  b2b: 'B2B Solutions',
   'suggest-brand': 'Suggest a Brand',
   'post-offer': 'Post Offer',
   cart: 'Cart',

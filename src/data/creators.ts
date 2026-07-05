@@ -51,7 +51,7 @@ export const CREATORS: Creator[] = [
         thumbnail: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=600&h=337&q=80",
         views: "124K views",
         duration: "15:42",
-        url: "#"
+        url: "https://www.youtube.com/watch?v=8jPQjjsBbIc",
       },
       {
         id: "v2",
@@ -60,7 +60,7 @@ export const CREATORS: Creator[] = [
         views: "98K views",
         duration: "12:18",
         url: "#",
-        associatedGuideId: 1
+        associatedGuideId: 1,
       },
       {
         id: "v3",
@@ -68,8 +68,8 @@ export const CREATORS: Creator[] = [
         thumbnail: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=600&h=337&q=80",
         views: "82K views",
         duration: "18:05",
-        url: "#"
-      }
+        url: "https://www.youtube.com/shorts/aqz-KE-bpKQ",
+      },
     ],
     reels: [
       {

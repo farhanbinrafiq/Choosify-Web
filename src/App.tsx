@@ -39,7 +39,6 @@ const CreatorProfilePage = lazy(() => import('./pages/CreatorProfilePage').then(
 const SuggestBrandPage = lazy(() => import('./pages/SuggestBrandPage').then(m => ({ default: m.SuggestBrandPage })));
 const PartnershipPage = lazy(() => import('./pages/PartnershipPage').then(m => ({ default: m.PartnershipPage })));
 const AdvertisePage = lazy(() => import('./pages/AdvertisePage').then(m => ({ default: m.AdvertisePage })));
-const B2BSolutionsPage = lazy(() => import('./pages/B2BSolutionsPage').then(m => ({ default: m.B2BSolutionsPage })));
 const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
@@ -171,6 +170,48 @@ function ScreenPreview({ title, children, id }: { title: string, children: React
 }
 
 import { useGlobalState } from './context/GlobalStateContext';
+import { isNavPathEnabled } from './lib/featureFlags';
+
+function FeatureFlagRoute({
+  flag,
+  fallback = '/',
+  children,
+}: {
+  flag: string;
+  fallback?: string;
+  children: React.ReactNode;
+}) {
+  const { isFeatureEnabled } = useGlobalState();
+  if (!isFeatureEnabled(flag)) {
+    return <Navigate to={fallback} replace />;
+  }
+  return <>{children}</>;
+}
+
+function MaintenanceGate({ children }: { children: React.ReactNode }) {
+  const { isFeatureEnabled } = useGlobalState();
+  const location = useLocation();
+  const allowedDuringMaintenance = ['/login', '/contact', '/about'];
+  if (
+    isFeatureEnabled('maintenance_mode') &&
+    !allowedDuringMaintenance.some((path) => location.pathname.startsWith(path))
+  ) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A1F] text-white p-8">
+        <div className="text-center max-w-md space-y-4">
+          <h1 className="text-2xl font-black uppercase tracking-tight italic">Maintenance Mode</h1>
+          <p className="text-white/60 text-sm">
+            Choosify is undergoing scheduled updates. Please check back soon or contact support.
+          </p>
+          <Link to="/contact" className="inline-block text-orange-primary font-bold text-sm uppercase tracking-widest">
+            Contact Support
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useGlobalState();
@@ -191,6 +232,7 @@ function AppContent() {
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
       {showSiteChrome && !isCompactShell && <Navbar />}
+      <MaintenanceGate>
       <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
           <Routes location={location}>
@@ -203,7 +245,7 @@ function AppContent() {
             <Route path="/brands/:id/products" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
             <Route path="/categories" element={<PageWrapper><CategoriesPage /></PageWrapper>} />
             <Route path="/deals" element={<PageWrapper><DealsPage /></PageWrapper>} />
-            <Route path="/compare" element={<PageWrapper><ComparePage /></PageWrapper>} />
+            <Route path="/compare" element={<FeatureFlagRoute flag="enable_comparison_engine"><PageWrapper><ComparePage /></PageWrapper></FeatureFlagRoute>} />
             <Route path="/guides" element={<PageWrapper><GuidesPage /></PageWrapper>} />
             <Route path="/blogs" element={<Navigate to="/guides" replace />} />
             <Route path="/blogs/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
@@ -217,20 +259,19 @@ function AppContent() {
             <Route path="/whats-on/:slug" element={<PageWrapper><BrandPostDetailPage /></PageWrapper>} />
             <Route path="/customer-favorite" element={<Navigate to="/whats-on" replace />} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
-            <Route path="/creators" element={<PageWrapper><CreatorsPage /></PageWrapper>} />
-            <Route path="/creators/:id" element={<PageWrapper><CreatorProfilePage /></PageWrapper>} />
+            <Route path="/creators" element={<FeatureFlagRoute flag="creator_hub"><PageWrapper><CreatorsPage /></PageWrapper></FeatureFlagRoute>} />
+            <Route path="/creators/:id" element={<FeatureFlagRoute flag="creator_hub"><PageWrapper><CreatorProfilePage /></PageWrapper></FeatureFlagRoute>} />
             
             <Route path="/suggest-brand" element={<PageWrapper><SuggestBrandPage /></PageWrapper>} />
             <Route path="/partnership" element={<PageWrapper><PartnershipPage /></PageWrapper>} />
             <Route path="/advertise" element={<PageWrapper><AdvertisePage /></PageWrapper>} />
-            <Route path="/b2b" element={<PageWrapper><B2BSolutionsPage /></PageWrapper>} />
             <Route path="/terms" element={<PageWrapper><TermsPage /></PageWrapper>} />
             <Route path="/privacy" element={<PageWrapper><PrivacyPage /></PageWrapper>} />
             <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
             <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
             <Route path="/faq" element={<PageWrapper><FAQPage /></PageWrapper>} />
 
-            <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
+            <Route path="/brand-deals" element={<FeatureFlagRoute flag="enable_brand_deals_page"><PageWrapper><BrandDealsPage /></PageWrapper></FeatureFlagRoute>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
             <Route path="/checkout" element={<ProtectedRoute><PageWrapper><CheckoutPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
@@ -246,6 +287,7 @@ function AppContent() {
           </Routes>
         </Suspense>
       </AnimatePresence>
+      </MaintenanceGate>
       {!isOverview && !isCompactShell && <FloatingOverlays />}
       {showSiteChrome && !isCompactShell && !isMessagesShell && <Footer />}
     </div>

@@ -65,46 +65,7 @@ export interface InfluencerReviewsProps {
   fullWidth?: boolean;
 }
 
-// Converts standard video links into embeddable iframe-safe URLs
-const getEmbedUrl = (url: string) => {
-  if (!url) return '';
-  let clean = url.trim();
-
-  // Handle YouTube Shorts
-  if (clean.includes('youtube.com/shorts/') || clean.includes('youtu.be/shorts/')) {
-    const parts = clean.split('/shorts/');
-    const id = parts[1]?.split('?')[0]?.split('&')[0];
-    if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
-  }
-
-  // Handle standard short youtu.be links
-  if (clean.includes('youtu.be/')) {
-    const parts = clean.split('youtu.be/');
-    const id = parts[1]?.split('?')[0]?.split('&')[0];
-    if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
-  }
-
-  // Handle standard watch links
-  if (clean.includes('youtube.com/watch')) {
-    try {
-      const urlParams = new URLSearchParams(clean.substring(clean.indexOf('?')));
-      const id = urlParams.get('v');
-      if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
-    } catch (e) {
-      // fallback
-    }
-  }
-
-  // Already an embed link
-  if (clean.includes('/embed/')) {
-    if (!clean.includes('autoplay=')) {
-      clean = clean.includes('?') ? `${clean}&autoplay=1&mute=1` : `${clean}?autoplay=1&mute=1`;
-    }
-    return clean;
-  }
-
-  return clean;
-};
+import { getVideoEmbedUrl } from '../lib/videoEmbed';
 
 // Unified avatar rendering to cleanly handle both dynamic image URLs and initial characters
 function RenderAvatar({ avatar, name, size = 'sm' }: { avatar: string; name: string; size?: 'sm' | 'md' }) {
@@ -120,18 +81,18 @@ function RenderAvatar({ avatar, name, size = 'sm' }: { avatar: string; name: str
   
   if (isUrl) {
     return (
-      <div className={`${sizeClass} rounded-full overflow-hidden border border-[#21262D] bg-[#21262D] flex-shrink-0 flex items-center justify-center`}>
+      <div className={`${sizeClass} rounded-full overflow-hidden border border-[#e8edf2] bg-white flex-shrink-0 flex items-center justify-center shadow-sm`}>
         <img src={safeAvatar} alt={name || "avatar"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
       </div>
     );
   }
-  
+
   const displayLetters = typeof name === 'string' && name.trim().length > 0
     ? name.trim().substring(0, 2)
     : (typeof safeAvatar === 'string' && safeAvatar.trim().length > 0 ? safeAvatar.trim().substring(0, 2) : "CR");
 
   return (
-    <div className={`${sizeClass} rounded-full bg-[#21262D] border border-[#21262D] flex items-center justify-center font-semibold text-[#F0F6FC] shrink-0 uppercase`}>
+    <div className={`${sizeClass} rounded-full bg-[#FFF0E8] border border-[#FFD4BC] flex items-center justify-center font-bold text-[#E8500A] shrink-0 uppercase`}>
       {safeAvatar && !isUrl ? safeAvatar.substring(0, 2) : displayLetters}
     </div>
   );
@@ -152,23 +113,23 @@ function VideoArea({ id, videoUrl, image, platform, aspectRatio, isPlaying, onPl
   const getLargePlatformIcon = () => {
     switch (platform) {
       case 'YouTube':
-        return <Youtube size={24} className="text-[#8B949E]/10" />;
+        return <Youtube size={24} className="text-white/80" />;
       case 'Instagram':
-        return <Instagram size={24} className="text-[#8B949E]/10" />;
+        return <Instagram size={24} className="text-white/80" />;
       case 'TikTok':
-        return <TikTokIcon className="w-6 h-6 text-[#8B949E]/10" />;
+        return <TikTokIcon className="w-6 h-6 text-white/80" />;
       case 'Facebook':
-        return <Facebook size={24} className="text-[#8B949E]/10" />;
+        return <Facebook size={24} className="text-white/80" />;
       default:
         return <Video size={24} className="text-[#8B949E]/10" />;
     }
   };
 
-  const cleanEmbed = getEmbedUrl(videoUrl);
+  const cleanEmbed = getVideoEmbedUrl(videoUrl);
 
   if (isPlaying && cleanEmbed) {
     return (
-      <div className="absolute inset-0 w-full h-full bg-black z-10 select-none rounded-[8px] overflow-hidden">
+      <div className="absolute inset-0 w-full h-full bg-black z-10 select-none overflow-hidden">
         <iframe
           src={cleanEmbed}
           frameBorder="0"
@@ -184,28 +145,25 @@ function VideoArea({ id, videoUrl, image, platform, aspectRatio, isPlaying, onPl
   return (
     <div 
       onClick={onPlay}
-      className="absolute inset-0 w-full h-full cursor-pointer group flex items-center justify-center overflow-hidden transition-all duration-300 select-none rounded-[8px]"
+      className="absolute inset-0 w-full h-full cursor-pointer group flex items-center justify-center overflow-hidden transition-all duration-300 select-none"
     >
-      {/* Background Image with optimized zoom and blur details */}
       <img 
         src={image} 
-        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1200ms] brightness-[0.4]"
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1200ms]"
         alt="Video Thumbnail"
       />
-      <div className="absolute inset-0 bg-[#0D1117]/50" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/20" />
 
-      {/* Centered White Play circle and text */}
       <div className="relative z-10 flex flex-col items-center gap-2 px-4 text-center">
-        <div className="w-9 h-9 rounded-full bg-[#FAF9F5]/90 text-[#0D1117] flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:bg-[#FAF9F5] shrink-0">
-          <Play size={12} className="fill-current ml-0.5 text-[#0D1117]" />
+        <div className="w-11 h-11 rounded-full bg-[#E8500A] text-white flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:bg-[#FF6B00] shrink-0">
+          <Play size={14} className="fill-current ml-0.5 text-white" />
         </div>
-        <span className="text-[11px] text-[#8B949E] font-medium tracking-wide">
-          Click to load video
+        <span className="text-[10px] text-white/90 font-semibold tracking-wide drop-shadow-sm">
+          Watch review
         </span>
       </div>
 
-      {/* Stylized background platform silhouette for premium branding */}
-      <div className="absolute right-3 bottom-3 opacity-40">
+      <div className="absolute right-3 bottom-3 opacity-70">
         {getLargePlatformIcon()}
       </div>
     </div>
@@ -468,7 +426,7 @@ export function InfluencerReviews({
     if (!subtitle) {
       return (
         <>
-          Trusted voices, <span className="italic text-[#8B949E] font-normal">real opinions</span>
+          Trusted voices, <span className="text-[#E8500A] not-italic">real opinions</span>
         </>
       );
     }
@@ -476,7 +434,7 @@ export function InfluencerReviews({
       const parts = subtitle.split(',');
       return (
         <>
-          {parts[0].trim()}, <span className="italic text-[#8B949E] font-normal">{parts[1].trim()}</span>
+          {parts[0].trim()}, <span className="text-[#E8500A] not-italic">{parts[1].trim()}</span>
         </>
       );
     }
@@ -486,26 +444,23 @@ export function InfluencerReviews({
   return (
     <section 
       id="influencer-reviews-section" 
-      className={`font-['DM_Sans',_sans-serif] hero-gradient text-[#F0F6FC] p-4 sm:p-6 md:p-8 rounded-[5px] border border-[#21262D]/60 text-left flex flex-col justify-start shadow-xl relative overflow-hidden ${
+      className={`font-sans text-[#1A1A2E] p-4 sm:p-6 md:p-8 rounded-[12px] border border-[#e8edf2] bg-white text-left flex flex-col justify-start shadow-[0_8px_30px_rgba(26,29,78,0.06)] relative overflow-hidden ${
         fullWidth ? 'w-full max-w-none my-0' : 'w-full max-w-[680px] mx-auto my-6'
       }`}
     >
       {/* PART 1 — SECTION HEADER */}
       <div className="text-center mb-6 border-0 p-0 bg-transparent flex flex-col items-center">
-        {/* Small ALL-CAPS eyebrow */}
-        <p className="inline-flex items-center gap-1.5 text-[11px] font-medium tracking-[0.12em] uppercase text-[#8B949E] mb-2">
-          <span className="w-5 h-[0.5px] bg-[#21262D]" />
+        <p className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-[0.18em] uppercase text-[#8a9bb0] mb-2">
+          <span className="w-5 h-px bg-[#e8edf2]" />
           {title}
-          <span className="w-5 h-[0.5px] bg-[#21262D]" />
+          <span className="w-5 h-px bg-[#e8edf2]" />
         </p>
 
-        {/* Dynamic H2 heading with italic logic */}
-        <h2 className="font-['DM_Serif_Display',_serif] text-xl sm:text-2xl md:text-3xl font-normal leading-[1.2] tracking-tight text-[#F0F6FC] mt-1 mb-4">
+        <h2 className="font-space text-xl sm:text-2xl md:text-[1.75rem] font-black leading-[1.15] tracking-tight text-[#1A1D4E] mt-1 mb-4 uppercase italic">
           {renderSubtitleText()}
         </h2>
 
-        {/* Filter Pills list - horizontal scrolling configured on mobile, centered on desktop */}
-        <div className="flex flex-nowrap md:justify-center items-center gap-1.5 overflow-x-auto no-scrollbar w-full py-1.5 justify-start max-w-full select-none">
+        <div className="flex flex-nowrap md:justify-center items-center gap-2 overflow-x-auto no-scrollbar w-full py-1.5 justify-start max-w-full select-none">
           {(['ALL', 'YouTube', 'Instagram', 'TikTok', 'Facebook'] as const).map((filter) => {
             const isActive = activePlatformFilter === filter;
             return (
@@ -515,10 +470,10 @@ export function InfluencerReviews({
                   setActivePlatformFilter(filter);
                   setPlayingVideoId(null);
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer border select-none whitespace-nowrap outline-none ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer border select-none whitespace-nowrap outline-none ${
                   isActive
-                    ? "bg-[#FF6B35] text-white border-[#FF6B35] shadow-sm shadow-[#FF6B35]/20"
-                    : "bg-transparent text-[#8B949E] border-[#21262D] hover:text-[#F0F6FC] hover:border-[#8B949E]/40"
+                    ? "bg-[#E8500A] text-white border-[#E8500A] shadow-sm shadow-[#E8500A]/20"
+                    : "bg-white text-[#64748b] border-[#e8edf2] hover:text-[#1A1D4E] hover:border-[#E8500A]/30"
                 }`}
               >
                 {filter !== 'ALL' && getPlatformIcon(filter)}
@@ -530,10 +485,9 @@ export function InfluencerReviews({
       </div>
 
       {/* PART 2 — FEATURED VIDEO BLOCK */}
-      <div className="flex flex-col sm:flex-row items-stretch border border-[#21262D]/70 rounded-[5px] overflow-hidden bg-[#161B22] mb-6 shadow-md shadow-[#000]/10">
+      <div className="flex flex-col sm:flex-row items-stretch border border-[#e8edf2] rounded-[12px] overflow-hidden bg-white mb-6 shadow-[0_4px_18px_rgba(26,29,78,0.05)]">
         
-        {/* Left Side: 16:9 Aspect Video Embed / Placeholder */}
-        <div className="w-full sm:w-[52%] relative bg-[#0D1117] aspect-[16/9] flex-shrink-0">
+        <div className="w-full sm:w-[52%] relative bg-[#0f172a] aspect-[16/9] flex-shrink-0">
           <VideoArea
             id="featured"
             videoUrl={finalFeatured.videoUrl || ""}
@@ -544,10 +498,9 @@ export function InfluencerReviews({
             onPlay={handlePlayFeatured}
           />
           
-          {/* Absolute Platform Badge Overlay */}
           {!playingVideoId || playingVideoId !== 'featured' ? (
-            <div className="absolute top-2.5 left-2.5 z-10">
-              <span className="bg-[#0D1117]/85 backdrop-blur-md border border-[#21262D] text-[#F0F6FC] px-2 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 shadow-sm select-none">
+            <div className="absolute top-3 left-3 z-10">
+              <span className="bg-white/95 backdrop-blur-md border border-white/80 text-[#1A1D4E] px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm select-none">
                 {getPlatformIcon(finalFeatured.platform || 'YouTube')}
                 {finalFeatured.platform}
               </span>
@@ -555,46 +508,43 @@ export function InfluencerReviews({
           ) : null}
         </div>
 
-        {/* Right Side: Editorial Meta Desk */}
-        <div className="w-full sm:w-[48%] bg-[#161B22] p-4.5 flex flex-col justify-between flex-shrink-0 text-left min-w-0">
+        <div className="w-full sm:w-[48%] bg-white p-5 sm:p-6 flex flex-col justify-between flex-shrink-0 text-left min-w-0 border-t sm:border-t-0 sm:border-l border-[#e8edf2]">
           <div>
-            <p className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#8B949E] mb-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#FF6B35]" />
-              {finalFeatured.platform} · {finalFeatured.badgeText}
+            <p className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-[#E8500A] mb-2">
+              <span className="inline-block w-1 h-3 rounded-full bg-[#E8500A]" />
+              {finalFeatured.badgeText || 'In-depth Review'}
             </p>
-            <h3 className="font-['DM_Serif_Display',_serif] text-base sm:text-lg font-normal text-[#F0F6FC] leading-snug tracking-tight mb-2 truncate">
+            <h3 className="font-space text-lg sm:text-xl font-black text-[#1A1D4E] leading-snug tracking-tight mb-2.5 line-clamp-2">
               {finalFeatured.title}
             </h3>
-            <p className="text-xs text-[#8B949E] leading-relaxed font-light line-clamp-3 mb-4">
+            <p className="text-sm text-[#64748b] leading-relaxed line-clamp-4 mb-4">
               {finalFeatured.excerpt}
             </p>
           </div>
 
-          <div className="pt-3 border-t border-[#21262D]/60 space-y-3.5 mt-auto">
-            {/* Stats list with safe wrapping */}
-            <div className="flex flex-wrap gap-x-3.5 gap-y-1 text-[#8B949E]">
+          <div className="pt-4 border-t border-[#e8edf2] space-y-3.5 mt-auto">
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[#64748b]">
               <span className="text-[10px] uppercase font-bold tracking-wider flex items-center gap-1">
-                <Eye size={12} className="text-[#8B949E]/70" />
-                <span className="text-[#F0F6FC]">{finalFeatured.stats?.views || "124K"} views</span>
+                <Eye size={12} className="text-[#E8500A]/70" />
+                <span className="text-[#1A1D4E]">{finalFeatured.stats?.views || "124K"} views</span>
               </span>
               <span className="text-[10px] uppercase font-bold tracking-wider flex items-center gap-1">
-                <ThumbsUp size={12} className="text-[#8B949E]/70" />
-                <span className="text-[#F0F6FC]">{finalFeatured.stats?.likes || "8.2K"}</span>
+                <ThumbsUp size={12} className="text-[#E8500A]/70" />
+                <span className="text-[#1A1D4E]">{finalFeatured.stats?.likes || "8.2K"}</span>
               </span>
               <span className="text-[10px] uppercase font-bold tracking-wider flex items-center gap-1">
-                <Clock size={12} className="text-[#8B949E]/70" />
-                <span className="text-[#F0F6FC]">{finalFeatured.stats?.duration || "18 min"}</span>
+                <Clock size={12} className="text-[#E8500A]/70" />
+                <span className="text-[#1A1D4E]">{finalFeatured.stats?.duration || "18 min"}</span>
               </span>
             </div>
 
-            {/* Author bar */}
             <div className="flex items-center gap-2.5 min-w-0">
               <RenderAvatar avatar={finalFeatured.authorLogo || ""} name={finalFeatured.authorName} size="md" />
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-semibold text-[#F0F6FC] leading-none truncate mb-0.5">
+                <span className="text-xs font-black text-[#1A1D4E] leading-none truncate mb-0.5 uppercase">
                   {finalFeatured.authorName}
                 </span>
-                <span className="text-[10px] text-[#8B949E] truncate">
+                <span className="text-[10px] text-[#8a9bb0] truncate font-medium">
                   {finalFeatured.authorSub || "@techreviewbd"}
                 </span>
               </div>
@@ -606,11 +556,11 @@ export function InfluencerReviews({
 
       {/* PART 3 — CARD GRID */}
       {filteredReviews.length === 0 ? (
-        <div className="w-full text-center py-10 bg-[#161B22] border border-[#21262D] rounded-[5px] text-gray-400">
+        <div className="w-full text-center py-10 bg-[#F8FAFC] border border-[#e8edf2] rounded-[12px] text-[#8a9bb0]">
           Creator content coming soon
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[1px] bg-[#21262D]/60 rounded-[5px] overflow-hidden border border-[#21262D]/60 shadow-inner">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {filteredReviews.map((review) => {
             const isPlaying = playingVideoId === review.id;
             const isPortrait = review.aspectRatio === 'portrait';
@@ -619,10 +569,9 @@ export function InfluencerReviews({
               <div 
                 key={review.id} 
                 data-platform={review.platform?.toLowerCase()}
-                className="ir-card flex flex-col bg-[#161B22] h-full transition-all duration-200"
+                className="ir-card flex flex-col bg-white h-full transition-all duration-200 rounded-[12px] border border-[#e8edf2] overflow-hidden shadow-[0_4px_16px_rgba(26,29,78,0.04)] hover:shadow-[0_8px_24px_rgba(232,80,10,0.08)] hover:border-[#E8500A]/20"
               >
-                {/* Stabilized Video Thumbnails with locked proportional aspects */}
-                <div className={`relative bg-[#0D1117] overflow-hidden ${
+                <div className={`relative bg-[#eef2f7] overflow-hidden ${
                   isPortrait ? "aspect-[3/4]" : "aspect-[16/10]"
                 }`}>
                   <VideoArea
@@ -635,10 +584,9 @@ export function InfluencerReviews({
                     onPlay={() => handlePlayCard(review.id, review.authorName)}
                   />
 
-                  {/* Absolute platform overlay label */}
                   {!isPlaying ? (
                     <div className="absolute top-2.5 left-2.5 z-10">
-                      <span className="bg-[#0D1117]/85 backdrop-blur-md border border-[#21262D] text-[#F0F6FC] px-1.5 py-0.5 rounded-[4px] text-[8.5px] font-bold uppercase tracking-widest flex items-center gap-1 shadow-sm select-none">
+                      <span className="bg-white/95 backdrop-blur-md border border-white/80 text-[#1A1D4E] px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm select-none">
                         {getPlatformIcon(review.platform || 'Instagram')}
                         {review.platform === 'Instagram' ? 'Reel' : review.platform}
                       </span>
@@ -646,26 +594,23 @@ export function InfluencerReviews({
                   ) : null}
                 </div>
 
-                {/* Card Body - optimized spacing to align contents and metadata perfectly */}
-                <div className="p-3.5 flex flex-col flex-grow text-left bg-[#161B22]">
-                  <span className="text-[9.5px] font-extrabold text-[#FF6B35] tracking-widest uppercase mb-1">
+                <div className="p-4 flex flex-col flex-grow text-left bg-white">
+                  <span className="text-[9px] font-black text-[#E8500A] tracking-[0.14em] uppercase mb-1.5">
                     {review.category}
                   </span>
                   
-                  {/* Clean text body with min-height constraint for perfect alignment, never overlapping */}
-                  <h4 className="text-[12.5px] font-medium text-[#F0F6FC] leading-snug line-clamp-2 min-h-[35px] text-left text-ellipsis overflow-hidden mt-0.5 mb-3.5">
+                  <h4 className="text-[13px] font-bold text-[#1A1D4E] leading-snug line-clamp-2 min-h-[38px] text-left mb-3">
                     {review.title}
                   </h4>
 
-                  {/* Separator / Creator metadata row with automatic bottom anchoring */}
-                  <div className="flex items-center justify-between border-t border-[#21262D]/60 pt-2.5 mt-auto">
+                  <div className="flex items-center justify-between border-t border-[#e8edf2] pt-3 mt-auto">
                     <div className="flex items-center gap-2 min-w-0">
                       <RenderAvatar avatar={review.authorAvatar} name={review.authorName} size="sm" />
-                      <span className="text-[11px] text-[#8B949E] truncate font-medium">
+                      <span className="text-[11px] text-[#64748b] truncate font-semibold">
                         {review.authorHandle}
                       </span>
                     </div>
-                    <span className="text-[9.5px] text-[#8B949E] font-mono shrink-0">
+                    <span className="text-[9px] text-[#8a9bb0] font-mono shrink-0">
                       {review.timeAgo}
                     </span>
                   </div>
@@ -679,53 +624,53 @@ export function InfluencerReviews({
 
       {/* PART 4 — ACCORDION DROPDOWN SUBMISSION FORM FOR CUSTOM INFLUENCER REVIEWS */}
       {canAddCreatorReview && showAddForm && (
-        <div className="mt-5 p-5 bg-[#161B22] border border-[#21262D] rounded-[5px] anim-fade text-left space-y-4">
-          <div className="flex items-center justify-between border-b border-[#21262D] pb-2.5">
-            <h4 className="font-['DM_Serif_Display',_serif] text-lg text-[#F0F6FC] font-normal tracking-wide flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B35]" />
+        <div className="mt-5 p-5 bg-[#F8FAFC] border border-[#e8edf2] rounded-[12px] anim-fade text-left space-y-4">
+          <div className="flex items-center justify-between border-b border-[#e8edf2] pb-2.5">
+            <h4 className="font-space text-lg text-[#1A1D4E] font-black tracking-wide flex items-center gap-1.5 uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E8500A]" />
               Add Creator Review
             </h4>
             <button 
               onClick={() => setShowAddForm(false)}
-              className="text-[#8B949E] hover:text-[#F0F6FC] transition-colors p-1"
+              className="text-[#8a9bb0] hover:text-[#1A1D4E] transition-colors p-1"
             >
               <X size={16} />
             </button>
           </div>
 
-          <form onSubmit={handleFormSubmit} className="space-y-4 text-xs font-['DM_Sans',_sans-serif]">
+          <form onSubmit={handleFormSubmit} className="space-y-4 text-xs font-sans">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[#8B949E] font-medium mb-1 uppercase tracking-wider text-[9px]">Creator Name *</label>
+                <label className="block text-[#64748b] font-bold mb-1 uppercase tracking-wider text-[9px]">Creator Name *</label>
                 <input 
                   type="text" 
                   required
                   placeholder="e.g. Style Guru" 
                   value={formData.authorName}
                   onChange={(e) => setFormData({...formData, authorName: e.target.value})}
-                  className="w-full bg-[#0D1117] border border-[#21262D] rounded-[6px] px-3 py-2 text-[#F0F6FC] focus:outline-none focus:border-[#FF6B35] transition-colors"
+                  className="w-full bg-white border border-[#e8edf2] rounded-[8px] px-3 py-2 text-[#1A1D4E] focus:outline-none focus:border-[#E8500A] transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[#8B949E] font-medium mb-1 uppercase tracking-wider text-[9px]">Social Handle *</label>
+                <label className="block text-[#64748b] font-bold mb-1 uppercase tracking-wider text-[9px]">Social Handle *</label>
                 <input 
                   type="text" 
                   required
                   placeholder="e.g. @styleguru" 
                   value={formData.authorHandle}
                   onChange={(e) => setFormData({...formData, authorHandle: e.target.value})}
-                  className="w-full bg-[#0D1117] border border-[#21262D] rounded-[6px] px-3 py-2 text-[#F0F6FC] focus:outline-none focus:border-[#FF6B35] transition-colors"
+                  className="w-full bg-white border border-[#e8edf2] rounded-[8px] px-3 py-2 text-[#1A1D4E] focus:outline-none focus:border-[#E8500A] transition-colors"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[#8B949E] font-medium mb-1 uppercase tracking-wider text-[9px]">Platform *</label>
+                <label className="block text-[#64748b] font-bold mb-1 uppercase tracking-wider text-[9px]">Platform *</label>
                 <select 
                   value={formData.platform}
                   onChange={(e) => setFormData({...formData, platform: e.target.value as any})}
-                  className="w-full bg-[#0D1117] border border-[#21262D] rounded-[6px] px-3 py-2 text-[#F0F6FC] focus:outline-none focus:border-[#FF6B35] transition-colors"
+                  className="w-full bg-white border border-[#e8edf2] rounded-[8px] px-3 py-2 text-[#1A1D4E] focus:outline-none focus:border-[#E8500A] transition-colors"
                 >
                   <option value="YouTube">YouTube</option>
                   <option value="Instagram">Instagram (Reel)</option>
@@ -734,64 +679,64 @@ export function InfluencerReviews({
                 </select>
               </div>
               <div>
-                <label className="block text-[#8B949E] font-medium mb-1 uppercase tracking-wider text-[9px]">Category/Tag</label>
+                <label className="block text-[#64748b] font-bold mb-1 uppercase tracking-wider text-[9px]">Category/Tag</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Fashion Vibes, Unboxing" 
                   value={formData.category}
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  className="w-full bg-[#0D1117] border border-[#21262D] rounded-[6px] px-3 py-2 text-[#F0F6FC] focus:outline-none focus:border-[#FF6B35] transition-colors"
+                  className="w-full bg-white border border-[#e8edf2] rounded-[8px] px-3 py-2 text-[#1A1D4E] focus:outline-none focus:border-[#E8500A] transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[#8B949E] font-medium mb-1 uppercase tracking-wider text-[9px]">Review Video Title *</label>
+              <label className="block text-[#64748b] font-bold mb-1 uppercase tracking-wider text-[9px]">Review Video Title *</label>
               <input 
                 type="text" 
                 required
                 placeholder="e.g. First look at the stunning fabric quality!" 
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
-                className="w-full bg-[#0D1117] border border-[#21262D] rounded-[6px] px-3 py-2 text-[#F0F6FC] focus:outline-none focus:border-[#FF6B35] transition-colors"
+                className="w-full bg-white border border-[#e8edf2] rounded-[8px] px-3 py-2 text-[#1A1D4E] focus:outline-none focus:border-[#E8500A] transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-[#8B949E] font-medium mb-1 uppercase tracking-wider text-[9px]">Video URL or YouTube Watch/Short Link *</label>
+              <label className="block text-[#64748b] font-bold mb-1 uppercase tracking-wider text-[9px]">Video URL or YouTube Watch/Short Link *</label>
               <input 
                 type="url" 
                 required
                 placeholder="e.g. https://www.youtube.com/watch?v=T68XW9Q-PqQ or any embed URL" 
                 value={formData.videoUrl}
                 onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
-                className="w-full bg-[#0D1117] border border-[#21262D] rounded-[6px] px-3 py-2 text-[#F0F6FC] focus:outline-none focus:border-[#FF6B35] transition-colors"
+                className="w-full bg-white border border-[#e8edf2] rounded-[8px] px-3 py-2 text-[#1A1D4E] focus:outline-none focus:border-[#E8500A] transition-colors"
               />
-              <p className="text-[10px] text-gray-500 mt-1">
+              <p className="text-[10px] text-[#8a9bb0] mt-1">
                 ProTip: Supports YouTube shorts, standard videos, and direct iframe embed links safely.
               </p>
             </div>
 
             <div>
-              <label className="block text-[#8B949E] font-medium mb-1 uppercase tracking-wider text-[9px]">Preferred Video Aspect Design *</label>
+              <label className="block text-[#64748b] font-bold mb-1 uppercase tracking-wider text-[9px]">Preferred Video Aspect Design *</label>
               <div className="flex items-center gap-4 mt-1.5">
-                <label className="flex items-center gap-2 cursor-pointer text-[#F0F6FC]">
+                <label className="flex items-center gap-2 cursor-pointer text-[#1A1D4E]">
                   <input 
                     type="radio" 
                     name="aspectRatio" 
                     checked={formData.aspectRatio === 'landscape'}
                     onChange={() => setFormData({...formData, aspectRatio: 'landscape'})}
-                    className="accent-[#FF6B35]"
+                    className="accent-[#E8500A]"
                   />
                   Horizontal (16:10 / 16:9)
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer text-[#F0F6FC]">
+                <label className="flex items-center gap-2 cursor-pointer text-[#1A1D4E]">
                   <input 
                     type="radio" 
                     name="aspectRatio" 
                     checked={formData.aspectRatio === 'portrait'}
                     onChange={() => setFormData({...formData, aspectRatio: 'portrait'})}
-                    className="accent-[#FF6B35]"
+                    className="accent-[#E8500A]"
                   />
                   Vertical Reels/TikTok (3:4)
                 </label>
@@ -802,13 +747,13 @@ export function InfluencerReviews({
               <button 
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="bg-[#21262D] hover:bg-[#30363D] text-[#F0F6FC] font-semibold py-2 px-4 rounded-[6px] transition-colors cursor-pointer"
+                className="bg-white hover:bg-[#F8FAFC] text-[#1A1D4E] font-semibold py-2 px-4 rounded-[8px] border border-[#e8edf2] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button 
                 type="submit"
-                className="bg-[#FF6B35] hover:bg-[#ff8554] text-white font-semibold py-2 px-5 rounded-[6px] transition-colors shadow-sm shadow-[#FF6B35]/20 cursor-pointer"
+                className="bg-[#E8500A] hover:bg-[#FF6B00] text-white font-semibold py-2 px-5 rounded-[8px] transition-colors shadow-sm shadow-[#E8500A]/20 cursor-pointer"
               >
                 Add Creator Review
               </button>
@@ -817,19 +762,17 @@ export function InfluencerReviews({
         </div>
       )}
 
-      {/* PART 5 — TRIGGER BUTTON to match mock design */}
       {canAddCreatorReview && !showAddForm && (
         <button 
           onClick={() => {
             setShowAddForm(true);
-            // Scroll to form area smoothly
             setTimeout(() => {
               document.getElementById('influencer-reviews-section')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }, 100);
           }}
-          className="flex items-center justify-center gap-2 w-full py-3.5 mt-5 border border-dashed border-[#21262D] rounded-[5px] bg-transparent hover:bg-[#161B22] text-[#8B949E] hover:text-[#F0F6FC] text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer select-none"
+          className="flex items-center justify-center gap-2 w-full py-3.5 mt-5 border border-dashed border-[#e8edf2] rounded-[12px] bg-[#F8FAFC] hover:bg-white text-[#64748b] hover:text-[#1A1D4E] text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer select-none"
         >
-          <Plus size={14} className="text-[#8B949E]" />
+          <Plus size={14} className="text-[#E8500A]" />
           Add creator review
         </button>
       )}

@@ -111,7 +111,7 @@ export function SellerIncomingOrdersPage() {
             <div>
               <h3 className="text-base font-black uppercase text-navy italic tracking-tight mb-2">No incoming packages staged</h3>
               <p className="text-[9.5px] text-gray-400 uppercase tracking-widest leading-relaxed font-bold">
-                Orders checking out from standard retail store or wholesale palette stages will land in this dashboard queue.
+                Orders checking out from the standard retail store will land in this dashboard queue.
               </p>
             </div>
           </div>

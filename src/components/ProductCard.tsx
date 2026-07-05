@@ -255,7 +255,7 @@ export function ProductCard({
 }) {
   const navigate = useNavigate();
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
-  const { mode, allBrands, addToCart } = useGlobalState();
+  const { allBrands, addToCart } = useGlobalState();
 
   const brandObj = allBrands?.find((b: any) => b.id === product.brandId);
   const brandName = brandObj ? brandObj.name : (product.brand || 'APEX');
@@ -365,7 +365,7 @@ export function ProductCard({
                
                <button 
                  type="button" 
-                 onClick={(e) => { e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); } else { const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); } }} 
+                 onClick={(e) => { e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); } else { addToCart(product, 1); } }} 
                  className="w-10 h-10 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
                  aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
                  title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
@@ -426,15 +426,6 @@ export function ProductCard({
                 <span className="text-[8.5px] font-semibold text-gray-500">4.8</span>
               </div>
             </div>
-            
-            {mode === 'wholesale' && (
-              <div className="flex flex-wrap gap-1 mt-0.5">
-                <span className="bg-orange-primary/10 text-orange-primary text-[6.5px] font-semibold px-1 rounded uppercase tracking-wider leading-none">
-                  Wholesale Approved
-                </span>
-              </div>
-            )}
-
             <h4 className="text-[11px] font-semibold text-[#1a1a2e] leading-snug line-clamp-1 group-hover:text-orange-primary transition-colors min-h-[14px] truncate leading-none mt-1">
               {product.title}
             </h4>
@@ -443,7 +434,7 @@ export function ProductCard({
                     <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
              <div className="flex flex-col text-left min-w-0">
                 <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">
-                  {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
+                  Market Price
                 </span>
                 <div className="flex flex-col text-left justify-center">
                   <span className="text-[10px] sm:text-[11px] font-mono font-bold text-orange-primary leading-none whitespace-nowrap">BDT {product.price.toLocaleString()}</span>
@@ -459,8 +450,7 @@ export function ProductCard({
                 type="button" 
                 onClick={(e) => { 
                   e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
-                  const qty = mode === 'retail' ? 1 : (product.moq || 10); 
-                  addToCart(product, qty); 
+                  addToCart(product, 1); 
                   toast.success(`Successfully added ${product.title} to your cart!`);
                 }} 
                 className="w-8 h-8 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
@@ -514,13 +504,6 @@ export function ProductCard({
                 {product.tag || 'HOT'}
               </div>
             </div>
-            {mode === 'wholesale' && (
-              <div className="flex flex-wrap gap-1 mb-2">
-                <span className="bg-orange-primary/10 text-orange-primary text-[7px] font-semibold px-2 py-0.5 rounded uppercase tracking-wide">
-                  WHOLESALE APPROVED
-                </span>
-              </div>
-            )}
             <h3 className="text-sm font-semibold text-[#1a1a2e] leading-snug line-clamp-1 mb-1.5 group-hover:text-orange-primary transition-colors">
               {product.title}
             </h3>
@@ -543,8 +526,7 @@ export function ProductCard({
               type="button"
               onClick={(e) => {
                 e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
-                const qty = mode === 'retail' ? 1 : (product.moq || 10);
-                addToCart(product, qty);
+                addToCart(product, 1);
                 toast.success(`Successfully added ${product.title} to your cart!`);
               }}
               className="w-10 h-10 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
@@ -616,11 +598,6 @@ export function ProductCard({
               <Star size={7} className="fill-orange-primary text-orange-primary" />
               <span className="text-[7.5px] font-semibold text-gray-500">4.8</span>
             </div>
-            {mode === 'wholesale' && product.moq && (
-              <span className="bg-gray-100 text-gray-600 text-[6.5px] font-semibold px-1 rounded uppercase tracking-wider shrink-0 ml-1 leading-none">
-                MOQ {product.moq}
-              </span>
-            )}
           </div>
 
           <h3 className={cn(
@@ -658,7 +635,7 @@ export function ProductCard({
                 <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
           <div className="flex flex-col text-left min-w-0">
              <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">
-               {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
+               Market Price
               </span>
               <div className="flex flex-col text-left justify-center">
                 <span className="text-[10px] sm:text-[11px] font-mono font-bold text-orange-primary leading-none whitespace-nowrap">
@@ -680,8 +657,7 @@ export function ProductCard({
             type="button"
             onClick={(e) => {
               e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
-              const qty = mode === 'retail' ? 1 : (product.moq || 10);
-              addToCart(product, qty);
+              addToCart(product, 1);
               toast.success(`Successfully added ${product.title} to your cart!`);
             }}
             className="w-8 h-8 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"

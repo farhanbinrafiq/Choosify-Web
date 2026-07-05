@@ -15,7 +15,7 @@ export function getBrandOverviews(brandName: string, customOverviews: CustomOver
            "VERIFIED OUTLET REVIEWS & INSIGHTS",
            "ACTIVE PROMO CODES & CAMPAIGNS",
            "INFLUENCER INSIGHTS & EXPERIENCES",
-           "B2B WHOLESALE COORDINATION ENGINE",
+           "RETAIL DEAL DISCOVERY & PRICE TRACKING",
            "REAL-TIME PRICE HISTORY TRACKER"
         ],
         "Best For Tags": ["#BrandDiscovery", "#ProductComparison", "#Deals", "#Recommendations", "#Creators", "#Marketplace", "#ConsumerInsights", "#ShoppingGuides"],
@@ -25,7 +25,7 @@ export function getBrandOverviews(brandName: string, customOverviews: CustomOver
      baseOverview = {
         "Shop Address & Links": "FFF SOURCING HQ, PLOT 12, ROAD 4, SECTOR 3, UTTARA, DHAKA 1230 BANGLADESH. Website: fff.com.bd",
         "Contact Information": "Email: sourcing@fff.com.bd, Phone: +8801711223344",
-        "Price & Audience": "Price Range: BDT - B2B SERVICE SLAB, Age Range: AGE: 18 - 60, Audience: INTERNATIONAL FASHION BRANDS, RETAILERS, IMPORTERS",
+        "Price & Audience": "Price Range: BDT - CUSTOM QUOTES, Age Range: AGE: 18 - 60, Audience: FASHION BRANDS, RETAILERS, IMPORTERS",
         "Services & Specialties": [
            "GARMENT SOURCING",
            "BUYING HOUSE SERVICES",
@@ -134,7 +134,7 @@ export function getProductOverviews(productId: number | string, productTitle: st
     "Audience & Use Cases": [
       "VALUE ORIENTED BUYERS APPRAISING BUILD INTEGRITY",
       "LIFESTYLE CREATORS REQUIRING RELIABLE WEARS",
-      "B2B & BULK ORGANIZATIONS WITH B2B PRICE SLAB TARGETS",
+      "EVERYDAY SHOPPERS SEEKING RELIABLE VALUE",
       "MODERN BANGLADESHI LIFESTYLE AND ACTIVE CIRCLES"
     ],
     "Customer Support & Assurance": [

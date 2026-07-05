@@ -146,7 +146,7 @@ export function OrderSuccessPage() {
             <div>
               <dt className="text-[9px] font-black text-[#8a9bb0] uppercase tracking-widest">Order type</dt>
               <dd className="text-xs font-black text-[#1A1D4E] uppercase mt-0.5">
-                {order.sourceMode === 'wholesale' ? 'B2B Wholesale' : 'Retail'}
+                Retail
                 {order.isSplit ? ' · Split shipment' : ''}
               </dd>
             </div>
@@ -168,22 +168,6 @@ export function OrderSuccessPage() {
                   {order.promoCode} — saved {formatMoney(order.promoDiscount ?? 0)}
                 </dd>
               </div>
-            )}
-            {order.sourceMode === 'wholesale' && (order.companyName || order.tradeLicense) && (
-              <>
-                {order.companyName && (
-                  <div>
-                    <dt className="text-[9px] font-black text-[#8a9bb0] uppercase tracking-widest">Company</dt>
-                    <dd className="text-xs font-bold text-[#1A1D4E] mt-0.5">{order.companyName}</dd>
-                  </div>
-                )}
-                {order.tradeLicense && (
-                  <div>
-                    <dt className="text-[9px] font-black text-[#8a9bb0] uppercase tracking-widest">Trade license</dt>
-                    <dd className="text-xs font-mono font-bold text-[#1A1D4E] mt-0.5">{order.tradeLicense}</dd>
-                  </div>
-                )}
-              </>
             )}
           </dl>
         </div>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { operationsApi, type TrackedShipment } from '../services/operationsApi';
 import { Truck, CheckCircle, ShieldAlert, ArrowLeft, ChevronRight, Clock, MapPin, Package, Settings } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -19,17 +20,31 @@ export function OrderTrackingPage() {
   });
 
   const order = selectedOrderId ? (orders.find(o => o.orderId === selectedOrderId) || null) : null;
-
+  const [remoteShipment, setRemoteShipment] = useState<TrackedShipment | null>(null);
   const [searchId, setSearchId] = useState('');
 
-  const handleSearchOrder = () => {
+  useEffect(() => {
+    if (!selectedOrderId) {
+      setRemoteShipment(null);
+      return;
+    }
+    operationsApi.trackShipment(selectedOrderId).then(setRemoteShipment).catch(() => setRemoteShipment(null));
+  }, [selectedOrderId]);
+
+  const handleSearchOrder = async () => {
     if (!searchId.trim()) return;
     const found = orders.find((x: any) => x.orderId.toUpperCase() === searchId.trim().toUpperCase());
     if (found) {
       setSelectedOrderId(found.orderId);
       toast.success(`Lot Ticket "${searchId.toUpperCase()}" loaded!`);
-    } else {
-      toast.error(`Ticket "${searchId.toUpperCase()}" not found in current local session DB.`);
+      return;
+    }
+    try {
+      await operationsApi.trackShipment(searchId.trim());
+      setSelectedOrderId(searchId.trim().toUpperCase());
+      toast.success(`Tracking loaded for "${searchId.toUpperCase()}"`);
+    } catch {
+      toast.error(`Ticket "${searchId.toUpperCase()}" not found.`);
       setSelectedOrderId(null);
     }
   };
@@ -199,6 +214,17 @@ export function OrderTrackingPage() {
                       minute: '2-digit'
                     })}
                   </p>
+                </div>
+              )}
+
+              {remoteShipment && (
+                <div className="mb-6 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-slate-700">
+                  <div className="font-bold text-orange-700 uppercase text-xs tracking-widest mb-1">Live shipment status</div>
+                  <div>Courier: {remoteShipment.courier} · Tracking: {remoteShipment.trackingNumber}</div>
+                  <div className="capitalize">Status: {remoteShipment.status.replace(/_/g, ' ')}</div>
+                  {remoteShipment.trackingEvents[0] && (
+                    <div className="text-xs text-slate-500 mt-1">{remoteShipment.trackingEvents[0].description}</div>
+                  )}
                 </div>
               )}
 

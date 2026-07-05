@@ -63,8 +63,8 @@ export function HeroScrollCue({
           transition={{ duration: 0.25 }}
           onClick={scrollToContent}
           className={cn(
-            'absolute left-1/2 bottom-0 z-30 -translate-x-1/2 translate-y-1/2',
-            'flex flex-col items-center gap-1 px-3.5 py-2 rounded-full shadow-md',
+            'absolute left-1/2 bottom-3 sm:bottom-4 z-20 -translate-x-1/2',
+            'flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-full shadow-md',
             'bg-white/95 hover:bg-[#E8500A] border border-[#e8edf2] hover:border-[#FF6B00]',
             'text-[#1a1a2e] hover:text-white backdrop-blur-sm cursor-pointer',
             'transition-colors duration-200 group pointer-events-auto',
@@ -84,5 +84,5 @@ export function HeroScrollCue({
   );
 }
 
-/** Reserve space below hero so the straddling cue does not overlap page content. */
-export const HERO_SCROLL_CUE_PADDING = 'pb-8 overflow-visible';
+/** Reserve space below hero so the scroll cue does not overlap the next section. */
+export const HERO_SCROLL_CUE_PADDING = 'pb-12 sm:pb-14 overflow-visible';

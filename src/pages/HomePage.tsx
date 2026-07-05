@@ -98,7 +98,7 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals, allCategories, allGuides, allPlacements, homepageConfig, mode, addToCart } = useGlobalState();
+  const { allProducts, allBrands, allDeals, allCategories, allGuides, allPlacements, homepageConfig, addToCart } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [activeTab, setActiveTab] = useState('FEED');
@@ -1273,7 +1273,7 @@ export function HomePage() {
             <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">Boost Sales Today</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px]">
-                Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
+                Gain entry to featured deal slots, exposure metrics, and buyer engagement streams.
               </p>
               
               <Link 
@@ -1294,7 +1294,7 @@ export function HomePage() {
             <div className="mb-4">
               <h3 className="text-[9px] font-bold tracking-widest text-[#1a1a2e]/40 uppercase mb-1">NEWS DISPATCH</h3>
               <p className="text-[11px] text-gray-500 leading-relaxed">
-                Receive newly verified outlet approvals, scam alerts, and business wholesale deals weekly.
+                Receive newly verified outlet approvals, scam alerts, and retail deals weekly.
               </p>
             </div>
             

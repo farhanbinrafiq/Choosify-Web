@@ -33,12 +33,12 @@ import {
   ChevronRight,
   MessageCircle,
   X,
-  Calculator,
   Tag,
   Check,
 } from "lucide-react";
 import { PRODUCTS, BRANDS, PLACEHOLDER_IMAGE } from "../constants";
 import { useGlobalState } from "../context/GlobalStateContext";
+import { operationsApi } from "../services/operationsApi";
 import { useDashboard } from "../context/DashboardContext";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
@@ -147,57 +147,80 @@ function resolveAddons(product: any): ProductAddon[] {
   return matchKey ? ADDON_SEEDS[matchKey] : [];
 }
 
-function WithInfluencerReviews({ brandName }: { brandName: string }) {
-  const featuredReview = {
-    image:
-      "https://images.unsplash.com/photo-1511119253457-36e78921865c?w=1200&h=800&fit=crop",
-    title: `${brandName} Special Edition`,
-    excerpt: `Watch as we dive deep into the performance and build quality of ${brandName}'s latest collection. From real-world testing to expert analysis.`,
-    authorName: "TECH REVIEW BD",
-    authorSub: "Dhaka Headquarters",
-    authorLogo: brandName,
-    badgeText: "TRENDING NOW",
+function WithInfluencerReviews({
+  brandName,
+  productTitle,
+  creatorContent,
+}: {
+  brandName: string;
+  productTitle?: string;
+  creatorContent?: Array<{
+    id: string;
+    platform: string;
+    videoUrl: string;
+    thumbnail: string;
+    title: string;
+    creatorHandle?: string;
+    views?: string;
+  }>;
+}) {
+  const mapPlatform = (platform: string): 'YouTube' | 'Instagram' | 'TikTok' | 'Facebook' => {
+    const p = platform.toLowerCase();
+    if (p.includes('tiktok')) return 'TikTok';
+    if (p.includes('insta')) return 'Instagram';
+    if (p.includes('facebook') || p.includes('fb')) return 'Facebook';
+    return 'YouTube';
   };
 
-  const reviews = [
-    {
-      id: 1,
-      image:
-        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=800&fit=crop",
-      category: "FASHION VIBES",
-      title: `${brandName} Style Showcase`,
-      authorName: "Style Maven",
-      authorHandle: "@stylemaven • 12m",
-      authorAvatar: "https://i.pravatar.cc/100?u=style",
-    },
-    {
-      id: 2,
-      image:
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=800&fit=crop",
-      category: "FOOTWEAR",
-      title: `${brandName} Collection: A Deep Dive`,
-      authorName: "BB Tech Reviews",
-      authorHandle: "@bbtech • 15h",
-      authorAvatar: "https://i.pravatar.cc/100?u=bbtech",
-      badgeBg: "bg-blue-600/95",
-    },
-    {
-      id: 3,
-      image:
-        "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=800&fit=crop",
-      category: "UNBOXING",
-      title: `Finding The Perfect Build in ${brandName}`,
-      authorName: "Avishek Mojumder",
-      authorHandle: "@avishek • 1d",
-      authorAvatar: "https://i.pravatar.cc/100?u=avishek",
-      badgeBg: "bg-purple-600/95",
-    },
-  ];
+  const displayName = productTitle || brandName;
+  const subtitle = productTitle
+    ? `TRUSTED EXPERTS REVIEWING ${productTitle.toUpperCase()}`
+    : `TRUSTED EXPERTS BREAKING DOWN ${brandName.toUpperCase()}`;
+
+  if (!creatorContent?.length) {
+    return (
+      <InfluencerReviews
+        title="INFLUENCER & CREATOR REVIEWS"
+        subtitle={subtitle}
+        brandName={brandName}
+        fullWidth
+      />
+    );
+  }
+
+  const featured = creatorContent[0];
+  const featuredReview = {
+    image: featured.thumbnail,
+    title: featured.title,
+    excerpt: `Watch as creators break down ${displayName} — real opinions, verified reviews, and honest takes from Bangladesh's top voices.`,
+    authorName: featured.creatorHandle?.replace('@', '').toUpperCase() || brandName,
+    authorSub: mapPlatform(featured.platform),
+    authorLogo: brandName,
+    badgeText: 'FEATURED',
+    platform: mapPlatform(featured.platform),
+    videoUrl: featured.videoUrl,
+    stats: featured.views
+      ? { views: featured.views, likes: '—', duration: '—' }
+      : undefined,
+  };
+
+  const reviews = creatorContent.slice(1).map((item, index) => ({
+    id: item.id || index,
+    image: item.thumbnail,
+    category: mapPlatform(item.platform).toUpperCase(),
+    title: item.title,
+    authorName: item.creatorHandle?.replace('@', '') || 'Creator',
+    authorHandle: item.creatorHandle || '@creator',
+    authorAvatar: item.thumbnail,
+    platform: mapPlatform(item.platform),
+    videoUrl: item.videoUrl,
+    stats: item.views ? { views: item.views } : undefined,
+  }));
 
   return (
     <InfluencerReviews
       title="INFLUENCER & CREATOR REVIEWS"
-      subtitle={`TRUSTED EXPERTS BREAKING DOWN ${brandName.toUpperCase()}`}
+      subtitle={subtitle}
       featuredReview={featuredReview}
       reviews={reviews}
       fullWidth
@@ -350,7 +373,7 @@ export function ProductDetailPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, mode, isLoggedIn, currentUser } = useGlobalState();
+  const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, isLoggedIn, currentUser } = useGlobalState();
 
   const productList = allProducts.length > 0 ? allProducts : PRODUCTS;
   const brandList = allBrands.length > 0 ? allBrands : BRANDS;
@@ -488,11 +511,30 @@ export function ProductDetailPage() {
   }, [product?.id]);
 
   React.useEffect(() => {
-    if (product) {
-      addRecentlyViewed(product);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product.id]);
+    if (!product?.id) return;
+    operationsApi
+      .listProductReviews(String(product.id))
+      .then((published) => {
+        if (!published.length) return;
+        setReviews((prev: any[]) => {
+          const pending = prev.filter((row) => !published.some((p) => p.id === row.id));
+          return [
+            ...published.map((row) => ({
+              id: row.id,
+              productId: product.id,
+              productTitle: product.title,
+              rating: row.rating,
+              text: row.comment,
+              authorName: row.userName,
+              createdAt: row.createdAt,
+              status: 'published',
+            })),
+            ...pending,
+          ];
+        });
+      })
+      .catch(() => {});
+  }, [product?.id, setReviews]);
 
   const [selectedRating, setSelectedRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
@@ -512,6 +554,18 @@ export function ProductDetailPage() {
     setSelectedRating(5);
     setReviewText("");
     toast.success('Review submitted! It will appear after approval.');
+    operationsApi
+      .submitReview({
+        userId: String(currentUser?.id || 'guest'),
+        userName: currentUser?.name || 'Guest',
+        productId: String(product.id),
+        productTitle: product.title,
+        brandName: brandName,
+        storeName: brandName,
+        rating: selectedRating,
+        comment: reviewText.trim(),
+      })
+      .catch(() => {});
     if (typeof addNotification === 'function') {
       addNotification('Your review was submitted successfully.', 'system');
     }
@@ -544,7 +598,6 @@ export function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState("Overview");
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(1);
-  const [b2bQty, setB2bQty] = useState(product?.moq || 10);
 
   // States for Stats Bar and ScrollSpy
   const [loveCount, setLoveCount] = useState(1243);
@@ -843,54 +896,6 @@ export function ProductDetailPage() {
     return "bg-amber-600";
   };
 
-  // Sync qty with state product MOQ
-  React.useEffect(() => {
-    if (product) {
-      setB2bQty(product.moq || 1);
-    }
-  }, [product]);
-
-  const getActiveUnitPrice = () => {
-    if (!product.pricingTiers || product.pricingTiers.length === 0) {
-      return product.price;
-    }
-    let activeSlab = product.pricingTiers[0];
-    for (const tier of product.pricingTiers) {
-      if (b2bQty >= tier.minQuantity) {
-        activeSlab = tier;
-      }
-    }
-    return activeSlab.price;
-  };
-
-  const activeUnitPrice = getActiveUnitPrice();
-  const activeTotalPrice = activeUnitPrice * b2bQty;
-
-  // Custom Quote Modal State
-  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
-  const [quoteNotes, setQuoteNotes] = useState("");
-  const [quoteBusinessName, setQuoteBusinessName] = useState("");
-
-  const handleAddToCartClick = () => {
-    if (mode === "wholesale" && product.moq && b2bQty < product.moq) {
-      toast.error(
-        `Minimum order quantity is ${product.moq} units for wholesale.`,
-      );
-      return;
-    }
-    addToCart(product, b2bQty);
-    // Store selected add-ons in sessionStorage for checkout to read
-    if (selectedAddons.length > 0) {
-      sessionStorage.setItem(
-        `choosify_addons_${product.id}`,
-        JSON.stringify(selectedAddons)
-      );
-    }
-    toast.success(
-      `Added ${b2bQty} units of ${product.title} to your cart successfully!`,
-    );
-  };
-
   const tabs = [
     "Overview",
     "Specifications",
@@ -932,7 +937,7 @@ export function ProductDetailPage() {
   };
 
   const handleMessageOrder = () => {
-    setOrderQty(product?.moq || 1);
+    setOrderQty(1);
     setOrderColor(selectedColor || (product?.colors && product.colors[0]) || "Sunset Orange");
     setOrderSize(selectedSize || selectedRam || selectedStorage || (product?.sizes && product.sizes[0]) || "Standard");
     setOrderNotes("");
@@ -979,7 +984,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
       threadId,
       brandName,
       brandObj?.logo || "https://i.pravatar.cc/150?u=brand",
-      mode === "wholesale" ? "wholesale" : "retail",
+      'retail',
       structuredMsg,
       orderRef
     );
@@ -1214,227 +1219,49 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   addons={resolvedAddons}
                   selectedIds={selectedAddonIds}
                   onToggle={toggleAddon}
-                  basePrice={activeUnitPrice || product.price}
+                  basePrice={product.price}
                   addonTotal={addonTotal}
                 />
               )}
               {/* ──────────────────────────────────────────────────────────── */}
 
               {/* Commercial Primary Buttons aligned horizontally */}
-              {mode === "retail" ? (
-                <div className="flex flex-row flex-wrap items-center justify-center gap-3 w-full pt-4 px-4 sm:px-0 box-border">
-                  <button
-                    onClick={() => {
-                      addToCart(product, 1);
-                      if (selectedAddons.length > 0) {
-                        sessionStorage.setItem(
-                          `choosify_addons_${product.id}`,
-                          JSON.stringify(selectedAddons)
-                        );
-                        toast.success(
-                          `Added ${product.title} + ${selectedAddons.length} add-on${selectedAddons.length > 1 ? 's' : ''} to your cart!`,
-                          { duration: 3500 }
-                        );
-                      } else {
-                        toast.success(`Added ${product.title} to your Retail Cart!`);
-                      }
-                    }}
-                    className="px-6 py-3 rounded-full bg-[#E8500A] text-white text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all transform hover:scale-[1.03] active:scale-95 italic border border-[#E8500A]/30 hover:bg-[#ff5d14] cursor-pointer shadow-md shadow-orange-500/10"
-                  >
-                    ADD TO CART
-                  </button>
-                  <a
-                    href={brandOfficialWebsite}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-6 py-3 rounded-full bg-white text-[#1A1D4E] hover:bg-gray-50 text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all transform hover:scale-[1.03] active:scale-95 italic border border-[#e8edf2] cursor-pointer shadow-sm inline-flex items-center justify-center"
-                  >
-                    Buy from Official Site
-                  </a>
-                  <button
-                    onClick={handleAddToCompare}
-                    className="px-6 py-3 rounded-full bg-[#1A1D4E] text-white hover:bg-[#252a6e] text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all transform hover:scale-[1.03] active:scale-95 italic border border-white/15 cursor-pointer shadow-md shadow-[#1A1D4E]/30"
-                  >
-                    ADD TO COMPARE
-                  </button>
-                </div>
-              ) : (
-                /* B2B Wholesale channels calculator inside the dark theme wrapper as well! */
-                <div className="w-full max-w-2xl bg-white/5 border border-white/10 rounded-[5px] p-6 relative overflow-hidden backdrop-blur-sm text-left">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#E8500A]/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl" />
-
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-white/10">
-                    <div className="text-left">
-                      <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic block mb-1 text-left">
-                        B2B Wholesale Channel
-                      </span>
-                      <h4 className="text-lg font-black text-white uppercase tracking-tighter italic text-left">
-                        Bulk Trade Sourcing Panel
-                      </h4>
-                    </div>
-                    <div className="bg-[#E8500A]/10 border border-[#E8500A]/30 text-[#E8500A] text-[9px] font-black px-3.5 py-1.5 rounded-full uppercase italic tracking-wider">
-                      MOQ: {product.moq || 10} Units Enforced
-                    </div>
-                  </div>
-
-                  {/* Quantity slabs layout */}
-                  {product.pricingTiers && (
-                    <div className="mb-6 text-left">
-                      <span className="text-[9px] font-black text-white/40 uppercase tracking-widest block mb-2 italic">
-                        Sourcing Pricing Slabs
-                      </span>
-                      <div className="grid grid-cols-3 gap-3">
-                        {product.pricingTiers.map((tier: any, tIdx: number) => {
-                          const isCurrentSlab =
-                            b2bQty >= tier.minQuantity &&
-                            (tIdx === product.pricingTiers.length - 1 ||
-                              b2bQty <
-                                product.pricingTiers[tIdx + 1].minQuantity);
-                          return (
-                            <div
-                              key={tIdx}
-                              className={cn(
-                                "rounded-xl p-3 border text-center transition-all bg-white/5",
-                                isCurrentSlab
-                                  ? "border-[#E8500A] bg-[#E8500A]/5 scale-102"
-                                  : "border-white/10",
-                              )}
-                            >
-                              <div className="text-[9px] font-black text-white/55">
-                                {tier.minQuantity}+ Pcs
-                              </div>
-                              <div className="text-base font-black font-mono text-[#E8500A] mt-1">
-                                ৳{tier.price.toLocaleString()}
-                              </div>
-                              {isCurrentSlab && (
-                                <div className="text-[7px] font-black text-[#E8500A] uppercase tracking-tighter mt-1 italic">
-                                  ✓ Selected
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Calculator */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                    <div className="space-y-2 text-left">
-                      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-[#FFF]/40">
-                        <span>Enter Order Qty:</span>
-                        {product.moq && b2bQty < product.moq && (
-                          <span className="text-red-500 font-bold font-mono">
-                            Below MOQ
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between bg-[#0A0B1E]/60 border border-white/10 rounded-xl px-4 py-2">
-                        <button
-                          type="button"
-                          onClick={() => setB2bQty(Math.max(1, b2bQty - 1))}
-                          className="text-white/60 hover:text-white font-black text-sm p-1 cursor-pointer bg-transparent border-none"
-                        >
-                          -
-                        </button>
-                        <input
-                          type="number"
-                          value={b2bQty}
-                          onChange={(e) =>
-                            setB2bQty(
-                              Math.max(1, parseInt(e.target.value) || 1),
-                            )
-                          }
-                          className="w-20 text-center bg-transparent border-none text-white focus:outline-none font-bold font-mono"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setB2bQty(b2bQty + 1)}
-                          className="text-white/60 hover:text-white font-black text-sm p-1 cursor-pointer bg-transparent border-none"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-between items-center text-left">
-                      <div>
-                        <span className="text-[8px] font-black text-white/40 uppercase tracking-widest italic block">
-                          Calculated Total
-                        </span>
-                        <span className="text-xl font-mono font-black text-white">
-                          ৳{activeTotalPrice.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-[8px] font-black text-white/40 uppercase tracking-widest italic block">
-                          Unit Active
-                        </span>
-                        <span className="text-[11px] font-black text-[#E8500A] font-mono">
-                          ৳{activeUnitPrice.toLocaleString()} / pc
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action buttons */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-                    <button
-                      onClick={handleAddToCartClick}
-                      className={cn(
-                        "py-3 w-full rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-wider italic transition-all flex items-center justify-center gap-2 cursor-pointer border-none transform hover:scale-[1.03] active:scale-95",
-                        product.moq && b2bQty < product.moq
-                          ? "bg-gray-700/50 text-white/40 cursor-not-allowed"
-                          : "bg-[#E8500A] text-white shadow-[#E8500A]/20 hover:brightness-110",
-                      )}
-                      disabled={product.moq && b2bQty < product.moq}
-                    >
-                      <ShoppingBag size={14} /> Add to B2B Cart
-                    </button>
-                    <button
-                      onClick={() => setIsQuoteModalOpen(true)}
-                      className="py-3 w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-wider italic transition-all flex items-center justify-center gap-2 cursor-pointer transform hover:scale-[1.03] active:scale-95"
-                    >
-                      Request Business Quote
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleAddToCompare}
-                      className="py-3 w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-wider italic transition-all flex items-center justify-center gap-2 cursor-pointer transform hover:scale-[1.03] active:scale-95 text-center"
-                    >
-                      Add to Compare
-                    </button>
-                  </div>
-
-                  {/* Sourcing details */}
-                  <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-3 gap-4 text-left">
-                    <div>
-                      <span className="text-[7.5px] font-black text-white/30 uppercase block">
-                        Invoicing
-                      </span>
-                      <span className="text-[9px] font-bold text-white/70">
-                        GST / BIN Compliant
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[7.5px] font-black text-[#FFF]/30 uppercase block">
-                        Sample Sourcing
-                      </span>
-                      <span className="text-[9px] font-bold text-[#E8500A]">
-                        Samples Available
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[7.5px] font-black text-white/30 uppercase block">
-                        Audit Verification
-                      </span>
-                      <span className="text-[9px] font-bold text-white/70">
-                        SGS Factory Pass
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <div className="flex flex-row flex-wrap items-center justify-center gap-3 w-full pt-4 px-4 sm:px-0 box-border">
+                <button
+                  onClick={() => {
+                    addToCart(product, 1);
+                    if (selectedAddons.length > 0) {
+                      sessionStorage.setItem(
+                        `choosify_addons_${product.id}`,
+                        JSON.stringify(selectedAddons)
+                      );
+                      toast.success(
+                        `Added ${product.title} + ${selectedAddons.length} add-on${selectedAddons.length > 1 ? 's' : ''} to your cart!`,
+                        { duration: 3500 }
+                      );
+                    } else {
+                      toast.success(`Added ${product.title} to your cart!`);
+                    }
+                  }}
+                  className="px-6 py-3 rounded-full bg-[#E8500A] text-white text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all transform hover:scale-[1.03] active:scale-95 italic border border-[#E8500A]/30 hover:bg-[#ff5d14] cursor-pointer shadow-md shadow-orange-500/10"
+                >
+                  ADD TO CART
+                </button>
+                <a
+                  href={brandOfficialWebsite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 rounded-full bg-white text-[#1A1D4E] hover:bg-gray-50 text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all transform hover:scale-[1.03] active:scale-95 italic border border-[#e8edf2] cursor-pointer shadow-sm inline-flex items-center justify-center"
+                >
+                  Buy from Official Site
+                </a>
+                <button
+                  onClick={handleAddToCompare}
+                  className="px-6 py-3 rounded-full bg-[#1A1D4E] text-white hover:bg-[#252a6e] text-[10px] md:text-[11px] font-black uppercase tracking-wider transition-all transform hover:scale-[1.03] active:scale-95 italic border border-white/15 cursor-pointer shadow-md shadow-[#1A1D4E]/30"
+                >
+                  ADD TO COMPARE
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1544,7 +1371,11 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
             />
 
             <div className="scroll-mt-36 w-full">
-              <WithInfluencerReviews brandName={brandName} />
+              <WithInfluencerReviews
+                brandName={brandName}
+                productTitle={product?.title}
+                creatorContent={product?.creatorContent}
+              />
             </div>
 
             {/* PUBLIC REVIEWS (ID: 'public-reviews-section') */}
@@ -1761,7 +1592,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     </div>
                     <div>• LIFESTYLE CREATORS REQUIRING RELIABLE WEARS</div>
                     <div>
-                      • B2B & BULK ORGANIZATIONS WITH B2B PRICE SLAB TARGETS
+                      • EVERYDAY SHOPPERS SEEKING RELIABLE VALUE
                     </div>
                     <div>• MODERN BANGLADESHI LIFESTYLE AND ACTIVE CIRCLES</div>
                   </div>
@@ -1989,119 +1820,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
         </div>
       </section>
 
-      {/* Quote Request Popup Modal */}
       <AnimatePresence>
-        {isQuoteModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-navy border border-white/10 text-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl"
-            >
-              <button
-                type="button"
-                onClick={() => setIsQuoteModalOpen(false)}
-                className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors p-1"
-              >
-                <X size={20} />
-              </button>
-
-              <div className="flex items-center gap-3 mb-6">
-                <Calculator className="text-[#FF5B00]" size={24} />
-                <h3 className="text-xl font-black uppercase tracking-tighter italic">
-                  Factory Trade Quotation
-                </h3>
-              </div>
-
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  toast.success(
-                    `Trade Request for ${b2bQty} pcs submitted! Factory manager will reach out within 2 hours.`,
-                  );
-                  setIsQuoteModalOpen(false);
-                }}
-                className="space-y-4"
-              >
-                <div>
-                  <label className="block text-[8px] font-black uppercase tracking-widest text-[#FFF]/40 mb-1.5 text-left">
-                    Product / Offer Target
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    value={product?.title}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[8px] font-black uppercase tracking-widest text-[#FFF]/40 mb-1.5 text-left">
-                      Volume (Min {product?.moq || 10})
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      min={product?.moq || 10}
-                      value={b2bQty}
-                      onChange={(e) =>
-                        setB2bQty(Math.max(1, parseInt(e.target.value) || 1))
-                      }
-                      className="w-full bg-[#050514] border border-white/15 rounded-xl px-4 py-3 text-xs text-white outline-none font-bold font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[8px] font-black uppercase tracking-widest text-[#FFF]/40 mb-1.5 text-left">
-                      Active Slab Rate
-                    </label>
-                    <div className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-orange-primary font-black font-mono">
-                      ৳{activeUnitPrice.toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[8px] font-black uppercase tracking-widest text-[#FFF]/40 mb-1.5 text-left">
-                    Company Trade Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Dhaka Apparel Holdings"
-                    value={quoteBusinessName}
-                    onChange={(e) => setQuoteBusinessName(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-[#FF5B00] transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[8px] font-black uppercase tracking-widest text-[#FFF]/40 mb-1.5 text-left">
-                    Custom Sourcing Remarks
-                  </label>
-                  <textarea
-                    rows={3}
-                    required
-                    placeholder="Describe custom logistics packaging or customized brand tags required..."
-                    value={quoteNotes}
-                    onChange={(e) => setQuoteNotes(e.target.value)}
-                    className="w-full bg-[#050514] border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-orange-primary transition-colors"
-                  />
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    className="w-full h-12 bg-[#FF5B00] text-white text-[11px] font-black uppercase tracking-widest italic rounded-xl shadow-lg shadow-orange-primary/20 hover:scale-[1.02] hover:brightness-110 active:scale-95 transition-all"
-                  >
-                    Submit RFQ Proposal
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
         {/* STEP 1: Message to Order - Option Configuration Popup */}
         {showOrderConfig && (
           <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
@@ -2205,12 +1924,12 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 {/* Quantity input */}
                 <div>
                   <label className="block text-[8px] font-black uppercase tracking-widest text-[#FFF]/40 mb-1.5">
-                    Order Quantity (MOQ: {product.moq || 1})
+                    Order Quantity
                   </label>
                   <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-2 w-max">
                     <button
                       type="button"
-                      onClick={() => setOrderQty(Math.max(product.moq || 1, orderQty - 1))}
+                      onClick={() => setOrderQty(Math.max(1, orderQty - 1))}
                       className="text-white/60 hover:text-white font-black text-sm p-1 cursor-pointer bg-transparent border-none"
                     >
                       -

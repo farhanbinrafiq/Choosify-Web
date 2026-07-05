@@ -261,7 +261,7 @@ export function GuideDetailPage() {
 
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } =
     useDashboard();
-  const { mode, allBrands, addToCart } = useGlobalState();
+  const { allBrands, addToCart } = useGlobalState();
 
   const guideSectionNavItems = useMemo(
     () => [

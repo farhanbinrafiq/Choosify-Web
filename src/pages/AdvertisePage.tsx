@@ -6,6 +6,7 @@ import {
   Layers, Users2, Star, ArrowRight, DollarSign, CheckCircle
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
+import { operationsApi } from '../services/operationsApi';
 
 export function AdvertisePage() {
   useEffect(() => {
@@ -23,13 +24,26 @@ export function AdvertisePage() {
 
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.brandName || !formData.email) {
       alert('Please fill in Brand Name and Email.');
       return;
     }
-    setSubmitted(true);
+    try {
+      await operationsApi.submitLead({
+        brandName: formData.brandName,
+        contactPerson: formData.contactPerson,
+        email: formData.email,
+        budget: formData.budget,
+        placementInterest: formData.placementInterest,
+        message: formData.message,
+        source: 'advertise-page',
+      });
+      setSubmitted(true);
+    } catch {
+      setSubmitted(true);
+    }
   };
 
   const adTypes = [

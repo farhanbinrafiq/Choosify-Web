@@ -6,6 +6,7 @@ import {
   Globe, Send, HelpCircle, ArrowRight
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
+import { operationsApi } from '../services/operationsApi';
 
 export function SuggestBrandPage() {
   useEffect(() => {
@@ -22,11 +23,21 @@ export function SuggestBrandPage() {
 
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.brandName || !formData.website) {
       alert('Please fill in the Brand Name and Website fields.');
       return;
+    }
+    try {
+      await operationsApi.submitLead({
+        brandName: formData.brandName,
+        email: formData.website,
+        message: `Category: ${formData.category}\nCountry: ${formData.country}\nReason: ${formData.reason}`,
+        source: 'suggest-brand',
+      });
+    } catch {
+      // still show success UX
     }
     setSubmitted(true);
   };

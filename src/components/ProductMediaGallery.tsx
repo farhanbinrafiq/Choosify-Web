@@ -54,10 +54,9 @@ export function getProductMedia(product: any, selectedVariantImage?: string): Me
 interface ProductMediaGalleryProps {
   product: any;
   selectedVariantImage?: string;
-  isB2B?: boolean;
 }
 
-export function ProductMediaGallery({ product, selectedVariantImage, isB2B = false }: ProductMediaGalleryProps) {
+export function ProductMediaGallery({ product, selectedVariantImage }: ProductMediaGalleryProps) {
   const mediaItems = getProductMedia(product, selectedVariantImage);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);

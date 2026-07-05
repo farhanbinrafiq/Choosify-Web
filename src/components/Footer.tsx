@@ -22,7 +22,6 @@ const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
       { label: 'Suggest a brand', url: '/suggest-brand' },
       { label: 'Partnership', url: '/partnership' },
       { label: 'Advertise', url: '/advertise' },
-      { label: 'b2b', url: '/b2b' },
     ],
   },
   {

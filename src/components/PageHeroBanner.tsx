@@ -54,7 +54,7 @@ const PAGE_DEFAULT_SLIDES: Record<PageHeroBannerKey, HeroBannerSlide[]> = {
     {
       id: 'products-default',
       title: 'Discover Verified Products',
-      subtitle: 'Compare retail and wholesale listings with confidence.',
+      subtitle: 'Compare verified retail listings with confidence.',
       ctaText: 'Browse Catalog',
       ctaLink: '/products',
       image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1920&q=80',

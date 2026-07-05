@@ -1,7 +1,50 @@
 import { MOCK_BRAND_POSTS } from '../data/mockBrandPosts';
+import { catalogApi } from '../services/catalogApi';
+import type { CatalogBrandPost } from '../types/catalog';
 import type { BrandPost, BrandPostKind } from '../types/brandPost';
 
 const now = () => Date.now();
+
+let cachedPosts: BrandPost[] | null = null;
+
+function mapCatalogBrandPost(post: CatalogBrandPost): BrandPost {
+  return {
+    id: post.id,
+    slug: post.slug,
+    brandId: Number(post.brandId) || 0,
+    brandName: post.brandName,
+    brandLogo: post.brandLogo,
+    kind: post.kind,
+    title: post.title,
+    excerpt: post.excerpt,
+    heroImage: post.heroImage,
+    bannerImages: post.bannerImages,
+    body: post.body,
+    startDate: post.startDate,
+    endDate: post.endDate,
+    location: post.location,
+    ctaLabel: post.ctaLabel,
+    ctaUrl: post.ctaUrl,
+    linkedProductIds: post.linkedProductIds?.map((id) => Number(id) || 0),
+    sponsored: post.sponsored,
+    status: post.status,
+    publishedAt: post.publishedAt,
+  };
+}
+
+export async function hydrateBrandPostsFromApi(): Promise<BrandPost[]> {
+  try {
+    const rows = await catalogApi.listBrandPosts();
+    if (rows.length > 0) {
+      cachedPosts = rows.map(mapCatalogBrandPost);
+      return cachedPosts;
+    }
+  } catch (error) {
+    console.warn('[brandPosts] Catalog API unavailable, using mock fallback.', error);
+  }
+  cachedPosts = MOCK_BRAND_POSTS;
+  return cachedPosts;
+}
 
 function isVisible(post: BrandPost): boolean {
   if (post.status === 'expired') return false;
@@ -10,16 +53,16 @@ function isVisible(post: BrandPost): boolean {
 }
 
 export function getAllBrandPosts(): BrandPost[] {
-  return MOCK_BRAND_POSTS.filter(isVisible);
+  return (cachedPosts ?? MOCK_BRAND_POSTS).filter(isVisible);
 }
 
 export function getBrandPostBySlug(slug: string): BrandPost | undefined {
-  return MOCK_BRAND_POSTS.find((p) => p.slug === slug);
+  return (cachedPosts ?? MOCK_BRAND_POSTS).find((post) => post.slug === slug);
 }
 
 export function getBrandPostsByBrandId(brandId: number): BrandPost[] {
   return getAllBrandPosts()
-    .filter((p) => p.brandId === brandId)
+    .filter((post) => post.brandId === brandId)
     .sort((a, b) => {
       const aTime = a.startDate ? new Date(a.startDate).getTime() : 0;
       const bTime = b.startDate ? new Date(b.startDate).getTime() : 0;

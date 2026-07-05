@@ -6,6 +6,7 @@ import {
   MessageSquare, ArrowRight, ShieldCheck, CheckCircle2
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
+import { operationsApi } from '../services/operationsApi';
 
 export function PartnershipPage() {
   useEffect(() => {
@@ -22,11 +23,23 @@ export function PartnershipPage() {
 
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.companyName || !formData.email) {
       alert('Please fill in Company Name and Email.');
       return;
+    }
+    try {
+      await operationsApi.submitLead({
+        brandName: formData.companyName,
+        contactPerson: formData.contactName,
+        email: formData.email,
+        placementInterest: formData.partnershipType,
+        message: formData.message,
+        source: 'partnership-page',
+      });
+    } catch {
+      // still show success UX
     }
     setSubmitted(true);
   };

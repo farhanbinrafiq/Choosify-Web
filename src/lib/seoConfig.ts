@@ -111,10 +111,6 @@ export const STATIC_PAGE_SEO: Record<string, SeoMeta> = {
     title: 'Advertise on Choosify',
     description: 'Promote your brand with Choosify advertising and sponsored placements.',
   },
-  '/b2b': {
-    title: 'B2B Solutions | Choosify',
-    description: 'Wholesale and B2B solutions for brands and retailers on Choosify.',
-  },
   '/suggest-brand': {
     title: 'Suggest a Brand | Choosify',
     description: 'Suggest a brand to be listed and verified on Choosify.',

@@ -55,7 +55,7 @@ const getCategoryIconComponent = (catName: string, iconName: string) => {
 };
 
 export function CategoriesPage() {
-  const { mode, allCategories } = useGlobalState();
+  const { allCategories } = useGlobalState();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState('All Categories');
@@ -78,7 +78,7 @@ export function CategoriesPage() {
     }, 400);
     return () => clearTimeout(timer);
   }, [
-    mode, searchQuery, activeCategoryTab, 
+    searchQuery, activeCategoryTab, 
     selectedCategoryType, selectedCategoryStatus, 
     selectedAlphabetical, selectedAvailability, selectedContent
   ]);
@@ -933,7 +933,7 @@ export function CategoriesPage() {
             <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
-                Gain entry to wholesale deals slots, exposure metrics, and buyer engagement streams.
+                Gain entry to featured deal slots, exposure metrics, and buyer engagement streams.
               </p>
               
               <Link 

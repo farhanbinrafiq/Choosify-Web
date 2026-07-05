@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Plus, ChevronRight, Info, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { operationsApi } from '../services/operationsApi';
 import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
 import { cn } from '../lib/utils';
 
@@ -101,7 +102,7 @@ export function PostOfferPage() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (step === 1) {
       if (!productName.trim()) {
         toast.error('Please enter a product name.');
@@ -155,8 +156,18 @@ export function PostOfferPage() {
       }
       
       // Submit
-      window.dispatchEvent(new CustomEvent('choosify-offer-submitted', { 
-        detail: { productName, category, brand, price, description, sellerName } 
+      await operationsApi.submitSellerOffer({
+        productName,
+        category,
+        brand,
+        price,
+        description,
+        sellerName,
+        sellerPhone,
+        sellerRegion,
+      });
+      window.dispatchEvent(new CustomEvent('choosify-offer-submitted', {
+        detail: { productName, category, brand, price, description, sellerName }
       }));
       toast.success('Offer submitted! Our team will review within 24 hours.');
       

@@ -57,7 +57,6 @@ export const SITEMAP_STATIC_PATHS: Array<{
   { path: '/privacy', changeFrequency: 'yearly', priority: 0.3 },
   { path: '/partnership', changeFrequency: 'monthly', priority: 0.5 },
   { path: '/advertise', changeFrequency: 'monthly', priority: 0.5 },
-  { path: '/b2b', changeFrequency: 'monthly', priority: 0.5 },
   { path: '/suggest-brand', changeFrequency: 'monthly', priority: 0.4 },
   { path: '/customer-favorite', changeFrequency: 'weekly', priority: 0.6 },
   { path: '/brand-deals', changeFrequency: 'daily', priority: 0.7 },

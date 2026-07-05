@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShoppingCart, MessageSquare, X, Trash2, ArrowRight, 
   ShoppingBag, ExternalLink, ChevronRight, CheckCircle, 
-  Package, SlidersHorizontal, X as XIcon, RotateCcw
+  Package, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp
 } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
@@ -12,13 +12,14 @@ import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { cn } from '../lib/utils';
 import { toast } from 'react-hot-toast';
 import { useFloatingFilter, useFloatingFilters } from './FilterEngine';
+import { VideoLightbox } from './VideoLightbox';
 
 export function FloatingOverlays() {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const { mode, retailCart, wholesaleCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo, isLoggedIn } = useGlobalState();
+  const { retailCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo, isLoggedIn } = useGlobalState();
   const { threads } = useDashboard();
 
   // Active floating panel state: cart preview only
@@ -36,6 +37,7 @@ export function FloatingOverlays() {
   // Tracking responsive media
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     const mobileMedia = window.matchMedia("(max-width: 640px)");
@@ -51,6 +53,17 @@ export function FloatingOverlays() {
       tabletMedia.removeEventListener("change", tabletListener);
     };
   }, []);
+
+  useEffect(() => {
+    const onScroll = () => setShowScrollTop(window.scrollY > 360);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const closeAllOverlays = () => {
     setActivePanel(null);
@@ -88,7 +101,7 @@ export function FloatingOverlays() {
   }, [isLoggedIn]);
 
   // Cart tracking details
-  const activeCart = mode === 'retail' ? retailCart : wholesaleCart;
+  const activeCart = retailCart;
   const totalCartItems = activeCart.reduce((sum, item) => sum + item.quantity, 0);
   const [lastCartCount, setLastCartCount] = useState(totalCartItems);
   const [cartBadgeBounce, setCartBadgeBounce] = useState(false);
@@ -195,6 +208,8 @@ export function FloatingOverlays() {
 
   return (
     <>
+      <VideoLightbox video={activeVideo} onClose={closeVideo} />
+
       <div 
         ref={containerRef}
         className={cn(
@@ -263,7 +278,7 @@ export function FloatingOverlays() {
                   const itemPrice = item.selectedVariant?.price || item.product.price;
                   const itemImage = item.selectedVariant?.image || item.product.image || PLACEHOLDER_IMAGE;
                   const itemTitle = item.product.title;
-                  const redirectPath = mode === 'retail' ? `/products/${item.product.id}` : `/b2b/product/${item.product.id}`;
+                  const redirectPath = `/products/${item.product.id}`;
 
                   return (
                     <div key={item.id} className="flex gap-4 items-center bg-white/[0.02] border border-white/5 hover:border-white/10 p-3.5 rounded-2xl transition-all group text-left">
@@ -339,7 +354,7 @@ export function FloatingOverlays() {
                   <button 
                     onClick={() => {
                       setActivePanel(null);
-                      navigate(mode === 'retail' ? '/cart/retail' : '/cart/b2b');
+                      navigate('/cart/retail');
                     }}
                     className="py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-white transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
                   >
@@ -471,76 +486,58 @@ export function FloatingOverlays() {
         </AnimatePresence>
 
       </div>
+      </div>
 
 
-      {/* CINEMATIC VIDEO PLAYER OVERLAY FOR EMBEDDED-ONLY CONTENT */}
+      {/* Scroll to top — desktop sits left of cart stack; mobile above filter FAB */}
       <AnimatePresence>
-        {activeVideo && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4 md:p-8"
-            onClick={closeVideo}
+        {showScrollTop && !activeVideo && (
+          <motion.button
+            type="button"
+            initial={{ opacity: 0, scale: 0.85, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85, y: 12 }}
+            transition={{ duration: 0.2 }}
+            onClick={scrollToTop}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={cn(
+              'fixed z-[218] w-11 h-11 rounded-full border border-[#e8edf2] bg-white text-[#1A1D4E] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#E8500A]/40 hover:text-[#E8500A] flex items-center justify-center cursor-pointer pointer-events-auto transition-colors',
+              isMobile ? 'bottom-20 right-4' : 'bottom-6 right-[212px] lg:bottom-8 lg:right-[220px]',
+            )}
+            aria-label="Scroll to top"
+            title="Back to top"
           >
-            {/* Modal Box */}
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 350 }}
-              className={cn(
-                "w-full bg-slate-950 rounded-2xl md:rounded-3xl border border-white/10 shadow-[0_24px_50px_rgba(0,0,0,0.8)] overflow-hidden relative flex flex-col mb-16 lg:mb-0",
-                activeVideo.isVertical ? "max-w-[360px] aspect-[9/16]" : "max-w-4xl aspect-video"
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header Info */}
-              <div className="absolute top-0 inset-x-0 p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-20 flex items-center justify-between text-white">
-                <div className="flex flex-col text-left pr-6">
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#E8500A] mb-0.5">
-                    {activeVideo.isVertical ? "Short / Reel Playback" : "YouTube Video Playback"}
-                  </span>
-                  <h3 className="text-xs md:text-sm font-extrabold tracking-tight truncate max-w-[240px] md:max-w-[600px] italic">
-                    {activeVideo.title}
-                  </h3>
-                </div>
-                
-                <button
-                  onClick={closeVideo}
-                  className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/15 hover:border-white/20 transition-all text-white shrink-0 cursor-pointer"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {/* Video Element */}
-              <div className="w-full h-full relative group flex items-center justify-center bg-[#050615]">
-                <video
-                  src={activeVideo.url && activeVideo.url !== '#' ? activeVideo.url : "https://assets.mixkit.co/videos/preview/mixkit-young-man-wearing-virtual-reality-glasses-4384-large.mp4"}
-                  className="w-full h-full object-contain"
-                  autoPlay
-                  controls
-                  playsInline
-                />
-              </div>
-            </motion.div>
-          </motion.div>
+            <ChevronUp size={20} strokeWidth={2.5} />
+          </motion.button>
         )}
       </AnimatePresence>
 
-    </div>
-
-    {/* FILTER LAUNCHER â€” legacy useRegisterPageFilters pages; drawer on all sizes, pill desktop-only */}
+    {/* FILTER LAUNCHER — legacy useRegisterPageFilters pages; drawer stacked above pill */}
     {hasFilters && (
       <>
+        {!isMobile && filterOpen && (
+          <button
+            type="button"
+            className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
+            aria-label="Close filters"
+            onClick={() => setFilterOpen(false)}
+          />
+        )}
+
+        <div
+          className={cn(
+            'fixed z-[219] flex flex-col-reverse items-start gap-3',
+            isMobile ? 'pointer-events-none' : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
+          )}
+        >
         <AnimatePresence>
           {filterOpen && (
             <motion.div
               ref={filterDrawerRef}
-              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 20, scale: 0.97 }}
               animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 20, scale: 0.97 }}
               transition={standardTransition}
               drag={isMobile ? 'y' : false}
               dragConstraints={{ top: 0, bottom: 250 }}
@@ -549,12 +546,12 @@ export function FloatingOverlays() {
                 if (info.offset.y > 120) setFilterOpen(false);
               }}
               className={cn(
-                'bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden z-[250]',
+                'bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden',
                 isMobile
-                  ? 'fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] w-full pointer-events-auto'
+                  ? 'fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto'
                   : isTablet
-                    ? 'fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px]'
-                    : 'fixed bottom-[88px] left-6 lg:left-8 w-[380px] rounded-[24px] max-h-[75vh]',
+                    ? 'fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]'
+                    : 'relative w-[380px] max-h-[min(75vh,calc(100vh-10rem))] rounded-[24px]',
               )}
             >
               {/* Mobile drag indicator */}
@@ -662,9 +659,8 @@ export function FloatingOverlays() {
         </AnimatePresence>
 
         {!isMobile && (
-        <div className="fixed z-[219] bottom-6 left-6 lg:bottom-8 lg:left-8 flex flex-col items-start">
-        {/* The pill button */}
         <motion.button
+          type="button"
           onClick={() => {
             setFilterOpen(!filterOpen);
             if (!filterOpen) setActivePanel(null);
@@ -672,7 +668,7 @@ export function FloatingOverlays() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className={cn(
-            "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
+            "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto",
             filterOpen
               ? "bg-[#FFF0E8] border-[#E8500A] text-[#E8500A]"
               : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40"
@@ -699,12 +695,12 @@ export function FloatingOverlays() {
             size={14}
             className={cn(
               "transition-transform duration-300",
-              filterOpen ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A] group-hover:translate-x-1"
+              filterOpen ? "text-[#E8500A] rotate-90" : "text-[#8a9bb0] group-hover:text-[#E8500A] group-hover:translate-x-1"
             )}
           />
         </motion.button>
-        </div>
         )}
+        </div>
       </>
     )}
 

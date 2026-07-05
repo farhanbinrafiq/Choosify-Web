@@ -13,6 +13,7 @@ import { useDashboard } from '../context/DashboardContext';
 import { CartDrawer } from './CartDrawer';
 import { cn } from '../lib/utils';
 import { PRIMARY_NAV_ITEMS } from '../lib/navigation';
+import { isNavPathEnabled } from '../lib/featureFlags';
 import toast from 'react-hot-toast';
 
 export function Navbar() {
@@ -26,7 +27,7 @@ export function Navbar() {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { mode, setMode, retailCart, wholesaleCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig } = useGlobalState();
+  const { retailCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig, featureFlags } = useGlobalState();
   const { threads, notifications = [], setNotifications, savedProducts } = useDashboard();
 
   const unreadMsgCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
@@ -105,14 +106,16 @@ export function Navbar() {
 
   const renderNavLinks = (linkClass: (path: string) => string) =>
     navItems ? (
-      navItems.map((item) => (
+      navItems
+        .filter((item) => isNavPathEnabled(item.path, featureFlags))
+        .map((item) => (
         <Link key={item.id} to={item.path} className={linkClass(item.path)}>
           {item.label}
         </Link>
       ))
     ) : (
       <>
-        {PRIMARY_NAV_ITEMS.map((item) => (
+        {PRIMARY_NAV_ITEMS.filter((item) => isNavPathEnabled(item.path, featureFlags)).map((item) => (
           <Link key={item.id} to={item.path} className={linkClass(item.path)}>
             {item.labelWide ? (
               <>

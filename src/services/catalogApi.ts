@@ -1,5 +1,6 @@
 import type {
   CatalogBrand,
+  CatalogBrandPost,
   CatalogCategory,
   CatalogCreator,
   CatalogDeal,
@@ -11,7 +12,7 @@ import type {
   SiteConfig,
 } from '../types/catalog';
 
-const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || 'http://localhost:3000/api/v1';
+const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -94,5 +95,15 @@ export const catalogApi = {
     } catch {
       return null;
     }
+  },
+
+  listBrandPosts: async (params?: { status?: string; slug?: string; brandId?: string }): Promise<CatalogBrandPost[]> => {
+    const query = new URLSearchParams();
+    if (params?.status) query.set('status', params.status);
+    if (params?.slug) query.set('slug', params.slug);
+    if (params?.brandId) query.set('brandId', params.brandId);
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    const result = await request<{ data: CatalogBrandPost[] }>(`/catalog/brand-posts${suffix}`);
+    return result.data;
   },
 };

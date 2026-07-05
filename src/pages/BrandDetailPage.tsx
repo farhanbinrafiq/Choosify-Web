@@ -985,7 +985,7 @@ export function BrandDetailPage() {
           "VERIFIED OUTLET REVIEWS & INSIGHTS",
           "ACTIVE PROMO CODES & CAMPAIGNS",
           "INFLUENCER INSIGHTS & EXPERIENCES",
-          "B2B WHOLESALE COORDINATION ENGINE",
+          "RETAIL DEAL DISCOVERY & PRICE TRACKING",
           "REAL-TIME PRICE HISTORY TRACKER",
         ],
         tags: [
@@ -1008,7 +1008,7 @@ export function BrandDetailPage() {
         map: "https://www.google.com/maps",
         email: "sourcing@fff.com.bd",
         phone: "+8801711223344",
-        priceRange: "BDT - B2B SERVICE SLAB",
+        priceRange: "BDT - CUSTOM QUOTES",
         ageRange: "AGE: 18 - 60",
         audience: "INTERNATIONAL FASHION BRANDS, RETAILERS, IMPORTERS",
         services: [

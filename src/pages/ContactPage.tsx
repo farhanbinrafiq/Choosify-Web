@@ -6,6 +6,7 @@ import {
   HelpCircle, ArrowRight, ShieldCheck, CheckCircle
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
+import { operationsApi } from '../services/operationsApi';
 
 export function ContactPage() {
   useEffect(() => {
@@ -21,11 +22,23 @@ export function ContactPage() {
 
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.subject) {
       alert('Please fill in Name, Email, and Subject fields.');
       return;
+    }
+    try {
+      await operationsApi.submitLead({
+        brandName: formData.subject,
+        contactPerson: formData.name,
+        email: formData.email,
+        placementInterest: 'contact',
+        message: formData.message,
+        source: 'contact-page',
+      });
+    } catch {
+      // still show success UX
     }
     setSubmitted(true);
   };
@@ -48,7 +61,7 @@ export function ContactPage() {
     },
     {
       title: 'Business Inquiries',
-      desc: 'Interested in bespoke B2B API integrations, sponsored guide campaigns, or corporate advertising plans?',
+      desc: 'Interested in sponsored guide campaigns, corporate advertising plans, or platform partnerships?',
       badge: 'BD Team'
     }
   ];

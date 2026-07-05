@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '../lib/utils';
-import { useGlobalState } from '../context/GlobalStateContext';
 
 export function Skeleton({ className }: { className?: string }) {
   return (
@@ -31,8 +30,6 @@ export function ProductCardSkeleton({
   variant?: 'grid' | 'list' | 'compact' | 'featured',
   showCountdown?: boolean
 }) {
-  const { mode } = useGlobalState();
-
   if (variant === 'featured') {
     return (
       <div className="bg-white rounded-[5px] p-5 md:p-6 h-full flex flex-col md:flex-row gap-6 relative overflow-hidden border border-[#e8edf2] animate-pulse w-full">

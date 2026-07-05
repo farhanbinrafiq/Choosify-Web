@@ -1,4 +1,4 @@
-export type UserRole = 'customer' | 'seller' | 'wholesaler' | 'creator' | 'admin';
+export type UserRole = 'customer' | 'seller' | 'creator' | 'admin';
 
 export interface User {
   id: string;
@@ -37,7 +37,6 @@ export interface Seller {
     supportedRegions: string[];
   };
   sponsoredStatus: boolean;
-  wholesaleEnabled: boolean;
   disputeHistory: {
     totalDisputes: number;
     resolvedDisputes: number;
@@ -55,16 +54,8 @@ export interface Brand {
   ratings: number;
   sponsoredFlag: boolean;
   featuredFlag: boolean;
-  wholesaleSupport: boolean;
   category?: string;
   claimStatus?: 'community' | 'pending' | 'verified';
-}
-
-export type ProductModeType = 'retail' | 'wholesale';
-
-export interface BulkPriceSlab {
-  minQuantity: number;
-  price: number;
 }
 
 export interface Product {
@@ -73,17 +64,11 @@ export interface Product {
   slug?: string;
   title: string;
   image: string;
-  mode_type: ProductModeType;
-  moq?: number;
-  quantitySlabs?: BulkPriceSlab[];
-  bulkPricing?: boolean;
   codSupport: boolean;
-  quotationSupport: boolean;
-  stock: number; // 0 for out of stock, positive for quantity in stock
+  stock: number;
   sellerId: string;
   brandId: number;
   brand?: string;
-  pricingTiers?: BulkPriceSlab[];
   price: number;
   description: string;
   category?: string;
@@ -94,7 +79,7 @@ export interface Product {
   discountPercent?: number;
   originalPrice?: number;
   promoCode?: string;
-  dealValidUntil?: string; // ISO date string
+  dealValidUntil?: string;
   tags?: string[];
   featuredFlag?: boolean;
   publishedAt?: string;
@@ -141,10 +126,10 @@ export interface Order {
 
 export interface BuyerReputation {
   userId: string;
-  reputationScore: number; // 0 - 100
-  codTrustScore: number;   // 0 - 100
-  cancellationRatio: number; // percentage
-  refusalRatio: number;      // percentage
+  reputationScore: number;
+  codTrustScore: number;
+  cancellationRatio: number;
+  refusalRatio: number;
 }
 
 export type ReportType = 'seller' | 'product' | 'brand';
@@ -153,7 +138,7 @@ export interface Report {
   report_id: string;
   reporter_id: string;
   type: ReportType;
-  targetId: string; // seller_id or product_id or brand_id
+  targetId: string;
   reason: string;
   description: string;
   evidence?: string;

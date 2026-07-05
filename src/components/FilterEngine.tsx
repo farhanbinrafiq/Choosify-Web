@@ -217,16 +217,6 @@ export const DEALS_PAGE_FILTER_PROFILE: FilterProfile = {
       type: 'single_select'
     },
     {
-      id: 'deal_channel',
-      name: 'Wholesale vs Retail',
-      type: 'single_select',
-      options: [
-        { value: 'all', label: 'All Channels' },
-        { value: 'retail', label: 'Retail Only' },
-        { value: 'wholesale', label: 'Wholesale Only' }
-      ]
-    },
-    {
       id: 'discount_range',
       name: 'Minimum Discount',
       type: 'range',
@@ -1205,10 +1195,19 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
       {children}
 
       {activeFiltersData && (
+        <>
+        {!isMobile && isOpen && (
+          <button
+            type="button"
+            className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
+            aria-label="Close filters"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
         <div
           ref={filterContainerRef}
           className={cn(
-            'fixed z-[219] flex flex-col items-start',
+            'fixed z-[219] flex flex-col-reverse items-start gap-3',
             isMobile ? 'pointer-events-none' : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
           )}
         >
@@ -1217,9 +1216,9 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
               <motion.div
                 ref={filterDrawerRef}
                 id="floating-filter-drawer"
-                initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+                initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 20, scale: 0.97 }}
                 animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-                exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+                exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 20, scale: 0.97 }}
                 transition={standardTransition}
                 drag={isMobile ? 'y' : false}
                 dragConstraints={{ top: 0, bottom: 250 }}
@@ -1227,14 +1226,13 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                 onDragEnd={(_e, info) => {
                   if (info.offset.y > 120) setIsOpen(false);
                 }}
-                style={isMobile || isTablet ? undefined : { bottom: '64px' }}
                 className={cn(
                   'bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden',
                   isMobile
                     ? 'fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto'
                     : isTablet
                       ? 'fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]'
-                      : 'absolute left-0 w-[380px] rounded-[24px] max-h-[75vh]',
+                      : 'relative w-[380px] max-h-[min(75vh,calc(100vh-10rem))] rounded-[24px]',
                 )}
               >
                 {isMobile && (
@@ -1356,7 +1354,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={cn(
-              'w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none',
+              'w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto',
               isOpen
                 ? 'bg-surface-selected border-orange-primary text-orange-primary'
                 : 'bg-white border-[#e8edf2] text-heading hover:border-orange-primary/40',
@@ -1383,6 +1381,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
           </motion.button>
           )}
         </div>
+        </>
       )}
     </DrawerFilterContext.Provider>
   );

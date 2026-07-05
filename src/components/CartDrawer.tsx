@@ -42,27 +42,16 @@ export function CartDrawer({ isOpen, onClose, anchorEl }: CartDrawerProps) {
   });
 
   const {
-    mode,
     retailCart,
-    wholesaleCart,
     removeFromCart,
     updateCartQuantity,
     clearCart,
   } = useGlobalState();
 
-  const cartItems = mode === 'retail' ? retailCart : wholesaleCart;
+  const cartItems = retailCart;
 
   const getItemPrice = (item: CartItem) => {
-    if (mode === 'retail') {
-      if (item.selectedVariant?.price !== undefined) return item.selectedVariant.price;
-      return item.product.price;
-    }
-    const slabs = item.product.pricingTiers || item.product.quantitySlabs || [];
-    if (slabs.length === 0) return item.product.price;
-    const sorted = [...slabs].sort((a, b) => b.minQuantity - a.minQuantity);
-    for (const slab of sorted) {
-      if (item.quantity >= slab.minQuantity) return slab.price;
-    }
+    if (item.selectedVariant?.price !== undefined) return item.selectedVariant.price;
     return item.product.price;
   };
 
@@ -132,13 +121,6 @@ export function CartDrawer({ isOpen, onClose, anchorEl }: CartDrawerProps) {
       removeFromCart(item.id);
       return;
     }
-    if (mode === 'wholesale') {
-      const moq = item.product.moq || 10;
-      if (newQty < moq) {
-        toast.error(`Minimum order quantity is ${moq} units.`);
-        return;
-      }
-    }
     updateCartQuantity(item.id, newQty);
   };
 
@@ -155,7 +137,7 @@ export function CartDrawer({ isOpen, onClose, anchorEl }: CartDrawerProps) {
       return;
     }
     onClose();
-    navigate('/checkout', { state: { sourceMode: mode } });
+    navigate('/checkout');
   };
 
   const openProduct = (item: CartItem) => {
@@ -172,7 +154,7 @@ export function CartDrawer({ isOpen, onClose, anchorEl }: CartDrawerProps) {
           </div>
           <div className="min-w-0 text-left">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8a9bb0]">
-              {mode === 'retail' ? 'Retail cart' : 'Wholesale cart'}
+              Retail cart
             </p>
             <h3 className="text-sm font-black uppercase tracking-wide text-[#1A1D4E] truncate">
               {cartItems.length === 0
@@ -324,7 +306,7 @@ export function CartDrawer({ isOpen, onClose, anchorEl }: CartDrawerProps) {
               type="button"
               onClick={() => {
                 onClose();
-                navigate(mode === 'retail' ? '/cart/retail' : '/cart/b2b');
+                navigate('/cart/retail');
               }}
               className="py-2.5 px-3 rounded-[5px] border border-[#e8edf2] bg-[#F8FAFC] hover:bg-white text-[10px] font-bold uppercase tracking-widest text-[#1A1D4E] transition-colors cursor-pointer"
             >
