@@ -28,6 +28,7 @@ import { getAllBrandPosts } from '../lib/brandPosts';
 import { getSectionItemIds, isHomeSectionVisible } from '../utils/homepageCms';
 import { pickByCatalogIds, orderByCatalogIds } from '../utils/catalogMatch';
 import { isPlacementActive } from '../utils/editorialMappers';
+import { CreatorCardDesign } from '../components/CreatorCardDesign';
 
 type HomeGuideCarouselKind = 'youtube' | 'reels' | 'blog';
 
@@ -98,7 +99,7 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals, allCategories, allGuides, allPlacements, homepageConfig, addToCart } = useGlobalState();
+  const { allProducts, allBrands, allDeals, allCategories, allGuides, allPlacements, allCreators, homepageConfig, addToCart } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [activeTab, setActiveTab] = useState('FEED');
@@ -470,6 +471,12 @@ export function HomePage() {
   const translateX = (containerWidth / 2) - (carouselIndex * (inactiveWidth + gap) + (activeWidth / 2)) - dragOffset;
 
   const spotlightBrands = React.useMemo(() => {
+    const placementBrands = allPlacements
+      .filter((placement) => isPlacementActive(placement) && placement.placement === 'spotlight_section' && placement.entityType === 'brand')
+      .map((placement) => rightBrandsList.find((b: any) => String(b.id) === placement.entityId))
+      .filter(Boolean);
+    if (placementBrands.length) return placementBrands.slice(0, 8);
+
     const featuredIds = homepageConfig?.featuredBrandIds?.length
       ? homepageConfig.featuredBrandIds
       : getSectionItemIds(homepageConfig, 'featured-brands');
@@ -478,16 +485,22 @@ export function HomePage() {
       if (picked.length) return picked.slice(0, 8);
     }
     return rightBrandsList.filter((b: any) => b.ratings >= 4.7 || b.featuredFlag || b.sponsoredFlag).slice(0, 8);
-  }, [rightBrandsList, homepageConfig]);
+  }, [rightBrandsList, homepageConfig, allPlacements]);
 
   const rightProductsList = React.useMemo(() => {
     const source = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
+    const placementProducts = allPlacements
+      .filter((placement) => isPlacementActive(placement) && placement.placement === 'trending_section' && placement.entityType === 'product')
+      .map((placement) => source.find((p: any) => String(p.catalogId || p.id) === placement.entityId))
+      .filter(Boolean);
+    if (placementProducts.length) return placementProducts as any[];
+
     const featuredIds = homepageConfig?.featuredProductIds?.length
       ? homepageConfig.featuredProductIds
       : getSectionItemIds(homepageConfig, 'trending');
     if (!featuredIds.length) return source;
     return orderByCatalogIds(source, featuredIds);
-  }, [allProducts, homepageConfig]);
+  }, [allProducts, homepageConfig, allPlacements]);
 
   const sponsoredDeals = React.useMemo(() => {
     const placementProducts = allPlacements
@@ -638,6 +651,17 @@ export function HomePage() {
     return rightProductsList.filter((p: any) => p.originalPrice || p.discount).slice(0, 4);
   }, [allDeals, homepageConfig, rightProductsList]);
 
+  const featuredCreators = React.useMemo(() => {
+    const featuredIds = homepageConfig?.featuredCreatorIds?.length
+      ? homepageConfig.featuredCreatorIds
+      : getSectionItemIds(homepageConfig, 'creators');
+    if (featuredIds.length) {
+      const picked = pickByCatalogIds(allCreators, featuredIds);
+      if (picked.length) return picked.slice(0, 8);
+    }
+    return allCreators.filter((creator: any) => creator.isFeatured || creator.featuredFlag).slice(0, 8);
+  }, [allCreators, homepageConfig]);
+
   const homepageGuides = React.useMemo(() => {
     const featuredIds = homepageConfig?.featuredGuideIds?.length
       ? homepageConfig.featuredGuideIds
@@ -696,10 +720,11 @@ export function HomePage() {
       { id: 'section-new-on-choosify', label: 'Products', icon: <ShoppingBag size={13} />, hidden: !sectionVisible('trending') },
       { id: 'section-hot-deals', label: 'Deals', icon: <Flame size={13} />, hidden: !sectionVisible('deals') },
       { id: 'section-recommendations', label: 'Picks', icon: <Sparkles size={13} />, hidden: !sectionVisible('recommended') || homeFeaturedGuideSlides.length === 0 },
+      { id: 'section-featured-creators', label: 'Creators', icon: <Users size={13} />, hidden: !sectionVisible('creators') || featuredCreators.length === 0 },
       { id: 'section-categories', label: 'Categories', icon: <LayoutGrid size={13} />, hidden: !sectionVisible('categories') },
       { id: 'section-whats-on', label: "What's On", icon: <Megaphone size={13} />, hidden: whatsOnPosts.length === 0 },
     ],
-    [sectionVisible, homeFeaturedGuideSlides.length, whatsOnPosts.length],
+    [sectionVisible, homeFeaturedGuideSlides.length, whatsOnPosts.length, featuredCreators.length],
   );
 
   const { activeId: homeActiveSectionId, scrollToSection: scrollToHomeSection } =
@@ -966,6 +991,37 @@ export function HomePage() {
                   renderCard={(product) => (
                     <div className="w-[210px] shrink-0 flex flex-col min-h-[270px] h-full">
                       <ProductCard product={product} variant="compact" />
+                    </div>
+                  )}
+                />
+              </div>
+              )}
+
+              {sectionVisible('creators') && featuredCreators.length > 0 && (
+              <div id="section-featured-creators" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4 pb-3 border-b border-gray-100">
+                  <div className="text-left">
+                    <h2 className="text-base font-semibold text-[#1a1a2e]">
+                      FEATURED <span className="text-[#E8500A]">CREATORS</span>
+                    </h2>
+                    <p className="text-[12px] text-[#8a9bb0] mt-1">
+                      Trusted reviewers and buying guides curated from the CMS.
+                    </p>
+                  </div>
+                  <Link
+                    to="/creators"
+                    className="inline-flex items-center gap-1.5 text-[#E8500A] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider transition-all shrink-0"
+                  >
+                    View All Creators <ChevronRight size={14} />
+                  </Link>
+                </div>
+                <PremiumCarousel
+                  items={featuredCreators}
+                  itemWidth={260}
+                  gap={16}
+                  renderCard={(creator: any) => (
+                    <div className="w-[260px] shrink-0">
+                      <CreatorCardDesign creator={creator} />
                     </div>
                   )}
                 />

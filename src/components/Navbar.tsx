@@ -195,6 +195,11 @@ export function Navbar() {
 
   return (
     <>
+      {siteConfig?.announcementBarEnabled && siteConfig.announcementBarText?.trim() && (
+        <div className="w-full bg-[#E8500A] text-white text-center text-[11px] sm:text-xs py-1.5 px-4 font-semibold tracking-wide">
+          {siteConfig.announcementBarText}
+        </div>
+      )}
       <header className="w-full min-w-0 z-50 sticky top-0 shadow-2xl" id="main-navbar">
         {/* Row 1 — Logo, prominent search, account actions (Amazon-style top bar) */}
         <nav className="choosify-dark-gradient text-white h-14 sm:h-16 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 xl:px-8 border-b border-white/5 lg:border-b-0">

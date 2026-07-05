@@ -5,6 +5,7 @@ import { cn } from '../lib/utils';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PLACEHOLDER_IMAGE } from '../constants';
+import { resolveProductBadges } from '../utils/productBadges';
 import toast from 'react-hot-toast';
 
 function getProductCardImages(product: any): string[] {
@@ -255,10 +256,28 @@ export function ProductCard({
 }) {
   const navigate = useNavigate();
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
-  const { allBrands, addToCart } = useGlobalState();
+  const { allBrands, addToCart, siteConfig } = useGlobalState();
 
   const brandObj = allBrands?.find((b: any) => b.id === product.brandId);
   const brandName = brandObj ? brandObj.name : (product.brand || 'APEX');
+  const cmsBadges = resolveProductBadges(product, siteConfig);
+
+  const renderCmsBadges = (className = 'absolute top-1.5 left-1.5 z-20 flex flex-col gap-1') => {
+    if (!cmsBadges.length) return null;
+    return (
+      <div className={className}>
+        {cmsBadges.map((badge) => (
+          <span
+            key={badge.id}
+            className="text-white text-[7px] font-semibold px-1.5 py-0.5 rounded uppercase leading-none shadow-sm"
+            style={{ backgroundColor: badge.color }}
+          >
+            {badge.label}
+          </span>
+        ))}
+      </div>
+    );
+  };
   
   const isSaved = savedProducts.some(p => p.id === product.id);
   const isInCompare = comparedProducts.some(p => p.id === product.id);
@@ -331,6 +350,7 @@ export function ProductCard({
               alt={product.title} 
               containerClassName="absolute inset-0 p-6 z-10"
             />
+            {renderCmsBadges('absolute top-3 right-3 z-20 flex flex-col gap-1 items-end')}
          </div>
   
          <div className="relative z-10 flex-1 flex flex-col justify-center py-2 px-1">
@@ -415,6 +435,7 @@ export function ProductCard({
               alt={product.title} 
               containerClassName="absolute inset-0 p-2"
             />
+            {renderCmsBadges()}
         </div>
         
         <div className="flex flex-col pt-2 flex-grow min-h-0 text-left justify-between select-none">
@@ -562,6 +583,7 @@ export function ProductCard({
           alt={product.title} 
           containerClassName="absolute inset-0 p-2"
         />
+        {renderCmsBadges('absolute top-1.5 right-1.5 z-20 flex flex-col gap-1 items-end')}
         <div className="absolute top-1.5 left-1.5 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
           <button 
             onClick={toggleSave}

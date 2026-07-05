@@ -73,7 +73,7 @@ export function GlobalSearchBar({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const { customOverviews } = useDashboard();
-  const { allProducts, allBrands, allCategories, allCreators } = useGlobalState();
+  const { allProducts, allBrands, allCategories, allCreators, siteConfig } = useGlobalState();
 
   const productSource = allProducts.length > 0 ? allProducts : PRODUCTS;
   const brandSource = allBrands.length > 0
@@ -215,8 +215,24 @@ export function GlobalSearchBar({
   }, [isOpen, queryValue, variant, isNavbarFluid, mobileExpanded]);
 
   // Static Preset Lists
-  const popularSearches = ['iPhone 15', 'Apex', 'Yellow', 'Sony WH-1000XM5'];
-  const trendingSearches = ['Samsung S24 Ultra', 'Gift wrapping', 'Sailor', 'PC Build'];
+  const popularSearches = useMemo(() => {
+    const cmsTerms = (siteConfig?.popularSearches ?? [])
+      .filter((item) => item.isActive && item.term.trim())
+      .sort((a, b) => a.order - b.order)
+      .map((item) => item.term);
+    return cmsTerms.length > 0 ? cmsTerms.slice(0, 6) : ['iPhone 15', 'Apex', 'Yellow', 'Sony WH-1000XM5'];
+  }, [siteConfig?.popularSearches]);
+
+  const trendingSearches = useMemo(() => {
+    const cmsTerms = (siteConfig?.popularSearches ?? [])
+      .filter((item) => item.isActive && item.term.trim())
+      .sort((a, b) => a.order - b.order)
+      .slice(6, 10)
+      .map((item) => item.term);
+    return cmsTerms.length > 0
+      ? cmsTerms
+      : ['Samsung S24 Ultra', 'Gift wrapping', 'Sailor', 'PC Build'];
+  }, [siteConfig?.popularSearches]);
   const commonKeywords = [
     'iphone', 'iphone 15', 'iphone charger', 'iphone cover', 'samsung galaxy', 'samsung s24',
     'gift wrapping', 'airport pickup', 't-shirt', 'casual wear', 'sound system', 'laptop',
