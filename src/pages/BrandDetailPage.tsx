@@ -33,6 +33,7 @@ import {
   Clock,
   Facebook,
   Instagram,
+  Megaphone,
 } from "lucide-react";
 import { BRANDS, PRODUCTS } from "../constants";
 import { ProductCard } from "../components/ProductCard";
@@ -101,19 +102,26 @@ function WithInfluencerReviews({
       category: brandName === "Apex" ? "FOOTWEAR" : "FASHION VIBES",
       title: `${brandName} Style & Creators Showcase`,
       authorName: "Style Maven",
-      authorHandle: "@stylemaven • 12m",
+      authorHandle: "@stylemaven",
       authorAvatar: "https://i.pravatar.cc/100?u=style",
+      platform: "Instagram" as const,
+      aspectRatio: "portrait" as const,
+      videoUrl: "https://www.youtube.com/embed/p17S_gQ2iV4?autoplay=1&mute=1",
+      timeAgo: "12m ago",
     },
     {
       id: 2,
       image:
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=800&fit=crop",
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=600&fit=crop",
       category: brandName === "Apex" ? "FOOTWEAR" : "CASUAL WEAR",
       title: `${brandName} Seasonal Collection Review`,
       authorName: "BB Fashion Talk",
-      authorHandle: "@bbtalk • 15h",
+      authorHandle: "@bbtalk",
       authorAvatar: "https://i.pravatar.cc/100?u=bbtech",
-      badgeBg: "bg-blue-600/95",
+      platform: "YouTube" as const,
+      aspectRatio: "landscape" as const,
+      videoUrl: "https://www.youtube.com/embed/T68XW9Q-PqQ?autoplay=1&mute=1",
+      timeAgo: "15h ago",
     },
     {
       id: 3,
@@ -122,9 +130,54 @@ function WithInfluencerReviews({
       category: "CREATOR OPINION",
       title: `Is ${brandName} the Best Local Brand in 2024?`,
       authorName: "Avishek Mojumder",
-      authorHandle: "@avishek • 1d",
+      authorHandle: "@avishek",
       authorAvatar: "https://i.pravatar.cc/100?u=avishek",
-      badgeBg: "bg-purple-600/95",
+      platform: "TikTok" as const,
+      aspectRatio: "portrait" as const,
+      videoUrl: "https://www.youtube.com/embed/bZha6f-Z35M?autoplay=1&mute=1",
+      timeAgo: "1d ago",
+    },
+    {
+      id: 4,
+      image:
+        "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900&h=600&fit=crop",
+      category: "DEEP DIVE",
+      title: `${brandName} — full brand breakdown`,
+      authorName: "Tech Review BD",
+      authorHandle: "@techreviewbd",
+      authorAvatar: "TR",
+      platform: "YouTube" as const,
+      aspectRatio: "landscape" as const,
+      videoUrl: "https://www.youtube.com/embed/PjRreH0T_W4?autoplay=1&mute=1",
+      timeAgo: "3d ago",
+    },
+    {
+      id: 5,
+      image:
+        "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=800&fit=crop",
+      category: "STYLING",
+      title: `How creators style ${brandName} daily`,
+      authorName: "Key Looks",
+      authorHandle: "@keylooks",
+      authorAvatar: "KL",
+      platform: "Instagram" as const,
+      aspectRatio: "portrait" as const,
+      videoUrl: "https://www.youtube.com/embed/p17S_gQ2iV4?autoplay=1&mute=1",
+      timeAgo: "5d ago",
+    },
+    {
+      id: 6,
+      image:
+        "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&h=800&fit=crop",
+      category: "QUICK TAKE",
+      title: `${brandName} in 60 seconds — honest take`,
+      authorName: "Daily Drop BD",
+      authorHandle: "@dailydrop",
+      authorAvatar: "DD",
+      platform: "TikTok" as const,
+      aspectRatio: "portrait" as const,
+      videoUrl: "https://www.youtube.com/embed/bZha6f-Z35M?autoplay=1&mute=1",
+      timeAgo: "1w ago",
     },
   ];
 
@@ -1139,27 +1192,33 @@ export function BrandDetailPage() {
       },
       {
         id: "products-section",
-        label: "Catalog",
+        label: "Products",
         icon: <Package size={13} />,
         hidden: !showProductCatalogSection,
       },
       {
-        id: "discovery-section",
-        label: "Discovery",
+        id: "creator-reviews-section",
+        label: "Creator Reviews",
         icon: <Sparkles size={13} />,
       },
       {
+        id: "campaigns-section",
+        label: "Campaigns",
+        icon: <Megaphone size={13} />,
+        hidden: brandWhatsOnPosts.length === 0,
+      },
+      {
         id: "public-reviews-section",
-        label: "Reviews",
+        label: "Public Reviews",
         icon: <MessageCircle size={13} />,
       },
       {
         id: "brand-overview-section",
-        label: "Overview",
+        label: "Brand Overview",
         icon: <Info size={13} />,
       },
     ],
-    [showDealsSection, showProductCatalogSection],
+    [showDealsSection, showProductCatalogSection, brandWhatsOnPosts.length],
   );
 
   const { activeId: activeSectionId, scrollToSection } =
@@ -2134,7 +2193,7 @@ export function BrandDetailPage() {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 text-left">
                   <div>
                     <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                      Product Catalog
+                      Products
                     </h2>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
                       Full authorized selection available
@@ -2155,7 +2214,7 @@ export function BrandDetailPage() {
                       <Lock className="w-5 h-5" />
                     </div>
                     <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight">
-                      Authorized Product Catalog Locked
+                      Products Locked
                     </h3>
                     <p className="text-xs text-gray-500 font-bold max-w-sm">
                       The full catalog, price list sync, inventory metrics, and
@@ -2267,14 +2326,14 @@ export function BrandDetailPage() {
               </div>
             )}
 
-          {/* Discovery & sponsored content */}
-          <div id="discovery-section" className="scroll-mt-36 w-full space-y-8">
+          {/* Creator reviews */}
+          <div id="creator-reviews-section" className="scroll-mt-36 w-full space-y-8">
             <div className="text-left">
               <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                Discovery & Sponsored
+                Creator Reviews
               </h2>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                Creator reviews, guides & official brand announcements
+                Influencer reviews & official creator collaborations
               </p>
             </div>
 
@@ -2285,12 +2344,11 @@ export function BrandDetailPage() {
                   <Lock className="w-5 h-5" />
                 </div>
                 <h3 className="text-sm font-black text-navy uppercase tracking-tight">
-                  Creator Collaborations & Reviews Locked
+                  Creator Collaborations Locked
                 </h3>
                 <p className="text-xs text-gray-500 font-bold max-w-sm mb-1">
-                  Professional influencer reviews, creator campaign
-                  collaborations, and brand ambassadorship metrics are locked
-                  until ownership is verified.
+                  Professional influencer reviews and creator campaign
+                  collaborations are locked until ownership is verified.
                 </p>
               </div>
             ) : (
@@ -2302,19 +2360,21 @@ export function BrandDetailPage() {
             )}
           </div>
 
+          </div>
+
           {brandWhatsOnPosts.length > 0 && (
-            <div id="brand-whats-on-section" className="scroll-mt-36 w-full">
+            <div id="campaigns-section" className="scroll-mt-36 w-full">
               <BrandPostCarouselSection
                 posts={brandWhatsOnPosts}
-                title={`Upcoming from ${brand.name}`}
+                badgeLabel="Campaigns"
+                showSponsoredBadge={false}
+                title="Campaigns"
                 subtitle="Official brand events, launches, and festival announcements."
                 viewAllHref="/whats-on"
-                viewAllLabel="Explore all What's On"
+                viewAllLabel="Explore all campaigns"
               />
             </div>
           )}
-
-          </div>
 
           <div
             id="public-reviews-section"

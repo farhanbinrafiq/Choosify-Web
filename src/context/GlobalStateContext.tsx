@@ -12,6 +12,14 @@ import { mapCatalogCreator, mapCatalogGuide } from '../utils/editorialMappers';
 import type { Creator } from '../data/creators';
 
 declare module '../types/schemas' {
+  interface SubOrderItem {
+    image?: string;
+    brand?: string;
+    variantLabel?: string;
+    variantSku?: string;
+    notes?: string;
+  }
+
   interface Order {
     promoCode?: string;
     promoDiscount?: number;

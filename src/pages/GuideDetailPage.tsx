@@ -31,7 +31,6 @@ import {
   CalendarDays,
   Check,
   X,
-  BookOpen,
   Facebook,
   Twitter,
   ShieldCheck,
@@ -40,6 +39,8 @@ import {
   Award,
   User,
   Gift,
+  Clock,
+  RefreshCw,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { BLOGS, PRODUCTS } from "../constants";
@@ -52,6 +53,11 @@ import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { EvaluationData, ComparisonProduct } from "../types/evaluation";
 import evaluationsData from "../data/evaluations.json";
 import { RecommendationMediaGallery } from "../components/RecommendationMediaGallery";
+import {
+  DetailHeroSummaryBar,
+  detailHeroSummaryActionPrimaryClass,
+  detailHeroSummaryActionSecondaryClass,
+} from "../components/DetailHeroSummaryBar";
 import { DYNAMIC_GUIDES, DEFAULT_DYNAMIC_GUIDE } from "../data/mockGuides";
 import { CATEGORY_SPEC_CONFIGS } from "../data/guideSpecConfigs";
 import { ProductCard } from "../components/ProductCard";
@@ -288,6 +294,26 @@ export function GuideDetailPage() {
     }
   };
 
+  const overallWinnerProduct = displayProducts[0] || allGuideProducts[0] || PRODUCTS[0];
+  const bestBudgetProduct = useMemo(() => {
+    if (!allGuideProducts.length) return PRODUCTS[1] || PRODUCTS[0];
+    return [...allGuideProducts].sort((a, b) => {
+      const priceA = parseFloat(String(a.price || 0).replace(/,/g, ""));
+      const priceB = parseFloat(String(b.price || 0).replace(/,/g, ""));
+      return priceA - priceB;
+    })[0];
+  }, [allGuideProducts]);
+
+  const formatProductLabel = (product?: { brand?: string; title?: string }) => {
+    if (!product) return "TBD";
+    const label = `${product.brand || ""} ${product.title || ""}`.trim();
+    return label.length > 42 ? `${label.slice(0, 39)}…` : label;
+  };
+
+  const guideReadTime =
+    (guide as { readTime?: string }).readTime?.replace(/_/g, " ") || "12 Min Read";
+  const guideLastUpdated = "June 2026";
+
   return (
     <div className="bg-white min-h-screen">
       {/* Unified Guide Hero — breadcrumbs, media, guide info, and summary in one section */}
@@ -302,141 +328,83 @@ export function GuideDetailPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
 
         <div className="relative z-10">
-          <div className="max-w-7xl mx-auto px-6 pt-8 pb-4">
-            <div className="flex flex-wrap items-center justify-end gap-6">
-              <div className="flex items-center gap-2 text-[10px] font-black text-white/80 uppercase tracking-widest italic bg-white/5 border border-white/10 px-4 py-2 rounded-full">
-                <CalendarDays size={14} className="text-orange-primary" />
-                Published May 12, 2026
-              </div>
-              <div className="flex items-center gap-2 text-[10px] font-black text-orange-primary uppercase tracking-widest italic bg-orange-primary/10 px-4 py-2 rounded-full border border-orange-primary/20">
-                <BookOpen size={14} className="text-orange-primary" />8 Min Read
-              </div>
-            </div>
-          </div>
-
           <div className="w-full bg-transparent relative">
             <RecommendationMediaGallery guide={guide} />
           </div>
 
-          <div className="max-w-[1080px] mx-auto px-6 pb-8 text-left">
+          <div className="max-w-[1080px] mx-auto px-6 pb-6 text-left">
             <h1 className="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-tight mb-4 font-sans drop-shadow-xl">
               {guide.title}
             </h1>
 
-            <p className="text-white/85 text-sm md:text-base font-medium italic uppercase tracking-wider leading-relaxed mb-6 max-w-4xl font-sans">
+            <p className="text-white/85 text-sm md:text-base font-medium italic uppercase tracking-wider leading-relaxed max-w-4xl font-sans">
               {guide.excerpt ||
                 "An in-depth expert curation guiding your next big decision, backed by extensive testing and research."}
             </p>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 bg-white/[0.04] rounded-[5px] p-6 border border-white/10 shadow-lg mb-6">
-              <div className="flex flex-col text-left">
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
-                  Published Date
-                </span>
-                <span className="text-sm font-black text-white uppercase italic tracking-tighter">
-                  {guide.date}
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
-                  Read Time
-                </span>
-                <span className="text-sm font-black text-white uppercase italic tracking-tighter">
-                  12 Minutes
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
-                  Audience
-                </span>
-                <span className="text-sm font-black text-[#F97316] uppercase italic tracking-tighter">
-                  ENTHUSIASTS
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
-                  Last Updated
-                </span>
-                <span className="text-sm font-black text-white uppercase italic tracking-tighter">
-                  June 2026
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <button
-                onClick={() => {
-                  toast.success("Guide saved to your dashboard!");
-                }}
-                className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/15 border border-white/15 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic cursor-pointer shadow-lg"
-              >
-                <Bookmark size={14} className="text-[#F97316]" />
-                Save Guide
-              </button>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast.success("Share link copied to clipboard!");
-                }}
-                className="flex items-center gap-2 px-6 py-3 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic border-none cursor-pointer shadow-lg hover:scale-102 active:scale-98"
-              >
-                <Share2 size={14} />
-                Share Guide
-              </button>
-            </div>
           </div>
 
-          <div className="border-t border-white/10 bg-[#000435]/60 backdrop-blur-sm">
-            <div className="max-w-7xl mx-auto px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-left">
-              <div className="flex flex-col text-left">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1 font-mono">
-                  PRODUCTS REVIEWED
-                </span>
-                <span className="text-sm font-black text-white uppercase italic">
-                  {allGuideProducts.length || 8} ITEMS
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1 font-mono">
-                  OVERALL WINNER
-                </span>
-                <span className="text-sm font-black text-[#E8500A] uppercase italic truncate">
-                  {displayProducts[0]
-                    ? `${displayProducts[0].brand} ${displayProducts[0].title}`
-                    : "Samsung Galaxy S26 Ultra"}
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1 font-mono">
-                  BEST BUDGET
-                </span>
-                <span className="text-sm font-black text-blue-300 uppercase italic truncate">
-                  {(() => {
-                    const cheapest = [...allGuideProducts].sort((a, b) => {
-                      const priceA = parseFloat(
-                        String(a.price || 0).replace(/,/g, ""),
-                      );
-                      const priceB = parseFloat(
-                        String(b.price || 0).replace(/,/g, ""),
-                      );
-                      return priceA - priceB;
-                    })[0];
-                    return cheapest
-                      ? `${cheapest.brand} ${cheapest.title}`
-                      : "Samsung Galaxy A56";
-                  })()}
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1 font-mono">
-                  LAST UPDATED
-                </span>
-                <span className="text-sm font-black text-white uppercase italic">
-                  June 2026
-                </span>
-              </div>
-            </div>
-          </div>
+          <DetailHeroSummaryBar
+            actionsPlacement="bottom-center"
+            items={[
+              {
+                id: 'published',
+                icon: CalendarDays,
+                label: `Published ${guide.date || 'May 12, 2026'}`,
+              },
+              {
+                id: 'read-time',
+                icon: Clock,
+                label: guideReadTime,
+              },
+              {
+                id: 'products-reviewed',
+                icon: Package,
+                label: `${allGuideProducts.length || 8} Products Reviewed`,
+              },
+              {
+                id: 'winner',
+                icon: Award,
+                wide: true,
+                label: `Winner: ${formatProductLabel(overallWinnerProduct)}`,
+              },
+              {
+                id: 'best-budget',
+                icon: Gift,
+                wide: true,
+                label: `Best Budget: ${formatProductLabel(bestBudgetProduct)}`,
+              },
+              {
+                id: 'updated',
+                icon: RefreshCw,
+                label: `Updated ${guideLastUpdated}`,
+              },
+            ]}
+            actions={
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast.success('Guide saved to your dashboard!');
+                  }}
+                  className={detailHeroSummaryActionSecondaryClass}
+                >
+                  <Bookmark size={13} className="text-[#E8500A]" />
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success('Share link copied to clipboard!');
+                  }}
+                  className={detailHeroSummaryActionPrimaryClass}
+                >
+                  <Share2 size={13} />
+                  Share
+                </button>
+              </>
+            }
+          />
         </div>
         <HeroScrollCue anchorRef={heroRef} />
       </section>

@@ -66,6 +66,9 @@ export interface InfluencerReviewsProps {
 }
 
 import { getVideoEmbedUrl } from '../lib/videoEmbed';
+import { CREATOR_HYBRID_GRID } from '../lib/pageLayout';
+
+type ReviewPlatform = 'YouTube' | 'Instagram' | 'TikTok' | 'Facebook';
 
 // Unified avatar rendering to cleanly handle both dynamic image URLs and initial characters
 function RenderAvatar({ avatar, name, size = 'sm' }: { avatar: string; name: string; size?: 'sm' | 'md' }) {
@@ -266,8 +269,156 @@ const curatedReviews: InfluencerReviewCard[] = [
     aspectRatio: "landscape",
     videoUrl: "https://www.youtube.com/embed/T68XW9Q-PqQ?autoplay=1&mute=1",
     timeAgo: "1w ago"
+  },
+  {
+    id: "card-7",
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900&h=600&fit=crop",
+    category: "Deep Dive",
+    title: "Long-term durability test — 90 days later",
+    authorName: "Tech Review BD",
+    authorHandle: "@techreviewbd",
+    authorAvatar: "TR",
+    platform: "YouTube",
+    aspectRatio: "landscape",
+    videoUrl: "https://www.youtube.com/embed/PjRreH0T_W4?autoplay=1&mute=1",
+    timeAgo: "2w ago"
+  },
+  {
+    id: "card-8",
+    image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&h=800&fit=crop",
+    category: "Quick Take",
+    title: "60-second honest verdict — worth it?",
+    authorName: "Daily Drop BD",
+    authorHandle: "@dailydrop",
+    authorAvatar: "DD",
+    platform: "TikTok",
+    aspectRatio: "portrait",
+    videoUrl: "https://www.youtube.com/embed/bZha6f-Z35M?autoplay=1&mute=1",
+    timeAgo: "4d ago"
   }
 ];
+
+const isPortraitReview = (review: InfluencerReviewCard): boolean => {
+  if (review.aspectRatio === 'portrait') return true;
+  if (review.aspectRatio === 'landscape') return false;
+  return review.platform === 'Instagram' || review.platform === 'TikTok';
+};
+
+const ROW_SIZE = 3;
+
+const partitionReviewsByFormat = (reviews: InfluencerReviewCard[]) => {
+  const landscape: InfluencerReviewCard[] = [];
+  const portrait: InfluencerReviewCard[] = [];
+  reviews.forEach((review) => {
+    (isPortraitReview(review) ? portrait : landscape).push(review);
+  });
+  return { landscape, portrait };
+};
+
+/** Pack reviews into hybrid rows: prefer 1 YouTube/long-form + up to 2 reels per row (max 3). */
+const buildHybridReviewRows = (reviews: InfluencerReviewCard[]): InfluencerReviewCard[][] => {
+  const { landscape, portrait } = partitionReviewsByFormat(reviews);
+  const rows: InfluencerReviewCard[][] = [];
+  let landscapeIndex = 0;
+  let portraitIndex = 0;
+
+  while (landscapeIndex < landscape.length || portraitIndex < portrait.length) {
+    const row: InfluencerReviewCard[] = [];
+
+    if (landscapeIndex < landscape.length) {
+      row.push(landscape[landscapeIndex++]);
+    }
+
+    while (row.length < ROW_SIZE && portraitIndex < portrait.length) {
+      row.push(portrait[portraitIndex++]);
+    }
+
+    while (row.length < ROW_SIZE && landscapeIndex < landscape.length) {
+      row.push(landscape[landscapeIndex++]);
+    }
+
+    if (row.length > 0) rows.push(row);
+  }
+
+  return rows;
+};
+
+interface CreatorReviewCardProps {
+  review: InfluencerReviewCard;
+  isPlaying: boolean;
+  onPlay: () => void;
+  getPlatformIcon: (platform: ReviewPlatform) => React.ReactNode;
+  variant: 'landscape' | 'portrait';
+}
+
+function CreatorReviewCard({
+  review,
+  isPlaying,
+  onPlay,
+  getPlatformIcon,
+  variant,
+}: CreatorReviewCardProps) {
+  const isPortrait = variant === 'portrait';
+
+  return (
+    <div
+      data-platform={review.platform?.toLowerCase()}
+      data-format={variant}
+      className="choosify-creator-hybrid-card ir-card flex flex-col bg-white h-full transition-all duration-200 rounded-[12px] border border-[#e8edf2] overflow-hidden shadow-[0_4px_16px_rgba(26,29,78,0.04)] hover:shadow-[0_8px_24px_rgba(232,80,10,0.08)] hover:border-[#E8500A]/20"
+    >
+      <div
+        className={`relative bg-[#eef2f7] overflow-hidden ${
+          isPortrait ? 'aspect-[9/16]' : 'aspect-[16/10]'
+        }`}
+      >
+        <VideoArea
+          id={review.id}
+          videoUrl={review.videoUrl || ''}
+          image={review.image}
+          platform={review.platform || 'Instagram'}
+          aspectRatio={isPortrait ? 'portrait' : 'landscape'}
+          isPlaying={isPlaying}
+          onPlay={onPlay}
+        />
+
+        {!isPlaying ? (
+          <div className="absolute top-2.5 left-2.5 z-10">
+            <span className="bg-white/95 backdrop-blur-md border border-white/80 text-[#1A1D4E] px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm select-none">
+              {getPlatformIcon(review.platform || 'Instagram')}
+              {review.platform === 'Instagram' || review.platform === 'TikTok'
+                ? 'Reel'
+                : review.platform}
+            </span>
+          </div>
+        ) : null}
+      </div>
+
+      <div className={`flex flex-col flex-grow text-left bg-white ${isPortrait ? 'p-3' : 'p-4'}`}>
+        <span className="text-[9px] font-black text-[#E8500A] tracking-[0.14em] uppercase mb-1.5">
+          {review.category}
+        </span>
+
+        <h4
+          className={`font-bold text-[#1A1D4E] leading-snug line-clamp-2 text-left mb-3 ${
+            isPortrait ? 'text-[12px] min-h-[34px]' : 'text-[13px] min-h-[38px]'
+          }`}
+        >
+          {review.title}
+        </h4>
+
+        <div className="flex items-center justify-between border-t border-[#e8edf2] pt-3 mt-auto">
+          <div className="flex items-center gap-2 min-w-0">
+            <RenderAvatar avatar={review.authorAvatar} name={review.authorName} size="sm" />
+            <span className="text-[11px] text-[#64748b] truncate font-semibold">
+              {review.authorHandle}
+            </span>
+          </div>
+          <span className="text-[9px] text-[#8a9bb0] font-mono shrink-0">{review.timeAgo}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function InfluencerReviews({
   title = "Creator Reviews",
@@ -350,6 +501,19 @@ export function InfluencerReviews({
     if (activePlatformFilter === 'ALL') return true;
     return review.platform === activePlatformFilter;
   });
+
+  const hybridRows = buildHybridReviewRows(filteredReviews);
+  const hasHybridFeed = hybridRows.length > 0;
+
+  const isFilterActive = activePlatformFilter !== 'ALL';
+  // Featured hero only belongs in the feed when its platform survives the active filter
+  const showFeaturedBlock =
+    !isFilterActive || (finalFeatured.platform || 'YouTube') === activePlatformFilter;
+
+  const clearPlatformFilter = () => {
+    setActivePlatformFilter('ALL');
+    setPlayingVideoId(null);
+  };
 
   const getPlatformIcon = (platform: 'YouTube' | 'Instagram' | 'TikTok' | 'Facebook') => {
     switch (platform) {
@@ -481,10 +645,28 @@ export function InfluencerReviews({
               </button>
             );
           })}
+
+          {isFilterActive && (
+            <button
+              onClick={clearPlatformFilter}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer border border-dashed border-[#E8500A]/40 bg-[#FFF0E8] text-[#E8500A] hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] select-none whitespace-nowrap outline-none"
+            >
+              <X size={11} className="shrink-0" />
+              <span className="leading-none">Clear Filter</span>
+            </button>
+          )}
         </div>
+
+        {isFilterActive && (
+          <p className="mt-2.5 text-[10px] font-bold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E8500A] animate-pulse" />
+            Showing {filteredReviews.length} {activePlatformFilter} review{filteredReviews.length === 1 ? '' : 's'}
+          </p>
+        )}
       </div>
 
-      {/* PART 2 — FEATURED VIDEO BLOCK */}
+      {/* PART 2 — FEATURED VIDEO BLOCK (hidden when it doesn't match the active platform filter) */}
+      {showFeaturedBlock && (
       <div className="flex flex-col sm:flex-row items-stretch border border-[#e8edf2] rounded-[12px] overflow-hidden bg-white mb-6 shadow-[0_4px_18px_rgba(26,29,78,0.05)]">
         
         <div className="w-full sm:w-[52%] relative bg-[#0f172a] aspect-[16/9] flex-shrink-0">
@@ -553,72 +735,46 @@ export function InfluencerReviews({
         </div>
 
       </div>
+      )}
 
-      {/* PART 3 — CARD GRID */}
-      {filteredReviews.length === 0 ? (
-        <div className="w-full text-center py-10 bg-[#F8FAFC] border border-[#e8edf2] rounded-[12px] text-[#8a9bb0]">
-          Creator content coming soon
+      {/* PART 3 — HYBRID FEED (mixed YouTube + reels, up to 3 per row) */}
+      {!hasHybridFeed ? (
+        <div className="w-full text-center py-10 bg-[#F8FAFC] border border-[#e8edf2] rounded-[12px] text-[#8a9bb0] flex flex-col items-center gap-3">
+          <span className="text-sm font-semibold">
+            {isFilterActive
+              ? `No ${activePlatformFilter} reviews yet for this listing`
+              : 'Creator content coming soon'}
+          </span>
+          {isFilterActive && (
+            <button
+              onClick={clearPlatformFilter}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white border border-[#E8500A]/40 text-[#E8500A] hover:bg-[#E8500A] hover:text-white transition-all cursor-pointer select-none"
+            >
+              <X size={11} className="shrink-0" />
+              Clear Filter & Show All
+            </button>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {filteredReviews.map((review) => {
-            const isPlaying = playingVideoId === review.id;
-            const isPortrait = review.aspectRatio === 'portrait';
-            
-            return (
-              <div 
-                key={review.id} 
-                data-platform={review.platform?.toLowerCase()}
-                className="ir-card flex flex-col bg-white h-full transition-all duration-200 rounded-[12px] border border-[#e8edf2] overflow-hidden shadow-[0_4px_16px_rgba(26,29,78,0.04)] hover:shadow-[0_8px_24px_rgba(232,80,10,0.08)] hover:border-[#E8500A]/20"
-              >
-                <div className={`relative bg-[#eef2f7] overflow-hidden ${
-                  isPortrait ? "aspect-[3/4]" : "aspect-[16/10]"
-                }`}>
-                  <VideoArea
-                    id={review.id}
-                    videoUrl={review.videoUrl || ""}
-                    image={review.image}
-                    platform={review.platform || 'Instagram'}
-                    aspectRatio={review.aspectRatio || 'landscape'}
-                    isPlaying={isPlaying}
-                    onPlay={() => handlePlayCard(review.id, review.authorName)}
-                  />
-
-                  {!isPlaying ? (
-                    <div className="absolute top-2.5 left-2.5 z-10">
-                      <span className="bg-white/95 backdrop-blur-md border border-white/80 text-[#1A1D4E] px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm select-none">
-                        {getPlatformIcon(review.platform || 'Instagram')}
-                        {review.platform === 'Instagram' ? 'Reel' : review.platform}
-                      </span>
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="p-4 flex flex-col flex-grow text-left bg-white">
-                  <span className="text-[9px] font-black text-[#E8500A] tracking-[0.14em] uppercase mb-1.5">
-                    {review.category}
-                  </span>
-                  
-                  <h4 className="text-[13px] font-bold text-[#1A1D4E] leading-snug line-clamp-2 min-h-[38px] text-left mb-3">
-                    {review.title}
-                  </h4>
-
-                  <div className="flex items-center justify-between border-t border-[#e8edf2] pt-3 mt-auto">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <RenderAvatar avatar={review.authorAvatar} name={review.authorName} size="sm" />
-                      <span className="text-[11px] text-[#64748b] truncate font-semibold">
-                        {review.authorHandle}
-                      </span>
-                    </div>
-                    <span className="text-[9px] text-[#8a9bb0] font-mono shrink-0">
-                      {review.timeAgo}
-                    </span>
-                  </div>
-                </div>
-
-              </div>
-            );
-          })}
+        <div className="space-y-5">
+          {hybridRows.map((row, rowIndex) => (
+            <div
+              key={`creator-hybrid-row-${rowIndex}`}
+              className={CREATOR_HYBRID_GRID}
+              data-row-size={row.length}
+            >
+              {row.map((review) => (
+                <CreatorReviewCard
+                  key={review.id}
+                  review={review}
+                  variant={isPortraitReview(review) ? 'portrait' : 'landscape'}
+                  isPlaying={playingVideoId === review.id}
+                  onPlay={() => handlePlayCard(review.id, review.authorName)}
+                  getPlatformIcon={getPlatformIcon}
+                />
+              ))}
+            </div>
+          ))}
         </div>
       )}
 

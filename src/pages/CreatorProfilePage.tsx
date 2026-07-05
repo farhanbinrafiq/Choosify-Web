@@ -22,16 +22,20 @@ import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScroll
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
       fill="currentColor"
     >
       <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
     </svg>
   );
 }
+
+/** Up to 4 cards per row on xl; scales down on smaller viewports */
+const CREATOR_CONTENT_GRID =
+  'grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5';
 
 export function CreatorProfilePage() {
   const creatorHeroRef = useRef<HTMLElement>(null);
@@ -626,11 +630,11 @@ export function CreatorProfilePage() {
                      <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
                         <Youtube className="text-red-650 text-[#FF0000]" size={20} /> Featured YouTube Videos
                      </h3>
-                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest">Landscape Row</span>
+                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest hidden sm:inline">Up to 4 per row</span>
                   </div>
 
                   {filteredVideos.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className={CREATOR_CONTENT_GRID}>
                       {filteredVideos.map(video => {
                         const isGuide = !!video.associatedGuideId;
                         const cardContent = (
@@ -701,11 +705,11 @@ export function CreatorProfilePage() {
                      <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
                         <Instagram className="text-pink-650 text-[#C13584]" size={20} /> Influencer Reels & Shorts
                      </h3>
-                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest">Vertical Grid</span>
+                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest hidden sm:inline">Up to 4 per row</span>
                   </div>
 
                   {filteredReels.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className={CREATOR_CONTENT_GRID}>
                       {filteredReels.map(reel => {
                         const isGuide = !!reel.associatedGuideId;
                         const cardContent = (
@@ -780,75 +784,95 @@ export function CreatorProfilePage() {
                      <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
                         <BookOpen className="text-orange-primary" size={20} /> Research Blogs & Case Essays
                      </h3>
-                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest">Separate Section</span>
+                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest hidden sm:inline">Up to 4 per row</span>
                   </div>
 
                   {filteredBlogs.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className={CREATOR_CONTENT_GRID}>
                       {filteredBlogs.map(blog => {
                         const isGuide = !!blog.associatedGuideId;
-                        return (
-                          <div key={blog.id} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 hover:border-orange-primary/10 transition-colors flex flex-col md:flex-row gap-6 shadow-sm relative overflow-hidden">
-                            {/* Visual Indicator Badge */}
-                            <div className="absolute top-4 right-4 z-10">
-                              {isGuide ? (
-                                <span className="bg-[#E8500A] text-white text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-[#E8500A]/10 shadow-xs">
-                                  Full Guide
-                                </span>
-                              ) : (
-                                <span className="bg-gray-50 text-gray-500 text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-gray-200">
-                                  Article
-                                </span>
-                              )}
-                            </div>
-
+                        const cardContent = (
+                          <div className="bg-white border border-[#e8edf2] rounded-[5px] overflow-hidden group hover:border-[#E8500A]/35 transition-all shadow-sm relative h-full flex flex-col">
                             {blog.thumbnail && (
-                              <div className="w-full md:w-48 h-32 rounded-[5px] overflow-hidden shrink-0 bg-gray-55 relative object-cover">
-                                <img 
-                                  src={blog.thumbnail} 
-                                  alt={blog.title} 
-                                  className="w-full h-full object-cover"
+                              <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden shrink-0">
+                                <img
+                                  src={blog.thumbnail}
+                                  alt={blog.title}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                   referrerPolicy="no-referrer"
                                 />
+                                <div className="absolute top-3 left-3 z-10">
+                                  {isGuide ? (
+                                    <span className="bg-[#E8500A] text-white text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-white/10 shadow-sm">
+                                      Full Guide
+                                    </span>
+                                  ) : (
+                                    <span className="bg-white/95 text-gray-600 text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-[#e8edf2] shadow-sm">
+                                      Article
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             )}
 
-                            <div className="flex-1 flex flex-col justify-center">
-                              <div className="flex items-center gap-4 text-[9px] font-mono font-bold text-gray-500 uppercase mb-2">
-                                <span className="flex items-center gap-1"><Clock size={10} /> {blog.readTime}</span>
-                                <span>•</span>
-                                <span>{blog.date}</span>
-                              </div>
-                              
-                              {isGuide ? (
-                                <Link to={`/guides/${blog.associatedGuideId}`}>
-                                  <h4 className="text-base md:text-lg font-extrabold text-[#10133A] hover:text-orange-primary transition-colors tracking-tight mb-2 italic">
-                                    {blog.title}
-                                  </h4>
-                                </Link>
-                              ) : (
-                                <a href={blog.url && blog.url !== '#' ? blog.url : "https://medium.com"} target="_blank" rel="noopener noreferrer">
-                                  <h4 className="text-base md:text-lg font-extrabold text-[#10133A] hover:text-orange-primary transition-colors tracking-tight mb-2 italic">
-                                    {blog.title}
-                                  </h4>
-                                </a>
+                            <div className="p-4 flex-1 flex flex-col">
+                              {!blog.thumbnail && (
+                                <div className="mb-2">
+                                  {isGuide ? (
+                                    <span className="bg-[#E8500A] text-white text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px]">
+                                      Full Guide
+                                    </span>
+                                  ) : (
+                                    <span className="bg-gray-50 text-gray-500 text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-gray-200">
+                                      Article
+                                    </span>
+                                  )}
+                                </div>
                               )}
 
-                              <p className="text-xs text-gray-400 font-semibold leading-relaxed mb-4">
+                              <div className="flex items-center gap-2 text-[9px] font-mono font-bold text-gray-500 uppercase mb-2">
+                                <span className="flex items-center gap-1"><Clock size={10} /> {blog.readTime}</span>
+                                <span>•</span>
+                                <span className="truncate">{blog.date}</span>
+                              </div>
+
+                              <h4 className="text-xs md:text-sm font-extrabold text-navy line-clamp-2 leading-snug group-hover:text-orange-primary transition-colors mb-2 italic">
+                                {blog.title}
+                              </h4>
+
+                              <p className="text-[11px] text-gray-500 leading-relaxed line-clamp-3 mb-3 flex-1">
                                 {blog.excerpt}
                               </p>
 
-                              {isGuide ? (
-                                <Link to={`/guides/${blog.associatedGuideId}`} className="text-[10px] font-black uppercase tracking-widest text-[#E8500A] hover:underline inline-flex items-center gap-1">
-                                  Read Guide <ChevronRight size={10} />
-                                </Link>
-                              ) : (
-                                <a href={blog.url && blog.url !== '#' ? blog.url : "https://medium.com"} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:underline inline-flex items-center gap-1">
-                                  Read Article <ExternalLink size={10} />
-                                </a>
-                              )}
+                              <span className="text-[10px] font-black uppercase tracking-widest text-[#E8500A] inline-flex items-center gap-1 mt-auto">
+                                {isGuide ? (
+                                  <>Read Guide <ChevronRight size={10} /></>
+                                ) : (
+                                  <>Read Article <ExternalLink size={10} /></>
+                                )}
+                              </span>
                             </div>
                           </div>
+                        );
+
+                        if (isGuide) {
+                          return (
+                            <Link key={blog.id} to={`/guides/${blog.associatedGuideId}`} className="block h-full cursor-pointer focus:outline-none">
+                              {cardContent}
+                            </Link>
+                          );
+                        }
+
+                        return (
+                          <a
+                            key={blog.id}
+                            href={blog.url && blog.url !== '#' ? blog.url : 'https://medium.com'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block h-full cursor-pointer focus:outline-none"
+                          >
+                            {cardContent}
+                          </a>
                         );
                       })}
                     </div>

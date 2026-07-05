@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { Star, ShieldCheck, HelpCircle, Check, Sparkles, Flame, Tag, DollarSign, Filter, Search, X, ChevronRight, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getFloatingPanelClassName } from './FloatingPanelShell';
 
 // ==========================================
 // LAYER 1: FILTER ENGINE (GLOBAL DEFINITIONS)
@@ -1226,14 +1227,11 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                 onDragEnd={(_e, info) => {
                   if (info.offset.y > 120) setIsOpen(false);
                 }}
-                className={cn(
-                  'bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden',
-                  isMobile
-                    ? 'fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto'
-                    : isTablet
-                      ? 'fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]'
-                      : 'relative w-[380px] max-h-[min(75vh,calc(100vh-10rem))] rounded-[24px]',
-                )}
+                className={getFloatingPanelClassName({
+                  isMobile,
+                  isTablet,
+                  textClass: 'text-[#1A1A2E]',
+                })}
               >
                 {isMobile && (
                   <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
@@ -1275,7 +1273,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                         }}
                         className="relative w-full"
                       >
-                        <div className="flex items-center bg-white rounded-xl border border-[#e8edf2] overflow-hidden focus-within:border-orange-primary/40 transition-all">
+                        <div className="flex items-center bg-white rounded-[5px] border border-[#e8edf2] overflow-hidden focus-within:border-orange-primary/40 transition-all">
                           <div className="pl-4 text-orange-primary shrink-0">
                             <Search className="w-4 h-4" />
                           </div>
@@ -1336,7 +1334,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                     <button
                       type="button"
                       onClick={() => setIsOpen(false)}
-                      className="w-full py-3.5 bg-orange-primary hover:bg-orange-deep text-white text-[11px] font-black uppercase tracking-widest rounded-[8px] transition-colors cursor-pointer border-0"
+                      className="w-full py-3.5 bg-orange-primary hover:bg-orange-deep text-white text-[11px] font-black uppercase tracking-widest rounded-[5px] transition-colors cursor-pointer border-0"
                     >
                       Show Results
                     </button>

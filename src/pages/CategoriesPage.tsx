@@ -11,6 +11,8 @@ import { PageHeroBanner } from '../components/PageHeroBanner';
 import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
+import { CATEGORIES } from '../constants';
+import { getCategoryImage } from '../lib/categoryImages';
 
 interface Subcategory {
   name: string;
@@ -341,86 +343,27 @@ export function CategoriesPage() {
     { name: "BATA SHOES", sub: "Premium Class Footwear", init: "BT", bg: "bg-[#C8102E]" }
   ];
 
-  const fallbackCategoriesList: CategoryItem[] = [
-    { 
-      name: 'Fashion & Lifestyle', 
-      icon: 'Shirt', 
-      count: 1240,
-      color: 'from-orange-500 to-rose-500',
-      subcategories: [
-        { name: "Men's Fashion", count: 840, brands: 42, icon: 'Shirt' },
-        { name: "Women's Fashion", count: 920, brands: 56, icon: 'ShoppingBag' },
-        { name: "Kid's Wear", count: 320, brands: 24, icon: 'Baby' },
-        { name: "Activewear", count: 410, brands: 18, icon: 'Dumbbell' },
-        { name: "Footwear", count: 650, brands: 35, icon: 'Footprints' },
-        { name: "Bags & Wallets", count: 280, brands: 15, icon: 'Briefcase' }
-      ]
-    },
-    { 
-      name: 'Jewelry & Accessories', 
-      icon: 'Gem', 
-      count: 270,
-      color: 'from-amber-400 to-yellow-600',
-      subcategories: [
-        { name: "Necklaces", count: 120, brands: 10, icon: 'Gem' },
-        { name: "Earrings", count: 80, brands: 8, icon: 'Gem' },
-        { name: "Watches", count: 150, brands: 12, icon: 'Watch' }
-      ]
-    },
-    { 
-      name: 'Eyewear & Fragrances', 
-      icon: 'Eye', 
-      count: 180,
-      color: 'from-sky-400 to-blue-600',
-      subcategories: [
-        { name: "Sunglasses", count: 100, brands: 8, icon: 'Glasses' },
-        { name: "Perfumes", count: 80, brands: 6, icon: 'Wind' }
-      ]
-    },
-    { 
-      name: 'Beauty & Personal Care', 
-      icon: 'Sparkles', 
-      count: 920,
-      color: 'from-pink-400 to-rose-600',
-      subcategories: [
-        { name: "Skin Care", count: 320, brands: 40, icon: 'Sparkles' },
-        { name: "Hair Care", count: 210, brands: 25, icon: 'Sparkles' },
-        { name: "Makeup", count: 450, brands: 30, icon: 'Sparkles' }
-      ]
-    },
-    { 
-      name: 'Tech & Electronics', 
-      icon: 'Cpu', 
-      count: 1100,
-      color: 'from-indigo-500 to-violet-600',
-      subcategories: [
-        { name: "Computers", count: 450, brands: 20, icon: 'Laptop' },
-        { name: "Audio", count: 320, brands: 15, icon: 'Headphones' },
-        { name: "Cameras", count: 180, brands: 10, icon: 'Camera' }
-      ]
-    },
-    { 
-      name: 'Mobile & Wearable', 
-      icon: 'Smartphone', 
-      count: 850,
-      color: 'from-emerald-500 to-teal-600',
-      subcategories: [
-        { name: "Smartphones", count: 540, brands: 15, icon: 'Smartphone' },
-        { name: "Smartwatches", count: 210, brands: 10, icon: 'Watch' },
-        { name: "Tablets", count: 100, brands: 8, icon: 'Tablet' }
-      ]
-    },
-    { name: 'TV & Appliances', icon: 'Tv', count: 390, color: 'from-red-500 to-rose-700', subcategories: [] },
-    { name: 'Gaming & Entertainment', icon: 'Gamepad2', count: 560, color: 'from-purple-500 to-indigo-700', subcategories: [] },
-    { name: 'Home & Living', icon: 'Home', count: 640, color: 'from-slate-400 to-gray-600', subcategories: [] },
-    { name: 'Vehicles & Automotive', icon: 'Car', count: 150, color: 'from-blue-500 to-cyan-700', subcategories: [] },
-    { name: 'Family & Kids', icon: 'Baby', count: 320, color: 'from-pink-500 to-rose-400', subcategories: [] },
-    { name: 'Food & Essentials', icon: 'ShoppingBasket', count: 1400, color: 'from-green-500 to-lime-600', subcategories: [] },
-    { name: 'Travel & Hospitality', icon: 'Plane', count: 210, color: 'from-cyan-400 to-sky-600', subcategories: [] },
-    { name: 'Hobbies & Creativity', icon: 'Palette', count: 190, color: 'from-amber-500 to-orange-700', subcategories: [] },
-    { name: 'Health & Wellness', icon: 'Activity', count: 480, color: 'from-emerald-400 to-green-600', subcategories: [] },
-    { name: 'Education & Learning', icon: 'BookOpen', count: 120, color: 'from-indigo-600 to-blue-700', subcategories: [] },
+  const FALLBACK_CATEGORY_COLORS = [
+    'from-orange-500 to-rose-500',
+    'from-amber-400 to-yellow-600',
+    'from-emerald-500 to-teal-600',
+    'from-blue-500 to-cyan-700',
+    'from-purple-500 to-indigo-700',
+    'from-green-500 to-lime-600',
+    'from-indigo-500 to-violet-600',
+    'from-red-500 to-rose-700',
+    'from-slate-400 to-gray-600',
+    'from-pink-500 to-rose-400',
   ];
+
+  const fallbackCategoriesList: CategoryItem[] = CATEGORIES.map((cat, idx) => ({
+    name: cat.name,
+    icon: cat.icon,
+    count: 150 + idx * 85,
+    color: FALLBACK_CATEGORY_COLORS[idx % FALLBACK_CATEGORY_COLORS.length],
+    image: getCategoryImage(cat.name),
+    subcategories: [],
+  }));
 
   const categoriesList: CategoryItem[] = React.useMemo(() => {
     if (allCategories && allCategories.length > 0) {

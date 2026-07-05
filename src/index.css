@@ -139,6 +139,48 @@
   background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
 }
 
+.choosify-detail-hero-summary__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+  align-items: start;
+}
+
+@media (min-width: 640px) {
+  .choosify-detail-hero-summary__meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-detail-hero-summary__meta {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .choosify-detail-hero-summary__meta {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.choosify-detail-hero-summary__item--wide {
+  grid-column: span 2;
+}
+
+@media (min-width: 640px) {
+  .choosify-detail-hero-summary__item--wide {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-detail-hero-summary__item--wide {
+    grid-column: span 2;
+  }
+}
+
 .hero-gradient {
   background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
 }
@@ -607,6 +649,31 @@
   }
 }
 
+/* Creator review hybrid feed — mixed YouTube + reels, up to 3 cards per row */
+.choosify-creator-hybrid-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.15vw, 1.25rem);
+  align-items: start;
+}
+
+@media (min-width: 640px) {
+  .choosify-creator-hybrid-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-creator-hybrid-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Lone YouTube / long-form card spans the full row (featured-style width) */
+.choosify-creator-hybrid-grid[data-row-size="1"] > .choosify-creator-hybrid-card[data-format="landscape"] {
+  grid-column: 1 / -1;
+}
+
 .choosify-product-grid > *,
 .choosify-detail-feed-grid > *,
 .choosify-category-grid > *,
@@ -614,7 +681,8 @@
 .choosify-brand-grid > *,
 .choosify-creator-grid > *,
 .choosify-guide-media-grid > *,
-.choosify-whats-on-grid > * {
+.choosify-whats-on-grid > *,
+.choosify-creator-hybrid-grid > * {
   min-width: 0;
   max-width: 100%;
   width: 100%;

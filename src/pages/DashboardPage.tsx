@@ -29,10 +29,11 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
-import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
-import { RecommendationCard } from '../components/RecommendationCard';
-import { PRODUCTS, BLOGS } from '../constants';
+import { PRODUCT_CARD_GRID, GUIDE_MEDIA_GRID } from '../lib/pageLayout';
+import { renderGuideMediaCard } from './GuidesPage';
+import { PRODUCTS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { CHOOSIFY_ANNOUNCEMENTS_THREAD_ID } from '../lib/announcements';
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { PublicReviewCard } from '../components/PublicReviewCard';
@@ -244,6 +245,52 @@ const SavedProductsSection = () => {
           <h3 className="text-xl font-black text-[#1a1a2e] italic uppercase tracking-widest mb-4">Vault is empty</h3>
           <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">Start exploring Choosify.bd and save products you love to your personal vault.</p>
           <Link to="/products" className="px-12 py-4 bg-[#E8500A] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-xl shadow-[#E8500A]/10 hover:scale-105 transition-all animate-none">Start Browsing</Link>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const SavedGuidesSection = () => {
+  const { savedGuides } = useDashboard();
+
+  return (
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="text-left">
+        <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">
+          Saved <span className="text-[#E8500A]">Guides</span>{' '}
+          <span className="text-gray-400 text-2xl">({savedGuides.length})</span>
+        </h2>
+        <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">
+          Knowledge bookmarks for your next big buy
+        </p>
+      </div>
+
+      {savedGuides.length > 0 ? (
+        <div className={GUIDE_MEDIA_GRID}>
+          {savedGuides.map((guide) => (
+            <div key={guide.id} className="relative group min-w-0 w-full">
+              {renderGuideMediaCard(guide)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="py-32 flex flex-col items-center text-center">
+          <div className="w-24 h-24 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center text-gray-300 mb-8 scale-110 shadow-sm">
+            <BookOpen size={40} />
+          </div>
+          <h3 className="text-xl font-black text-[#1a1a2e] italic uppercase tracking-widest mb-4">
+            No saved guides yet
+          </h3>
+          <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">
+            Bookmark guides from the recommendations page to find them here later.
+          </p>
+          <Link
+            to="/guides"
+            className="px-12 py-4 bg-[#E8500A] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-xl shadow-[#E8500A]/10 hover:scale-105 transition-all"
+          >
+            Browse Guides
+          </Link>
         </div>
       )}
     </div>
@@ -801,13 +848,14 @@ export function DashboardPage() {
   const { 
     savedProducts, 
     savedBrands, 
+    savedGuides,
     lovedBrands, 
     followedBrands, 
     recentlyViewed,
     messages,
-    notifications,
     reviews,
     setReviews,
+    threads,
   } = useDashboard();
   const location = useLocation();
   const navigate = useNavigate();
@@ -818,7 +866,7 @@ export function DashboardPage() {
     // TODO: addToRecentlyViewed called from ProductDetailPage â€” see Prompt 6
   }, []);
 
-  const REMOVED_TABS = new Set(['my-comparisons', 'admin-campaigns', 'admin-overviews']);
+  const REMOVED_TABS = new Set(['my-comparisons', 'admin-campaigns', 'admin-overviews', 'notifications']);
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -833,6 +881,13 @@ export function DashboardPage() {
     }
   }, [activeTab, navigate]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('tab') === 'notifications' || activeTab === 'notifications') {
+      navigate(`/messages/${CHOOSIFY_ANNOUNCEMENTS_THREAD_ID}`, { replace: true });
+    }
+  }, [location.search, activeTab, navigate]);
+
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
   };
@@ -844,9 +899,8 @@ export function DashboardPage() {
     { id: 'loved-brands', label: `Loved Brands (${lovedBrands.length})`, icon: Heart },
     { id: 'followed-brands', label: `Followed Brands (${followedBrands.length})`, icon: CheckCircle2 },
     { id: 'recently-viewed', label: `Recently Viewed (${recentlyViewed.length})`, icon: Clock },
-    { id: 'saved-recommendations', label: 'Saved Guides', icon: Bookmark },
-    { id: 'messages', label: `Messages (${messages.length})`, icon: MessageSquare, href: '/messages' },
-    { id: 'notifications', label: `Notifications (${notifications.filter(n => !n.read).length})`, icon: Bell },
+    { id: 'saved-recommendations', label: `Saved Guides (${savedGuides.length})`, icon: Bookmark },
+    { id: 'messages', label: `Messages${threads.some(t => t.unread) ? ` (${threads.filter(t => t.unread).length} unread)` : ''}`, icon: MessageSquare, href: '/messages' },
     { id: 'my-reviews', label: 'My Reviews', icon: Star },
     { id: 'settings', label: 'Profile Settings', icon: Settings },
   ];
@@ -856,7 +910,7 @@ export function DashboardPage() {
   );
 
   const accountItems = menuItems.filter(item => 
-    ['messages', 'notifications', 'my-reviews', 'settings'].includes(item.id)
+    ['messages', 'my-reviews', 'settings'].includes(item.id)
   );
 
   const renderContent = () => {
@@ -868,19 +922,7 @@ export function DashboardPage() {
       case 'loved-brands': return <LovedBrandsSection />;
       case 'followed-brands': return <FollowedBrandsSection />;
       case 'recently-viewed': return <RecentlyViewedSection />;
-      case 'saved-recommendations': return (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
-           <div>
-              <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Guides</span></h2>
-              <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Knowledge bookmarks for your next big buy</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-               {BLOGS.slice(0, 4).map((guide, i) => (
-                 <RecommendationCard key={guide.id} guide={guide} index={i} />
-               ))}
-            </div>
-        </div>
-      );
+      case 'saved-recommendations': return <SavedGuidesSection />;
       case 'messages': return (
         <div className="flex flex-col items-center justify-center p-12 text-center max-w-lg mx-auto h-[500px]">
           <div className="w-16 h-16 bg-[#F96500]/10 text-orange-primary rounded-full flex items-center justify-center mb-4">
@@ -898,7 +940,6 @@ export function DashboardPage() {
           </Link>
         </div>
       );
-      case 'notifications': return <NotificationsSection />;
       case 'my-reviews': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
             <div>

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard, Campaign } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { cn } from '../lib/utils';
-import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from './HeroScrollCue';
+import { HeroScrollCue } from './HeroScrollCue';
 export type PageHeroBannerKey =
   | 'home'
   | 'products'
@@ -265,15 +265,14 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
     <section
       ref={sectionRef}
       className={cn(
-        'relative w-full border-b border-black/10 select-none bg-[#0a0a1f]',
-        HERO_SCROLL_CUE_PADDING,
+        'relative w-full border-b border-black/10 select-none',
         className,
       )}
       aria-label="Campaign banner"
       onMouseEnter={() => setAutoplay(false)}
       onMouseLeave={() => setAutoplay(true)}
     >
-      <div className="relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[360px] overflow-hidden">
+      <div className="relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[360px] overflow-hidden bg-[#0a0a1f]">
         <AnimatePresence mode="wait">
           <motion.div
             key={current.id}
@@ -366,7 +365,7 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
             >
               <ChevronRight className="w-5 h-5" />
             </button>
-            <div className="absolute bottom-10 sm:bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+            <div className="absolute bottom-14 sm:bottom-16 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
               {slides.map((slide, idx) => (
                 <button
                   key={slide.id}
@@ -387,9 +386,9 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
             </div>
           </>
         )}
-      </div>
 
-      <HeroScrollCue anchorRef={sectionRef} resetKey={pageKey} />
+        <HeroScrollCue anchorRef={sectionRef} resetKey={pageKey} />
+      </div>
     </section>
   );
 }

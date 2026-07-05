@@ -13,6 +13,8 @@ type BrandPostCarouselSectionProps = {
   viewAllLabel?: string;
   className?: string;
   id?: string;
+  badgeLabel?: string;
+  showSponsoredBadge?: boolean;
 };
 
 export function BrandPostCarouselSection({
@@ -23,6 +25,8 @@ export function BrandPostCarouselSection({
   viewAllLabel = "View All What's On",
   className,
   id,
+  badgeLabel = 'Discovery',
+  showSponsoredBadge = true,
 }: BrandPostCarouselSectionProps) {
   if (!posts.length) return null;
 
@@ -39,11 +43,13 @@ export function BrandPostCarouselSection({
           <div className="flex items-center gap-2 flex-wrap">
             <Sparkles size={14} className="text-[#E8500A]" />
             <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-[0.2em]">
-              Discovery
+              {badgeLabel}
             </span>
-            <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-[#E8500A]/90 border border-[#E8500A]/30 uppercase bg-[#E8500A]/10 rounded-full">
-              Sponsored
-            </span>
+            {showSponsoredBadge && (
+              <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-[#E8500A]/90 border border-[#E8500A]/30 uppercase bg-[#E8500A]/10 rounded-full">
+                Sponsored
+              </span>
+            )}
           </div>
           <h2 className="text-base font-semibold text-[#1a1a2e] mt-1 uppercase tracking-tight">
             {title.includes(' ') ? (

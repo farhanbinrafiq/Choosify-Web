@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { PageHeroBanner } from '../components/PageHeroBanner';
-import { PRODUCTS, BRANDS } from '../constants';
+import { PRODUCTS, BRANDS, CATEGORIES } from '../constants';
 import { ReelCard, HorizontalMediaCard } from './GuidesPage';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
@@ -705,13 +705,11 @@ export function HomePage() {
   const { activeId: homeActiveSectionId, scrollToSection: scrollToHomeSection } =
     useSectionScrollSpy(homeSectionNavItems);
 
-  const popularCategoriesMock = [
-    { name: 'Fashion & Lifestyle', productCount: 50, id: 'Fashion & Lifestyle' },
-    { name: 'Tech & Electronics', productCount: 50, id: 'Mobile & Phones' },
-    { name: 'Family & Kids', productCount: 50, id: 'Fashion & Lifestyle' },
-    { name: 'Jewelry & Accessories', productCount: 50, id: 'Jewelry & Accessories' },
-    { name: 'Hobbies & Creativity', productCount: 50, id: 'Jewelry & Accessories' },
-  ];
+  const popularCategoriesMock = CATEGORIES.slice(0, 5).map((category, idx) => ({
+    name: category.name,
+    productCount: 50 - idx * 5,
+    id: category.id,
+  }));
 
   const popularCategoriesList = React.useMemo(() => {
     if (allCategories?.length) {

@@ -13,33 +13,6 @@ import { PageHeroBanner } from '../components/PageHeroBanner';
 import { useDashboard } from '../context/DashboardContext';
 import toast from 'react-hot-toast';
 
-function takeGuideSlots(guides: any[], count = 4): any[] {
-  if (guides.length === 0) return [];
-  return Array.from({ length: count }, (_, i) => guides[i % guides.length]);
-}
-
-function GuideSectionHeader({
-  icon,
-  title,
-  accent,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  accent: string;
-}) {
-  return (
-    <div className="flex items-center gap-3 pb-1 border-b border-gray-100">
-      <div className="w-9 h-9 rounded-[5px] bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center shrink-0">
-        {icon}
-      </div>
-      <h3 className="font-sans text-sm md:text-base font-black uppercase tracking-tight italic text-[#1A1D4E]">
-        {title}
-        <span className="text-[#E8500A]"> {accent}</span>
-      </h3>
-    </div>
-  );
-}
-
 export function renderGuideMediaCard(guide: any) {
   if (guide.type === 'reels' || guide.type === 'shorts') {
     return <ReelCard guide={guide} />;
@@ -495,25 +468,6 @@ export function GuidesPage() {
   const { allGuides } = useGlobalState();
   const guideSource = allGuides;
 
-  const youtubeGuides = useMemo(
-    () => takeGuideSlots(guideSource.filter((g) => g.type === 'video')),
-    [guideSource],
-  );
-  const reelGuides = useMemo(
-    () =>
-      takeGuideSlots(
-        guideSource.filter((g) => g.type === 'reels' || g.type === 'shorts'),
-      ),
-    [guideSource],
-  );
-  const blogGuides = useMemo(
-    () =>
-      takeGuideSlots(
-        guideSource.filter((g) => g.type === 'article' || !g.type),
-      ),
-    [guideSource],
-  );
-
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
@@ -907,15 +861,14 @@ export function GuidesPage() {
   );
 
   const guideSectionNavItems = useMemo(
-    () =>
-      isAnyFilterActive
-        ? [{ id: 'guides-filtered-results', label: 'Results', icon: <Search size={13} /> }]
-        : [
-            { id: 'guides-youtube-section', label: 'YouTube', icon: <Youtube size={13} />, hidden: youtubeGuides.length === 0 },
-            { id: 'guides-reels-section', label: 'Reels', icon: <Instagram size={13} />, hidden: reelGuides.length === 0 },
-            { id: 'guides-blogs-section', label: 'Blogs', icon: <BookOpen size={13} />, hidden: blogGuides.length === 0 },
-          ],
-    [isAnyFilterActive, youtubeGuides.length, reelGuides.length, blogGuides.length],
+    () => [
+      {
+        id: 'guides-hybrid-feed',
+        label: isAnyFilterActive ? 'Results' : 'All Content',
+        icon: isAnyFilterActive ? <Search size={13} /> : <BookOpen size={13} />,
+      },
+    ],
+    [isAnyFilterActive],
   );
 
   const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(guideSectionNavItems);
@@ -1627,21 +1580,17 @@ export function GuidesPage() {
 
          <div id="guides-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10">
             {isLoading ? (
-               <div className="flex flex-col gap-14">
-                  {['YouTube', 'Reels', 'Blogs'].map((label) => (
-                    <div key={label} className="flex flex-col gap-5">
-                      <div className="h-9 w-48 bg-gray-100 rounded-[5px] animate-pulse" />
-                      <div className={GUIDE_MEDIA_GRID}>
-                        {Array.from({ length: 4 }).map((_, i) => (
-                          <RecommendationCardSkeleton
-                            key={i}
-                            variant={label === 'Reels' ? 'shorts' : 'default'}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                 </div>
+               <div className="flex flex-col gap-5">
+                  <div className="h-9 w-48 bg-gray-100 rounded-[5px] animate-pulse" />
+                  <div className={GUIDE_MEDIA_GRID}>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <RecommendationCardSkeleton
+                        key={i}
+                        variant={i % 3 === 1 ? 'shorts' : 'default'}
+                      />
+                    ))}
+                  </div>
+               </div>
              ) : (
                 <>
                   {filteredBlogs.length === 0 ? (
@@ -1652,9 +1601,13 @@ export function GuidesPage() {
                        <h3 className="font-sans text-lg font-black italic uppercase tracking-tighter text-[#1A1D4E] mb-1">No Results Found</h3>
                        <p className="text-gray-400 text-xs font-semibold leading-relaxed max-w-sm">We couldn't find any guides matching your criteria. Try adjusting your search query or category.</p>
                      </div>
-                  ) : isAnyFilterActive ? (
-                     <div id="guides-filtered-results" className="flex flex-col gap-10 scroll-mt-36">
-                        <h4 className="font-sans text-xs font-black uppercase tracking-[0.25em] text-[#8a92a6] italic text-left">Filtered Results ({filteredBlogs.length})</h4>
+                  ) : (
+                     <div id="guides-hybrid-feed" className="flex flex-col gap-6 scroll-mt-36 animate-fade-in duration-500">
+                        {isAnyFilterActive && (
+                          <h4 className="font-sans text-xs font-black uppercase tracking-[0.25em] text-[#8a92a6] italic text-left">
+                            Filtered Results ({filteredBlogs.length})
+                          </h4>
+                        )}
                         <div className={GUIDE_MEDIA_GRID}>
                            {filteredBlogs.map((guide, i) => (
                               <React.Fragment key={`${guide.id}-${i}`}>
@@ -1662,61 +1615,6 @@ export function GuidesPage() {
                               </React.Fragment>
                            ))}
                         </div>
-                     </div>
-                  ) : (
-                     <div className="flex flex-col gap-14 animate-fade-in duration-500">
-                        {youtubeGuides.length > 0 && (
-                          <section id="guides-youtube-section" className="flex flex-col gap-5 scroll-mt-36">
-                            <GuideSectionHeader
-                              icon={<Youtube size={18} />}
-                              title="Featured"
-                              accent="YouTube"
-                            />
-                            <div className={GUIDE_MEDIA_GRID}>
-                              {youtubeGuides.map((guide, i) => (
-                                <HorizontalMediaCard
-                                  key={`yt-${guide.id}-${i}`}
-                                  guide={guide}
-                                  badgeType="youtube"
-                                />
-                              ))}
-                            </div>
-                          </section>
-                        )}
-
-                        {reelGuides.length > 0 && (
-                          <section id="guides-reels-section" className="flex flex-col gap-5 scroll-mt-36">
-                            <GuideSectionHeader
-                              icon={<Instagram size={18} />}
-                              title="Trending"
-                              accent="Reels"
-                            />
-                            <div className={GUIDE_MEDIA_GRID}>
-                              {reelGuides.map((guide, i) => (
-                                <ReelCard key={`reel-${guide.id}-${i}`} guide={guide} />
-                              ))}
-                            </div>
-                          </section>
-                        )}
-
-                        {blogGuides.length > 0 && (
-                          <section id="guides-blogs-section" className="flex flex-col gap-5 scroll-mt-36">
-                            <GuideSectionHeader
-                              icon={<BookOpen size={18} />}
-                              title="Editorial"
-                              accent="Blogs"
-                            />
-                            <div className={GUIDE_MEDIA_GRID}>
-                              {blogGuides.map((guide, i) => (
-                                <HorizontalMediaCard
-                                  key={`blog-${guide.id}-${i}`}
-                                  guide={guide}
-                                  badgeType="blog"
-                                />
-                              ))}
-                            </div>
-                          </section>
-                        )}
                      </div>
                   )}
                </>

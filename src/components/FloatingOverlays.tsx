@@ -1,25 +1,28 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ShoppingCart, MessageSquare, X, Trash2, ArrowRight, 
-  ShoppingBag, ExternalLink, ChevronRight, CheckCircle, 
-  Package, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp
+  ShoppingCart, MessageSquare, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp
 } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
-import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { cn } from '../lib/utils';
-import { toast } from 'react-hot-toast';
 import { useFloatingFilter, useFloatingFilters } from './FilterEngine';
 import { VideoLightbox } from './VideoLightbox';
+import {
+  CartPreviewPanel,
+  cartPreviewDesktopShellClass,
+  cartPreviewMobileShellClass,
+  cartPreviewShellClass,
+} from './CartPreviewPanel';
+import { getFloatingPanelClassName } from './FloatingPanelShell';
 
 export function FloatingOverlays() {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const { retailCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo, isLoggedIn } = useGlobalState();
+  const { retailCart, activeVideo, closeVideo, isLoggedIn } = useGlobalState();
   const { threads } = useDashboard();
 
   // Active floating panel state: cart preview only
@@ -101,8 +104,7 @@ export function FloatingOverlays() {
   }, [isLoggedIn]);
 
   // Cart tracking details
-  const activeCart = retailCart;
-  const totalCartItems = activeCart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalCartItems = retailCart.reduce((sum, item) => sum + item.quantity, 0);
   const [lastCartCount, setLastCartCount] = useState(totalCartItems);
   const [cartBadgeBounce, setCartBadgeBounce] = useState(false);
 
@@ -190,12 +192,6 @@ export function FloatingOverlays() {
 
 
 
-  const subtotal = activeCart.reduce((sum, item) => {
-    const price = item.selectedVariant?.price || item.product.price;
-    return sum + (price * item.quantity);
-  }, 0);
-
-  const formatPrice = (p: number) => p.toLocaleString('en-US');
   const onMessagesPage = currentPath.startsWith('/messages');
 
   // Stack calculation based on active item volumes
@@ -223,155 +219,26 @@ export function FloatingOverlays() {
       {/* GLOBAL PERSISTENT FLOATING PANEL POPUPS */}
       <AnimatePresence>
         
-        {/* PANEL 1: MINI FLOATING CART */}
+        {/* PANEL 1: MINI FLOATING CART — matches navbar cart dropdown */}
         {activePanel === 'cart' && (
           <motion.div 
             ref={panelRef}
-            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
             animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
             transition={standardTransition}
             style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
             className={cn(
-              "bg-[#0A0B1E]/95 backdrop-blur-xl border border-white/10 overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] text-white flex flex-col",
+              cartPreviewShellClass,
               isMobile
-                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto"
+                ? cn('fixed z-[250] pointer-events-auto', cartPreviewMobileShellClass, 'h-[82vh]')
                 : isTablet
-                  ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
-                  : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
+                  ? cn('fixed bottom-4 left-1/2 -translate-x-1/2 z-[250]', cartPreviewDesktopShellClass, 'w-[min(24rem,calc(100vw-1.5rem))]')
+                  : cn('absolute right-0 z-[250]', cartPreviewDesktopShellClass),
             )}
             id="floating-mini-cart-drawer"
           >
-            {/* Header */}
-            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02] shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-orange-primary/10 flex items-center justify-center text-orange-primary">
-                  <ShoppingCart size={16} />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-widest text-[#E8500A] font-extrabold text-left">Instant Checklist</div>
-                  <h3 className="text-sm font-black uppercase italic tracking-wider text-left">My Quick Cart</h3>
-                </div>
-              </div>
-              <button 
-                onClick={() => setActivePanel(null)}
-                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* List Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
-              {activeCart.length === 0 ? (
-                <div className="py-12 text-center text-gray-500 flex flex-col items-center justify-center gap-3">
-                  <div className="w-12 h-12 rounded-full border border-white/5 bg-white/[0.01] flex items-center justify-center text-gray-600">
-                    <ShoppingBag size={20} />
-                  </div>
-                  <p className="text-[11px] font-black uppercase tracking-wider">Your transaction cart is empty</p>
-                  <p className="text-[9px] lowercase italic text-gray-600 max-w-[200px] leading-relaxed">
-                    discover top Bangladesh products and click add with custom volume metrics
-                  </p>
-                </div>
-              ) : (
-                activeCart.map((item) => {
-                  const itemPrice = item.selectedVariant?.price || item.product.price;
-                  const itemImage = item.selectedVariant?.image || item.product.image || PLACEHOLDER_IMAGE;
-                  const itemTitle = item.product.title;
-                  const redirectPath = `/products/${item.product.id}`;
-
-                  return (
-                    <div key={item.id} className="flex gap-4 items-center bg-white/[0.02] border border-white/5 hover:border-white/10 p-3.5 rounded-2xl transition-all group text-left">
-                      <Link 
-                        to={redirectPath} 
-                        onClick={() => setActivePanel(null)}
-                        className="w-14 h-14 rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0 relative flex items-center justify-center"
-                      >
-                        <img src={itemImage} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" referrerPolicy="no-referrer" />
-                      </Link>
-                      <div className="flex-1 min-w-0">
-                        <Link 
-                          to={redirectPath}
-                          onClick={() => setActivePanel(null)}
-                          className="text-[11px] font-bold text-white uppercase italic truncate block hover:text-orange-primary transition-colors mb-0.5"
-                        >
-                          {itemTitle}
-                        </Link>
-                        {item.selectedVariant?.attributes && (
-                          <div className="text-[9px] text-[#A0A5C0] flex gap-2 mb-1">
-                            {Object.entries(item.selectedVariant.attributes).map(([key, val]: any) => (
-                              <span key={key} className="bg-white/5 px-1.5 py-0.5 rounded text-[8px] uppercase">{key}: {val}</span>
-                            ))}
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-mono font-black text-orange-primary">
-                            à§³{formatPrice(itemPrice)}
-                          </span>
-                          
-                          {/* Compact Qty Stepper */}
-                          <div className="flex items-center gap-2 bg-black/20 px-2 py-0.5 rounded-lg border border-white/5">
-                            <button 
-                              onClick={() => item.quantity > 1 && updateCartQuantity(item.id, item.quantity - 1)}
-                              className="text-[10px] text-gray-400 hover:text-white px-1 font-mono focus:outline-none"
-                            >
-                              -
-                            </button>
-                            <span className="text-[9px] font-bold font-mono px-0.5">{item.quantity}</span>
-                            <button 
-                              onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
-                              className="text-[10px] text-gray-400 hover:text-white px-1 font-mono focus:outline-none"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Delete */}
-                      <button 
-                        onClick={() => removeFromCart(item.id)}
-                        className="p-2 rounded-xl text-gray-500 hover:text-red-400 hover:bg-white/[0.04] transition-all shrink-0 cursor-pointer"
-                        title="Remove product"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            {/* Bottom Actions if cart is populated */}
-            {activeCart.length > 0 && (
-              <div className="p-6 border-t border-white/5 bg-white/[0.01] space-y-4 shrink-0">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[#A0A5C0]">Estimated Subtotal</span>
-                  <span className="text-lg font-mono font-black text-white">à§³{formatPrice(subtotal)}</span>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <button 
-                    onClick={() => {
-                      setActivePanel(null);
-                      navigate('/cart/retail');
-                    }}
-                    className="py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-white transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
-                  >
-                    View Full Cart
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setActivePanel(null);
-                      navigate('/checkout');
-                    }}
-                    className="py-3 px-4 bg-orange-primary hover:bg-[#FF5B00] rounded-2xl text-[10px] font-bold uppercase tracking-widest text-white transition-all text-center flex items-center justify-center gap-1 shadow-[0_4px_20px_rgba(249,101,0,0.3)] font-black italic cursor-pointer animate-pulse-subtle"
-                  >
-                    Checkout <ChevronRight size={12} />
-                  </button>
-                </div>
-              </div>
-            )}
+            <CartPreviewPanel onClose={() => setActivePanel(null)} />
           </motion.div>
         )}
 
@@ -545,14 +412,11 @@ export function FloatingOverlays() {
               onDragEnd={(_e: any, info: any) => {
                 if (info.offset.y > 120) setFilterOpen(false);
               }}
-              className={cn(
-                'bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden',
-                isMobile
-                  ? 'fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full pointer-events-auto'
-                  : isTablet
-                    ? 'fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]'
-                    : 'relative w-[380px] max-h-[min(75vh,calc(100vh-10rem))] rounded-[24px]',
-              )}
+              className={getFloatingPanelClassName({
+                isMobile,
+                isTablet,
+                textClass: 'text-[#1A1A2E]',
+              })}
             >
               {/* Mobile drag indicator */}
               {isMobile && (
@@ -647,7 +511,7 @@ export function FloatingOverlays() {
                 <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
                   <button
                     onClick={() => setFilterOpen(false)}
-                    className="w-full py-3.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] font-black uppercase tracking-widest rounded-[8px] transition-colors cursor-pointer border-0"
+                    className="w-full py-3.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] font-black uppercase tracking-widest rounded-[5px] transition-colors cursor-pointer border-0"
                   >
                     Show Results
                   </button>

@@ -204,18 +204,25 @@ function WithInfluencerReviews({
       : undefined,
   };
 
-  const reviews = creatorContent.slice(1).map((item, index) => ({
-    id: item.id || index,
-    image: item.thumbnail,
-    category: mapPlatform(item.platform).toUpperCase(),
-    title: item.title,
-    authorName: item.creatorHandle?.replace('@', '') || 'Creator',
-    authorHandle: item.creatorHandle || '@creator',
-    authorAvatar: item.thumbnail,
-    platform: mapPlatform(item.platform),
-    videoUrl: item.videoUrl,
-    stats: item.views ? { views: item.views } : undefined,
-  }));
+  const reviews = creatorContent.slice(1).map((item, index) => {
+    const platform = mapPlatform(item.platform);
+    return {
+      id: item.id || index,
+      image: item.thumbnail,
+      category: platform.toUpperCase(),
+      title: item.title,
+      authorName: item.creatorHandle?.replace('@', '') || 'Creator',
+      authorHandle: item.creatorHandle || '@creator',
+      authorAvatar: item.thumbnail,
+      platform,
+      aspectRatio:
+        platform === 'Instagram' || platform === 'TikTok'
+          ? ('portrait' as const)
+          : ('landscape' as const),
+      videoUrl: item.videoUrl,
+      stats: item.views ? { views: item.views } : undefined,
+    };
+  });
 
   return (
     <InfluencerReviews
@@ -441,8 +448,8 @@ export function ProductDetailPage() {
       { id: 'pd-specs', label: '📊 Specs', active: false, onClick: () => jumpToProductSection('product-specs-section') },
       { id: 'pd-creators', label: '🎥 Creator Reviews', active: false, onClick: () => jumpToProductSection('influencer-reviews-section') },
       { id: 'pd-reviews', label: '⭐ Public Reviews', active: false, onClick: () => jumpToProductSection('public-reviews-section') },
-      { id: 'pd-overview', label: 'ℹ️ Overview', active: false, onClick: () => jumpToProductSection('product-overview-section') },
-      { id: 'pd-stores', label: '🏪 Stores', active: false, onClick: () => jumpToProductSection('product-utility-section') },
+      { id: 'pd-overview', label: 'ℹ️ Product Overview', active: false, onClick: () => jumpToProductSection('product-overview-section') },
+      { id: 'pd-stores', label: '📖 Buying Guide', active: false, onClick: () => jumpToProductSection('product-utility-section') },
     ],
     renderFilters: null, // product detail has no sidebar filters
     activeFilterCount: 0,
@@ -602,8 +609,7 @@ export function ProductDetailPage() {
   // States for Stats Bar and ScrollSpy
   const [loveCount, setLoveCount] = useState(1243);
   const [hasLoved, setHasLoved] = useState(false);
-  const [purchasedCount, setPurchasedCount] = useState(854);
-  const [hasPurchased, setHasPurchased] = useState(false);
+  const [purchasedCount] = useState(854);
   const [viewCount] = useState(14238);
 
   const productSectionNavItems = useMemo(
@@ -615,22 +621,22 @@ export function ProductDetailPage() {
       },
       {
         id: "influencer-reviews-section",
-        label: "Creators",
+        label: "Creator Reviews",
         icon: <Users size={13} />,
       },
       {
         id: "public-reviews-section",
-        label: "Reviews",
+        label: "Public Reviews",
         icon: <MessageSquare size={13} />,
       },
       {
         id: "product-overview-section",
-        label: "Overview",
+        label: "Product Overview",
         icon: <Info size={13} />,
       },
       {
         id: "product-utility-section",
-        label: "Stores",
+        label: "Buying Guide",
         icon: <ShoppingBag size={13} />,
       },
     ],
@@ -641,18 +647,6 @@ export function ProductDetailPage() {
     productSectionNavItems,
     { scrollOffset: 168, allId: "all" },
   );
-
-  const handlePurchasedClicked = () => {
-    if (hasPurchased) {
-      setPurchasedCount((prev) => prev - 1);
-      setHasPurchased(false);
-      toast.success("Removed your verified purchase status.");
-    } else {
-      setPurchasedCount((prev) => prev + 1);
-      setHasPurchased(true);
-      toast.success("Verified purchase recorded!");
-    }
-  };
 
   // Variant support state hooks
   const [selectedColor, setSelectedColor] = useState<string>("");
@@ -1100,7 +1094,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               </h1>
 
               {/* Row 3: Price Display & Quick controls */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-4 border-b border-white/10 pb-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-0 pb-4">
                 <div
                   className="text-[25px] font-extrabold text-[#E8500A] italic uppercase tracking-tight leading-none"
                   style={{ fontSize: "25px" }}
@@ -1128,9 +1122,14 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 </div>
               </div>
             </div>
+          </div>
 
+          {/* Single edge-to-edge divider below price (full content width) */}
+          <div className="w-full border-t border-white/10" aria-hidden="true" />
+
+          <div className="w-full max-w-4xl mx-auto text-center text-white relative bg-transparent p-0 border-none shadow-none">
             {/* Dynamic Variants & Beautiful Interactive Callouts */}
-            <div className="w-full border-t border-white/10 pt-4 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="w-full pt-4 flex flex-col items-center justify-center text-center space-y-4">
               <div className="space-y-1">
                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.25em] block">
                   SELECT OPTIONS
@@ -1269,76 +1268,42 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
       </div>
 
       {/* Post-Hero Stats Bar */}
-      <div className="bg-white border-y border-gray-100 py-4.5 px-6 shadow-sm z-20 relative">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100 text-center gap-4 md:gap-0">
-          {/* LOVE REACTS */}
-          <div className="flex flex-row items-center justify-between md:justify-center gap-4 px-6 py-2.5 md:py-0 text-left">
-            <div>
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">
-                Love Reacts
-              </span>
-              <span className="text-xl font-black text-navy font-sans tracking-tight block">
-                {loveCount.toLocaleString()} Likes
-              </span>
-            </div>
+      <div className="w-full hero-gradient text-white py-4.5 border-y border-white/5 font-space font-black italic uppercase tracking-[0.2em] text-[11px] md:text-xs z-20 relative">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 flex flex-wrap justify-center sm:justify-around items-center gap-y-3 gap-x-6 md:gap-x-10">
+          <div className="flex items-center gap-2.5 shrink-0 whitespace-nowrap">
+            <span className="text-[#E8500A] text-lg font-space font-black">♥</span>
+            <span>{loveCount.toLocaleString()} Love Reacts</span>
             <button
+              type="button"
               onClick={handleLoveClicked}
               className={cn(
-                "h-10 px-5 rounded-full font-black text-[10px] uppercase tracking-wider italic flex items-center gap-2 transition-all cursor-pointer active:scale-95",
+                "ml-1 h-9 px-4 rounded-full font-black text-[10px] uppercase tracking-wider italic flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md whitespace-nowrap",
                 hasLoved
-                  ? "bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/10 border border-[#E8500A]"
-                  : "bg-gray-50 border border-gray-150 text-gray-500 hover:bg-gray-100",
+                  ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-[#E8500A]/30"
+                  : "bg-white text-[#E8500A] border border-white hover:bg-[#FFF0E8] animate-pulse hover:animate-none",
               )}
             >
               <Heart size={13} className={cn(hasLoved && "fill-current")} />
-              {hasLoved ? "Loved!" : "Love"}
+              {hasLoved ? "Loved!" : "Love React"}
             </button>
           </div>
 
-          {/* PURCHASED */}
-          <div className="flex flex-row items-center justify-between md:justify-center gap-4 px-6 py-2.5 md:py-0 text-left">
-            <div>
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">
-                Purchased
-              </span>
-              <span className="text-xl font-black text-[#4DBC15] font-sans tracking-tight block">
-                {purchasedCount.toLocaleString()} Verified Orders
-              </span>
-            </div>
-            <button
-              onClick={handlePurchasedClicked}
-              className={cn(
-                "h-10 px-5 rounded-full font-black text-[10px] uppercase tracking-wider italic flex items-center gap-2 transition-all cursor-pointer active:scale-95 whitespace-nowrap",
-                hasPurchased
-                  ? "bg-[#4DBC15] text-white shadow-md shadow-[#4DBC15]/10 border border-[#4DBC15]"
-                  : "bg-gray-50 border border-gray-150 text-gray-500 hover:bg-gray-100",
-              )}
-            >
-              <CheckCircle2
-                size={13}
-                className={cn(
-                  hasPurchased && "fill-current text-white",
-                  !hasPurchased && "text-[#4DBC15]",
-                )}
-              />
-              {hasPurchased ? "Purchased!" : "Purchase"}
-            </button>
+          <div className="hidden sm:block h-4 w-px bg-white/20 shrink-0" aria-hidden="true" />
+
+          <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
+            <span className="text-[#4DBC15] text-lg font-space font-black">✓</span>
+            <span>{purchasedCount.toLocaleString()} Verified Orders</span>
           </div>
 
-          {/* VIEWS */}
-          <div className="flex flex-row items-center justify-between md:justify-center gap-4 px-6 py-2.5 md:py-0 text-left">
-            <div>
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">
-                Product Views
-              </span>
-              <span className="text-xl font-black text-navy font-sans tracking-tight block">
-                {viewCount.toLocaleString()} Sessions
-              </span>
-            </div>
-            <div className="h-10 px-4.5 bg-[#E8500A]/5 text-[#E8500A] rounded-full text-[9px] font-black uppercase tracking-widest italic flex items-center gap-1.5 border border-[#E8500A]/10 select-none">
-              <TrendingUp size={11} className="text-[#E8500A] animate-pulse" />
-              Trending Rapidly
-            </div>
+          <div className="hidden sm:block h-4 w-px bg-white/20 shrink-0" aria-hidden="true" />
+
+          <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
+            <span className="text-[#E8500A] text-lg font-space font-black">👁</span>
+            <span>{viewCount.toLocaleString()} Product Views</span>
+            <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 border border-white/15 text-[9px] tracking-widest ml-1">
+              <TrendingUp size={10} className="text-[#E8500A]" />
+              Trending
+            </span>
           </div>
         </div>
         <HeroScrollCue anchorRef={productHeroRef} />

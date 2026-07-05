@@ -230,8 +230,15 @@ ORDER STATUS: PENDING_CONFIRMATION
           productTitle: it.product.title,
           quantity: it.quantity,
           price: getSlabPrice(it.product, it.quantity),
-          image: it.product.image,
+          image: it.selectedVariant?.image || it.product.image,
           brand: it.product.brand,
+          variantLabel: it.selectedVariant?.attributes
+            ? Object.entries(it.selectedVariant.attributes)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(' · ')
+            : undefined,
+          variantSku: it.selectedVariant?.sku,
+          notes: deliveryNotes.trim() || undefined,
         })),
         deliveryFee: DELIVERY_FEE_PER_SELLER,
         invoiceId: invoiceIdStr,
@@ -267,6 +274,7 @@ ORDER STATUS: PENDING_CONFIRMATION
     }
 
     sessionStorage.setItem('choosify_last_order_id', tempOrderId);
+    sessionStorage.setItem('choosify_last_order_snapshot', JSON.stringify(fullOrderObject));
 
     // Add to global state (which automatically updates localStorage and triggers reactivity)
     addOrder(fullOrderObject);
@@ -278,7 +286,7 @@ ORDER STATUS: PENDING_CONFIRMATION
     toast.success('Order placed successfully! Live support thread generated.');
     
     // Auto-open newly spawned buyer-seller conversation thread or show success screen
-    navigate('/order-success', { state: { order: fullOrderObject } });
+    navigate(`/order-success/${tempOrderId}`, { replace: true, state: { order: fullOrderObject } });
   };
 
   return (

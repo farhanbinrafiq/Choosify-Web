@@ -1,12 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDashboard, ThreadMessage, MessageThread } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
+import {
+  CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+  CHOOSIFY_ANNOUNCEMENTS_TITLE,
+} from '../lib/announcements';
 import { 
-  Search, ArrowLeft, Send, Bell, MoreVertical, ShieldAlert, CheckCircle, 
+  Search, ArrowLeft, Send, MoreVertical, ShieldAlert, CheckCircle, 
   Package, Truck, Clock, MessageSquare, ExternalLink, Settings, LayoutDashboard, Heart, CheckSquare,
-  X, MessageCircle, CheckCircle2, Info, Sparkles, Plus
+  X, MessageCircle, CheckCircle2, Info, Sparkles, Plus, Megaphone
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { operationsApi } from '../services/operationsApi';
@@ -29,9 +33,21 @@ export function MessagesPage() {
   const [modalQuantity, setModalQuantity] = useState(5);
   const [modalNotes, setModalNotes] = useState('');
 
-  // Active thread selection
-  const activeThreadId = threadId || (threads.length > 0 ? threads[0].id : null);
-  const activeThread = threads.find(t => t.id === activeThreadId);
+  const sortedThreads = useMemo(() => {
+    return [...threads].sort((a, b) => {
+      if (a.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID) return -1;
+      if (b.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID) return 1;
+      return 0;
+    });
+  }, [threads]);
+
+  // Active thread selection — announcements thread is pinned first
+  const activeThreadId = threadId || (sortedThreads.length > 0 ? sortedThreads[0].id : null);
+  const activeThread = sortedThreads.find(t => t.id === activeThreadId);
+  const isAnnouncementsThread =
+    activeThread?.type === 'announcement' ||
+    activeThread?.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID ||
+    activeThread?.readOnly === true;
 
   // Auto-mark active thread as read
   useEffect(() => {
@@ -44,7 +60,7 @@ export function MessagesPage() {
   }, [activeThreadId, threads, setThreads]);
 
   // Filter threads by search query
-  const filteredThreads = threads.filter(t => 
+  const filteredThreads = sortedThreads.filter(t => 
     t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
     t.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.orderRef?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -103,7 +119,7 @@ export function MessagesPage() {
   };
 
   const handleSendMessage = () => {
-    if (!inputText.trim() || !activeThreadId) return;
+    if (!inputText.trim() || !activeThreadId || isAnnouncementsThread) return;
 
     addThreadMessage(activeThreadId, inputText.trim(), 'user', 'Me');
     const userMsg = inputText.trim();
@@ -325,7 +341,12 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                         {t.lastMessage}
                       </p>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        {isActive && (
+                        {t.type === 'announcement' && (
+                          <span className="inline-flex text-[8px] font-black bg-[#1A1D4E] text-white px-1.5 py-0.5 rounded uppercase tracking-wider">
+                            Broadcast
+                          </span>
+                        )}
+                        {isActive && t.type !== 'announcement' && (
                           <span className="inline-flex text-[8px] font-black bg-[#E8500A] text-white px-2 py-0.5 rounded uppercase tracking-wider">
                             Active chat
                           </span>
@@ -369,18 +390,29 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                   />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="inline-flex text-[8px] font-black bg-[#E8500A] text-white px-2 py-0.5 rounded uppercase tracking-wider">
-                        Current thread
+                      <span className={`inline-flex text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
+                        isAnnouncementsThread
+                          ? 'bg-[#1A1D4E] text-white'
+                          : 'bg-[#E8500A] text-white'
+                      }`}>
+                        {isAnnouncementsThread ? 'Announcements' : 'Current thread'}
                       </span>
                     </div>
                     <h2 className="text-sm font-black text-[#1A1D4E] italic uppercase tracking-wider leading-none mb-1 truncate">
                       {activeThread.title}
                     </h2>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[9px] font-bold text-green-600 uppercase italic flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        Live chat
-                      </span>
+                      {isAnnouncementsThread ? (
+                        <span className="text-[9px] font-bold text-[#1A1D4E] uppercase italic flex items-center gap-1">
+                          <Megaphone size={10} className="text-[#E8500A]" />
+                          Read-only broadcast channel
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-bold text-green-600 uppercase italic flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                          Live chat
+                        </span>
+                      )}
                       {activeThread.orderRef && (
                         <span className="text-[8px] font-black bg-orange-50 border border-orange-200 text-[#E8500A] px-2 py-0.5 rounded-md uppercase tracking-wider">
                           {activeThread.orderRef}
@@ -391,9 +423,6 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors border-none cursor-pointer" title="Notifications">
-                    <Bell size={14} />
-                  </button>
                   <button className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors border-none cursor-pointer" title="Thread Options">
                     <MoreVertical size={14} />
                   </button>
@@ -405,8 +434,16 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 ref={chatViewportRef}
                 className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto space-y-6 no-scrollbar relative min-h-0"
               >
+                {isAnnouncementsThread && (
+                  <div className="max-w-2xl mx-auto bg-[#FFF5F0] border border-[#E8500A]/20 rounded-2xl p-4 flex items-start gap-3">
+                    <Info size={16} className="text-[#E8500A] shrink-0 mt-0.5" />
+                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wider leading-relaxed">
+                      {CHOOSIFY_ANNOUNCEMENTS_TITLE} is a read-only channel. Order updates, platform news, and campaign alerts appear here. Replies are not supported.
+                    </p>
+                  </div>
+                )}
                 {/* 🚨 ORDER OVERVIEW CARD INSIDE CHAT (CRITICAL REQUIREMENT) */}
-                {linkedSubOrder && (
+                {linkedSubOrder && !isAnnouncementsThread && (
                   <div className="max-w-2xl mx-auto bg-white border border-[#D6E1EC] rounded-3xl p-6 shadow-sm relative overflow-hidden transition-all duration-300">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-[#F96500]/5 rounded-full blur-2xl" />
                     
@@ -501,7 +538,12 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 <div className="space-y-6">
                   {activeMessages.map((m) => {
                     const isOutgoing = m.sender === 'user';
-                    const senderLabel = m.sender === 'user' ? 'You' : (activeThread?.title || 'Merchant');
+                    const isAnnouncementMessage = isAnnouncementsThread || m.sender === 'admin';
+                    const senderLabel = isOutgoing
+                      ? 'You'
+                      : isAnnouncementMessage
+                        ? CHOOSIFY_ANNOUNCEMENTS_TITLE
+                        : (m.senderName || activeThread?.title || 'Merchant');
 
                     return (
                       <div 
@@ -643,10 +685,12 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                           </div>
                         )}
 
-                        <div className={`px-5 py-3 md:px-6 md:py-4 rounded-[20px] mb-2 text-[11px] md:text-sm font-bold leading-relaxed shadow-sm
+                        <div className={`px-5 py-3 md:px-6 md:py-4 rounded-[20px] mb-2 text-[11px] md:text-sm font-bold leading-relaxed shadow-sm whitespace-pre-line
                           ${isOutgoing 
                             ? 'bg-[#F96500] text-white rounded-tr-none italic' 
-                            : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
+                            : isAnnouncementMessage
+                              ? 'bg-[#1A1D4E]/5 text-[#1A1D4E] rounded-tl-none border border-[#1A1D4E]/10'
+                              : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
                           }
                         `}>
                           {m.text}
@@ -660,7 +704,8 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 </div>
               </div>
 
-              {/* Chat send input */}
+              {/* Chat send input — hidden for read-only announcements */}
+              {!isAnnouncementsThread && (
               <div className="p-4 sm:p-6 md:p-8 bg-white border-t border-gray-200 flex flex-col gap-3 shrink-0">
                 
                 {/* 🛒 QUICK SOURCING DEMO ACTION PILLS */}
@@ -714,6 +759,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                   </button>
                 </div>
               </div>
+              )}
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-12 text-center max-w-lg mx-auto space-y-4">

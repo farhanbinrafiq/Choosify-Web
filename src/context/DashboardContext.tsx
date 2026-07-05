@@ -1,6 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { PRODUCTS, BRANDS } from '../constants';
 import toast from 'react-hot-toast';
+import {
+  CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+  CHOOSIFY_ANNOUNCEMENTS_TITLE,
+  CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+  CHOOSIFY_ANNOUNCEMENTS_WELCOME,
+  formatAnnouncementBody,
+  formatCampaignAnnouncement,
+} from '../lib/announcements';
 
 export interface MessageThread {
   id: string;
@@ -8,9 +16,10 @@ export interface MessageThread {
   avatar: string;
   lastMessage: string;
   time: string;
-  type: 'retail' | 'general';
+  type: 'retail' | 'general' | 'announcement';
   unread: boolean;
   orderRef?: string;
+  readOnly?: boolean;
 }
 
 export interface ThreadMessage {
@@ -101,7 +110,7 @@ interface DashboardContextType {
   removeFromCompare: (id: number) => void;
   addMessage: (text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator') => void;
   addThreadMessage: (threadId: string, text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', senderName?: string, productCard?: any) => void;
-  createNewThread: (id: string, title: string, avatar: string, type: 'retail' | 'general', lastMessage: string, orderRef?: string) => void;
+  createNewThread: (id: string, title: string, avatar: string, type: 'retail' | 'general' | 'announcement', lastMessage: string, orderRef?: string) => void;
   markAllAsRead: () => void;
   addToRecentlyViewed: (product: any) => void;
   addNotification: (message: string, type: 'order' | 'message' | 'system' | 'deal') => void;
@@ -177,7 +186,18 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [threads, setThreads] = useState<MessageThread[]>(() => {
     const saved = localStorage.getItem('choosify_threads');
     if (saved) return JSON.parse(saved);
+    const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return [
+      {
+        id: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        title: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+        lastMessage: CHOOSIFY_ANNOUNCEMENTS_WELCOME,
+        time: welcomeTime,
+        type: 'announcement',
+        unread: false,
+        readOnly: true,
+      },
       { id: 'thread-general', title: 'Farhan Rafiq (Admin)', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png', lastMessage: 'Absolutely! We can ship the S24 Ultra...', time: '10:30 AM', type: 'general', unread: true },
       { id: 'seller-apple', title: 'Apple Retail BD', avatar: 'https://i.pravatar.cc/150?u=apple', lastMessage: 'Welcome to Apple Retail! Feel free to ask queries.', time: '2 days ago', type: 'retail', unread: false }
     ];
@@ -186,7 +206,17 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [threadMessages, setThreadMessages] = useState<ThreadMessage[]>(() => {
     const saved = localStorage.getItem('choosify_thread_messages');
     if (saved) return JSON.parse(saved);
+    const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return [
+      {
+        id: 100,
+        threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        text: CHOOSIFY_ANNOUNCEMENTS_WELCOME,
+        sender: 'admin',
+        senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        time: welcomeTime,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+      },
       { id: 1, threadId: 'thread-general', text: 'Hello! I am interested in the Samsung S24 Ultra you posted. Is it still available?', sender: 'other', senderName: 'Rahat Hossain', time: '10:30 AM', avatar: 'https://i.pravatar.cc/150?u=1' },
       { id: 2, threadId: 'thread-general', text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', senderName: 'Me', time: '10:35 AM' },
       { id: 3, threadId: 'thread-general', text: 'Absolutely! We can ship the S24 Ultra to Banani with standard COD coverage.', sender: 'other', senderName: 'Farhan Rafiq', time: '11:00 AM', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png' },
@@ -295,17 +325,68 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
 
 
+  const appendAnnouncementMessage = useCallback((text: string, markUnread = true) => {
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const preview = text.split('\n')[0].slice(0, 120);
+
+    setThreadMessages(prev => [
+      ...prev,
+      {
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        text,
+        sender: 'admin',
+        senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        time: timeStr,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+      },
+    ]);
+
+    setThreads(prev => {
+      const existing = prev.find(t => t.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID);
+      const announcementThread: MessageThread = {
+        id: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        title: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+        lastMessage: preview,
+        time: timeStr,
+        type: 'announcement',
+        unread: markUnread,
+        readOnly: true,
+      };
+
+      if (!existing) {
+        return [announcementThread, ...prev];
+      }
+
+      return [
+        { ...existing, ...announcementThread, unread: markUnread || existing.unread },
+        ...prev.filter(t => t.id !== CHOOSIFY_ANNOUNCEMENTS_THREAD_ID),
+      ];
+    });
+  }, []);
+
   const addCampaign = (campaign: Omit<Campaign, 'id'>) => {
     const newCampaign: Campaign = {
       ...campaign,
       id: 'camp-' + Date.now()
     };
     setCampaigns(prev => [newCampaign, ...prev]);
+    if (newCampaign.active) {
+      appendAnnouncementMessage(formatCampaignAnnouncement(newCampaign));
+    }
     toast.success('Campaign created successfully!');
   };
 
   const updateCampaign = (target: Campaign) => {
-    setCampaigns(prev => prev.map(c => c.id === target.id ? target : c));
+    setCampaigns(prev => {
+      const previous = prev.find(c => c.id === target.id);
+      const next = prev.map(c => c.id === target.id ? target : c);
+      if (target.active && !previous?.active) {
+        appendAnnouncementMessage(formatCampaignAnnouncement(target));
+      }
+      return next;
+    });
     toast.success('Campaign updated successfully!');
   };
 
@@ -465,19 +546,84 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const addNotification = (message: string, type: 'order' | 'message' | 'system' | 'deal') => {
-    const titleVal = type === 'deal' ? 'Special Deal Alert' : type.charAt(0).toUpperCase() + type.slice(1) + ' Notification';
-    const newNotification = {
-      id: Date.now().toString(),
-      message,
-      type,
-      read: false,
-      createdAt: new Date().toISOString(),
-      title: titleVal,
-      time: 'Just now'
-    };
-    setNotifications(prev => [newNotification, ...prev]);
-  };
+  const addNotification = useCallback((message: string, type: 'order' | 'message' | 'system' | 'deal') => {
+    const titleVal =
+      type === 'deal'
+        ? 'Special Deal Alert'
+        : type === 'order'
+          ? 'Order Update'
+          : type === 'message'
+            ? 'Message Update'
+            : 'Platform Update';
+    appendAnnouncementMessage(formatAnnouncementBody(message, titleVal));
+  }, [appendAnnouncementMessage]);
+
+  // Ensure announcements thread exists and migrate legacy notification records once
+  useEffect(() => {
+    setThreads(prev => {
+      if (prev.some(t => t.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID)) {
+        return prev.map(t =>
+          t.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID
+            ? { ...t, type: 'announcement', readOnly: true, title: CHOOSIFY_ANNOUNCEMENTS_TITLE }
+            : t
+        );
+      }
+
+      const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return [
+        {
+          id: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+          title: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+          avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+          lastMessage: CHOOSIFY_ANNOUNCEMENTS_WELCOME,
+          time: welcomeTime,
+          type: 'announcement',
+          unread: false,
+          readOnly: true,
+        },
+        ...prev,
+      ];
+    });
+
+    setThreadMessages(prev => {
+      if (prev.some(m => m.threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID)) return prev;
+      const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return [
+        ...prev,
+        {
+          id: Date.now(),
+          threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+          text: CHOOSIFY_ANNOUNCEMENTS_WELCOME,
+          sender: 'admin',
+          senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+          time: welcomeTime,
+          avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+        },
+      ];
+    });
+
+    if (localStorage.getItem('choosify_notifications_migrated')) return;
+
+    try {
+      const saved = localStorage.getItem('choosify_notifications');
+      const legacy = saved ? JSON.parse(saved) : [];
+      if (Array.isArray(legacy) && legacy.length > 0) {
+        legacy
+          .slice()
+          .reverse()
+          .forEach((n: { title?: string; message?: string }) => {
+            if (n.message) {
+              appendAnnouncementMessage(formatAnnouncementBody(n.message, n.title), false);
+            }
+          });
+      }
+      localStorage.setItem('choosify_notifications_migrated', '1');
+      setNotifications([]);
+      localStorage.removeItem('choosify_notifications');
+    } catch {
+      localStorage.setItem('choosify_notifications_migrated', '1');
+    }
+  }, [appendAnnouncementMessage]);
 
   // Expose to window to facilitate cross-context notifications without circular imports
   useEffect(() => {
@@ -485,7 +631,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       delete (window as any).choosifyAddNotification;
     };
-  }, [notifications]);
+  }, [addNotification]);
 
   useEffect(() => {
     const handleOrderPlaced = (e: CustomEvent) => {
@@ -501,7 +647,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       window.removeEventListener('choosify-order-placed', handleOrderPlaced as EventListener);
       window.removeEventListener('choosify-return-request', handleReturnRequest as EventListener);
     };
-  }, []);
+  }, [addNotification]);
 
   // Listen to order actions from GlobalStateContext
   useEffect(() => {
@@ -525,7 +671,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       window.removeEventListener('choosify-order-placed', handleOrderPlaced);
       window.removeEventListener('choosify-order-cancelled', handleOrderCancelled);
     };
-  }, []);
+  }, [addNotification]);
 
   // Persist threads and thread messages
   React.useEffect(() => {
@@ -560,6 +706,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     senderName?: string,
     productCard?: any
   ) => {
+    if (threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID && sender === 'user') {
+      return;
+    }
+
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const newMsg: ThreadMessage = {
       id: Date.now() + Math.floor(Math.random() * 100),
@@ -592,7 +742,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     id: string, 
     title: string, 
     avatar: string, 
-    type: 'retail' | 'general', 
+    type: 'retail' | 'general' | 'announcement', 
     lastMessage: string, 
     orderRef?: string
   ) => {

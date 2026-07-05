@@ -274,6 +274,7 @@ function AppContent() {
             <Route path="/brand-deals" element={<FeatureFlagRoute flag="enable_brand_deals_page"><PageWrapper><BrandDealsPage /></PageWrapper></FeatureFlagRoute>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
             <Route path="/checkout" element={<ProtectedRoute><PageWrapper><CheckoutPage /></PageWrapper></ProtectedRoute>} />
+            <Route path="/order-success/:orderId" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />
             <Route path="/seller/orders" element={<ProtectedRoute><PageWrapper><SellerIncomingOrdersPage /></PageWrapper></ProtectedRoute>} />

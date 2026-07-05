@@ -3,15 +3,24 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
   Bookmark,
+  Building2,
   CalendarDays,
   ChevronRight,
+  CircleDot,
   ExternalLink,
+  Images,
   MapPin,
   Share2,
+  ShoppingBag,
   Sparkles,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { cn } from '../lib/utils';
+import {
+  DetailHeroSummaryBar,
+  detailHeroSummaryActionPrimaryClass,
+  detailHeroSummaryActionSecondaryClass,
+} from '../components/DetailHeroSummaryBar';
 import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
 import { PRODUCT_CARD_GRID, WHATS_ON_CARD_GRID } from '../lib/pageLayout';
 import { ProductCard } from '../components/ProductCard';
@@ -117,110 +126,91 @@ export function BrandPostDetailPage() {
             <p className="text-white/85 text-sm md:text-base font-medium italic uppercase tracking-wider leading-relaxed mb-6 max-w-4xl font-sans">
               {post.excerpt}
             </p>
+          </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 bg-white/[0.04] rounded-[5px] p-6 border border-white/10 shadow-lg mb-6">
-              <div className="flex flex-col text-left">
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
-                  Brand Partner
-                </span>
-                <span className="text-sm font-black text-white uppercase italic tracking-tighter truncate">
-                  {post.brandName}
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
-                  Event Type
-                </span>
-                <span className="text-sm font-black text-[#F97316] uppercase italic tracking-tighter">
-                  {BRAND_POST_KIND_LABELS[post.kind]}
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
-                  Location
-                </span>
-                <span className="text-sm font-black text-white uppercase italic tracking-tighter truncate">
-                  {post.location || 'Multiple venues'}
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
-                  Availability
-                </span>
-                <span className="text-sm font-black text-white uppercase italic tracking-tighter">
-                  {statusLabel}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              {post.ctaLabel && post.ctaUrl && (
-                <Link
-                  to={post.ctaUrl}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic border-none cursor-pointer shadow-lg"
+          <DetailHeroSummaryBar
+            actionsPlacement="bottom-center"
+            items={[
+              {
+                id: 'brand',
+                icon: Building2,
+                label: post.brandName,
+              },
+              {
+                id: 'event-type',
+                icon: Sparkles,
+                label: BRAND_POST_KIND_LABELS[post.kind],
+              },
+              {
+                id: 'location',
+                icon: MapPin,
+                wide: true,
+                label: post.location || 'Multiple venues',
+              },
+              {
+                id: 'availability',
+                icon: CircleDot,
+                label: statusLabel,
+              },
+              {
+                id: 'linked-products',
+                icon: ShoppingBag,
+                label: `${linkedProducts.length || 0} Linked Products`,
+              },
+              {
+                id: 'banners',
+                icon: Images,
+                label: `${bannerImages.length} Banner${bannerImages.length === 1 ? '' : 's'}`,
+              },
+              {
+                id: 'published',
+                icon: CalendarDays,
+                label: `Published ${post.publishedAt}`,
+              },
+              ...(dateLabel
+                ? [
+                    {
+                      id: 'event-dates',
+                      icon: CalendarDays,
+                      wide: true,
+                      label: dateLabel,
+                    },
+                  ]
+                : []),
+            ]}
+            actions={
+              <>
+                {post.ctaLabel && post.ctaUrl && (
+                  <Link
+                    to={post.ctaUrl}
+                    className={detailHeroSummaryActionPrimaryClass}
+                  >
+                    {post.ctaLabel}
+                    <ExternalLink size={13} />
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={() => toast.success('Event saved to your dashboard!')}
+                  className={detailHeroSummaryActionSecondaryClass}
                 >
-                  {post.ctaLabel}
-                  <ExternalLink size={14} />
-                </Link>
-              )}
-              <button
-                type="button"
-                onClick={() => toast.success("Event saved to your dashboard!")}
-                className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/15 border border-white/15 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic cursor-pointer shadow-lg"
-              >
-                <Bookmark size={14} className="text-[#F97316]" />
-                Save Event
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast.success('Share link copied to clipboard!');
-                }}
-                className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/15 border border-white/15 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic cursor-pointer shadow-lg"
-              >
-                <Share2 size={14} />
-                Share Event
-              </button>
-            </div>
-          </div>
-
-          <div className="border-t border-white/10 bg-[#000435]/60 backdrop-blur-sm">
-            <div className="max-w-7xl mx-auto px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-left">
-              <div className="flex flex-col text-left">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1 font-mono">
-                  POSTED BY
-                </span>
-                <span className="text-sm font-black text-white uppercase italic truncate">
-                  {post.brandName}
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1 font-mono">
-                  LINKED PRODUCTS
-                </span>
-                <span className="text-sm font-black text-[#E8500A] uppercase italic">
-                  {linkedProducts.length || 0} items
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1 font-mono">
-                  BANNERS
-                </span>
-                <span className="text-sm font-black text-blue-300 uppercase italic">
-                  {bannerImages.length} visual{bannerImages.length === 1 ? '' : 's'}
-                </span>
-              </div>
-              <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1 font-mono">
-                  PUBLISHED
-                </span>
-                <span className="text-sm font-black text-white uppercase italic">
-                  {post.publishedAt}
-                </span>
-              </div>
-            </div>
-          </div>
+                  <Bookmark size={13} className="text-[#E8500A]" />
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success('Share link copied to clipboard!');
+                  }}
+                  className={detailHeroSummaryActionSecondaryClass}
+                >
+                  <Share2 size={13} />
+                  Share
+                </button>
+              </>
+            }
+          />
         </div>
         <HeroScrollCue anchorRef={heroRef} />
       </section>

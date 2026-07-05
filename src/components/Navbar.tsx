@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Search, ShoppingBag, User, PlusCircle, ChevronRight, Bell, Bookmark, LogIn, 
+  Search, ShoppingBag, User, PlusCircle, ChevronRight, Bookmark, LogIn, 
   LayoutDashboard, Heart, MessageSquare, Settings, Briefcase, Package, ShieldCheck, 
   FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X
 } from 'lucide-react';
@@ -28,10 +28,9 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { retailCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig, featureFlags } = useGlobalState();
-  const { threads, notifications = [], setNotifications, savedProducts } = useDashboard();
+  const { threads, savedProducts } = useDashboard();
 
   const unreadMsgCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
-  const unreadNotifCount = isLoggedIn ? notifications.filter((n: any) => !n.read).length : 0;
   const savedCount = isLoggedIn ? savedProducts.length : 0;
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -59,16 +58,6 @@ export function Navbar() {
       window.removeEventListener('resize', syncNavbarHeight);
     };
   }, []);
-
-  // Mark notifications as read when user opens the notifications tab
-  useEffect(() => {
-    if (location.pathname === '/dashboard') {
-      const params = new URLSearchParams(location.search);
-      if (params.get('tab') === 'notifications') {
-        setNotifications((prev: any[]) => prev.map((n: any) => ({ ...n, read: true })));
-      }
-    }
-  }, [location, setNotifications]);
 
   // Close mobile menus on route change
   useEffect(() => {
@@ -165,16 +154,13 @@ export function Navbar() {
     { label: 'My Orders', path: '/profile/orders', icon: Package },
     { label: 'Messages', path: '/messages', icon: MessageSquare },
     { label: 'Saved Products', path: '/dashboard', tab: 'saved-products', icon: Heart },
-    { label: 'Notifications', path: '/dashboard', tab: 'notifications', icon: Bell },
     { label: 'Settings', path: '/dashboard', tab: 'settings', icon: Settings },
   ];
 
   const navigateProfileItem = (item: (typeof dashboardMiniMenu)[number]) => {
     setIsUserMenuOpen(false);
     setIsMobileProfileOpen(false);
-    if (item.tab === 'notifications') {
-      navigate('/dashboard?tab=notifications');
-    } else if (item.tab) {
+    if (item.tab) {
       navigate(item.path, { state: { activeTab: item.tab } });
     } else {
       navigate(item.path);
@@ -333,18 +319,6 @@ export function Navbar() {
                     )}
                   </div>
                 </button>
-                <Link
-                  to="/dashboard?tab=notifications"
-                  className="relative flex items-center justify-center w-9 h-9 rounded-xl hover:bg-white/5 transition-colors"
-                  title="Notifications"
-                >
-                  <Bell size={18} className="text-white/70 hover:text-white transition-colors" />
-                  {unreadNotifCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
-                      {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                    </span>
-                  )}
-                </Link>
               </>
             )}
           </div>
@@ -422,11 +396,6 @@ export function Navbar() {
                             >
                               <div className="relative flex items-center justify-center">
                                 <item.icon size={16} className="group-hover:text-orange-primary transition-colors" />
-                                {item.icon === Bell && unreadNotifCount > 0 && (
-                                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-orange-primary text-white text-[7px] font-black rounded-full flex items-center justify-center leading-none">
-                                    {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                                  </span>
-                                )}
                                 {item.icon === MessageSquare && unreadMsgCount > 0 && (
                                   <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-orange-primary text-white text-[7px] font-black rounded-full flex items-center justify-center leading-none">
                                     {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
@@ -684,11 +653,6 @@ export function Navbar() {
                     >
                       <div className="relative flex items-center justify-center shrink-0">
                         <item.icon size={14} className="text-orange-primary" />
-                        {item.icon === Bell && unreadNotifCount > 0 && (
-                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-orange-primary text-white text-[7px] font-black rounded-full flex items-center justify-center leading-none">
-                            {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                          </span>
-                        )}
                       </div>
                       <span className="italic flex-1">{item.label}</span>
                     </button>

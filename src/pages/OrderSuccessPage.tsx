@@ -1,6 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link, useNavigate, useParams } from 'react-router-dom';
 import {
   CheckCircle2,
   ShoppingBag,
@@ -42,19 +42,30 @@ export function OrderSuccessPage() {
   const heroRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { orderId } = useParams<{ orderId: string }>();
   const { orders, clearCart } = useGlobalState();
 
   const locationOrder = (location.state as { order?: Order } | null)?.order;
 
   const order = useMemo(() => {
     if (locationOrder) return locationOrder;
-    const savedId = sessionStorage.getItem('choosify_last_order_id');
-    if (savedId) {
-      const match = orders.find((o) => o.orderId === savedId);
+
+    const targetId = orderId || sessionStorage.getItem('choosify_last_order_id');
+    if (targetId) {
+      const match = orders.find((o) => o.orderId === targetId);
       if (match) return match;
     }
+
+    const savedSnapshot = sessionStorage.getItem('choosify_last_order_snapshot');
+    if (savedSnapshot) {
+      try {
+        const parsed = JSON.parse(savedSnapshot) as Order;
+        if (!targetId || parsed.orderId === targetId) return parsed;
+      } catch {}
+    }
+
     return orders[0] ?? null;
-  }, [locationOrder, orders]);
+  }, [locationOrder, orderId, orders]);
 
   React.useEffect(() => {
     if (typeof clearCart === 'function') clearCart();
@@ -256,7 +267,13 @@ export function OrderSuccessPage() {
 
                   <ul className="divide-y divide-[#e8edf2]">
                     {sub.items.map((item, itemIdx) => {
-                      const extended = item as typeof item & { image?: string; brand?: string };
+                      const extended = item as typeof item & {
+                        image?: string;
+                        brand?: string;
+                        variantLabel?: string;
+                        variantSku?: string;
+                        notes?: string;
+                      };
                       return (
                         <li
                           key={`${item.productId}-${itemIdx}`}
@@ -281,6 +298,18 @@ export function OrderSuccessPage() {
                             <p className="text-[10px] text-gray-500 mt-0.5">
                               Qty {item.quantity} × {formatMoney(item.price)}
                             </p>
+                            {(extended.variantLabel || extended.variantSku) && (
+                              <p className="text-[9px] text-[#8a9bb0] font-semibold uppercase mt-1">
+                                {[extended.variantLabel, extended.variantSku ? `SKU ${extended.variantSku}` : null]
+                                  .filter(Boolean)
+                                  .join(' · ')}
+                              </p>
+                            )}
+                            {extended.notes && (
+                              <p className="text-[10px] text-gray-500 mt-1 italic line-clamp-2">
+                                Note: {extended.notes}
+                              </p>
+                            )}
                           </div>
                           <p className="text-xs font-black text-[#1A1D4E] shrink-0">
                             {formatMoney(item.price * item.quantity)}
