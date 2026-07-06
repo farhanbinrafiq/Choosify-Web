@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
 import {
   BadgeCheck,
   ChevronRight,
@@ -143,7 +142,6 @@ export function LoginSignUpPage() {
           ref={loginHeroRef}
           className={cn(
             'relative flex min-h-[420px] items-center choosify-dark-gradient px-8 py-14 md:px-12 lg:px-16 lg:py-16',
-            HERO_SCROLL_CUE_PADDING,
           )}
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.2),transparent_45%)]" />
@@ -178,7 +176,6 @@ export function LoginSignUpPage() {
               ))}
             </ul>
           </div>
-          <HeroScrollCue anchorRef={loginHeroRef} scrollTargetId="login-trust-section" />
         </section>
 
         {/* Right auth panel */}

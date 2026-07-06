@@ -19,7 +19,7 @@ const KIND_TABS: Array<{ id: BrandPostKind | 'all'; label: string }> = [
   { id: 'event', label: 'Events' },
   { id: 'launch', label: 'Launches' },
   { id: 'festival', label: 'Festivals' },
-  { id: 'campaign', label: 'Campaigns' },
+  { id: 'campaign', label: 'Promotions' },
   { id: 'store_moment', label: 'Store Moments' },
 ];
 
@@ -188,7 +188,7 @@ export function WhatsOnPage() {
       { id: 'event', label: 'Events', icon: <CalendarDays size={13} /> },
       { id: 'launch', label: 'Launches', icon: <Rocket size={13} /> },
       { id: 'festival', label: 'Festivals', icon: <PartyPopper size={13} /> },
-      { id: 'campaign', label: 'Campaigns', icon: <Megaphone size={13} /> },
+      { id: 'campaign', label: 'Promotions', icon: <Megaphone size={13} /> },
       { id: 'store_moment', label: 'Store Moments', icon: <Store size={13} /> },
     ],
     [],

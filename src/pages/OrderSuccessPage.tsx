@@ -1,5 +1,4 @@
 import React, { useMemo, useRef } from 'react';
-import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
 import { useLocation, Link, useNavigate, useParams } from 'react-router-dom';
 import {
   CheckCircle2,
@@ -120,7 +119,7 @@ export function OrderSuccessPage() {
       {/* Confirmation hero */}
       <div
         ref={heroRef}
-        className={cn('w-full border-b border-white/5 relative', HERO_SCROLL_CUE_PADDING)}
+        className="w-full border-b border-white/5 relative"
       >
         <div className="absolute inset-0 hero-gradient" />
         <div className="max-w-4xl mx-auto px-4 py-10 md:py-14 relative z-10 text-center text-white">
@@ -139,7 +138,6 @@ export function OrderSuccessPage() {
           </p>
           <p className="text-[10px] text-white/40 font-mono mt-3">{formatDateTime(order.createdAt)}</p>
         </div>
-        <HeroScrollCue anchorRef={heroRef} scrollTargetId="order-success-details" />
       </div>
 
       <div id="order-success-details" className="max-w-4xl mx-auto w-full px-4 py-8 md:py-10 -mt-6 relative z-20 space-y-6">

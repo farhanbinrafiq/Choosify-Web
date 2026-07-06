@@ -53,7 +53,7 @@ import { SizeGuideModal } from "../components/SizeGuideModal";
 import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
 import { ProductSpecsOverview } from "../components/ProductSpecsOverview";
 import { StickySectionNav } from "../components/StickySectionNav";
-import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from "../components/HeroScrollCue";
+import { CardEngagementStrip } from "../components/CardEngagementStrip";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { usePageBreadcrumbs } from "../context/BreadcrumbContext";
 import { slugifyPathSegment } from "../lib/seoHelpers";
@@ -607,10 +607,8 @@ export function ProductDetailPage() {
   const [carouselIndex, setCarouselIndex] = useState(1);
 
   // States for Stats Bar and ScrollSpy
-  const [loveCount, setLoveCount] = useState(1243);
-  const [hasLoved, setHasLoved] = useState(false);
   const [purchasedCount] = useState(854);
-  const [viewCount] = useState(14238);
+  const [viewCount] = useState(() => 8420 + (product?.id ?? 0) * 37);
 
   const productSectionNavItems = useMemo(
     () => [
@@ -999,27 +997,12 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
     navigate(`/messages/${threadId}`);
   };
 
-  const handleLoveClicked = () => {
-    if (hasLoved) {
-      setLoveCount((prev) => prev - 1);
-      setHasLoved(false);
-      toast.success("Removed love react.");
-    } else {
-      setLoveCount((prev) => prev + 1);
-      setHasLoved(true);
-      toast.success("Thanks for loving this product!");
-    }
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Continuous Hero Wrapper with Unified Choosify Gradient */}
       <div
         ref={productHeroRef}
-        className={cn(
-          "choosify-dark-gradient w-full relative",
-          HERO_SCROLL_CUE_PADDING,
-        )}
+        className="choosify-dark-gradient w-full relative"
       >
         {/* Layer 1 Base & ambient accents matching home hero */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(232,80,10,0.18)_0%,_transparent_55%)] pointer-events-none" />
@@ -1100,25 +1083,6 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   style={{ fontSize: "25px" }}
                 >
                   BDT - {product.price}
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(window.location.href);
-                      toast.success("Link copied directly to clipboard!");
-                    }}
-                    className="w-10 h-10 rounded-full bg-white hover:bg-white/90 text-[#120713] flex items-center justify-center transition-all shadow-md cursor-pointer border-none"
-                    title="Share link"
-                  >
-                    <Share2 size={15} />
-                  </button>
-                  <button
-                    onClick={() => toast.success("Product bookmarked!")}
-                    className="w-10 h-10 rounded-full bg-white hover:bg-white/95 text-[#120713] flex items-center justify-center transition-all shadow-md cursor-pointer border-none"
-                    title="Save Bookmark"
-                  >
-                    <Bookmark size={15} />
-                  </button>
                 </div>
               </div>
             </div>
@@ -1270,23 +1234,14 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
       {/* Post-Hero Stats Bar */}
       <div className="w-full hero-gradient text-white py-4.5 border-y border-white/5 font-space font-black italic uppercase tracking-[0.2em] text-[11px] md:text-xs z-20 relative">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 flex flex-wrap justify-center sm:justify-around items-center gap-y-3 gap-x-6 md:gap-x-10">
-          <div className="flex items-center gap-2.5 shrink-0 whitespace-nowrap">
-            <span className="text-[#E8500A] text-lg font-space font-black">♥</span>
-            <span>{loveCount.toLocaleString()} Love Reacts</span>
-            <button
-              type="button"
-              onClick={handleLoveClicked}
-              className={cn(
-                "ml-1 h-9 px-4 rounded-full font-black text-[10px] uppercase tracking-wider italic flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md whitespace-nowrap",
-                hasLoved
-                  ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-[#E8500A]/30"
-                  : "bg-white text-[#E8500A] border border-white hover:bg-[#FFF0E8] animate-pulse hover:animate-none",
-              )}
-            >
-              <Heart size={13} className={cn(hasLoved && "fill-current")} />
-              {hasLoved ? "Loved!" : "Love React"}
-            </button>
-          </div>
+          <CardEngagementStrip
+            variant="hero"
+            entityType="product"
+            entityId={product.id}
+            payload={product}
+            showShare
+            shareUrl={typeof window !== 'undefined' ? window.location.href : undefined}
+          />
 
           <div className="hidden sm:block h-4 w-px bg-white/20 shrink-0" aria-hidden="true" />
 
@@ -1306,7 +1261,6 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
             </span>
           </div>
         </div>
-        <HeroScrollCue anchorRef={productHeroRef} />
       </div>
 
       <StickySectionNav

@@ -6,6 +6,7 @@ import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { resolveProductBadges } from '../utils/productBadges';
+import { CardEngagementStrip } from './CardEngagementStrip';
 import toast from 'react-hot-toast';
 
 function getProductCardImages(product: any): string[] {
@@ -300,6 +301,7 @@ export function ProductCard({
 
   const stock = product.stock || 12;
   const soldPercent = product.soldPercent || 85;
+  const engagementType = product.tag === 'SALE' ? 'deal' as const : 'product' as const;
 
   const StockProgress = ({ sm = false }: { sm?: boolean }) => (
     <div className={cn("flex flex-col gap-1.5", sm ? "w-full mb-3" : "w-full mb-6")}>
@@ -393,6 +395,12 @@ export function ProductCard({
                  {isGuideDetail ? <ArrowRight size={16} className="stroke-[2.5]" /> : <ShoppingCart size={16} className="stroke-[2.5]" />}
                </button>
             </div>
+            <CardEngagementStrip
+              entityType={engagementType}
+              entityId={product.id}
+              payload={product}
+              onClickCapture={(e) => e.stopPropagation()}
+            />
          </div>
       </div>
     );
@@ -481,6 +489,12 @@ export function ProductCard({
                 {isGuideDetail ? <ArrowRight size={13} className="stroke-[2.5]" /> : <ShoppingCart size={13} className="stroke-[2.5]" />}
                </button>
           </div>
+          <CardEngagementStrip
+            entityType={engagementType}
+            entityId={product.id}
+            payload={product}
+            onClickCapture={(e) => e.stopPropagation()}
+          />
         </div>
       </div>
     );
@@ -557,6 +571,12 @@ export function ProductCard({
               {isGuideDetail ? <ArrowRight size={16} className="stroke-[2.5]" /> : <ShoppingCart size={16} className="stroke-[2.5]" />}
             </button>
           </div>
+          <CardEngagementStrip
+            entityType={engagementType}
+            entityId={product.id}
+            payload={product}
+            onClickCapture={(e) => e.stopPropagation()}
+          />
         </div>
       </div>
     );
@@ -689,6 +709,12 @@ export function ProductCard({
              {isGuideDetail ? <ArrowRight size={13} className="stroke-[2.5]" /> : <ShoppingCart size={13} className="stroke-[2.5]" />}
           </button>
         </div>
+        <CardEngagementStrip
+          entityType={engagementType}
+          entityId={product.id}
+          payload={product}
+          onClickCapture={(e) => e.stopPropagation()}
+        />
       </div>
     </div>
   );

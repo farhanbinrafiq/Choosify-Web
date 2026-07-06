@@ -21,7 +21,6 @@ import {
   detailHeroSummaryActionPrimaryClass,
   detailHeroSummaryActionSecondaryClass,
 } from '../components/DetailHeroSummaryBar';
-import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
 import { PRODUCT_CARD_GRID, WHATS_ON_CARD_GRID } from '../lib/pageLayout';
 import { ProductCard } from '../components/ProductCard';
 import { BrandPostCard } from '../components/BrandPostCard';
@@ -86,10 +85,7 @@ export function BrandPostDetailPage() {
       {/* Hero — matches Guide Detail layout */}
       <section
         ref={heroRef}
-        className={cn(
-          'relative w-full choosify-dark-gradient border-b border-white/5',
-          HERO_SCROLL_CUE_PADDING,
-        )}
+        className="relative w-full choosify-dark-gradient border-b border-white/5"
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.18),transparent_42%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
@@ -212,7 +208,6 @@ export function BrandPostDetailPage() {
             }
           />
         </div>
-        <HeroScrollCue anchorRef={heroRef} />
       </section>
 
       <div className="max-w-[900px] mx-auto px-4 sm:px-6 py-8">

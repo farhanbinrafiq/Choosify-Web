@@ -31,6 +31,6 @@ export const BRAND_POST_KIND_LABELS: Record<BrandPostKind, string> = {
   event: 'Event',
   launch: 'Product Launch',
   festival: 'Festival',
-  campaign: 'Campaign',
+  campaign: 'Brand Promotion',
   store_moment: 'Store Moment',
 };

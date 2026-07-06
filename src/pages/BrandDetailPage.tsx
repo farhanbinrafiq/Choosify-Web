@@ -41,7 +41,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
 import { DETAIL_SINGLE_FEED, DETAIL_FEED_GRID_5 } from "../lib/pageLayout";
 import { StickySectionNav } from "../components/StickySectionNav";
-import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from "../components/HeroScrollCue";
+import { CardEngagementStrip } from "../components/CardEngagementStrip";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { BrandPostCarouselSection } from "../components/BrandPostCarouselSection";
 import { getBrandPostsByBrandId } from "../lib/brandPosts";
@@ -83,7 +83,7 @@ function WithInfluencerReviews({
   const featuredReview = {
     image:
       "https://images.unsplash.com/photo-1511119253457-36e78921865c?w=1200&h=800&fit=crop",
-    title: `${brandName} Collaborative Campaign`,
+    title: `${brandName} Creator Spotlight`,
     excerpt: `Dive deep into the fabric, longevity, and brand heritage of ${brandName}. Real-world creators share their personal daily style experiences.`,
     authorName:
       brandName === "Apex"
@@ -1203,7 +1203,7 @@ export function BrandDetailPage() {
       },
       {
         id: "campaigns-section",
-        label: "Campaigns",
+        label: "Events",
         icon: <Megaphone size={13} />,
         hidden: brandWhatsOnPosts.length === 0,
       },
@@ -1405,10 +1405,7 @@ export function BrandDetailPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className={cn(
-          "hero-gradient relative pt-10 pb-12 border-b border-white/5",
-          HERO_SCROLL_CUE_PADDING,
-        )}
+        className="hero-gradient relative pt-10 pb-12 border-b border-white/5"
       >
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -1712,27 +1709,6 @@ export function BrandDetailPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Save share controls */}
-              <div className="relative flex flex-wrap items-center justify-center lg:justify-end gap-3 z-20 mt-5 lg:mt-4 lg:pt-2.5 w-full">
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                    toast.success("Page link copied to clipboard!");
-                  }}
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50 text-navy"
-                >
-                  <Share2 size={16} />
-                </button>
-                <button
-                  onClick={() =>
-                    toast.success(`${brand.name} saved to your bookmarks!`)
-                  }
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-white text-[#1A1D4E] shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-50 text-navy"
-                >
-                  <Bookmark size={15} />
-                </button>
-              </div>
             </div>
 
             {/* Mobile Social links */}
@@ -1798,16 +1774,22 @@ export function BrandDetailPage() {
                 </div>
               </div>
             </div>
-
-
           </div>
         </div>
-        <HeroScrollCue anchorRef={brandHeroRef} />
       </motion.section>
 
       {/* 2. SECTION SUMMARY BAR */}
       <div className="w-full hero-gradient text-white py-4.5 border-y border-white/5 font-space font-black italic uppercase tracking-[0.2em] text-[11px] md:text-xs">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-wrap justify-center sm:justify-around items-center gap-y-4 gap-x-12 text-center">
+        <div className="max-w-[1440px] mx-auto px-6 flex flex-wrap justify-center sm:justify-around items-center gap-y-4 gap-x-8 text-center">
+          <CardEngagementStrip
+            variant="hero"
+            entityType="brand"
+            entityId={brand.id}
+            payload={brand}
+            showShare
+            shareUrl={typeof window !== 'undefined' ? window.location.href : undefined}
+          />
+          <div className="hidden sm:block h-4 w-px bg-white/20" />
           <div className="flex items-center gap-2">
             <span className="text-[#E8500A] text-lg font-space font-black">
               ★
@@ -2366,12 +2348,12 @@ export function BrandDetailPage() {
             <div id="campaigns-section" className="scroll-mt-36 w-full">
               <BrandPostCarouselSection
                 posts={brandWhatsOnPosts}
-                badgeLabel="Campaigns"
+                badgeLabel="Events"
                 showSponsoredBadge={false}
-                title="Campaigns"
+                title="Events"
                 subtitle="Official brand events, launches, and festival announcements."
                 viewAllHref="/whats-on"
-                viewAllLabel="Explore all campaigns"
+                viewAllLabel="Explore all events"
               />
             </div>
           )}

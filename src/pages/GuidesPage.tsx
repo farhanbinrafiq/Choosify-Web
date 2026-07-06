@@ -18,6 +18,7 @@ import { InfeedSponsoredCard } from '../components/SponsoredPlacementCard';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
+import { CardEngagementStrip } from '../components/CardEngagementStrip';
 import { useDashboard } from '../context/DashboardContext';
 import toast from 'react-hot-toast';
 
@@ -177,20 +178,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
 export function ReelCard({ guide }: { guide: any }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
-  const { savedGuides, setSavedGuides } = useDashboard();
   if (!guide?.id) return null;
-  const isBookmarked = savedGuides.some((g: any) => g?.id === guide.id);
-
-  const handleBookmark = () => {
-    if (isBookmarked) {
-      setSavedGuides((prev: any[]) => prev.filter((g: any) => g.id !== guide.id));
-      toast.success('Removed from saved guides');
-    } else {
-      setSavedGuides((prev: any[]) => [guide, ...prev]);
-      toast.success('Guide saved to your dashboard!');
-    }
-  };
-
   const handleMouseEnter = () => {
     setIsHovering(true);
     if (videoRef.current) {
@@ -276,36 +264,15 @@ export function ReelCard({ guide }: { guide: any }) {
       </div>
 
       {/* Footer Section below Media */}
-      <div className="pt-3 border-t border-gray-100 flex items-center justify-between mt-3">
-        <div className="flex items-center gap-3.5 text-[10px] font-black text-[#8a92a6] uppercase tracking-wider italic">
-          <span className="flex items-center gap-1 hover:text-rose-500 transition-colors">
-            <Heart size={14} className="text-rose-500 stroke-[2.5]" /> {guide.shares || '12k'}
-          </span>
-          <span className="flex items-center gap-1">
-            <Eye size={14} className="text-[#8a92a6] stroke-[2.5]" /> {guide.views || '1.2k'}
-          </span>
-          <span className="flex items-center gap-1">
-            <Share2 size={14} className="text-[#8a92a6] stroke-[2.5]" /> 450
-          </span>
-        </div>
-
-        <button 
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleBookmark();
-          }}
-          className={cn(
-            "w-8 h-8 rounded-full bg-white border flex items-center justify-center transition-all cursor-pointer shadow-none",
-            isBookmarked 
-              ? "border-orange-primary text-orange-primary bg-orange-primary/5" 
-              : "border-[#e8edf2] text-gray-400 hover:text-orange-primary hover:border-orange-primary"
-          )}
-        >
-          <Bookmark className={cn("w-3.5 h-3.5", isBookmarked ? "fill-current" : "")} />
-        </button>
-      </div>
+      <CardEngagementStrip
+        entityType="guide"
+        entityId={guide.id}
+        payload={guide}
+        onClickCapture={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      />
     </Link>
   );
 }
@@ -314,20 +281,7 @@ export function ReelCard({ guide }: { guide: any }) {
 export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeType: 'youtube' | 'blog' }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
-  const { savedGuides, setSavedGuides } = useDashboard();
   if (!guide?.id) return null;
-  const isBookmarked = savedGuides.some((g: any) => g?.id === guide.id);
-
-  const handleBookmark = () => {
-    if (isBookmarked) {
-      setSavedGuides((prev: any[]) => prev.filter((g: any) => g.id !== guide.id));
-      toast.success('Removed from saved guides');
-    } else {
-      setSavedGuides((prev: any[]) => [guide, ...prev]);
-      toast.success('Guide saved to your dashboard!');
-    }
-  };
-
   const handleMouseEnter = () => {
     if (badgeType === 'youtube') {
       setIsHovering(true);
@@ -436,37 +390,16 @@ export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeTyp
           {guide.excerpt || "Top 10 Smartphones to Buy in 2026. Find the best phone deals............"}
         </p>
 
-        {/* Footer with Stats and Bookmark */}
-        <div className="pt-3 border-t border-gray-100 flex items-center justify-between mt-2.5">
-          <div className="flex items-center gap-3.5 text-[10px] font-black text-[#8a92a6] uppercase tracking-wider italic">
-            <span className="flex items-center gap-1 hover:text-rose-500 transition-colors">
-              <Heart size={14} className="text-rose-500 stroke-[2.5]" /> {guide.shares || '12k'}
-            </span>
-            <span className="flex items-center gap-1">
-              <Eye size={14} className="text-[#8a92a6] stroke-[2.5]" /> {guide.views || '1.2k'}
-            </span>
-            <span className="flex items-center gap-1">
-              <Share2 size={14} className="text-[#8a92a6] stroke-[2.5]" /> 450
-            </span>
-          </div>
-
-          <button 
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleBookmark();
-            }}
-            className={cn(
-              "w-8 h-8 rounded-full bg-white border flex items-center justify-center transition-all cursor-pointer shadow-none",
-              isBookmarked 
-                ? "border-orange-primary text-orange-primary bg-orange-primary/5" 
-                : "border-[#e8edf2] text-gray-400 hover:text-orange-primary hover:border-orange-primary"
-            )}
-          >
-            <Bookmark className={cn("w-3.5 h-3.5", isBookmarked ? "fill-current" : "")} />
-          </button>
-        </div>
+        {/* Footer with engagement */}
+        <CardEngagementStrip
+          entityType="guide"
+          entityId={guide.id}
+          payload={guide}
+          onClickCapture={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        />
       </div>
     </Link>
   );

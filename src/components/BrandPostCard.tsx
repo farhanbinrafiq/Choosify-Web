@@ -4,6 +4,7 @@ import { cn } from '../lib/utils';
 import type { BrandPost } from '../types/brandPost';
 import { BRAND_POST_KIND_LABELS } from '../types/brandPost';
 import { formatBrandPostDateRange } from '../lib/brandPosts';
+import { CardEngagementStrip } from './CardEngagementStrip';
 
 type BrandPostCardProps = {
   post: BrandPost;
@@ -87,6 +88,16 @@ export function BrandPostCard({ post, variant = 'grid', compact = false, classNa
             </div>
           )}
         </div>
+
+        <CardEngagementStrip
+          entityType="brand-post"
+          entityId={post.id}
+          payload={post}
+          onClickCapture={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        />
 
         <div className={cn(
           'flex items-center gap-1 font-black uppercase tracking-wider text-[#E8500A]',

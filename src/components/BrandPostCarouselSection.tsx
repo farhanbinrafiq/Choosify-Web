@@ -25,7 +25,7 @@ export function BrandPostCarouselSection({
   viewAllLabel = 'View All Events',
   className,
   id,
-  badgeLabel = 'Discovery',
+  badgeLabel = 'Events',
   showSponsoredBadge = true,
 }: BrandPostCarouselSectionProps) {
   if (!posts.length) return null;

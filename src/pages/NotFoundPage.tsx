@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home, Search } from 'lucide-react';
-import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
 import { cn } from '../lib/utils';
 
 export default function NotFoundPage() {
@@ -19,10 +18,7 @@ export default function NotFoundPage() {
   return (
     <div
       ref={heroRef}
-      className={cn(
-        'min-h-[calc(100vh-5rem)] choosify-dark-gradient flex flex-col items-center justify-center p-8 text-center relative',
-        HERO_SCROLL_CUE_PADDING,
-      )}
+      className="min-h-[calc(100vh-5rem)] choosify-dark-gradient flex flex-col items-center justify-center p-8 text-center relative"
     >
 
       <div className="max-w-xl relative z-10 animate-in fade-in zoom-in duration-700 flex-1 flex flex-col items-center justify-center">
@@ -70,8 +66,6 @@ export default function NotFoundPage() {
           </form>
         </div>
       </div>
-
-      <HeroScrollCue anchorRef={heroRef} scrollTargetId="not-found-search" />
     </div>
   );
 }

@@ -48,7 +48,6 @@ import { cn } from "../lib/utils";
 import { PRODUCT_CARD_GRID, DETAIL_SINGLE_FEED, GUIDE_MEDIA_GRID } from "../lib/pageLayout";
 import { renderGuideMediaCard } from "./GuidesPage";
 import { StickySectionNav } from "../components/StickySectionNav";
-import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from "../components/HeroScrollCue";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { EvaluationData, ComparisonProduct } from "../types/evaluation";
 import evaluationsData from "../data/evaluations.json";
@@ -319,10 +318,7 @@ export function GuideDetailPage() {
       {/* Unified Guide Hero — breadcrumbs, media, guide info, and summary in one section */}
       <section
         ref={heroRef}
-        className={cn(
-          "relative w-full choosify-dark-gradient border-b border-white/5",
-          HERO_SCROLL_CUE_PADDING,
-        )}
+        className="relative w-full choosify-dark-gradient border-b border-white/5"
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.18),transparent_42%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
@@ -406,7 +402,6 @@ export function GuideDetailPage() {
             }
           />
         </div>
-        <HeroScrollCue anchorRef={heroRef} />
       </section>
 
       <StickySectionNav

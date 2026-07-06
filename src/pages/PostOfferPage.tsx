@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Plus, ChevronRight, Info, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { operationsApi } from '../services/operationsApi';
-import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
 import { cn } from '../lib/utils';
 
 export function PostOfferPage() {
@@ -200,10 +199,7 @@ export function PostOfferPage() {
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       <section
         ref={heroRef}
-        className={cn(
-          'relative choosify-dark-gradient px-8 pt-12 pb-10 border-b border-white/5',
-          HERO_SCROLL_CUE_PADDING,
-        )}
+        className="relative choosify-dark-gradient px-8 pt-12 pb-10 border-b border-white/5"
       >
         <div className="max-w-4xl mx-auto w-full">
           <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 italic">Post Your Offer</h1>
@@ -216,7 +212,6 @@ export function PostOfferPage() {
             </span>
           </div>
         </div>
-        <HeroScrollCue anchorRef={heroRef} scrollTargetId="post-offer-form" resetKey={step} />
       </section>
 
       <div id="post-offer-form" className="px-8 py-12">

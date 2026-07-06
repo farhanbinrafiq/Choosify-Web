@@ -18,7 +18,6 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { ClaimProfileModal } from '../components/ClaimProfileModal';
 import { FollowButton } from '../components/FollowButton';
 import { useRegisterPageFilters } from '../components/FilterEngine';
-import { HeroScrollCue, HERO_SCROLL_CUE_PADDING } from '../components/HeroScrollCue';
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
@@ -308,10 +307,7 @@ export function CreatorProfilePage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className={cn(
-          "hero-gradient relative pt-10 pb-12 border-b border-white/5",
-          HERO_SCROLL_CUE_PADDING,
-        )}
+        className="hero-gradient relative pt-10 pb-12 border-b border-white/5"
       >
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -575,7 +571,6 @@ export function CreatorProfilePage() {
 
             </div>
         </div>
-        <HeroScrollCue anchorRef={creatorHeroRef} />
       </motion.section>
 
       {/* 2. SECTION SUMMARY BAR */}
