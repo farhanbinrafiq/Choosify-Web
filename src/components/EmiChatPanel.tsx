@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2, RotateCcw, Send, Sparkles, X } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { ChoosifyIconLogo } from './ChoosifyIconLogo';
 import { useEmiChat } from '../hooks/useEmiChat';
 import type { EmiCatalogPick } from '../lib/emiCatalogSearch';
 import {
@@ -120,8 +121,8 @@ export function EmiChatPanel({ onClose, className, variant = 'panel' }: EmiChatP
     <div className={cn('flex flex-col min-h-0 h-full', className)}>
       <div className="px-4 sm:px-5 py-4 border-b border-[#e8edf2] flex items-center justify-between shrink-0 bg-gradient-to-r from-[#1A1D4E] to-[#252a6e] text-white gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full bg-[#E8500A] flex items-center justify-center shrink-0 shadow-lg shadow-[#E8500A]/30">
-            <span className="text-sm font-black italic">E</span>
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-lg p-1.5">
+            <ChoosifyIconLogo size={28} />
           </div>
           <div className="min-w-0 text-left">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60 flex items-center gap-1">

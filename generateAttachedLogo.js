@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
-import { BRAND_BG_COLOR, OFFICIAL_SVG_LOGO } from './brandLogoSvg.js';
+import { BRAND_BG_COLOR, CHOOSIFY_ICON_SVG } from './brandLogoSvg.js';
 
 export async function buildLogo() {
   const publicDir = path.resolve('./public');
@@ -9,7 +9,7 @@ export async function buildLogo() {
     fs.mkdirSync(publicDir, { recursive: true });
   }
 
-  const svgBuffer = Buffer.from(OFFICIAL_SVG_LOGO);
+  const svgBuffer = Buffer.from(CHOOSIFY_ICON_SVG);
 
   const paddedSize = Math.round(512 * 0.88);
   const logoBuffer = await sharp(svgBuffer)

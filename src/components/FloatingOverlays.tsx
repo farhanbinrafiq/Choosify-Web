@@ -1,9 +1,10 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  ShoppingCart, MessageSquare, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp, ArrowRight, Sparkles
+import {
+  ShoppingCart, MessageSquare, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp, ArrowRight
 } from 'lucide-react';
+import { ChoosifyIconLogo } from './ChoosifyIconLogo';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { cn } from '../lib/utils';
@@ -336,17 +337,11 @@ export function FloatingOverlays() {
               title="Ask Emi — Choosify Assistant"
             >
               <div className="flex items-center gap-2">
-                <Sparkles
-                  size={15}
-                  className={cn(
-                    'transition-colors',
-                    activePanel === 'emi' ? 'text-[#E8500A]' : 'text-[#8a9bb0] group-hover:text-[#E8500A]',
-                  )}
-                />
+                <ChoosifyIconLogo size={22} className="w-[22px] h-[22px]" />
                 <span className="text-[10px] font-black uppercase tracking-wider">ASK EMI</span>
               </div>
-              <span className="w-6 h-6 rounded-full bg-[#E8500A] text-white text-[10px] font-black flex items-center justify-center italic">
-                E
+              <span className="w-7 h-7 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
+                <ChoosifyIconLogo size={20} className="w-5 h-5" />
               </span>
             </motion.button>
           )}
@@ -678,16 +673,16 @@ export function FloatingOverlays() {
         onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[219] bottom-4 left-4 w-14 h-14 rounded-full border shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-colors pointer-events-auto sm:hidden',
+          'fixed z-[219] bottom-4 left-4 w-14 h-14 rounded-full border shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-colors pointer-events-auto sm:hidden p-2.5',
           activePanel === 'emi'
             ? 'bg-[#1A1D4E] border-[#1A1D4E] text-white'
-            : 'bg-[#E8500A] border-[#E8500A] text-white',
+            : 'bg-white border-[#e8edf2] text-white',
         )}
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         aria-label="Ask Emi"
         title="Ask Emi"
       >
-        <Sparkles size={22} />
+        <ChoosifyIconLogo size={36} className="w-9 h-9" />
       </motion.button>
     )}
 

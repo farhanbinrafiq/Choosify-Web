@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
-import { BRAND_BG_COLOR, MASKED_ICON_SVG, OFFICIAL_SVG_LOGO } from './brandLogoSvg.js';
+import { BRAND_BG_COLOR, CHOOSIFY_ICON_SVG, MASKED_ICON_SVG } from './brandLogoSvg.js';
 
 export async function buildAssets() {
   const publicDir = path.resolve('./public');
@@ -14,10 +14,10 @@ export async function buildAssets() {
     fs.mkdirSync(iconsDir, { recursive: true });
   }
 
-  fs.writeFileSync(path.join(publicDir, 'favicon.svg'), OFFICIAL_SVG_LOGO);
+  fs.writeFileSync(path.join(publicDir, 'favicon.svg'), CHOOSIFY_ICON_SVG);
   fs.writeFileSync(path.join(publicDir, 'masked-icon.svg'), MASKED_ICON_SVG);
 
-  const svgBuffer = Buffer.from(OFFICIAL_SVG_LOGO);
+  const svgBuffer = Buffer.from(CHOOSIFY_ICON_SVG);
 
   const renderSquareIcon = async (size, bgHex = BRAND_BG_COLOR, paddingPercent = 0.08) => {
     const paddedSize = Math.round(size * (1 - paddingPercent * 2));

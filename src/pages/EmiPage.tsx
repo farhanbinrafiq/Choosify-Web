@@ -1,15 +1,15 @@
 import React from 'react';
 import { PageHeroHeader } from '../components/PageHeroHeader';
 import { EmiChatPanel } from '../components/EmiChatPanel';
-import { Sparkles } from 'lucide-react';
+import { ChoosifyIconLogo } from '../components/ChoosifyIconLogo';
 
 export function EmiPage() {
   return (
     <div className="min-h-screen bg-choosify-feed flex flex-col">
       <PageHeroHeader variant="gradient" className="px-6 py-10">
         <div className="max-w-3xl mx-auto text-center relative z-10">
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#E8500A] mb-2 flex items-center justify-center gap-1.5">
-            <Sparkles size={12} />
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#E8500A] mb-2 flex items-center justify-center gap-2">
+            <ChoosifyIconLogo size={22} className="w-[22px] h-[22px]" />
             Choosify Assistant
           </p>
           <h1 className="text-3xl md:text-4xl font-black text-white uppercase italic tracking-tighter mb-2">
