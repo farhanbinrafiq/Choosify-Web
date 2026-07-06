@@ -1,4 +1,4 @@
-export type BrandPostKind = 'event' | 'launch' | 'festival' | 'campaign' | 'store_moment';
+export type BrandPostKind = 'event' | 'announcement' | 'festival' | 'carnival' | 'launch' | 'campaign' | 'store_moment';
 
 export type BrandPostStatus = 'scheduled' | 'live' | 'expired';
 
@@ -29,8 +29,10 @@ export interface BrandPost {
 
 export const BRAND_POST_KIND_LABELS: Record<BrandPostKind, string> = {
   event: 'Event',
-  launch: 'Product Launch',
+  announcement: 'Announcement',
   festival: 'Festival',
+  carnival: 'Carnival',
+  launch: 'Product Launch',
   campaign: 'Brand Promotion',
   store_moment: 'Store Moment',
 };

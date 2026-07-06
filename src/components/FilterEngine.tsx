@@ -1145,7 +1145,8 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
   const filterDrawerRef = useRef<HTMLDivElement>(null);
   const filterContainerRef = useRef<HTMLDivElement>(null);
 
-  const standardTransition = { type: 'spring' as const, damping: 25, stiffness: 350 };
+  const desktopDrawerTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
+  const mobileDrawerTransition = { type: 'tween' as const, ease: [0.32, 0.72, 0, 1] as const, duration: 0.28 };
 
   useEffect(() => {
     const mobileMedia = window.matchMedia('(max-width: 640px)');
@@ -1226,8 +1227,12 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
       {activeFiltersData && (
         <>
         {!isMobile && isOpen && (
-          <button
+          <motion.button
             type="button"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
             aria-label="Close filters"
             onClick={() => closeDrawer()}
@@ -1245,10 +1250,11 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
               <motion.div
                 ref={filterDrawerRef}
                 id="floating-filter-drawer"
-                initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 20, scale: 0.97 }}
-                animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-                exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 20, scale: 0.97 }}
-                transition={standardTransition}
+                initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
+                animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0 }}
+                exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
+                transition={isMobile ? mobileDrawerTransition : desktopDrawerTransition}
+                style={{ willChange: 'transform' }}
                 drag={isMobile ? 'y' : false}
                 dragConstraints={{ top: 0, bottom: 250 }}
                 dragElastic={{ top: 0.1, bottom: 0.8 }}

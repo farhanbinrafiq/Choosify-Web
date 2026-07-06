@@ -79,7 +79,7 @@ export interface CatalogDeal {
   updatedAt: string;
 }
 
-export type CatalogBrandPostKind = 'event' | 'launch' | 'festival' | 'campaign' | 'store_moment';
+export type CatalogBrandPostKind = 'event' | 'announcement' | 'festival' | 'carnival' | 'launch' | 'campaign' | 'store_moment';
 export type CatalogBrandPostStatus = 'scheduled' | 'live' | 'expired';
 
 export interface CatalogBrandPost {
@@ -180,6 +180,42 @@ export interface SiteProductBadge {
   isActive: boolean;
 }
 
+export type SiteHeroTickerPageKey =
+  | 'home'
+  | 'products'
+  | 'categories'
+  | 'brands'
+  | 'guides'
+  | 'deals'
+  | 'whats-on'
+  | 'search'
+  | 'creators'
+  | 'brand-deals'
+  | 'compare';
+
+export interface SiteHeroTickerSegment {
+  text: string;
+  emphasis?: boolean;
+}
+
+export interface SiteHeroTickerItem {
+  id: string;
+  pageKey: SiteHeroTickerPageKey;
+  segments: SiteHeroTickerSegment[];
+  order: number;
+  isActive: boolean;
+}
+
+export interface SiteContentBadge {
+  id: string;
+  label: string;
+  color: string;
+  entityType: 'product' | 'event';
+  mapsTo?: string;
+  priority: number;
+  isActive: boolean;
+}
+
 export interface SiteWebsiteAssets {
   navbarLogo: string;
   footerLogo: string;
@@ -203,6 +239,8 @@ export interface SiteConfig {
   announcementBarText: string;
   announcementBarEnabled: boolean;
   productBadges?: SiteProductBadge[];
+  contentBadges?: SiteContentBadge[];
+  heroTickers?: SiteHeroTickerItem[];
   websiteAssets?: SiteWebsiteAssets;
   updatedAt: string;
 }

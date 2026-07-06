@@ -2,6 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays, ChevronRight, Search, Rocket, PartyPopper, Megaphone, Store } from 'lucide-react';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
 import { BrandPostCard } from '../components/BrandPostCard';
 import {
   ActiveFilterChips,
@@ -12,24 +13,32 @@ import { filterBrandPosts, getAllBrandPosts } from '../lib/brandPosts';
 import { BRAND_POST_KIND_LABELS, type BrandPostKind } from '../types/brandPost';
 import { PAGE_SHELL_WRAPPER, PAGE_LISTING_SINGLE_SHELL, WHATS_ON_CARD_GRID } from '../lib/pageLayout';
 import { StickySectionNav } from '../components/StickySectionNav';
+import { useGlobalState } from '../context/GlobalStateContext';
 import { cn } from '../lib/utils';
 
 const KIND_TABS: Array<{ id: BrandPostKind | 'all'; label: string }> = [
   { id: 'all', label: 'All' },
   { id: 'event', label: 'Events' },
+  { id: 'announcement', label: 'Announcements' },
   { id: 'launch', label: 'Launches' },
   { id: 'festival', label: 'Festivals' },
+  { id: 'carnival', label: 'Carnivals' },
   { id: 'campaign', label: 'Promotions' },
   { id: 'store_moment', label: 'Store Moments' },
 ];
 
 type StatusFilter = 'all' | 'live' | 'scheduled';
+type DateRangeFilter = 'all' | 'this_month' | 'next_30';
 
 export function WhatsOnPage() {
+  const { siteConfig } = useGlobalState();
   const [query, setQuery] = useState('');
   const [activeKind, setActiveKind] = useState<BrandPostKind | 'all'>('all');
   const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [locationFilter, setLocationFilter] = useState('');
+  const [sponsoredOnly, setSponsoredOnly] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRangeFilter>('all');
 
   const brandOptions = useMemo(() => {
     const seen = new Map<number, string>();
@@ -41,17 +50,28 @@ export function WhatsOnPage() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, []);
 
+  const locationOptions = useMemo(() => {
+    const seen = new Set<string>();
+    getAllBrandPosts().forEach((post) => {
+      if (post.location?.trim()) seen.add(post.location.trim());
+    });
+    return Array.from(seen).sort();
+  }, []);
+
   const posts = useMemo(() => {
     let result = filterBrandPosts({
       kind: activeKind,
       query,
       brandId: selectedBrandId ?? undefined,
+      location: locationFilter || undefined,
+      sponsoredOnly,
+      dateRange,
     });
     if (statusFilter !== 'all') {
       result = result.filter((post) => post.status === statusFilter);
     }
     return result;
-  }, [activeKind, query, selectedBrandId, statusFilter]);
+  }, [activeKind, query, selectedBrandId, statusFilter, locationFilter, sponsoredOnly, dateRange]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -59,14 +79,20 @@ export function WhatsOnPage() {
     if (activeKind !== 'all') count += 1;
     if (selectedBrandId != null) count += 1;
     if (statusFilter !== 'all') count += 1;
+    if (locationFilter.trim()) count += 1;
+    if (sponsoredOnly) count += 1;
+    if (dateRange !== 'all') count += 1;
     return count;
-  }, [query, activeKind, selectedBrandId, statusFilter]);
+  }, [query, activeKind, selectedBrandId, statusFilter, locationFilter, sponsoredOnly, dateRange]);
 
   const handleClearAll = () => {
     setQuery('');
     setActiveKind('all');
     setSelectedBrandId(null);
     setStatusFilter('all');
+    setLocationFilter('');
+    setSponsoredOnly(false);
+    setDateRange('all');
   };
 
   const activeChips = useMemo(
@@ -96,8 +122,21 @@ export function WhatsOnPage() {
               onRemove: () => setStatusFilter('all'),
             }
           : null,
+        locationFilter.trim()
+          ? { id: 'location', label: `Location: ${locationFilter}`, onRemove: () => setLocationFilter('') }
+          : null,
+        sponsoredOnly
+          ? { id: 'sponsored', label: 'Sponsored only', onRemove: () => setSponsoredOnly(false) }
+          : null,
+        dateRange !== 'all'
+          ? {
+              id: 'date',
+              label: `Date: ${dateRange === 'this_month' ? 'This month' : 'Next 30 days'}`,
+              onRemove: () => setDateRange('all'),
+            }
+          : null,
       ].filter(Boolean) as Array<{ id: string; label: string; onRemove: () => void }>,
-    [query, activeKind, selectedBrandId, statusFilter, brandOptions],
+    [query, activeKind, selectedBrandId, statusFilter, brandOptions, locationFilter, sponsoredOnly, dateRange],
   );
 
   useRegisterPageFilters(
@@ -158,12 +197,43 @@ export function WhatsOnPage() {
                     { value: 'scheduled', label: 'Upcoming / scheduled' },
                   ],
                 },
+                {
+                  id: 'location',
+                  name: 'Location',
+                  type: 'single_select',
+                  options: [
+                    { value: 'all', label: 'All locations' },
+                    ...locationOptions.map((loc) => ({ value: loc, label: loc })),
+                  ],
+                },
+                {
+                  id: 'date',
+                  name: 'Date range',
+                  type: 'single_select',
+                  options: [
+                    { value: 'all', label: 'Any date' },
+                    { value: 'this_month', label: 'This month' },
+                    { value: 'next_30', label: 'Next 30 days' },
+                  ],
+                },
+                {
+                  id: 'sponsored',
+                  name: 'Sponsorship',
+                  type: 'single_select',
+                  options: [
+                    { value: 'all', label: 'All posts' },
+                    { value: 'sponsored', label: 'Sponsored only' },
+                  ],
+                },
               ],
             }}
             activeFilters={{
               kind: activeKind,
               brand: selectedBrandId != null ? String(selectedBrandId) : 'all',
               status: statusFilter,
+              location: locationFilter || 'all',
+              date: dateRange,
+              sponsored: sponsoredOnly ? 'sponsored' : 'all',
             }}
             onFilterChange={(filterId, value) => {
               if (filterId === 'kind') {
@@ -172,6 +242,12 @@ export function WhatsOnPage() {
                 setSelectedBrandId(value === 'all' || !value ? null : Number(value));
               } else if (filterId === 'status') {
                 setStatusFilter((value === 'all' || !value ? 'all' : value) as StatusFilter);
+              } else if (filterId === 'location') {
+                setLocationFilter(value === 'all' || !value ? '' : value);
+              } else if (filterId === 'date') {
+                setDateRange((value === 'all' || !value ? 'all' : value) as DateRangeFilter);
+              } else if (filterId === 'sponsored') {
+                setSponsoredOnly(value === 'sponsored');
               }
             }}
           />
@@ -180,14 +256,16 @@ export function WhatsOnPage() {
       activeFilterCount,
       onClearAll: handleClearAll,
     },
-    [query, activeKind, selectedBrandId, statusFilter, activeFilterCount, brandOptions],
+    [query, activeKind, selectedBrandId, statusFilter, activeFilterCount, brandOptions, locationFilter, sponsoredOnly, dateRange, locationOptions],
   );
 
   const categoryNavItems = useMemo(
     () => [
       { id: 'event', label: 'Events', icon: <CalendarDays size={13} /> },
+      { id: 'announcement', label: 'Announcements', icon: <Megaphone size={13} /> },
       { id: 'launch', label: 'Launches', icon: <Rocket size={13} /> },
       { id: 'festival', label: 'Festivals', icon: <PartyPopper size={13} /> },
+      { id: 'carnival', label: 'Carnivals', icon: <PartyPopper size={13} /> },
       { id: 'campaign', label: 'Promotions', icon: <Megaphone size={13} /> },
       { id: 'store_moment', label: 'Store Moments', icon: <Store size={13} /> },
     ],
@@ -205,6 +283,7 @@ export function WhatsOnPage() {
   return (
     <div className="bg-choosify-feed min-h-screen pb-16">
       <PageHeroBanner pageKey="whats-on" />
+      <HeroMarqueeTicker pageKey="whats-on" siteConfig={siteConfig} />
 
       <ActiveFilterChips chips={activeChips} onClearAll={handleClearAll} />
 
@@ -227,40 +306,41 @@ export function WhatsOnPage() {
           </div>
         </aside>
 
-        <section id="whats-on-feed" className="choosify-middle-feed flex flex-col gap-5 min-w-0 scroll-mt-36">
+        <main id="whats-on-feed" className="scroll-mt-36 min-w-0 flex flex-col gap-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-black text-[#1A1D4E] uppercase italic tracking-tighter">What&apos;s On</h2>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                {posts.length} live brand moments
+              </p>
+            </div>
+            <Link
+              to="/brands"
+              className="text-[10px] font-black uppercase tracking-wider text-[#E8500A] hover:underline flex items-center gap-1"
+            >
+              Browse brands <ChevronRight size={12} />
+            </Link>
+          </div>
+
           {posts.length === 0 ? (
-            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-12 text-center">
-              <CalendarDays className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-              <h2 className="text-sm font-black uppercase text-[#1A1D4E] mb-1">No posts found</h2>
-              <p className="text-xs text-gray-400">Try another filter or search term.</p>
+            <div className="bg-white rounded-[5px] border border-dashed border-[#e8edf2] p-10 text-center">
+              <p className="text-sm font-semibold text-gray-400">No events match your filters.</p>
+              <button
+                type="button"
+                onClick={handleClearAll}
+                className="mt-3 text-[10px] font-black uppercase tracking-wider text-[#E8500A] hover:underline"
+              >
+                Clear filters
+              </button>
             </div>
           ) : (
             <div className={WHATS_ON_CARD_GRID}>
               {posts.map((post) => (
-                <BrandPostCard key={post.id} post={post} compact />
+                <BrandPostCard key={post.id} post={post} />
               ))}
             </div>
           )}
-
-          <p className="text-[10px] text-gray-400 font-semibold text-center uppercase tracking-wider">
-            All listings marked Sponsored · Posted by verified brand partners
-          </p>
-        </section>
-
-        <aside className="hidden 2xl:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 choosify-sidebar-right">
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4 shadow-sm text-left">
-            <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-3">For brands</h3>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-3">
-              Promote launches, festivals, and in-store moments to Choosify shoppers.
-            </p>
-            <Link
-              to="/advertise"
-              className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-[#E8500A] hover:underline"
-            >
-              Advertise with us <ChevronRight size={12} />
-            </Link>
-          </div>
-        </aside>
+        </main>
       </div>
     </div>
   );

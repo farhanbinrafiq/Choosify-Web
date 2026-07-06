@@ -40,8 +40,8 @@ function NavButton({
       className={cn(
         'shrink-0 px-4 py-2.5 sm:py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap relative touch-manipulation min-h-[40px] sm:min-h-0',
         active
-          ? 'bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/25'
-          : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white hover:border-white/20',
+          ? 'bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/25 border border-[#E8500A]'
+          : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A]',
       )}
     >
       {icon}

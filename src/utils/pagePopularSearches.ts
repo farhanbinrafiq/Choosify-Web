@@ -156,6 +156,41 @@ export function buildCreatorsPopularSearchTerms(options: {
   return results.slice(0, limit);
 }
 
+export function buildGuidePopularSearchTerms(options: {
+  cmsTerms?: SitePopularSearch[];
+  guideTitle?: string;
+  guideCategory?: string;
+  guideTags?: string[];
+  relatedGuideTitles?: string[];
+  limit?: number;
+}): string[] {
+  const limit = options.limit ?? 12;
+  const seen = new Set<string>();
+  const results: string[] = [];
+  const push = (term: string) => {
+    const normalized = normalizeTerm(term);
+    if (!normalized) return;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    results.push(normalized);
+  };
+
+  (options.cmsTerms ?? [])
+    .filter((item) => item.isActive && item.term.trim())
+    .sort((a, b) => a.order - b.order)
+    .forEach((item) => push(item.term));
+
+  if (options.guideTitle) push(options.guideTitle);
+  if (options.guideCategory) push(options.guideCategory);
+  options.guideTags?.forEach((tag) => push(String(tag)));
+  options.relatedGuideTitles?.forEach((title) => push(title));
+
+  ['Buying Guides', 'Product Reviews', 'Best Picks 2026', 'Compare Before Buy', 'Expert Tips'].forEach(push);
+
+  return results.slice(0, limit);
+}
+
 export function buildGuidesPopularSearchTerms(options: {
   cmsTerms?: SitePopularSearch[];
   guideTitles?: string[];

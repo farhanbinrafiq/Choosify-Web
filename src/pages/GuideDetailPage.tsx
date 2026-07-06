@@ -64,7 +64,9 @@ import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
 import toast from "react-hot-toast";
 import { FollowButton } from "../components/FollowButton";
-import { useRegisterPageFilters } from "../components/FilterEngine";
+import { useRegisterPageFilters, UniversalFilterRenderer } from "../components/FilterEngine";
+import { PopularSearchKeywords } from "../components/PopularSearchKeywords";
+import { buildGuidePopularSearchTerms } from "../utils/pagePopularSearches";
 
 const evaluations = evaluationsData as EvaluationData[];
 
@@ -146,7 +148,9 @@ export function GuideDetailPage() {
   const heroRef = useRef<HTMLElement>(null);
   const { id } = useParams();
   const navigate = useNavigate();
-  const { allGuides } = useGlobalState();
+  const { allGuides, siteConfig, allBrands, addToCart } = useGlobalState();
+  const [relatedPlatformFilter, setRelatedPlatformFilter] = useState<string>('all');
+  const [relatedTopicFilter, setRelatedTopicFilter] = useState<string>('all');
 
   const guide =
     allGuides.find((b) => String(b.id) === String(id) || (b as any).slug === id) ||
@@ -159,13 +163,55 @@ export function GuideDetailPage() {
     renderSearch: null,
     quickFilters: [
       { id: 'article', label: '📖 Editorial Guide', active: true, onClick: () => {} },
-      { id: 'products', label: '🛒 Recommended Products', active: false, onClick: () => {} },
-      { id: 'specs', label: '📊 Spec Breakdown', active: false, onClick: () => {} }
+      { id: 'products', label: '🛒 Recommended Products', active: false, onClick: () => document.getElementById('top-3')?.scrollIntoView({ behavior: 'smooth' }) },
+      { id: 'specs', label: '📊 Spec Breakdown', active: false, onClick: () => document.getElementById('specs')?.scrollIntoView({ behavior: 'smooth' }) },
     ],
-    renderFilters: null,
-    activeFilterCount: 0,
-    onClearAll: null
-  }, [guide]);
+    renderFilters: () => (
+      <UniversalFilterRenderer
+        profile={{
+          entity: 'guides',
+          filters: [
+            {
+              id: 'platform',
+              name: 'Platform',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'All platforms' },
+                { value: 'youtube', label: 'YouTube' },
+                { value: 'reels', label: 'Reels / Shorts' },
+                { value: 'blog', label: 'Blog / Article' },
+              ],
+            },
+            {
+              id: 'topic',
+              name: 'Topic',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'All topics' },
+                { value: 'mobile', label: 'Mobile & Tech' },
+                { value: 'fashion', label: 'Fashion' },
+                { value: 'home', label: 'Home & Living' },
+              ],
+            },
+          ],
+        }}
+        activeFilters={{
+          platform: relatedPlatformFilter,
+          topic: relatedTopicFilter,
+        }}
+        onFilterChange={(filterId, value) => {
+          if (filterId === 'platform') setRelatedPlatformFilter(value || 'all');
+          if (filterId === 'topic') setRelatedTopicFilter(value || 'all');
+        }}
+      />
+    ),
+    activeFilterCount:
+      (relatedPlatformFilter !== 'all' ? 1 : 0) + (relatedTopicFilter !== 'all' ? 1 : 0),
+    onClearAll: () => {
+      setRelatedPlatformFilter('all');
+      setRelatedTopicFilter('all');
+    },
+  }, [guide, relatedPlatformFilter, relatedTopicFilter]);
 
   const guideId = guide?.id;
   const dynamicData = DYNAMIC_GUIDES[Number(guideId)] || {
@@ -266,7 +312,6 @@ export function GuideDetailPage() {
 
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } =
     useDashboard();
-  const { allBrands, addToCart } = useGlobalState();
 
   const guideSectionNavItems = useMemo(
     () => [
@@ -284,6 +329,39 @@ export function GuideDetailPage() {
 
   const { activeId: activeSectionId, scrollToSection } =
     useSectionScrollSpy(guideSectionNavItems);
+
+  const relatedGuides = useMemo(() => {
+    return allGuides
+      .filter((b) => String(b.id) !== String(guide.id))
+      .filter((b) => {
+        if (relatedPlatformFilter !== 'all') {
+          const type = String((b as any).type || (b as any).contentType || '').toLowerCase();
+          if (relatedPlatformFilter === 'youtube' && !type.includes('youtube') && !type.includes('video')) return false;
+          if (relatedPlatformFilter === 'reels' && !type.includes('reel') && !type.includes('short')) return false;
+          if (relatedPlatformFilter === 'blog' && !type.includes('blog') && !type.includes('article')) return false;
+        }
+        if (relatedTopicFilter !== 'all') {
+          const cat = String(b.category || '').toLowerCase();
+          if (relatedTopicFilter === 'mobile' && !cat.includes('mobile') && !cat.includes('tech')) return false;
+          if (relatedTopicFilter === 'fashion' && !cat.includes('fashion')) return false;
+          if (relatedTopicFilter === 'home' && !cat.includes('home') && !cat.includes('living')) return false;
+        }
+        return true;
+      })
+      .slice(0, 4);
+  }, [allGuides, guide.id, relatedPlatformFilter, relatedTopicFilter]);
+
+  const guidePopularSearchTerms = useMemo(
+    () =>
+      buildGuidePopularSearchTerms({
+        cmsTerms: siteConfig?.popularSearches,
+        guideTitle: guide.title,
+        guideCategory: guide.category,
+        guideTags: (guide as any).tags,
+        relatedGuideTitles: relatedGuides.map((g) => g.title),
+      }),
+    [siteConfig?.popularSearches, guide, relatedGuides],
+  );
 
   const handleViewProducts = () => {
     if (allGuideProducts.length > 6) {
@@ -1163,13 +1241,16 @@ export function GuideDetailPage() {
           </div>
 
           <div className={GUIDE_MEDIA_GRID}>
-            {allGuides
-              .filter((b) => String(b.id) !== String(guide.id))
-              .slice(0, 4)
-              .map((g) => (
-                <div key={g.id}>{renderGuideMediaCard(g)}</div>
-              ))}
+            {relatedGuides.map((g) => (
+              <div key={g.id}>{renderGuideMediaCard(g)}</div>
+            ))}
           </div>
+
+          <PopularSearchKeywords
+            title="Popular searches for this guide"
+            terms={guidePopularSearchTerms}
+            className="mt-10 pt-10 border-t border-gray-100"
+          />
         </section>
       </div>
     </div>

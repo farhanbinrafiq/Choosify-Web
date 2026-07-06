@@ -224,7 +224,9 @@ export function FloatingOverlays() {
   const triggerStackHeight = visibleButtonsCount * 48 + (visibleButtonsCount - 1) * 12;
 
   // Custom motion transitions matching standard Choosify velocity
-  const standardTransition = { type: "spring" as const, damping: 25, stiffness: 350 };
+  const desktopDrawerTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
+  const mobileDrawerTransition = { type: 'tween' as const, ease: [0.32, 0.72, 0, 1] as const, duration: 0.28 };
+  const panelTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
 
   return (
     <>
@@ -250,7 +252,7 @@ export function FloatingOverlays() {
             initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
             animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
-            transition={standardTransition}
+            transition={panelTransition}
             style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
             className={cn(
               cartPreviewShellClass,
@@ -272,7 +274,7 @@ export function FloatingOverlays() {
             initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
             animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
-            transition={standardTransition}
+            transition={panelTransition}
             style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
             className={cn(
               messagesPreviewShellClass,
@@ -294,7 +296,7 @@ export function FloatingOverlays() {
             initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
             animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
-            transition={standardTransition}
+            transition={panelTransition}
             style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
             className={cn(
               emiChatShellClass,
@@ -329,20 +331,15 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                'w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none',
+                'w-[185px] h-12 rounded-full border flex items-center justify-center gap-2 px-4 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none',
                 activePanel === 'emi'
                   ? 'bg-[#1A1D4E] border-[#1A1D4E] text-white'
                   : 'bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40',
               )}
               title="Ask Emi — Choosify Assistant"
             >
-              <div className="flex items-center gap-2">
-                <ChoosifyIconLogo size={22} className="w-[22px] h-[22px]" />
-                <span className="text-[10px] font-black uppercase tracking-wider">ASK EMI</span>
-              </div>
-              <span className="w-7 h-7 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
-                <ChoosifyIconLogo size={20} className="w-5 h-5" />
-              </span>
+              <ChoosifyIconLogo size={22} className="w-[22px] h-[22px] shrink-0" />
+              <span className="text-[11px] font-bold tracking-tight">Ask Emi</span>
             </motion.button>
           )}
         </AnimatePresence>
@@ -473,8 +470,12 @@ export function FloatingOverlays() {
     {hasFilters && (
       <>
         {!isMobile && filterOpen && (
-          <button
+          <motion.button
             type="button"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
             aria-label="Close filters"
             onClick={closeFilterPanel}
@@ -491,10 +492,11 @@ export function FloatingOverlays() {
           {filterOpen && (
             <motion.div
               ref={filterDrawerRef}
-              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 20, scale: 0.97 }}
-              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 20, scale: 0.97 }}
-              transition={standardTransition}
+              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
+              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
+              transition={isMobile ? mobileDrawerTransition : desktopDrawerTransition}
+              style={{ willChange: 'transform' }}
               drag={isMobile ? 'y' : false}
               dragConstraints={{ top: 0, bottom: 250 }}
               dragElastic={{ top: 0.1, bottom: 0.8 }}

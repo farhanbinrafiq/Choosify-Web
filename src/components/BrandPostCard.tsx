@@ -2,9 +2,10 @@ import { Link } from 'react-router-dom';
 import { CalendarDays, MapPin, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 import type { BrandPost } from '../types/brandPost';
-import { BRAND_POST_KIND_LABELS } from '../types/brandPost';
 import { formatBrandPostDateRange } from '../lib/brandPosts';
 import { CardEngagementStrip } from './CardEngagementStrip';
+import { useGlobalState } from '../context/GlobalStateContext';
+import { resolveEventBadges } from '../utils/eventBadges';
 
 type BrandPostCardProps = {
   post: BrandPost;
@@ -14,7 +15,9 @@ type BrandPostCardProps = {
 };
 
 export function BrandPostCard({ post, variant = 'grid', compact = false, className }: BrandPostCardProps) {
+  const { siteConfig } = useGlobalState();
   const dateLabel = formatBrandPostDateRange(post.startDate, post.endDate);
+  const badges = resolveEventBadges(post, siteConfig);
 
   return (
     <Link
@@ -38,18 +41,18 @@ export function BrandPostCard({ post, variant = 'grid', compact = false, classNa
 
       <div className={cn('flex flex-col flex-1 gap-2', compact ? 'p-3' : 'p-4')}>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className={cn(
-            'px-2 py-0.5 rounded-full font-black uppercase tracking-wider bg-[#E8500A] text-white',
-            compact ? 'text-[8px]' : 'text-[9px]',
-          )}>
-            Sponsored
-          </span>
-          <span className={cn(
-            'px-2 py-0.5 rounded-full font-black uppercase tracking-wider bg-[#1A1D4E]/5 text-[#1A1D4E] border border-[#e8edf2]',
-            compact ? 'text-[8px]' : 'text-[9px]',
-          )}>
-            {BRAND_POST_KIND_LABELS[post.kind]}
-          </span>
+          {badges.map((badge) => (
+            <span
+              key={badge.id}
+              className={cn(
+                'px-2 py-0.5 rounded-full font-black uppercase tracking-wider text-white',
+                compact ? 'text-[8px]' : 'text-[9px]',
+              )}
+              style={{ backgroundColor: badge.color }}
+            >
+              {badge.label}
+            </span>
+          ))}
         </div>
 
         <div className="flex items-center gap-2">

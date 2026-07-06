@@ -9,6 +9,7 @@ import {
 import { PRODUCTS, BRANDS, BLOGS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
 import { PRODUCT_CARD_GRID, BRAND_CARD_GRID, CREATOR_CARD_GRID } from '../lib/pageLayout';
 import { StickySectionNav } from '../components/StickySectionNav';
 import { BrandCardDesign } from '../components/BrandCardDesign';
@@ -19,7 +20,7 @@ import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '../utils/overviewRegistry';
-import { useRegisterPageFilters } from '../components/FilterEngine';
+import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
 import { filterBrandPosts } from '../lib/brandPosts';
 import { BrandPostCard } from '../components/BrandPostCard';
 
@@ -126,8 +127,12 @@ export function SearchPage() {
   const [localInput, setLocalInput] = useState(rawQuery);
   const [activeTab, setActiveTab] = useState<'all' | 'products' | 'brands' | 'deals' | 'guides' | 'coupons' | 'categories' | 'influencers' | 'whats-on' | 'compares'>('all');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'default' | 'price_asc' | 'price_desc' | 'newest'>('default');
+  const [maxPrice, setMaxPrice] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [inStockOnly, setInStockOnly] = useState(false);
   const { customOverviews } = useDashboard();
-  const { allProducts, allBrands, allCategories, allCreators, allGuides } = useGlobalState();
+  const { allProducts, allBrands, allCategories, allCreators, allGuides, siteConfig } = useGlobalState();
   const productSource = allProducts.length > 0 ? allProducts : PRODUCTS;
   const brandSource = allBrands.length > 0
     ? allBrands.map((b) => ({ ...b, products: (b as any).followers ?? (b as any).products ?? 0, rating: (b as any).ratings ?? (b as any).rating ?? 0 }))
@@ -137,6 +142,17 @@ export function SearchPage() {
     : CATEGORIES;
   const guideSource = allGuides.length > 0 ? allGuides : mockGuides;
   const creatorSource = allCreators.length > 0 ? allCreators : (Array.isArray(CREATORS) ? CREATORS : Object.values(CREATORS));
+
+  const searchFilterCount = useMemo(() => {
+    let count = 0;
+    if (activeTab !== 'all') count += 1;
+    if (rawQuery.trim()) count += 1;
+    if (sortBy !== 'default') count += 1;
+    if (maxPrice !== 'all') count += 1;
+    if (categoryFilter !== 'all') count += 1;
+    if (inStockOnly) count += 1;
+    return count;
+  }, [activeTab, rawQuery, sortBy, maxPrice, categoryFilter, inStockOnly]);
 
   useRegisterPageFilters({
     pageName: 'Search',
@@ -167,14 +183,81 @@ export function SearchPage() {
       { id: 'coupons', label: '🎫 Coupons', active: activeTab === 'coupons', onClick: () => setActiveTab('coupons') },
       { id: 'influencers', label: '👥 Influencers', active: activeTab === 'influencers', onClick: () => setActiveTab('influencers') }
     ],
-    renderFilters: null,
-    activeFilterCount: activeTab !== 'all' || rawQuery.trim() !== '' ? 1 : 0,
+    renderFilters: () => (
+      <UniversalFilterRenderer
+        profile={{
+          entity: 'products',
+          filters: [
+            {
+              id: 'sort',
+              name: 'Sort by',
+              type: 'single_select',
+              options: [
+                { value: 'default', label: 'Relevance' },
+                { value: 'price_asc', label: 'Price: Low to High' },
+                { value: 'price_desc', label: 'Price: High to Low' },
+                { value: 'newest', label: 'Newest' },
+              ],
+            },
+            {
+              id: 'price',
+              name: 'Max price',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'Any price' },
+                { value: '5000', label: 'Under BDT 5,000' },
+                { value: '15000', label: 'Under BDT 15,000' },
+                { value: '50000', label: 'Under BDT 50,000' },
+              ],
+            },
+            {
+              id: 'category',
+              name: 'Category',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'All categories' },
+                ...categorySource.slice(0, 12).map((c: any) => ({
+                  value: c.name,
+                  label: c.name,
+                })),
+              ],
+            },
+            {
+              id: 'stock',
+              name: 'Availability',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'All items' },
+                { value: 'in_stock', label: 'In stock only' },
+              ],
+            },
+          ],
+        }}
+        activeFilters={{
+          sort: sortBy,
+          price: maxPrice,
+          category: categoryFilter,
+          stock: inStockOnly ? 'in_stock' : 'all',
+        }}
+        onFilterChange={(filterId, value) => {
+          if (filterId === 'sort') setSortBy((value || 'default') as typeof sortBy);
+          if (filterId === 'price') setMaxPrice(value || 'all');
+          if (filterId === 'category') setCategoryFilter(value || 'all');
+          if (filterId === 'stock') setInStockOnly(value === 'in_stock');
+        }}
+      />
+    ),
+    activeFilterCount: searchFilterCount,
     onClearAll: () => {
       setActiveTab('all');
       setLocalInput('');
       setSearchParams({});
+      setSortBy('default');
+      setMaxPrice('all');
+      setCategoryFilter('all');
+      setInStockOnly(false);
     }
-  }, [rawQuery, activeTab]);
+  }, [rawQuery, activeTab, sortBy, maxPrice, categoryFilter, inStockOnly, categorySource, searchFilterCount]);
 
   // Sync state with url parameter
   React.useEffect(() => {
@@ -219,15 +302,37 @@ export function SearchPage() {
   }, [rawQuery, creatorSource]);
 
   const filteredProducts = useMemo(() => {
-    if (!rawQuery.trim()) return productSource;
-    const q = rawQuery.toLowerCase();
-    return productSource.filter(p =>
-      p.title.toLowerCase().includes(q) || 
-      p.brand.toLowerCase().includes(q) || 
-      p.category.toLowerCase().includes(q) || 
-      (p.description || '').toLowerCase().includes(q)
-    );
-  }, [rawQuery, productSource]);
+    let results = !rawQuery.trim()
+      ? productSource
+      : productSource.filter((p) => {
+          const q = rawQuery.toLowerCase();
+          return (
+            p.title.toLowerCase().includes(q) ||
+            p.brand.toLowerCase().includes(q) ||
+            p.category.toLowerCase().includes(q) ||
+            (p.description || '').toLowerCase().includes(q)
+          );
+        });
+
+    if (categoryFilter !== 'all') {
+      results = results.filter((p) => p.category === categoryFilter || (p as any).categoryName === categoryFilter);
+    }
+    if (maxPrice !== 'all') {
+      const cap = Number(maxPrice);
+      if (!Number.isNaN(cap)) results = results.filter((p) => Number(p.price) <= cap);
+    }
+    if (inStockOnly) {
+      results = results.filter((p) => Number((p as any).stock ?? 1) > 0);
+    }
+    if (sortBy === 'price_asc') {
+      results = [...results].sort((a, b) => Number(a.price) - Number(b.price));
+    } else if (sortBy === 'price_desc') {
+      results = [...results].sort((a, b) => Number(b.price) - Number(a.price));
+    } else if (sortBy === 'newest') {
+      results = [...results].sort((a, b) => Number((b as any).id) - Number((a as any).id));
+    }
+    return results;
+  }, [rawQuery, productSource, categoryFilter, maxPrice, inStockOnly, sortBy]);
 
   const combinedCreators = useMemo(() => {
     const uniqueCreatorsMap = new Map<string, any>();
@@ -542,6 +647,7 @@ export function SearchPage() {
   return (
     <div className="bg-choosify-feed min-h-screen text-[#1A1A2E] pb-24 font-sans antialiased">
       <PageHeroBanner pageKey="search" />
+      <HeroMarqueeTicker pageKey="search" siteConfig={siteConfig} />
 
       {rawQuery && (
         <div className="bg-[#000435] border-b border-white/5 py-2 px-6 text-center">

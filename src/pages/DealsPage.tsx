@@ -7,6 +7,7 @@ import { cn } from '../lib/utils';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
 import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
 import { buildDealsPopularSearchTerms } from '../utils/pagePopularSearches';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
@@ -321,8 +322,6 @@ export function DealsPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <PageHeroBanner pageKey="deals" />
-
-      {/* Flash sale countdown strip below banner */}
       <div className="w-full bg-[#000435] border-b border-white/5 py-2 px-6">
         <div className="max-w-[1440px] mx-auto flex flex-row items-center justify-center gap-4 md:gap-6 flex-wrap">
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[12px] py-1 px-2.5 flex items-center gap-3.5 shadow-lg shrink-0">
@@ -346,17 +345,7 @@ export function DealsPage() {
         </div>
       </div>
 
-      {/* Repeating Banner / Marquee - Orange Slide Through style */}
-      <div className="w-full bg-orange-primary py-2.5 px-6 overflow-hidden relative z-20">
-        <div className="flex items-center gap-12 animate-marquee whitespace-nowrap">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <span key={i} className="text-white font-black uppercase text-[11px] tracking-[0.3em] italic flex items-center gap-6">
-              FREE SHIPPING. EXTRA 15% OFF. LIMITED STOCK.
-              <div className="w-1.5 h-1.5 bg-white rounded-full opacity-50" />
-            </span>
-          ))}
-        </div>
-      </div>
+      <HeroMarqueeTicker pageKey="deals" siteConfig={siteConfig} />
 
       <main className="w-full bg-choosify-feed min-h-screen">
 
@@ -776,14 +765,6 @@ export function DealsPage() {
       </main>
 
       <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          display: inline-flex;
-          animation: marquee 30s linear infinite;
-        }
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-20px); }

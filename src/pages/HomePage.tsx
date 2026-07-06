@@ -10,11 +10,12 @@ import {
 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
 import { PRODUCTS, BRANDS, CATEGORIES } from '../constants';
 import { ReelCard, HorizontalMediaCard } from './GuidesPage';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
-import { useRegisterPageFilters } from '../components/FilterEngine';
+import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -133,6 +134,9 @@ export function HomePage() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [showAllFollowed, setShowAllFollowed] = useState(false);
   const [activeBrandsTab, setActiveBrandsTab] = useState<'brands' | 'products'>('brands');
+  const [homeCategoryFilter, setHomeCategoryFilter] = useState<string>('all');
+  const [homeBrandFilter, setHomeBrandFilter] = useState<string>('all');
+  const [homePriceBand, setHomePriceBand] = useState<string>('all');
 
   const jumpToHomeSection = (id: string) => {
     const el = document.getElementById(id);
@@ -141,9 +145,17 @@ export function HomePage() {
     window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   };
 
+  const homeFilterCount = useMemo(() => {
+    let count = 0;
+    if (homeCategoryFilter !== 'all') count += 1;
+    if (homeBrandFilter !== 'all') count += 1;
+    if (homePriceBand !== 'all') count += 1;
+    return count;
+  }, [homeCategoryFilter, homeBrandFilter, homePriceBand]);
+
   useRegisterPageFilters({
     pageName: 'Home',
-    renderSearch: null, // global search lives in the navbar
+    renderSearch: null,
     quickFilters: [
       { id: 'home-brands', label: '🏬 Trending Brands', active: false, onClick: () => jumpToHomeSection('section-trending-brands') },
       { id: 'home-products', label: '🛍️ New Products', active: false, onClick: () => jumpToHomeSection('section-new-on-choosify') },
@@ -151,10 +163,61 @@ export function HomePage() {
       { id: 'home-picks', label: '✨ Editor Picks', active: false, onClick: () => jumpToHomeSection('section-recommendations') },
       { id: 'home-categories', label: '🗂️ Categories', active: false, onClick: () => jumpToHomeSection('section-categories') },
     ],
-    renderFilters: null, // no sidebar filters on homepage
-    activeFilterCount: 0,
-    onClearAll: null,
-  });
+    renderFilters: () => (
+      <UniversalFilterRenderer
+        profile={{
+          entity: 'products',
+          filters: [
+            {
+              id: 'category',
+              name: 'Category',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'All categories' },
+                ...((allCategories ?? []).slice(0, 10).map((c) => ({ value: c.name, label: c.name }))),
+              ],
+            },
+            {
+              id: 'brand',
+              name: 'Brand',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'All brands' },
+                ...rightBrandsList.slice(0, 10).map((b: any) => ({ value: b.name, label: b.name })),
+              ],
+            },
+            {
+              id: 'price',
+              name: 'Price band',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'Any price' },
+                { value: '5000', label: 'Under BDT 5,000' },
+                { value: '15000', label: 'Under BDT 15,000' },
+                { value: '50000', label: 'Under BDT 50,000' },
+              ],
+            },
+          ],
+        }}
+        activeFilters={{
+          category: homeCategoryFilter,
+          brand: homeBrandFilter,
+          price: homePriceBand,
+        }}
+        onFilterChange={(filterId, value) => {
+          if (filterId === 'category') setHomeCategoryFilter(value || 'all');
+          if (filterId === 'brand') setHomeBrandFilter(value || 'all');
+          if (filterId === 'price') setHomePriceBand(value || 'all');
+        }}
+      />
+    ),
+    activeFilterCount: homeFilterCount,
+    onClearAll: () => {
+      setHomeCategoryFilter('all');
+      setHomeBrandFilter('all');
+      setHomePriceBand('all');
+    },
+  }, [homeCategoryFilter, homeBrandFilter, homePriceBand, homeFilterCount, allCategories, rightBrandsList]);
 
   const [isMobile, setIsMobile] = useState(false);
   const [dragStartX, setDragStartX] = useState<number | null>(null);
@@ -763,15 +826,7 @@ export function HomePage() {
         <PageHeroBanner pageKey="home" />
       )}
 
-      {/* SECTION 3 — MARQUEE BANNER */}
-      <div className="relative z-20 bg-gradient-to-r from-[#E8500A] via-[#FF5B00] to-[#E8500A] text-white py-4.5 overflow-hidden border-y border-[#CF4400]/40 shadow-lg font-space text-[11.5px] font-black tracking-[0.2em] uppercase leading-none">
-        <div className="flex w-max animate-marquee whitespace-nowrap gap-16">
-          <span>🛡️ 100% ORIGINAL PRODUCTS ONLY • VERIFIED SHOPS IN BANGLADESH • CHOOSE WISELY 🛡️</span>
-          <span>💎 AUTHENTIC OUTLETS DIRECTORY • NO MORE ONLINE SCAMS • SHOP WITH CONFIDENCE 💎</span>
-          <span>🛡️ 100% ORIGINAL PRODUCTS ONLY • VERIFIED SHOPS IN BANGLADESH • CHOOSE WISELY 🛡️</span>
-          <span>💎 AUTHENTIC OUTLETS DIRECTORY • NO MORE ONLINE SCAMS • SHOP WITH CONFIDENCE 💎</span>
-        </div>
-      </div>
+      <HeroMarqueeTicker pageKey="home" siteConfig={siteConfig} />
 
       <StickySectionNav
         sections={homeSectionNavItems}

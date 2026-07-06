@@ -10,6 +10,7 @@ import { CategorySubcategoryPanel } from '../components/CategorySubcategoryPanel
 import { buildCategoryDisplayList } from '../utils/categoryDisplay';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
 import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -607,28 +608,7 @@ export function CategoriesPage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       <PageHeroBanner pageKey="categories" />
-
-      {/* Product name ticker below banner */}
-      <div className="w-full overflow-hidden py-2 border-b border-white/5 bg-[#000435] relative">
-        <motion.div 
-           animate={{ x: [0, -1500] }}
-           transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-           className="flex whitespace-nowrap gap-8 px-6"
-        >
-           {[
-             'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
-             '4K Drone', 'Mechanical Keyboard', 'DSLR Camera', 'Portable Speaker', 
-             'Fitness Tracker', 'Power Bank',
-             'Wireless Earbuds', 'Smart Watch', 'Gaming Laptop', 'Noise Cancelling Headphones', 
-             '4K Drone', 'Mechanical Keyboard', 'DSLR Camera', 'Portable Speaker', 
-             'Fitness Tracker', 'Power Bank',
-           ].map((name, i) => (
-             <span key={i} className="text-base lg:text-xl font-black text-white/10 italic uppercase tracking-tighter">
-                {name}
-             </span>
-           ))}
-        </motion.div>
-      </div>
+      <HeroMarqueeTicker pageKey="categories" siteConfig={siteConfig} />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips

@@ -8,6 +8,8 @@ import { ProductCardSkeleton } from '../components/Skeleton';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
+import { PaginationBar } from '../components/PaginationBar';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -571,6 +573,7 @@ export function AllProductsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       <PageHeroBanner pageKey="products" />
+      <HeroMarqueeTicker pageKey="products" siteConfig={siteConfig} />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -953,34 +956,10 @@ export function AllProductsPage() {
             </div>
           )}
 
-          {/* Static Pagination (Styled Perfectly matching global canonical standard) */}
-          <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-full px-2">
-              <button className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
-                <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
-              </button>
-              {[1, 2, 3, '...', 12].map((page, i) => (
-                <button 
-                  key={i} 
-                  className={cn(
-                    "w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
-                    page === 1 
-                    ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
-                    : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
-                  )}
-                >
-                  {page}
-                </button>
-              ))}
-              <button className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
-                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-            
-            <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">
-              Showing <span className="text-navy">{filteredProducts.length}</span> Of <span className="text-navy">{filteredProducts.length}</span> Results
-            </p>
-          </div>
+          <PaginationBar
+            showingCount={filteredProducts.length}
+            totalCount={filteredProducts.length}
+          />
 
           <PopularSearchKeywords
             title="Popular searches"

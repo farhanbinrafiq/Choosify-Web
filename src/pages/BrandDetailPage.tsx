@@ -61,6 +61,7 @@ import {
   CategorySmartFilters,
   useRegisterPageFilters,
 } from "../components/FilterEngine";
+import { PaginationBar } from "../components/PaginationBar";
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
@@ -2250,60 +2251,14 @@ export function BrandDetailPage() {
                   </div>
                 )}
 
-                {/* Pagination footer (from Brand Wise Products page - standardized to global canonical style) */}
                 {localClaimStatus === "verified" && totalPages > 1 && (
-                  <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
-                    <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-full px-2">
-                      <button
-                        disabled={currentPage === 1}
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(prev - 1, 1))
-                        }
-                        className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] disabled:opacity-45 disabled:hover:bg-white disabled:hover:text-navy disabled:hover:border-[#e8edf2] transition-all shadow-none group cursor-pointer"
-                      >
-                        <ArrowRight
-                          size={18}
-                          className="rotate-180 group-hover:-translate-x-1 transition-transform"
-                        />
-                      </button>
-                      {Array.from(
-                        { length: totalPages },
-                        (_, idx) => idx + 1,
-                      ).map((p) => (
-                        <button
-                          key={p}
-                          onClick={() => setCurrentPage(p)}
-                          className={cn(
-                            "w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
-                            p === currentPage
-                              ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none"
-                              : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none",
-                          )}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                      <button
-                        disabled={currentPage === totalPages}
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages),
-                          )
-                        }
-                        className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] disabled:opacity-45 disabled:hover:bg-white disabled:hover:text-navy disabled:hover:border-[#e8edf2] transition-all shadow-none group cursor-pointer"
-                      >
-                        <ArrowRight
-                          size={18}
-                          className="group-hover:translate-x-1 transition-transform"
-                        />
-                      </button>
-                    </div>
-                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">
-                      Authorized Distribution • Showing{" "}
-                      {paginatedProducts.length} of {filteredProducts.length}{" "}
-                      items (Page {currentPage} of {totalPages})
-                    </p>
-                  </div>
+                  <PaginationBar
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    showingCount={paginatedProducts.length}
+                    totalCount={filteredProducts.length}
+                    onPageChange={setCurrentPage}
+                  />
                 )}
               </div>
             )}

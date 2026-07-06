@@ -74,12 +74,30 @@ export function filterBrandPosts(options?: {
   kind?: BrandPostKind | 'all';
   query?: string;
   brandId?: number;
+  location?: string;
+  sponsoredOnly?: boolean;
+  dateRange?: 'all' | 'this_month' | 'next_30';
 }): BrandPost[] {
   const q = options?.query?.trim().toLowerCase() ?? '';
+  const locationQ = options?.location?.trim().toLowerCase() ?? '';
+  const now = new Date();
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  const next30 = new Date(now);
+  next30.setDate(next30.getDate() + 30);
+
   return getAllBrandPosts()
     .filter((post) => {
       if (options?.brandId != null && post.brandId !== options.brandId) return false;
       if (options?.kind && options.kind !== 'all' && post.kind !== options.kind) return false;
+      if (options?.sponsoredOnly && !post.sponsored) return false;
+      if (locationQ && !post.location?.toLowerCase().includes(locationQ)) return false;
+
+      if (options?.dateRange && options.dateRange !== 'all' && post.startDate) {
+        const start = new Date(post.startDate);
+        if (options.dateRange === 'this_month' && (start < now || start > monthEnd)) return false;
+        if (options.dateRange === 'next_30' && (start < now || start > next30)) return false;
+      }
+
       if (!q) return true;
       return (
         post.title.toLowerCase().includes(q) ||

@@ -10,6 +10,8 @@ import { cn } from '../lib/utils';
 import { RecommendationCardSkeleton } from '../components/Skeleton';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
+import { PaginationBar } from '../components/PaginationBar';
 import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
 import { buildGuidesPopularSearchTerms } from '../utils/pagePopularSearches';
 import { AdSenseSlot } from '../components/AdSenseSlot';
@@ -1471,24 +1473,7 @@ export function GuidesPage() {
   return (
     <div id="guides-root" className="flex flex-col min-h-screen bg-choosify-feed">
       <PageHeroBanner pageKey="guides" />
-
-      {/* Article titles ticker below banner */}
-      <div id="guides-hero" className="w-full overflow-hidden py-2 border-b border-white/5 bg-[#000435] relative">
-        <motion.div 
-           animate={{ x: [0, -2000] }}
-           transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-           className="flex whitespace-nowrap gap-8 px-6"
-        >
-           {[...recommendationTitles, ...recommendationTitles].map((title, i) => (
-             <span 
-               key={i} 
-               className="text-xl md:text-2xl font-black text-white/10 italic uppercase tracking-tighter"
-             >
-                   {title}
-             </span>
-           ))}
-        </motion.div>
-      </div>
+      <HeroMarqueeTicker pageKey="guides" siteConfig={siteConfig} />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -1598,32 +1583,7 @@ export function GuidesPage() {
                </>
              )}
              
-             {/* Pagination Component */}
-             <div className="mt-24 pt-16 border-t border-gray-100 flex flex-col items-center gap-10">
-             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-full px-2">
-                  <button className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
-                     <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
-                  </button>
-                  {[1, 2, 3, '...', 12].map((page, i) => (
-                    <button 
-                      key={i} 
-                      className={cn(
-                        "w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
-                        page === 1 
-                        ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
-                        : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
-                      )}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                  <button className="w-11 h-11 md:w-12 md:h-12 min-w-[44px] min-h-[44px] shrink-0 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
-                     <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
-               </div>
-               
-               <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">Results 1-8 of 156 Stories</p>
-            </div>
+             <PaginationBar showingCount={8} totalCount={156} className="mt-24 pt-16" />
 
             <PopularSearchKeywords
               title="Popular recommendation searches"
