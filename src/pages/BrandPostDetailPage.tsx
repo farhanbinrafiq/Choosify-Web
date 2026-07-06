@@ -8,6 +8,7 @@ import {
   ChevronRight,
   CircleDot,
   ExternalLink,
+  FileText,
   Images,
   MapPin,
   Share2,
@@ -15,30 +16,33 @@ import {
   Sparkles,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { cn } from '../lib/utils';
 import {
   DetailHeroSummaryBar,
   detailHeroSummaryActionPrimaryClass,
   detailHeroSummaryActionSecondaryClass,
 } from '../components/DetailHeroSummaryBar';
-import { PRODUCT_CARD_GRID, WHATS_ON_CARD_GRID } from '../lib/pageLayout';
+import { DETAIL_SINGLE_FEED, DETAIL_FEED_GRID_5, WHATS_ON_CARD_GRID } from '../lib/pageLayout';
 import { ProductCard } from '../components/ProductCard';
 import { BrandPostCard } from '../components/BrandPostCard';
 import { BrandPostBannerGallery } from '../components/BrandPostBannerGallery';
+import { StickySectionNav } from '../components/StickySectionNav';
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { useRegisterPageFilters } from '../components/FilterEngine';
+import { useGlobalState } from '../context/GlobalStateContext';
 import {
   formatBrandPostDateRange,
   getBrandPostBannerImages,
   getBrandPostBySlug,
   getBrandPostsByBrandId,
 } from '../lib/brandPosts';
-import { BRAND_POST_KIND_LABELS } from '../types/brandPost';
+import { resolveEventBadges } from '../utils/eventBadges';
 import { PRODUCTS } from '../constants';
 
 export function BrandPostDetailPage() {
   const heroRef = useRef<HTMLElement>(null);
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { siteConfig } = useGlobalState();
   const post = slug ? getBrandPostBySlug(slug) : undefined;
 
   const bannerImages = useMemo(
@@ -55,6 +59,26 @@ export function BrandPostDetailPage() {
     if (!post?.linkedProductIds?.length) return [];
     return PRODUCTS.filter((p) => post.linkedProductIds!.includes(p.id));
   }, [post]);
+
+  const eventBadges = useMemo(
+    () => (post ? resolveEventBadges(post, siteConfig) : []),
+    [post, siteConfig],
+  );
+
+  const sectionNavItems = useMemo(() => {
+    const items = [
+      { id: 'event-about', label: 'About', icon: <FileText size={13} /> },
+    ];
+    if (linkedProducts.length > 0) {
+      items.push({ id: 'related-products', label: 'Products', icon: <ShoppingBag size={13} /> });
+    }
+    if (relatedPosts.length > 0) {
+      items.push({ id: 'more-events', label: 'More Events', icon: <Sparkles size={13} /> });
+    }
+    return items;
+  }, [linkedProducts.length, relatedPosts.length]);
+
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
 
   useRegisterPageFilters({
     pageName: post?.title ?? 'Events',
@@ -82,7 +106,6 @@ export function BrandPostDetailPage() {
 
   return (
     <div className="bg-white min-h-screen pb-16">
-      {/* Hero — matches Guide Detail layout */}
       <section
         ref={heroRef}
         className="relative w-full choosify-dark-gradient border-b border-white/5"
@@ -93,12 +116,15 @@ export function BrandPostDetailPage() {
         <div className="relative z-10">
           <div className="max-w-7xl mx-auto px-6 pt-8 pb-4">
             <div className="flex flex-wrap items-center justify-end gap-3">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#E8500A] text-white">
-                Sponsored
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/90 text-[#1A1D4E]">
-                {BRAND_POST_KIND_LABELS[post.kind]}
-              </span>
+              {eventBadges.map((badge) => (
+                <span
+                  key={badge.id}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider text-white"
+                  style={{ backgroundColor: badge.color }}
+                >
+                  {badge.label}
+                </span>
+              ))}
               {dateLabel && (
                 <div className="flex items-center gap-2 text-[10px] font-black text-white/80 uppercase tracking-widest italic bg-white/5 border border-white/10 px-4 py-2 rounded-full">
                   <CalendarDays size={14} className="text-orange-primary" />
@@ -135,7 +161,7 @@ export function BrandPostDetailPage() {
               {
                 id: 'event-type',
                 icon: Sparkles,
-                label: BRAND_POST_KIND_LABELS[post.kind],
+                label: eventBadges.find((b) => b.mapsTo !== 'sponsored')?.label ?? post.kind,
               },
               {
                 id: 'location',
@@ -210,92 +236,126 @@ export function BrandPostDetailPage() {
         </div>
       </section>
 
-      <div className="max-w-[900px] mx-auto px-4 sm:px-6 py-8">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-gray-500 hover:text-[#E8500A] mb-6"
-        >
-          <ArrowLeft size={14} />
-          Back
-        </button>
+      <StickySectionNav
+        sections={sectionNavItems}
+        activeId={activeSectionId}
+        onNavigate={scrollToSection}
+        allLabel="Event"
+        allId="all"
+        profileLabel="Event sections"
+      />
 
-        <article className="bg-white rounded-[5px] border border-[#e8edf2] shadow-sm overflow-hidden">
-          <div className="p-5 sm:p-8 space-y-6 text-left">
-            <Link
-              to={`/brands/${post.brandId}`}
-              className="inline-flex items-center gap-3 group"
-            >
-              <div className="w-11 h-11 rounded-full bg-[#1A1D4E] text-white flex items-center justify-center text-xs font-black">
-                {post.brandLogo || post.brandName.slice(0, 2)}
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">Verified brand partner</p>
-                <p className="text-sm font-bold text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors">
-                  {post.brandName}
+      <main id="all-section" className="bg-choosify-feed py-5 scroll-mt-36">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 w-full">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-gray-500 hover:text-[#E8500A] mb-6"
+          >
+            <ArrowLeft size={14} />
+            Back
+          </button>
+
+          <div className={DETAIL_SINGLE_FEED}>
+            <section id="event-about" className="scroll-mt-36 w-full">
+              <div className="mb-4 text-left">
+                <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
+                  Event Details
+                </h2>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
+                  Official brand announcement and event information
                 </p>
               </div>
-            </Link>
 
-            {post.location && (
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500">
-                <MapPin size={14} />
-                {post.location}
-              </div>
+              <article className="bg-white rounded-[5px] border border-[#e8edf2] shadow-sm overflow-hidden w-full">
+                <div className="p-6 sm:p-10 space-y-6 text-left">
+                  <Link
+                    to={`/brands/${post.brandId}`}
+                    className="inline-flex items-center gap-3 group"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-[#1A1D4E] text-white flex items-center justify-center text-xs font-black">
+                      {post.brandLogo || post.brandName.slice(0, 2)}
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">Verified brand partner</p>
+                      <p className="text-base font-bold text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors">
+                        {post.brandName}
+                      </p>
+                    </div>
+                  </Link>
+
+                  {post.location && (
+                    <div className="flex items-center gap-1.5 text-[12px] font-semibold text-gray-500">
+                      <MapPin size={15} className="text-[#E8500A]" />
+                      {post.location}
+                    </div>
+                  )}
+
+                  <div className="space-y-5 max-w-4xl">
+                    {post.body.map((paragraph, i) => (
+                      <p key={i} className="text-sm md:text-[15px] text-gray-600 leading-relaxed">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+
+                  <div className="rounded-[5px] bg-[#FFF8F5] border border-[#E8500A]/15 p-5 flex items-start gap-3 max-w-4xl">
+                    <Sparkles size={18} className="text-[#E8500A] shrink-0 mt-0.5" />
+                    <p className="text-[12px] text-gray-600 leading-relaxed">
+                      This is a <strong>sponsored brand awareness post</strong>, not an editorial buying guide.
+                      Offers and availability are confirmed directly with {post.brandName}.
+                    </p>
+                  </div>
+                </div>
+              </article>
+            </section>
+
+            {linkedProducts.length > 0 && (
+              <section id="related-products" className="scroll-mt-36 w-full">
+                <div className="mb-4 text-left">
+                  <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
+                    Related <span className="text-[#E8500A]">Products</span>
+                  </h2>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
+                    Items linked to this event from {post.brandName}
+                  </p>
+                </div>
+                <div className={DETAIL_FEED_GRID_5}>
+                  {linkedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} variant="grid" isGuideDetail />
+                  ))}
+                </div>
+              </section>
             )}
 
-            <div className="space-y-4">
-              {post.body.map((paragraph, i) => (
-                <p key={i} className="text-[13px] text-gray-600 leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-
-            <div className="rounded-[5px] bg-[#FFF8F5] border border-[#E8500A]/15 p-4 flex items-start gap-3">
-              <Sparkles size={16} className="text-[#E8500A] shrink-0 mt-0.5" />
-              <p className="text-[11px] text-gray-600 leading-relaxed">
-                This is a <strong>sponsored brand awareness post</strong>, not an editorial buying guide.
-                Offers and availability are confirmed directly with {post.brandName}.
-              </p>
-            </div>
+            {relatedPosts.length > 0 && (
+              <section id="more-events" className="scroll-mt-36 w-full">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4 text-left">
+                  <div>
+                    <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
+                      More from <span className="text-[#E8500A]">{post.brandName}</span>
+                    </h2>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
+                      Other upcoming events and announcements
+                    </p>
+                  </div>
+                  <Link
+                    to="/whats-on"
+                    className="text-[10px] font-black uppercase text-[#E8500A] hover:underline inline-flex items-center gap-1 shrink-0"
+                  >
+                    All What&apos;s On <ChevronRight size={12} />
+                  </Link>
+                </div>
+                <div className={WHATS_ON_CARD_GRID}>
+                  {relatedPosts.map((related) => (
+                    <BrandPostCard key={related.id} post={related} />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
-        </article>
-
-        {linkedProducts.length > 0 && (
-          <section className="mt-8">
-            <h2 className="text-sm font-black uppercase text-[#1A1D4E] mb-4 tracking-tight">
-              Related <span className="text-[#E8500A]">Products</span>
-            </h2>
-            <div className={PRODUCT_CARD_GRID}>
-              {linkedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} variant="grid" isGuideDetail />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {relatedPosts.length > 0 && (
-          <section className="mt-10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-black uppercase text-[#1A1D4E] tracking-tight">
-                More from <span className="text-[#E8500A]">{post.brandName}</span>
-              </h2>
-              <Link
-                to="/whats-on"
-                className="text-[10px] font-black uppercase text-[#E8500A] hover:underline inline-flex items-center gap-1"
-              >
-                All What&apos;s On <ChevronRight size={12} />
-              </Link>
-            </div>
-            <div className={WHATS_ON_CARD_GRID}>
-              {relatedPosts.map((related) => (
-                <BrandPostCard key={related.id} post={related} compact />
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
