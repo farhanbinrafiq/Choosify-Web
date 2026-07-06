@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { PageHeroBannerKey } from './PageHeroBanner';
 import type { SiteConfig } from '../types/catalog';
 import { getHeroTickerItems } from '../utils/heroTickers';
 import { cn } from '../lib/utils';
+
+/** Pixels per second — keeps marquee speed consistent across pages regardless of content length */
+const MARQUEE_SPEED_PX_PER_SEC = 60;
 
 interface HeroMarqueeTickerProps {
   pageKey: PageHeroBannerKey;
@@ -48,9 +51,29 @@ function TickerLine({
 
 export function HeroMarqueeTicker({ pageKey, siteConfig, className }: HeroMarqueeTickerProps) {
   const items = getHeroTickerItems(pageKey, siteConfig);
-  if (!items.length) return null;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [durationSec, setDurationSec] = useState(30);
 
   const doubled = [...items, ...items];
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || !items.length) return;
+
+    const updateDuration = () => {
+      const halfWidth = track.scrollWidth / 2;
+      if (halfWidth <= 0) return;
+      setDurationSec(Math.max(12, halfWidth / MARQUEE_SPEED_PX_PER_SEC));
+    };
+
+    updateDuration();
+
+    const observer = new ResizeObserver(updateDuration);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [items, pageKey]);
+
+  if (!items.length) return null;
 
   return (
     <div
@@ -60,7 +83,13 @@ export function HeroMarqueeTicker({ pageKey, siteConfig, className }: HeroMarque
       )}
       aria-hidden
     >
-      <div className="flex w-max animate-marquee whitespace-nowrap gap-0 px-4">
+      <div
+        ref={trackRef}
+        className="flex w-max whitespace-nowrap gap-0"
+        style={{
+          animation: `marquee ${durationSec}s linear infinite`,
+        }}
+      >
         {doubled.map((item, i) => (
           <TickerLine key={`${item.id}-${i}`} segments={item.segments} />
         ))}

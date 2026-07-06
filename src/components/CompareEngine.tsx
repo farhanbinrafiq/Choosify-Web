@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { 
   Zap, Info, Star, ShieldCheck, ShoppingBag, 
@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from './FilterEngine';
+import { DragScrollContainer, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters, useDragScroll } from './FilterEngine';
 import { useDashboard } from '../context/DashboardContext';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
@@ -601,6 +601,26 @@ export function CompareEngine() {
   const [selectedRiskRating, setSelectedRiskRating] = useState<string>('all');
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showDifferencesOnly, setShowDifferencesOnly] = useState(false);
+  const { ref: stickyNavTrackRef, props: stickyNavTrackProps } = useDragScroll({ grabCursor: false });
+  const userNavScrollUntilRef = useRef(0);
+
+  const STICKY_PILL_BASE =
+    'shrink-0 px-4 py-2.5 sm:py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap touch-manipulation min-h-[40px] sm:min-h-0';
+  const STICKY_PILL_ACTIVE =
+    'bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/25 border border-[#E8500A]';
+  const STICKY_PILL_INACTIVE =
+    'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A]';
+
+  const compareModeOptions = [
+    { id: 'product' as const, label: 'Product Compare', icon: <ShoppingBag size={13} /> },
+    { id: 'brand' as const, label: 'Brand Compare', icon: <ShieldCheck size={13} /> },
+    { id: 'creator' as const, label: 'Creator Intel', icon: <Users size={13} /> },
+    { id: 'guide' as const, label: 'Buying Guides', icon: <BookOpen size={13} /> },
+    { id: 'ai' as const, label: 'AI Smart Mode', icon: <Sparkles size={13} /> },
+  ];
+
+  const heroProductSlots = compareMode === 'product' ? Math.max(0, 4 - comparedProducts.length) : 0;
 
   // Soft trigger for loading state when filters adjust
   const triggerSoftLoading = () => {
@@ -693,10 +713,10 @@ export function CompareEngine() {
             officialStore: 'Yes',
           }
         }));
-        return { 
-          items: mappedProducts.length > 0 ? mappedProducts : PRODUCT_ITEMS, 
-          sections: PRODUCT_SECTIONS, 
-          titlePrefix: 'PRODUCTS' 
+        return {
+          items: mappedProducts,
+          sections: PRODUCT_SECTIONS,
+          titlePrefix: 'PRODUCTS',
         };
       }
     }
@@ -857,6 +877,11 @@ export function CompareEngine() {
     selectedAIChoice, selectedRiskRating
   ]);
 
+  const metricValuesDiffer = (metricKey: string) => {
+    const values = evaluatedMatchingColumns.map((p) => String(p.specs[metricKey] ?? ''));
+    return new Set(values).size > 1;
+  };
+
   useRegisterPageFilters(
     {
       pageName: 'Compare',
@@ -870,111 +895,233 @@ export function CompareEngine() {
   );
 
   return (
-    <div className="w-full bg-[#F8FAFC]">
+    <div className="w-full bg-choosify-feed">
       {/* Unified Compare Hero — title, matched columns, and decision profile in one section */}
       <section className="relative w-full overflow-hidden choosify-dark-gradient border-b border-white/5">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.18),transparent_42%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
 
         <div className="relative z-10">
-          {evaluatedMatchingColumns.length > 0 && (
-            <div className="px-6 pt-8 pb-8">
-              <div className={cn("grid grid-cols-1 gap-6 max-w-5xl mx-auto",
-                evaluatedMatchingColumns.length === 1 && "md:grid-cols-1 max-w-md",
-                evaluatedMatchingColumns.length === 2 && "md:grid-cols-2 max-w-3xl",
-                evaluatedMatchingColumns.length === 3 && "md:grid-cols-3",
-                evaluatedMatchingColumns.length >= 4 && "md:grid-cols-4 max-w-7xl"
-              )}>
-                {evaluatedMatchingColumns.map((p) => (
-                  <div key={p.id} className="relative">
-                    <div className={cn(
-                      "bg-white/5 backdrop-blur-sm border rounded-[5px] p-6 text-left group transition-all duration-300 flex flex-col justify-between h-44 relative overflow-hidden",
-                      p.matchesCriteria
-                        ? p.isWinner
-                          ? "border-orange-primary shadow-lg shadow-orange-primary/10"
-                          : "border-white/10 hover:border-orange-primary/30"
-                        : "border-white/5 opacity-40 grayscale"
-                    )}>
-                      {p.isWinner && (
-                        <div className="absolute -top-1.5 right-4 bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-b-[4px] uppercase tracking-widest z-20 shadow-md">
-                          AI Winner
-                        </div>
-                      )}
-                      {!p.matchesCriteria && (
-                        <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 text-[8px] font-black px-2 py-0.5 rounded-[3px] uppercase tracking-wider z-20">
-                          Filtered Out
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="w-14 h-14 rounded overflow-hidden bg-white/5 border border-white/10 p-1 shrink-0 flex items-center justify-center">
-                          <img src={p.image} className="w-full h-full object-cover rounded-[3px]" alt={p.name} />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-orange-primary text-[8px] font-black uppercase italic tracking-widest block leading-none mb-1">{p.brand}</span>
-                          <h4 className="text-white text-xs font-bold italic line-clamp-2 leading-snug">{p.name}</h4>
+          {(compareMode === 'product' || evaluatedMatchingColumns.length > 0) && (
+            <div className="px-6 pt-8 pb-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4 max-w-7xl mx-auto">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
+                  {compareMode === 'product' ? 'Compared products' : 'Matched columns'}
+                </span>
+                {compareMode === 'product' && comparedProducts.length > 0 && setComparedProducts && (
+                  <button
+                    type="button"
+                    onClick={() => setComparedProducts([])}
+                    className="text-[10px] font-black uppercase tracking-wider text-red-300 hover:text-red-100 border border-red-400/30 hover:border-red-300 px-3 py-1.5 rounded-[5px] transition-colors cursor-pointer bg-transparent"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+              <div
+                className={cn(
+                  'grid grid-cols-1 gap-4 max-w-7xl mx-auto',
+                  (compareMode === 'product' ? comparedProducts.length + heroProductSlots : evaluatedMatchingColumns.length) === 1 && 'md:grid-cols-1 max-w-md',
+                  (compareMode === 'product' ? comparedProducts.length + heroProductSlots : evaluatedMatchingColumns.length) === 2 && 'md:grid-cols-2 max-w-3xl',
+                  (compareMode === 'product' ? comparedProducts.length + heroProductSlots : evaluatedMatchingColumns.length) === 3 && 'md:grid-cols-3',
+                  (compareMode === 'product' ? comparedProducts.length + heroProductSlots : evaluatedMatchingColumns.length) >= 4 && 'md:grid-cols-4',
+                )}
+              >
+                {compareMode === 'product' ? (
+                  <>
+                    {evaluatedMatchingColumns.map((p) => (
+                      <div key={p.id} className="relative">
+                        <div
+                          className={cn(
+                            'bg-white/5 backdrop-blur-sm border rounded-[5px] p-6 text-left group transition-all duration-300 flex flex-col justify-between h-44 relative overflow-hidden',
+                            p.matchesCriteria
+                              ? p.isWinner
+                                ? 'border-orange-primary shadow-lg shadow-orange-primary/10'
+                                : 'border-white/10 hover:border-orange-primary/30'
+                              : 'border-white/5 opacity-40 grayscale',
+                          )}
+                        >
+                          {setComparedProducts && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setComparedProducts((prev: any[]) =>
+                                  prev.filter((prod: any) => String(prod.id) !== String(p.id)),
+                                )
+                              }
+                              className="absolute top-2 right-2 z-20 w-7 h-7 rounded-full bg-red-500/20 text-red-300 border border-red-400/30 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
+                              aria-label={`Remove ${p.name}`}
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                          {p.isWinner && (
+                            <div className="absolute -top-1.5 right-10 bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-b-[4px] uppercase tracking-widest z-20 shadow-md">
+                              AI Winner
+                            </div>
+                          )}
+                          {!p.matchesCriteria && (
+                            <div className="absolute top-2 left-2 bg-red-500/20 text-red-400 text-[8px] font-black px-2 py-0.5 rounded-[3px] uppercase tracking-wider z-20">
+                              Filtered Out
+                            </div>
+                          )}
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="w-14 h-14 rounded overflow-hidden bg-white/5 border border-white/10 p-1 shrink-0 flex items-center justify-center">
+                              <img src={p.image} className="w-full h-full object-cover rounded-[3px]" alt={p.name} />
+                            </div>
+                            <div className="min-w-0 pr-6">
+                              <span className="text-orange-primary text-[8px] font-black uppercase italic tracking-widest block leading-none mb-1">{p.brand}</span>
+                              <h4 className="text-white text-xs font-bold italic line-clamp-2 leading-snug">{p.name}</h4>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="w-full h-px bg-white/5 my-2" />
+                            <p className="text-white/60 text-[10px] font-medium leading-none truncate italic">
+                              💡 {p.highlightText || 'Algorithmic assessment matched.'}
+                            </p>
+                          </div>
                         </div>
                       </div>
-
-                      <div>
-                        <div className="w-full h-px bg-white/5 my-2" />
-                        <p className="text-white/60 text-[10px] font-medium leading-none truncate italic">
-                          💡 {p.highlightText || 'Algorithmic assessment matched.'}
-                        </p>
+                    ))}
+                    {Array.from({ length: heroProductSlots }).map((_, i) => (
+                      <Link
+                        key={`add-slot-${i}`}
+                        to="/products"
+                        className="border-2 border-dashed border-white/20 rounded-[5px] p-6 h-44 flex flex-col items-center justify-center gap-2 text-white/50 hover:border-orange-primary/50 hover:text-orange-primary transition-all group"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-orange-primary/20 group-hover:border-orange-primary/40">
+                          <Plus size={18} />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-wider">Add product</span>
+                      </Link>
+                    ))}
+                  </>
+                ) : (
+                  evaluatedMatchingColumns.map((p) => (
+                    <div key={p.id} className="relative">
+                      <div
+                        className={cn(
+                          'bg-white/5 backdrop-blur-sm border rounded-[5px] p-6 text-left group transition-all duration-300 flex flex-col justify-between h-44 relative overflow-hidden',
+                          p.matchesCriteria
+                            ? p.isWinner
+                              ? 'border-orange-primary shadow-lg shadow-orange-primary/10'
+                              : 'border-white/10 hover:border-orange-primary/30'
+                            : 'border-white/5 opacity-40 grayscale',
+                        )}
+                      >
+                        {p.isWinner && (
+                          <div className="absolute -top-1.5 right-4 bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-b-[4px] uppercase tracking-widest z-20 shadow-md">
+                            AI Winner
+                          </div>
+                        )}
+                        {!p.matchesCriteria && (
+                          <div className="absolute top-2 right-2 bg-red-500/20 text-red-400 text-[8px] font-black px-2 py-0.5 rounded-[3px] uppercase tracking-wider z-20">
+                            Filtered Out
+                          </div>
+                        )}
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="w-14 h-14 rounded overflow-hidden bg-white/5 border border-white/10 p-1 shrink-0 flex items-center justify-center">
+                            <img src={p.image} className="w-full h-full object-cover rounded-[3px]" alt={p.name} />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-orange-primary text-[8px] font-black uppercase italic tracking-widest block leading-none mb-1">{p.brand}</span>
+                            <h4 className="text-white text-xs font-bold italic line-clamp-2 leading-snug">{p.name}</h4>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="w-full h-px bg-white/5 my-2" />
+                          <p className="text-white/60 text-[10px] font-medium leading-none truncate italic">
+                            💡 {p.highlightText || 'Algorithmic assessment matched.'}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}
 
-          <div className="choosify-sticky-section-nav sticky z-40 select-none border-t border-white/10 bg-[#000435]/85 backdrop-blur-md">
-            <div className="max-w-[1440px] mx-auto px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 whitespace-nowrap">DECISION PROFILE:</span>
-                <div className="w-2 h-2 rounded-full bg-orange-primary animate-pulse" />
-              </div>
+          <nav
+            aria-label="Compare decision profile"
+            className="choosify-sticky-section-nav sticky z-40 w-full border-t border-white/10 bg-[#000435]/90 backdrop-blur-md"
+          >
+            <div className="max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-3">
+              <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between min-w-0">
+                <div className="flex items-center gap-2 shrink-0 select-none">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 whitespace-nowrap">
+                    Decision profile
+                  </span>
+                  <div className="w-2 h-2 rounded-full bg-[#E8500A] animate-pulse shrink-0" />
+                </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {[
-                  { id: 'product', label: 'Product Compare', icon: <ShoppingBag size={13} /> },
-                  { id: 'brand', label: 'Brand Compare', icon: <ShieldCheck size={13} /> },
-                  { id: 'creator', label: 'Creator Intel', icon: <Users size={13} /> },
-                  { id: 'guide', label: 'Buying Guides', icon: <BookOpen size={13} /> },
-                  { id: 'ai', label: 'AI Smart Mode', icon: <Sparkles size={13} /> }
-                ].map(modeOpt => {
-                  const isActive = compareMode === modeOpt.id;
-                  return (
+                <div className="relative min-w-0 w-full md:w-auto md:max-w-full">
+                  <div
+                    className="pointer-events-none absolute inset-y-0 left-0 w-5 bg-gradient-to-r from-[#000435] to-transparent z-10 md:hidden"
+                    aria-hidden
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-y-0 right-0 w-5 bg-gradient-to-l from-[#000435] to-transparent z-10 md:hidden"
+                    aria-hidden
+                  />
+                  <div
+                    ref={stickyNavTrackRef}
+                    {...stickyNavTrackProps}
+                    onTouchStart={() => {
+                      userNavScrollUntilRef.current = Date.now() + 1500;
+                    }}
+                    className="choosify-sticky-nav-track flex items-center gap-2 min-w-0 w-full md:w-auto"
+                  >
+                    {compareModeOptions.map((modeOpt) => {
+                      const isActive = compareMode === modeOpt.id;
+                      return (
+                        <button
+                          key={modeOpt.id}
+                          type="button"
+                          onClick={() => {
+                            setCompareMode(modeOpt.id);
+                            triggerSoftLoading();
+                          }}
+                          className={cn(STICKY_PILL_BASE, isActive ? STICKY_PILL_ACTIVE : STICKY_PILL_INACTIVE)}
+                        >
+                          {modeOpt.icon}
+                          <span>{modeOpt.label}</span>
+                        </button>
+                      );
+                    })}
+
+                    {quickFiltersList.length > 0 && (
+                      <>
+                        <div className="w-px h-6 bg-white/10 shrink-0 mx-0.5" aria-hidden />
+                        {quickFiltersList.map((filter) => (
+                          <button
+                            key={filter.id}
+                            type="button"
+                            onClick={filter.onClick}
+                            className={cn(STICKY_PILL_BASE, filter.active ? STICKY_PILL_ACTIVE : STICKY_PILL_INACTIVE)}
+                          >
+                            <span>{filter.label}</span>
+                          </button>
+                        ))}
+                      </>
+                    )}
+
+                    <div className="w-px h-6 bg-white/10 shrink-0 mx-0.5" aria-hidden />
                     <button
-                      key={modeOpt.id}
-                      onClick={() => {
-                        setCompareMode(modeOpt.id as CompareMode);
-                        triggerSoftLoading();
-                      }}
-                      className={cn(
-                        "px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer",
-                        isActive
-                          ? "bg-orange-primary text-white shadow-md shadow-orange-primary/20 scale-105"
-                          : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white"
-                      )}
+                      type="button"
+                      onClick={() => setShowDifferencesOnly((v) => !v)}
+                      className={cn(STICKY_PILL_BASE, showDifferencesOnly ? STICKY_PILL_ACTIVE : STICKY_PILL_INACTIVE)}
                     >
-                      {modeOpt.icon}
-                      <span>{modeOpt.label}</span>
+                      <Scale size={13} />
+                      <span>Differences only</span>
                     </button>
-                  );
-                })}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </nav>
         </div>
       </section>
-
-      {/* QUICK FILTER BAR Short-cuts */}
-      <QuickFilterBar
-        title="Comparison Trait Shortcuts"
-        filters={quickFiltersList}
-      />
 
       {/* ACTIVE INTELLIGENT FILTER CHIPS */}
       <ActiveFilterChips
@@ -1343,22 +1490,6 @@ export function CompareEngine() {
                         <span className="text-[10px] font-black text-orange-primary uppercase tracking-widest block leading-none mb-1.5">{titlePrefix} CONTEXT</span>
                         <div className="flex items-center justify-between">
                            <h3 className="text-lg font-black text-navy italic uppercase leading-none">Decision Matrix</h3>
-                           {compareMode === 'product' && comparedProducts.length > 0 && setComparedProducts && (
-                              <button 
-                                onClick={() => setComparedProducts([])}
-                                className="text-[10px] font-black uppercase tracking-wider text-red-400 hover:text-red-600 border border-red-200 hover:border-red-400 px-3 py-1.5 rounded-lg transition-colors cursor-pointer border bg-transparent"
-                              >
-                                Clear All
-                              </button>
-                           )}
-                           {(compareMode === 'creator' || compareMode === 'guide') && setComparedProducts && (
-                              <button
-                                onClick={() => setComparedProducts([])}
-                                className="text-[10px] font-black uppercase tracking-wider text-red-400 hover:text-red-600 border border-red-200 hover:border-red-400 px-3 py-1.5 rounded-lg transition-colors"
-                              >
-                                Clear All
-                              </button>
-                           )}
                         </div>
                         <p className="text-[8.5px] font-bold text-gray-400 uppercase tracking-widest italic mt-1 leading-normal">Side-by-side parameters breakdown</p>
                      </div>
@@ -1373,62 +1504,21 @@ export function CompareEngine() {
                            <div 
                              key={p.id} 
                              className={cn(
-                               "p-5 flex flex-col items-center text-center relative transition-all duration-300",
+                               "px-4 py-3 flex flex-col items-center justify-center text-center relative transition-all duration-300 min-h-[72px]",
                                p.matchesCriteria 
                                 ? p.isWinner 
-                                  ? "bg-orange-primary/5 shadow-inner" 
+                                  ? "bg-orange-primary/5" 
                                   : "bg-white" 
-                                : "opacity-35 grayscale scale-95"
+                                : "opacity-35 grayscale"
                              )}
                            >
-                              {/* Add Remove button for product mode */}
-                              {compareMode === 'product' && setComparedProducts && (
-                                <button
-                                  onClick={() => setComparedProducts((prev: any[]) => prev.filter((prod: any) => String(prod.id) !== String(p.id)))}
-                                  className="absolute top-2 right-2 w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-[10px] font-black hover:bg-red-500 hover:text-white transition-colors cursor-pointer border-none"
-                                >
-                                  ×
-                                </button>
-                              )}
-                              {(compareMode === 'creator' || compareMode === 'guide') && setComparedProducts && (
-                                <button
-                                  onClick={() => setComparedProducts((prev: any[]) => prev.filter((item: any) => String(item.id) !== String(p.id)))}
-                                  className="absolute top-2 right-2 w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-[10px] font-black hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
-                                >
-                                  ×
-                                </button>
-                              )}
                               {p.matchesCriteria && p.isWinner && (
-                                <div className="absolute top-2 left-2 flex items-center gap-1 bg-[#10B981] text-white text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-[3px] shadow-xs">
-                                  <Trophy size={8} /> Selected Option
+                                <div className="absolute top-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-[#10B981] text-white text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-[3px] shadow-xs whitespace-nowrap">
+                                  <Trophy size={8} /> Winner
                                 </div>
                               )}
-                              
-                              <div className="w-10 h-10 mb-3 rounded shadow-xs overflow-hidden border border-gray-100 p-0.5 bg-white">
-                                 <img src={p.image} className="w-full h-full object-cover rounded" alt={p.name} />
-                              </div>
-                              <span className="text-[7.5px] font-black text-gray-300 uppercase tracking-widest italic mb-0.5 leading-none">Category Target</span>
-                              <h4 className="text-[11px] font-black text-navy italic uppercase leading-tight line-clamp-1 mb-2">{p.name}</h4>
-                              
-                              <div className="flex items-center gap-1 mb-3">
-                                 <div className="flex items-center gap-0.5">
-                                    {[1, 2, 3, 4, 5].map(s => (
-                                       <Star key={s} size={9} className={s <= Math.floor(p.rating) ? "text-[#FFD700] fill-current" : "text-gray-100"} />
-                                    ))}
-                                 </div>
-                                 <span className="text-[9px] font-black text-navy italic leading-none">{p.rating}</span>
-                              </div>
-
-                              <button className={cn(
-                                 "w-full py-1.5 rounded-[5px] text-[8.5px] font-black uppercase tracking-widest italic transition-all",
-                                 p.matchesCriteria 
-                                   ? p.isWinner 
-                                     ? "bg-[#059669] text-white hover:bg-[#047857]" 
-                                     : "bg-orange-primary text-white hover:bg-orange-600"
-                                   : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              )}>
-                                 Explore <ArrowRight size={10} className="inline ml-1" />
-                              </button>
+                              <span className="text-[7.5px] font-black text-gray-300 uppercase tracking-widest italic leading-none mt-3">{p.brand}</span>
+                              <h4 className="text-[11px] font-black text-navy italic uppercase leading-tight line-clamp-2">{p.name}</h4>
                            </div>
                         ))}
                      </div>
@@ -1437,7 +1527,13 @@ export function CompareEngine() {
 
                {/* Sections Accordion Matrices Row */}
                <div className="divide-y divide-gray-100">
-                  {sections.map((section) => (
+                  {sections.map((section) => {
+                    const visibleMetrics = showDifferencesOnly
+                      ? section.metrics.filter((metric) => metricValuesDiffer(metric.key))
+                      : section.metrics;
+                    if (visibleMetrics.length === 0) return null;
+
+                    return (
                      <div key={section.title} className="bg-white">
                         <button 
                           onClick={() => toggleSection(section.title)}
@@ -1464,7 +1560,7 @@ export function CompareEngine() {
                                 className="overflow-hidden bg-[#FAF9F5]/20"
                               >
                                  <div className="divide-y divide-gray-100 overflow-x-auto no-scrollbar">
-                                    {section.metrics.map((metric, midx) => (
+                                    {visibleMetrics.map((metric, midx) => (
                                        <div key={midx} className="min-w-[700px] grid grid-cols-[1.5fr_2.5fr] gap-px bg-gray-100">
                                           <div className="bg-white p-6 flex flex-col justify-center">
                                              <h5 className="text-[11px] font-black text-navy uppercase italic tracking-tighter leading-tight">{metric.label}</h5>
@@ -1536,7 +1632,8 @@ export function CompareEngine() {
                            )}
                         </AnimatePresence>
                      </div>
-                  ))}
+                    );
+                  })}
                </div>
 
                {/* Dynamic Global Verdict Section */}

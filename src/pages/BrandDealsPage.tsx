@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
+import { PAGE_LISTING_SINGLE_SHELL, PRODUCT_CARD_GRID } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { useNavigate, Link } from 'react-router-dom';
@@ -8,9 +8,12 @@ import { BRANDS } from '../constants';
 import { cn } from '../lib/utils';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
+import { useGlobalState } from '../context/GlobalStateContext';
 
 export function BrandDealsPage() {
   const navigate = useNavigate();
+  const { siteConfig } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All');
@@ -217,6 +220,7 @@ export function BrandDealsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       <PageHeroBanner pageKey="brand-deals" />
+      <HeroMarqueeTicker pageKey="brand-deals" siteConfig={siteConfig} />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -246,7 +250,7 @@ export function BrandDealsPage() {
       />
 
       {/* CORE THREE-COLUMN SYSTEM LAYOUT INTEGRATION */}
-      <div className="w-full bg-[#F3F9FF]/30 min-h-screen py-8">
+      <div className="w-full bg-choosify-feed min-h-screen py-8">
         <div id="brand-deals-main" className={`scroll-mt-36 max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
           
           {/* Left Sidebar */}
@@ -617,8 +621,8 @@ export function BrandDealsPage() {
                     </div>
 
                     {/* Standardized cards grid inside main layout */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-stretch">
-                      {[1, 2, 3].map((deal) => (
+                    <div className={PRODUCT_CARD_GRID}>
+                      {[1, 2, 3, 4, 5].map((deal) => (
                         <div 
                           key={deal} 
                           onClick={() => navigate(`/brands/${brand.id}/products`)}

@@ -624,6 +624,14 @@
   }
 }
 
+@media (min-width: 1280px) {
+  .choosify-brand-grid,
+  .choosify-creator-grid,
+  .choosify-guide-media-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
 /* What's On feed — max 4 cards per row; columns scale down on smaller viewports */
 .choosify-whats-on-grid {
   display: grid;

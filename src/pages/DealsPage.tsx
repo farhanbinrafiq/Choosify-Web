@@ -8,6 +8,7 @@ import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFil
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PageHeroBanner } from '../components/PageHeroBanner';
 import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
+import { PaginationBar } from '../components/PaginationBar';
 import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
 import { buildDealsPopularSearchTerms } from '../utils/pagePopularSearches';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
@@ -650,33 +651,10 @@ export function DealsPage() {
                 )}
               </div>
 
-              <div className="mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-8">
-                <div className="flex items-center gap-3">
-                  <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
-                    <ArrowRight size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
-                  </button>
-                  {[1, 2, 3, '...', 12].map((p, i) => (
-                    <button 
-                      key={i} 
-                      className={cn(
-                        "w-12 h-12 rounded-[5px] flex items-center justify-center text-[11px] font-black transition-all italic",
-                        p === 1 
-                        ? "bg-[#E8500A] text-white border border-[#E8500A] shadow-none" 
-                        : "bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A] shadow-none"
-                      )}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                  <button className="w-12 h-12 rounded-[5px] flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all shadow-none group">
-                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-                
-                <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">
-                  Showing {Math.min(12, filteredProducts.length)} of {filteredProducts.length} deals available today
-                </p>
-              </div>
+              <PaginationBar
+                showingCount={Math.min(12, filteredProducts.length)}
+                totalCount={filteredProducts.length}
+              />
 
               <PopularSearchKeywords
                 title="Popular deal searches"

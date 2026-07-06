@@ -1272,7 +1272,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
       />
 
       {/* Main Content Area */}
-      <main id="all-section" className="bg-[#F8FAFC] py-5">
+      <main id="all-section" className="bg-choosify-feed py-5">
         <div className="max-w-[1440px] mx-auto px-4 w-full">
           <div className={`${DETAIL_SINGLE_FEED}`}>
             <ProductSpecsOverview

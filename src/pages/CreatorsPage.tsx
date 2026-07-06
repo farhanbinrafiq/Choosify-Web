@@ -3,7 +3,6 @@ import { PAGE_LISTING_SINGLE_SHELL, CREATOR_CARD_GRID } from "../lib/pageLayout"
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy } from 'lucide-react';
-import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -12,6 +11,7 @@ import type { Creator } from '../data/creators';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
 import { PaginationBar } from '../components/PaginationBar';
 import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
 import { buildCreatorsPopularSearchTerms } from '../utils/pagePopularSearches';
@@ -378,20 +378,7 @@ export function CreatorsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       <PageHeroBanner pageKey="creators" />
-
-      <div className="w-full overflow-hidden py-2 border-b border-white/5 bg-[#000435] relative">
-        <motion.div 
-           animate={{ x: [0, -1000] }}
-           transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-           className="flex whitespace-nowrap gap-8 px-6"
-        >
-           {['Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha', 'Farhan Bin Rafiq', 'Sarah Jenkins', 'Imtiaz Ahmed', 'Mily Rahman', 'Shakib Al-Mridha'].map((name, i) => (
-             <span key={i} className="text-base lg:text-xl font-black text-white/10 italic uppercase tracking-tighter">
-                {name}
-             </span>
-           ))}
-        </motion.div>
-      </div>
+      <HeroMarqueeTicker pageKey="creators" siteConfig={siteConfig} />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips

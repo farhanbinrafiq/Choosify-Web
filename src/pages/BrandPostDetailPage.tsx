@@ -105,7 +105,7 @@ export function BrandPostDetailPage() {
     post.status === 'live' ? 'Live Now' : post.status === 'scheduled' ? 'Upcoming' : 'Ended';
 
   return (
-    <div className="bg-white min-h-screen pb-16">
+    <div className="bg-choosify-feed min-h-screen pb-16">
       <section
         ref={heroRef}
         className="relative w-full choosify-dark-gradient border-b border-white/5"
