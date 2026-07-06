@@ -8,6 +8,7 @@ type StudioSectionShellProps = {
   editMode?: boolean;
   onEdit?: (sectionId: string) => void;
   className?: string;
+  style?: React.CSSProperties;
   children: React.ReactNode;
 };
 
@@ -20,6 +21,7 @@ export function StudioSectionShell({
   editMode = false,
   onEdit,
   className,
+  style,
   children,
 }: StudioSectionShellProps) {
   return (
@@ -27,6 +29,7 @@ export function StudioSectionShell({
       id={section.anchorId}
       data-studio-section={section.id}
       data-studio-kind={section.studio}
+      style={style}
       className={cn('relative scroll-mt-36 w-full', editMode && 'ring-1 ring-transparent hover:ring-[#E8500A]/25 rounded-[5px]', className)}
     >
       {editMode && (

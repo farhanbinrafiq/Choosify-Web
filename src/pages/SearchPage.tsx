@@ -154,6 +154,30 @@ export function SearchPage() {
     return count;
   }, [activeTab, rawQuery, sortBy, maxPrice, categoryFilter, inStockOnly]);
 
+  const searchSectionNavItems = useMemo(
+    () => [
+      { id: 'products', label: 'Products', icon: <ShoppingBag size={13} /> },
+      { id: 'brands', label: 'Brands', icon: <Award size={13} /> },
+      { id: 'deals', label: 'Deals', icon: <Tag size={13} /> },
+      { id: 'whats-on', label: 'Events', icon: <Sparkles size={13} /> },
+      { id: 'guides', label: 'Guides', icon: <BookOpen size={13} /> },
+      { id: 'coupons', label: 'Coupons', icon: <Percent size={13} /> },
+      { id: 'categories', label: 'Categories', icon: <LayoutGrid size={13} /> },
+      { id: 'influencers', label: 'Creators', icon: <Users size={13} /> },
+      { id: 'compares', label: 'Compare', icon: <Layers size={13} /> },
+    ],
+    [],
+  );
+
+  const handleSearchNav = React.useCallback((id: string) => {
+    setActiveTab(id as typeof activeTab);
+    const resultsEl = document.getElementById('search-results');
+    if (resultsEl) {
+      const top = resultsEl.getBoundingClientRect().top + window.pageYOffset - 168;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+  }, []);
+
   useRegisterPageFilters({
     pageName: 'Search',
     renderSearch: () => (
@@ -256,8 +280,17 @@ export function SearchPage() {
       setMaxPrice('all');
       setCategoryFilter('all');
       setInStockOnly(false);
-    }
-  }, [rawQuery, activeTab, sortBy, maxPrice, categoryFilter, inStockOnly, categorySource, searchFilterCount]);
+    },
+    sectionNav: rawQuery
+      ? {
+          items: searchSectionNavItems,
+          activeId: activeTab,
+          onNavigate: handleSearchNav,
+          allLabel: 'All matches',
+          profileLabel: 'Search results',
+        }
+      : undefined,
+  }, [rawQuery, activeTab, sortBy, maxPrice, categoryFilter, inStockOnly, categorySource, searchFilterCount, searchSectionNavItems, handleSearchNav]);
 
   // Sync state with url parameter
   React.useEffect(() => {
@@ -612,37 +645,17 @@ export function SearchPage() {
   ];
 
   const searchNavItems = useMemo(
-    () => [
-      { key: 'products', label: 'Products', icon: <ShoppingBag size={13} /> },
-      { key: 'brands', label: 'Brands', icon: <Award size={13} /> },
-      { key: 'deals', label: 'Deals', icon: <Tag size={13} /> },
-      { key: 'whats-on', label: 'Events', icon: <Sparkles size={13} /> },
-      { key: 'guides', label: 'Guides', icon: <BookOpen size={13} /> },
-      { key: 'coupons', label: 'Coupons', icon: <Percent size={13} /> },
-      { key: 'categories', label: 'Categories', icon: <LayoutGrid size={13} /> },
-      { key: 'influencers', label: 'Creators', icon: <Users size={13} /> },
-      { key: 'compares', label: 'Compare', icon: <Layers size={13} /> },
-    ]
-      .map((item) => {
-        const tab = tabConfig.find((t) => t.key === item.key);
-        return {
-          id: item.key,
-          label: item.label,
-          icon: item.icon,
-          hidden: !tab || tab.count === 0,
-        };
-      }),
-    [tabConfig],
+    () =>
+      searchSectionNavItems
+        .map((item) => {
+          const tab = tabConfig.find((t) => t.key === item.id);
+          return {
+            ...item,
+            hidden: !tab || tab.count === 0,
+          };
+        }),
+    [tabConfig, searchSectionNavItems],
   );
-
-  const handleSearchNav = (id: string) => {
-    setActiveTab(id as typeof activeTab);
-    const resultsEl = document.getElementById('search-results');
-    if (resultsEl) {
-      const top = resultsEl.getBoundingClientRect().top + window.pageYOffset - 168;
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-    }
-  };
 
   return (
     <div className="bg-choosify-feed min-h-screen text-[#1A1A2E] pb-24 font-sans antialiased">

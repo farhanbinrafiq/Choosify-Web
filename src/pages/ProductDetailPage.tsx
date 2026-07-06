@@ -57,6 +57,7 @@ import { CardEngagementStrip } from "../components/CardEngagementStrip";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { usePageBreadcrumbs } from "../context/BreadcrumbContext";
 import { slugifyPathSegment } from "../lib/seoHelpers";
+import { StudioWrap } from "../components/studio/StudioWrap";
 
 function hasActiveSizeGuide(sizeGuide?: CatalogProductSizeGuide | null): boolean {
   if (!sizeGuide?.enabled) return false;
@@ -1259,6 +1260,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
       <main id="all-section" className="bg-choosify-feed py-5">
         <div className="max-w-[1440px] mx-auto px-4 w-full">
           <div className={`${DETAIL_SINGLE_FEED}`}>
+            <StudioWrap sectionId="product-specs">
             <ProductSpecsOverview
               productTitle={product.title}
               specs={[
@@ -1272,18 +1274,19 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 { label: 'Status', value: isOutOfStock ? 'Out of Stock' : 'In Stock' },
               ]}
             />
+            </StudioWrap>
 
-            <div className="scroll-mt-36 w-full">
+            <StudioWrap sectionId="product-creator-reviews" className="scroll-mt-36 w-full">
               <WithInfluencerReviews
                 brandName={brandName}
                 productTitle={product?.title}
                 creatorContent={product?.creatorContent}
               />
-            </div>
+            </StudioWrap>
 
             {/* PUBLIC REVIEWS (ID: 'public-reviews-section') */}
-            <div
-              id="public-reviews-section"
+            <StudioWrap
+              sectionId="product-public-reviews"
               className="scroll-mt-36 bg-white rounded-[5px] p-8 border border-gray-100/85 shadow-2xl shadow-gray-100/40 space-y-8 font-sans text-left w-full"
             >
               <div className="text-center flex flex-col items-center">
@@ -1430,11 +1433,11 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   LOAD MORE REVIEWS
                 </button>
               </div>
-            </div>
+            </StudioWrap>
 
             {/* PRODUCT OVERVIEW (ID: 'product-overview-section') */}
-            <div
-              id="product-overview-section"
+            <StudioWrap
+              sectionId="product-overview"
               className="scroll-mt-36 bg-white rounded-[5px] p-8 border border-gray-100/80 shadow-xl space-y-8 text-left font-sans w-full"
             >
               <div>
@@ -1564,10 +1567,10 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   ))}
                 </div>
               </div>
-            </div>
+            </StudioWrap>
 
             {/* Utility cards row */}
-            <div id="product-utility-section" className="scroll-mt-36 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
+            <StudioWrap sectionId="product-buying-guide" className="scroll-mt-36 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
               {/* Box Content */}
               <div className="bg-white rounded-[5px] border border-gray-100 shadow-sm overflow-hidden p-5 space-y-3 font-sans text-left h-full">
                 <h3 className="text-[10px] font-black text-navy uppercase tracking-tight pb-2 border-b border-gray-50 flex items-center gap-2">
@@ -1679,7 +1682,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   ))}
                 </div>
               </div>
-            </div>
+            </StudioWrap>
 
             {/* Sponsored Advertisement */}
             <div className="bg-[#1A1D4E] text-white rounded-[5px] p-6 relative overflow-hidden text-left shadow-xl border border-white/5 font-sans w-full">

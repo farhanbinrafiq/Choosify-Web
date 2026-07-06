@@ -384,6 +384,12 @@ export function CategoriesPage() {
     setExpandedCategory(expandedCategory === catName ? null : catName);
   };
 
+  const sectionNavItems = useMemo(
+    () => [{ id: 'categories-main-display', label: 'Browse', icon: <LucideIcons.LayoutGrid size={13} /> }],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
   useRegisterPageFilters({
     pageName: 'Categories',
     scrollTargetId: 'categories-main-display',
@@ -589,6 +595,13 @@ export function CategoriesPage() {
       (activeCategoryTab !== 'All Categories' ? 1 : 0) +
       (searchQuery ? 1 : 0),
     onClearAll: handleClearAllFilters,
+    sectionNav: {
+      items: sectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Categories',
+      profileLabel: 'Category hub',
+    },
   }, [
     searchQuery,
     activeCategoryTab,
@@ -596,14 +609,11 @@ export function CategoriesPage() {
     selectedCategoryStatus,
     selectedAlphabetical,
     selectedAvailability,
-    selectedContent
+    selectedContent,
+    sectionNavItems,
+    activeSectionId,
+    scrollToSection,
   ]);
-
-  const sectionNavItems = useMemo(
-    () => [{ id: 'categories-main-display', label: 'Browse', icon: <LucideIcons.LayoutGrid size={13} /> }],
-    [],
-  );
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">

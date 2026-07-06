@@ -158,6 +158,23 @@ export function GuideDetailPage() {
     BLOGS.find((b) => b.id === Number(id)) ||
     BLOGS[0];
 
+  const guideSectionNavItems = useMemo(
+    () => [
+      { id: "winner", label: "Winner", icon: <Award size={13} /> },
+      { id: "why-won", label: "Why It Won", icon: <CheckCircle2 size={13} /> },
+      { id: "quick-verdict", label: "Verdict", icon: <Zap size={13} /> },
+      { id: "takeaways", label: "Takeaways", icon: <Sparkles size={13} /> },
+      { id: "top-3", label: "Top 3", icon: <Star size={13} /> },
+      { id: "all-products", label: "Products", icon: <ShoppingBag size={13} /> },
+      { id: "review-context", label: "Reviewed", icon: <Package size={13} /> },
+      { id: "reviewer-profile", label: "Reviewer", icon: <User size={13} /> },
+    ],
+    [],
+  );
+
+  const { activeId: activeSectionId, scrollToSection } =
+    useSectionScrollSpy(guideSectionNavItems);
+
   useRegisterPageFilters({
     pageName: guide ? guide.title : 'Guide Details',
     renderSearch: null,
@@ -211,7 +228,14 @@ export function GuideDetailPage() {
       setRelatedPlatformFilter('all');
       setRelatedTopicFilter('all');
     },
-  }, [guide, relatedPlatformFilter, relatedTopicFilter]);
+    sectionNav: {
+      items: guideSectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Guide',
+      profileLabel: 'Guide detail',
+    },
+  }, [guide, relatedPlatformFilter, relatedTopicFilter, guideSectionNavItems, activeSectionId, scrollToSection]);
 
   const guideId = guide?.id;
   const dynamicData = DYNAMIC_GUIDES[Number(guideId)] || {
@@ -312,23 +336,6 @@ export function GuideDetailPage() {
 
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } =
     useDashboard();
-
-  const guideSectionNavItems = useMemo(
-    () => [
-      { id: "winner", label: "Winner", icon: <Award size={13} /> },
-      { id: "why-won", label: "Why It Won", icon: <CheckCircle2 size={13} /> },
-      { id: "quick-verdict", label: "Verdict", icon: <Zap size={13} /> },
-      { id: "takeaways", label: "Takeaways", icon: <Sparkles size={13} /> },
-      { id: "top-3", label: "Top 3", icon: <Star size={13} /> },
-      { id: "all-products", label: "Products", icon: <ShoppingBag size={13} /> },
-      { id: "review-context", label: "Reviewed", icon: <Package size={13} /> },
-      { id: "reviewer-profile", label: "Reviewer", icon: <User size={13} /> },
-    ],
-    [],
-  );
-
-  const { activeId: activeSectionId, scrollToSection } =
-    useSectionScrollSpy(guideSectionNavItems);
 
   const relatedGuides = useMemo(() => {
     return allGuides

@@ -43,6 +43,7 @@ import { DETAIL_SINGLE_FEED, DETAIL_FEED_GRID_5 } from "../lib/pageLayout";
 import { StickySectionNav } from "../components/StickySectionNav";
 import { CardEngagementStrip } from "../components/CardEngagementStrip";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
+import { StudioWrap } from "../components/studio/StudioWrap";
 import { BrandPostCarouselSection } from "../components/BrandPostCarouselSection";
 import { getBrandPostsByBrandId } from "../lib/brandPosts";
 import { useNavigate, Link, useParams } from "react-router-dom";
@@ -334,6 +335,54 @@ export function BrandDetailPage() {
       p.brandId === brand.id ||
       (p.brand && p.brand.toLowerCase() === brandNameLower),
   );
+
+  const previewShowProductCatalogSection =
+    localClaimStatus !== "verified" || brandProducts.length > 0;
+  const previewShowDealsSection =
+    localClaimStatus !== "verified" ||
+    brandProducts.some((p: any) => p.discount || p.tag === "SALE" || p.tag === "HOT");
+
+  const sectionNavItems = useMemo(
+    () => [
+      {
+        id: "deals-section",
+        label: "Deals",
+        icon: <Gift size={13} />,
+        hidden: !previewShowDealsSection,
+      },
+      {
+        id: "products-section",
+        label: "Products",
+        icon: <Package size={13} />,
+        hidden: !previewShowProductCatalogSection,
+      },
+      {
+        id: "creator-reviews-section",
+        label: "Creator Reviews",
+        icon: <Sparkles size={13} />,
+      },
+      {
+        id: "campaigns-section",
+        label: "Events",
+        icon: <Megaphone size={13} />,
+        hidden: brandWhatsOnPosts.length === 0,
+      },
+      {
+        id: "public-reviews-section",
+        label: "Public Reviews",
+        icon: <MessageCircle size={13} />,
+      },
+      {
+        id: "brand-overview-section",
+        label: "Brand Overview",
+        icon: <Info size={13} />,
+      },
+    ],
+    [previewShowDealsSection, previewShowProductCatalogSection, brandWhatsOnPosts.length],
+  );
+
+  const { activeId: activeSectionId, scrollToSection } =
+    useSectionScrollSpy(sectionNavItems);
 
   // Dynamic Categories options
   const dynamicCategories = Array.from(
@@ -686,6 +735,13 @@ export function BrandDetailPage() {
         (featuredOnlyFilter ? 1 : 0) +
         Object.values(smartSpecs).filter(Boolean).length,
       onClearAll: clearAllFilters,
+      sectionNav: {
+        items: sectionNavItems,
+        activeId: activeSectionId,
+        onNavigate: scrollToSection,
+        allLabel: "Brand",
+        profileLabel: "Brand profile",
+      },
     },
     [
       currentSearchInput,
@@ -712,6 +768,9 @@ export function BrandDetailPage() {
       featuredOnlyFilter,
       sortOption,
       smartSpecs,
+      sectionNavItems,
+      activeSectionId,
+      scrollToSection,
     ],
   );
 
@@ -1182,48 +1241,6 @@ export function BrandDetailPage() {
   ];
 
   const overviewData = getBrandOverviews(brand.name);
-
-  const sectionNavItems = useMemo(
-    () => [
-      {
-        id: "deals-section",
-        label: "Deals",
-        icon: <Gift size={13} />,
-        hidden: !showDealsSection,
-      },
-      {
-        id: "products-section",
-        label: "Products",
-        icon: <Package size={13} />,
-        hidden: !showProductCatalogSection,
-      },
-      {
-        id: "creator-reviews-section",
-        label: "Creator Reviews",
-        icon: <Sparkles size={13} />,
-      },
-      {
-        id: "campaigns-section",
-        label: "Events",
-        icon: <Megaphone size={13} />,
-        hidden: brandWhatsOnPosts.length === 0,
-      },
-      {
-        id: "public-reviews-section",
-        label: "Public Reviews",
-        icon: <MessageCircle size={13} />,
-      },
-      {
-        id: "brand-overview-section",
-        label: "Brand Overview",
-        icon: <Info size={13} />,
-      },
-    ],
-    [showDealsSection, showProductCatalogSection, brandWhatsOnPosts.length],
-  );
-
-  const { activeId: activeSectionId, scrollToSection } =
-    useSectionScrollSpy(sectionNavItems);
 
   const getPopularCategoryPreviews = () => {
     const cat = (brand.category || "").toLowerCase();
@@ -2074,7 +2091,7 @@ export function BrandDetailPage() {
 
             {/* A. DEALS SECTION */}
             {showDealsSection && (
-              <div id="deals-section" className="scroll-mt-36">
+              <StudioWrap sectionId="brand-deals" className="scroll-mt-36">
                 <div className="mb-6 text-left">
                   <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
                     Exclusive Deals
@@ -2167,12 +2184,12 @@ export function BrandDetailPage() {
                     ))}
                   </div>
                 )}
-              </div>
+              </StudioWrap>
             )}
 
             {/* B. PRODUCTS SECTION */}
             {showProductCatalogSection && (
-              <div id="products-section" className="scroll-mt-36">
+              <StudioWrap sectionId="brand-catalog" className="scroll-mt-36">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 text-left">
                   <div>
                     <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
@@ -2260,7 +2277,7 @@ export function BrandDetailPage() {
                     onPageChange={setCurrentPage}
                   />
                 )}
-              </div>
+              </StudioWrap>
             )}
 
           {/* Creator reviews */}

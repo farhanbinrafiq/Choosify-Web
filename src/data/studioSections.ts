@@ -115,7 +115,7 @@ export const STUDIO_SECTION_REGISTRY: StudioSectionDescriptor[] = [
     id: 'brand-overview',
     label: 'Brand overview',
     studio: 'brand',
-    anchorId: 'brand-overview',
+    anchorId: 'brand-overview-section',
     order: 2,
     fields: [
       { id: 'story', label: 'Brand story', type: 'richtext', path: 'story' },
@@ -126,7 +126,7 @@ export const STUDIO_SECTION_REGISTRY: StudioSectionDescriptor[] = [
     id: 'brand-catalog',
     label: 'Product catalog',
     studio: 'brand',
-    anchorId: 'product-catalog-section',
+    anchorId: 'products-section',
     order: 1,
     fields: [
       { id: 'featuredProductIds', label: 'Featured products', type: 'product_list', path: 'featuredProductIds' },
@@ -136,7 +136,7 @@ export const STUDIO_SECTION_REGISTRY: StudioSectionDescriptor[] = [
     id: 'brand-deals',
     label: 'Brand deals',
     studio: 'brand',
-    anchorId: 'brand-deals-section',
+    anchorId: 'deals-section',
     order: 4,
     fields: [
       { id: 'dealsEnabled', label: 'Deals enabled', type: 'toggle', path: 'deals.enabled' },
@@ -300,4 +300,12 @@ export const STUDIO_SECTION_REGISTRY: StudioSectionDescriptor[] = [
 
 export function getStudioSections(studio: StudioSectionDescriptor['studio']) {
   return STUDIO_SECTION_REGISTRY.filter((section) => section.studio === studio).sort((a, b) => a.order - b.order);
+}
+
+export function getStudioSectionById(sectionId: string) {
+  return STUDIO_SECTION_REGISTRY.find((section) => section.id === sectionId);
+}
+
+export function getStudioSectionByAnchor(anchorId: string) {
+  return STUDIO_SECTION_REGISTRY.find((section) => section.anchorId === anchorId);
 }

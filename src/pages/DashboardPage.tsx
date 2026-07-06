@@ -847,30 +847,35 @@ const CmsStudiosSection = () => {
       title: 'Website Studio',
       description: 'Mirror the public homepage and platform-wide content surfaces for admin editing.',
       previewHref: '/',
+      studioHref: '/dashboard/studio/website',
     },
     {
       id: 'product',
       title: 'Product Studio',
       description: 'Manage the same hero, specs, reviews, and buying-guide surfaces users see on product pages.',
       previewHref: '/products/1',
+      studioHref: '/dashboard/studio/product/1',
     },
     {
       id: 'brand',
       title: 'Brand Studio',
       description: 'Keep brand storytelling, catalog blocks, and credibility modules aligned with the live page.',
       previewHref: '/brands/1',
+      studioHref: '/dashboard/studio/brand/1',
     },
     {
       id: 'creator',
       title: 'Creator Studio',
       description: 'Reuse public creator-profile sections so creators and admins edit against the real layout.',
       previewHref: '/creators/creator-1',
+      studioHref: '/dashboard/studio/creator/creator-1',
     },
     {
       id: 'event',
       title: 'Event Studio',
       description: 'Control event detail content, related products, and follow-up placements from one studio.',
       previewHref: '/whats-on',
+      studioHref: '/dashboard/studio/event/aarong-eid-carnival-2026',
     },
   ] as const;
 
@@ -902,12 +907,20 @@ const CmsStudiosSection = () => {
                     {studio.description}
                   </p>
                 </div>
+                <div className="flex flex-col items-end gap-2 shrink-0">
                 <Link
-                  to={studio.previewHref}
-                  className="shrink-0 px-4 py-2 rounded-[5px] border border-[#e8edf2] text-[10px] font-black uppercase tracking-widest text-navy hover:border-[#E8500A]/30 hover:text-[#E8500A]"
+                  to={studio.studioHref}
+                  className="px-4 py-2 rounded-[5px] bg-[#1A1D4E] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#E8500A] transition-colors"
+                >
+                  Edit in studio
+                </Link>
+                <Link
+                  to={`${studio.previewHref}${studio.previewHref.includes('?') ? '&' : '?'}studioEdit=1`}
+                  className="px-4 py-2 rounded-[5px] border border-[#e8edf2] text-[10px] font-black uppercase tracking-widest text-navy hover:border-[#E8500A]/30 hover:text-[#E8500A]"
                 >
                   Preview live
                 </Link>
+                </div>
               </div>
 
               <div className="space-y-2">

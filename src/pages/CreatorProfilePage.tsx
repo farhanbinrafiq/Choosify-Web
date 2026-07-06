@@ -18,6 +18,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { ClaimProfileModal } from '../components/ClaimProfileModal';
 import { FollowButton } from '../components/FollowButton';
 import { useRegisterPageFilters } from '../components/FilterEngine';
+import { StudioWrap } from '../components/studio/StudioWrap';
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
@@ -618,7 +619,7 @@ export function CreatorProfilePage() {
                )}
 
                {/* Dedicated Section 1: YouTube Videos */}
-               <section id="videos-section" className="scroll-mt-44 text-left">
+               <StudioWrap sectionId="creator-videos" className="scroll-mt-44 text-left">
                   <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
                      <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
                         <Youtube className="text-red-650 text-[#FF0000]" size={20} /> Featured YouTube Videos
@@ -690,10 +691,10 @@ export function CreatorProfilePage() {
                         No videos matched search phrase.
                      </div>
                   )}
-               </section>
+               </StudioWrap>
 
                {/* Dedicated Section 2: Shorts & Reels */}
-               <section id="reels-section" className="scroll-mt-44 text-left">
+               <StudioWrap sectionId="creator-reels" className="scroll-mt-44 text-left">
                   <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
                      <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
                         <Instagram className="text-pink-650 text-[#C13584]" size={20} /> Influencer Reels & Shorts
@@ -769,10 +770,10 @@ export function CreatorProfilePage() {
                        No shorts/reels matched search phrase.
                     </div>
                   )}
-               </section>
+               </StudioWrap>
 
                {/* Dedicated Section 3: Insights & Case Blogs */}
-               <section id="blogs-section" className="scroll-mt-44 text-left">
+               <StudioWrap sectionId="creator-blogs" className="scroll-mt-44 text-left">
                   <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
                      <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
                         <BookOpen className="text-orange-primary" size={20} /> Research Blogs & Case Essays
@@ -874,12 +875,12 @@ export function CreatorProfilePage() {
                        No insights matched search phrase.
                     </div>
                   )}
-               </section>
+               </StudioWrap>
 
             </main>
 
          {/* SECTION 5 — BRAND REVIEWS */}
-         <div id="brand-reviews-section" className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80 text-left">
+         <StudioWrap sectionId="creator-brand-reviews" className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80 text-left">
             <div className="text-center mb-8 border-b border-gray-100 pb-5">
                <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
                   Brand Reviews
@@ -913,10 +914,10 @@ export function CreatorProfilePage() {
                   Load More Reviews
                </button>
             </div>
-         </div>
+         </StudioWrap>
 
          {/* SECTION 6 — CREATOR OVERVIEW */}
-         <div id="creator-overview-section" className="bg-white rounded-[5px] p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36 text-left">
+         <StudioWrap sectionId="creator-overview" className="bg-white rounded-[5px] p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36 text-left">
             <div className="text-center mb-8 border-b border-gray-100 pb-5">
                <h3 className="text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-1">
                   Creator Overview
@@ -1108,7 +1109,7 @@ export function CreatorProfilePage() {
                   </div>
                </div>
             )}
-         </div>
+         </StudioWrap>
 
          </div>
       </div>

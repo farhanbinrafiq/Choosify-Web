@@ -453,6 +453,12 @@ export function BrandsPage() {
     return acc;
   }, {} as Record<string, Brand[]>);
 
+  const sectionNavItems = useMemo(
+    () => [{ id: 'brands-main-display', label: 'Directory', icon: <Store size={13} /> }],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
   useRegisterPageFilters({
     pageName: 'Brands',
     renderSearch: () => (
@@ -574,13 +580,14 @@ export function BrandsPage() {
       setVerificationFilter('all');
       setPopularityFilter('all');
     },
-  }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter]);
-
-  const sectionNavItems = useMemo(
-    () => [{ id: 'brands-main-display', label: 'Directory', icon: <Store size={13} /> }],
-    [],
-  );
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+    sectionNav: {
+      items: sectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Brands',
+      profileLabel: 'Brand directory',
+    },
+  }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">

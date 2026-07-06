@@ -1440,6 +1440,13 @@ export function GuidesPage() {
       (sortOption !== 'default' ? 1 : 0) +
       (searchQuery ? 1 : 0),
     onClearAll: handleClearAllFilters,
+    sectionNav: {
+      items: guideSectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Guides',
+      profileLabel: 'Guide feed',
+    },
   }, [
     searchQuery,
     activeTab,
@@ -1467,7 +1474,10 @@ export function GuidesPage() {
     selectedViews,
     selectedUploadDate,
     selectedMusic,
-    sortOption
+    sortOption,
+    guideSectionNavItems,
+    activeSectionId,
+    scrollToSection,
   ]);
 
   return (

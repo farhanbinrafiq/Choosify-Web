@@ -248,6 +248,12 @@ export function CreatorsPage() {
     return acc;
   }, {} as Record<string, typeof filteredCreators[0][]>);
 
+  const sectionNavItems = useMemo(
+    () => [{ id: 'creators-main-display', label: 'Creators', icon: <Users size={13} /> }],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
   useRegisterPageFilters({
     pageName: 'Creators',
     renderSearch: () => (
@@ -367,13 +373,14 @@ export function CreatorsPage() {
       setVerificationFilter('all');
       setPopularityFilter('all');
     },
-  }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter]);
-
-  const sectionNavItems = useMemo(
-    () => [{ id: 'creators-main-display', label: 'Creators', icon: <Users size={13} /> }],
-    [],
-  );
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+    sectionNav: {
+      items: sectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Creators',
+      profileLabel: 'Creator hub',
+    },
+  }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">

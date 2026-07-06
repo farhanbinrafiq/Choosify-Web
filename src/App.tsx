@@ -11,6 +11,8 @@ import { BreadcrumbProvider } from './context/BreadcrumbContext';
 import { DashboardProvider } from './context/DashboardContext';
 import { GlobalStateProvider } from './context/GlobalStateContext';
 import { DrawerFilterProvider, FloatingFilterProvider } from './components/FilterEngine';
+import { StudioEditProvider } from './context/StudioEditContext';
+import { StudioEditPanel } from './components/studio/StudioEditPanel';
 import { Toaster } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'motion/react';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -54,6 +56,7 @@ const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(m 
 const SellerIncomingOrdersPage = lazy(() => import('./pages/SellerIncomingOrdersPage').then(m => ({ default: m.SellerIncomingOrdersPage })));
 const SellerOrderDetailsPage = lazy(() => import('./pages/SellerOrderDetailsPage').then(m => ({ default: m.SellerOrderDetailsPage })));
 const SellerCashbookPage = lazy(() => import('./pages/SellerCashbookPage').then(m => ({ default: m.SellerCashbookPage })));
+const CmsStudioPage = lazy(() => import('./pages/CmsStudioPage').then(m => ({ default: m.CmsStudioPage })));
 const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })));
 const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
 const EmiPage = lazy(() => import('./pages/EmiPage').then(m => ({ default: m.EmiPage })));
@@ -285,6 +288,11 @@ function AppContent() {
             <Route path="/seller/orders/:id" element={<ProtectedRoute><PageWrapper><SellerOrderDetailsPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/seller/cashbook" element={<ProtectedRoute><PageWrapper><SellerCashbookPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
+            <Route path="/dashboard/studio/website" element={<ProtectedRoute><CmsStudioPage kind="website" /></ProtectedRoute>} />
+            <Route path="/dashboard/studio/product/:id" element={<ProtectedRoute><CmsStudioPage kind="product" /></ProtectedRoute>} />
+            <Route path="/dashboard/studio/brand/:id" element={<ProtectedRoute><CmsStudioPage kind="brand" /></ProtectedRoute>} />
+            <Route path="/dashboard/studio/creator/:id" element={<ProtectedRoute><CmsStudioPage kind="creator" /></ProtectedRoute>} />
+            <Route path="/dashboard/studio/event/:slug" element={<ProtectedRoute><CmsStudioPage kind="event" /></ProtectedRoute>} />
             <Route path="/cashbook/*" element={<Navigate to="/seller/cashbook" replace />} />
             <Route path="/messages" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/messages/:threadId" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
@@ -327,9 +335,12 @@ export default function App() {
             <PageSeo />
             <DrawerFilterProvider>
               <FloatingFilterProvider>
+                <StudioEditProvider>
                 <BreadcrumbProvider>
                   <AppContent />
                 </BreadcrumbProvider>
+                <StudioEditPanel />
+                </StudioEditProvider>
               </FloatingFilterProvider>
             </DrawerFilterProvider>
             <PWAInstallPrompt />

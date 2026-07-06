@@ -92,6 +92,12 @@ export function BrandDealsPage() {
     { id: 'Ethnic', label: "Heritage & Ethnic", icon: <Star size={13} /> }
   ];
 
+  const sectionNavItems = useMemo(
+    () => [{ id: 'brand-deals-main', label: 'Deals', icon: <Tag size={13} /> }],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
   useRegisterPageFilters({
     pageName: 'Brand Deals',
     renderSearch: () => (
@@ -209,13 +215,14 @@ export function BrandDealsPage() {
       setSearchQuery('');
       setActiveTab('All');
     },
-  }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter]);
-
-  const sectionNavItems = useMemo(
-    () => [{ id: 'brand-deals-main', label: 'Deals', icon: <Tag size={13} /> }],
-    [],
-  );
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+    sectionNav: {
+      items: sectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Deals',
+      profileLabel: 'Brand deals',
+    },
+  }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">

@@ -28,6 +28,7 @@ import { BrandPostBannerGallery } from '../components/BrandPostBannerGallery';
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { useRegisterPageFilters } from '../components/FilterEngine';
+import { StudioWrap } from '../components/studio/StudioWrap';
 import { useGlobalState } from '../context/GlobalStateContext';
 import {
   formatBrandPostDateRange,
@@ -87,6 +88,13 @@ export function BrandPostDetailPage() {
     renderFilters: null,
     activeFilterCount: 0,
     onClearAll: null,
+    sectionNav: {
+      items: sectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Event',
+      profileLabel: 'Event detail',
+    },
   });
 
   if (!post) {
@@ -257,7 +265,7 @@ export function BrandPostDetailPage() {
           </button>
 
           <div className={DETAIL_SINGLE_FEED}>
-            <section id="event-about" className="scroll-mt-36 w-full">
+            <StudioWrap sectionId="event-about" className="scroll-mt-36 w-full">
               <div className="mb-4 text-left">
                 <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
                   Event Details
@@ -308,10 +316,10 @@ export function BrandPostDetailPage() {
                   </div>
                 </div>
               </article>
-            </section>
+            </StudioWrap>
 
             {linkedProducts.length > 0 && (
-              <section id="related-products" className="scroll-mt-36 w-full">
+              <StudioWrap sectionId="related-products" className="scroll-mt-36 w-full">
                 <div className="mb-4 text-left">
                   <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
                     Related <span className="text-[#E8500A]">Products</span>
@@ -325,11 +333,11 @@ export function BrandPostDetailPage() {
                     <ProductCard key={product.id} product={product} variant="grid" isGuideDetail />
                   ))}
                 </div>
-              </section>
+              </StudioWrap>
             )}
 
             {relatedPosts.length > 0 && (
-              <section id="more-events" className="scroll-mt-36 w-full">
+              <StudioWrap sectionId="more-events" className="scroll-mt-36 w-full">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4 text-left">
                   <div>
                     <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
@@ -351,7 +359,7 @@ export function BrandPostDetailPage() {
                     <BrandPostCard key={related.id} post={related} />
                   ))}
                 </div>
-              </section>
+              </StudioWrap>
             )}
           </div>
         </div>

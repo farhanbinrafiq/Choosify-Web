@@ -223,6 +223,15 @@ export function DealsPage() {
     { name: 'Cars / Bike', icon: <Car size={16} className="stroke-[2.5]" />, count: 310 }
   ];
 
+  const dealsSectionNavItems = useMemo(
+    () => [
+      { id: 'all-deals', label: 'All Deals', icon: <Flame size={13} /> },
+      { id: 'featured-brand-deals-section', label: 'Brand Deals', icon: <Award size={13} /> },
+    ],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(dealsSectionNavItems);
+
   useRegisterPageFilters({
     pageName: 'Deals',
     renderSearch: () => (
@@ -309,16 +318,14 @@ export function DealsPage() {
       setSearchQuery('');
       setActiveTab('All Deals');
     },
-  }, [searchQuery, activeTab, selectedCategory, minDiscount]);
-
-  const dealsSectionNavItems = useMemo(
-    () => [
-      { id: 'all-deals', label: 'All Deals', icon: <Flame size={13} /> },
-      { id: 'featured-brand-deals-section', label: 'Brand Deals', icon: <Award size={13} /> },
-    ],
-    [],
-  );
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(dealsSectionNavItems);
+    sectionNav: {
+      items: dealsSectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Deals',
+      profileLabel: 'Deal hub',
+    },
+  }, [searchQuery, activeTab, selectedCategory, minDiscount, activeSectionId, dealsSectionNavItems, scrollToSection]);
 
   return (
     <div className="flex flex-col min-h-screen">

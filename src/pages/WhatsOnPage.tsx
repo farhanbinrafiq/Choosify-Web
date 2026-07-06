@@ -139,6 +139,27 @@ export function WhatsOnPage() {
     [query, activeKind, selectedBrandId, statusFilter, brandOptions, locationFilter, sponsoredOnly, dateRange],
   );
 
+  const categoryNavItems = useMemo(
+    () => [
+      { id: 'event', label: 'Events', icon: <CalendarDays size={13} /> },
+      { id: 'announcement', label: 'Announcements', icon: <Megaphone size={13} /> },
+      { id: 'launch', label: 'Launches', icon: <Rocket size={13} /> },
+      { id: 'festival', label: 'Festivals', icon: <PartyPopper size={13} /> },
+      { id: 'carnival', label: 'Carnivals', icon: <PartyPopper size={13} /> },
+      { id: 'campaign', label: 'Promotions', icon: <Megaphone size={13} /> },
+      { id: 'store_moment', label: 'Store Moments', icon: <Store size={13} /> },
+    ],
+    [],
+  );
+
+  const handleCategoryNavigate = useCallback((id: string) => {
+    setActiveKind(id === 'all' ? 'all' : (id as BrandPostKind));
+    const el = document.getElementById('whats-on-feed');
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.pageYOffset - 200;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  }, []);
+
   useRegisterPageFilters(
     {
       pageName: 'Events',
@@ -255,30 +276,17 @@ export function WhatsOnPage() {
       ),
       activeFilterCount,
       onClearAll: handleClearAll,
+      sectionNav: {
+        items: categoryNavItems,
+        activeId: activeKind,
+        onNavigate: handleCategoryNavigate,
+        allLabel: 'All',
+        allId: 'all',
+        profileLabel: 'Event feed',
+      },
     },
-    [query, activeKind, selectedBrandId, statusFilter, activeFilterCount, brandOptions, locationFilter, sponsoredOnly, dateRange, locationOptions],
+    [query, activeKind, selectedBrandId, statusFilter, activeFilterCount, brandOptions, locationFilter, sponsoredOnly, dateRange, locationOptions, categoryNavItems, handleCategoryNavigate],
   );
-
-  const categoryNavItems = useMemo(
-    () => [
-      { id: 'event', label: 'Events', icon: <CalendarDays size={13} /> },
-      { id: 'announcement', label: 'Announcements', icon: <Megaphone size={13} /> },
-      { id: 'launch', label: 'Launches', icon: <Rocket size={13} /> },
-      { id: 'festival', label: 'Festivals', icon: <PartyPopper size={13} /> },
-      { id: 'carnival', label: 'Carnivals', icon: <PartyPopper size={13} /> },
-      { id: 'campaign', label: 'Promotions', icon: <Megaphone size={13} /> },
-      { id: 'store_moment', label: 'Store Moments', icon: <Store size={13} /> },
-    ],
-    [],
-  );
-
-  const handleCategoryNavigate = useCallback((id: string) => {
-    setActiveKind(id === 'all' ? 'all' : (id as BrandPostKind));
-    const el = document.getElementById('whats-on-feed');
-    if (!el) return;
-    const top = el.getBoundingClientRect().top + window.pageYOffset - 200;
-    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-  }, []);
 
   return (
     <div className="bg-choosify-feed min-h-screen pb-16">

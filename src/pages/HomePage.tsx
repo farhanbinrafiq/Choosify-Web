@@ -34,6 +34,7 @@ import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
 import { CategorySubcategoryPanel } from '../components/CategorySubcategoryPanel';
 import { buildCategoryDisplayList } from '../utils/categoryDisplay';
 import { buildPagePopularSearchTerms } from '../utils/pagePopularSearches';
+import { StudioWrap } from '../components/studio/StudioWrap';
 
 type HomeGuideCarouselKind = 'youtube' | 'reels' | 'blog';
 
@@ -896,8 +897,8 @@ export function HomePage() {
           {activeTab === 'FEED' ? (
             <>
               {sectionVisible('trending') && (
-              <div
-                id="section-trending-brands"
+              <StudioWrap
+                sectionId="home-trending-brands"
                 className="rounded-[5px] border border-white/10 p-3 sm:p-5 shadow-sm overflow-hidden"
                 style={{
                   backgroundColor: CAROUSEL_BG_COLORS[carouselIndex % CAROUSEL_BG_COLORS.length],
@@ -929,11 +930,11 @@ export function HomePage() {
                   handleMouseDown={handleMouseDown}
                   handleMouseUpOrLeave={handleMouseUpOrLeave}
                 />
-              </div>
+              </StudioWrap>
               )}
 
               {sectionVisible('trending') && (
-              <div id="section-new-on-choosify" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
+              <StudioWrap sectionId="home-new-products" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
                   <div className="text-left">
                     <div className="flex items-center gap-1">
@@ -970,7 +971,7 @@ export function HomePage() {
                     <ChevronRight size={16} />
                   </Link>
                 </div>
-              </div>
+              </StudioWrap>
               )}
 
               {sectionVisible('featured-brands') && (
@@ -1013,7 +1014,7 @@ export function HomePage() {
               )}
 
               {sectionVisible('deals') && (
-              <div id="section-hot-deals" className="bg-[#FFFFFF] border-t-2 border-[#E8500A] rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left mb-6">
+              <StudioWrap sectionId="home-deals" className="bg-[#FFFFFF] border-t-2 border-[#E8500A] rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left mb-6">
                 
                 {/* Section Header */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
@@ -1046,11 +1047,11 @@ export function HomePage() {
                     </div>
                   )}
                 />
-              </div>
+              </StudioWrap>
               )}
 
               {sectionVisible('creators') && featuredCreators.length > 0 && (
-              <div id="section-featured-creators" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
+              <StudioWrap sectionId="home-creators" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4 pb-3 border-b border-gray-100">
                   <div className="text-left">
                     <h2 className="text-base font-semibold text-[#1a1a2e]">
@@ -1077,11 +1078,11 @@ export function HomePage() {
                     </div>
                   )}
                 />
-              </div>
+              </StudioWrap>
               )}
 
               {sectionVisible('recommended') && homeFeaturedGuideSlides.length > 0 && (
-              <div id="section-recommendations" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
+              <StudioWrap sectionId="home-recommendations" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4 pb-3 border-b border-gray-100">
                   <div className="text-left">
                     <h2 className="text-base font-semibold text-[#1a1a2e]">
@@ -1110,11 +1111,11 @@ export function HomePage() {
                     </div>
                   )}
                 />
-              </div>
+              </StudioWrap>
               )}
 
               {sectionVisible('categories') && (
-              <div id="section-categories" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
+              <StudioWrap sectionId="home-categories" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 
                 {/* Section Header */}
                 <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-100">
@@ -1174,19 +1175,19 @@ export function HomePage() {
                   terms={homePopularSearchTerms}
                   className="mt-6 pt-6"
                 />
-              </div>
+              </StudioWrap>
               )}
 
               {whatsOnPosts.length > 0 && (
+              <StudioWrap sectionId="home-events" className="mt-6">
               <BrandPostCarouselSection
-                id="section-whats-on"
                 posts={whatsOnPosts}
                 title="Events"
                 subtitle="Upcoming launches, festivals, and brand events from verified shops."
                 viewAllHref="/whats-on"
                 viewAllLabel="View All Events"
-                className="mt-6"
               />
+              </StudioWrap>
               )}
             </>
           ) : (
