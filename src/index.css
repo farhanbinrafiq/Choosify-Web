@@ -669,6 +669,10 @@
   .choosify-creator-hybrid-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .choosify-creator-hybrid-grid[data-dense-row="true"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* Lone YouTube / long-form card spans the full row (featured-style width) */

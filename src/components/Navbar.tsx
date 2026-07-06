@@ -12,7 +12,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { CartDrawer } from './CartDrawer';
 import { cn } from '../lib/utils';
-import { PRIMARY_NAV_ITEMS } from '../lib/navigation';
+import { PRIMARY_NAV_ITEMS, resolveSiteNavigation } from '../lib/navigation';
 import { isNavPathEnabled } from '../lib/featureFlags';
 import toast from 'react-hot-toast';
 
@@ -88,9 +88,7 @@ export function Navbar() {
     setIsCartOpen((open) => !open);
   };
 
-  const navItems = siteConfig?.navigation?.length
-    ? [...siteConfig.navigation].sort((a, b) => a.order - b.order)
-    : null;
+  const navItems = resolveSiteNavigation(siteConfig?.navigation);
 
   const renderNavLinks = (linkClass: (path: string) => string) =>
     navItems ? (

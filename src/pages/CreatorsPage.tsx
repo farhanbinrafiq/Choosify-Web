@@ -12,6 +12,14 @@ import type { Creator } from '../data/creators';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
+import { buildCreatorsPopularSearchTerms } from '../utils/pagePopularSearches';
+import { ListingAdRail } from '../components/ListingAdRail';
+import { AdSenseSlot } from '../components/AdSenseSlot';
+import { InfeedSponsoredCard } from '../components/SponsoredPlacementCard';
+import { usePlacements } from '../hooks/usePlacements';
+import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
+import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 
 interface CreatorCollab {
   id: string;
@@ -41,7 +49,7 @@ const CREATOR_PROMOS: CreatorPromo[] = [
 ];
 
 export function CreatorsPage() {
-  const { getCreatorClaimStatus, creatorClaimStatuses, allCreators } = useGlobalState();
+  const { getCreatorClaimStatus, creatorClaimStatuses, allCreators, siteConfig } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Creators');
@@ -215,6 +223,21 @@ export function CreatorsPage() {
 
     return result;
   }, [originalFeaturedCreators, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter]);
+
+  const popularSearchTerms = React.useMemo(
+    () =>
+      buildCreatorsPopularSearchTerms({
+        cmsTerms: siteConfig?.popularSearches,
+        creatorNames: filteredCreators.map((c) => c.name),
+        limit: 12,
+      }),
+    [siteConfig?.popularSearches, filteredCreators],
+  );
+
+  const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_CREATOR, {
+    limit: INFEED_MAX_PER_PAGE,
+    entityType: 'creator',
+  });
 
   const groupedCreators = letters.reduce((acc, letter) => {
     const filtered = filteredCreators.filter(c => c.name.toUpperCase().startsWith(letter));
@@ -571,30 +594,11 @@ export function CreatorsPage() {
             </div>
           </div>
 
-          {/* SPONSOR AD IMAGE CARD */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
-             <div className="relative z-10 flex flex-col">
-                <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#e8edf2] px-1">
-                  <h3 className="text-[10px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
-                </div>
-                
-                <div className="w-full aspect-video rounded-[5px] overflow-hidden mb-3 border border-[#e8edf2] shadow-inner shrink-0">
-                   <img 
-                      src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=620&h=350&fit=crop" 
-                      alt="Sponsor AD" 
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
-                      referrerPolicy="no-referrer"
-                   />
-                </div>
-                
-                <h4 className="font-sans text-[11.5px] font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">CREATORS MASTERCLASS</h4>
-                <p className="text-[9.5px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Scale Your Digital Influence</p>
-                
-                <button className="w-full py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0">
-                   Register Now
-                </button>
-             </div>
-          </div>
+          <ListingAdRail
+            sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_LANDSCAPE}
+            sponsoredVariant="landscape"
+            showAdSense={false}
+          />
         </aside>
 
         {/* Main Content Area */}
@@ -734,14 +738,24 @@ export function CreatorsPage() {
               </div>
 
               <div className={CREATOR_CARD_GRID}>
-                {filteredFeaturedCreators.map((creator) => (
-                  <CreatorCardDesign key={creator.id} creator={creator} />
-                ))}
+                {injectPlacementsIntoFeed(
+                  filteredFeaturedCreators,
+                  (creator) => `featured-creator-${creator.id}`,
+                  infeedPlacements.slice(0, 1),
+                  INFEED_INTERVAL.creator,
+                  1,
+                ).map((entry) =>
+                  entry.kind === 'placement' ? (
+                    <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
+                  ) : (
+                    <CreatorCardDesign key={entry.key} creator={entry.item} />
+                  ),
+                )}
               </div>
             </div>
           )}
 
-          {Object.entries(groupedCreators).map(([letter, letterCreators]) => (
+          {Object.entries(groupedCreators).map(([letter, letterCreators], letterIndex) => (
             <div key={letter} className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center text-xl font-black">{letter}</div>
@@ -749,9 +763,19 @@ export function CreatorsPage() {
               </div>
 
               <div className={CREATOR_CARD_GRID}>
-                {letterCreators.map(creator => (
-                  <CreatorCardDesign key={creator.id} creator={creator} />
-                ))}
+                {injectPlacementsIntoFeed(
+                  letterCreators,
+                  (creator) => `creator-${creator.id}`,
+                  infeedPlacements.slice(letterIndex % Math.max(infeedPlacements.length, 1)),
+                  INFEED_INTERVAL.creator,
+                  letterIndex === 0 ? 0 : 1,
+                ).map((entry) =>
+                  entry.kind === 'placement' ? (
+                    <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
+                  ) : (
+                    <CreatorCardDesign key={entry.key} creator={entry.item} />
+                  ),
+                )}
               </div>
             </div>
           ))}
@@ -784,6 +808,14 @@ export function CreatorsPage() {
               Showing {filteredCreators.length} Of {mappedCreators.length} Results
             </p>
           </div>
+
+          <PopularSearchKeywords
+            title="Popular creator searches"
+            terms={popularSearchTerms}
+            className="mt-0 pt-10"
+          />
+
+          <AdSenseSlot format="infeed" className="mt-6" />
 
           {filteredCreators.length === 0 && (
              <div className="py-20 text-center">
@@ -893,9 +925,7 @@ export function CreatorsPage() {
             </div>
           </div>
 
-
-
-
+          <AdSenseSlot format="sidebar" />
 
         </aside>
       </div>

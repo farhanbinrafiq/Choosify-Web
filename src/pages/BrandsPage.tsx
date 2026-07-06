@@ -8,6 +8,14 @@ import { toast } from 'react-hot-toast';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { BrandCardDesign } from '../components/BrandCardDesign';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
+import { buildBrandsPopularSearchTerms } from '../utils/pagePopularSearches';
+import { ListingAdRail } from '../components/ListingAdRail';
+import { AdSenseSlot } from '../components/AdSenseSlot';
+import { InfeedSponsoredCard } from '../components/SponsoredPlacementCard';
+import { usePlacements } from '../hooks/usePlacements';
+import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
+import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 import {BRAND_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -58,7 +66,7 @@ interface Brand {
 }
 
 export function BrandsPage() {
-  const { allBrands: globalBrands, getBrandClaimStatus } = useGlobalState();
+  const { allBrands: globalBrands, getBrandClaimStatus, siteConfig } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Brands');
@@ -420,6 +428,20 @@ export function BrandsPage() {
 
     return result;
   }, [originalFeaturedBrands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus]);
+
+  const popularSearchTerms = React.useMemo(
+    () =>
+      buildBrandsPopularSearchTerms({
+        cmsTerms: siteConfig?.popularSearches,
+        brandNames: filteredBrands.map((b) => b.name),
+        limit: 12,
+      }),
+    [siteConfig?.popularSearches, filteredBrands],
+  );
+
+  const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_BRAND, {
+    limit: INFEED_MAX_PER_PAGE,
+  });
 
   const groupedBrands = letters.reduce((acc, letter) => {
     const filtered = filteredBrands.filter(b => b.name.toUpperCase().startsWith(letter));
@@ -793,30 +815,12 @@ export function BrandsPage() {
             </div>
           </div>
 
-          {/* SPONSOR AD IMAGE CARD */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
-             <div className="relative z-10 flex flex-col">
-                <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#e8edf2] px-1">
-                  <h3 className="text-[10px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
-                </div>
-                
-                <div className="w-full aspect-video rounded-[5px] overflow-hidden mb-3 border border-[#e8edf2] shadow-inner shrink-0">
-                   <img 
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=620&h=350&fit=crop" 
-                      alt="Sponsor AD" 
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
-                      referrerPolicy="no-referrer"
-                   />
-                </div>
-                
-                <h4 className="font-sans text-[11.5px] font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">AARONG HERITAGE</h4>
-                <p className="text-[9.5px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Traditional Handcrafted Brand</p>
-                
-                <button className="w-full py-2 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0">
-                   Shop Now
-                </button>
-             </div>
-          </div>
+          {/* SPONSOR AD */}
+          <ListingAdRail
+            sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_LANDSCAPE}
+            sponsoredVariant="landscape"
+            showAdSense={false}
+          />
         </aside>
 
         {/* Main Content Area */}
@@ -956,13 +960,23 @@ export function BrandsPage() {
               </div>
 
               <div className={BRAND_CARD_GRID}>
-                {filteredFeaturedBrands.map((brand) => (
-                  <BrandCardDesign key={brand.id} brand={brand} />
-                ))}
+                {injectPlacementsIntoFeed(
+                  filteredFeaturedBrands,
+                  (brand) => `featured-brand-${brand.id}`,
+                  infeedPlacements.slice(0, 1),
+                  INFEED_INTERVAL.brand,
+                  1,
+                ).map((entry) =>
+                  entry.kind === 'placement' ? (
+                    <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
+                  ) : (
+                    <BrandCardDesign key={entry.key} brand={entry.item} />
+                  ),
+                )}
               </div>
             </div>
           )}
-          {Object.entries(groupedBrands).map(([letter, letterBrands]) => (
+          {Object.entries(groupedBrands).map(([letter, letterBrands], letterIndex) => (
             <div key={letter} className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center text-xl font-black">{letter}</div>
@@ -970,9 +984,19 @@ export function BrandsPage() {
               </div>
 
               <div className={BRAND_CARD_GRID}>
-                {letterBrands.map(brand => (
-                  <BrandCardDesign key={brand.id} brand={brand} />
-                ))}
+                {injectPlacementsIntoFeed(
+                  letterBrands,
+                  (brand) => `brand-${brand.id}`,
+                  infeedPlacements.slice(letterIndex % Math.max(infeedPlacements.length, 1)),
+                  INFEED_INTERVAL.brand,
+                  letterIndex === 0 ? 0 : 1,
+                ).map((entry) =>
+                  entry.kind === 'placement' ? (
+                    <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
+                  ) : (
+                    <BrandCardDesign key={entry.key} brand={entry.item} />
+                  ),
+                )}
               </div>
             </div>
           ))}
@@ -1005,6 +1029,14 @@ export function BrandsPage() {
               Showing 100 Of 150 Results
             </p>
           </div>
+
+          <PopularSearchKeywords
+            title="Popular brand searches"
+            terms={popularSearchTerms}
+            className="mt-0 pt-10"
+          />
+
+          <AdSenseSlot format="infeed" className="mt-6" />
 
           {Object.keys(groupedBrands).length === 0 && (
              <div className="py-20 text-center">
@@ -1125,6 +1157,8 @@ export function BrandsPage() {
               )}
             </div>
           </div>
+
+          <AdSenseSlot format="sidebar" />
 
          </aside>
       </div>

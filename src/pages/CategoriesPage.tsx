@@ -14,10 +14,10 @@ import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { CATEGORIES } from '../constants';
 import { getCategoryImage } from '../lib/categoryImages';
 import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
-import {
-  buildCategoryChunkPopularSearchTerms,
-  getCategoryChunkPopularSearchHeading,
-} from '../utils/pagePopularSearches';
+import { buildCategoryPopularSearchTerms } from '../utils/categoryPopularSearches';
+import { ListingAdRail } from '../components/ListingAdRail';
+import { AdSenseSlot } from '../components/AdSenseSlot';
+import { PLACEMENT_KEYS } from '../lib/placements';
 
 interface Subcategory {
   name: string;
@@ -234,7 +234,7 @@ export function CategoriesPage() {
                   { value: 'brands', label: 'Has Brands' },
                   { value: 'creators', label: 'Has Creators' },
                   { value: 'recs', label: 'Has Recommendations' },
-                  { value: 'whats-on', label: "Has What's On Posts" }
+                  { value: 'whats-on', label: 'Has Events' }
                 ].map(opt => (
                   <button
                     key={opt.value}
@@ -550,7 +550,7 @@ export function CategoriesPage() {
               { value: 'brands', label: 'Has Brands' },
               { value: 'creators', label: 'Has Creators' },
               { value: 'recs', label: 'Has Recommendations' },
-              { value: 'whats-on', label: "Has What's On Posts" }
+              { value: 'whats-on', label: 'Has Events' }
             ].map(opt => (
               <button
                 key={opt.value}
@@ -756,13 +756,8 @@ export function CategoriesPage() {
             </div>
           ) : (
             <div className={CATEGORY_CARD_GRID}>
-              {filteredCategoriesList.map((cat, idx) => {
+              {filteredCategoriesList.map((cat) => {
                 const isExpanded = expandedCategory === cat.name;
-                const chunkStart = Math.floor(idx / 4) * 4;
-                const chunkNames = filteredCategoriesList
-                  .slice(chunkStart, chunkStart + 4)
-                  .map((item) => item.name);
-                const showChunkKeywords = (idx + 1) % 4 === 0 || idx === filteredCategoriesList.length - 1;
 
                 return (
                   <React.Fragment key={cat.name}>
@@ -851,22 +846,20 @@ export function CategoriesPage() {
                               </div>
                             )}
                           </div>
+
+                          <PopularSearchKeywords
+                            className="mt-8 pt-6 border-t border-gray-100"
+                            title={`Popular searches in ${cat.name}`}
+                            terms={buildCategoryPopularSearchTerms({
+                              categoryName: cat.name,
+                              cmsTerms: siteConfig?.popularSearches,
+                              products: allProducts ?? [],
+                              limit: 12,
+                            })}
+                          />
                         </motion.div>
                       )}
                     </AnimatePresence>
-
-                    {showChunkKeywords && (
-                      <PopularSearchKeywords
-                        className="col-span-full mt-2 mb-2"
-                        title={getCategoryChunkPopularSearchHeading(chunkNames)}
-                        terms={buildCategoryChunkPopularSearchTerms({
-                          categoryNames: chunkNames,
-                          cmsTerms: siteConfig?.popularSearches,
-                          products: allProducts ?? [],
-                          limit: 12,
-                        })}
-                      />
-                    )}
                   </React.Fragment>
                 );
               })}
@@ -917,32 +910,13 @@ export function CategoriesPage() {
           </div>
 
           {/* Sponsored Ad Section */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full">
-             <div className="relative z-10 flex flex-col">
-                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
-                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">Sponsored Ad</h3>
-                </div>
-                
-                <div className="w-full aspect-video rounded-[5px] overflow-hidden mb-4 border border-[#e8edf2] shadow-inner shrink-0">
-                   <img 
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=350&fit=crop" 
-                      alt="Sponsor AD" 
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-[2s]"
-                   />
-                </div>
-                
-                <h4 className="font-sans text-xs font-semibold text-[#1a1a2e] uppercase tracking-wider mb-0.5">AARONG</h4>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Heritage Shopping Brand</p>
-                
-                <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-4 px-1">
-                   New Collection Available. Free Delivery Overall Dhaka On Purchase Above BDT 1500
-                </p>
-                
-                <button className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0">
-                   Shop Now
-                </button>
-             </div>
-          </div>
+          <ListingAdRail
+            sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_LANDSCAPE}
+            sponsoredVariant="landscape"
+            sponsoredDescription="New collection available from verified partners."
+            showAdSense
+            adSenseFormat="sidebar"
+          />
         </aside>
       </div>
 

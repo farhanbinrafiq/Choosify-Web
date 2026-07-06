@@ -305,6 +305,7 @@ const isPortraitReview = (review: InfluencerReviewCard): boolean => {
 };
 
 const ROW_SIZE = 3;
+const DENSE_ROW_SIZE = 4;
 
 const partitionReviewsByFormat = (reviews: InfluencerReviewCard[]) => {
   const landscape: InfluencerReviewCard[] = [];
@@ -315,28 +316,36 @@ const partitionReviewsByFormat = (reviews: InfluencerReviewCard[]) => {
   return { landscape, portrait };
 };
 
-/** Pack reviews into hybrid rows: prefer 1 YouTube/long-form + up to 2 reels per row (max 3). */
+/** Pack reviews into hybrid rows: first row max 3 (1 YouTube + reels); later rows max 4 reels. */
 const buildHybridReviewRows = (reviews: InfluencerReviewCard[]): InfluencerReviewCard[][] => {
   const { landscape, portrait } = partitionReviewsByFormat(reviews);
   const rows: InfluencerReviewCard[][] = [];
   let landscapeIndex = 0;
   let portraitIndex = 0;
 
+  if (landscapeIndex < landscape.length || portraitIndex < portrait.length) {
+    const firstRow: InfluencerReviewCard[] = [];
+    if (landscapeIndex < landscape.length) {
+      firstRow.push(landscape[landscapeIndex++]);
+    }
+    while (firstRow.length < ROW_SIZE && portraitIndex < portrait.length) {
+      firstRow.push(portrait[portraitIndex++]);
+    }
+    while (firstRow.length < ROW_SIZE && landscapeIndex < landscape.length) {
+      firstRow.push(landscape[landscapeIndex++]);
+    }
+    if (firstRow.length > 0) rows.push(firstRow);
+  }
+
+  const DENSE_ROW_SIZE = 4;
   while (landscapeIndex < landscape.length || portraitIndex < portrait.length) {
     const row: InfluencerReviewCard[] = [];
-
-    if (landscapeIndex < landscape.length) {
-      row.push(landscape[landscapeIndex++]);
-    }
-
-    while (row.length < ROW_SIZE && portraitIndex < portrait.length) {
+    while (row.length < DENSE_ROW_SIZE && portraitIndex < portrait.length) {
       row.push(portrait[portraitIndex++]);
     }
-
-    while (row.length < ROW_SIZE && landscapeIndex < landscape.length) {
+    while (row.length < DENSE_ROW_SIZE && landscapeIndex < landscape.length) {
       row.push(landscape[landscapeIndex++]);
     }
-
     if (row.length > 0) rows.push(row);
   }
 
@@ -737,7 +746,7 @@ export function InfluencerReviews({
       </div>
       )}
 
-      {/* PART 3 — HYBRID FEED (mixed YouTube + reels, up to 3 per row) */}
+      {/* PART 3 — HYBRID FEED (row 1: up to 3; row 2+: up to 4 reels per row) */}
       {!hasHybridFeed ? (
         <div className="w-full text-center py-10 bg-[#F8FAFC] border border-[#e8edf2] rounded-[12px] text-[#8a9bb0] flex flex-col items-center gap-3">
           <span className="text-sm font-semibold">
@@ -762,6 +771,7 @@ export function InfluencerReviews({
               key={`creator-hybrid-row-${rowIndex}`}
               className={CREATOR_HYBRID_GRID}
               data-row-size={row.length}
+              data-dense-row={rowIndex >= 1 ? 'true' : undefined}
             >
               {row.map((review) => (
                 <CreatorReviewCard

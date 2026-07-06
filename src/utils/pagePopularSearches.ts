@@ -99,3 +99,88 @@ export function getCategoryChunkPopularSearchHeading(categoryNames: string[]): s
   if (names.length > 1) return `Popular searches: ${names.slice(0, 3).join(', ')}${names.length > 3 ? '…' : ''}`;
   return 'Popular searches on Choosify';
 }
+
+export function buildDealsPopularSearchTerms(options: {
+  cmsTerms?: SitePopularSearch[];
+  products?: CatalogProduct[];
+  limit?: number;
+}): string[] {
+  const dealProducts = (options.products ?? []).filter(
+    (p) => Boolean((p as { dealValidUntil?: string }).dealValidUntil) || (p as { discount?: number }).discount,
+  );
+  return buildPagePopularSearchTerms({
+    cmsTerms: options.cmsTerms,
+    products: dealProducts.length ? dealProducts : options.products,
+    limit: options.limit ?? 12,
+  });
+}
+
+export function buildBrandsPopularSearchTerms(options: {
+  cmsTerms?: SitePopularSearch[];
+  brandNames?: string[];
+  limit?: number;
+}): string[] {
+  return buildPagePopularSearchTerms({
+    cmsTerms: options.cmsTerms,
+    brandNames: options.brandNames,
+    limit: options.limit ?? 12,
+  });
+}
+
+export function buildCreatorsPopularSearchTerms(options: {
+  cmsTerms?: SitePopularSearch[];
+  creatorNames?: string[];
+  limit?: number;
+}): string[] {
+  const limit = options.limit ?? 12;
+  const seen = new Set<string>();
+  const results: string[] = [];
+  const push = (term: string) => {
+    const normalized = normalizeTerm(term);
+    if (!normalized) return;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    results.push(normalized);
+  };
+
+  (options.cmsTerms ?? [])
+    .filter((item) => item.isActive && item.term.trim())
+    .sort((a, b) => a.order - b.order)
+    .forEach((item) => push(item.term));
+
+  options.creatorNames?.forEach((name) => push(name));
+
+  ['Tech Reviewers', 'Fashion Creators', 'Gadget Unboxing', 'Budget Finds', 'Verified Creators'].forEach(push);
+
+  return results.slice(0, limit);
+}
+
+export function buildGuidesPopularSearchTerms(options: {
+  cmsTerms?: SitePopularSearch[];
+  guideTitles?: string[];
+  limit?: number;
+}): string[] {
+  const limit = options.limit ?? 12;
+  const seen = new Set<string>();
+  const results: string[] = [];
+  const push = (term: string) => {
+    const normalized = normalizeTerm(term);
+    if (!normalized) return;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    results.push(normalized);
+  };
+
+  (options.cmsTerms ?? [])
+    .filter((item) => item.isActive && item.term.trim())
+    .sort((a, b) => a.order - b.order)
+    .forEach((item) => push(item.term));
+
+  options.guideTitles?.forEach((title) => push(title));
+
+  ['Buying Guides', 'Product Reviews', 'Best Picks 2026', 'Compare Before Buy', 'Expert Tips'].forEach(push);
+
+  return results.slice(0, limit);
+}

@@ -7,9 +7,17 @@ import { cn } from '../lib/utils';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
+import { buildDealsPopularSearchTerms } from '../utils/pagePopularSearches';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
+import { ListingAdRail } from '../components/ListingAdRail';
+import { AdSenseSlot } from '../components/AdSenseSlot';
+import { InfeedSponsoredCard } from '../components/SponsoredPlacementCard';
+import { usePlacements } from '../hooks/usePlacements';
+import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
+import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 
 const PROMO_CODES = [
   { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
@@ -37,7 +45,7 @@ function FlashDealCountdown({ validUntil }: { validUntil?: string }) {
 
 export function DealsPage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals } = useGlobalState();
+  const { allProducts, allBrands, allDeals, siteConfig } = useGlobalState();
   const [searchParams, setSearchParams] = useSearchParams();
   const getInitialTab = () => {
     const t = searchParams.get('tab');
@@ -171,6 +179,35 @@ export function DealsPage() {
     }
     return result;
   }, [searchQuery, activeTab, selectedCategory, minDiscount, productSource]);
+
+  const popularSearchTerms = React.useMemo(
+    () =>
+      buildDealsPopularSearchTerms({
+        cmsTerms: siteConfig?.popularSearches,
+        products: filteredProducts,
+        limit: 12,
+      }),
+    [siteConfig?.popularSearches, filteredProducts],
+  );
+
+  const featuredDealProducts = (filteredProducts.length > 0 ? filteredProducts : productSource).slice(0, 2);
+  const secondaryDealProducts = (filteredProducts.length > 1 ? filteredProducts : productSource).slice(2, 6);
+
+  const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_DEAL, {
+    limit: INFEED_MAX_PER_PAGE,
+  });
+
+  const dealFeed = React.useMemo(
+    () =>
+      injectPlacementsIntoFeed(
+        filteredProducts,
+        (product) => `deal-${product.id}`,
+        infeedPlacements,
+        INFEED_INTERVAL.deal,
+        INFEED_MAX_PER_PAGE,
+      ),
+    [filteredProducts, infeedPlacements],
+  );
 
   const categoriesList = [
     { name: 'Fashion', icon: <Shirt size={16} className="stroke-[2.5]" />, count: 550 },
@@ -518,28 +555,35 @@ export function DealsPage() {
               </div>
    
               <div className="flex flex-col gap-6 items-center w-full">
-                 {/* Banner Card */}
-                 <div className="w-full lg:min-h-[395px] lg:h-auto flex-shrink-0 relative">
-                    <ProductCard 
-                      product={{
-                        ...filteredProducts[0] || productSource[0],
-                        tag: "HOT",
-                        tagColor: "bg-[#E93B3B]",
-                        originalPrice: "3,500"
-                      }} 
-                      variant="featured" titleStyle={{ minHeight: '60px', marginBottom: '11px' }}
-                      showCountdown={true}
-                    />
-                    <div className="absolute top-4 right-16 z-30 bg-white/95 px-3 py-1.5 rounded-full border border-orange-primary/20 shadow-sm flex items-center gap-1.5">
-                      <Zap size={11} className="text-orange-primary fill-orange-primary animate-pulse" />
-                      <span className="text-[8px] font-black text-navy uppercase tracking-widest">ENDS IN:</span>
-                      <FlashDealCountdown validUntil={(filteredProducts[0] as any)?.dealValidUntil} />
-                    </div>
+                 {/* Two featured deal cards */}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    {featuredDealProducts.map((product, idx) => (
+                      <div key={product.id} className="w-full lg:min-h-[320px] relative">
+                        <ProductCard
+                          product={{
+                            ...product,
+                            tag: idx === 0 ? 'HOT' : 'SALE',
+                            tagColor: idx === 0 ? 'bg-[#E93B3B]' : 'bg-[#E98B8B]',
+                            originalPrice: idx === 0 ? '3,500' : product.originalPrice,
+                          }}
+                          variant="featured"
+                          titleStyle={{ minHeight: '60px', marginBottom: '11px' }}
+                          showCountdown={idx === 0}
+                        />
+                        {idx === 0 ? (
+                          <div className="absolute top-4 right-4 z-30 bg-white/95 px-3 py-1.5 rounded-full border border-orange-primary/20 shadow-sm flex items-center gap-1.5">
+                            <Zap size={11} className="text-orange-primary fill-orange-primary animate-pulse" />
+                            <span className="text-[8px] font-black text-navy uppercase tracking-widest">ENDS IN:</span>
+                            <FlashDealCountdown validUntil={(product as { dealValidUntil?: string })?.dealValidUntil} />
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
                  </div>
                  
                  {/* Small Cards Row */}
                  <div className={cn(PRODUCT_CARD_GRID, "text-left")}>
-                    {(filteredProducts.length > 1 ? filteredProducts : productSource).slice(1, 5).map((product) => (
+                    {secondaryDealProducts.map((product) => (
                        <div key={product.id} className="w-full h-full">
                          <ProductCard 
                            product={{
@@ -598,18 +642,22 @@ export function DealsPage() {
                     </div>
                   ))
                 ) : (
-                  (filteredProducts.length > 0 ? filteredProducts : productSource).slice(0, 12).map((product, idx) => (
-                    <div key={`${product.id}-${idx}`} className="w-full h-full">
-                      <ProductCard 
-                        product={{
-                          ...product,
-                          tag: idx % 3 === 0 ? "HOT" : idx % 3 === 1 ? "SALE" : "NEW",
-                          tagColor: idx % 3 === 0 ? "bg-[#E93B3B]" : idx % 3 === 1 ? "bg-[#E98B8B]" : "bg-[#7CD93B]",
-                        }} 
-                        variant="compact"
-                      />
-                    </div>
-                  ))
+                  dealFeed.map((entry) =>
+                    entry.kind === 'placement' ? (
+                      <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
+                    ) : (
+                      <div key={entry.key} className="w-full h-full">
+                        <ProductCard
+                          product={{
+                            ...entry.item,
+                            tag: 'SALE',
+                            tagColor: 'bg-[#E98B8B]',
+                          }}
+                          variant="compact"
+                        />
+                      </div>
+                    ),
+                  )
                 )}
               </div>
 
@@ -640,13 +688,20 @@ export function DealsPage() {
                   Showing {Math.min(12, filteredProducts.length)} of {filteredProducts.length} deals available today
                 </p>
               </div>
+
+              <PopularSearchKeywords
+                title="Popular deal searches"
+                terms={popularSearchTerms}
+                className="mt-0 pt-10"
+              />
+
+              <AdSenseSlot format="infeed" className="mt-6" />
             </section>
 
           </div>
 
           {/* RIGHT SIDEBAR COLUMN */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-             {/* Sourcing Badge card to fill the right sidebar slot beautifully */}
              <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left font-sans">
                 <h4 className="text-[11px] font-black text-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
                    <ShieldCheck size={14} className="text-green-500 shrink-0" />
@@ -656,6 +711,13 @@ export function DealsPage() {
                    Each listed bargain point is validated against native brand catalogs. Rest assured, checkout is immediate, safe, and transparent.
                 </p>
              </div>
+
+             <ListingAdRail
+               sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
+               sponsoredVariant="portrait"
+               showAdSense
+               adSenseFormat="sidebar"
+             />
           </aside>
 
         </div>

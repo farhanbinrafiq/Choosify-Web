@@ -58,7 +58,7 @@ export function BrandPostDetailPage() {
   }, [post]);
 
   useRegisterPageFilters({
-    pageName: post?.title ?? "What's On",
+    pageName: post?.title ?? 'Events',
     renderSearch: null,
     quickFilters: [],
     renderFilters: null,

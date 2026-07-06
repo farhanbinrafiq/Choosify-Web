@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard, Campaign } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { cn } from '../lib/utils';
-import { HeroScrollCue } from './HeroScrollCue';
+import { getNavItemByPath } from '../lib/navigation';
 export type PageHeroBannerKey =
   | 'home'
   | 'products'
@@ -104,7 +104,7 @@ const PAGE_DEFAULT_SLIDES: Record<PageHeroBannerKey, HeroBannerSlide[]> = {
   'whats-on': [
     {
       id: 'whats-on-default',
-      title: "What's On Choosify",
+      title: 'Events on Choosify',
       subtitle: 'Launches, festivals, and brand events happening now.',
       ctaText: 'See Events',
       ctaLink: '/whats-on',
@@ -189,6 +189,26 @@ function normalizeBannerLink(link: string): string {
   return trimmed;
 }
 
+const PAGE_KEY_TO_PATH: Record<PageHeroBannerKey, string> = {
+  home: '/',
+  products: '/products',
+  categories: '/categories',
+  brands: '/brands',
+  guides: '/guides',
+  deals: '/deals',
+  'whats-on': '/whats-on',
+  creators: '/creators',
+  search: '/search',
+  'brand-deals': '/brand-deals',
+  compare: '/compare',
+};
+
+function getCompactHeroTitle(pageKey: PageHeroBannerKey): string {
+  const navItem = getNavItemByPath(PAGE_KEY_TO_PATH[pageKey]);
+  if (navItem) return navItem.heroTitle;
+  return PAGE_DEFAULT_SLIDES[pageKey]?.[0]?.title ?? 'Choosify';
+}
+
 interface PageHeroBannerProps {
   pageKey: PageHeroBannerKey;
   className?: string;
@@ -244,7 +264,38 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
     };
   }, [slides.length, autoplay]);
 
-  if (hidden || slides.length === 0) return null;
+  if (hidden) return null;
+
+  if (pageKey !== 'home') {
+    const compactTitle = getCompactHeroTitle(pageKey);
+    const compactSubtitle = PAGE_DEFAULT_SLIDES[pageKey]?.[0]?.subtitle;
+
+    return (
+      <section
+        className={cn(
+          'relative w-full border-b border-black/10 select-none choosify-dark-gradient',
+          className,
+        )}
+        aria-label={`${compactTitle} page header`}
+      >
+        <div className="relative w-full h-[112px] sm:h-[128px] md:h-[140px] overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#000435]/92 via-[#1A1D4E]/85 to-[#3A1E22]/75" />
+          <div className="relative z-10 h-full max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 flex flex-col justify-center items-start text-left">
+            <h1 className="font-space font-black text-white text-xl sm:text-2xl md:text-[1.65rem] uppercase tracking-tight leading-none">
+              {compactTitle}
+            </h1>
+            {compactSubtitle ? (
+              <p className="mt-1.5 text-[10px] sm:text-xs text-white/65 max-w-xl leading-relaxed line-clamp-1">
+                {compactSubtitle}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (slides.length === 0) return null;
 
   const current = slides[currentIndex];
 
@@ -387,7 +438,6 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
           </>
         )}
 
-        <HeroScrollCue anchorRef={sectionRef} resetKey={pageKey} />
       </div>
     </section>
   );

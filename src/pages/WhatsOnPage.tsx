@@ -102,7 +102,7 @@ export function WhatsOnPage() {
 
   useRegisterPageFilters(
     {
-      pageName: "What's On",
+      pageName: 'Events',
       renderSearch: () => (
         <div className="relative">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">

@@ -90,7 +90,7 @@ const SECTION_LABELS: Record<string, string> = {
   recommendations: 'Recommendations',
   creators: 'Creators',
   search: 'Search',
-  'whats-on': "What's On",
+  'whats-on': 'Events',
   'brand-deals': 'Brand Deals',
   about: 'About Us',
   contact: 'Contact Us',

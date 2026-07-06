@@ -163,5 +163,5 @@ export const HOME_POPULAR_CATEGORY_GRID = 'choosify-home-category-grid w-full';
 /** What's On brand post cards — 1 → 2 → 3 → 4 cols by breakpoint; max 4 per row */
 export const WHATS_ON_CARD_GRID = 'choosify-whats-on-grid w-full';
 
-/** Creator review hybrid feed — mixed YouTube + reels, max 3 per row (1 → 2 → 3 cols) */
+/** Creator review hybrid feed — row 1: max 3 (1 → 2 → 3 cols); row 2+: max 4 reels per row */
 export const CREATOR_HYBRID_GRID = 'choosify-creator-hybrid-grid w-full';

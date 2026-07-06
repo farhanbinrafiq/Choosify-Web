@@ -724,7 +724,7 @@ export function HomePage() {
       { id: 'section-recommendations', label: 'Picks', icon: <Sparkles size={13} />, hidden: !sectionVisible('recommended') || homeFeaturedGuideSlides.length === 0 },
       { id: 'section-featured-creators', label: 'Creators', icon: <Users size={13} />, hidden: !sectionVisible('creators') || featuredCreators.length === 0 },
       { id: 'section-categories', label: 'Categories', icon: <LayoutGrid size={13} />, hidden: !sectionVisible('categories') },
-      { id: 'section-whats-on', label: "What's On", icon: <Megaphone size={13} />, hidden: whatsOnPosts.length === 0 },
+      { id: 'section-whats-on', label: 'Events', icon: <Megaphone size={13} />, hidden: whatsOnPosts.length === 0 },
     ],
     [sectionVisible, homeFeaturedGuideSlides.length, whatsOnPosts.length, featuredCreators.length],
   );
@@ -1124,10 +1124,10 @@ export function HomePage() {
               <BrandPostCarouselSection
                 id="section-whats-on"
                 posts={whatsOnPosts}
-                title="What's On"
+                title="Events"
                 subtitle="Upcoming launches, festivals, and brand events from verified shops."
                 viewAllHref="/whats-on"
-                viewAllLabel="View All What's On"
+                viewAllLabel="View All Events"
                 className="mt-6"
               />
               )}

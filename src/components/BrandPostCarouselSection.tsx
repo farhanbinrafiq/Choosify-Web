@@ -19,10 +19,10 @@ type BrandPostCarouselSectionProps = {
 
 export function BrandPostCarouselSection({
   posts,
-  title = "What's On",
+  title = 'Events',
   subtitle = 'Upcoming launches, festivals, and brand events from verified shops.',
   viewAllHref = '/whats-on',
-  viewAllLabel = "View All What's On",
+  viewAllLabel = 'View All Events',
   className,
   id,
   badgeLabel = 'Discovery',

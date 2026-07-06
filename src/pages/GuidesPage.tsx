@@ -10,6 +10,14 @@ import { cn } from '../lib/utils';
 import { RecommendationCardSkeleton } from '../components/Skeleton';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PageHeroBanner } from '../components/PageHeroBanner';
+import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
+import { buildGuidesPopularSearchTerms } from '../utils/pagePopularSearches';
+import { AdSenseSlot } from '../components/AdSenseSlot';
+import { ListingAdRail } from '../components/ListingAdRail';
+import { InfeedSponsoredCard } from '../components/SponsoredPlacementCard';
+import { usePlacements } from '../hooks/usePlacements';
+import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
+import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 import { useDashboard } from '../context/DashboardContext';
 import toast from 'react-hot-toast';
 
@@ -465,7 +473,7 @@ export function HorizontalMediaCard({ guide, badgeType }: { guide: any, badgeTyp
 }
 
 export function GuidesPage() {
-  const { allGuides } = useGlobalState();
+  const { allGuides, siteConfig } = useGlobalState();
   const guideSource = allGuides;
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -850,6 +858,33 @@ export function GuidesPage() {
   };
 
   const filteredBlogs = getFilteredBlogs();
+
+  const popularSearchTerms = useMemo(
+    () =>
+      buildGuidesPopularSearchTerms({
+        cmsTerms: siteConfig?.popularSearches,
+        guideTitles: filteredBlogs.map((blog) => blog.title),
+        limit: 12,
+      }),
+    [siteConfig?.popularSearches, filteredBlogs],
+  );
+
+  const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_GUIDE, {
+    limit: INFEED_MAX_PER_PAGE,
+    entityType: 'guide',
+  });
+
+  const guideFeed = useMemo(
+    () =>
+      injectPlacementsIntoFeed(
+        filteredBlogs,
+        (guide) => `guide-${guide.id}`,
+        infeedPlacements,
+        INFEED_INTERVAL.guide,
+        INFEED_MAX_PER_PAGE,
+      ),
+    [filteredBlogs, infeedPlacements],
+  );
 
   const isAnyFilterActive = !!(
     selectedContentType || selectedPlatform || selectedCategory || selectedLanguage ||
@@ -1576,6 +1611,12 @@ export function GuidesPage() {
             <div id="guides-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
               {renderFilterPanel()}
             </div>
+
+            <ListingAdRail
+              sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_LANDSCAPE}
+              sponsoredVariant="landscape"
+              showAdSense={false}
+            />
          </aside>
 
          <div id="guides-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10">
@@ -1609,11 +1650,15 @@ export function GuidesPage() {
                           </h4>
                         )}
                         <div className={GUIDE_MEDIA_GRID}>
-                           {filteredBlogs.map((guide, i) => (
-                              <React.Fragment key={`${guide.id}-${i}`}>
-                                 {renderGuideMediaCard(guide)}
-                              </React.Fragment>
-                           ))}
+                           {guideFeed.map((entry) =>
+                              entry.kind === 'placement' ? (
+                                <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
+                              ) : (
+                                <React.Fragment key={entry.key}>
+                                  {renderGuideMediaCard(entry.item)}
+                                </React.Fragment>
+                              ),
+                           )}
                         </div>
                      </div>
                   )}
@@ -1646,6 +1691,14 @@ export function GuidesPage() {
                
                <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] italic">Results 1-8 of 156 Stories</p>
             </div>
+
+            <PopularSearchKeywords
+              title="Popular recommendation searches"
+              terms={popularSearchTerms}
+              className="mt-0 pt-10"
+            />
+
+            <AdSenseSlot format="infeed" className="mt-6" />
          </div>
 
          {/* Right Sidebar Widgets */}
@@ -1689,6 +1742,8 @@ export function GuidesPage() {
                   LOAD MORE
                </button>
             </div>
+
+            <AdSenseSlot format="sidebar" />
          </aside>
       </main>
       {/* Mobile/Tablet Bottom Sheet Drawer for Filters */}
