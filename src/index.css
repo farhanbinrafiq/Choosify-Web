@@ -651,7 +651,7 @@
   }
 }
 
-/* Creator review hybrid feed — mixed YouTube + reels, up to 3 cards per row */
+/* Creator review grid — lead row (max 2), dense rows (responsive 4–5 cols) */
 .choosify-creator-hybrid-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -659,25 +659,61 @@
   align-items: start;
 }
 
+/* Row 1: always at most 2 cards */
+.choosify-creator-hybrid-grid[data-row-tier="lead"] {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
 @media (min-width: 640px) {
-  .choosify-creator-hybrid-grid {
+  .choosify-creator-hybrid-grid[data-row-tier="lead"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 1024px) {
-  .choosify-creator-hybrid-grid {
+/* Single card in lead row */
+.choosify-creator-hybrid-grid[data-row-tier="lead"][data-row-size="1"] {
+  justify-items: stretch;
+}
+
+.choosify-creator-hybrid-grid[data-row-tier="lead"][data-row-size="1"] > .choosify-creator-hybrid-card[data-format="landscape"] {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 640px) {
+  .choosify-creator-hybrid-grid[data-row-tier="lead"][data-row-size="1"] > .choosify-creator-hybrid-card[data-format="portrait"] {
+    grid-column: 1 / -1;
+    max-width: 22rem;
+    justify-self: center;
+  }
+}
+
+/* Row 2+: responsive density (reels + YouTube share the same grid) */
+.choosify-creator-hybrid-grid[data-row-tier="dense"] {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
 
-  .choosify-creator-hybrid-grid[data-dense-row="true"] {
+@media (min-width: 1024px) {
+  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-/* Lone YouTube / long-form card spans the full row (featured-style width) */
-.choosify-creator-hybrid-grid[data-row-size="1"] > .choosify-creator-hybrid-card[data-format="landscape"] {
-  grid-column: 1 / -1;
+@media (min-width: 1280px) {
+  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 }
 
 .choosify-product-grid > *,

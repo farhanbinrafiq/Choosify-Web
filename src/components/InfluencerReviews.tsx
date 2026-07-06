@@ -304,61 +304,19 @@ const isPortraitReview = (review: InfluencerReviewCard): boolean => {
   return review.platform === 'Instagram' || review.platform === 'TikTok';
 };
 
-const ROW_SIZE = 3;
-const DENSE_ROW_SIZE = 4;
+const DENSE_ROW_MAX = 5;
 
-const partitionReviewsByFormat = (reviews: InfluencerReviewCard[]) => {
-  const landscape: InfluencerReviewCard[] = [];
-  const portrait: InfluencerReviewCard[] = [];
-  reviews.forEach((review) => {
-    (isPortraitReview(review) ? portrait : landscape).push(review);
-  });
-  return { landscape, portrait };
-};
+/** Lead row: up to 2 cards (any mix). Following rows: up to 5 per row, order preserved. */
+const buildCreatorReviewRows = (reviews: InfluencerReviewCard[]): InfluencerReviewCard[][] => {
+  if (reviews.length === 0) return [];
+  if (reviews.length === 1) return [[reviews[0]]];
 
-/** Pack hybrid rows after the featured block: row 1 can mix up to 3; row 2+ uses 4 reels when multiple. */
-const buildHybridReviewRows = (reviews: InfluencerReviewCard[]): InfluencerReviewCard[][] => {
-  const { landscape, portrait } = partitionReviewsByFormat(reviews);
-  const rows: InfluencerReviewCard[][] = [];
-  let landscapeIndex = 0;
-  let portraitIndex = 0;
+  const rows: InfluencerReviewCard[][] = [reviews.slice(0, 2)];
 
-  const takePortrait = (count: number) => {
-    const chunk: InfluencerReviewCard[] = [];
-    while (chunk.length < count && portraitIndex < portrait.length) {
-      chunk.push(portrait[portraitIndex++]);
-    }
-    return chunk;
-  };
-
-  const takeLandscape = () =>
-    landscapeIndex < landscape.length ? landscape[landscapeIndex++] : null;
-
-  if (landscapeIndex < landscape.length || portraitIndex < portrait.length) {
-    const firstRow: InfluencerReviewCard[] = [];
-    const leadLandscape = takeLandscape();
-    if (leadLandscape) firstRow.push(leadLandscape);
-    while (firstRow.length < ROW_SIZE && portraitIndex < portrait.length) {
-      firstRow.push(portrait[portraitIndex++]);
-    }
-    while (firstRow.length < ROW_SIZE && landscapeIndex < landscape.length) {
-      const extra = takeLandscape();
-      if (extra) firstRow.push(extra);
-    }
-    if (firstRow.length > 0) rows.push(firstRow);
-  }
-
-  while (portraitIndex < portrait.length || landscapeIndex < landscape.length) {
-    if (portraitIndex < portrait.length) {
-      const chunk = takePortrait(DENSE_ROW_SIZE);
-      if (chunk.length > 0) {
-        rows.push(chunk);
-        continue;
-      }
-    }
-
-    const loneLandscape = takeLandscape();
-    if (loneLandscape) rows.push([loneLandscape]);
+  let index = 2;
+  while (index < reviews.length) {
+    rows.push(reviews.slice(index, index + DENSE_ROW_MAX));
+    index += DENSE_ROW_MAX;
   }
 
   return rows;
@@ -370,61 +328,6 @@ interface CreatorReviewCardProps {
   onPlay: () => void;
   getPlatformIcon: (platform: ReviewPlatform) => React.ReactNode;
   variant: 'landscape' | 'portrait';
-}
-
-function SingularLandscapeReviewCard({
-  review,
-  isPlaying,
-  onPlay,
-  getPlatformIcon,
-}: Omit<CreatorReviewCardProps, 'variant'>) {
-  return (
-    <div
-      data-platform={review.platform?.toLowerCase()}
-      data-format="landscape"
-      className="choosify-creator-hybrid-card col-span-full flex flex-col sm:flex-row items-stretch border border-[#e8edf2] rounded-[12px] overflow-hidden bg-white shadow-[0_4px_18px_rgba(26,29,78,0.05)] hover:border-[#E8500A]/20 transition-all duration-200"
-    >
-      <div className="w-full sm:w-[52%] relative bg-[#0f172a] aspect-[16/9] flex-shrink-0">
-        <VideoArea
-          id={review.id}
-          videoUrl={review.videoUrl || ''}
-          image={review.image}
-          platform={review.platform || 'YouTube'}
-          aspectRatio="landscape"
-          isPlaying={isPlaying}
-          onPlay={onPlay}
-        />
-        {!isPlaying ? (
-          <div className="absolute top-3 left-3 z-10">
-            <span className="bg-white/95 backdrop-blur-md border border-white/80 text-[#1A1D4E] px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm select-none">
-              {getPlatformIcon(review.platform || 'YouTube')}
-              {review.platform}
-            </span>
-          </div>
-        ) : null}
-      </div>
-
-      <div className="w-full sm:w-[48%] bg-white p-4 sm:p-5 flex flex-col justify-between flex-shrink-0 text-left min-w-0 border-t sm:border-t-0 sm:border-l border-[#e8edf2]">
-        <div>
-          <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#E8500A] mb-1.5">
-            {review.category}
-          </p>
-          <h3 className="font-space text-base sm:text-lg font-black text-[#1A1D4E] leading-snug tracking-tight mb-2 line-clamp-2">
-            {review.title}
-          </h3>
-        </div>
-        <div className="flex items-center justify-between border-t border-[#e8edf2] pt-3 mt-auto">
-          <div className="flex items-center gap-2 min-w-0">
-            <RenderAvatar avatar={review.authorAvatar} name={review.authorName} size="sm" />
-            <span className="text-[11px] text-[#64748b] truncate font-semibold">
-              {review.authorHandle}
-            </span>
-          </div>
-          <span className="text-[9px] text-[#8a9bb0] font-mono shrink-0">{review.timeAgo}</span>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function CreatorReviewCard({
@@ -583,8 +486,8 @@ export function InfluencerReviews({
     return review.platform === activePlatformFilter;
   });
 
-  const hybridRows = buildHybridReviewRows(filteredReviews);
-  const hasHybridFeed = hybridRows.length > 0;
+  const creatorRows = buildCreatorReviewRows(filteredReviews);
+  const hasHybridFeed = creatorRows.length > 0;
 
   const isFilterActive = activePlatformFilter !== 'ALL';
   // Featured hero only belongs in the feed when its platform survives the active filter
@@ -838,34 +741,23 @@ export function InfluencerReviews({
         </div>
       ) : (
         <div className="space-y-5">
-          {hybridRows.map((row, rowIndex) => {
-            const isDenseRow = rowIndex >= 1 && row.length > 1;
+          {creatorRows.map((row, rowIndex) => {
+            const rowTier = rowIndex === 0 ? 'lead' : 'dense';
             return (
               <div
                 key={`creator-hybrid-row-${rowIndex}`}
                 className={CREATOR_HYBRID_GRID}
+                data-row-tier={rowTier}
                 data-row-size={row.length}
-                data-dense-row={isDenseRow ? 'true' : undefined}
               >
                 {row.map((review) => {
                   const isPortrait = isPortraitReview(review);
-                  if (row.length === 1 && !isPortrait) {
-                    return (
-                      <SingularLandscapeReviewCard
-                        key={review.id}
-                        review={review}
-                        isPlaying={playingVideoId === review.id}
-                        onPlay={() => handlePlayCard(review.id, review.authorName)}
-                        getPlatformIcon={getPlatformIcon}
-                      />
-                    );
-                  }
                   return (
                     <CreatorReviewCard
                       key={review.id}
                       review={review}
                       variant={isPortrait ? 'portrait' : 'landscape'}
-                      dense={isDenseRow && isPortrait}
+                      dense={rowTier === 'dense' && isPortrait}
                       isPlaying={playingVideoId === review.id}
                       onPlay={() => handlePlayCard(review.id, review.authorName)}
                       getPlatformIcon={getPlatformIcon}
