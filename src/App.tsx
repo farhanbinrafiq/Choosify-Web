@@ -231,7 +231,8 @@ function AppContent() {
 
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
-      {showSiteChrome && !isCompactShell && <Navbar />}
+      {/* Navbar renders on the auth page too, so users can get back home via the logo */}
+      {showSiteChrome && <Navbar />}
       <MaintenanceGate>
       <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
@@ -28,7 +28,7 @@ const KNOWN_PROMOS_FALLBACK = [
 ];
 
 export function CheckoutPage() {
-  const { retailCart, createOrder, addOrder, clearCart, currentUser, buyerReputations, isFeatureEnabled } = useGlobalState();
+  const { retailCart, addOrder, currentUser, buyerReputations, isFeatureEnabled } = useGlobalState();
   const { createNewThread } = useDashboard();
   
   const navigate = useNavigate();
@@ -51,6 +51,7 @@ export function CheckoutPage() {
   const codTrustScore = userRep ? userRep.codTrustScore : 100;
   const cancellationRatio = userRep ? userRep.cancellationRatio : 0;
   const isCODRestricted = codTrustScore < 50 || cancellationRatio > 40;
+  const orderPlacedRef = useRef(false);
 
   React.useEffect(() => {
     if (isCODRestricted) {
@@ -58,8 +59,9 @@ export function CheckoutPage() {
     }
   }, [isCODRestricted]);
 
-  // If cart is empty, redirect
+  // If cart is empty, redirect — unless we just placed an order (cart clears before navigate)
   React.useEffect(() => {
+    if (orderPlacedRef.current) return;
     if (activeCart.length === 0) {
       toast.error('No items in checkout buffer!');
       navigate('/');
@@ -280,12 +282,10 @@ ORDER STATUS: PENDING_CONFIRMATION
     addOrder(fullOrderObject);
     operationsApi.createOrder(fullOrderObject as Record<string, unknown>).catch(() => {});
 
-    // Clear active cart
-    clearCart();
-
+    orderPlacedRef.current = true;
     toast.success('Order placed successfully! Live support thread generated.');
     
-    // Auto-open newly spawned buyer-seller conversation thread or show success screen
+    // Navigate before cart clears so the empty-cart guard does not bounce to home
     navigate(`/order-success/${tempOrderId}`, { replace: true, state: { order: fullOrderObject } });
   };
 

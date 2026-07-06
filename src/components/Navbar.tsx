@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Search, ShoppingBag, User, PlusCircle, ChevronRight, Bookmark, LogIn, 
+  Search, ShoppingBag, User, PlusCircle, ChevronRight, LogIn, 
   LayoutDashboard, Heart, MessageSquare, Settings, Briefcase, Package, ShieldCheck, 
   FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X
 } from 'lucide-react';
@@ -28,10 +28,9 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { retailCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig, featureFlags } = useGlobalState();
-  const { threads, savedProducts } = useDashboard();
+  const { threads } = useDashboard();
 
   const unreadMsgCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
-  const savedCount = isLoggedIn ? savedProducts.length : 0;
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const { ref: categoryStripRef, props: categoryStripProps } = useDragScroll({ grabCursor: false });
@@ -277,7 +276,7 @@ export function Navbar() {
         {/* ACTIONS & MESSAGES */}
         <div className="flex items-center gap-1 sm:gap-1.5 xl:gap-2 shrink-0 nav-actions">
           
-          {/* CART + ACCOUNT ACTIONS (messages/saved/alerts only when logged in) */}
+          {/* CART + ACCOUNT ACTIONS (messages only when logged in) */}
           <div className="hidden sm:flex items-center gap-2 xl:gap-4 border-r border-[#ffffff1a] pr-2 xl:pr-5 shrink-0">
             <button 
               type="button"
@@ -295,36 +294,21 @@ export function Navbar() {
               )}
             </button>
             {isLoggedIn && (
-              <>
-                <button 
-                  type="button"
-                  onClick={() => navigate('/dashboard', { state: { activeTab: 'saved-products' } })}
-                  className="relative text-white/60 hover:text-white transition-colors"
-                  title="Saved Vault"
-                >
-                  <Bookmark size={20} />
-                  {savedCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary/30 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">
-                      {savedCount > 9 ? '9+' : savedCount}
+              <button 
+                type="button"
+                onClick={() => navigate('/messages')}
+                className="relative text-white/60 hover:text-white transition-colors"
+                title="Secure Support Chats"
+              >
+                <div className="relative">
+                  <MessageSquare size={19} className={cn("text-orange-primary", unreadMsgCount > 0 && "animate-pulse")} />
+                  {unreadMsgCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                      {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
                     </span>
                   )}
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => navigate('/messages')}
-                  className="relative text-white/60 hover:text-white transition-colors"
-                  title="Secure Support Chats"
-                >
-                  <div className="relative">
-                    <MessageSquare size={19} className={cn("text-orange-primary", unreadMsgCount > 0 && "animate-pulse")} />
-                    {unreadMsgCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
-                        {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
-                      </span>
-                    )}
-                  </div>
-                </button>
-              </>
+                </div>
+              </button>
             )}
           </div>
 

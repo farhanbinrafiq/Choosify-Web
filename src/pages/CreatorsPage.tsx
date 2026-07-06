@@ -328,6 +328,8 @@ export function CreatorsPage() {
         </div>
       </div>
     ),
+    alphabetFilter: { activeLetter: selectedLetter, onLetterChange: setSelectedLetter },
+    scrollTargetId: 'creators-main-display',
     activeFilterCount: (selectedCategory ? 1 : 0) +
       (selectedLetter ? 1 : 0) +
       (verificationFilter !== 'all' ? 1 : 0) +

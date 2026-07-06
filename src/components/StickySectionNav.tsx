@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useOpenPageFilters, useDragScroll } from './FilterEngine';
@@ -23,16 +23,19 @@ function NavButton({
   icon,
   label,
   badge,
+  itemId,
 }: {
   active: boolean;
   onClick: () => void;
   icon?: React.ReactNode;
   label: string;
   badge?: number;
+  itemId?: string;
 }) {
   return (
     <button
       type="button"
+      data-section-nav-item={itemId}
       onClick={onClick}
       className={cn(
         'shrink-0 px-4 py-2.5 sm:py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap relative touch-manipulation min-h-[40px] sm:min-h-0',
@@ -71,8 +74,35 @@ export function StickySectionNav({
   const { canOpenFilters, openFilters, isFiltersOpen, activeFilterCount } = useOpenPageFilters();
   const filterVisible = showFilter ?? canOpenFilters;
   const { ref: scrollTrackRef, props: scrollTrackProps } = useDragScroll({ grabCursor: false });
+  const userScrollUntilRef = useRef(0);
+
+  // Auto-center the active pill in the horizontal track as the page scrolls
+  // between sections, so on mobile the current section is always visible.
+  useEffect(() => {
+    const track = scrollTrackRef.current;
+    if (!track) return;
+    if (track.scrollWidth <= track.clientWidth + 4) return;
+    // Don't fight the user while they are actively swiping the track.
+    if (Date.now() < userScrollUntilRef.current) return;
+
+    const target = track.querySelector<HTMLElement>(
+      `[data-section-nav-item="${CSS.escape(activeId)}"]`,
+    );
+    if (!target) return;
+
+    const desired =
+      target.offsetLeft - (track.clientWidth - target.offsetWidth) / 2;
+    const max = track.scrollWidth - track.clientWidth;
+    const next = Math.max(0, Math.min(desired, max));
+    if (Math.abs(next - track.scrollLeft) < 2) return;
+    track.scrollTo({ left: next, behavior: 'smooth' });
+  }, [activeId, scrollTrackRef]);
 
   if (items.length === 0 && !filterVisible) return null;
+
+  const markUserScroll = () => {
+    userScrollUntilRef.current = Date.now() + 1500;
+  };
 
   return (
     <nav
@@ -103,12 +133,16 @@ export function StickySectionNav({
             <div
               ref={scrollTrackRef}
               {...scrollTrackProps}
+              onTouchStart={markUserScroll}
+              onTouchMove={markUserScroll}
+              onWheel={markUserScroll}
               className="choosify-sticky-nav-track flex items-center gap-2 min-w-0 w-full md:w-auto"
             >
             <NavButton
               active={activeId === allId}
               onClick={() => onNavigate(allId)}
               label={allLabel}
+              itemId={allId}
             />
             {items.map((section) => (
               <NavButton
@@ -117,6 +151,7 @@ export function StickySectionNav({
                 onClick={() => onNavigate(section.id)}
                 icon={section.icon}
                 label={section.label}
+                itemId={section.id}
               />
             ))}
             {filterVisible && (

@@ -11,6 +11,8 @@ import { PageHeroBanner } from '../components/PageHeroBanner';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
+import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
+import { buildPagePopularSearchTerms } from '../utils/pagePopularSearches';
 
 const SPONSORED_RECOMMENDATIONS = [
   {
@@ -45,7 +47,7 @@ const SPONSORED_RECOMMENDATIONS = [
 export function AllProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchParams, setSearchParams] = useSearchParams();
-  const { allProducts, allBrands } = useGlobalState();
+  const { allProducts, allBrands, siteConfig } = useGlobalState();
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All Products');
 
@@ -176,6 +178,7 @@ export function AllProductsPage() {
 
   useRegisterPageFilters({
     pageName: 'Products',
+    scrollTargetId: 'all-products-display',
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -525,6 +528,18 @@ export function AllProductsPage() {
     [],
   );
   const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
+  const popularSearchTerms = useMemo(
+    () =>
+      buildPagePopularSearchTerms({
+        cmsTerms: siteConfig?.popularSearches,
+        products: allProducts ?? [],
+        categoryNames: [...new Set((allProducts ?? []).map((p) => p.categoryName).filter(Boolean))].slice(0, 12) as string[],
+        brandNames: allBrands?.map((b) => b.name).slice(0, 12),
+        limit: 30,
+      }),
+    [siteConfig?.popularSearches, allProducts, allBrands],
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
@@ -956,6 +971,12 @@ export function AllProductsPage() {
               Showing <span className="text-navy">{filteredProducts.length}</span> Of <span className="text-navy">{filteredProducts.length}</span> Results
             </p>
           </div>
+
+          <PopularSearchKeywords
+            title="Popular searches"
+            terms={popularSearchTerms}
+            className="mt-0 pt-10 border-t-0"
+          />
         </main>
 
         {/* RIGHT SIDEBAR WITH PREMIUM AARONG AD BANNER */}

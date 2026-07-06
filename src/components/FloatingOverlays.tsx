@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShoppingCart, MessageSquare, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp, ArrowRight
@@ -7,7 +7,7 @@ import {
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { cn } from '../lib/utils';
-import { useFloatingFilter, useFloatingFilters } from './FilterEngine';
+import { useFloatingFilter, useFloatingFilters, scrollToFilterResultsTarget } from './FilterEngine';
 import { VideoLightbox } from './VideoLightbox';
 import {
   CartPreviewPanel,
@@ -15,18 +15,25 @@ import {
   cartPreviewMobileShellClass,
   cartPreviewShellClass,
 } from './CartPreviewPanel';
+import {
+  MessagesPreviewPanel,
+  messagesPreviewDesktopShellClass,
+  messagesPreviewMobileShellClass,
+  messagesPreviewShellClass,
+} from './MessagesPreviewPanel';
+import { AlphabetFilterStrip } from './AlphabetFilterStrip';
 import { getFloatingPanelClassName } from './FloatingPanelShell';
 
 export function FloatingOverlays() {
-  const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+  const onMessagesPage = currentPath.startsWith('/messages');
 
   const { retailCart, activeVideo, closeVideo, isLoggedIn } = useGlobalState();
   const { threads } = useDashboard();
 
-  // Active floating panel state: cart preview only
-  const [activePanel, setActivePanel] = useState<'cart' | null>(null);
+  // Active floating panel state: cart preview or messages preview
+  const [activePanel, setActivePanel] = useState<'cart' | 'messages' | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const filterDrawerRef = useRef<HTMLDivElement>(null);
 
@@ -66,6 +73,14 @@ export function FloatingOverlays() {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const closeFilterPanel = () => {
+    const targetId = filterConfig.scrollTargetId;
+    setFilterOpen(false);
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => scrollToFilterResultsTarget(targetId), 80);
+    });
   };
 
   const closeAllOverlays = () => {
@@ -108,8 +123,9 @@ export function FloatingOverlays() {
   const [lastCartCount, setLastCartCount] = useState(totalCartItems);
   const [cartBadgeBounce, setCartBadgeBounce] = useState(false);
 
-  // Unread messages tracking (only meaningful when logged in)
-  const unreadCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
+  // Unread messages — hide floating pill when inbox empty or fully read
+  const unreadCount = isLoggedIn ? threads.filter((t) => t.unread).length : 0;
+  const showMessagesFab = isLoggedIn && !onMessagesPage && threads.length > 0 && unreadCount > 0;
   const [lastUnreadCount, setLastUnreadCount] = useState(unreadCount);
   const [inboxBadgeBounce, setInboxBadgeBounce] = useState(false);
 
@@ -134,7 +150,7 @@ export function FloatingOverlays() {
         filterDrawerRef.current &&
         !filterDrawerRef.current.contains(event.target as Node)
       ) {
-        setFilterOpen(false);
+        closeFilterPanel();
       }
     };
 
@@ -151,7 +167,7 @@ export function FloatingOverlays() {
           return;
         }
         if (filterOpen) {
-          setFilterOpen(false);
+          closeFilterPanel();
           return;
         }
         if (drawerFilterOpen) {
@@ -190,12 +206,9 @@ export function FloatingOverlays() {
     }
   }, [totalCartItems, activePanel]);
 
-
-
-  const onMessagesPage = currentPath.startsWith('/messages');
-
   // Stack calculation based on active item volumes
-  const visibleButtonsCount = (isLoggedIn && !onMessagesPage ? 1 : 0) + (totalCartItems > 0 ? 1 : 0);
+  const visibleButtonsCount =
+    (showMessagesFab ? 1 : 0) + (totalCartItems > 0 ? 1 : 0);
   // Each trigger is h-12 (48px) and equal spacing is gap-3 (12px)
   const triggerStackHeight = visibleButtonsCount * 48 + (visibleButtonsCount - 1) * 12;
 
@@ -239,6 +252,28 @@ export function FloatingOverlays() {
             id="floating-mini-cart-drawer"
           >
             <CartPreviewPanel onClose={() => setActivePanel(null)} />
+          </motion.div>
+        )}
+
+        {activePanel === 'messages' && (
+          <motion.div
+            ref={panelRef}
+            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
+            animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
+            transition={standardTransition}
+            style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
+            className={cn(
+              messagesPreviewShellClass,
+              isMobile
+                ? cn('fixed z-[250] pointer-events-auto', messagesPreviewMobileShellClass, 'h-[82vh]')
+                : isTablet
+                  ? cn('fixed bottom-4 left-1/2 -translate-x-1/2 z-[250]', messagesPreviewDesktopShellClass, 'w-[min(28rem,calc(100vw-1.5rem))]')
+                  : cn('absolute right-0 z-[250]', messagesPreviewDesktopShellClass, 'w-[min(28rem,calc(100vw-2rem))]'),
+            )}
+            id="floating-messages-drawer"
+          >
+            <MessagesPreviewPanel onClose={() => setActivePanel(null)} />
           </motion.div>
         )}
 
@@ -298,24 +333,21 @@ export function FloatingOverlays() {
         </AnimatePresence>
 
 
-        {/* MESSAGES PILL — hidden while on messages page */}
+        {/* MESSAGES PILL — only when unread conversations exist */}
         <AnimatePresence>
-          {isLoggedIn && !onMessagesPage && (
+          {showMessagesFab && (
             <motion.button
               key="dock-messages-trigger"
               initial={{ scale: 0, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0, opacity: 0, y: 15 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              onClick={() => {
-                setActivePanel(null);
-                navigate('/messages');
-              }}
+              onClick={() => setActivePanel(activePanel === 'messages' ? null : 'messages')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
                 "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
-                currentPath.startsWith('/messages')
+                activePanel === 'messages'
                   ? "bg-[#FFF0E8] border-[#E8500A] text-[#E8500A]"
                   : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40"
               )}
@@ -326,7 +358,7 @@ export function FloatingOverlays() {
                   size={15} 
                   className={cn(
                     "transition-colors",
-                    currentPath.startsWith('/messages') ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A]"
+                    activePanel === 'messages' ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A]"
                   )} 
                 />
                 <span className="text-[10px] font-black uppercase tracking-wider">
@@ -337,16 +369,9 @@ export function FloatingOverlays() {
               <motion.span 
                 animate={inboxBadgeBounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className={cn(
-                  "font-mono text-[9px] font-black min-w-[1.25rem] h-5 px-1 rounded-full flex items-center justify-center leading-none",
-                  currentPath.startsWith('/messages')
-                    ? "bg-[#E8500A] text-white"
-                    : unreadCount > 0
-                      ? "bg-gradient-to-br from-[#FF6A00] to-[#FF9E2C] text-white animate-pulse"
-                      : "bg-[#e8edf2] text-[#8a9bb0]"
-                )}
+                className="font-mono text-[9px] font-black min-w-[1.25rem] h-5 px-1 rounded-full flex items-center justify-center leading-none bg-gradient-to-br from-[#FF6A00] to-[#FF9E2C] text-white animate-pulse"
               >
-                {unreadCount > 99 ? '99+' : unreadCount > 0 ? unreadCount : '•'}
+                {unreadCount > 99 ? '99+' : unreadCount}
               </motion.span>
             </motion.button>
           )}
@@ -388,7 +413,7 @@ export function FloatingOverlays() {
             type="button"
             className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
             aria-label="Close filters"
-            onClick={() => setFilterOpen(false)}
+            onClick={closeFilterPanel}
           />
         )}
 
@@ -410,7 +435,7 @@ export function FloatingOverlays() {
               dragConstraints={{ top: 0, bottom: 250 }}
               dragElastic={{ top: 0.1, bottom: 0.8 }}
               onDragEnd={(_e: any, info: any) => {
-                if (info.offset.y > 120) setFilterOpen(false);
+                if (info.offset.y > 120) closeFilterPanel();
               }}
               className={getFloatingPanelClassName({
                 isMobile,
@@ -448,7 +473,7 @@ export function FloatingOverlays() {
                     </button>
                   )}
                   <button
-                    onClick={() => setFilterOpen(false)}
+                    onClick={closeFilterPanel}
                     className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#1A1A2E] transition-all border border-[#e8edf2] cursor-pointer"
                   >
                     <XIcon size={14} />
@@ -463,6 +488,16 @@ export function FloatingOverlays() {
                   <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
                     <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2">Page Search</div>
                     {filterConfig.renderSearch()}
+                  </div>
+                )}
+
+                {filterConfig.alphabetFilter && (
+                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
+                    <AlphabetFilterStrip
+                      activeLetter={filterConfig.alphabetFilter.activeLetter}
+                      onLetterChange={filterConfig.alphabetFilter.onLetterChange}
+                      compact
+                    />
                   </div>
                 )}
 
@@ -510,7 +545,7 @@ export function FloatingOverlays() {
               {isMobile && (
                 <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
                   <button
-                    onClick={() => setFilterOpen(false)}
+                    onClick={closeFilterPanel}
                     className="w-full py-3.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] font-black uppercase tracking-widest rounded-[5px] transition-colors cursor-pointer border-0"
                   >
                     Show Results

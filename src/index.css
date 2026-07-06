@@ -309,7 +309,10 @@
   color: #6b7280 !important;
 }
 
-/* Horizontal touch scroll rows — sticky nav, quick filters, carousels */
+/* Horizontal touch scroll rows — sticky nav, quick filters, carousels.
+   No scroll-behavior:smooth here: it animates the drag handler's scrollLeft
+   writes and makes swiping feel rubbery. Programmatic scrolls pass
+   behavior:'smooth' explicitly instead. */
 .choosify-touch-scroll-row,
 .choosify-sticky-nav-track {
   overflow-x: auto;
@@ -317,7 +320,6 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   touch-action: pan-x;
-  scroll-behavior: smooth;
   scrollbar-width: none;
 }
 

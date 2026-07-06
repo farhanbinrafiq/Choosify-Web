@@ -13,6 +13,11 @@ import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { CATEGORIES } from '../constants';
 import { getCategoryImage } from '../lib/categoryImages';
+import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
+import {
+  buildCategoryChunkPopularSearchTerms,
+  getCategoryChunkPopularSearchHeading,
+} from '../utils/pagePopularSearches';
 
 interface Subcategory {
   name: string;
@@ -57,7 +62,7 @@ const getCategoryIconComponent = (catName: string, iconName: string) => {
 };
 
 export function CategoriesPage() {
-  const { allCategories } = useGlobalState();
+  const { allCategories, allProducts, siteConfig } = useGlobalState();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState('All Categories');
@@ -454,6 +459,7 @@ export function CategoriesPage() {
 
   useRegisterPageFilters({
     pageName: 'Categories',
+    scrollTargetId: 'categories-main-display',
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -750,8 +756,13 @@ export function CategoriesPage() {
             </div>
           ) : (
             <div className={CATEGORY_CARD_GRID}>
-              {filteredCategoriesList.map((cat) => {
+              {filteredCategoriesList.map((cat, idx) => {
                 const isExpanded = expandedCategory === cat.name;
+                const chunkStart = Math.floor(idx / 4) * 4;
+                const chunkNames = filteredCategoriesList
+                  .slice(chunkStart, chunkStart + 4)
+                  .map((item) => item.name);
+                const showChunkKeywords = (idx + 1) % 4 === 0 || idx === filteredCategoriesList.length - 1;
 
                 return (
                   <React.Fragment key={cat.name}>
@@ -843,6 +854,19 @@ export function CategoriesPage() {
                         </motion.div>
                       )}
                     </AnimatePresence>
+
+                    {showChunkKeywords && (
+                      <PopularSearchKeywords
+                        className="col-span-full mt-2 mb-2"
+                        title={getCategoryChunkPopularSearchHeading(chunkNames)}
+                        terms={buildCategoryChunkPopularSearchTerms({
+                          categoryNames: chunkNames,
+                          cmsTerms: siteConfig?.popularSearches,
+                          products: allProducts ?? [],
+                          limit: 12,
+                        })}
+                      />
+                    )}
                   </React.Fragment>
                 );
               })}

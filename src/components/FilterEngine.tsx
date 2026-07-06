@@ -4,6 +4,7 @@ import { cn } from '../lib/utils';
 import { Star, ShieldCheck, HelpCircle, Check, Sparkles, Flame, Tag, DollarSign, Filter, Search, X, ChevronRight, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { getFloatingPanelClassName } from './FloatingPanelShell';
+import { AlphabetFilterStrip } from './AlphabetFilterStrip';
 
 // ==========================================
 // LAYER 1: FILTER ENGINE (GLOBAL DEFINITIONS)
@@ -39,6 +40,20 @@ export interface FilterProfile {
 // DRAG SCROLL HELPER HOOK FOR HORIZONTAL SCROLL
 // ==========================================
 const DRAG_SCROLL_SWIPE_THRESHOLD_PX = 6;
+
+/** Scroll to the page results section after closing the floating filter drawer. */
+export function scrollToFilterResultsTarget(targetId?: string | null, offset = 200) {
+  if (!targetId) return;
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+}
+
+export interface AlphabetFilterConfig {
+  activeLetter: string | null;
+  onLetterChange: (letter: string | null) => void;
+}
 
 export function useDragScroll(options?: { grabCursor?: boolean }) {
   const grabCursor = options?.grabCursor ?? true;
@@ -80,12 +95,14 @@ export function useDragScroll(options?: { grabCursor?: boolean }) {
     const el = ref.current;
     if (!el) return;
 
+    // Touch scrolling is left fully native (touch-action: pan-x +
+    // -webkit-overflow-scrolling) so momentum/inertia is preserved.
+    // We only observe movement to suppress accidental clicks after a swipe.
     const onTouchStart = (e: TouchEvent) => {
       dragState.current.pointerDown = true;
       dragState.current.moved = false;
       dragState.current.startX = e.touches[0]?.pageX ?? 0;
       dragState.current.scrollLeft = el.scrollLeft;
-      setIsDragging(true);
     };
 
     const onTouchMove = (e: TouchEvent) => {
@@ -95,7 +112,6 @@ export function useDragScroll(options?: { grabCursor?: boolean }) {
       if (Math.abs(walk) > DRAG_SCROLL_SWIPE_THRESHOLD_PX) {
         dragState.current.moved = true;
       }
-      el.scrollLeft = dragState.current.scrollLeft + walk;
     };
 
     const onTouchEnd = () => {
@@ -158,7 +174,7 @@ export function DragScrollContainer({ children, className, ...props }: ScrollCon
         ref={ref}
         {...dragProps}
         className={cn(
-          "flex flex-row items-stretch gap-4 overflow-x-auto no-scrollbar scroll-smooth select-none pb-1 py-1 w-full choosify-touch-scroll-row",
+          "flex flex-row items-stretch gap-4 overflow-x-auto no-scrollbar select-none pb-1 py-1 w-full choosify-touch-scroll-row",
           className
         )}
         {...props}
@@ -981,7 +997,7 @@ export function FullSidebarFilterPanel({
   sorting
 }: FullSidebarFilterPanelProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const { registerPageFilters, setIsOpen } = useFloatingFilters();
+  const { registerPageFilters, setIsOpen, closeDrawer } = useFloatingFilters();
 
   useEffect(() => {
     const pageId = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -1009,7 +1025,7 @@ export function FullSidebarFilterPanel({
         <>
           <button
             type="button"
-            onClick={() => setIsOpen(false)}
+            onClick={() => closeDrawer()}
             className="flex-1 py-3 bg-orange-primary text-white hover:bg-orange-deep font-sans text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs border-none"
           >
             Apply Filters
@@ -1104,6 +1120,8 @@ export interface FloatingFilterData {
   fullFilters?: React.ReactNode;
   sorting?: React.ReactNode;
   footerActions?: React.ReactNode;
+  alphabetFilter?: AlphabetFilterConfig | null;
+  scrollTargetId?: string | null;
 }
 
 interface DrawerFilterContextType {
@@ -1112,6 +1130,7 @@ interface DrawerFilterContextType {
   activeFiltersData: FloatingFilterData | null;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  closeDrawer: () => void;
 }
 
 const DrawerFilterContext = createContext<DrawerFilterContextType | undefined>(undefined);
@@ -1158,14 +1177,22 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
 
   const activeFiltersData = activePageId ? activeFiltersMap[activePageId] : null;
 
+  const closeDrawer = useCallback(() => {
+    const targetId = activePageId ? activeFiltersMap[activePageId]?.scrollTargetId : null;
+    setIsOpen(false);
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => scrollToFilterResultsTarget(targetId), 80);
+    });
+  }, [activePageId, activeFiltersMap]);
+
   // ESC key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.key === 'Escape' && isOpen) closeDrawer();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isOpen, closeDrawer]);
 
   useEffect(() => {
     setIsOpen(false);
@@ -1177,11 +1204,11 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
       const target = event.target as Node;
       if (filterDrawerRef.current?.contains(target)) return;
       if (!isMobile && filterContainerRef.current?.contains(target)) return;
-      setIsOpen(false);
+      closeDrawer();
     };
     document.addEventListener('mousedown', handleOutsideClick);
     return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [isOpen, isMobile]);
+  }, [isOpen, isMobile, closeDrawer]);
 
   return (
     <DrawerFilterContext.Provider
@@ -1191,6 +1218,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
         activeFiltersData,
         isOpen,
         setIsOpen,
+        closeDrawer,
       }}
     >
       {children}
@@ -1202,7 +1230,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
             type="button"
             className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
             aria-label="Close filters"
-            onClick={() => setIsOpen(false)}
+            onClick={() => closeDrawer()}
           />
         )}
         <div
@@ -1225,7 +1253,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                 dragConstraints={{ top: 0, bottom: 250 }}
                 dragElastic={{ top: 0.1, bottom: 0.8 }}
                 onDragEnd={(_e, info) => {
-                  if (info.offset.y > 120) setIsOpen(false);
+                  if (info.offset.y > 120) closeDrawer();
                 }}
                 className={getFloatingPanelClassName({
                   isMobile,
@@ -1253,7 +1281,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                   </div>
                   <button
                     type="button"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => closeDrawer()}
                     className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-heading transition-all border border-[#e8edf2] cursor-pointer"
                   >
                     <X size={14} />
@@ -1291,6 +1319,14 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                         </div>
                       </form>
                     </div>
+                  )}
+
+                  {activeFiltersData.alphabetFilter && (
+                    <AlphabetFilterStrip
+                      activeLetter={activeFiltersData.alphabetFilter.activeLetter}
+                      onLetterChange={activeFiltersData.alphabetFilter.onLetterChange}
+                      compact
+                    />
                   )}
 
                   {activeFiltersData.quickFilters && (
@@ -1333,7 +1369,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                   <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
                     <button
                       type="button"
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => closeDrawer()}
                       className="w-full py-3.5 bg-orange-primary hover:bg-orange-deep text-white text-[11px] font-black uppercase tracking-widest rounded-[5px] transition-colors cursor-pointer border-0"
                     >
                       Show Results
@@ -1478,6 +1514,10 @@ export interface FloatingFilterConfig {
   pageName: string;
   // Clear all filters for this page
   onClearAll: (() => void) | null;
+  /** A–Z letter strip shown below search in the floating filter drawer */
+  alphabetFilter?: AlphabetFilterConfig | null;
+  /** Section id to scroll to when the filter drawer closes */
+  scrollTargetId?: string | null;
 }
 
 const defaultConfig: FloatingFilterConfig = {

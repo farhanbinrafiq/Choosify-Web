@@ -29,6 +29,8 @@ import { getSectionItemIds, isHomeSectionVisible } from '../utils/homepageCms';
 import { pickByCatalogIds, orderByCatalogIds } from '../utils/catalogMatch';
 import { isPlacementActive } from '../utils/editorialMappers';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
+import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
+import { buildPagePopularSearchTerms } from '../utils/pagePopularSearches';
 
 type HomeGuideCarouselKind = 'youtube' | 'reels' | 'blog';
 
@@ -99,7 +101,7 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals, allCategories, allGuides, allPlacements, allCreators, homepageConfig, addToCart } = useGlobalState();
+  const { allProducts, allBrands, allDeals, allCategories, allGuides, allPlacements, allCreators, homepageConfig, siteConfig, addToCart } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [activeTab, setActiveTab] = useState('FEED');
@@ -756,6 +758,18 @@ export function HomePage() {
     return popularCategoriesMock;
   }, [allCategories, allProducts]);
 
+  const homePopularSearchTerms = useMemo(
+    () =>
+      buildPagePopularSearchTerms({
+        cmsTerms: siteConfig?.popularSearches,
+        products: allProducts ?? [],
+        categoryNames: popularCategoriesList.map((cat) => cat.name),
+        brandNames: allBrands?.slice(0, 10).map((b) => b.name),
+        limit: 24,
+      }),
+    [siteConfig?.popularSearches, allProducts, popularCategoriesList, allBrands],
+  );
+
   const CAROUSEL_BG_COLORS = [
     '#0f2b2b', '#0a1e30', '#271808', '#16112b',
     '#0b2318', '#26102a', '#102333', '#22200a',
@@ -1097,6 +1111,12 @@ export function HomePage() {
                     />
                   ))}
                 </div>
+
+                <PopularSearchKeywords
+                  title="Popular searches"
+                  terms={homePopularSearchTerms}
+                  className="mt-6 pt-6"
+                />
               </div>
               )}
 
