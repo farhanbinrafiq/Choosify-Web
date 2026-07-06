@@ -156,6 +156,9 @@ export function AllProductsPage() {
     setSearchParams(updated);
   }
 
+  const sectionNavItems = [{ id: 'all-products-display', label: 'Catalog', icon: <Package size={13} /> }];
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
   // Dynamically group categories & brands from the product catalog
   const dynamicCategories = React.useMemo(() => {
     const counts: { [name: string]: number } = {};
@@ -187,6 +190,13 @@ export function AllProductsPage() {
   useRegisterPageFilters({
     pageName: 'Products',
     scrollTargetId: 'all-products-display',
+    sectionNav: {
+      items: sectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Products',
+      profileLabel: 'Product catalog',
+    },
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -530,12 +540,6 @@ export function AllProductsPage() {
     setPriceMax(999999);
     setSearchParams(new URLSearchParams());
   }
-
-  const sectionNavItems = useMemo(
-    () => [{ id: 'all-products-display', label: 'Catalog', icon: <Package size={13} /> }],
-    [],
-  );
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
 
   const popularSearchTerms = useMemo(
     () =>

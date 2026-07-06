@@ -153,9 +153,29 @@ export function HomePage() {
     return count;
   }, [homeCategoryFilter, homeBrandFilter, homePriceBand]);
 
+  const whatsOnPosts = React.useMemo(() => getAllBrandPosts().slice(0, 8), []);
+  const homeSectionNavItems = [
+    { id: 'section-trending-brands', label: 'Brands', icon: <Store size={13} />, hidden: !sectionVisible('trending') },
+    { id: 'section-new-on-choosify', label: 'Products', icon: <ShoppingBag size={13} />, hidden: !sectionVisible('trending') },
+    { id: 'section-hot-deals', label: 'Deals', icon: <Flame size={13} />, hidden: !sectionVisible('deals') },
+    { id: 'section-recommendations', label: 'Picks', icon: <Sparkles size={13} />, hidden: !sectionVisible('recommended') || homeFeaturedGuideSlides.length === 0 },
+    { id: 'section-featured-creators', label: 'Creators', icon: <Users size={13} />, hidden: !sectionVisible('creators') || featuredCreators.length === 0 },
+    { id: 'section-categories', label: 'Categories', icon: <LayoutGrid size={13} />, hidden: !sectionVisible('categories') },
+    { id: 'section-whats-on', label: 'Events', icon: <Megaphone size={13} />, hidden: whatsOnPosts.length === 0 },
+  ];
+  const { activeId: homeActiveSectionId, scrollToSection: scrollToHomeSection } =
+    useSectionScrollSpy(homeSectionNavItems);
+
   useRegisterPageFilters({
     pageName: 'Home',
     renderSearch: null,
+    sectionNav: {
+      items: homeSectionNavItems,
+      activeId: homeActiveSectionId,
+      onNavigate: scrollToHomeSection,
+      allLabel: 'Home',
+      profileLabel: 'Home feed',
+    },
     quickFilters: [
       { id: 'home-brands', label: '🏬 Trending Brands', active: false, onClick: () => jumpToHomeSection('section-trending-brands') },
       { id: 'home-products', label: '🛍️ New Products', active: false, onClick: () => jumpToHomeSection('section-new-on-choosify') },
@@ -779,24 +799,6 @@ export function HomePage() {
 
     return slides;
   }, [homepageGuides]);
-
-  const whatsOnPosts = React.useMemo(() => getAllBrandPosts().slice(0, 8), []);
-
-  const homeSectionNavItems = useMemo(
-    () => [
-      { id: 'section-trending-brands', label: 'Brands', icon: <Store size={13} />, hidden: !sectionVisible('trending') },
-      { id: 'section-new-on-choosify', label: 'Products', icon: <ShoppingBag size={13} />, hidden: !sectionVisible('trending') },
-      { id: 'section-hot-deals', label: 'Deals', icon: <Flame size={13} />, hidden: !sectionVisible('deals') },
-      { id: 'section-recommendations', label: 'Picks', icon: <Sparkles size={13} />, hidden: !sectionVisible('recommended') || homeFeaturedGuideSlides.length === 0 },
-      { id: 'section-featured-creators', label: 'Creators', icon: <Users size={13} />, hidden: !sectionVisible('creators') || featuredCreators.length === 0 },
-      { id: 'section-categories', label: 'Categories', icon: <LayoutGrid size={13} />, hidden: !sectionVisible('categories') },
-      { id: 'section-whats-on', label: 'Events', icon: <Megaphone size={13} />, hidden: whatsOnPosts.length === 0 },
-    ],
-    [sectionVisible, homeFeaturedGuideSlides.length, whatsOnPosts.length, featuredCreators.length],
-  );
-
-  const { activeId: homeActiveSectionId, scrollToSection: scrollToHomeSection } =
-    useSectionScrollSpy(homeSectionNavItems);
 
   const popularCategoriesList = React.useMemo(() => {
     return buildCategoryDisplayList(allCategories ?? [], allProducts ?? []).slice(0, 5);

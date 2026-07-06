@@ -44,10 +44,27 @@ export function CreatorProfilePage() {
 
   // Find creator or fallback safely to first creator
   const creator = CREATORS.find(c => c.id === id) || CREATORS[0];
+  const creatorSectionNavItems = [
+    { id: 'videos-section', label: 'Videos', icon: <Youtube size={13} /> },
+    { id: 'reels-section', label: 'Reels', icon: <Instagram size={13} /> },
+    { id: 'blogs-section', label: 'Blogs', icon: <BookOpen size={13} /> },
+    { id: 'brand-reviews-section', label: 'Reviews', icon: <ShieldCheck size={13} /> },
+    { id: 'creator-overview-section', label: 'Overview', icon: <Award size={13} /> },
+  ];
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(
+    creatorSectionNavItems,
+  );
 
   useRegisterPageFilters({
     pageName: creator ? creator.name : 'Creator Profile',
     renderSearch: null,
+    sectionNav: {
+      items: creatorSectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Creator',
+      profileLabel: 'Creator profile',
+    },
     quickFilters: [
       { id: 'about', label: 'ℹ️ About', active: true, onClick: () => {} },
       { id: 'collabs', label: '🤝 Collaborations', active: false, onClick: () => {} },
@@ -99,25 +116,6 @@ export function CreatorProfilePage() {
 
   const [searchFilter, setSearchFilter] = useState('');
   const [currentSearchInput, setCurrentSearchInput] = useState('');
-
-  const creatorSectionNavItems = useMemo(
-    () => [
-      { id: 'videos-section', label: 'Videos', icon: <Youtube size={13} /> },
-      { id: 'reels-section', label: 'Reels', icon: <Instagram size={13} /> },
-      { id: 'blogs-section', label: 'Blogs', icon: <BookOpen size={13} /> },
-      {
-        id: 'brand-reviews-section',
-        label: 'Reviews',
-        icon: <ShieldCheck size={13} />,
-      },
-      { id: 'creator-overview-section', label: 'Overview', icon: <Award size={13} /> },
-    ],
-    [],
-  );
-
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(
-    creatorSectionNavItems,
-  );
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();

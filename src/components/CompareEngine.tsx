@@ -11,8 +11,10 @@ import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { DragScrollContainer, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters, useDragScroll } from './FilterEngine';
 import { useDashboard } from '../context/DashboardContext';
+import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { PRODUCTS } from '../constants';
 
 // ==========================================
 // TYPE & INTERFACE DEFINITIONS FOR ADVANCED COMPARISONS
@@ -559,6 +561,8 @@ type CompareMode = 'product' | 'brand' | 'creator' | 'guide' | 'ai';
 
 export function CompareEngine() {
   const { comparedProducts = [], setComparedProducts, addToCompare } = useDashboard() || {};
+  const { allProducts } = useGlobalState();
+  const navigate = useNavigate();
 
   // Guard for 4-product comparison limit on any nested compare triggers
   const handleAddToCompare = (product: any) => {
@@ -602,6 +606,8 @@ export function CompareEngine() {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showDifferencesOnly, setShowDifferencesOnly] = useState(false);
+  const [isProductSearchOpen, setIsProductSearchOpen] = useState(false);
+  const [productSearchQuery, setProductSearchQuery] = useState('');
   const { ref: stickyNavTrackRef, props: stickyNavTrackProps } = useDragScroll({ grabCursor: false });
   const userNavScrollUntilRef = useRef(0);
 
@@ -621,6 +627,7 @@ export function CompareEngine() {
   ];
 
   const heroProductSlots = compareMode === 'product' ? Math.max(0, 4 - comparedProducts.length) : 0;
+  const catalogProducts = allProducts.length > 0 ? allProducts : PRODUCTS;
 
   // Soft trigger for loading state when filters adjust
   const triggerSoftLoading = () => {
@@ -877,6 +884,65 @@ export function CompareEngine() {
     selectedAIChoice, selectedRiskRating
   ]);
 
+  const compareSectionNavItems = useMemo(
+    () => [
+      ...compareModeOptions.map((mode) => ({
+        id: `mode-${mode.id}`,
+        label: mode.label,
+        icon: mode.icon,
+      })),
+      ...quickFiltersList.map((filter) => ({
+        id: `shortcut-${filter.id}`,
+        label: filter.label,
+        icon: filter.icon,
+      })),
+      { id: 'differences-only', label: 'Differences only', icon: <Scale size={13} /> },
+    ],
+    [compareModeOptions, quickFiltersList],
+  );
+
+  const handleCompareSectionNavigate = (id: string) => {
+    if (id === 'all') {
+      stickyNavTrackRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (id.startsWith('mode-')) {
+      const modeId = id.replace('mode-', '') as CompareMode;
+      setCompareMode(modeId);
+      triggerSoftLoading();
+      return;
+    }
+
+    if (id.startsWith('shortcut-')) {
+      const shortcut = quickFiltersList.find((filter) => `shortcut-${filter.id}` === id);
+      shortcut?.onClick();
+      return;
+    }
+
+    if (id === 'differences-only') {
+      setShowDifferencesOnly((value) => !value);
+    }
+  };
+
+  const comparedProductIds = useMemo(
+    () => new Set((comparedProducts || []).map((product: any) => String(product.id))),
+    [comparedProducts],
+  );
+
+  const searchableProducts = useMemo(() => {
+    const normalizedQuery = productSearchQuery.trim().toLowerCase();
+    return catalogProducts
+      .filter((product: any) => !comparedProductIds.has(String(product.id)))
+      .filter((product: any) => {
+        if (!normalizedQuery) return true;
+        return [product.title, product.brand, product.category, product.description]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(normalizedQuery));
+      })
+      .slice(0, 12);
+  }, [catalogProducts, comparedProductIds, productSearchQuery]);
+
   const metricValuesDiffer = (metricKey: string) => {
     const values = evaluatedMatchingColumns.map((p) => String(p.specs[metricKey] ?? ''));
     return new Set(values).size > 1;
@@ -886,12 +952,20 @@ export function CompareEngine() {
     {
       pageName: 'Compare',
       renderSearch: null,
+      sectionNav: {
+        items: compareSectionNavItems,
+        activeId: `mode-${compareMode}`,
+        onNavigate: handleCompareSectionNavigate,
+        allLabel: 'Decision profile',
+        allId: 'all',
+        profileLabel: 'Compare controls',
+      },
       quickFilters: quickFiltersList,
       renderFilters: null, // full filters live in the compare sidebar
       activeFilterCount: activeChips.length,
       onClearAll: handleClearAllFilters,
     },
-    [quickFiltersList, activeChips.length],
+    [quickFiltersList, activeChips.length, compareMode, compareSectionNavItems],
   );
 
   return (
@@ -984,16 +1058,17 @@ export function CompareEngine() {
                       </div>
                     ))}
                     {Array.from({ length: heroProductSlots }).map((_, i) => (
-                      <Link
+                      <button
                         key={`add-slot-${i}`}
-                        to="/products"
+                        type="button"
+                        onClick={() => setIsProductSearchOpen(true)}
                         className="border-2 border-dashed border-white/20 rounded-[5px] p-6 h-44 flex flex-col items-center justify-center gap-2 text-white/50 hover:border-orange-primary/50 hover:text-orange-primary transition-all group"
                       >
                         <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-orange-primary/20 group-hover:border-orange-primary/40">
                           <Plus size={18} />
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-wider">Add product</span>
-                      </Link>
+                      </button>
                     ))}
                   </>
                 ) : (
@@ -1472,12 +1547,13 @@ export function CompareEngine() {
                    <p className="text-white/60 text-xs max-w-md mb-8 leading-relaxed font-sans">
                      Add products to compare by clicking 'Add to Compare' on any product
                    </p>
-                   <Link 
-                     to="/products"
-                     className="px-8 py-3 bg-orange-primary hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg shadow-orange-primary/20 hover:scale-[1.03] active:scale-95 cursor-pointer leading-none inline-block border-none animate-bounce"
+                   <button
+                     type="button"
+                     onClick={() => setIsProductSearchOpen(true)}
+                     className="px-8 py-3 bg-orange-primary hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest rounded-full transition-all duration-300 shadow-lg shadow-orange-primary/20 hover:scale-[1.03] active:scale-95 cursor-pointer leading-none inline-block border-none"
                    >
-                     Browse Products
-                   </Link>
+                     Add Products
+                   </button>
                  </div>
                </div>
             ) : (
@@ -1805,6 +1881,124 @@ export function CompareEngine() {
            </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {isProductSearchOpen && (
+          <motion.div
+            className="fixed inset-0 z-[260] bg-[#050514]/70 backdrop-blur-sm px-4 py-6 md:p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="max-w-5xl mx-auto h-full flex flex-col">
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 18 }}
+                className="bg-white rounded-[15px] border border-[#e8edf2] shadow-2xl overflow-hidden flex flex-col min-h-0"
+              >
+                <div className="flex items-center justify-between gap-4 p-5 border-b border-[#e8edf2]">
+                  <div>
+                    <div className="text-[9px] font-black uppercase tracking-[0.16em] text-[#8a9bb0]">Compare builder</div>
+                    <h3 className="text-sm font-black uppercase italic text-[#1A1D4E]">Search and add products</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsProductSearchOpen(false)}
+                    className="w-9 h-9 rounded-full border border-[#e8edf2] text-[#8a9bb0] hover:text-[#E8500A] hover:border-[#E8500A]/30 flex items-center justify-center cursor-pointer"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="p-5 border-b border-[#e8edf2] bg-[#F8FBFD]">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={productSearchQuery}
+                      onChange={(e) => setProductSearchQuery(e.target.value)}
+                      placeholder="Search products, brands, or categories..."
+                      className="w-full h-11 rounded-[5px] border border-[#e8edf2] bg-white px-4 pr-28 text-sm font-semibold text-[#1A1D4E] placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/40"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">
+                      {comparedProducts.length}/4 selected
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex-1 min-h-0 overflow-y-auto p-5 bg-choosify-feed">
+                  {searchableProducts.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {searchableProducts.map((product: any) => (
+                        <div
+                          key={product.id}
+                          className="bg-white border border-[#e8edf2] rounded-[8px] p-4 flex flex-col gap-4 shadow-sm"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/products/${product.id}`)}
+                            className="text-left flex items-start gap-3 cursor-pointer"
+                          >
+                            <img
+                              src={(product.images && product.images[0]) || product.image}
+                              alt={product.title}
+                              className="w-16 h-16 rounded-[6px] object-cover border border-[#e8edf2] shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <div className="text-[9px] font-black uppercase tracking-widest text-[#E8500A] mb-1">
+                                {product.brand || product.brandName || 'Brand'}
+                              </div>
+                              <h4 className="text-sm font-black text-[#1A1D4E] line-clamp-2 leading-snug">
+                                {product.title || product.name}
+                              </h4>
+                              <p className="text-[11px] font-semibold text-gray-500 mt-1">
+                                {(product.category || product.categoryName || 'Category')} {product.price ? `• ৳${Number(product.price).toLocaleString()}` : ''}
+                              </p>
+                            </div>
+                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleAddToCompare(product);
+                                if ((comparedProducts?.length || 0) + 1 >= 4) {
+                                  setIsProductSearchOpen(false);
+                                }
+                              }}
+                              className="flex-1 py-2 rounded-[5px] bg-[#E8500A] hover:bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest cursor-pointer"
+                            >
+                              Add to compare
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/products/${product.id}`)}
+                              className="px-3 py-2 rounded-[5px] border border-[#e8edf2] text-[#1A1D4E] hover:border-[#E8500A]/30 hover:text-[#E8500A] text-[10px] font-black uppercase tracking-widest cursor-pointer"
+                            >
+                              View
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="min-h-[260px] flex flex-col items-center justify-center text-center gap-3">
+                      <div className="w-14 h-14 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center text-[#E8500A]">
+                        <ShoppingBag size={22} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-black uppercase italic text-[#1A1D4E]">No matching products</h4>
+                        <p className="text-[11px] font-semibold text-gray-500 mt-1">
+                          Try another keyword or remove a compared product first.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

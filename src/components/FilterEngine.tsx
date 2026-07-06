@@ -5,6 +5,7 @@ import { Star, ShieldCheck, HelpCircle, Check, Sparkles, Flame, Tag, DollarSign,
 import { motion, AnimatePresence } from 'motion/react';
 import { getFloatingPanelClassName } from './FloatingPanelShell';
 import { AlphabetFilterStrip } from './AlphabetFilterStrip';
+import type { SectionNavItem } from '../hooks/useSectionScrollSpy';
 
 // ==========================================
 // LAYER 1: FILTER ENGINE (GLOBAL DEFINITIONS)
@@ -1115,6 +1116,14 @@ export interface FloatingFilterData {
   setSearchQuery?: (q: string) => void;
   onSearchSubmit?: (q: string) => void;
   searchPlaceholder?: string;
+  sectionNav?: {
+    items: SectionNavItem[];
+    activeId: string;
+    onNavigate: (id: string) => void;
+    allLabel?: string;
+    allId?: string;
+    profileLabel?: string;
+  } | null;
   quickFilters?: React.ReactNode;
   activeChips?: React.ReactNode;
   fullFilters?: React.ReactNode;
@@ -1335,6 +1344,48 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                     />
                   )}
 
+                  {activeFiltersData.sectionNav && activeFiltersData.sectionNav.items.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">
+                        {activeFiltersData.sectionNav.profileLabel || 'On this page'}
+                      </div>
+                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3 shadow-sm">
+                        <DragScrollContainer className="gap-2 pb-0 py-0 items-center">
+                          <button
+                            type="button"
+                            onClick={() => activeFiltersData.sectionNav?.onNavigate(activeFiltersData.sectionNav.allId || 'all')}
+                            className={cn(
+                              'shrink-0 px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
+                              activeFiltersData.sectionNav.activeId === (activeFiltersData.sectionNav.allId || 'all')
+                                ? 'bg-[#E8500A] text-white border border-[#E8500A] shadow-md shadow-[#E8500A]/20'
+                                : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A]',
+                            )}
+                          >
+                            {activeFiltersData.sectionNav.allLabel || 'Overview'}
+                          </button>
+                          {activeFiltersData.sectionNav.items
+                            .filter((item) => !item.hidden)
+                            .map((item) => (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => activeFiltersData.sectionNav?.onNavigate(item.id)}
+                                className={cn(
+                                  'shrink-0 px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
+                                  activeFiltersData.sectionNav?.activeId === item.id
+                                    ? 'bg-[#E8500A] text-white border border-[#E8500A] shadow-md shadow-[#E8500A]/20'
+                                    : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A]',
+                                )}
+                              >
+                                {item.icon}
+                                <span>{item.label}</span>
+                              </button>
+                            ))}
+                        </DragScrollContainer>
+                      </div>
+                    </div>
+                  )}
+
                   {activeFiltersData.quickFilters && (
                     <div className="flex flex-col gap-2">
                       <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">Quick Filters</div>
@@ -1476,6 +1527,7 @@ export function RegisterPageFilters({
   setSearchQuery,
   onSearchSubmit,
   searchPlaceholder,
+  sectionNav,
   quickFilters,
   activeChips,
   fullFilters,
@@ -1490,13 +1542,14 @@ export function RegisterPageFilters({
       setSearchQuery,
       onSearchSubmit,
       searchPlaceholder,
+      sectionNav,
       quickFilters,
       activeChips,
       fullFilters,
       sorting,
       footerActions
     });
-  }, [id, searchQuery, setSearchQuery, onSearchSubmit, searchPlaceholder, quickFilters, activeChips, fullFilters, sorting, footerActions]);
+  }, [id, searchQuery, setSearchQuery, onSearchSubmit, searchPlaceholder, sectionNav, quickFilters, activeChips, fullFilters, sorting, footerActions]);
 
   return null;
 }
@@ -1512,6 +1565,14 @@ export interface FloatingFilterConfig {
   renderFilters: (() => React.ReactNode) | null;
   // The page search bar — render prop
   renderSearch: (() => React.ReactNode) | null;
+  sectionNav?: {
+    items: SectionNavItem[];
+    activeId: string;
+    onNavigate: (id: string) => void;
+    allLabel?: string;
+    allId?: string;
+    profileLabel?: string;
+  } | null;
   // Active filter count for the badge
   activeFilterCount: number;
   // Quick filter bar chips for this page

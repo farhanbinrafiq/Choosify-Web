@@ -441,9 +441,29 @@ export function ProductDetailPage() {
     window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   };
 
+  const productSectionNavItems = [
+    { id: "product-specs-section", label: "Specs", icon: <Package size={13} /> },
+    { id: "influencer-reviews-section", label: "Creator Reviews", icon: <Users size={13} /> },
+    { id: "public-reviews-section", label: "Public Reviews", icon: <MessageSquare size={13} /> },
+    { id: "product-overview-section", label: "Product Overview", icon: <Info size={13} /> },
+    { id: "product-utility-section", label: "Buying Guide", icon: <ShoppingBag size={13} /> },
+  ];
+
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(
+    productSectionNavItems,
+    { scrollOffset: 168, allId: "all" },
+  );
+
   useRegisterPageFilters({
     pageName: 'Product',
     renderSearch: null,
+    sectionNav: {
+      items: productSectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Product',
+      profileLabel: 'Product profile',
+    },
     quickFilters: [
       { id: 'pd-specs', label: '📊 Specs', active: false, onClick: () => jumpToProductSection('product-specs-section') },
       { id: 'pd-creators', label: '🎥 Creator Reviews', active: false, onClick: () => jumpToProductSection('influencer-reviews-section') },
@@ -609,42 +629,6 @@ export function ProductDetailPage() {
   // States for Stats Bar and ScrollSpy
   const [purchasedCount] = useState(854);
   const [viewCount] = useState(() => 8420 + (product?.id ?? 0) * 37);
-
-  const productSectionNavItems = useMemo(
-    () => [
-      {
-        id: "product-specs-section",
-        label: "Specs",
-        icon: <Package size={13} />,
-      },
-      {
-        id: "influencer-reviews-section",
-        label: "Creator Reviews",
-        icon: <Users size={13} />,
-      },
-      {
-        id: "public-reviews-section",
-        label: "Public Reviews",
-        icon: <MessageSquare size={13} />,
-      },
-      {
-        id: "product-overview-section",
-        label: "Product Overview",
-        icon: <Info size={13} />,
-      },
-      {
-        id: "product-utility-section",
-        label: "Buying Guide",
-        icon: <ShoppingBag size={13} />,
-      },
-    ],
-    [],
-  );
-
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(
-    productSectionNavItems,
-    { scrollOffset: 168, allId: "all" },
-  );
 
   // Variant support state hooks
   const [selectedColor, setSelectedColor] = useState<string>("");
