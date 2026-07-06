@@ -155,90 +155,6 @@ export function HomePage() {
   }, [homeCategoryFilter, homeBrandFilter, homePriceBand]);
 
   const whatsOnPosts = React.useMemo(() => getAllBrandPosts().slice(0, 8), []);
-  const homeSectionNavItems = [
-    { id: 'section-trending-brands', label: 'Brands', icon: <Store size={13} />, hidden: !sectionVisible('trending') },
-    { id: 'section-new-on-choosify', label: 'Products', icon: <ShoppingBag size={13} />, hidden: !sectionVisible('trending') },
-    { id: 'section-hot-deals', label: 'Deals', icon: <Flame size={13} />, hidden: !sectionVisible('deals') },
-    { id: 'section-recommendations', label: 'Picks', icon: <Sparkles size={13} />, hidden: !sectionVisible('recommended') || homeFeaturedGuideSlides.length === 0 },
-    { id: 'section-featured-creators', label: 'Creators', icon: <Users size={13} />, hidden: !sectionVisible('creators') || featuredCreators.length === 0 },
-    { id: 'section-categories', label: 'Categories', icon: <LayoutGrid size={13} />, hidden: !sectionVisible('categories') },
-    { id: 'section-whats-on', label: 'Events', icon: <Megaphone size={13} />, hidden: whatsOnPosts.length === 0 },
-  ];
-  const { activeId: homeActiveSectionId, scrollToSection: scrollToHomeSection } =
-    useSectionScrollSpy(homeSectionNavItems);
-
-  useRegisterPageFilters({
-    pageName: 'Home',
-    renderSearch: null,
-    sectionNav: {
-      items: homeSectionNavItems,
-      activeId: homeActiveSectionId,
-      onNavigate: scrollToHomeSection,
-      allLabel: 'Home',
-      profileLabel: 'Home feed',
-    },
-    quickFilters: [
-      { id: 'home-brands', label: '🏬 Trending Brands', active: false, onClick: () => jumpToHomeSection('section-trending-brands') },
-      { id: 'home-products', label: '🛍️ New Products', active: false, onClick: () => jumpToHomeSection('section-new-on-choosify') },
-      { id: 'home-deals', label: '🔥 Hot Deals', active: false, onClick: () => jumpToHomeSection('section-hot-deals') },
-      { id: 'home-picks', label: '✨ Editor Picks', active: false, onClick: () => jumpToHomeSection('section-recommendations') },
-      { id: 'home-categories', label: '🗂️ Categories', active: false, onClick: () => jumpToHomeSection('section-categories') },
-    ],
-    renderFilters: () => (
-      <UniversalFilterRenderer
-        profile={{
-          entity: 'products',
-          filters: [
-            {
-              id: 'category',
-              name: 'Category',
-              type: 'single_select',
-              options: [
-                { value: 'all', label: 'All categories' },
-                ...((allCategories ?? []).slice(0, 10).map((c) => ({ value: c.name, label: c.name }))),
-              ],
-            },
-            {
-              id: 'brand',
-              name: 'Brand',
-              type: 'single_select',
-              options: [
-                { value: 'all', label: 'All brands' },
-                ...rightBrandsList.slice(0, 10).map((b: any) => ({ value: b.name, label: b.name })),
-              ],
-            },
-            {
-              id: 'price',
-              name: 'Price band',
-              type: 'single_select',
-              options: [
-                { value: 'all', label: 'Any price' },
-                { value: '5000', label: 'Under BDT 5,000' },
-                { value: '15000', label: 'Under BDT 15,000' },
-                { value: '50000', label: 'Under BDT 50,000' },
-              ],
-            },
-          ],
-        }}
-        activeFilters={{
-          category: homeCategoryFilter,
-          brand: homeBrandFilter,
-          price: homePriceBand,
-        }}
-        onFilterChange={(filterId, value) => {
-          if (filterId === 'category') setHomeCategoryFilter(value || 'all');
-          if (filterId === 'brand') setHomeBrandFilter(value || 'all');
-          if (filterId === 'price') setHomePriceBand(value || 'all');
-        }}
-      />
-    ),
-    activeFilterCount: homeFilterCount,
-    onClearAll: () => {
-      setHomeCategoryFilter('all');
-      setHomeBrandFilter('all');
-      setHomePriceBand('all');
-    },
-  }, [homeCategoryFilter, homeBrandFilter, homePriceBand, homeFilterCount, allCategories, rightBrandsList]);
 
   const [isMobile, setIsMobile] = useState(false);
   const [dragStartX, setDragStartX] = useState<number | null>(null);
@@ -800,6 +716,106 @@ export function HomePage() {
 
     return slides;
   }, [homepageGuides]);
+
+  const homeSectionNavItems = useMemo(
+    () => [
+      { id: 'section-trending-brands', label: 'Brands', icon: <Store size={13} />, hidden: !sectionVisible('trending') },
+      { id: 'section-new-on-choosify', label: 'Products', icon: <ShoppingBag size={13} />, hidden: !sectionVisible('trending') },
+      { id: 'section-hot-deals', label: 'Deals', icon: <Flame size={13} />, hidden: !sectionVisible('deals') },
+      { id: 'section-recommendations', label: 'Picks', icon: <Sparkles size={13} />, hidden: !sectionVisible('recommended') || homeFeaturedGuideSlides.length === 0 },
+      { id: 'section-featured-creators', label: 'Creators', icon: <Users size={13} />, hidden: !sectionVisible('creators') || featuredCreators.length === 0 },
+      { id: 'section-categories', label: 'Categories', icon: <LayoutGrid size={13} />, hidden: !sectionVisible('categories') },
+      { id: 'section-whats-on', label: 'Events', icon: <Megaphone size={13} />, hidden: whatsOnPosts.length === 0 },
+    ],
+    [featuredCreators.length, homeFeaturedGuideSlides.length, whatsOnPosts.length],
+  );
+  const { activeId: homeActiveSectionId, scrollToSection: scrollToHomeSection } =
+    useSectionScrollSpy(homeSectionNavItems);
+
+  useRegisterPageFilters({
+    pageName: 'Home',
+    renderSearch: null,
+    sectionNav: {
+      items: homeSectionNavItems,
+      activeId: homeActiveSectionId,
+      onNavigate: scrollToHomeSection,
+      allLabel: 'Home',
+      profileLabel: 'Home feed',
+    },
+    quickFilters: [
+      { id: 'home-brands', label: '🏬 Trending Brands', active: false, onClick: () => jumpToHomeSection('section-trending-brands') },
+      { id: 'home-products', label: '🛍️ New Products', active: false, onClick: () => jumpToHomeSection('section-new-on-choosify') },
+      { id: 'home-deals', label: '🔥 Hot Deals', active: false, onClick: () => jumpToHomeSection('section-hot-deals') },
+      { id: 'home-picks', label: '✨ Editor Picks', active: false, onClick: () => jumpToHomeSection('section-recommendations') },
+      { id: 'home-categories', label: '🗂️ Categories', active: false, onClick: () => jumpToHomeSection('section-categories') },
+    ],
+    renderFilters: () => (
+      <UniversalFilterRenderer
+        profile={{
+          entity: 'products',
+          filters: [
+            {
+              id: 'category',
+              name: 'Category',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'All categories' },
+                ...((allCategories ?? []).slice(0, 10).map((c) => ({ value: c.name, label: c.name }))),
+              ],
+            },
+            {
+              id: 'brand',
+              name: 'Brand',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'All brands' },
+                ...rightBrandsList.slice(0, 10).map((b: any) => ({ value: b.name, label: b.name })),
+              ],
+            },
+            {
+              id: 'price',
+              name: 'Price band',
+              type: 'single_select',
+              options: [
+                { value: 'all', label: 'Any price' },
+                { value: '5000', label: 'Under BDT 5,000' },
+                { value: '15000', label: 'Under BDT 15,000' },
+                { value: '50000', label: 'Under BDT 50,000' },
+              ],
+            },
+          ],
+        }}
+        activeFilters={{
+          category: homeCategoryFilter,
+          brand: homeBrandFilter,
+          price: homePriceBand,
+        }}
+        onFilterChange={(filterId, value) => {
+          if (filterId === 'category') setHomeCategoryFilter(value || 'all');
+          if (filterId === 'brand') setHomeBrandFilter(value || 'all');
+          if (filterId === 'price') setHomePriceBand(value || 'all');
+        }}
+      />
+    ),
+    activeFilterCount: homeFilterCount,
+    onClearAll: () => {
+      setHomeCategoryFilter('all');
+      setHomeBrandFilter('all');
+      setHomePriceBand('all');
+    },
+  }, [
+    homeCategoryFilter,
+    homeBrandFilter,
+    homePriceBand,
+    homeFilterCount,
+    allCategories,
+    rightBrandsList,
+    homeSectionNavItems,
+    homeActiveSectionId,
+    scrollToHomeSection,
+    featuredCreators.length,
+    homeFeaturedGuideSlides.length,
+  ]);
 
   const popularCategoriesList = React.useMemo(() => {
     return buildCategoryDisplayList(allCategories ?? [], allProducts ?? []).slice(0, 5);
