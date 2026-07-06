@@ -6,60 +6,16 @@ import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
 import { CategoryPhotoCard } from '../components/CategoryPhotoCard';
+import { CategorySubcategoryPanel } from '../components/CategorySubcategoryPanel';
+import { buildCategoryDisplayList } from '../utils/categoryDisplay';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PageHeroBanner } from '../components/PageHeroBanner';
 import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
-import { CATEGORIES } from '../constants';
-import { getCategoryImage } from '../lib/categoryImages';
-import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
-import { buildCategoryPopularSearchTerms } from '../utils/categoryPopularSearches';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
 import { PLACEMENT_KEYS } from '../lib/placements';
-
-interface Subcategory {
-  name: string;
-  count: number;
-  brands: number;
-  icon: string;
-}
-
-interface CategoryItem {
-  name: string;
-  icon: string;
-  count: number;
-  color: string;
-  image?: string;
-  subcategories: Subcategory[];
-}
-
-// Custom high-fidelity category icon helper with colors matching Homepage Popular Categories reference
-const getCategoryIconComponent = (catName: string, iconName: string) => {
-  const IconComponent = (LucideIcons as any)[iconName] || LucideIcons.Package;
-  const name = catName.toLowerCase();
-  
-  let colorClass = "text-gray-500";
-  if (name.includes('fashion')) colorClass = "text-blue-600";
-  else if (name.includes('tech') || name.includes('electronics')) colorClass = "text-[#1A73E8]";
-  else if (name.includes('family') || name.includes('kids')) colorClass = "text-blue-500";
-  else if (name.includes('jewelry') || name.includes('accessories')) colorClass = "text-yellow-500";
-  else if (name.includes('hobby') || name.includes('creativity') || name.includes('hobbies')) colorClass = "text-orange-500";
-  else if (name.includes('travel') || name.includes('hospitality')) colorClass = "text-rose-500";
-  else if (name.includes('beauty') || name.includes('personal care')) colorClass = "text-pink-500";
-  else if (name.includes('eyewear') || name.includes('fragrance')) colorClass = "text-sky-500";
-  else if (name.includes('mobile') || name.includes('wearable')) colorClass = "text-emerald-500";
-  else if (name.includes('tv') || name.includes('appliance')) colorClass = "text-red-500";
-  else if (name.includes('gaming') || name.includes('entertainment')) colorClass = "text-purple-500";
-  else if (name.includes('home') || name.includes('living')) colorClass = "text-slate-500";
-  else if (name.includes('vehicle') || name.includes('automotive')) colorClass = "text-blue-500";
-  else if (name.includes('food') || name.includes('essential')) colorClass = "text-green-600";
-  else if (name.includes('health') || name.includes('wellness')) colorClass = "text-emerald-500";
-  else if (name.includes('education') || name.includes('learning')) colorClass = "text-indigo-600";
-  
-  return <IconComponent className={cn("w-5 h-5 stroke-[2]", colorClass)} />;
-};
 
 export function CategoriesPage() {
   const { allCategories, allProducts, siteConfig } = useGlobalState();
@@ -348,40 +304,10 @@ export function CategoriesPage() {
     { name: "BATA SHOES", sub: "Premium Class Footwear", init: "BT", bg: "bg-[#C8102E]" }
   ];
 
-  const FALLBACK_CATEGORY_COLORS = [
-    'from-orange-500 to-rose-500',
-    'from-amber-400 to-yellow-600',
-    'from-emerald-500 to-teal-600',
-    'from-blue-500 to-cyan-700',
-    'from-purple-500 to-indigo-700',
-    'from-green-500 to-lime-600',
-    'from-indigo-500 to-violet-600',
-    'from-red-500 to-rose-700',
-    'from-slate-400 to-gray-600',
-    'from-pink-500 to-rose-400',
-  ];
-
-  const fallbackCategoriesList: CategoryItem[] = CATEGORIES.map((cat, idx) => ({
-    name: cat.name,
-    icon: cat.icon,
-    count: 150 + idx * 85,
-    color: FALLBACK_CATEGORY_COLORS[idx % FALLBACK_CATEGORY_COLORS.length],
-    image: getCategoryImage(cat.name),
-    subcategories: [],
-  }));
-
-  const categoriesList: CategoryItem[] = React.useMemo(() => {
-    if (allCategories && allCategories.length > 0) {
-      return allCategories.map((cat, idx) => ({
-        name: cat.name,
-        icon: cat.icon || 'Package',
-        count: 150 + idx * 25,
-        color: 'from-indigo-500 to-violet-600',
-        subcategories: [],
-      }));
-    }
-    return fallbackCategoriesList;
-  }, [allCategories]);
+  const categoriesList = React.useMemo(
+    () => buildCategoryDisplayList(allCategories ?? [], allProducts ?? []),
+    [allCategories, allProducts],
+  );
 
   // Dynamic filter supporting the page search system and discovery state criteria
   const filteredCategoriesList = React.useMemo(() => {
@@ -770,95 +696,14 @@ export function CategoriesPage() {
                     />
 
                     <AnimatePresence mode="sync">
-                      {isExpanded && (
-                        <motion.div
-                          key={`subpanel-${cat.name}`}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 4 }}
-                          transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-                          className="col-span-full bg-white shadow-md rounded-[5px] p-6 md:p-8 border border-[#e8edf2] overflow-hidden z-10 text-left mt-4"
-                        >
-                          <motion.div
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.16, delay: 0.03, ease: 'easeOut' }}
-                            className="flex items-center justify-between pb-4 mb-6 border-b border-gray-100"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
-                                {getCategoryIconComponent(cat.name, cat.icon)}
-                              </div>
-                              <div className="text-left">
-                                <h2 className="text-base font-semibold text-[#1a1a2e] uppercase tracking-tight">
-                                  {cat.name} <span className="text-[#E8500A]">SUBCATEGORIES</span>
-                                </h2>
-                                <p className="text-[10px] text-[#8a9bb0] font-semibold uppercase tracking-[0.2em] mt-1">
-                                  {cat.count} Products Across {Math.floor(cat.count / 15)} Brands - Curated Recommendations
-                                </p>
-                              </div>
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setExpandedCategory(null);
-                              }}
-                              className="w-8 h-8 rounded-full border border-[#e8edf2] hover:border-[#E8500A]/30 flex items-center justify-center text-gray-400 hover:text-[#E8500A] transition-all active:scale-95 cursor-pointer bg-white"
-                              aria-label="Close subcategories"
-                            >
-                              <LucideIcons.X className="w-4 h-4" />
-                            </button>
-                          </motion.div>
-
-                          <div className={CATEGORY_CARD_GRID}>
-                            {cat.subcategories.length > 0 ? (
-                              cat.subcategories.map((sub, j) => (
-                                <motion.div
-                                  key={sub.name}
-                                  initial={{ opacity: 0, y: 6 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ duration: 0.14, delay: j * 0.012, ease: 'easeOut' }}
-                                  className="choosify-category-card bg-white border border-[#e8edf2] rounded-[5px] p-4 flex flex-col items-start hover:border-gray-200/90 transition-[border-color] duration-200 cursor-pointer group text-left"
-                                >
-                                  <div className="w-9 h-9 bg-gray-50 rounded-full flex items-center justify-center mb-4 shrink-0">
-                                    {getCategoryIconComponent(sub.name, sub.icon)}
-                                  </div>
-
-                                  <div className="w-full text-left">
-                                    <h4 className="font-medium text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-tight mb-1 uppercase tracking-tight line-clamp-2">
-                                      {sub.name}
-                                    </h4>
-                                    <p className="text-[10px] text-red-500 font-semibold leading-none uppercase font-mono mt-1">
-                                      {sub.count} Products • {sub.brands} Brands
-                                    </p>
-                                    <p className="text-[9px] text-[#8a9bb0] font-medium leading-none uppercase mt-1.5">
-                                      Verified Options
-                                    </p>
-                                  </div>
-                                </motion.div>
-                              ))
-                            ) : (
-                              <div className="col-span-full py-12 text-center">
-                                <LucideIcons.Construction className="mx-auto text-gray-200 mb-4" size={48} />
-                                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-[0.4em]">Subcategories coming soon</p>
-                              </div>
-                            )}
-                          </div>
-
-                          <PopularSearchKeywords
-                            className="mt-8 pt-6 border-t border-gray-100"
-                            title={`Popular searches in ${cat.name}`}
-                            terms={buildCategoryPopularSearchTerms({
-                              categoryName: cat.name,
-                              cmsTerms: siteConfig?.popularSearches,
-                              products: allProducts ?? [],
-                              limit: 12,
-                            })}
-                          />
-                        </motion.div>
-                      )}
+                      {isExpanded ? (
+                        <CategorySubcategoryPanel
+                          category={cat}
+                          onClose={() => setExpandedCategory(null)}
+                          products={allProducts ?? []}
+                          cmsTerms={siteConfig?.popularSearches}
+                        />
+                      ) : null}
                     </AnimatePresence>
                   </React.Fragment>
                 );

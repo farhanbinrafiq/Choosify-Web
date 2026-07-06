@@ -591,7 +591,7 @@ export function DealsPage() {
                              tag: "SALE",
                              tagColor: "bg-[#E98B8B]",
                            }} 
-                           variant="compact"
+                           variant="grid"
                          />
                        </div>
                     ))}
@@ -653,7 +653,7 @@ export function DealsPage() {
                             tag: 'SALE',
                             tagColor: 'bg-[#E98B8B]',
                           }}
-                          variant="compact"
+                          variant="grid"
                         />
                       </div>
                     ),

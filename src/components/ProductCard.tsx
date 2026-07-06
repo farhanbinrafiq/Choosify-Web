@@ -7,7 +7,12 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { resolveProductBadges } from '../utils/productBadges';
 import { CardEngagementStrip } from './CardEngagementStrip';
+import { ProductStatusBadge, ProductStatusBadgeStack, collectProductBadgeLabels } from './ProductStatusBadge';
 import toast from 'react-hot-toast';
+
+const CARD_ACTION_BTN =
+  'w-7 h-7 rounded-full border flex items-center justify-center bg-white border-gray-100 shadow-sm transition-transform hover:scale-105';
+const CARD_ACTION_ICON = 12;
 
 function getProductCardImages(product: any): string[] {
   const mainImage = product.image || PLACEHOLDER_IMAGE;
@@ -241,7 +246,7 @@ function ProductCardImageCarousel({ images, alt, containerClassName }: { images:
 
 export function ProductCard({ 
   product, 
-  variant = 'grid',
+  variant: variantProp = 'grid',
   showCountdown = false,
   imageContainerStyle,
   titleStyle,
@@ -255,6 +260,7 @@ export function ProductCard({
   titleStyle?: React.CSSProperties,
   isGuideDetail?: boolean
 }) {
+  const variant = variantProp === 'compact' ? 'grid' : variantProp;
   const navigate = useNavigate();
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
   const { allBrands, addToCart, siteConfig } = useGlobalState();
@@ -262,21 +268,17 @@ export function ProductCard({
   const brandObj = allBrands?.find((b: any) => b.id === product.brandId);
   const brandName = brandObj ? brandObj.name : (product.brand || 'APEX');
   const cmsBadges = resolveProductBadges(product, siteConfig);
+  const statusBadgeLabels = collectProductBadgeLabels(product, cmsBadges);
 
-  const renderCmsBadges = (className = 'absolute top-1.5 left-1.5 z-20 flex flex-col gap-1') => {
-    if (!cmsBadges.length) return null;
+  const renderStatusBadges = (className = 'absolute top-2 left-2 z-20', align: 'start' | 'end' = 'start') => {
+    if (!statusBadgeLabels.length) return null;
     return (
-      <div className={className}>
-        {cmsBadges.map((badge) => (
-          <span
-            key={badge.id}
-            className="text-white text-[7px] font-semibold px-1.5 py-0.5 rounded uppercase leading-none shadow-sm"
-            style={{ backgroundColor: badge.color }}
-          >
-            {badge.label}
-          </span>
-        ))}
-      </div>
+      <ProductStatusBadgeStack
+        labels={statusBadgeLabels}
+        className={className}
+        align={align}
+        size="sm"
+      />
     );
   };
   
@@ -329,21 +331,21 @@ export function ProductCard({
                 <button 
                   onClick={toggleSave}
                   className={cn(
-                    "w-8 h-8 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-none",
+                    "w-9 h-9 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-sm",
                     isSaved ? "bg-orange-primary border-orange-primary text-white" : "border-gray-200 text-orange-primary bg-white"
                   )}
                 >
-                   <Bookmark size={14} className={isSaved ? "fill-current" : ""} />
+                   <Bookmark size={15} className={isSaved ? "fill-current" : ""} />
                 </button>
                 <button 
                    onClick={handleCompare}
                    title="Add to Compare"
                    className={cn(
-                     "w-8 h-8 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-none bg-white",
+                     "w-9 h-9 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-sm bg-white",
                      isInCompare ? "bg-emerald-600 border-emerald-600 text-white" : "border-gray-200 text-blue-600"
                    )}
                 >
-                   <Layers size={14} />
+                   <Layers size={15} />
                  </button>
              </div>
             
@@ -352,7 +354,7 @@ export function ProductCard({
               alt={product.title} 
               containerClassName="absolute inset-0 p-6 z-10"
             />
-            {renderCmsBadges('absolute top-3 right-3 z-20 flex flex-col gap-1 items-end')}
+            {renderStatusBadges('absolute top-3 left-3 z-20', 'start')}
          </div>
   
          <div className="relative z-10 flex-1 flex flex-col justify-center py-2 px-1">
@@ -406,100 +408,6 @@ export function ProductCard({
     );
   }
 
-  if (variant === 'compact') {
-    return (
-      <div 
-        onClick={() => navigate(`/products/${product.id}`)}
-        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-orange-primary/30 hover:shadow-md transition-all duration-300 cursor-pointer group relative w-full max-w-full min-w-0 h-full self-stretch box-border animate-in fade-in"
-      >
-        <div 
-          className="w-full aspect-[4/3] bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-2 select-none shrink-0"
-          style={imageContainerStyle}
-        >
-            <div className="absolute top-2 left-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
-               <button 
-                 onClick={toggleSave}
-                 className={cn(
-                    "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
-                    isSaved ? "text-orange-primary" : "text-gray-400 hover:text-orange-primary"
-                 )}
-               >
-                  <Bookmark size={10} className={isSaved ? "fill-current" : ""} />
-               </button>
-               <button 
-                 onClick={handleCompare}
-                 title="Add to Compare"
-                 className={cn(
-                    "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
-                    isInCompare ? "text-green-600" : "text-gray-400 hover:text-blue-500"
-                 )}
-               >
-                  <Layers size={10} />
-               </button>
-            </div>
-            
-            <ProductCardImageCarousel 
-              images={getProductCardImages(product)} 
-              alt={product.title} 
-              containerClassName="absolute inset-0 p-2"
-            />
-            {renderCmsBadges()}
-        </div>
-        
-        <div className="flex flex-col pt-2 flex-grow min-h-0 text-left justify-between select-none">
-          <div className="flex flex-col gap-1 w-full">
-            <div className="flex items-center justify-between gap-1 w-full leading-none">
-              <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider truncate max-w-[80px]">{brandName}</span>
-              <div className="flex items-center gap-0.5 shrink-0 ml-auto bg-gray-50 px-1 py-0.5 rounded leading-none">
-                <Star size={7} className="fill-orange-primary text-orange-primary" />
-                <span className="text-[8.5px] font-semibold text-gray-500">4.8</span>
-              </div>
-            </div>
-            <h4 className="text-[11px] font-semibold text-[#1a1a2e] leading-snug line-clamp-1 group-hover:text-orange-primary transition-colors min-h-[14px] truncate leading-none mt-1">
-              {product.title}
-            </h4>
-          </div>
-          
-                    <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
-             <div className="flex flex-col text-left min-w-0">
-                <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">
-                  Market Price
-                </span>
-                <div className="flex flex-col text-left justify-center">
-                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-orange-primary leading-none whitespace-nowrap">BDT {product.price.toLocaleString()}</span>
-                  {product.originalPrice ? (
-                    <span className="text-[8px] font-mono text-gray-400 line-through leading-none mt-0.5 whitespace-nowrap">৳{product.originalPrice}</span>
-                  ) : (
-                    <span className="text-[8px] font-mono text-transparent select-none leading-none mt-0.5 whitespace-nowrap">Placeholder</span>
-                  )}
-                </div>
-             </div>
-             
-             <button 
-                type="button" 
-                onClick={(e) => { 
-                  e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
-                  addToCart(product, 1); 
-                  toast.success(`Successfully added ${product.title} to your cart!`);
-                }} 
-                className="w-8 h-8 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
-                aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
-                title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
-             >
-                {isGuideDetail ? <ArrowRight size={13} className="stroke-[2.5]" /> : <ShoppingCart size={13} className="stroke-[2.5]" />}
-               </button>
-          </div>
-          <CardEngagementStrip
-            entityType={engagementType}
-            entityId={product.id}
-            payload={product}
-            onClickCapture={(e) => e.stopPropagation()}
-          />
-        </div>
-      </div>
-    );
-  }
-
   if (variant === 'list') {
     return (
       <div className="bg-white rounded-[5px] border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.005] transition-all duration-300 flex gap-5 p-4 group cursor-pointer text-left shadow-none" onClick={() => navigate(`/products/${product.id}`)}>
@@ -509,35 +417,36 @@ export function ProductCard({
             alt={product.title} 
             containerClassName="absolute inset-0 p-3"
           />
-          <div className="absolute top-2 left-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+          <div className="absolute top-2 left-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1.5">
             <button 
               onClick={toggleSave}
               className={cn(
-                "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
+                CARD_ACTION_BTN,
                 isSaved ? "text-orange-primary" : "text-gray-400 hover:text-orange-primary"
               )}
             >
-               <Bookmark size={11} className={isSaved ? "fill-current" : ""} />
+               <Bookmark size={CARD_ACTION_ICON} className={isSaved ? "fill-current" : ""} />
             </button>
             <button 
               onClick={handleCompare}
               title="Add to Compare"
               className={cn(
-                 "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
+                 CARD_ACTION_BTN,
                  isInCompare ? "text-green-600" : "text-gray-400 hover:text-blue-500"
               )}
             >
-               <Layers size={11} />
+               <Layers size={CARD_ACTION_ICON} />
             </button>
           </div>
+          {renderStatusBadges('absolute top-2 right-2 z-20', 'end')}
         </div>
         <div className="flex-1 flex flex-col py-0.5 justify-between min-w-0">
           <div>
             <div className="flex items-center justify-between gap-2 mb-1.5">
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">{brandName}</span>
-              <div className={cn("text-[8px] font-semibold text-white px-2 py-0.5 rounded uppercase leading-none bg-orange-primary", product.tagColor)}>
-                {product.tag || 'HOT'}
-              </div>
+              {statusBadgeLabels[0] ? (
+                <ProductStatusBadge label={statusBadgeLabels[0]} size="sm" />
+              ) : null}
             </div>
             <h3 className="text-sm font-semibold text-[#1a1a2e] leading-snug line-clamp-1 mb-1.5 group-hover:text-orange-primary transition-colors">
               {product.title}
@@ -603,33 +512,28 @@ export function ProductCard({
           alt={product.title} 
           containerClassName="absolute inset-0 p-2"
         />
-        {renderCmsBadges('absolute top-1.5 right-1.5 z-20 flex flex-col gap-1 items-end')}
-        <div className="absolute top-1.5 left-1.5 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+        {renderStatusBadges('absolute top-2 left-2 z-20', 'start')}
+        <div className="absolute top-2 right-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1.5">
           <button 
             onClick={toggleSave}
             className={cn(
-              "w-5 h-5 rounded-full border flex items-center justify-center bg-white border-gray-100 shadow-none transition-transform hover:scale-105",
+              CARD_ACTION_BTN,
               isSaved ? "text-orange-primary" : "text-gray-400 hover:text-orange-primary"
             )}
           >
-             <Bookmark size={9} className={isSaved ? "fill-current" : ""} />
+             <Bookmark size={CARD_ACTION_ICON} className={isSaved ? "fill-current" : ""} />
           </button>
           <button 
             onClick={handleCompare}
             title="Add to Compare"
             className={cn(
-              "w-5 h-5 rounded-full border flex items-center justify-center bg-white border-gray-100 shadow-none transition-transform hover:scale-105",
+              CARD_ACTION_BTN,
               isInCompare ? "text-green-500" : "text-gray-400 hover:text-blue-500"
             )}
           >
-             <Layers size={9} />
+             <Layers size={CARD_ACTION_ICON} />
           </button>
         </div>
-        {product.tag && (
-          <div className={cn("absolute top-1.5 right-1.5 text-white text-[7px] font-semibold px-1.5 py-0.5 rounded uppercase z-25 leading-none", product.tagColor || "bg-orange-primary")}>
-            {product.tag}
-          </div>
-        )}
       </div>
       
       <div className="pt-1.5 flex flex-col flex-grow min-h-0 text-left justify-between">

@@ -108,51 +108,55 @@ export function CardEngagementStrip({
     );
   }
 
-  return (
-    <div
-      className={cn(
-        'flex items-center justify-between gap-2 pt-2 mt-2 border-t border-[#e8edf2]/80',
-        className,
-      )}
-      onClick={onClickCapture}
-    >
-      <button
-        type="button"
-        onClick={toggleLove}
+  if (variant === 'card') {
+    return (
+      <div
         className={cn(
-          'inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider transition-colors cursor-pointer border-0 bg-transparent p-0',
-          hasLoved ? 'text-[#E8500A]' : 'text-[#8a9bb0] hover:text-[#E8500A]',
+          'flex items-center justify-between gap-2 pt-2.5 mt-2 border-t border-[#e8edf2]/80',
+          className,
         )}
+        onClick={onClickCapture}
       >
-        <Heart size={11} className={cn(hasLoved && 'fill-current')} />
-        <span>{loveCount.toLocaleString()}</span>
-      </button>
-
-      <button
-        type="button"
-        onClick={toggleSave}
-        className={cn(
-          'inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider transition-colors cursor-pointer border-0 bg-transparent p-0',
-          isSaved ? 'text-[#E8500A]' : 'text-[#8a9bb0] hover:text-[#E8500A]',
-        )}
-      >
-        <Bookmark size={11} className={cn(isSaved && 'fill-current')} />
-        <span>{saveCount.toLocaleString()}</span>
-      </button>
-
-      {showShare ? (
         <button
           type="button"
-          onClick={(event) => share(event, shareUrl)}
-          className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-[#8a9bb0] hover:text-[#E8500A] transition-colors cursor-pointer border-0 bg-transparent p-0"
+          onClick={toggleLove}
+          className={cn(
+            'inline-flex items-center gap-1.5 min-h-8 px-1 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer border-0 bg-transparent',
+            hasLoved ? 'text-[#E8500A]' : 'text-[#8a9bb0] hover:text-[#E8500A]',
+          )}
         >
-          <Share2 size={11} />
+          <Heart size={14} className={cn(hasLoved && 'fill-current')} />
+          <span>{loveCount.toLocaleString()}</span>
         </button>
-      ) : (
-        <span className="text-[8px] font-semibold text-[#c5d0dc] uppercase tracking-widest">
-          Choosify
-        </span>
-      )}
-    </div>
-  );
+
+        <button
+          type="button"
+          onClick={toggleSave}
+          className={cn(
+            'inline-flex items-center gap-1.5 min-h-8 px-1 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer border-0 bg-transparent',
+            isSaved ? 'text-[#E8500A]' : 'text-[#8a9bb0] hover:text-[#E8500A]',
+          )}
+        >
+          <Bookmark size={14} className={cn(isSaved && 'fill-current')} />
+          <span>{saveCount.toLocaleString()}</span>
+        </button>
+
+        {showShare ? (
+          <button
+            type="button"
+            onClick={(event) => share(event, shareUrl)}
+            className="inline-flex items-center gap-1.5 min-h-8 px-1 text-[11px] font-bold uppercase tracking-wider text-[#8a9bb0] hover:text-[#E8500A] transition-colors cursor-pointer border-0 bg-transparent"
+          >
+            <Share2 size={14} />
+          </button>
+        ) : (
+          <span className="text-[9px] font-semibold text-[#c5d0dc] uppercase tracking-widest">
+            Choosify
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return null;
 }

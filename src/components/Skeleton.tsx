@@ -3,14 +3,14 @@ import { cn } from '../lib/utils';
 
 export function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("animate-pulse bg-gray-200/80 rounded-md", className)} />
+    <div className={cn('choosify-skeleton rounded-md', className)} />
   );
 }
 
 export function ProductSkeleton() {
   return (
-    <div className="bg-white rounded-[20px] p-6 border border-gray-100 flex flex-col gap-4 animate-pulse">
-      <Skeleton className="aspect-square w-full rounded-[15px]" />
+    <div className="bg-white rounded-[5px] p-2.5 border border-[#e8edf2] flex flex-col gap-3 h-full w-full">
+      <Skeleton className="aspect-[4/3] w-full rounded-[5px]" />
       <div className="space-y-2">
         <Skeleton className="h-4 w-2/3" />
         <Skeleton className="h-3 w-1/3" />
@@ -141,27 +141,27 @@ export function ProductCardSkeleton({
   // Default Grid layout: mirrors regular card proportions in responsive grid
   return (
     <div 
-      className="bg-white rounded-[5px] p-2.5 border border-[#e8edf2] flex flex-col relative overflow-hidden animate-pulse w-full max-w-full min-w-0 h-full self-stretch" 
+      className="bg-white rounded-[5px] p-2.5 border border-[#e8edf2] flex flex-col relative overflow-hidden w-full max-w-full min-w-0 h-full self-stretch" 
     >
-      <div className="relative w-full aspect-[4/3] bg-gray-55 rounded-[5px] shrink-0 p-2 flex items-center justify-center">
+      <div className="relative w-full aspect-[4/3] bg-[#eef2f7] rounded-[5px] shrink-0 p-2 flex items-center justify-center">
         <Skeleton className="w-full h-full rounded-[5px]" />
       </div>
 
       <div className="pt-1.5 flex flex-col flex-grow min-h-0 justify-between">
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between w-full">
-            <Skeleton className="h-2 w-12 rounded" />
-            <Skeleton className="h-2.5 w-6 rounded" />
+            <Skeleton className="h-2.5 w-12 rounded" />
+            <Skeleton className="h-2.5 w-8 rounded-full" />
           </div>
           <Skeleton className="h-3.5 w-full rounded" />
         </div>
 
-        <div className="mt-auto pt-1 border-t border-gray-100 flex items-center justify-between gap-1 w-full overflow-hidden">
-          <div className="space-y-1 min-w-0">
-            <Skeleton className="h-1.5 w-6 rounded" />
-            <Skeleton className="h-3.5 w-14 rounded" />
+        <div className="mt-auto pt-2 border-t border-[#e8edf2] flex items-center justify-between gap-2 w-full">
+          <div className="space-y-1.5 min-w-0">
+            <Skeleton className="h-2 w-10 rounded" />
+            <Skeleton className="h-4 w-16 rounded" />
           </div>
-          <Skeleton className="w-7 h-7 rounded-full shrink-0" />
+          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
         </div>
       </div>
     </div>
@@ -254,11 +254,11 @@ export function RecommendationCardSkeleton({
 
 export function CategoryCardSkeleton() {
   return (
-    <div className="choosify-category-photo-card choosify-category-card bg-white border rounded-[5px] flex flex-col overflow-hidden animate-pulse w-full border-[#e8edf2] p-0">
-      <div className="w-full aspect-[4/3] bg-gray-100" />
+    <div className="choosify-category-photo-card choosify-category-card bg-white border rounded-[5px] flex flex-col overflow-hidden w-full border-[#e8edf2] p-0">
+      <Skeleton className="w-full aspect-[4/3] rounded-none" />
       <div className="w-full px-3 py-3 border-t border-[#e8edf2] space-y-2">
         <Skeleton className="h-3 w-4/5 rounded-sm" />
-        <Skeleton className="h-2 w-1/3 rounded-sm" />
+        <Skeleton className="h-2.5 w-1/3 rounded-sm" />
       </div>
     </div>
   );

@@ -16,7 +16,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { useRegisterPageFilters } from '../components/FilterEngine';
 import toast from 'react-hot-toast';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { BrandCardDesign, mapBrandToCardDesign } from '../components/BrandCardDesign';
 import { BrandPostCarouselSection } from '../components/BrandPostCarouselSection';
@@ -30,6 +30,8 @@ import { pickByCatalogIds, orderByCatalogIds } from '../utils/catalogMatch';
 import { isPlacementActive } from '../utils/editorialMappers';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
+import { CategorySubcategoryPanel } from '../components/CategorySubcategoryPanel';
+import { buildCategoryDisplayList } from '../utils/categoryDisplay';
 import { buildPagePopularSearchTerms } from '../utils/pagePopularSearches';
 
 type HomeGuideCarouselKind = 'youtube' | 'reels' | 'blog';
@@ -105,6 +107,7 @@ export function HomePage() {
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [activeTab, setActiveTab] = useState('FEED');
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(1);
 
   const sectionVisible = React.useCallback(
@@ -732,30 +735,8 @@ export function HomePage() {
   const { activeId: homeActiveSectionId, scrollToSection: scrollToHomeSection } =
     useSectionScrollSpy(homeSectionNavItems);
 
-  const popularCategoriesMock = CATEGORIES.slice(0, 5).map((category, idx) => ({
-    name: category.name,
-    productCount: 50 - idx * 5,
-    id: category.id,
-  }));
-
   const popularCategoriesList = React.useMemo(() => {
-    if (allCategories?.length) {
-      return [...allCategories]
-        .filter((category) => category.enabled)
-        .sort((a, b) => a.displayOrder - b.displayOrder)
-        .slice(0, 5)
-        .map((category) => {
-          const productCount = (allProducts || []).filter(
-            (product: any) => product.category === category.name,
-          ).length;
-          return {
-            name: category.name,
-            productCount: productCount || 0,
-            id: category.slug || category.id,
-          };
-        });
-    }
-    return popularCategoriesMock;
+    return buildCategoryDisplayList(allCategories ?? [], allProducts ?? []).slice(0, 5);
   }, [allCategories, allProducts]);
 
   const homePopularSearchTerms = useMemo(
@@ -1003,8 +984,8 @@ export function HomePage() {
                   itemWidth={210}
                   gap={16}
                   renderCard={(product) => (
-                    <div className="w-[210px] shrink-0 flex flex-col min-h-[270px] h-full">
-                      <ProductCard product={product} variant="compact" />
+                    <div className="w-[210px] shrink-0 flex flex-col h-full">
+                      <ProductCard product={product} variant="grid" />
                     </div>
                   )}
                 />
@@ -1102,14 +1083,33 @@ export function HomePage() {
 
                 {/* Categories Grid — photo-first tiles matching Categories page */}
                 <div className={cn(HOME_POPULAR_CATEGORY_GRID, 'text-left')}>
-                  {popularCategoriesList.map((cat) => (
-                    <CategoryPhotoCard
-                      key={cat.id || cat.name}
-                      name={cat.name}
-                      productCount={cat.productCount}
-                      href="/categories"
-                    />
-                  ))}
+                  {popularCategoriesList.map((cat) => {
+                    const isExpanded = expandedCategory === cat.name;
+                    return (
+                      <React.Fragment key={cat.id || cat.name}>
+                        <CategoryPhotoCard
+                          name={cat.name}
+                          productCount={cat.count}
+                          image={cat.image}
+                          onClick={() =>
+                            setExpandedCategory(isExpanded ? null : cat.name)
+                          }
+                          isExpanded={isExpanded}
+                        />
+
+                        <AnimatePresence mode="sync">
+                          {isExpanded ? (
+                            <CategorySubcategoryPanel
+                              category={cat}
+                              onClose={() => setExpandedCategory(null)}
+                              products={allProducts ?? []}
+                              cmsTerms={siteConfig?.popularSearches}
+                            />
+                          ) : null}
+                        </AnimatePresence>
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
 
                 <PopularSearchKeywords
@@ -1153,7 +1153,7 @@ export function HomePage() {
               {filteredProducts.length > 0 ? (
                 <div className={PRODUCT_CARD_GRID}>
                   {filteredProducts.map((p: any) => (
-                    <ProductCard key={p.id} product={p} variant="compact" />
+                    <ProductCard key={p.id} product={p} variant="grid" />
                   ))}
                 </div>
               ) : (
