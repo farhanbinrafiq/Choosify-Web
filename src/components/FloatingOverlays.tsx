@@ -2,7 +2,7 @@
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ShoppingCart, MessageSquare, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp, ArrowRight
+  ShoppingCart, MessageSquare, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp, ArrowRight, Sparkles
 } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
@@ -21,6 +21,12 @@ import {
   messagesPreviewMobileShellClass,
   messagesPreviewShellClass,
 } from './MessagesPreviewPanel';
+import {
+  EmiChatPanel,
+  emiChatDesktopShellClass,
+  emiChatMobileShellClass,
+  emiChatShellClass,
+} from './EmiChatPanel';
 import { AlphabetFilterStrip } from './AlphabetFilterStrip';
 import { getFloatingPanelClassName } from './FloatingPanelShell';
 
@@ -29,11 +35,15 @@ export function FloatingOverlays() {
   const currentPath = location.pathname;
   const onMessagesPage = currentPath.startsWith('/messages');
 
-  const { retailCart, activeVideo, closeVideo, isLoggedIn } = useGlobalState();
+  const onEmiPage = currentPath.startsWith('/emi');
+
+  const { retailCart, activeVideo, closeVideo, isLoggedIn, isFeatureEnabled } = useGlobalState();
   const { threads } = useDashboard();
 
-  // Active floating panel state: cart preview or messages preview
-  const [activePanel, setActivePanel] = useState<'cart' | 'messages' | null>(null);
+  const showEmiFab = isFeatureEnabled('enable_emi_assistant') && !onEmiPage;
+
+  // Active floating panel state: cart preview, messages preview, or Emi
+  const [activePanel, setActivePanel] = useState<'cart' | 'messages' | 'emi' | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const filterDrawerRef = useRef<HTMLDivElement>(null);
 
@@ -208,7 +218,7 @@ export function FloatingOverlays() {
 
   // Stack calculation based on active item volumes
   const visibleButtonsCount =
-    (showMessagesFab ? 1 : 0) + (totalCartItems > 0 ? 1 : 0);
+    (showEmiFab ? 1 : 0) + (showMessagesFab ? 1 : 0) + (totalCartItems > 0 ? 1 : 0);
   // Each trigger is h-12 (48px) and equal spacing is gap-3 (12px)
   const triggerStackHeight = visibleButtonsCount * 48 + (visibleButtonsCount - 1) * 12;
 
@@ -277,11 +287,70 @@ export function FloatingOverlays() {
           </motion.div>
         )}
 
+        {activePanel === 'emi' && (
+          <motion.div
+            ref={panelRef}
+            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
+            animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
+            transition={standardTransition}
+            style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
+            className={cn(
+              emiChatShellClass,
+              isMobile
+                ? cn('fixed z-[250] pointer-events-auto', emiChatMobileShellClass, 'h-[85vh]')
+                : isTablet
+                  ? cn('fixed bottom-4 left-1/2 -translate-x-1/2 z-[250]', emiChatDesktopShellClass)
+                  : cn('absolute right-0 z-[250]', emiChatDesktopShellClass, 'max-h-[min(36rem,calc(100vh-10rem))]'),
+            )}
+            id="floating-emi-drawer"
+          >
+            <EmiChatPanel onClose={() => setActivePanel(null)} />
+          </motion.div>
+        )}
+
       </AnimatePresence>
 
       
-      {/* Desktop / tablet pill stack â€” cart + messages only */}
+      {/* Desktop / tablet pill stack — Emi + cart + messages */}
       <div className="hidden sm:flex flex-col-reverse items-end gap-3 w-[185px]">
+
+        {/* EMi ASSISTANT — always available when feature flag is on */}
+        <AnimatePresence>
+          {showEmiFab && (
+            <motion.button
+              key="dock-emi-trigger"
+              initial={{ scale: 0, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0, opacity: 0, y: 15 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={cn(
+                'w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none',
+                activePanel === 'emi'
+                  ? 'bg-[#1A1D4E] border-[#1A1D4E] text-white'
+                  : 'bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40',
+              )}
+              title="Ask Emi — Choosify Assistant"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles
+                  size={15}
+                  className={cn(
+                    'transition-colors',
+                    activePanel === 'emi' ? 'text-[#E8500A]' : 'text-[#8a9bb0] group-hover:text-[#E8500A]',
+                  )}
+                />
+                <span className="text-[10px] font-black uppercase tracking-wider">ASK EMI</span>
+              </div>
+              <span className="w-6 h-6 rounded-full bg-[#E8500A] text-white text-[10px] font-black flex items-center justify-center italic">
+                E
+              </span>
+            </motion.button>
+          )}
+        </AnimatePresence>
 
         {/* BUTTON 2: QUICK CART (visible when cart has items) */}
         <AnimatePresence>
@@ -601,6 +670,25 @@ export function FloatingOverlays() {
         )}
         </div>
       </>
+    )}
+
+    {isMobile && showEmiFab && (
+      <motion.button
+        type="button"
+        onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
+        whileTap={{ scale: 0.95 }}
+        className={cn(
+          'fixed z-[219] bottom-4 left-4 w-14 h-14 rounded-full border shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-colors pointer-events-auto sm:hidden',
+          activePanel === 'emi'
+            ? 'bg-[#1A1D4E] border-[#1A1D4E] text-white'
+            : 'bg-[#E8500A] border-[#E8500A] text-white',
+        )}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        aria-label="Ask Emi"
+        title="Ask Emi"
+      >
+        <Sparkles size={22} />
+      </motion.button>
     )}
 
     {isMobile && showFiltersAction && (

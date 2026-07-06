@@ -9,6 +9,7 @@ export const FEATURE_FLAG_DEFAULTS: Record<string, boolean> = {
   enable_cod_only_mode: false,
   enable_promo_codes: true,
   enable_brand_deals_page: true,
+  enable_emi_assistant: true,
   maintenance_mode: false,
 };
 
