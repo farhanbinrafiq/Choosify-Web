@@ -1,5 +1,5 @@
 import type { CatalogCategory } from '../types/catalog';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES } from '../data/categories';
 import { getCategoryImage } from '../lib/categoryImages';
 
 export type CategorySubcategory = {
@@ -61,18 +61,20 @@ const SUBCATEGORY_PRESETS: Record<string, { names: string[]; icon: string }> = {
   },
 };
 
-function countProductsForCategory(products: Array<Record<string, unknown>>, categoryName: string) {
+import type { CatalogProduct } from '../types/catalog';
+
+function countProductsForCategory(products: CatalogProduct[], categoryName: string) {
   const needle = categoryName.toLowerCase();
   return products.filter((product) => {
-    const category = String(product.category ?? product.categoryName ?? '').toLowerCase();
+    const category = String(product.categoryName ?? '').toLowerCase();
     return category === needle || category.includes(needle) || needle.includes(category);
   }).length;
 }
 
-function countBrandsForSlice(products: Array<Record<string, unknown>>) {
+function countBrandsForSlice(products: CatalogProduct[]) {
   const brands = new Set<string>();
   products.forEach((product) => {
-    const brand = String(product.brand ?? product.brandName ?? '').trim();
+    const brand = String(product.brandName ?? '').trim();
     if (brand) brands.add(brand.toLowerCase());
   });
   return Math.max(brands.size, 1);
@@ -81,13 +83,13 @@ function countBrandsForSlice(products: Array<Record<string, unknown>>) {
 function buildPresetSubcategories(
   categoryName: string,
   icon: string,
-  products: Array<Record<string, unknown>>,
+  products: CatalogProduct[],
 ): CategorySubcategory[] {
   const preset = SUBCATEGORY_PRESETS[categoryName.toLowerCase()];
   if (!preset) return [];
 
   const categoryProducts = products.filter((product) => {
-    const category = String(product.category ?? product.categoryName ?? '').toLowerCase();
+    const category = String(product.categoryName ?? '').toLowerCase();
     return category.includes(categoryName.toLowerCase().split(' ')[0]);
   });
 
@@ -106,12 +108,12 @@ function buildPresetSubcategories(
 function mapChildCategories(
   parent: CatalogCategory,
   children: CatalogCategory[],
-  products: Array<Record<string, unknown>>,
+  products: CatalogProduct[],
 ): CategorySubcategory[] {
   return children.map((child) => {
     const childProducts = products.filter((product) => {
-      const categoryId = String(product.categoryId ?? '');
-      const categoryName = String(product.category ?? product.categoryName ?? '').toLowerCase();
+    const categoryId = String(product.categoryId ?? '');
+    const categoryName = String(product.categoryName ?? '').toLowerCase();
       return categoryId === child.id || categoryName === child.name.toLowerCase();
     });
 
@@ -126,7 +128,7 @@ function mapChildCategories(
 
 export function buildCategoryDisplayList(
   allCategories: CatalogCategory[],
-  allProducts: Array<Record<string, unknown>> = [],
+  allProducts: CatalogProduct[] = [],
 ): CategoryDisplayItem[] {
   if (allCategories.length > 0) {
     const roots = allCategories.filter((cat) => !cat.parentId && cat.enabled);

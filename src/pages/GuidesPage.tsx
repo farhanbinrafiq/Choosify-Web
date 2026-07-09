@@ -619,18 +619,18 @@ export function GuidesPage() {
 
     // Filter by Top Sticky Tabs (activeTab)
     if (activeTab === 'Featured') {
-      result = result.filter(blog => blog.id === 1 || blog.id === 2);
+      result = result.slice(0, 2);
     } else if (activeTab === 'Editors Choice') {
-      result = result.filter(blog => blog.id % 2 === 0);
+      result = result.filter((_, idx) => idx % 2 === 0);
     } else if (activeTab === 'Most Popular') {
       result = result.filter(blog => {
         const viewsStr = blog.views || '';
-        return viewsStr.includes('M') || viewsStr.includes('K') || parseInt(viewsStr) > 100;
+        return viewsStr.includes('M') || viewsStr.includes('K') || parseInt(viewsStr, 10) > 100;
       });
     } else if (activeTab === 'Budget Picks') {
-      result = result.filter(blog => blog.id % 3 === 0);
+      result = result.filter((_, idx) => idx % 3 === 0);
     } else if (activeTab === 'Premium Picks') {
-      result = result.filter(blog => blog.id % 4 === 1);
+      result = result.filter((_, idx) => idx % 4 === 1);
     }
 
     // Filter by searchQuery
@@ -702,10 +702,10 @@ export function GuidesPage() {
       });
     }
     if (isNew === true) {
-      result = result.filter(blog => blog.id % 2 !== 0);
+      result = result.filter((_, idx) => idx % 2 !== 0);
     }
     if (isEditorsPick === true) {
-      result = result.filter(blog => blog.id % 2 === 0);
+      result = result.filter((_, idx) => idx % 2 === 0);
     }
     if (isPopular === true) {
       result = result.filter(blog => blog.views.includes('M'));
@@ -760,9 +760,9 @@ export function GuidesPage() {
 
     if (productPriceRange) {
       if (productPriceRange === 'under1k') {
-        result = result.filter(blog => blog.id % 2 === 0);
+        result = result.filter((_, idx) => idx % 2 === 0);
       } else if (productPriceRange === '1k-5k') {
-        result = result.filter(blog => blog.id % 2 !== 0);
+        result = result.filter((_, idx) => idx % 2 !== 0);
       }
     }
 
@@ -786,7 +786,7 @@ export function GuidesPage() {
         return getSVal(b.shares) - getSVal(a.shares);
       });
     } else if (sortOption === 'newest') {
-      result = result.sort((a, b) => b.id - a.id);
+      result = result.sort((a, b) => String(b.id).localeCompare(String(a.id)));
     }
 
     return result;

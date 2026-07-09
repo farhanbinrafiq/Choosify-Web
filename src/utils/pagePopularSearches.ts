@@ -36,7 +36,7 @@ export function buildPagePopularSearchTerms(options: {
 
   (options.products ?? []).slice(0, 20).forEach((product) => {
     push(product.title);
-    if (product.brand) push(product.brand);
+    if (product.brandName) push(product.brandName);
     if (product.categoryName) push(product.categoryName);
   });
 

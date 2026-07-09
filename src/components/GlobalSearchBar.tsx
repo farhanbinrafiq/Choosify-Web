@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Search, Folder, User, Clock, ArrowRight, Sparkles, X } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { PRODUCTS, BRANDS, CATEGORIES } from '../constants';
+import { BRANDS, CATEGORIES } from '../constants';
 import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -73,9 +73,9 @@ export function GlobalSearchBar({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const { customOverviews } = useDashboard();
-  const { allProducts, allBrands, allCategories, allCreators, siteConfig } = useGlobalState();
+  const { allCatalogProducts, allBrands, allCategories, allCreators, siteConfig } = useGlobalState();
 
-  const productSource = allProducts.length > 0 ? allProducts : PRODUCTS;
+  const productSource = allCatalogProducts;
   const brandSource = allBrands.length > 0
     ? allBrands.map((b) => ({ ...b, products: (b as any).followers ?? (b as any).products ?? 0, rating: (b as any).ratings ?? (b as any).rating ?? 0 }))
     : BRANDS;
@@ -295,14 +295,14 @@ export function GlobalSearchBar({
 
     // 2.2 Products Matching (Check title, brand, category, description, and overviews)
     const matchedProducts: SuggestionItem[] = productSource.filter(p => {
-      const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews || []);
+      const pOverviews = getProductOverviews(p.id, p.title, p.categoryName, customOverviews || []);
       const matchedOverview = Object.values(pOverviews).some(val => 
         typeof val === 'string' && val.toLowerCase().includes(q)
       );
 
       return matchSearchText(p.title, q) ||
-             matchSearchText(p.brand, q) ||
-             matchSearchText(p.category, q) ||
+             matchSearchText(p.brandName, q) ||
+             matchSearchText(p.categoryName, q) ||
              matchSearchText(p.description, q) ||
              matchedOverview;
     })
@@ -311,10 +311,10 @@ export function GlobalSearchBar({
       id: `product-${p.id}`,
       type: 'product',
       title: p.title,
-      subtitle: `${p.brand} • BDT ${p.price}`,
+      subtitle: `${p.brandName} • BDT ${p.price}`,
       image: p.image,
       route: `/products/${p.id}`,
-      badge: p.tag
+      badge: p.tags?.[0]
     }));
 
     // 2.3 Brands Matching (Check name, category, and overviews)

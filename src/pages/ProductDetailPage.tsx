@@ -58,6 +58,7 @@ import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { usePageBreadcrumbs } from "../context/BreadcrumbContext";
 import { slugifyPathSegment } from "../lib/seoHelpers";
 import { StudioWrap } from "../components/studio/StudioWrap";
+import type { CatalogProductSizeGuide } from "../types/catalog";
 
 function hasActiveSizeGuide(sizeGuide?: CatalogProductSizeGuide | null): boolean {
   if (!sizeGuide?.enabled) return false;

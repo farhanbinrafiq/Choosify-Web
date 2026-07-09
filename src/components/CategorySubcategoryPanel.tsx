@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import * as LucideIcons from 'lucide-react';
+import { Construction, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { getCategoryIconComponent } from '../lib/categoryIcons';
 import { CATEGORY_CARD_GRID } from '../lib/pageLayout';
@@ -8,13 +8,15 @@ import type { CategoryDisplayItem } from '../utils/categoryDisplay';
 import { PopularSearchKeywords } from './PopularSearchKeywords';
 import { buildCategoryPopularSearchTerms } from '../utils/categoryPopularSearches';
 
+import type { CatalogProduct, SitePopularSearch } from '../types/catalog';
+
 type CategorySubcategoryPanelProps = {
   category: CategoryDisplayItem;
   onClose: () => void;
   className?: string;
   popularSearchTerms?: string[];
-  products?: Array<Record<string, unknown>>;
-  cmsTerms?: string[];
+  products?: CatalogProduct[];
+  cmsTerms?: SitePopularSearch[];
 };
 
 export function CategorySubcategoryPanel({
@@ -76,7 +78,7 @@ export function CategorySubcategoryPanel({
           className="w-8 h-8 rounded-full border border-[#e8edf2] hover:border-[#E8500A]/30 flex items-center justify-center text-gray-400 hover:text-[#E8500A] transition-all active:scale-95 cursor-pointer bg-white"
           aria-label="Close subcategories"
         >
-          <LucideIcons.X className="w-4 h-4" />
+          <X className="w-4 h-4" />
         </button>
       </motion.div>
 
@@ -109,7 +111,7 @@ export function CategorySubcategoryPanel({
           ))
         ) : (
           <div className="col-span-full py-12 text-center">
-            <LucideIcons.Construction className="mx-auto text-gray-200 mb-4" size={48} />
+            <Construction className="mx-auto text-gray-200 mb-4" size={48} />
             <p className="text-gray-400 font-bold uppercase text-[10px] tracking-[0.4em]">
               Subcategories coming soon
             </p>

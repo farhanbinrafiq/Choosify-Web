@@ -58,7 +58,7 @@ export interface Brand {
   claimStatus?: 'community' | 'pending' | 'verified';
 }
 
-export interface Product {
+export interface CommerceProduct {
   id: number;
   catalogId?: string;
   slug?: string;

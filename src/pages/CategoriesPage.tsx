@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import * as LucideIcons from 'lucide-react';
+import { Check, Construction, LayoutGrid, PenTool, Search, Sparkles, Users, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
 import { CategoryPhotoCard } from '../components/CategoryPhotoCard';
 import { CategorySubcategoryPanel } from '../components/CategorySubcategoryPanel';
-import { buildCategoryDisplayList } from '../utils/categoryDisplay';
+import { buildCategoryDisplayList, type CategoryDisplayItem } from '../utils/categoryDisplay';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PageHeroBanner } from '../components/PageHeroBanner';
 import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
@@ -18,8 +18,10 @@ import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
 import { PLACEMENT_KEYS } from '../lib/placements';
 
+type CategoryItem = CategoryDisplayItem;
+
 export function CategoriesPage() {
-  const { allCategories, allProducts, siteConfig } = useGlobalState();
+  const { allCategories, allCatalogProducts, siteConfig } = useGlobalState();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState('All Categories');
@@ -180,7 +182,7 @@ export function CategoriesPage() {
                     )}
                   >
                     <span>{opt.label}</span>
-                    {selectedAvailability === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                    {selectedAvailability === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
                   </button>
                 ))}
               </div>
@@ -203,7 +205,7 @@ export function CategoriesPage() {
                     )}
                   >
                     <span>{opt.label}</span>
-                    {selectedContent === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                    {selectedContent === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
                   </button>
                 ))}
               </div>
@@ -238,7 +240,7 @@ export function CategoriesPage() {
                 )}
               >
                 <span>{opt.label}</span>
-                {selectedCategoryType === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                {selectedCategoryType === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
               </button>
             ))}
           </div>
@@ -264,7 +266,7 @@ export function CategoriesPage() {
                 )}
               >
                 <span>{opt.label}</span>
-                {selectedCategoryStatus === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                {selectedCategoryStatus === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
               </button>
             ))}
           </div>
@@ -287,7 +289,7 @@ export function CategoriesPage() {
                 )}
               >
                 <span>{opt.label}</span>
-                {selectedAlphabetical === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                {selectedAlphabetical === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
               </button>
             ))}
           </div>
@@ -306,8 +308,8 @@ export function CategoriesPage() {
   ];
 
   const categoriesList = React.useMemo(
-    () => buildCategoryDisplayList(allCategories ?? [], allProducts ?? []),
-    [allCategories, allProducts],
+    () => buildCategoryDisplayList(allCategories ?? [], allCatalogProducts ?? []),
+    [allCategories, allCatalogProducts],
   );
 
   // Dynamic filter supporting the page search system and discovery state criteria
@@ -385,7 +387,7 @@ export function CategoriesPage() {
   };
 
   const sectionNavItems = useMemo(
-    () => [{ id: 'categories-main-display', label: 'Browse', icon: <LucideIcons.LayoutGrid size={13} /> }],
+    () => [{ id: 'categories-main-display', label: 'Browse', icon: <LayoutGrid size={13} /> }],
     [],
   );
   const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
@@ -396,7 +398,7 @@ export function CategoriesPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <LucideIcons.Search size={13} className="text-[#E8500A]" />
+          <Search size={13} className="text-[#E8500A]" />
         </div>
         <input
           type="text"
@@ -472,7 +474,7 @@ export function CategoriesPage() {
                 )}
               >
                 <span>{opt.label}</span>
-                {selectedAvailability === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                {selectedAvailability === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
               </button>
             ))}
           </div>
@@ -495,7 +497,7 @@ export function CategoriesPage() {
                 )}
               >
                 <span>{opt.label}</span>
-                {selectedContent === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                {selectedContent === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
               </button>
             ))}
           </div>
@@ -529,7 +531,7 @@ export function CategoriesPage() {
                 )}
               >
                 <span>{opt.label}</span>
-                {selectedCategoryType === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                {selectedCategoryType === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
               </button>
             ))}
           </div>
@@ -556,7 +558,7 @@ export function CategoriesPage() {
                 )}
               >
                 <span>{opt.label}</span>
-                {selectedCategoryStatus === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                {selectedCategoryStatus === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
               </button>
             ))}
           </div>
@@ -580,7 +582,7 @@ export function CategoriesPage() {
                 )}
               >
                 <span>{opt.label}</span>
-                {selectedAlphabetical === opt.value && <LucideIcons.Check size={11} className="text-orange-primary shrink-0" />}
+                {selectedAlphabetical === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
               </button>
             ))}
           </div>
@@ -647,7 +649,7 @@ export function CategoriesPage() {
           {/* LEFT COLUMN SEARCH BAR */}
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <LucideIcons.Search size={13} className="text-[#E8500A]" />
+              <Search size={13} className="text-[#E8500A]" />
             </div>
             <input
               type="text"
@@ -690,7 +692,7 @@ export function CategoriesPage() {
                         <CategorySubcategoryPanel
                           category={cat}
                           onClose={() => setExpandedCategory(null)}
-                          products={allProducts ?? []}
+                          products={allCatalogProducts ?? []}
                           cmsTerms={siteConfig?.popularSearches}
                         />
                       ) : null}
@@ -713,7 +715,7 @@ export function CategoriesPage() {
             
             <div className="flex flex-col items-center">
               <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-3 border border-[#E8500A]/5 shrink-0 shadow-sm">
-                <LucideIcons.Sparkles className="w-5 h-5" />
+                <Sparkles className="w-5 h-5" />
               </div>
               
               <h3 className="font-sans text-sm font-semibold uppercase tracking-tight text-[#1A1D4E] leading-snug">
@@ -735,12 +737,12 @@ export function CategoriesPage() {
                 to="/post-offer" 
                 className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
               >
-                POST OFFER <LucideIcons.PenTool className="w-3.5 h-3.5" />
+                POST OFFER <PenTool className="w-3.5 h-3.5" />
               </Link>
             </div>
 
             <div className="flex items-center justify-center gap-1.5 text-[8.5px] font-semibold text-[#8a9bb0] uppercase font-mono tracking-widest shrink-0">
-               <LucideIcons.Users className="w-3.5 h-3.5 text-gray-400" /> 100k+ shopper log Daily
+               <Users className="w-3.5 h-3.5 text-gray-400" /> 100k+ shopper log Daily
             </div>
           </div>
 
@@ -782,7 +784,7 @@ export function CategoriesPage() {
                   onClick={() => setIsMobileDrawerOpen(false)}
                   className="w-8 h-8 rounded-full border border-gray-200 hover:border-orange-primary flex items-center justify-center text-gray-400 hover:text-orange-primary bg-white cursor-pointer"
                 >
-                  <LucideIcons.X className="w-4 h-4" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
               <div className="flex-1 pb-10">

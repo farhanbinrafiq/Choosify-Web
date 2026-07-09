@@ -1,9 +1,34 @@
 import React from 'react';
-import * as LucideIcons from 'lucide-react';
+import {
+  Baby,
+  Cpu,
+  Gamepad2,
+  Gem,
+  Home,
+  Monitor,
+  Package,
+  Shirt,
+  Smartphone,
+  Tv,
+  Utensils,
+} from 'lucide-react';
+
+const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Baby,
+  Cpu,
+  Gamepad2,
+  Gem,
+  Home,
+  Monitor,
+  Package,
+  Shirt,
+  Smartphone,
+  Tv,
+  Utensils,
+};
 
 export function getCategoryIconComponent(catName: string, iconName: string) {
-  const IconComponent = (LucideIcons as Record<string, React.ComponentType<{ className?: string }>>)[iconName]
-    || LucideIcons.Package;
+  const IconComponent = CATEGORY_ICON_MAP[iconName] || Package;
   const name = catName.toLowerCase();
 
   let colorClass = 'text-gray-500';

@@ -9,7 +9,7 @@ export interface MediaItem {
   readTime?: string;
   date?: string;
   url: string;
-  associatedGuideId?: number;
+  associatedGuideId?: string | number;
 }
 
 export interface Creator {

@@ -1,4 +1,4 @@
-import type { Brand, Product } from '../types/schemas';
+import type { CommerceProduct, Brand } from '../types/schemas';
 import type { CatalogDeal } from '../types/catalog';
 
 export type EmiCatalogPick =
@@ -41,7 +41,7 @@ function scoreText(text: string, terms: string[]): number {
 export function searchEmiCatalog(
   query: string,
   options: {
-    products: Product[];
+    products: CommerceProduct[];
     brands: Brand[];
     deals: CatalogDeal[];
     limit?: number;

@@ -894,7 +894,7 @@ export function CompareEngine() {
       ...quickFiltersList.map((filter) => ({
         id: `shortcut-${filter.id}`,
         label: filter.label,
-        icon: filter.icon,
+        ...('icon' in filter && filter.icon ? { icon: filter.icon as React.ReactNode } : {}),
       })),
       { id: 'differences-only', label: 'Differences only', icon: <Scale size={13} /> },
     ],

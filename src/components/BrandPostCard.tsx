@@ -95,7 +95,7 @@ export function BrandPostCard({ post, variant = 'grid', compact = false, classNa
         <CardEngagementStrip
           entityType="brand-post"
           entityId={post.id}
-          payload={post}
+          payload={post as unknown as Record<string, unknown>}
           onClickCapture={(e) => {
             e.preventDefault();
             e.stopPropagation();

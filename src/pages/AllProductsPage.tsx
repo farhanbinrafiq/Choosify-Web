@@ -55,7 +55,7 @@ const SPONSORED_RECOMMENDATIONS = [
 export function AllProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchParams, setSearchParams] = useSearchParams();
-  const { allProducts, allBrands, siteConfig } = useGlobalState();
+  const { allCatalogProducts, allBrands, siteConfig } = useGlobalState();
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All Products');
 
@@ -162,8 +162,8 @@ export function AllProductsPage() {
   // Dynamically group categories & brands from the product catalog
   const dynamicCategories = React.useMemo(() => {
     const counts: { [name: string]: number } = {};
-    allProducts.forEach(p => {
-      const cat = p.category || 'Other';
+    allCatalogProducts.forEach(p => {
+      const cat = p.categoryName || 'Other';
       counts[cat] = (counts[cat] || 0) + 1;
     });
     return Object.entries(counts).map(([name, count]) => ({
@@ -171,13 +171,12 @@ export function AllProductsPage() {
       count,
       checked: selectedCategory === name
     }));
-  }, [allProducts, selectedCategory]);
+  }, [allCatalogProducts, selectedCategory]);
 
   const dynamicBrands = React.useMemo(() => {
     const counts: { [name: string]: number } = {};
-    allProducts.forEach(p => {
-      const brandObj = allBrands.find(b => b.id === p.brandId);
-      const bName = brandObj ? brandObj.name : 'Apex';
+    allCatalogProducts.forEach(p => {
+      const bName = p.brandName || 'Apex';
       counts[bName] = (counts[bName] || 0) + 1;
     });
     return Object.entries(counts).map(([name, count]) => ({
@@ -185,7 +184,7 @@ export function AllProductsPage() {
       count,
       checked: selectedBrand === name
     }));
-  }, [allProducts, allBrands, selectedBrand]);
+  }, [allCatalogProducts, allBrands, selectedBrand]);
 
   useRegisterPageFilters({
     pageName: 'Products',
@@ -415,58 +414,58 @@ export function AllProductsPage() {
 
   // Core reactive filtering logic
   const filteredProducts = React.useMemo(() => {
-    let result = [...allProducts];
+    let result = [...allCatalogProducts];
 
     // 0. Tab Selection Filtering
     if (activeTab === 'New Arrivals' || activeTab === 'Newest') {
       const arrivals = result.filter(p => p.isNewArrival === true);
       if (arrivals.length === 0) {
-        result = [...result].sort((a, b) => b.id - a.id).slice(0, 8);
+        result = [...result].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8);
       } else {
         result = arrivals;
       }
     } else if (activeTab === 'Bestsellers' || activeTab === 'Trending') {
       const best = result.filter(p => p.isBestseller === true);
       if (best.length === 0) {
-        result = result.filter(p => p.rating && p.rating >= 4.5);
+        result = result.filter(p => p.featuredFlag || p.isBestseller);
       } else {
         result = best;
       }
     } else if (activeTab === 'Flash Deals' || activeTab === 'Featured' || activeTab === 'Popular') {
       const deals = result.filter(p => p.isDeal === true && p.dealType === 'flash');
       if (deals.length === 0) {
-        result = result.filter(p => !p.id || p.id % 2 === 0);
+        result = result.filter((_, idx) => idx % 2 === 0);
       } else {
         result = deals;
       }
     } else if (activeTab === 'COD Ready' || activeTab === 'Top Rated') {
-      result = result.filter(p => p.codSupport === true);
+      result = result.filter(p => (p.stock || 0) > 0);
     }
 
     // 1. Text Search across Title, Description, Brand, and Category
     const textQuery = (searchParams.get('q') || '').toLowerCase().trim();
     if (textQuery) {
       result = result.filter(p => {
-        const brandObj = allBrands.find(b => b.id === p.brandId);
-        const bName = brandObj ? brandObj.name : '';
+        const brandObj = allBrands.find(b => String(b.id) === String(p.brandId) || b.name === p.brandName);
+        const bName = brandObj ? brandObj.name : p.brandName;
         return (
           p.title.toLowerCase().includes(textQuery) ||
           (p.description || '').toLowerCase().includes(textQuery) ||
           bName.toLowerCase().includes(textQuery) ||
-          (p.category || '').toLowerCase().includes(textQuery)
+          (p.categoryName || '').toLowerCase().includes(textQuery)
         );
       });
     }
 
     // 2. Class/Category Selection
     if (selectedCategory) {
-      result = result.filter(p => p.category === selectedCategory);
+      result = result.filter(p => p.categoryName === selectedCategory);
     }
 
     // 3. Brand Selection
     if (selectedBrand) {
       result = result.filter(p => {
-        const brandObj = allBrands.find(b => b.id === p.brandId);
+        const brandObj = allBrands.find(b => String(b.id) === String(p.brandId) || b.name === p.brandName);
         return brandObj && brandObj.name === selectedBrand;
       });
     }
@@ -482,7 +481,7 @@ export function AllProductsPage() {
 
     // Rating limit filter
     if (ratingFilter !== null) {
-      result = result.filter(p => (p.rating || 4.5) >= ratingFilter);
+      result = result.filter(p => p.featuredFlag || p.isBestseller);
     }
 
     // Availability filter
@@ -497,7 +496,7 @@ export function AllProductsPage() {
       result = result.filter(p => {
         return Object.entries(activeSpecs).every(([key, value]) => {
           if (!value) return true;
-          const text = `${p.title} ${p.category || ''} ${(p as any).tagline || ''} ${p.description || ''}`.toLowerCase();
+          const text = `${p.title} ${p.categoryName || ''} ${(p as any).tagline || ''} ${p.description || ''}`.toLowerCase();
           if (key === 'ram') return text.includes(value.toLowerCase());
           if (key === 'storage') return text.includes(value.toLowerCase());
           if (key === 'processor') return text.includes(value.toLowerCase());
@@ -523,7 +522,7 @@ export function AllProductsPage() {
     }
 
     return result;
-  }, [allProducts, searchParams, selectedCategory, selectedBrand, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax, allBrands]);
+  }, [allCatalogProducts, searchParams, selectedCategory, selectedBrand, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax, allBrands]);
 
   function handleResetFilters() {
     setSelectedCategory(null);
@@ -545,12 +544,12 @@ export function AllProductsPage() {
     () =>
       buildPagePopularSearchTerms({
         cmsTerms: siteConfig?.popularSearches,
-        products: allProducts ?? [],
-        categoryNames: [...new Set((allProducts ?? []).map((p) => p.categoryName).filter(Boolean))].slice(0, 12) as string[],
+        products: allCatalogProducts ?? [],
+        categoryNames: [...new Set((allCatalogProducts ?? []).map((p) => p.categoryName).filter(Boolean))].slice(0, 12) as string[],
         brandNames: allBrands?.map((b) => b.name).slice(0, 12),
         limit: 30,
       }),
-    [siteConfig?.popularSearches, allProducts, allBrands],
+    [siteConfig?.popularSearches, allCatalogProducts, allBrands],
   );
 
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_PRODUCT, {

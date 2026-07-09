@@ -1,17 +1,6 @@
 export const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1560393464-5c69a73c5770?w=800&h=800&fit=crop';
 
-export const CATEGORIES = [
-  { id: 'fashion', name: 'Fashion & Lifestyle', icon: 'Shirt' },
-  { id: 'jewelry', name: 'Jewelry & Accessories', icon: 'Gem' },
-  { id: 'mobile', name: 'Mobile & Phones', icon: 'Smartphone' },
-  { id: 'sporting', name: 'Sporting & Playstation', icon: 'Gamepad2' },
-  { id: 'gaming', name: 'Gaming & Entertainment', icon: 'Monitor' },
-  { id: 'food', name: 'Food & Restaurants', icon: 'Utensils' },
-  { id: 'tech', name: 'Tech & Electronics', icon: 'Cpu' },
-  { id: 'appliances', name: 'TV & Appliances', icon: 'Tv' },
-  { id: 'home', name: 'Home & Living', icon: 'Home' },
-  { id: 'baby', name: 'Baby & Maternity', icon: 'Baby' },
-];
+export { CATEGORIES } from './data/categories';
 
 export const PRODUCTS = [
   {

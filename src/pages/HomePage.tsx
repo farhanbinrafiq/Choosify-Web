@@ -11,7 +11,7 @@ import {
 import { ProductCard } from '../components/ProductCard';
 import { PageHeroBanner } from '../components/PageHeroBanner';
 import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
-import { PRODUCTS, BRANDS, CATEGORIES } from '../constants';
+import { BRANDS, CATEGORIES } from '../constants';
 import { ReelCard, HorizontalMediaCard } from './GuidesPage';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
@@ -105,7 +105,7 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals, allCategories, allGuides, allPlacements, allCreators, homepageConfig, siteConfig, addToCart } = useGlobalState();
+  const { allCatalogProducts, allCatalogBrands, allBrands, allDeals, allCategories, allGuides, allPlacements, allCreators, homepageConfig, siteConfig, addToCart } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [activeTab, setActiveTab] = useState('FEED');
@@ -118,7 +118,7 @@ export function HomePage() {
   );
 
   // Trending brands slider helper
-  const rightBrandsList = allBrands && allBrands.length > 0 ? allBrands : BRANDS;
+  const rightBrandsList = allCatalogBrands.length > 0 ? allCatalogBrands : (allBrands.length > 0 ? allBrands : BRANDS);
   const carouselBrands = React.useMemo(() => {
     return rightBrandsList.map((brand: any) => {
       const img = BRAND_IMAGES[brand.name] || CATEGORY_IMAGES[brand.category] || "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&q=80";
@@ -486,51 +486,54 @@ export function HomePage() {
       ? homepageConfig.featuredBrandIds
       : getSectionItemIds(homepageConfig, 'featured-brands');
     if (featuredIds.length) {
-      const picked = pickByCatalogIds(rightBrandsList, featuredIds);
+      const brandSource = allCatalogBrands.length > 0 ? allCatalogBrands : rightBrandsList;
+      const picked = pickByCatalogIds(
+        brandSource as Array<{ catalogId?: string; id?: string | number }>,
+        featuredIds,
+      );
       if (picked.length) return picked.slice(0, 8);
     }
     return rightBrandsList.filter((b: any) => b.ratings >= 4.7 || b.featuredFlag || b.sponsoredFlag).slice(0, 8);
   }, [rightBrandsList, homepageConfig, allPlacements]);
 
   const rightProductsList = React.useMemo(() => {
-    const source = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
+    const source = allCatalogProducts;
     const placementProducts = allPlacements
       .filter((placement) => isPlacementActive(placement) && placement.placement === 'trending_section' && placement.entityType === 'product')
-      .map((placement) => source.find((p: any) => String(p.catalogId || p.id) === placement.entityId))
+      .map((placement) => source.find((p) => String(p.id) === placement.entityId))
       .filter(Boolean);
-    if (placementProducts.length) return placementProducts as any[];
+    if (placementProducts.length) return placementProducts as typeof source;
 
     const featuredIds = homepageConfig?.featuredProductIds?.length
       ? homepageConfig.featuredProductIds
       : getSectionItemIds(homepageConfig, 'trending');
     if (!featuredIds.length) return source;
     return orderByCatalogIds(source, featuredIds);
-  }, [allProducts, homepageConfig, allPlacements]);
+  }, [allCatalogProducts, homepageConfig, allPlacements]);
 
   const sponsoredDeals = React.useMemo(() => {
     const placementProducts = allPlacements
       .filter((placement) => isPlacementActive(placement) && placement.placement === 'deals_section')
-      .map((placement) => allProducts.find((p: any) => String(p.catalogId || p.id) === placement.entityId))
+      .map((placement) => allCatalogProducts.find((p: any) => String(p.catalogId || p.id) === placement.entityId))
       .filter(Boolean);
     if (placementProducts.length > 0) return placementProducts;
 
-    const productsList = allProducts && allProducts.length > 0 ? allProducts : PRODUCTS;
-    return productsList.filter((p: any) => {
+    const productsList = allCatalogProducts;
+    return productsList.filter((p) => {
       // Check direct product flags
-      if (p.isSponsored || p.sponsored || p.sponsoredStatus || p.sponsoredFlag) return true;
+      if (p.isDeal) return true;
       
       // Look up brand
-      const brand = allBrands?.find((b: any) => b.id === p.brandId || b.name?.toLowerCase() === p.brand?.toLowerCase());
+      const brand = allCatalogBrands.find((b) => b.id === p.brandId || b.name?.toLowerCase() === p.brandName?.toLowerCase())
+        ?? allBrands?.find((b) => String(b.id) === String(p.brandId) || b.name?.toLowerCase() === p.brandName?.toLowerCase());
       if (brand && brand.sponsoredFlag) return true;
       
-      // brandId or brand checks
-      if (p.brandId === 1 || p.brandId === 2 || p.brandId === 10) return true;
-      const bLower = p.brand?.toLowerCase();
+      const bLower = p.brandName?.toLowerCase();
       if (bLower === 'samsung' || bLower === 'apple' || bLower === 'aarong') return true;
       
       return false;
     });
-  }, [allProducts, allBrands, allPlacements]);
+  }, [allCatalogProducts, allCatalogBrands, allBrands, allPlacements]);
 
   const styledSponsoredDeals = React.useMemo(() => {
     return sponsoredDeals.map((p: any, idx: number) => {
@@ -560,7 +563,7 @@ export function HomePage() {
   }, [allBrands]);
 
   const viralProductsList = React.useMemo(() => {
-    return (allProducts && allProducts.length > 0 ? allProducts : PRODUCTS).map((p, idx) => {
+    return allCatalogProducts.map((p, idx) => {
       // Define a stable viral tag sequence based on ID
       let tag = '🔥 Viral';
       let tagColor = 'bg-[#E8500A]';
@@ -599,10 +602,10 @@ export function HomePage() {
         heartsCount: 120 + (idx * 56) % 800
       };
     });
-  }, [allProducts]);
+  }, [allCatalogProducts]);
 
   const featuredDeals = React.useMemo(() => {
-    return (allProducts && allProducts.length > 0 ? allProducts : PRODUCTS).map((p, idx) => {
+    return allCatalogProducts.map((p, idx) => {
       // Create curated, realistic discounts and original prices
       const discountPct = 15 + ((idx * 7) % 21); // 15% to 35% discount
       const originalPriceVal = Math.round(p.price / (1 - discountPct / 100));
@@ -632,14 +635,14 @@ export function HomePage() {
         discountPercent: discountPct
       };
     }).slice(0, 8); // Curb at exactly 8 cards
-  }, [allProducts]);
+  }, [allCatalogProducts]);
 
   const filteredProducts = activeTab === 'FEED' 
     ? rightProductsList 
-    : rightProductsList.filter((p: any) => p.category?.toLowerCase() === activeTab.toLowerCase());
+    : rightProductsList.filter((p) => p.categoryName?.toLowerCase() === activeTab.toLowerCase());
 
   // Sailor is the Spotlight Brand (Brand ID: default or 3)
-  const sailorProductList = rightProductsList.filter((p: any) => p.brand?.toLowerCase() === 'sailor' || p.category?.toLowerCase() === 'fashion & lifestyle').slice(0, 4);
+  const sailorProductList = rightProductsList.filter((p) => p.brandName?.toLowerCase() === 'sailor' || p.categoryName?.toLowerCase() === 'fashion & lifestyle').slice(0, 4);
 
   // Deals Sidebar calculations (with discount tags)
   const dealsProducts = React.useMemo(() => {
@@ -818,19 +821,19 @@ export function HomePage() {
   ]);
 
   const popularCategoriesList = React.useMemo(() => {
-    return buildCategoryDisplayList(allCategories ?? [], allProducts ?? []).slice(0, 5);
-  }, [allCategories, allProducts]);
+    return buildCategoryDisplayList(allCategories ?? [], allCatalogProducts ?? []).slice(0, 5);
+  }, [allCategories, allCatalogProducts]);
 
   const homePopularSearchTerms = useMemo(
     () =>
       buildPagePopularSearchTerms({
         cmsTerms: siteConfig?.popularSearches,
-        products: allProducts ?? [],
+        products: allCatalogProducts ?? [],
         categoryNames: popularCategoriesList.map((cat) => cat.name),
         brandNames: allBrands?.slice(0, 10).map((b) => b.name),
         limit: 24,
       }),
-    [siteConfig?.popularSearches, allProducts, popularCategoriesList, allBrands],
+    [siteConfig?.popularSearches, allCatalogProducts, popularCategoriesList, allBrands],
   );
 
   const CAROUSEL_BG_COLORS = [
@@ -968,9 +971,9 @@ export function HomePage() {
 
                 {/* 4-column, 2-row Product Grid */}
                 <div className={PRODUCT_CARD_GRID}>
-                  {((allProducts.length > 0 ? allProducts : PRODUCTS) as any[])
-                    .filter((p: any) => p.isNewArrival || p.id % 3 === 0)
-                    .sort((a: any, b: any) => b.id - a.id)
+                  {allCatalogProducts
+                    .filter((p) => p.isNewArrival || Number.parseInt(String(p.id).replace(/\D/g, ''), 10) % 3 === 0)
+                    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
                     .slice(0, 8)
                     .map((product) => (
                       <ProductCard key={product.id} product={product} variant="grid" />
@@ -1176,7 +1179,7 @@ export function HomePage() {
                             <CategorySubcategoryPanel
                               category={cat}
                               onClose={() => setExpandedCategory(null)}
-                              products={allProducts ?? []}
+                              products={allCatalogProducts ?? []}
                               cmsTerms={siteConfig?.popularSearches}
                             />
                           ) : null}

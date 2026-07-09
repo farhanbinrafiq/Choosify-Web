@@ -53,10 +53,6 @@ const RetailCartPage = lazy(() => import('./pages/RetailCartPage').then(m => ({ 
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage').then(m => ({ default: m.OrderSuccessPage })));
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(m => ({ default: m.OrderTrackingPage })));
-const SellerIncomingOrdersPage = lazy(() => import('./pages/SellerIncomingOrdersPage').then(m => ({ default: m.SellerIncomingOrdersPage })));
-const SellerOrderDetailsPage = lazy(() => import('./pages/SellerOrderDetailsPage').then(m => ({ default: m.SellerOrderDetailsPage })));
-const SellerCashbookPage = lazy(() => import('./pages/SellerCashbookPage').then(m => ({ default: m.SellerCashbookPage })));
-const CmsStudioPage = lazy(() => import('./pages/CmsStudioPage').then(m => ({ default: m.CmsStudioPage })));
 const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })));
 const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
 const EmiPage = lazy(() => import('./pages/EmiPage').then(m => ({ default: m.EmiPage })));
@@ -64,115 +60,6 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 
 
-
-// Shell for all 15 screens overview
-function Overview() {
-  const screens = [
-    { title: "01. Homepage", id: "screen-1", content: <HomePage /> },
-    { title: "02. All Products", id: "screen-2", content: <AllProductsPage /> },
-    { title: "03. List View", id: "screen-3", content: <AllProductsPage /> },
-    { title: "04. All Brands", id: "screen-4", content: <BrandsPage /> },
-    { title: "05. All Categories", id: "screen-5", content: <CategoriesPage /> },
-    { title: "06. Brand Detail", id: "screen-6", content: <BrandDetailPage /> },
-    { title: "07. Product Detail", id: "screen-7", content: <ProductDetailPage /> },
-    { title: "08. Deals Page", id: "screen-8", content: <DealsPage /> },
-    { title: "09. Compare Tool", id: "screen-9", content: <ComparePage /> },
-    { title: "10. Recommendations", id: "screen-10", content: <GuidesPage /> },
-    { title: "12. Login / Sign Up", id: "screen-12", content: <LoginSignUpPage /> },
-    { title: "13. Post Your Offer", id: "screen-13", content: <PostOfferPage /> },
-    { title: "14. Brand Wise Deals", id: "screen-14", content: <BrandDealsPage /> },
-    { title: "15. Creators Directory", id: "screen-15", content: <CreatorsPage /> },
-    { title: "16. Creator Profile", id: "screen-16", content: <CreatorProfilePage /> },
-  ];
-
-  return (
-    <div className="flex bg-[#f4f7f9] h-screen overflow-hidden font-sans">
-      {/* Sidebar navigation */}
-      <aside className="w-64 bg-navy border-r border-white/10 flex flex-col shrink-0">
-        <div className="p-6 border-b border-white/5">
-           <div className="flex items-center gap-2 mb-1">
-              <div className="w-5 h-5 border-2 border-orange-primary rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 border-2 border-orange-primary rounded-full"></div>
-              </div>
-              <span className="text-white font-bold tracking-tight lowercase">choosify.bd</span>
-           </div>
-           <div className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Design System v1.0</div>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto p-4 space-y-1 no-scrollbar">
-          <div className="text-[9px] uppercase tracking-widest text-white/30 mb-4 px-2 font-black">13-Screen Stack</div>
-          {screens.map((screen) => (
-            <a
-              key={screen.id}
-              href={`#${screen.id}`}
-              className="block px-3 py-2 rounded text-[#D6E1EC]/60 hover:text-white hover:bg-white/5 text-[11px] font-semibold transition-all border border-transparent hover:border-white/5"
-            >
-              {screen.title}
-            </a>
-          ))}
-        </div>
-        
-        <div className="p-4 bg-black/20 text-center">
-           <button className="w-full py-2 bg-orange-primary text-white text-[10px] font-bold uppercase tracking-widest rounded shadow-lg shadow-orange-primary/20">
-              Export PDF
-           </button>
-        </div>
-      </aside>
-
-      {/* Main Preview Area */}
-      <main className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
-        <Suspense fallback={<LoadingFallback />}>
-          <div className="p-12 space-y-32">
-            {screens.map((screen) => (
-              <div key={screen.id}>
-                <ScreenPreview title={screen.title} id={screen.id}>
-                  {screen.content}
-                </ScreenPreview>
-              </div>
-            ))}
-          </div>
-        </Suspense>
-        
-        <footer className="py-20 text-center border-t border-gray-200">
-          <div className="flex items-center justify-center gap-2 mb-4 opacity-30 grayscale saturate-0">
-            <div className="w-6 h-6 border-2 border-navy rounded-full flex items-center justify-center">
-              <div className="w-2 h-2 border-2 border-navy rounded-full"></div>
-            </div>
-            <span className="text-navy font-bold tracking-tight lowercase">choosify.bd</span>
-          </div>
-          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">Bangladesh's Most Trusted Product Discovery Platform</p>
-        </footer>
-      </main>
-    </div>
-  );
-}
-
-function ScreenPreview({ title, children, id }: { title: string, children: React.ReactNode, id: string }) {
-  return (
-    <div id={id} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      <div className="flex items-center justify-between border-b-2 border-navy/10 pb-4">
-        <div className="flex items-baseline gap-4">
-          <h2 className="text-3xl font-black text-navy uppercase tracking-tighter italic">{title}</h2>
-          <span className="text-[10px] text-gray-400 font-black tracking-widest uppercase">Responsive Desktop</span>
-        </div>
-        <div className="flex items-center gap-2">
-           <div className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded text-[10px] font-bold text-gray-500 uppercase">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-accent"></div>
-              Active View
-           </div>
-           <div className="px-3 py-1 bg-navy text-white text-[10px] font-bold rounded uppercase tracking-widest">1440 × 900</div>
-        </div>
-      </div>
-      <div className="w-full bg-white shadow-high-density overflow-hidden border border-gray-100 rounded-lg relative aspect-video">
-        <div className="h-full overflow-y-auto">
-          <Navbar />
-          {children}
-          <Footer />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 import { useGlobalState } from './context/GlobalStateContext';
 import { isNavPathEnabled } from './lib/featureFlags';
@@ -229,21 +116,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const location = useLocation();
-  const isOverview = location.pathname === '/overview';
   const isCompactShell = location.pathname === '/login';
   const isMessagesShell = location.pathname.startsWith('/messages');
-  const showSiteChrome = !isOverview;
 
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
       {/* Navbar renders on the auth page too, so users can get back home via the logo */}
-      {showSiteChrome && <Navbar />}
+      <Navbar />
       <MaintenanceGate>
       <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
           <Routes location={location}>
             <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
-            <Route path="/overview" element={<Overview />} />
             <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
             <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
             <Route path="/brands" element={<PageWrapper><BrandsPage /></PageWrapper>} />
@@ -284,16 +168,7 @@ function AppContent() {
             <Route path="/order-success/:orderId" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />
-            <Route path="/seller/orders" element={<ProtectedRoute><PageWrapper><SellerIncomingOrdersPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/seller/orders/:id" element={<ProtectedRoute><PageWrapper><SellerOrderDetailsPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/seller/cashbook" element={<ProtectedRoute><PageWrapper><SellerCashbookPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/dashboard/studio/website" element={<ProtectedRoute><CmsStudioPage kind="website" /></ProtectedRoute>} />
-            <Route path="/dashboard/studio/product/:id" element={<ProtectedRoute><CmsStudioPage kind="product" /></ProtectedRoute>} />
-            <Route path="/dashboard/studio/brand/:id" element={<ProtectedRoute><CmsStudioPage kind="brand" /></ProtectedRoute>} />
-            <Route path="/dashboard/studio/creator/:id" element={<ProtectedRoute><CmsStudioPage kind="creator" /></ProtectedRoute>} />
-            <Route path="/dashboard/studio/event/:slug" element={<ProtectedRoute><CmsStudioPage kind="event" /></ProtectedRoute>} />
-            <Route path="/cashbook/*" element={<Navigate to="/seller/cashbook" replace />} />
             <Route path="/messages" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/messages/:threadId" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/profile/orders" element={<ProtectedRoute><PageWrapper><CustomerOrdersPage /></PageWrapper></ProtectedRoute>} />
@@ -302,8 +177,8 @@ function AppContent() {
         </Suspense>
       </AnimatePresence>
       </MaintenanceGate>
-      {!isOverview && !isCompactShell && <FloatingOverlays />}
-      {showSiteChrome && !isCompactShell && !isMessagesShell && <Footer />}
+      {!isCompactShell && <FloatingOverlays />}
+      {!isCompactShell && !isMessagesShell && <Footer />}
     </div>
   );
 }

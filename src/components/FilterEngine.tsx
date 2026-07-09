@@ -33,7 +33,7 @@ export interface FilterDefinition {
 }
 
 export interface FilterProfile {
-  entity: 'products' | 'brands' | 'deals' | 'creators' | 'recommendations';
+  entity: 'products' | 'brands' | 'deals' | 'creators' | 'recommendations' | 'guides' | 'whats-on';
   filters: FilterDefinition[];
 }
 

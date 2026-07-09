@@ -23,10 +23,11 @@ export function usePlacements(
 ): ResolvedPlacement[] {
   const {
     allPlacements,
-    allProducts,
-    allBrands,
+    allCatalogProducts,
+    allCatalogBrands,
     allDeals,
-    allGuides,
+    allCatalogGuides,
+    allCatalogCreators,
     allCreators,
   } = useGlobalState();
 
@@ -39,13 +40,13 @@ export function usePlacements(
 
   const catalogs = useMemo(
     () => ({
-      products: allProducts,
-      brands: allBrands,
+      products: allCatalogProducts,
+      brands: allCatalogBrands,
       deals: allDeals,
-      guides: allGuides,
-      creators: allCreators,
+      guides: allCatalogGuides,
+      creators: allCatalogCreators.length > 0 ? allCatalogCreators : [],
     }),
-    [allProducts, allBrands, allDeals, allGuides, allCreators],
+    [allCatalogProducts, allCatalogBrands, allDeals, allCatalogGuides, allCatalogCreators],
   );
 
   return useMemo(() => {

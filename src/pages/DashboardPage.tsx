@@ -38,7 +38,6 @@ import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { PublicReviewCard } from '../components/PublicReviewCard';
 import toast from 'react-hot-toast';
-import { getStudioSections } from '../data/studioSections';
 
 // Hex Colors as per instruction
 const COLORS = {
@@ -840,118 +839,6 @@ const SettingsSection = () => {
   );
 };
 
-const CmsStudiosSection = () => {
-  const studioCards = [
-    {
-      id: 'website',
-      title: 'Website Studio',
-      description: 'Mirror the public homepage and platform-wide content surfaces for admin editing.',
-      previewHref: '/',
-      studioHref: '/dashboard/studio/website',
-    },
-    {
-      id: 'product',
-      title: 'Product Studio',
-      description: 'Manage the same hero, specs, reviews, and buying-guide surfaces users see on product pages.',
-      previewHref: '/products/1',
-      studioHref: '/dashboard/studio/product/1',
-    },
-    {
-      id: 'brand',
-      title: 'Brand Studio',
-      description: 'Keep brand storytelling, catalog blocks, and credibility modules aligned with the live page.',
-      previewHref: '/brands/1',
-      studioHref: '/dashboard/studio/brand/1',
-    },
-    {
-      id: 'creator',
-      title: 'Creator Studio',
-      description: 'Reuse public creator-profile sections so creators and admins edit against the real layout.',
-      previewHref: '/creators/creator-1',
-      studioHref: '/dashboard/studio/creator/creator-1',
-    },
-    {
-      id: 'event',
-      title: 'Event Studio',
-      description: 'Control event detail content, related products, and follow-up placements from one studio.',
-      previewHref: '/whats-on',
-      studioHref: '/dashboard/studio/event/aarong-eid-carnival-2026',
-    },
-  ] as const;
-
-  return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
-      <div className="text-left">
-        <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">
-          CMS <span className="text-[#E8500A]">Studios</span>
-        </h2>
-        <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">
-          Public-page mirror map for admins, sellers, and creators
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {studioCards.map((studio) => {
-          const sections = getStudioSections(studio.id as any);
-          return (
-            <div key={studio.id} className="bg-white border border-[#e8edf2] rounded-[8px] p-6 shadow-sm">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0]">
-                    {sections.length} mapped sections
-                  </div>
-                  <h3 className="text-xl font-black text-navy italic uppercase tracking-tight mt-2">
-                    {studio.title}
-                  </h3>
-                  <p className="text-[11px] font-semibold text-gray-500 mt-2 leading-relaxed">
-                    {studio.description}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end gap-2 shrink-0">
-                <Link
-                  to={studio.studioHref}
-                  className="px-4 py-2 rounded-[5px] bg-[#1A1D4E] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#E8500A] transition-colors"
-                >
-                  Edit in studio
-                </Link>
-                <Link
-                  to={`${studio.previewHref}${studio.previewHref.includes('?') ? '&' : '?'}studioEdit=1`}
-                  className="px-4 py-2 rounded-[5px] border border-[#e8edf2] text-[10px] font-black uppercase tracking-widest text-navy hover:border-[#E8500A]/30 hover:text-[#E8500A]"
-                >
-                  Preview live
-                </Link>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {sections.map((section) => (
-                  <div
-                    key={section.id}
-                    className="flex items-start justify-between gap-3 px-3 py-3 rounded-[5px] bg-[#F8FBFD] border border-[#e8edf2]"
-                  >
-                    <div className="min-w-0">
-                      <div className="text-[11px] font-black text-navy uppercase italic">
-                        {section.label}
-                      </div>
-                      <div className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mt-1">
-                        Anchor: {section.anchorId}
-                      </div>
-                    </div>
-                    <span className="text-[9px] font-black text-[#E8500A] uppercase tracking-widest shrink-0">
-                      {section.fields.length} fields
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-
 
 // --- MAIN PAGE ---
 
@@ -978,7 +865,7 @@ export function DashboardPage() {
     // TODO: addToRecentlyViewed called from ProductDetailPage â€” see Prompt 6
   }, []);
 
-  const REMOVED_TABS = new Set(['my-comparisons', 'admin-campaigns', 'admin-overviews', 'notifications']);
+  const REMOVED_TABS = new Set(['my-comparisons', 'admin-campaigns', 'admin-overviews', 'notifications', 'cms-studios']);
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -1006,7 +893,6 @@ export function DashboardPage() {
 
   const menuItems: Array<{ id: string; label: string; icon: any; href?: string }> = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'cms-studios', label: 'CMS Studios', icon: Settings },
     { id: 'saved-products', label: `Saved Products (${savedProducts.length})`, icon: Heart },
     { id: 'saved-brands', label: `Saved Brands (${savedBrands.length})`, icon: Store },
     { id: 'loved-brands', label: `Loved Brands (${lovedBrands.length})`, icon: Heart },
@@ -1014,24 +900,22 @@ export function DashboardPage() {
     { id: 'recently-viewed', label: `Recently Viewed (${recentlyViewed.length})`, icon: Clock },
     { id: 'saved-recommendations', label: `Saved Guides (${savedGuides.length})`, icon: Bookmark },
     { id: 'messages', label: `Messages${threads.some(t => t.unread) ? ` (${threads.filter(t => t.unread).length} unread)` : ''}`, icon: MessageSquare, href: '/messages' },
-    { id: 'seller-cashbook', label: 'Seller Cashbook', icon: TrendingUp, href: '/seller/cashbook' },
     { id: 'my-reviews', label: 'My Reviews', icon: Star },
     { id: 'settings', label: 'Profile Settings', icon: Settings },
   ];
 
   const controlItems = menuItems.filter(item => 
-    ['overview', 'cms-studios', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations'].includes(item.id)
+    ['overview', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations'].includes(item.id)
   );
 
   const accountItems = menuItems.filter(item => 
-    ['messages', 'seller-cashbook', 'my-reviews', 'settings'].includes(item.id)
+    ['messages', 'my-reviews', 'settings'].includes(item.id)
   );
 
   const renderContent = () => {
     switch (activeTab) {
       // Retail Tabs
       case 'overview': return <OverviewSection onTabChange={setActiveTab} />;
-      case 'cms-studios': return <CmsStudiosSection />;
       case 'saved-products': return <SavedProductsSection />;
       case 'saved-brands': return <SavedBrandsSection />;
       case 'loved-brands': return <LovedBrandsSection />;

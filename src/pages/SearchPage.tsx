@@ -6,7 +6,7 @@ import {
   Percent, AlertCircle, Sparkle, LayoutGrid, CheckCircle, Layers,
   BookOpen, Users
 } from 'lucide-react';
-import { PRODUCTS, BRANDS, BLOGS, CATEGORIES } from '../constants';
+import { BRANDS, BLOGS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { PageHeroBanner } from '../components/PageHeroBanner';
 import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
@@ -132,8 +132,8 @@ export function SearchPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [inStockOnly, setInStockOnly] = useState(false);
   const { customOverviews } = useDashboard();
-  const { allProducts, allBrands, allCategories, allCreators, allGuides, siteConfig } = useGlobalState();
-  const productSource = allProducts.length > 0 ? allProducts : PRODUCTS;
+  const { allCatalogProducts, allBrands, allCategories, allCreators, allGuides, siteConfig } = useGlobalState();
+  const productSource = allCatalogProducts;
   const brandSource = allBrands.length > 0
     ? allBrands.map((b) => ({ ...b, products: (b as any).followers ?? (b as any).products ?? 0, rating: (b as any).ratings ?? (b as any).rating ?? 0 }))
     : BRANDS;
@@ -341,14 +341,14 @@ export function SearchPage() {
           const q = rawQuery.toLowerCase();
           return (
             p.title.toLowerCase().includes(q) ||
-            p.brand.toLowerCase().includes(q) ||
-            p.category.toLowerCase().includes(q) ||
+            p.brandName.toLowerCase().includes(q) ||
+            p.categoryName.toLowerCase().includes(q) ||
             (p.description || '').toLowerCase().includes(q)
           );
         });
 
     if (categoryFilter !== 'all') {
-      results = results.filter((p) => p.category === categoryFilter || (p as any).categoryName === categoryFilter);
+      results = results.filter((p) => p.categoryName === categoryFilter || (p as any).categoryName === categoryFilter);
     }
     if (maxPrice !== 'all') {
       const cap = Number(maxPrice);
@@ -469,21 +469,22 @@ export function SearchPage() {
     
     // 1. PRODUCTS
     const matchedProducts = productSource.map(p => {
-      const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews);
+      const pOverviews = getProductOverviews(p.id, p.title, p.categoryName, customOverviews);
       const matchedOverview = matchOverviewContent(pOverviews, q);
+      const primaryTag = p.tags?.[0];
 
       const match = p.title.toLowerCase().includes(q) || 
-                    p.brand.toLowerCase().includes(q) || 
-                    p.category.toLowerCase().includes(q) || 
+                    p.brandName.toLowerCase().includes(q) || 
+                    p.categoryName.toLowerCase().includes(q) || 
                     (p.description || '').toLowerCase().includes(q) ||
                     !!matchedOverview;
 
       if (!match) return null;
-      const isHot = p.tag === 'HOT' || p.tag === 'NEW';
+      const isHot = primaryTag === 'HOT' || primaryTag === 'NEW' || p.isBestseller || p.isNewArrival;
       return {
         ...p,
         matchOverview: matchedOverview,
-        score: getPriorityScore(p, p.title, isHot, p.category, p.tag, matchedOverview)
+        score: getPriorityScore(p, p.title, isHot, p.categoryName, primaryTag, matchedOverview)
       };
     }).filter(Boolean) as any[];
 
@@ -505,12 +506,13 @@ export function SearchPage() {
     }).filter(Boolean) as any[];
 
     // 3. DEALS
-    const productDeals = productSource.filter(p => p.originalPrice || p.tag === 'SALE' || p.tag === 'HOT').map(p => {
-      const pOverviews = getProductOverviews(p.id, p.title, p.category, customOverviews);
+    const productDeals = productSource.filter(p => p.originalPrice || p.isDeal || p.tags?.includes('SALE') || p.tags?.includes('HOT')).map(p => {
+      const pOverviews = getProductOverviews(p.id, p.title, p.categoryName, customOverviews);
       const matchedOverview = matchOverviewContent(pOverviews, q);
+      const primaryTag = p.tags?.[0];
 
       const match = p.title.toLowerCase().includes(q) || 
-                    p.brand.toLowerCase().includes(q) ||
+                    p.brandName.toLowerCase().includes(q) ||
                     !!matchedOverview;
 
       if (!match) return null;
@@ -518,13 +520,13 @@ export function SearchPage() {
         type: 'product_deal',
         id: p.id,
         title: p.title,
-        brand: p.brand,
+        brand: p.brandName,
         price: p.price,
         originalPrice: p.originalPrice,
         image: p.image,
-        tag: p.tag || 'DEAL',
+        tag: primaryTag || 'DEAL',
         matchOverview: matchedOverview,
-        score: getPriorityScore(p, p.title, true, p.category, p.tag, matchedOverview)
+        score: getPriorityScore(p, p.title, true, p.categoryName, primaryTag, matchedOverview)
       };
     }).filter(Boolean) as any[];
 

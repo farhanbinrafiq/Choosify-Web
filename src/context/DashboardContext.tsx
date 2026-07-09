@@ -7,7 +7,6 @@ import {
   CHOOSIFY_ANNOUNCEMENTS_AVATAR,
   CHOOSIFY_ANNOUNCEMENTS_WELCOME,
   formatAnnouncementBody,
-  formatCampaignAnnouncement,
 } from '../lib/announcements';
 
 export interface MessageThread {
@@ -96,11 +95,6 @@ interface DashboardContextType {
   setCampaigns: React.Dispatch<React.SetStateAction<Campaign[]>>;
   customOverviews: CustomOverview[];
   setCustomOverviews: React.Dispatch<React.SetStateAction<CustomOverview[]>>;
-  addCampaign: (campaign: Omit<Campaign, 'id'>) => void;
-  updateCampaign: (campaign: Campaign) => void;
-  deleteCampaign: (id: string) => void;
-  addCustomOverview: (overview: Omit<CustomOverview, 'id'>) => void;
-  deleteCustomOverview: (id: string) => void;
   removeSavedProduct: (id: number) => void;
   removeSavedBrand: (id: number) => void;
   toggleLoveBrand: (brand: any) => void;
@@ -366,35 +360,6 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
-  const addCampaign = (campaign: Omit<Campaign, 'id'>) => {
-    const newCampaign: Campaign = {
-      ...campaign,
-      id: 'camp-' + Date.now()
-    };
-    setCampaigns(prev => [newCampaign, ...prev]);
-    if (newCampaign.active) {
-      appendAnnouncementMessage(formatCampaignAnnouncement(newCampaign));
-    }
-    toast.success('Campaign created successfully!');
-  };
-
-  const updateCampaign = (target: Campaign) => {
-    setCampaigns(prev => {
-      const previous = prev.find(c => c.id === target.id);
-      const next = prev.map(c => c.id === target.id ? target : c);
-      if (target.active && !previous?.active) {
-        appendAnnouncementMessage(formatCampaignAnnouncement(target));
-      }
-      return next;
-    });
-    toast.success('Campaign updated successfully!');
-  };
-
-  const deleteCampaign = (id: string) => {
-    setCampaigns(prev => prev.filter(c => c.id !== id));
-    toast.success('Campaign deleted successfully.');
-  };
-
   const [customOverviews, setCustomOverviews] = useState<CustomOverview[]>(() => {
     const saved = localStorage.getItem('choosify_custom_overviews');
     if (saved) return JSON.parse(saved);
@@ -426,20 +391,6 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem('choosify_custom_overviews', JSON.stringify(customOverviews));
   }, [customOverviews]);
-
-  const addCustomOverview = (ov: Omit<CustomOverview, 'id'>) => {
-    const newOv: CustomOverview = {
-      ...ov,
-      id: 'co-' + Date.now()
-    };
-    setCustomOverviews(prev => [newOv, ...prev]);
-    toast.success('Dynamic overview section created successfully!');
-  };
-
-  const deleteCustomOverview = (id: string) => {
-    setCustomOverviews(prev => prev.filter(ov => ov.id !== id));
-    toast.success('Overview section removed.');
-  };
 
   const removeSavedProduct = (id: number) => {
     setSavedProducts(prev => prev.filter(p => p.id !== id));
@@ -806,11 +757,6 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       reviews, setReviews,
       campaigns, setCampaigns,
       customOverviews, setCustomOverviews,
-      addCampaign,
-      updateCampaign,
-      deleteCampaign,
-      addCustomOverview,
-      deleteCustomOverview,
       removeSavedProduct,
       removeSavedBrand,
       toggleLoveBrand,

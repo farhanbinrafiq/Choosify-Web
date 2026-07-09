@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
+import { CommerceProduct, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
 import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { CREATORS } from '../data/creators';
 import { toast } from 'react-hot-toast';
@@ -9,6 +9,7 @@ import { FEATURE_FLAG_DEFAULTS, isFlagEnabled, normalizeFeatureFlags } from '../
 import { operationsApi } from '../services/operationsApi';
 import type { CatalogBrand, CatalogCategory, CatalogCreator, CatalogDeal, CatalogGuide, CatalogPlacement, CatalogProduct, CatalogProductDetail, HomepageConfig, SiteConfig } from '../types/catalog';
 import { mapCatalogCreator, mapCatalogGuide } from '../utils/editorialMappers';
+import { commerceProductToCatalog, resolveCatalogProducts } from '../utils/productNormalize';
 import type { Creator } from '../data/creators';
 
 declare module '../types/schemas' {
@@ -66,11 +67,15 @@ export interface GlobalStateContextType {
   buyerReputations: BuyerReputation[];
   sellers: Seller[];
   allBrands: Brand[];
-  allProducts: Product[];
+  allProducts: CommerceProduct[];
+  allCatalogProducts: CatalogProduct[];
+  allCatalogBrands: CatalogBrand[];
   allCategories: CatalogCategory[];
   allDeals: CatalogDeal[];
   allCreators: Creator[];
+  allCatalogCreators: CatalogCreator[];
   allGuides: ReturnType<typeof mapCatalogGuide>[];
+  allCatalogGuides: CatalogGuide[];
   allPlacements: CatalogPlacement[];
   productDetailsById: Record<string, CatalogProductDetail>;
   homepageConfig: HomepageConfig | null;
@@ -665,7 +670,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     return undefined;
   };
 
-  const mappedProducts: Product[] = [];
+  const mappedProducts: CommerceProduct[] = [];
   
   // Create Retail Products
   PRODUCTS.forEach(p => {
@@ -709,7 +714,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     };
   });
 
-  const apiProducts: Product[] = (catalogProducts || []).map((product, idx) => {
+  const apiProducts: CommerceProduct[] = (catalogProducts || []).map((product, idx) => {
     const normalizedId = toNumericId(product.id, idx + 1);
     const normalizedBrandId = toNumericId(product.brandId, idx + 1);
     return {
@@ -744,7 +749,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const allCategories: CatalogCategory[] = catalogCategories;
   const allDeals: CatalogDeal[] = catalogDeals;
   const allCreators: Creator[] = catalogCreators.length > 0 ? catalogCreators.map(mapCatalogCreator) : CREATORS;
-  const allGuides = catalogGuides.length > 0 ? catalogGuides.map(mapCatalogGuide) : BLOGS;
+  const allGuides =
+    catalogGuides.length > 0
+      ? catalogGuides.map(mapCatalogGuide)
+      : (BLOGS as unknown as ReturnType<typeof mapCatalogGuide>[]);
   const allPlacements: CatalogPlacement[] = catalogPlacements;
 
   const addToCart = (product: any, quantity: number, selectedVariant?: any) => {
@@ -961,6 +969,26 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   const productSource = apiProducts.length > 0 ? apiProducts : mappedProducts;
   const allProducts = productSource;
+  const allCatalogProducts = resolveCatalogProducts(catalogProducts, productSource);
+  const allCatalogBrands = catalogBrands?.length
+    ? catalogBrands
+    : allBrands.map((brand, idx) => ({
+        id: brand.catalogId || String(brand.id),
+        slug: brand.slug || String(brand.id),
+        name: brand.name,
+        category: brand.category || 'General',
+        description: '',
+        logo: brand.logo,
+        verifiedStatus: brand.verifiedStatus,
+        claimStatus: brand.claimStatus || 'community',
+        followers: brand.followers || 0,
+        ratings: brand.ratings || 0,
+        featuredFlag: Boolean(brand.featuredFlag),
+        sponsoredFlag: Boolean(brand.sponsoredFlag),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } satisfies CatalogBrand));
+  const allCatalogGuides = catalogGuides;
 
   const [activeVideo, setActiveVideo] = useState<{ url: string; title: string; isVertical?: boolean } | null>(null);
 
@@ -996,10 +1024,14 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       sellers: INITIAL_SELLERS,
       allBrands,
       allProducts,
+      allCatalogProducts,
+      allCatalogBrands,
       allCategories,
       allDeals,
       allCreators,
+      allCatalogCreators: catalogCreators,
       allGuides,
+      allCatalogGuides,
       allPlacements,
       productDetailsById,
       homepageConfig,

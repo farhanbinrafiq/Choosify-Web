@@ -78,9 +78,11 @@ import { PublicReviewCard } from "../components/PublicReviewCard";
 function WithInfluencerReviews({
   brandName,
   brandLogo,
+  fullWidth,
 }: {
   brandName: string;
   brandLogo?: string;
+  fullWidth?: boolean;
 }) {
   const featuredReview = {
     image:
@@ -1803,7 +1805,7 @@ export function BrandDetailPage() {
             variant="hero"
             entityType="brand"
             entityId={brand.id}
-            payload={brand}
+            payload={brand as unknown as Record<string, unknown>}
             showShare
             shareUrl={typeof window !== 'undefined' ? window.location.href : undefined}
           />
@@ -2395,7 +2397,7 @@ export function BrandDetailPage() {
           <BrandOverviewSection
             brandName={brand.name}
             overviewData={overviewData}
-            claimStatus={brand.claimStatus}
+            claimStatus={'claimStatus' in brand ? brand.claimStatus : undefined}
           />
 
           <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left font-sans w-full">
