@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { PRODUCTS, BRANDS } from '../constants';
+import { loadMockCatalog } from '../data/loadMockCatalog';
 import toast from 'react-hot-toast';
 import {
   CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
@@ -112,41 +112,21 @@ interface DashboardContextType {
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
+function readStoredArray(key: string): any[] {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
-  const [savedProducts, setSavedProducts] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_saved_products');
-      return saved ? JSON.parse(saved) : [PRODUCTS[0], PRODUCTS[3], PRODUCTS[5]];
-    } catch { return [PRODUCTS[0], PRODUCTS[3], PRODUCTS[5]]; }
-  });
-
-  const [savedBrands, setSavedBrands] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_saved_brands');
-      return saved ? JSON.parse(saved) : [BRANDS[0], BRANDS[2], BRANDS[9]];
-    } catch { return [BRANDS[0], BRANDS[2], BRANDS[9]]; }
-  });
-
-  const [lovedBrands, setLovedBrands] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_loved_brands');
-      return saved ? JSON.parse(saved) : [BRANDS[1], BRANDS[3], BRANDS[4]];
-    } catch { return [BRANDS[1], BRANDS[3], BRANDS[4]]; }
-  });
-
-  const [followedBrands, setFollowedBrands] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_followed_brands');
-      return saved ? JSON.parse(saved) : [BRANDS[2], BRANDS[5], BRANDS[6], BRANDS[10]];
-    } catch { return [BRANDS[2], BRANDS[5], BRANDS[6], BRANDS[10]]; }
-  });
-
-  const [recentlyViewed, setRecentlyViewed] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_recently_viewed');
-      return saved ? JSON.parse(saved) : [PRODUCTS[1], PRODUCTS[2], PRODUCTS[4]];
-    } catch { return [PRODUCTS[1], PRODUCTS[2], PRODUCTS[4]]; }
-  });
+  const [savedProducts, setSavedProducts] = useState<any[]>(() => readStoredArray('choosify_saved_products'));
+  const [savedBrands, setSavedBrands] = useState<any[]>(() => readStoredArray('choosify_saved_brands'));
+  const [lovedBrands, setLovedBrands] = useState<any[]>(() => readStoredArray('choosify_loved_brands'));
+  const [followedBrands, setFollowedBrands] = useState<any[]>(() => readStoredArray('choosify_followed_brands'));
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>(() => readStoredArray('choosify_recently_viewed'));
 
   const [savedGuides, setSavedGuides] = useState<any[]>(() => {
     try {
@@ -169,12 +149,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  const [comparedProducts, setComparedProducts] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_compared_products');
-      return saved ? JSON.parse(saved) : [PRODUCTS[0], PRODUCTS[1]];
-    } catch { return [PRODUCTS[0], PRODUCTS[1]]; }
-  });
+  const [comparedProducts, setComparedProducts] = useState<any[]>(() => readStoredArray('choosify_compared_products'));
 
   // Threaded Messaging States with Localstorage persistence
   const [threads, setThreads] = useState<MessageThread[]>(() => {
@@ -243,17 +218,29 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [reviews, setReviews] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('choosify_reviews');
-      return saved ? JSON.parse(saved) : [
-        { id: 1, product: PRODUCTS[0].title, rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
-        { id: 2, product: PRODUCTS[5].title, rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
+      if (saved) return JSON.parse(saved);
+      return [
+        { id: 1, product: 'Samsung Galaxy S24 Ultra', rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
+        { id: 2, product: 'LG C3 55" OLED EVO TV', rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
       ];
     } catch {
       return [
-        { id: 1, product: PRODUCTS[0].title, rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
-        { id: 2, product: PRODUCTS[5].title, rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
+        { id: 1, product: 'Samsung Galaxy S24 Ultra', rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
+        { id: 2, product: 'LG C3 55" OLED EVO TV', rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
       ];
     }
   });
+
+  useEffect(() => {
+    loadMockCatalog().then(({ products, brands }) => {
+      setSavedProducts((prev) => (prev.length ? prev : [products[0], products[3], products[5]]));
+      setSavedBrands((prev) => (prev.length ? prev : [brands[0], brands[2], brands[9]]));
+      setLovedBrands((prev) => (prev.length ? prev : [brands[1], brands[3], brands[4]]));
+      setFollowedBrands((prev) => (prev.length ? prev : [brands[2], brands[5], brands[6], brands[10]]));
+      setRecentlyViewed((prev) => (prev.length ? prev : [products[1], products[2], products[4]]));
+      setComparedProducts((prev) => (prev.length ? prev : [products[0], products[1]]));
+    });
+  }, []);
 
   const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
     const saved = localStorage.getItem('choosify_campaigns');

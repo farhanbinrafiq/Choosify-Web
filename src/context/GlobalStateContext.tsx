@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { CommerceProduct, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
-import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { CREATORS } from '../data/creators';
+import { loadMockCatalog } from '../data/loadMockCatalog';
+import { buildFallbackBrandsFromMock, buildMappedProductsFromMock } from '../utils/mockCatalogHydration';
+import { perfApiCall } from '../utils/performanceDev';
 import { toast } from 'react-hot-toast';
 import { catalogApi } from '../services/catalogApi';
 import { hydrateBrandPostsFromApi } from '../lib/brandPosts';
@@ -331,7 +333,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     setBrandClaimStatuses(prev => {
       const key = String(brandNameOrId).toLowerCase().trim();
       const updated = { ...prev, [key]: status };
-      const foundBrand = BRANDS.find(b => String(b.id) === key || b.name.toLowerCase().trim() === key);
+      const foundBrand = mockBrandsRef.current.find(
+        (b) => String(b.id) === key || b.name.toLowerCase().trim() === key,
+      );
       if (foundBrand) {
         updated[String(foundBrand.id)] = status;
         updated[foundBrand.name.toLowerCase().trim()] = status;
@@ -403,26 +407,53 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const [featureFlags, setFeatureFlags] = useState<Record<string, boolean>>(() => ({
     ...FEATURE_FLAG_DEFAULTS,
   }));
+  const [mockMappedProducts, setMockMappedProducts] = useState<CommerceProduct[]>([]);
+  const [mockFallbackBrands, setMockFallbackBrands] = useState<Brand[]>([]);
+  const [mockGuideFallback, setMockGuideFallback] = useState<ReturnType<typeof mapCatalogGuide>[]>([]);
+  const mockBrandsRef = useRef<Array<{ id: number; name: string }>>([]);
+  const lastCatalogFetchAt = useRef(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadMockCatalog().then(({ products, brands, blogs }) => {
+      if (cancelled) return;
+      mockBrandsRef.current = brands;
+      setMockMappedProducts(buildMappedProductsFromMock(products));
+      setMockFallbackBrands(buildFallbackBrandsFromMock(brands, getBrandClaimStatus));
+      setMockGuideFallback(blogs as unknown as ReturnType<typeof mapCatalogGuide>[]);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function hydrateCatalogFromApi() {
+    async function hydrateCatalogFromApi(force = false) {
+      const now = Date.now();
+      if (!force && now - lastCatalogFetchAt.current < 30_000) return;
+
       try {
-        const [products, brands, categories, deals, homepage, site, creators, guides, placements] = await Promise.all([
-          catalogApi.listProducts(),
-          catalogApi.listBrands(),
-          catalogApi.listCategories(),
-          catalogApi.listDeals(),
-          catalogApi.getHomepage(),
-          catalogApi.getSiteConfig(),
-          catalogApi.listCreators(),
-          catalogApi.listGuides(),
-          catalogApi.listPlacements(),
-        ]);
+        const [products, brands, categories, deals, homepage, site, creators, guides, placements] = await perfApiCall(
+          'catalog-hydrate',
+          () =>
+            Promise.all([
+              catalogApi.listProducts(),
+              catalogApi.listBrands(),
+              catalogApi.listCategories(),
+              catalogApi.listDeals(),
+              catalogApi.getHomepage(),
+              catalogApi.getSiteConfig(),
+              catalogApi.listCreators(),
+              catalogApi.listGuides(),
+              catalogApi.listPlacements(),
+            ]),
+        );
         await hydrateBrandPostsFromApi();
         const flags = await operationsApi.getFeatureFlags().catch(() => ({}));
         if (cancelled) return;
+        lastCatalogFetchAt.current = Date.now();
         setCatalogProducts(products);
         setCatalogBrands(brands);
         setCatalogCategories(categories);
@@ -454,9 +485,13 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       hydrateCatalogFromApi();
     };
 
-    hydrateCatalogFromApi();
+    hydrateCatalogFromApi(true);
     window.addEventListener('focus', onFocus);
-    const interval = window.setInterval(hydrateCatalogFromApi, 60_000);
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        hydrateCatalogFromApi();
+      }
+    }, 60_000);
 
     return () => {
       cancelled = true;
@@ -464,232 +499,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       window.clearInterval(interval);
     };
   }, []);
-
-  // Combine static brands with schema rules
-  const fallbackBrands: Brand[] = BRANDS.map(b => {
-    const status = getBrandClaimStatus(b.id);
-    return {
-      id: b.id,
-      name: b.name,
-      logo: b.logo,
-      verifiedStatus: status === 'verified',
-      followers: Math.floor(b.products * 12.3),
-      ratings: b.rating,
-      sponsoredFlag: b.id === 1 || b.id === 2 || b.id === 10,
-      featuredFlag: b.id === 3 || b.id === 11,
-      category: b.category,
-      claimStatus: status
-    };
-  });
-
-  // Map products statically into retail catalog
-  const getVariantsForProduct = (productId: number, basePrice: number, baseImage: string): any[] | undefined => {
-    if (productId === 1) {
-      // Samsung Galaxy S24 Ultra
-      const colors = ["Titanium Gray", "Titanium Yellow", "Titanium Violet"];
-      const storages = ["256GB", "512GB", "1TB"];
-      const colorImages: { [color: string]: string } = {
-        "Titanium Gray": baseImage,
-        "Titanium Yellow": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&h=400&fit=crop",
-        "Titanium Violet": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&h=400&fit=crop"
-      };
-      const variants: any[] = [];
-      colors.forEach(color => {
-        storages.forEach(storage => {
-          let priceDiff = 0;
-          if (storage === "512GB") priceDiff = 10000;
-          if (storage === "1TB") priceDiff = 25000;
-
-          let stock = 15;
-          if (color === "Titanium Yellow" && storage === "512GB") stock = 0;
-          if (color === "Titanium Violet" && storage === "256GB") stock = 0;
-
-          variants.push({
-            sku: `S24U-${color.split(' ')[1].toUpperCase()}-${storage}`,
-            attributes: {
-              color,
-              storage
-            },
-            price: basePrice + priceDiff,
-            stock,
-            image: colorImages[color]
-          });
-        });
-      });
-      return variants;
-    }
-
-    if (productId === 2) {
-      // Sony WH-1000XM5
-      return [
-        {
-          sku: "WH5-SILVER",
-          attributes: { color: "Platinum Silver" },
-          price: basePrice,
-          stock: 12,
-          image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop"
-        },
-        {
-          sku: "WH5-BLACK",
-          attributes: { color: "Midnight Black" },
-          price: basePrice,
-          stock: 18,
-          image: baseImage
-        }
-      ];
-    }
-
-    if (productId === 3) {
-      // Apple MacBook Air M3 (Simulated as Out of Stock)
-      const rams = ["8GB", "16GB", "24GB"];
-      const storages = ["256GB", "512GB"];
-      const variants: any[] = [];
-      rams.forEach(ram => {
-        storages.forEach(storage => {
-          let priceDiff = 0;
-          if (ram === "16GB") priceDiff += 20000;
-          if (ram === "24GB") priceDiff += 40000;
-          if (storage === "512GB") priceDiff += 20000;
-
-          variants.push({
-            sku: `MBA3-${ram}-${storage}`,
-            attributes: {
-              ram,
-              storage
-            },
-            price: basePrice + priceDiff,
-            stock: 0,
-            image: baseImage
-          });
-        });
-      });
-      return variants;
-    }
-
-    if (productId === 4) {
-      // Nike Air Max 270 React
-      const colors = ["Obsidian Black", "Hyper Crimson", "Electric Blue"];
-      const sizes = ["40", "41", "42", "43", "44"];
-      const colorImages: { [color: string]: string } = {
-        "Obsidian Black": baseImage,
-        "Hyper Crimson": "https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400&h=400&fit=crop",
-        "Electric Blue": "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&h=400&fit=crop"
-      };
-      const variants: any[] = [];
-      colors.forEach(color => {
-        sizes.forEach(size => {
-          let priceDiff = 0;
-          if (color === "Hyper Crimson") priceDiff = 400;
-          if (color === "Electric Blue") priceDiff = 600;
-
-          let stock = 8;
-          if (color === "Obsidian Black" && size === "42") stock = 0;
-          if (color === "Hyper Crimson" && size === "40") stock = 0;
-          if (color === "Electric Blue" && size === "44") stock = 0;
-
-          variants.push({
-            sku: `NIKE-${color.split(' ')[1].toUpperCase()}-${size}`,
-            attributes: {
-              color,
-              size
-            },
-            price: basePrice + priceDiff,
-            stock,
-            image: colorImages[color]
-          });
-        });
-      });
-      return variants;
-    }
-
-    if (productId === 6) {
-      // Apex Men's Ultima Pro Runner
-      const colors = ["Stealth Black", "Neon Lime", "Carbon Grey"];
-      const sizes = ["39", "40", "41", "42", "43"];
-      const colorImages: { [color: string]: string } = {
-        "Stealth Black": baseImage,
-        "Neon Lime": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=400&fit=crop",
-        "Carbon Grey": "https://images.unsplash.com/photo-1539185441755-769473a23570?w=400&h=400&fit=crop"
-      };
-      const variants: any[] = [];
-      colors.forEach(color => {
-        sizes.forEach(size => {
-          let priceDiff = 0;
-          if (color === "Neon Lime") priceDiff = 150;
-          if (color === "Carbon Grey") priceDiff = 250;
-
-          let stock = 12;
-          if (color === "Stealth Black" && size === "41") stock = 0;
-          if (color === "Neon Lime" && size === "39") stock = 0;
-          if (color === "Carbon Grey" && size === "43") stock = 0;
-
-          variants.push({
-            sku: `APEX-${color.split(' ')[1].toUpperCase()}-${size}`,
-            attributes: {
-              color,
-              size
-            },
-            price: basePrice + priceDiff,
-            stock,
-            image: colorImages[color]
-          });
-        });
-      });
-      return variants;
-    }
-
-    if (productId === 8) {
-      // Xiaomi Redmi Note 13 Pro
-      const rams = ["8GB", "12GB"];
-      const storages = ["256GB", "512GB"];
-      const variants: any[] = [];
-      rams.forEach(ram => {
-        storages.forEach(storage => {
-          let priceDiff = 0;
-          if (ram === "12GB") priceDiff += 4000;
-          if (storage === "512GB") priceDiff += 4000;
-
-          let stock = 16;
-          if (ram === "12GB" && storage === "512GB") stock = 3;
-
-          variants.push({
-            sku: `XIAOMI-${ram}-${storage}`,
-            attributes: {
-              ram,
-              storage
-            },
-            price: basePrice + priceDiff,
-            stock,
-            image: baseImage
-          });
-        });
-      });
-      return variants;
-    }
-
-    return undefined;
-  };
-
-  const mappedProducts: CommerceProduct[] = [];
-  
-  // Create Retail Products
-  PRODUCTS.forEach(p => {
-    const cleanPrice = parseFloat(p.price.replace(/,/g, '')) || 5000;
-    mappedProducts.push({
-      id: p.id,
-      title: p.title,
-      image: p.image,
-      brand: p.brand,
-      codSupport: p.id !== 1,
-      stock: p.id === 3 ? 0 : p.id === 5 ? 3 : 58,
-      sellerId: p.brand === 'Samsung' ? 'seller-samsung' : p.brand === 'Apple' ? 'seller-apple' : p.brand === 'Apex' ? 'seller-apex' : 'seller-general',
-      brandId: p.brand === 'Samsung' ? 1 : p.brand === 'Apple' ? 2 : p.brand === 'Apex' ? 3 : 4,
-      price: cleanPrice,
-      description: p.description || `Full verified ${p.title} with complete manufacturer accessory bundle and native local warranty coverage.`,
-      category: p.category,
-      variants: getVariantsForProduct(p.id, cleanPrice, p.image)
-    });
-  });
 
   const toNumericId = (value: string, fallback: number): number => {
     const numeric = Number(value.replace(/[^0-9]/g, ''));
@@ -745,14 +554,14 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     };
   });
 
-  const allBrands: Brand[] = apiBrands.length > 0 ? apiBrands : fallbackBrands;
+  const allBrands: Brand[] = apiBrands.length > 0 ? apiBrands : mockFallbackBrands;
   const allCategories: CatalogCategory[] = catalogCategories;
   const allDeals: CatalogDeal[] = catalogDeals;
   const allCreators: Creator[] = catalogCreators.length > 0 ? catalogCreators.map(mapCatalogCreator) : CREATORS;
   const allGuides =
     catalogGuides.length > 0
       ? catalogGuides.map(mapCatalogGuide)
-      : (BLOGS as unknown as ReturnType<typeof mapCatalogGuide>[]);
+      : mockGuideFallback;
   const allPlacements: CatalogPlacement[] = catalogPlacements;
 
   const addToCart = (product: any, quantity: number, selectedVariant?: any) => {
@@ -967,7 +776,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     });
   };
 
-  const productSource = apiProducts.length > 0 ? apiProducts : mappedProducts;
+  const productSource = apiProducts.length > 0 ? apiProducts : mockMappedProducts;
   const allProducts = productSource;
   const allCatalogProducts = resolveCatalogProducts(catalogProducts, productSource);
   const allCatalogBrands = catalogBrands?.length

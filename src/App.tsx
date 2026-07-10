@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Link, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -63,6 +63,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 import { useGlobalState } from './context/GlobalStateContext';
 import { isNavPathEnabled } from './lib/featureFlags';
+import { perfRouteTransition } from './utils/performanceDev';
 
 function FeatureFlagRoute({
   flag,
@@ -118,6 +119,10 @@ function AppContent() {
   const location = useLocation();
   const isCompactShell = location.pathname === '/login';
   const isMessagesShell = location.pathname.startsWith('/messages');
+
+  useEffect(() => {
+    perfRouteTransition(location.pathname);
+  }, [location.pathname]);
 
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">

@@ -3,11 +3,12 @@ import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Search, Folder, User, Clock, ArrowRight, Sparkles, X } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { BRANDS, CATEGORIES } from '../constants';
+import { CATEGORIES } from '../constants';
 import { CREATORS } from '../data/creators';
+import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
+import { type SuggestionItem } from './search/searchTypes';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { getBrandOverviews, getProductOverviews } from '../utils/overviewRegistry';
 
 interface GlobalSearchBarProps {
   initialValue?: string;
@@ -25,19 +26,6 @@ interface GlobalSearchBarProps {
   layout?: 'default' | 'navbar-fluid';
   onMobileExpandedChange?: (expanded: boolean) => void;
 }
-
-interface SuggestionItem {
-  id: string;
-  type: 'query' | 'product' | 'brand' | 'creator' | 'category' | 'recent' | 'popular' | 'trending';
-  title: string;
-  subtitle?: string;
-  image?: string;
-  route: string;
-  badge?: string;
-}
-
-const matchSearchText = (value: unknown, query: string) =>
-  typeof value === 'string' && value.toLowerCase().includes(query);
 
 export function GlobalSearchBar({
   initialValue = '',
@@ -78,7 +66,7 @@ export function GlobalSearchBar({
   const productSource = allCatalogProducts;
   const brandSource = allBrands.length > 0
     ? allBrands.map((b) => ({ ...b, products: (b as any).followers ?? (b as any).products ?? 0, rating: (b as any).ratings ?? (b as any).rating ?? 0 }))
-    : BRANDS;
+    : [];
   const creatorSource = allCreators.length > 0 ? allCreators : CREATORS;
   const categorySource = allCategories.length > 0
     ? allCategories.map((c) => ({ id: c.id, name: c.name, icon: c.icon }))
@@ -233,172 +221,18 @@ export function GlobalSearchBar({
       ? cmsTerms
       : ['Samsung S24 Ultra', 'Gift wrapping', 'Sailor', 'PC Build'];
   }, [siteConfig?.popularSearches]);
-  const commonKeywords = [
-    'iphone', 'iphone 15', 'iphone charger', 'iphone cover', 'samsung galaxy', 'samsung s24',
-    'gift wrapping', 'airport pickup', 't-shirt', 'casual wear', 'sound system', 'laptop',
-    'gaming console', 'leather shoes', 'beauty care', 'eid panjabi', 'headphones', 'earbuds',
-    'aarong salwar kameez', 'apex shoes', 'sailor clothing'
-  ];
 
-  // Dynamically compute suggestions list
-  const suggestionsGrouped = useMemo(() => {
-    const q = queryValue.trim().toLowerCase();
-    
-    // 1. BEFORE TYPING STATE
-    if (!q) {
-      const recents: SuggestionItem[] = recentSearches.map((s, idx) => ({
-        id: `recent-${idx}-${s}`,
-        type: 'recent',
-        title: s,
-        route: `/search?q=${encodeURIComponent(s)}`
-      }));
-
-      const populars: SuggestionItem[] = popularSearches.map((s, idx) => ({
-        id: `popular-${idx}-${s}`,
-        type: 'popular',
-        title: s,
-        route: `/search?q=${encodeURIComponent(s)}`
-      }));
-
-      const trendings: SuggestionItem[] = trendingSearches.map((s, idx) => ({
-        id: `trending-${idx}-${s}`,
-        type: 'trending',
-        title: s,
-        route: `/search?q=${encodeURIComponent(s)}`
-      }));
-
-      return {
-        recent: recents,
-        popular: populars,
-        trending: trendings,
-        queries: [],
-        products: [],
-        brands: [],
-        creators: [],
-        categories: [],
-        totalCount: recents.length + populars.length + trendings.length
-      };
-    }
-
-    // 2. ACTIVE TYPING STATE: Filter lists using the search query
-    
-    // 2.1 Suggested Queries
-    const matchedQueries: SuggestionItem[] = commonKeywords
-      .filter(k => k.toLowerCase().includes(q))
-      .slice(0, 4)
-      .map((k, idx) => ({
-        id: `query-${idx}-${k}`,
-        type: 'query',
-        title: k,
-        route: `/search?q=${encodeURIComponent(k)}`
-      }));
-
-    // 2.2 Products Matching (Check title, brand, category, description, and overviews)
-    const matchedProducts: SuggestionItem[] = productSource.filter(p => {
-      const pOverviews = getProductOverviews(p.id, p.title, p.categoryName, customOverviews || []);
-      const matchedOverview = Object.values(pOverviews).some(val => 
-        typeof val === 'string' && val.toLowerCase().includes(q)
-      );
-
-      return matchSearchText(p.title, q) ||
-             matchSearchText(p.brandName, q) ||
-             matchSearchText(p.categoryName, q) ||
-             matchSearchText(p.description, q) ||
-             matchedOverview;
-    })
-    .slice(0, 3)
-    .map(p => ({
-      id: `product-${p.id}`,
-      type: 'product',
-      title: p.title,
-      subtitle: `${p.brandName} • BDT ${p.price}`,
-      image: p.image,
-      route: `/products/${p.id}`,
-      badge: p.tags?.[0]
-    }));
-
-    // 2.3 Brands Matching (Check name, category, and overviews)
-    const matchedBrands: SuggestionItem[] = brandSource.filter(b => {
-      const bOverviews = getBrandOverviews(b.name, customOverviews || []);
-      const matchedOverview = Object.values(bOverviews).some(val => 
-        typeof val === 'string' && val.toLowerCase().includes(q)
-      );
-
-      return matchSearchText(b.name, q) ||
-             matchSearchText(b.category, q) ||
-             matchedOverview;
-    })
-    .slice(0, 3)
-    .map(b => ({
-      id: `brand-${b.id}`,
-      type: 'brand',
-      title: b.name,
-      subtitle: `${b.category || 'Brand'} • ${b.products ?? 0} Products`,
-      route: `/brands/${b.id}`,
-      badge: b.rating >= 4.8 ? 'Verified' : undefined
-    }));
-
-    // 2.4 Creators Matching (Check name, handle, bio, bestFor)
-    const matchedCreators: SuggestionItem[] = creatorSource.filter(c => {
-      return matchSearchText(c.name, q) ||
-             matchSearchText(c.handle, q) ||
-             matchSearchText(c.bio, q) ||
-             matchSearchText(c.bestFor, q);
-    })
-    .slice(0, 3)
-    .map(c => ({
-      id: `creator-${c.id}`,
-      type: 'creator',
-      title: c.name,
-      subtitle: `${c.handle || '@creator'} • ${c.bestFor || 'Creator'} Expert`,
-      image: c.avatar,
-      route: `/creators/${c.id}`
-    }));
-
-    // 2.5 Categories Matching (Check name)
-    const matchedCategories: SuggestionItem[] = categorySource.filter(c => matchSearchText(c.name, q))
-    .slice(0, 3)
-    .map(c => ({
-      id: `category-${c.id}`,
-      type: 'category',
-      title: c.name,
-      route: `/products?category=${encodeURIComponent(c.name)}`,
-      badge: 'Category'
-    }));
-
-    const totalCount = matchedQueries.length + matchedProducts.length + matchedBrands.length + matchedCreators.length + matchedCategories.length;
-
-    return {
-      recent: [],
-      popular: [],
-      trending: [],
-      queries: matchedQueries,
-      products: matchedProducts,
-      brands: matchedBrands,
-      creators: matchedCreators,
-      categories: matchedCategories,
-      totalCount
-    };
-  }, [queryValue, recentSearches, customOverviews, productSource, brandSource, creatorSource, categorySource]);
-
-  // Create flat suggestion list for arrow-key keyboard navigation
-  const flatSuggestions = useMemo(() => {
-    const list: SuggestionItem[] = [];
-    
-    if (!queryValue.trim()) {
-      list.push(...suggestionsGrouped.recent);
-      list.push(...suggestionsGrouped.popular);
-      list.push(...suggestionsGrouped.trending);
-    } else {
-      list.push(...suggestionsGrouped.queries);
-      list.push(...suggestionsGrouped.products);
-      list.push(...suggestionsGrouped.brands);
-      list.push(...suggestionsGrouped.creators);
-      list.push(...suggestionsGrouped.categories);
-    }
-    
-    return list;
-  }, [queryValue, suggestionsGrouped]);
+  const { suggestionsGrouped, flatSuggestions } = useSearchSuggestions({
+    queryValue,
+    recentSearches,
+    popularSearches,
+    trendingSearches,
+    customOverviews,
+    productSource,
+    brandSource,
+    creatorSource,
+    categorySource,
+  });
 
   // Keyboard controls
   const handleKeyDown = (e: React.KeyboardEvent) => {

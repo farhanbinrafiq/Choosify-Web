@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers, ImageOff, Plus, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PLACEHOLDER_IMAGE } from '../constants';
+import { OptimizedImage } from './OptimizedImage';
 import { resolveProductBadges } from '../utils/productBadges';
 import { CardEngagementStrip } from './CardEngagementStrip';
 import { ProductStatusBadge, ProductStatusBadgeStack, collectProductBadgeLabels } from './ProductStatusBadge';
@@ -202,6 +203,7 @@ function ProductCardImageCarousel({ images, alt, containerClassName }: { images:
         src={images[idx]}
         alt={alt}
         loading="lazy"
+        decoding="async"
         onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE; }}
         className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
       />
@@ -244,7 +246,7 @@ function ProductCardImageCarousel({ images, alt, containerClassName }: { images:
   );
 }
 
-export function ProductCard({ 
+export const ProductCard = memo(function ProductCard({ 
   product, 
   variant: variantProp = 'grid',
   showCountdown = false,
@@ -622,5 +624,5 @@ export function ProductCard({
       </div>
     </div>
   );
-}
+});
 

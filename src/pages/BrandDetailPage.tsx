@@ -63,138 +63,9 @@ import {
   useRegisterPageFilters,
 } from "../components/FilterEngine";
 import { PaginationBar } from "../components/PaginationBar";
-
-function TikTokIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
-    </svg>
-  );
-}
-
-import { InfluencerReviews } from "../components/InfluencerReviews";
 import { PublicReviewCard } from "../components/PublicReviewCard";
-
-function WithInfluencerReviews({
-  brandName,
-  brandLogo,
-  fullWidth,
-}: {
-  brandName: string;
-  brandLogo?: string;
-  fullWidth?: boolean;
-}) {
-  const featuredReview = {
-    image:
-      "https://images.unsplash.com/photo-1511119253457-36e78921865c?w=1200&h=800&fit=crop",
-    title: `${brandName} Creator Spotlight`,
-    excerpt: `Dive deep into the fabric, longevity, and brand heritage of ${brandName}. Real-world creators share their personal daily style experiences.`,
-    authorName:
-      brandName === "Apex"
-        ? "TECH REVIEW BD"
-        : `${brandName.toUpperCase()} TALK BD`,
-    authorSub: "Dhaka Headquarters",
-    authorLogo: brandLogo || brandName.substring(0, 2),
-    badgeText: "BRAND PARTNERSHIP",
-  };
-
-  const reviews = [
-    {
-      id: 1,
-      image:
-        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=800&fit=crop",
-      category: brandName === "Apex" ? "FOOTWEAR" : "FASHION VIBES",
-      title: `${brandName} Style & Creators Showcase`,
-      authorName: "Style Maven",
-      authorHandle: "@stylemaven",
-      authorAvatar: "https://i.pravatar.cc/100?u=style",
-      platform: "Instagram" as const,
-      aspectRatio: "portrait" as const,
-      videoUrl: "https://www.youtube.com/embed/p17S_gQ2iV4?autoplay=1&mute=1",
-      timeAgo: "12m ago",
-    },
-    {
-      id: 2,
-      image:
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=600&fit=crop",
-      category: brandName === "Apex" ? "FOOTWEAR" : "CASUAL WEAR",
-      title: `${brandName} Seasonal Collection Review`,
-      authorName: "BB Fashion Talk",
-      authorHandle: "@bbtalk",
-      authorAvatar: "https://i.pravatar.cc/100?u=bbtech",
-      platform: "YouTube" as const,
-      aspectRatio: "landscape" as const,
-      videoUrl: "https://www.youtube.com/embed/T68XW9Q-PqQ?autoplay=1&mute=1",
-      timeAgo: "15h ago",
-    },
-    {
-      id: 3,
-      image:
-        "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=800&fit=crop",
-      category: "CREATOR OPINION",
-      title: `Is ${brandName} the Best Local Brand in 2024?`,
-      authorName: "Avishek Mojumder",
-      authorHandle: "@avishek",
-      authorAvatar: "https://i.pravatar.cc/100?u=avishek",
-      platform: "TikTok" as const,
-      aspectRatio: "portrait" as const,
-      videoUrl: "https://www.youtube.com/embed/bZha6f-Z35M?autoplay=1&mute=1",
-      timeAgo: "1d ago",
-    },
-    {
-      id: 4,
-      image:
-        "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900&h=600&fit=crop",
-      category: "DEEP DIVE",
-      title: `${brandName} — full brand breakdown`,
-      authorName: "Tech Review BD",
-      authorHandle: "@techreviewbd",
-      authorAvatar: "TR",
-      platform: "YouTube" as const,
-      aspectRatio: "landscape" as const,
-      videoUrl: "https://www.youtube.com/embed/PjRreH0T_W4?autoplay=1&mute=1",
-      timeAgo: "3d ago",
-    },
-    {
-      id: 5,
-      image:
-        "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=800&fit=crop",
-      category: "STYLING",
-      title: `How creators style ${brandName} daily`,
-      authorName: "Key Looks",
-      authorHandle: "@keylooks",
-      authorAvatar: "KL",
-      platform: "Instagram" as const,
-      aspectRatio: "portrait" as const,
-      videoUrl: "https://www.youtube.com/embed/p17S_gQ2iV4?autoplay=1&mute=1",
-      timeAgo: "5d ago",
-    },
-    {
-      id: 6,
-      image:
-        "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&h=800&fit=crop",
-      category: "QUICK TAKE",
-      title: `${brandName} in 60 seconds — honest take`,
-      authorName: "Daily Drop BD",
-      authorHandle: "@dailydrop",
-      authorAvatar: "DD",
-      platform: "TikTok" as const,
-      aspectRatio: "portrait" as const,
-      videoUrl: "https://www.youtube.com/embed/bZha6f-Z35M?autoplay=1&mute=1",
-      timeAgo: "1w ago",
-    },
-  ];
-
-  return (
-    <InfluencerReviews
-      title="BRAND CAMPAIGN & INFLUENCERS"
-      subtitle={`CREATOR EXPERIENCES WITH ${brandName.toUpperCase()}`}
-      featuredReview={featuredReview}
-      reviews={reviews}
-      fullWidth
-    />
-  );
-}
+import { TikTokIcon } from "../components/brand/TikTokIcon";
+import { BrandInfluencerReviewsSection } from "../components/brand/BrandInfluencerReviewsSection";
 
 export function BrandDetailPage() {
   const brandHeroRef = useRef<HTMLElement>(null);
@@ -2308,7 +2179,7 @@ export function BrandDetailPage() {
                 </p>
               </div>
             ) : (
-              <WithInfluencerReviews
+              <BrandInfluencerReviewsSection
                 brandName={brand.name}
                 brandLogo={brand.logo}
                 fullWidth

@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { PageHeroHeader } from '../components/PageHeroHeader';
-import { EmiChatPanel } from '../components/EmiChatPanel';
 import { ChoosifyIconLogo } from '../components/ChoosifyIconLogo';
+import { LoadingFallback } from '../components/LoadingFallback';
+
+const EmiChatPanel = lazy(() =>
+  import('../components/EmiChatPanel').then((module) => ({ default: module.EmiChatPanel })),
+);
 
 export function EmiPage() {
   return (
@@ -23,7 +27,9 @@ export function EmiPage() {
 
       <div className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 md:py-8">
         <div className="h-[min(70vh,720px)] rounded-[5px] border border-[#e8edf2] bg-white shadow-sm overflow-hidden flex flex-col">
-          <EmiChatPanel variant="page" className="h-full" />
+          <Suspense fallback={<LoadingFallback />}>
+            <EmiChatPanel variant="page" className="h-full" />
+          </Suspense>
         </div>
       </div>
     </div>
