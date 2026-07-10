@@ -58,6 +58,8 @@ import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { usePageBreadcrumbs } from "../context/BreadcrumbContext";
 import { slugifyPathSegment } from "../lib/seoHelpers";
 import { StudioWrap } from "../components/studio/StudioWrap";
+import { useStudioEdit } from "../context/StudioEditContext";
+import { CreateSpotlightCampaignButton } from "../components/spotlight/cms/CreateSpotlightCampaignButton";
 import type { CatalogProductSizeGuide } from "../types/catalog";
 
 function hasActiveSizeGuide(sizeGuide?: CatalogProductSizeGuide | null): boolean {
@@ -383,6 +385,7 @@ export function ProductDetailPage() {
   }, []);
 
   const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, isLoggedIn, currentUser } = useGlobalState();
+  const { editMode: studioEditMode } = useStudioEdit();
 
   const productList = allProducts.length > 0 ? allProducts : PRODUCTS;
   const brandList = allBrands.length > 0 ? allBrands : BRANDS;
@@ -985,6 +988,19 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
+      {studioEditMode && isLoggedIn && (
+        <div className="sticky top-0 z-[110] bg-[#1A1D4E] border-b border-white/10 px-4 py-3">
+          <div className="max-w-[1080px] mx-auto flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70 italic">
+              Product Studio
+            </p>
+            <CreateSpotlightCampaignButton
+              productId={String(product?.catalogId ?? product?.id ?? '')}
+              brandId={product?.brand ? String(product.brand) : undefined}
+            />
+          </div>
+        </div>
+      )}
       {/* Continuous Hero Wrapper with Unified Choosify Gradient */}
       <div
         ref={productHeroRef}

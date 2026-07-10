@@ -23,7 +23,8 @@ import {
   ShieldCheck,
   TrendingUp,
   Filter,
-  X
+  X,
+  Megaphone,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard } from '../context/DashboardContext';
@@ -900,6 +901,7 @@ export function DashboardPage() {
     { id: 'recently-viewed', label: `Recently Viewed (${recentlyViewed.length})`, icon: Clock },
     { id: 'saved-recommendations', label: `Saved Guides (${savedGuides.length})`, icon: Bookmark },
     { id: 'messages', label: `Messages${threads.some(t => t.unread) ? ` (${threads.filter(t => t.unread).length} unread)` : ''}`, icon: MessageSquare, href: '/messages' },
+    { id: 'spotlight-campaigns', label: 'Spotlight Campaigns', icon: Megaphone, href: '/marketing/spotlight' },
     { id: 'my-reviews', label: 'My Reviews', icon: Star },
     { id: 'settings', label: 'Profile Settings', icon: Settings },
   ];
@@ -909,7 +911,7 @@ export function DashboardPage() {
   );
 
   const accountItems = menuItems.filter(item => 
-    ['messages', 'my-reviews', 'settings'].includes(item.id)
+    ['messages', 'spotlight-campaigns', 'my-reviews', 'settings'].includes(item.id)
   );
 
   const renderContent = () => {

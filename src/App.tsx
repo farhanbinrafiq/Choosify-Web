@@ -57,6 +57,9 @@ const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ defa
 const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
 const EmiPage = lazy(() => import('./pages/EmiPage').then(m => ({ default: m.EmiPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const MarketingLayout = lazy(() => import('./pages/marketing/MarketingLayout').then(m => ({ default: m.MarketingLayout })));
+const SpotlightCampaignsPage = lazy(() => import('./pages/marketing/SpotlightCampaignsPage').then(m => ({ default: m.SpotlightCampaignsPage })));
+const SpotlightCampaignEditorPage = lazy(() => import('./pages/marketing/SpotlightCampaignEditorPage').then(m => ({ default: m.SpotlightCampaignEditorPage })));
 
 
 
@@ -174,6 +177,11 @@ function AppContent() {
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />
             <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
+            <Route path="/marketing" element={<ProtectedRoute><MarketingLayout /></ProtectedRoute>}>
+              <Route path="spotlight" element={<SpotlightCampaignsPage />} />
+              <Route path="spotlight/new" element={<SpotlightCampaignEditorPage />} />
+              <Route path="spotlight/:campaignId" element={<SpotlightCampaignEditorPage />} />
+            </Route>
             <Route path="/messages" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/messages/:threadId" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/profile/orders" element={<ProtectedRoute><PageWrapper><CustomerOrdersPage /></PageWrapper></ProtectedRoute>} />
