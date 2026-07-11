@@ -8,6 +8,8 @@ import {
   CHOOSIFY_ANNOUNCEMENTS_WELCOME,
   formatAnnouncementBody,
 } from '../lib/announcements';
+import type { CustomerAddress } from '../lib/address/addressTypes';
+import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from '../lib/address/addressUtils';
 
 export interface MessageThread {
   id: string;
@@ -95,6 +97,13 @@ interface DashboardContextType {
   setCampaigns: React.Dispatch<React.SetStateAction<Campaign[]>>;
   customOverviews: CustomOverview[];
   setCustomOverviews: React.Dispatch<React.SetStateAction<CustomOverview[]>>;
+  customerAddresses: CustomerAddress[];
+  setCustomerAddresses: React.Dispatch<React.SetStateAction<CustomerAddress[]>>;
+  defaultCustomerAddress?: CustomerAddress;
+  addCustomerAddress: (address: CustomerAddress) => void;
+  updateCustomerAddress: (address: CustomerAddress) => void;
+  deleteCustomerAddress: (id: string) => void;
+  setDefaultCustomerAddress: (id: string) => void;
   removeSavedProduct: (id: number) => void;
   removeSavedBrand: (id: number) => void;
   toggleLoveBrand: (brand: any) => void;
@@ -127,6 +136,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [lovedBrands, setLovedBrands] = useState<any[]>(() => readStoredArray('choosify_loved_brands'));
   const [followedBrands, setFollowedBrands] = useState<any[]>(() => readStoredArray('choosify_followed_brands'));
   const [recentlyViewed, setRecentlyViewed] = useState<any[]>(() => readStoredArray('choosify_recently_viewed'));
+  const [customerAddresses, setCustomerAddresses] = useState<CustomerAddress[]>(() =>
+    normalizeDefaultAddress(readStoredArray(ADDRESS_STORAGE_KEY) as CustomerAddress[]),
+  );
 
   const [savedGuides, setSavedGuides] = useState<any[]>(() => {
     try {
@@ -462,6 +474,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   }, [recentlyViewed]);
 
   useEffect(() => {
+    localStorage.setItem(ADDRESS_STORAGE_KEY, JSON.stringify(customerAddresses));
+  }, [customerAddresses]);
+
+  useEffect(() => {
     localStorage.setItem('choosify_saved_guides', JSON.stringify(savedGuides));
   }, [savedGuides]);
 
@@ -495,6 +511,43 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
             : 'Platform Update';
     appendAnnouncementMessage(formatAnnouncementBody(message, titleVal));
   }, [appendAnnouncementMessage]);
+
+  const addCustomerAddress = useCallback((address: CustomerAddress) => {
+    setCustomerAddresses((prev) => {
+      const nextAddress = { ...address, isDefault: address.isDefault || prev.length === 0 };
+      const next = nextAddress.isDefault
+        ? prev.map((item) => ({ ...item, isDefault: false })).concat(nextAddress)
+        : prev.concat(nextAddress);
+      return normalizeDefaultAddress(next);
+    });
+    toast.success('Address saved to your address book');
+  }, []);
+
+  const updateCustomerAddress = useCallback((address: CustomerAddress) => {
+    setCustomerAddresses((prev) => {
+      const next = prev.map((item) =>
+        item.id === address.id
+          ? { ...address, isDefault: address.isDefault || item.isDefault }
+          : address.isDefault
+            ? { ...item, isDefault: false }
+            : item,
+      );
+      return normalizeDefaultAddress(next);
+    });
+    toast.success('Address updated');
+  }, []);
+
+  const deleteCustomerAddress = useCallback((id: string) => {
+    setCustomerAddresses((prev) => normalizeDefaultAddress(prev.filter((item) => item.id !== id)));
+    toast.success('Address deleted');
+  }, []);
+
+  const setDefaultCustomerAddress = useCallback((id: string) => {
+    setCustomerAddresses((prev) => prev.map((item) => ({ ...item, isDefault: item.id === id })));
+    toast.success('Default address updated');
+  }, []);
+
+  const defaultCustomerAddress = getDefaultAddress(customerAddresses);
 
   // Ensure announcements thread exists and migrate legacy notification records once
   useEffect(() => {
@@ -744,6 +797,13 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       reviews, setReviews,
       campaigns, setCampaigns,
       customOverviews, setCustomOverviews,
+      customerAddresses,
+      setCustomerAddresses,
+      defaultCustomerAddress,
+      addCustomerAddress,
+      updateCustomerAddress,
+      deleteCustomerAddress,
+      setDefaultCustomerAddress,
       removeSavedProduct,
       removeSavedBrand,
       toggleLoveBrand,

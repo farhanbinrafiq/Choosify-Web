@@ -10,6 +10,7 @@ import { type SuggestionItem } from './search/searchTypes';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { resolveSpotlightExperience } from '../utils/spotlightContentResolver';
+import { spotlightContentHref } from '../lib/spotlight/content';
 import { getAllBrandPosts } from '../lib/brandPosts';
 
 interface GlobalSearchBarProps {
@@ -276,7 +277,7 @@ export function GlobalSearchBar({
         type: 'guide' as const,
         title: g.title,
         subtitle: g.category ?? 'Buying guide',
-        route: `/guides/${g.id}`,
+        route: spotlightContentHref(String((g as { slug?: string }).slug ?? g.id)),
         badge: 'Guide',
       }));
 

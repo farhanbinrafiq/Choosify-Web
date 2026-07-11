@@ -97,12 +97,20 @@ type EmiChatPanelProps = {
   onClose?: () => void;
   className?: string;
   variant?: 'panel' | 'page';
+  seedPrompt?: string;
 };
 
-export function EmiChatPanel({ onClose, className, variant = 'panel' }: EmiChatPanelProps) {
+export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt }: EmiChatPanelProps) {
   const { messages, isLoading, sendMessage, clearChat } = useEmiChat();
   const [draft, setDraft] = useState('');
   const chatRef = useRef<HTMLDivElement>(null);
+  const seededRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!seedPrompt || seededRef.current === seedPrompt) return;
+    seededRef.current = seedPrompt;
+    void sendMessage(seedPrompt);
+  }, [seedPrompt, sendMessage]);
 
   useEffect(() => {
     const el = chatRef.current;

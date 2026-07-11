@@ -45,6 +45,7 @@ export function FloatingOverlays() {
 
   // Active floating panel state: cart preview, messages preview, or Emi
   const [activePanel, setActivePanel] = useState<'cart' | 'messages' | 'emi' | null>(null);
+  const [emiSeedPrompt, setEmiSeedPrompt] = useState<string | undefined>();
   const [filterOpen, setFilterOpen] = useState(false);
   const filterDrawerRef = useRef<HTMLDivElement>(null);
 
@@ -80,6 +81,16 @@ export function FloatingOverlays() {
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onOpenEmi = (e: Event) => {
+      const detail = (e as CustomEvent<{ prompt?: string }>).detail;
+      setEmiSeedPrompt(detail?.prompt);
+      setActivePanel('emi');
+    };
+    window.addEventListener('choosify:open-emi', onOpenEmi);
+    return () => window.removeEventListener('choosify:open-emi', onOpenEmi);
   }, []);
 
   const scrollToTop = () => {
@@ -308,7 +319,7 @@ export function FloatingOverlays() {
             )}
             id="floating-emi-drawer"
           >
-            <EmiChatPanel onClose={() => setActivePanel(null)} />
+            <EmiChatPanel onClose={() => setActivePanel(null)} seedPrompt={emiSeedPrompt} />
           </motion.div>
         )}
 

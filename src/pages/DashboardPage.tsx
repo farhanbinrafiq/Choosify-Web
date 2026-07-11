@@ -25,6 +25,11 @@ import {
   Filter,
   X,
   Megaphone,
+  Package,
+  BarChart3,
+  Flame,
+  MapPin,
+  Menu,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard } from '../context/DashboardContext';
@@ -38,7 +43,11 @@ import { CHOOSIFY_ANNOUNCEMENTS_THREAD_ID } from '../lib/announcements';
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { PublicReviewCard } from '../components/PublicReviewCard';
+import { AddressBookManager } from '../components/address/AddressBookManager';
 import toast from 'react-hot-toast';
+import { toPlatformRole } from '../lib/platform/roles';
+import { getDashboardNavForRole, isDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
+import { SellerWorkspaceSection } from './ReviewDetailPage';
 
 // Hex Colors as per instruction
 const COLORS = {
@@ -705,137 +714,214 @@ const NotificationsSection = () => {
   );
 };
 
-const SettingsSection = () => {
+const SETTINGS_TABS = [
+  { id: 'personal', label: 'Personal Information' },
+  { id: 'addresses', label: 'Addresses' },
+  { id: 'security', label: 'Security' },
+  { id: 'notifications', label: 'Notifications' },
+  { id: 'privacy', label: 'Privacy' },
+] as const;
+
+type SettingsSubTab = (typeof SETTINGS_TABS)[number]['id'];
+
+const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: SettingsSubTab }) => {
   const { currentUser, setCurrentUser } = useGlobalState();
   const [name, setName] = useState(currentUser?.name || '');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
-  const [address, setAddress] = useState(currentUser?.address || '');
+  const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>(initialSubTab);
+
+  useEffect(() => {
+    setSettingsSubTab(initialSubTab);
+  }, [initialSubTab]);
 
   useEffect(() => {
     if (currentUser) {
       setName(currentUser.name || '');
       setEmail(currentUser.email || '');
       setPhone(currentUser.phone || '');
-      setAddress(currentUser.address || '');
     }
   }, [currentUser]);
 
   const handleSave = () => {
-    setCurrentUser({ ...currentUser, name, email, phone, address });
-    localStorage.setItem('choosify_user_profile', JSON.stringify({ name, email, phone, address }));
+    setCurrentUser({ ...currentUser, name, email, phone });
+    localStorage.setItem('choosify_user_profile', JSON.stringify({ name, email, phone }));
     toast.success('Profile settings updated successfully');
   };
 
   return (
-    <div className="max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
-       <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Profile <span className="text-[#E8500A]">Master</span></h2>
-            <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Configure your discovery experience</p>
-          </div>
-          <button 
+    <div className="max-w-6xl space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div className="text-left">
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">
+            Profile <span className="text-[#E8500A]">Settings</span>
+          </h2>
+          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">
+            Account center — personal info, addresses, security &amp; preferences
+          </p>
+        </div>
+        {settingsSubTab === 'personal' && (
+          <button
             onClick={handleSave}
             className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
           >
             Save Changes
           </button>
-       </div>
+        )}
+      </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="flex flex-wrap gap-2 border-b border-[#e8edf2] pb-1">
+        {SETTINGS_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setSettingsSubTab(tab.id)}
+            className={cn(
+              'min-h-[44px] px-4 py-2 text-[10px] font-black uppercase tracking-wider rounded-t-lg border-b-2 transition-colors',
+              settingsSubTab === tab.id
+                ? 'border-[#E8500A] text-[#E8500A] bg-[#FFF0E8]/40'
+                : 'border-transparent text-gray-400 hover:text-[#1a1a2e]',
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {settingsSubTab === 'personal' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="space-y-8">
-             <div className="flex flex-col items-center p-8 bg-white border border-[#e8edf2] rounded-[5px] relative overflow-hidden group shadow-sm">
-                <div className="absolute inset-0 bg-gradient-to-b from-[#E8500A]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative w-32 h-32 mb-6 cursor-pointer group/avatar">
-                   <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-full h-full rounded-full object-cover border-4 border-[#E8500A]/30 transition-all group-hover/avatar:border-navy" alt="Profile" />
-                   <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
-                      <Plus className="text-white" size={32} />
-                   </div>
+            <div className="flex flex-col items-center p-8 bg-white border border-[#e8edf2] rounded-[5px] relative overflow-hidden group shadow-sm">
+              <div className="absolute inset-0 bg-gradient-to-b from-[#E8500A]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative w-32 h-32 mb-6 cursor-pointer group/avatar">
+                <img
+                  src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png"
+                  className="w-full h-full rounded-full object-cover border-4 border-[#E8500A]/30 transition-all group-hover/avatar:border-navy"
+                  alt="Profile"
+                />
+                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                  <Plus className="text-white" size={32} />
                 </div>
-                <h4 className="text-xl font-black text-navy italic uppercase mb-1">{name}</h4>
-                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator â€¢ ID: 89BD-001</p>
               </div>
+              <h4 className="text-xl font-black text-navy italic uppercase mb-1">{name}</h4>
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator</p>
+            </div>
 
-             <div className="space-y-6">
-                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Basic Intel</h3>
-                <div className="space-y-4">
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Full Display Name</label>
-                      <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Your full name"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Email Address</label>
-                      <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="your@email.com"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Phone Number</label>
-                      <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+880 1XXX-XXXXXX"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Delivery Address</label>
-                      <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        placeholder="Your address, Dhaka, Bangladesh"
-                      />
-                   </div>
+            <div className="space-y-6">
+              <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Basic Intel</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">
+                    Full Display Name
+                  </label>
+                  <input
+                    className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your full name"
+                  />
                 </div>
-             </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">
+                    Email Address
+                  </label>
+                  <input
+                    className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">
+                    Phone Number
+                  </label>
+                  <input
+                    className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+880 1XXX-XXXXXX"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-8">
-             <div className="space-y-6">
-                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Notification Matrix</h3>
-                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-8 space-y-6 shadow-sm">
-                   {[
-                     { label: 'Sale Alerts', desc: 'When your saved product goes on flash sale', checked: true },
-                     { label: 'Expert Tips', desc: 'Weekly curated guides for your categories', checked: true },
-                     { label: 'Price Drops', desc: 'Whenever a brand lowers price beyond 20%', checked: false },
-                     { label: 'Inbox Direct', desc: 'Direct messages from verified sellers', checked: true }
-                   ].map((item, i) => (
-                     <div key={i} className="flex items-center justify-between gap-6 group">
-                        <div className="flex-1">
-                           <h5 className="text-[11px] font-black text-navy uppercase italic tracking-tighter mb-1">{item.label}</h5>
-                           <p className="text-[9px] font-bold text-gray-500 italic uppercase">{item.desc}</p>
-                        </div>
-                        <button className={cn(
-                          "w-12 h-6 rounded-full transition-all relative p-1",
-                          item.checked ? "bg-[#059669]" : "bg-gray-200"
-                        )}>
-                           <div className={cn("w-4 h-4 rounded-full bg-white transition-all shadow-md", item.checked ? "translate-x-6" : "translate-x-0")} />
-                        </button>
-                     </div>
-                   ))}
-                </div>
-             </div>
-
-             <div className="space-y-6">
-                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Security Zone</h3>
-                <button className="w-full py-4 bg-white border border-gray-200 rounded-lg text-[10px] font-black text-navy uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-3 cursor-pointer shadow-sm">
-                   <ShieldCheck size={16} className="text-[#E8500A]" /> Reset Multi-Factor Auth
-                </button>
-                <button className="w-full py-4 bg-red-50 border border-red-100 rounded-lg text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all cursor-pointer">
-                   Deactivate Curator Account
-                </button>
-             </div>
+            <div className="space-y-6">
+              <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">
+                Quick Links
+              </h3>
+              <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 space-y-3 shadow-sm">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                  Manage delivery locations from the Addresses tab or sidebar menu.
+                </p>
+              </div>
+            </div>
           </div>
-       </div>
+        </div>
+      )}
+
+      {settingsSubTab === 'addresses' && <AddressBookManager embedded />}
+
+      {settingsSubTab === 'security' && (
+        <div className="space-y-6 max-w-xl">
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Security Zone</h3>
+          <button className="w-full py-4 bg-white border border-gray-200 rounded-lg text-[10px] font-black text-navy uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-3 cursor-pointer shadow-sm min-h-[44px]">
+            <ShieldCheck size={16} className="text-[#E8500A]" /> Reset Multi-Factor Auth
+          </button>
+          <button className="w-full py-4 bg-red-50 border border-red-100 rounded-lg text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all cursor-pointer min-h-[44px]">
+            Deactivate Curator Account
+          </button>
+        </div>
+      )}
+
+      {settingsSubTab === 'notifications' && (
+        <div className="space-y-6 max-w-2xl">
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Notification Matrix</h3>
+          <div className="bg-white border border-[#e8edf2] rounded-[5px] p-8 space-y-6 shadow-sm">
+            {[
+              { label: 'Sale Alerts', desc: 'When your saved product goes on flash sale', checked: true },
+              { label: 'Expert Tips', desc: 'Weekly curated guides for your categories', checked: true },
+              { label: 'Price Drops', desc: 'Whenever a brand lowers price beyond 20%', checked: false },
+              { label: 'Inbox Direct', desc: 'Direct messages from verified sellers', checked: true },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center justify-between gap-6 group">
+                <div className="flex-1 text-left">
+                  <h5 className="text-[11px] font-black text-navy uppercase italic tracking-tighter mb-1">
+                    {item.label}
+                  </h5>
+                  <p className="text-[9px] font-bold text-gray-500 italic uppercase">{item.desc}</p>
+                </div>
+                <button
+                  type="button"
+                  className={cn(
+                    'w-12 h-6 rounded-full transition-all relative p-1 min-h-[44px] min-w-[48px] flex items-center',
+                    item.checked ? 'bg-[#059669]' : 'bg-gray-200',
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'w-4 h-4 rounded-full bg-white transition-all shadow-md',
+                      item.checked ? 'translate-x-6' : 'translate-x-0',
+                    )}
+                  />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {settingsSubTab === 'privacy' && (
+        <div className="max-w-2xl bg-white border border-[#e8edf2] rounded-[5px] p-8 shadow-sm text-left">
+          <h3 className="text-sm font-black italic uppercase tracking-tight text-[#1a1a2e] mb-2">Privacy</h3>
+          <p className="text-[11px] text-gray-500 leading-relaxed">
+            Control how your browsing activity and profile data are used across Choosify. Privacy controls
+            will expand in a future release.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
@@ -844,7 +930,7 @@ const SettingsSection = () => {
 // --- MAIN PAGE ---
 
 export function DashboardPage() {
-  const { setIsLoggedIn } = useGlobalState();
+  const { setIsLoggedIn, currentUser } = useGlobalState();
   const { 
     savedProducts, 
     savedBrands, 
@@ -860,20 +946,101 @@ export function DashboardPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const platformRole = toPlatformRole(currentUser.role);
+  const dashboardNav = getDashboardNavForRole(platformRole);
+
+  const DASHBOARD_ICONS: Record<string, any> = {
+    LayoutDashboard,
+    Heart,
+    Store,
+    CheckCircle2,
+    Clock,
+    Bookmark,
+    ShoppingBag,
+    Package,
+    Send,
+    TrendingUp,
+    Megaphone,
+    BarChart3,
+    Sparkles: Star,
+    Users: MessageSquare,
+    Flame,
+    ShieldCheck: CheckCircle2,
+    MessageSquare,
+    Star,
+    Settings,
+    MapPin,
+  };
+
+  const formatNavLabel = (item: { id: string; label: string }) => {
+    if (item.id === 'saved-products') return `Saved Products (${savedProducts.length})`;
+    if (item.id === 'saved-brands') return `Saved Brands (${savedBrands.length})`;
+    if (item.id === 'loved-brands') return `Loved Brands (${lovedBrands.length})`;
+    if (item.id === 'followed-brands') return `Following (${followedBrands.length})`;
+    if (item.id === 'recently-viewed') return `Browsing History (${recentlyViewed.length})`;
+    if (item.id === 'saved-recommendations') return `Saved Spotlight (${savedGuides.length})`;
+    if (item.id === 'messages') {
+      const unread = threads.filter((t) => t.unread).length;
+      return unread ? `Messages (${unread} unread)` : 'Messages';
+    }
+    return item.label;
+  };
+
+  const mapNavItems = (items: typeof dashboardNav.platform) =>
+    items.map((item) => ({
+      id: item.id,
+      label: formatNavLabel(item),
+      icon: DASHBOARD_ICONS[item.icon] ?? LayoutDashboard,
+      href: item.href,
+    }));
+
+  const controlItems = mapNavItems(dashboardNav.platform);
+  const workspaceItems = mapNavItems(dashboardNav.workspace);
+  const accountItems = mapNavItems(dashboardNav.account);
+
   const [activeTab, setActiveTab] = useState('overview');
+  const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>('personal');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     // TODO: addToRecentlyViewed called from ProductDetailPage â€” see Prompt 6
   }, []);
 
-  const REMOVED_TABS = new Set(['my-comparisons', 'admin-campaigns', 'admin-overviews', 'notifications', 'cms-studios']);
+  const REMOVED_TABS = new Set([
+    'my-comparisons',
+    'admin-campaigns',
+    'admin-overviews',
+    'notifications',
+    'cms-studios',
+    'spotlight-campaigns',
+  ]);
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const queryTab = params.get('tab');
+    if (queryTab && !REMOVED_TABS.has(queryTab) && isDashboardTabAllowed(queryTab, platformRole)) {
+      setActiveTab(queryTab);
+      if (queryTab === 'settings') {
+        const sub = params.get('section');
+        if (sub === 'addresses' || sub === 'personal' || sub === 'security' || sub === 'notifications' || sub === 'privacy') {
+          setSettingsSubTab(sub);
+        }
+      }
+      return;
+    }
+
     if (location.state?.activeTab) {
       const tab = location.state.activeTab as string;
-      setActiveTab(REMOVED_TABS.has(tab) ? 'overview' : tab);
+      if (REMOVED_TABS.has(tab) || !isDashboardTabAllowed(tab, platformRole)) {
+        setActiveTab('overview');
+      } else {
+        setActiveTab(tab);
+      }
+      if (location.state?.settingsSubTab) {
+        setSettingsSubTab(location.state.settingsSubTab as SettingsSubTab);
+      }
     }
-  }, [location.state]);
+  }, [location.state, location.search, platformRole]);
 
   useEffect(() => {
     if (activeTab === 'messages') {
@@ -892,29 +1059,11 @@ export function DashboardPage() {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
   };
 
-  const menuItems: Array<{ id: string; label: string; icon: any; href?: string }> = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'saved-products', label: `Saved Products (${savedProducts.length})`, icon: Heart },
-    { id: 'saved-brands', label: `Saved Brands (${savedBrands.length})`, icon: Store },
-    { id: 'loved-brands', label: `Loved Brands (${lovedBrands.length})`, icon: Heart },
-    { id: 'followed-brands', label: `Followed Brands (${followedBrands.length})`, icon: CheckCircle2 },
-    { id: 'recently-viewed', label: `Recently Viewed (${recentlyViewed.length})`, icon: Clock },
-    { id: 'saved-recommendations', label: `Saved Guides (${savedGuides.length})`, icon: Bookmark },
-    { id: 'messages', label: `Messages${threads.some(t => t.unread) ? ` (${threads.filter(t => t.unread).length} unread)` : ''}`, icon: MessageSquare, href: '/messages' },
-    { id: 'spotlight-campaigns', label: 'Spotlight Campaigns', icon: Megaphone, href: '/marketing/spotlight' },
-    { id: 'my-reviews', label: 'My Reviews', icon: Star },
-    { id: 'settings', label: 'Profile Settings', icon: Settings },
-  ];
-
-  const controlItems = menuItems.filter(item => 
-    ['overview', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations'].includes(item.id)
-  );
-
-  const accountItems = menuItems.filter(item => 
-    ['messages', 'spotlight-campaigns', 'my-reviews', 'settings'].includes(item.id)
-  );
-
   const renderContent = () => {
+    if (!isDashboardTabAllowed(activeTab, platformRole)) {
+      return <OverviewSection onTabChange={setActiveTab} />;
+    }
+
     switch (activeTab) {
       // Retail Tabs
       case 'overview': return <OverviewSection onTabChange={setActiveTab} />;
@@ -941,6 +1090,24 @@ export function DashboardPage() {
           </Link>
         </div>
       );
+      case 'orders':
+        navigate('/profile/orders');
+        return null;
+      case 'seller-products':
+      case 'seller-orders':
+      case 'spotlight-requests':
+      case 'seller-performance':
+      case 'creator-studio':
+      case 'creator-collaborations':
+      case 'creator-spotlight':
+      case 'mod-queues':
+      case 'mod-approvals':
+        return <SellerWorkspaceSection tab={activeTab} />;
+      case 'brand-spotlight':
+      case 'brand-analytics':
+      case 'admin-marketing':
+        navigate('/marketing/studio');
+        return null;
       case 'my-reviews': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
             <div>
@@ -980,20 +1147,80 @@ export function DashboardPage() {
             </div>
         </div>
       );
-      case 'settings': return <SettingsSection />;
+      case 'settings':
+        return <SettingsSection initialSubTab={settingsSubTab} />;
+      case 'addresses':
+        return <AddressBookManager />;
 
       default: return <OverviewSection onTabChange={setActiveTab} />;
+    }
+  };
+
+  const allNavItems = [...controlItems, ...workspaceItems, ...accountItems];
+
+  const handleNavClick = (item: { id: string; href?: string }) => {
+    setMobileNavOpen(false);
+    if (item.href) {
+      navigate(item.href);
+    } else {
+      setActiveTab(item.id);
     }
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed text-[#1a1a2e]">
       {/* Mobile Top Header */}
-      <div className="lg:hidden p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-50">
+      <div className="lg:hidden p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-50">
         <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border border-gray-200 cursor-pointer">
           <ArrowLeft size={20} />
         </button>
+        <p className="text-[10px] font-black uppercase tracking-wider text-[#1a1a2e] truncate px-2">
+          {allNavItems.find((item) => item.id === activeTab)?.label ?? 'Dashboard'}
+        </p>
+        <button
+          type="button"
+          onClick={() => setMobileNavOpen(true)}
+          className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border border-gray-200 cursor-pointer"
+          aria-label="Open dashboard menu"
+        >
+          <Menu size={20} />
+        </button>
       </div>
+
+      {mobileNavOpen && (
+        <div className="lg:hidden fixed inset-0 z-[80]">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMobileNavOpen(false)}
+            aria-label="Close menu"
+          />
+          <div className="absolute inset-y-0 left-0 w-[min(100%,320px)] bg-[#1a1a2e] text-white shadow-2xl overflow-y-auto">
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+              <span className="text-sm font-black uppercase italic tracking-tight">Dashboard Menu</span>
+              <button type="button" onClick={() => setMobileNavOpen(false)} className="text-white/60 hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
+            <nav className="py-4">
+              {allNavItems.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleNavClick(item)}
+                  className={cn(
+                    'w-full flex items-center gap-3 px-6 py-3 text-left text-[11px] font-black uppercase tracking-wider',
+                    activeTab === item.id ? 'text-[#E8500A] bg-white/5' : 'text-white/70 hover:text-white hover:bg-white/5',
+                  )}
+                >
+                  <item.icon size={16} />
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-1">
         {/* Sidebar Desktop */}
@@ -1030,6 +1257,27 @@ export function DashboardPage() {
                 }}
               />
             ))}
+
+            {workspaceItems.length > 0 && (
+              <>
+                <div className="mt-12 px-10 text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-4 italic">Workspace</div>
+                {workspaceItems.map((item) => (
+                  <SidebarItem
+                    key={item.id}
+                    icon={item.icon}
+                    label={item.label}
+                    active={activeTab === item.id}
+                    onClick={() => {
+                      if (item.href) {
+                        navigate(item.href);
+                      } else {
+                        setActiveTab(item.id);
+                      }
+                    }}
+                  />
+                ))}
+              </>
+            )}
             
             <div className="mt-12 px-10 text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-4 italic">Communication & Account</div>
             {accountItems.map((item) => (

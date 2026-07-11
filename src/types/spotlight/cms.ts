@@ -69,6 +69,8 @@ export interface SpotlightCampaignWizardDraft {
   cta: SpotlightCampaignCta;
   /** LE-005.4 merchandising engine state */
   merchandising?: SpotlightCampaignMerchandising;
+  /** LE-005 Phase 5.3 — block editor state (session/local only, not Firestore) */
+  experienceDraft?: import('./studio').SpotlightExperienceDraft;
 }
 
 export interface SpotlightCampaignListFilters {

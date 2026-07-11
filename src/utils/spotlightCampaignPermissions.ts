@@ -2,9 +2,15 @@ import type { UserRole } from '../types/schemas';
 import type { SpotlightCampaignActorRole } from '../types/spotlight/cms';
 import type { SpotlightCampaignStatus } from '../types/spotlight/lifecycle';
 
-export function mapUserRoleToCampaignActor(role: UserRole): SpotlightCampaignActorRole {
+export function mapUserRoleToCampaignActor(role: UserRole): SpotlightCampaignActorRole | null {
   if (role === 'admin') return 'admin';
-  return 'seller';
+  if (role === 'moderator') return 'moderator';
+  if (role === 'seller' || role === 'brand') return 'seller';
+  return null;
+}
+
+export function canActOnCampaigns(role: UserRole): boolean {
+  return mapUserRoleToCampaignActor(role) !== null;
 }
 
 export function canCreateCampaign(actor: SpotlightCampaignActorRole): boolean {

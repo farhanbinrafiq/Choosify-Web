@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -11,7 +11,7 @@ interface SpotlightHeroCarouselProps {
   setCarouselIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
-/** Provider-agnostic hero carousel — reused from Trending Brands visual design (CTO) */
+/** Provider-agnostic hero carousel ΓÇö reused from Trending Brands visual design (CTO) */
 export function SpotlightHeroCarousel({
   items,
   carouselIndex,

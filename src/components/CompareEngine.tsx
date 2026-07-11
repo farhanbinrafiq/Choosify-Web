@@ -10,6 +10,7 @@ import {
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { DragScrollContainer, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters, useDragScroll } from './FilterEngine';
+import { EmiComparePanel } from './emi/EmiComparePanel';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
@@ -1215,6 +1216,10 @@ export function CompareEngine() {
 
          {/* RIGHT COLUMN: DECISION INSIGHTS / AI ADVISOR */}
          <aside className="lg:sticky lg:top-36 flex flex-col gap-4">
+            <EmiComparePanel
+              compareLabels={(comparedProducts || []).map((p: { title?: string }) => p.title ?? 'Product')}
+              compareMode={compareMode}
+            />
             
             {/* 1. DECISION COGNITIVE ASSISTANT CARD */}
             <div className="choosify-dark-gradient rounded-[5px] border border-white/5 p-5 text-left relative overflow-hidden shadow-md">

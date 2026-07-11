@@ -7,7 +7,7 @@ const ITEMS = [
   { path: '/', label: 'Home', icon: Home },
   { path: '/categories', label: 'Categories', icon: LayoutGrid },
   { path: '/spotlight', label: 'Spotlight', icon: Flame },
-  { path: '/search', label: 'Discover', icon: Search },
+  { path: '/search', label: 'Search', icon: Search },
   { path: '/dashboard', label: 'Profile', icon: User },
 ];
 

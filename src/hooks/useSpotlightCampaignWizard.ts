@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { SpotlightCampaignWizardDraft } from '../types/spotlight/cms';
+import type { SpotlightExperienceDraft } from '../types/spotlight/studio';
 import type { SpotlightCampaignType } from '../types/spotlight/campaignTypes';
 import {
   clearWizardDraft,
@@ -53,5 +54,17 @@ export function useSpotlightCampaignWizard(campaignId?: string) {
     setDraft(defaultDraft());
   }, []);
 
-  return { draft, updateDraft, setStep, resetWizard, setDraft };
+  const setExperienceDraft = useCallback((experienceDraft: SpotlightExperienceDraft) => {
+    setDraft((prev) => ({ ...prev, experienceDraft }));
+  }, []);
+
+  return {
+    draft,
+    updateDraft,
+    setStep,
+    resetWizard,
+    setDraft,
+    experienceDraft: draft.experienceDraft,
+    setExperienceDraft,
+  };
 }

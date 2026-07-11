@@ -3,7 +3,8 @@ import type { SpotlightContent } from '../../../types/spotlight/experience/conte
 import { MediaRenderer } from '../../media/renderers/MediaRenderer';
 import { MediaPreview } from '../../media/renderers/MediaPreview';
 import { MediaPlaceholder } from '../../media/renderers/MediaPlaceholder';
-import { getHomepageSpotlightMediaProfile } from '../homepage/spotlightMediaProfile';
+import { getDisplayProfile, resolveProfileAspectRatio } from '../../media/types/displayProfile';
+import { resolveMediaPresentation } from '../../../lib/spotlight/experience/mediaPresentationRegistry';
 import { cn } from '../../../lib/utils';
 
 interface SpotlightContentMediaProps {
@@ -12,6 +13,8 @@ interface SpotlightContentMediaProps {
   onPreviewComplete?: () => void;
   className?: string;
   priority?: boolean;
+  /** Retain natural orientation — no forced crop */
+  naturalOrientation?: boolean;
 }
 
 export function SpotlightContentMedia({
@@ -20,15 +23,23 @@ export function SpotlightContentMedia({
   onPreviewComplete,
   className,
   priority,
+  naturalOrientation = true,
 }: SpotlightContentMediaProps) {
   const [previewing, setPreviewing] = useState(false);
   const [mediaError, setMediaError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const profile = getHomepageSpotlightMediaProfile();
+  const profile = getDisplayProfile('spotlight_feed');
+  const presentation = resolveMediaPresentation(content.media);
   const media = content.media;
   const reducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const aspectRatio = naturalOrientation
+    ? presentation.aspectRatio
+    : resolveProfileAspectRatio(profile, media!) ?? presentation.aspectRatio;
+  const objectFit = naturalOrientation ? presentation.objectFit : profile.objectFit;
+  const maxHeight = naturalOrientation ? presentation.maxHeight : profile.maxHeight;
 
   const startPreview = useCallback(() => {
     if (!media?.videoUrl || reducedMotion) return;
@@ -49,7 +60,10 @@ export function SpotlightContentMedia({
 
   if (content.live?.embedUrl && !media?.videoUrl) {
     return (
-      <div className={cn('relative w-full overflow-hidden rounded-[5px] bg-black', className)} style={{ aspectRatio: '16/9' }}>
+      <div
+        className={cn('relative w-full overflow-hidden rounded-[5px] bg-black', className)}
+        style={{ aspectRatio: '16/9', maxHeight }}
+      >
         <iframe
           src={content.live.embedUrl}
           title={content.headline}
@@ -66,7 +80,7 @@ export function SpotlightContentMedia({
       <MediaPlaceholder
         label={content.headline}
         className={cn('w-full', className)}
-        aspectRatio={profile.aspectRatio}
+        aspectRatio={aspectRatio.replace(' / ', '/')}
       />
     );
   }
@@ -75,7 +89,13 @@ export function SpotlightContentMedia({
     return (
       <MediaRenderer
         media={media}
-        profile={{ ...profile, priorityImage: priority }}
+        profile={{
+          ...profile,
+          priorityImage: priority,
+          aspectRatio,
+          maxHeight,
+          objectFit,
+        }}
         className={className}
         onError={() => setMediaError(true)}
       />
@@ -84,8 +104,8 @@ export function SpotlightContentMedia({
 
   return (
     <div
-      className={cn('relative w-full overflow-hidden bg-black rounded-[5px]', className)}
-      style={{ aspectRatio: profile.aspectRatio, maxHeight: profile.maxHeight }}
+      className={cn('relative w-full overflow-hidden bg-[#0a0a0a] rounded-[5px]', className)}
+      style={{ aspectRatio, maxHeight }}
       onMouseEnter={() => window.matchMedia('(hover: hover)').matches && startPreview()}
       onMouseLeave={() => window.matchMedia('(hover: hover)').matches && stopPreview()}
     >
@@ -99,7 +119,8 @@ export function SpotlightContentMedia({
       ) : (
         <video
           ref={videoRef}
-          className="w-full h-full object-cover"
+          className="w-full h-full"
+          style={{ objectFit }}
           src={media.videoUrl}
           poster={media.thumbnail}
           muted

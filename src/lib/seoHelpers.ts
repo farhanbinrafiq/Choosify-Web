@@ -68,6 +68,7 @@ export function resolveOgType(pathname: string): OgPageType {
   if (pathname.startsWith('/products/')) return 'product';
   if (
     pathname.startsWith('/guides/') ||
+    pathname.startsWith('/reviews/') ||
     pathname.startsWith('/blogs/') ||
     pathname.startsWith('/recommendations/')
   ) {
@@ -85,11 +86,12 @@ const SECTION_LABELS: Record<string, string> = {
   categories: 'Categories',
   deals: 'Deals',
   compare: 'Compare',
-  guides: 'Recommendations',
-  blogs: 'Recommendations',
-  recommendations: 'Recommendations',
+  guides: 'Discover & Learn',
+  blogs: 'Discover & Learn',
+  recommendations: 'Discover & Learn',
+  reviews: 'Review Details',
   creators: 'Creators',
-  search: 'Search',
+  search: 'Discover',
   'whats-on': 'Events',
   'brand-deals': 'Brand Deals',
   about: 'About Us',
@@ -159,7 +161,7 @@ export function buildBreadcrumbItems(
     const query = params.get('q');
     if (query && pathname.startsWith('/search')) {
       crumbs.push({
-        name: `Search: ${query}`,
+        name: `Discover: ${query}`,
         path: `${current}?q=${encodeURIComponent(query)}`,
       });
     }

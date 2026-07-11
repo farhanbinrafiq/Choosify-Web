@@ -17,6 +17,8 @@ import { getSpotlightContentCtaLabel } from '../types/spotlight/experience/cta';
 import type { SpotlightLiveConfig } from '../types/spotlight/experience/live';
 import { enrichContentWithDiscoveryScore } from './spotlightDiscoveryScore';
 import { listCampaignRecords } from '../services/spotlightCampaignStorage';
+import { creatorReviewHref, resolveContentHref } from '../lib/platform/contentRegistry';
+import { spotlightContentHref } from '../lib/spotlight/content';
 import {
   buildHomepageSpotlightCard,
   listHomepageSpotlightCampaigns,
@@ -194,9 +196,7 @@ export function campaignToSpotlightContent(
     isLive: campaign.campaignType === 'livestream',
     isVerified: true,
     ctaLabel: campaign.campaignType === 'livestream' ? 'Watch Live' : (card.ctaLabel || getSpotlightContentCtaLabel(contentType)),
-    href: campaign.campaignType === 'livestream'
-      ? `/spotlight/live/${campaign.campaignSlug}`
-      : `/spotlight/${campaign.campaignSlug}`,
+    href: spotlightContentHref(campaign.campaignSlug),
     publishedAt: campaign.createdAt,
     endsAt: campaign.schedule.endAt,
     popularityScore: campaign.campaignHealthScore ?? campaign.priority,
@@ -216,12 +216,11 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
     .map((id) => catalog.find((p) => p.id === String(id) || p.id === id))
     .filter(Boolean) as CatalogProduct[];
 
+  const slug = guide.slug || guide.id;
   const href =
     contentType === 'comparison'
       ? '/compare'
-      : contentType === 'recommendation'
-        ? `/recommendations/${guide.slug || guide.id}`
-        : `/guides/${guide.slug || guide.id}`;
+      : resolveContentHref(contentType, String(slug));
 
   return {
     contentId: `guide-${guide.id}`,
@@ -290,14 +289,14 @@ export function brandPostToSpotlightContent(post: BrandPost): SpotlightContent {
       featuredProductIds: (post.linkedProductIds ?? []).map(String),
       primaryCta: post.ctaUrl
         ? { label: post.ctaLabel ?? getSpotlightContentCtaLabel(contentType), href: post.ctaUrl }
-        : { label: getSpotlightContentCtaLabel(contentType), href: `/whats-on/${post.slug}` },
+        : { label: getSpotlightContentCtaLabel(contentType), href: spotlightContentHref(post.slug) },
     },
     badges: [contentType.replace('_', ' ')],
     isSponsored: post.sponsored,
     isLive: post.status === 'live',
     isVerified: true,
     ctaLabel: post.ctaLabel ?? getSpotlightContentCtaLabel(contentType),
-    href: `/whats-on/${post.slug}`,
+    href: spotlightContentHref(post.slug),
     publishedAt: post.publishedAt,
     endsAt: post.endDate,
     popularityScore: post.sponsored ? 80 : 50,
@@ -338,7 +337,7 @@ export function creatorToSpotlightContent(creator: Creator): SpotlightContent {
     isLive: false,
     isVerified: creator.score >= 75,
     ctaLabel: getSpotlightContentCtaLabel('creator_review'),
-    href: `/creators/${creator.id}`,
+    href: creatorReviewHref(String(creator.id)),
     publishedAt: new Date().toISOString(),
     popularityScore: creator.score,
   };
@@ -395,7 +394,20 @@ export function getSpotlightContentBySlug(
   slug: string,
   sources: SpotlightExperienceSources,
 ): SpotlightContent | undefined {
+  const all = resolveSpotlightExperience(sources);
+  const bySlug = all.find((c) => c.slug === slug);
+  if (bySlug) return bySlug;
+
+  if (slug.startsWith('creator-')) {
+    const creatorId = slug.replace('creator-', '');
+    return all.find((c) => c.sourceKind === 'creator' && c.sourceId === creatorId);
+  }
+
   const campaign = listCampaignRecords().find((c) => c.campaignSlug === slug);
   if (campaign) return campaignToSpotlightContent(campaign, sources.catalog, sources.brandLogos);
-  return resolveSpotlightExperience(sources).find((c) => c.slug === slug);
+
+  const guide = sources.guides.find((g) => String(g.slug || g.id) === slug || String(g.id) === slug);
+  if (guide) return guideToSpotlightContent(guide, sources.catalog);
+
+  return undefined;
 }

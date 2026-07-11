@@ -4,24 +4,35 @@ import { ChevronRight } from 'lucide-react';
 import type { SpotlightDiscoverSection } from '../../../types/spotlight/experience/content';
 import type { SpotlightImpressionCallbacks } from '../../../types/spotlight/homepage';
 import { PremiumCarousel } from '../../home/PremiumCarousel';
-import { SpotlightContentCard } from './SpotlightContentCard';
+import { SpotlightCardRenderer } from './SpotlightCardRenderer';
+import { SpotlightCommerceFeedGrid } from './SpotlightCommerceFeedGrid';
 import { SpotlightCollectionRow } from '../discovery/SpotlightCollectionCard';
+import { SpotlightLazySection } from './SpotlightLazySection';
 import type { SpotlightCollection } from '../../../types/spotlight/discovery/collections';
+import { sectionDefinition } from '../../../lib/spotlight/experience/sectionRegistry';
+import { CONTENT_DENSITY_REGISTRY } from '../../../lib/spotlight/experience/contentDensityRegistry';
 
 interface SpotlightDiscoverSectionBlockProps {
   section: SpotlightDiscoverSection;
   impressionCallbacks?: SpotlightImpressionCallbacks;
   collections?: SpotlightCollection[];
+  lazyLoad?: boolean;
 }
 
 export function SpotlightDiscoverSectionBlock({
   section,
   impressionCallbacks,
   collections = [],
+  lazyLoad = true,
 }: SpotlightDiscoverSectionBlockProps) {
-  if (!section.items.length) return null;
+  if (!section.items.length && section.layout !== 'collection_row') return null;
 
-  return (
+  const def = sectionDefinition(section.id);
+  const density = def?.defaultDensity ?? 'standard';
+  const densityDef = CONTENT_DENSITY_REGISTRY[density];
+  const cardVariant = density === 'featured' ? 'hero' : density === 'compact' ? 'compact' : 'default';
+
+  const body = (
     <section className="mb-10" aria-labelledby={`spotlight-section-${section.id}`}>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-4 pb-3 border-b border-gray-100">
         <div className="text-left">
@@ -37,29 +48,33 @@ export function SpotlightDiscoverSectionBlock({
             to={section.viewAllHref}
             className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#E8500A] hover:underline shrink-0"
           >
-            View All <ChevronRight size={14} />
+            View More <ChevronRight size={14} />
           </Link>
         )}
       </div>
 
       {section.layout === 'hero' && (
-        <SpotlightContentCard
+        <SpotlightCardRenderer
           content={section.items[0]}
           impressionCallbacks={impressionCallbacks}
           variant="hero"
+          sectionLayout="hero"
+          feedMode="hero"
         />
       )}
 
       {section.layout === 'carousel' && (
         <PremiumCarousel
           items={section.items.map((item) => ({ ...item, id: item.contentId }))}
-          itemWidth={280}
+          itemWidth={densityDef.cardWidth}
           gap={16}
           renderCard={(item) => (
-            <SpotlightContentCard
+            <SpotlightCardRenderer
               content={item}
               impressionCallbacks={impressionCallbacks}
-              variant="compact"
+              variant={cardVariant === 'hero' ? 'compact' : cardVariant}
+              sectionLayout="carousel"
+              feedMode="carousel"
               className="w-full"
             />
           )}
@@ -67,25 +82,23 @@ export function SpotlightDiscoverSectionBlock({
       )}
 
       {section.layout === 'grid' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {section.items.map((item) => (
-            <SpotlightContentCard
-              key={item.contentId}
-              content={item}
-              impressionCallbacks={impressionCallbacks}
-            />
-          ))}
-        </div>
+        <SpotlightCommerceFeedGrid
+          items={section.items}
+          impressionCallbacks={impressionCallbacks}
+          sectionLayout="grid"
+        />
       )}
 
       {section.layout === 'list' && (
         <ul className="divide-y divide-gray-100 border border-[#e8edf2] rounded-[5px] overflow-hidden">
           {section.items.map((item) => (
             <li key={item.contentId} className="p-4 hover:bg-gray-50/50">
-              <SpotlightContentCard
+              <SpotlightCardRenderer
                 content={item}
                 impressionCallbacks={impressionCallbacks}
                 variant="compact"
+                sectionLayout="list"
+                feedMode="list"
               />
             </li>
           ))}
@@ -99,4 +112,10 @@ export function SpotlightDiscoverSectionBlock({
       )}
     </section>
   );
+
+  if (lazyLoad && def?.lazyLoad) {
+    return <SpotlightLazySection enabled>{body}</SpotlightLazySection>;
+  }
+
+  return body;
 }

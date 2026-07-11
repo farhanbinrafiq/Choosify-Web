@@ -1,144 +1,159 @@
-import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { PAGE_LISTING_SINGLE_SHELL, PAGE_MIDDLE_FEED } from '../lib/pageLayout';
+import { PageHeroBanner } from '../components/PageHeroBanner';
+import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
 import { useSpotlightExperience } from '../hooks/useSpotlightExperience';
 import { createSpotlightImpressionLogger } from '../hooks/useSpotlightImpression';
 import { useSpotlightHistory } from '../hooks/useSpotlightHistory';
-import {
-  SpotlightDiscoverSectionBlock,
-} from '../components/spotlight/experience';
 import { SpotlightEmptyState } from '../components/spotlight/homepage/SpotlightEmptyState';
-import {
-  SpotlightDiscoveryNav,
-  SpotlightPersonalizedRails,
-  SpotlightStoryRail,
-  SpotlightStoryViewer,
-  SpotlightUniversalFiltersPanel,
-} from '../components/spotlight/discovery';
-import { buildDemoStoryGroups } from '../utils/spotlightStory';
+import { SpotlightMixedFeed } from '../components/spotlight/feed/SpotlightMixedFeed';
+import { useGlobalState } from '../context/GlobalStateContext';
+import { contentTypesForTab } from '../lib/spotlight/content/contentTypeRegistry';
+import type { SpotlightContentTabId } from '../types/spotlight/discovery/navigation';
+import { listFollows, listSaves } from '../utils/spotlightUserSignals';
+import { useSpotlightFloatingFilters } from '../hooks/useSpotlightFloatingFilters';
+import { filterSpotlightFeedItems, SPOTLIGHT_FEED_VISIBLE_KEY } from '../utils/spotlightMixedFeed';
 
 export function SpotlightDiscoverPage() {
-  const {
-    sections,
-    filters,
-    setFilters,
-    hasContent,
-    allContent,
-    collections,
-    personalizedRails,
-  } = useSpotlightExperience();
+  const { allContent, filters, setFilters, hasContent } = useSpotlightExperience();
+  const { allCatalogProducts, siteConfig } = useGlobalState();
   const { recordView } = useSpotlightHistory(allContent);
-  const impressionCallbacks = useMemo(() => createSpotlightImpressionLogger(), []);
-  const storyGroups = useMemo(() => buildDemoStoryGroups(allContent), [allContent]);
-  const [storyOpen, setStoryOpen] = useState<number | null>(null);
+  const impressionCallbacks = useMemo(() => {
+    const base = createSpotlightImpressionLogger();
+    return {
+      ...base,
+      onClicked: (id: string) => {
+        base.onClicked?.(id);
+        const item = allContent.find((c) => c.sourceId === id || c.contentId === id);
+        if (item) recordView(item);
+      },
+    };
+  }, [allContent, recordView]);
+
+  const [searchParams] = useSearchParams();
+  const activeTab = (searchParams.get('tab') ?? 'featured') as SpotlightContentTabId;
+  const linkedProductId = searchParams.get('product');
+  const linkedBrandId = searchParams.get('brand');
+  const followedIds = useMemo(() => new Set(listFollows().map((f) => f.targetId)), []);
+  const savedIds = useMemo(() => new Set(listSaves().map((s) => s.contentId ?? s.targetId)), []);
   const [replayOnly, setReplayOnly] = useState(false);
   const [upcomingOnly, setUpcomingOnly] = useState(false);
 
-  const displaySections = useMemo(() => {
-    if (!replayOnly && !upcomingOnly) return sections;
-    return sections.map((s) => ({
-      ...s,
-      items: s.items.filter((item) => {
+  useSpotlightFloatingFilters({
+    filters,
+    setFilters,
+    activeTab,
+    replayOnly,
+    upcomingOnly,
+    onReplayToggle: () => setReplayOnly((v) => !v),
+    onUpcomingToggle: () => setUpcomingOnly((v) => !v),
+  });
+
+  useEffect(() => {
+    if (activeTab === 'featured' || activeTab === 'following' || activeTab === 'saved') return;
+    const types = contentTypesForTab(activeTab);
+    if (types.length) {
+      setFilters({ ...filters, contentTypes: types, liveOnly: activeTab === 'live' });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- tab preset
+  }, [activeTab]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem(SPOTLIGHT_FEED_VISIBLE_KEY);
+    } catch {
+      /* filter change reset */
+    }
+  }, [filters, activeTab, replayOnly, upcomingOnly]);
+
+  const feedItems = useMemo(() => {
+    let base = filterSpotlightFeedItems(allContent, filters, {
+      activeTab,
+      followedPublisherIds: followedIds,
+      savedContentIds: savedIds,
+    });
+    if (replayOnly || upcomingOnly) {
+      base = base.filter((item) => {
         if (replayOnly && item.live?.status !== 'replay' && item.live?.status !== 'ended') return false;
         if (upcomingOnly && item.live?.status !== 'upcoming') return false;
         return true;
-      }),
-    })).filter((s) => s.layout === 'collection_row' || s.items.length > 0);
-  }, [sections, replayOnly, upcomingOnly]);
+      });
+    }
+    if (linkedProductId) {
+      base = base.filter(
+        (item) =>
+          item.connections.productIds.some((id) => String(id) === linkedProductId) ||
+          item.commerce.featuredProductIds.some((id) => String(id) === linkedProductId),
+      );
+    }
+    if (linkedBrandId) {
+      base = base.filter((item) => item.connections.brandIds.some((id) => String(id) === linkedBrandId));
+    }
+    return base;
+  }, [allContent, filters, activeTab, followedIds, savedIds, replayOnly, upcomingOnly, linkedProductId, linkedBrandId]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <header className="mb-4 text-left">
-        <h1 className="text-2xl font-bold text-[#1a1a2e]">Spotlight</h1>
-        <p className="text-sm text-gray-500 mt-2 max-w-2xl">
-          Choosify&apos;s discovery home — endlessly browse campaigns, live sessions, creators, guides, and collections.
-        </p>
-      </header>
+    <div id="spotlight-root" className="flex flex-col min-h-screen bg-choosify-feed">
+      <PageHeroBanner pageKey="guides" />
+      <HeroMarqueeTicker pageKey="guides" siteConfig={siteConfig} />
 
-      <SpotlightDiscoveryNav />
+      <main className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+        <div className={`${PAGE_MIDDLE_FEED} choosify-listing-single-feed`}>
+          <header className="mb-6 text-left">
+            <h1 className="text-2xl font-bold text-[#1a1a2e]">Spotlight</h1>
+            <p className="text-sm text-gray-500 mt-2 max-w-2xl">
+              Discover products and services through shoppable reels, videos, guides, and offers — one mixed shopping feed.
+            </p>
+          </header>
 
-      {storyGroups.length > 0 && (
-        <div className="mb-8">
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Stories</p>
-          <SpotlightStoryRail groups={storyGroups} onOpen={setStoryOpen} />
-        </div>
-      )}
-
-      <SpotlightUniversalFiltersPanel
-        filters={filters}
-        onChange={setFilters}
-        replayOnly={replayOnly}
-        upcomingOnly={upcomingOnly}
-        onReplayToggle={() => setReplayOnly((v) => !v)}
-        onUpcomingToggle={() => setUpcomingOnly((v) => !v)}
-      />
-
-      {!hasContent ? (
-        <SpotlightEmptyState />
-      ) : displaySections.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-[#e8edf2] rounded-lg">
-          <p className="text-sm text-gray-500">No experiences match your filters.</p>
-          <button
-            type="button"
-            onClick={() => {
-              setFilters({ ...filters, contentTypes: [], query: '', liveOnly: false, sponsoredOnly: false, verifiedOnly: false, trendingOnly: false, promotionsOnly: false });
-              setReplayOnly(false);
-              setUpcomingOnly(false);
-            }}
-            className="mt-4 text-xs font-bold uppercase text-[#E8500A] hover:underline min-h-[44px] px-4"
-          >
-            Clear filters
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <SpotlightPersonalizedRails
-            rails={personalizedRails.slice(0, 2)}
-            allContent={allContent}
-            impressionCallbacks={impressionCallbacks}
-          />
-
-          {displaySections.map((section) => (
-            <SpotlightDiscoverSectionBlock
-              key={section.id}
-              section={section}
-              impressionCallbacks={{
-                ...impressionCallbacks,
-                onClicked: (id) => {
-                  impressionCallbacks.onClicked?.(id);
-                  const item = allContent.find((c) => c.contentId === id || c.sourceId === id);
-                  if (item) recordView(item);
-                },
-              }}
-              collections={collections}
+          {!hasContent ? (
+            <SpotlightEmptyState />
+          ) : feedItems.length === 0 ? (
+            <div className="text-center py-16 border border-dashed border-[#e8edf2] rounded-lg">
+              <p className="text-sm text-gray-500">No Spotlight content matches your filters.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setFilters({
+                    ...filters,
+                    contentTypes: [],
+                    query: '',
+                    liveOnly: false,
+                    sponsoredOnly: false,
+                    verifiedOnly: false,
+                    trendingOnly: false,
+                    promotionsOnly: false,
+                    publisherTypes: [],
+                  });
+                  setReplayOnly(false);
+                  setUpcomingOnly(false);
+                }}
+                className="mt-4 text-xs font-bold uppercase text-[#E8500A] hover:underline min-h-[44px] px-4"
+              >
+                Clear filters
+              </button>
+            </div>
+          ) : (
+            <SpotlightMixedFeed
+              items={feedItems}
+              products={allCatalogProducts}
+              impressionCallbacks={impressionCallbacks}
             />
-          ))}
+          )}
 
-          <SpotlightPersonalizedRails
-            rails={personalizedRails.slice(2)}
-            allContent={allContent}
-            impressionCallbacks={impressionCallbacks}
-          />
+          <div className="mt-12 text-center">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#E8500A] hover:underline min-h-[44px]"
+            >
+              Back to Home
+              <ChevronRight size={14} />
+            </Link>
+          </div>
         </div>
-      )}
-
-      <div className="mt-12 text-center">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#E8500A] hover:underline min-h-[44px]"
-        >
-          Back to Home
-          <ChevronRight size={14} />
-        </Link>
-      </div>
-
-      {storyOpen != null && (
-        <SpotlightStoryViewer
-          groups={storyGroups}
-          initialGroupIndex={storyOpen}
-          onClose={() => setStoryOpen(null)}
-        />
-      )}
+      </main>
     </div>
   );
 }

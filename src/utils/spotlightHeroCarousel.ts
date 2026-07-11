@@ -98,6 +98,21 @@ export function buildSpotlightHeroCarouselItems(
     .slice(0, 3)
     .forEach((c) => add(contentToCarouselItem(c, 50)));
 
+  allContent
+    .filter((c) => ['buying_guide', 'tutorial', 'recommendation', 'product_review', 'creator_review', 'editorial'].includes(c.contentType))
+    .slice(0, 4)
+    .forEach((c) => add(contentToCarouselItem(c, 55)));
+
+  allContent
+    .filter((c) => c.contentType === 'buying_guide' || c.contentType === 'tutorial')
+    .slice(0, 3)
+    .forEach((c) => add(contentToCarouselItem(c, 52)));
+
+  allContent
+    .filter((c) => c.contentType === 'recommendation')
+    .slice(0, 3)
+    .forEach((c) => add(contentToCarouselItem(c, 51)));
+
   collections
     .filter((c) => c.isFeatured)
     .slice(0, 3)

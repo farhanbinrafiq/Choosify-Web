@@ -44,7 +44,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
 import { toast } from "react-hot-toast";
 import { ProductMediaGallery } from "../components/ProductMediaGallery";
-import { InfluencerReviews } from "../components/InfluencerReviews";
+import { CreatorReviewsPreview } from "../components/creatorReviews/CreatorReviewsPreview";
 import { PublicReviewCard } from "../components/PublicReviewCard";
 import { FollowButton } from "../components/FollowButton";
 import { useRegisterPageFilters } from "../components/FilterEngine";
@@ -59,7 +59,9 @@ import { usePageBreadcrumbs } from "../context/BreadcrumbContext";
 import { slugifyPathSegment } from "../lib/seoHelpers";
 import { StudioWrap } from "../components/studio/StudioWrap";
 import { useStudioEdit } from "../context/StudioEditContext";
+import { useHasRole } from "../components/auth/RequireRole";
 import { CreateSpotlightCampaignButton } from "../components/spotlight/cms/CreateSpotlightCampaignButton";
+import { EmiProductAssistant } from "../components/emi/EmiProductAssistant";
 import { SpotlightIntegrationRail } from "../components/spotlight/SpotlightIntegrationRail";
 import type { CatalogProductSizeGuide } from "../types/catalog";
 
@@ -150,94 +152,6 @@ function resolveAddons(product: any): ProductAddon[] {
     k.toLowerCase().includes(category.toLowerCase())
   );
   return matchKey ? ADDON_SEEDS[matchKey] : [];
-}
-
-function WithInfluencerReviews({
-  brandName,
-  productTitle,
-  creatorContent,
-}: {
-  brandName: string;
-  productTitle?: string;
-  creatorContent?: Array<{
-    id: string;
-    platform: string;
-    videoUrl: string;
-    thumbnail: string;
-    title: string;
-    creatorHandle?: string;
-    views?: string;
-  }>;
-}) {
-  const mapPlatform = (platform: string): 'YouTube' | 'Instagram' | 'TikTok' | 'Facebook' => {
-    const p = platform.toLowerCase();
-    if (p.includes('tiktok')) return 'TikTok';
-    if (p.includes('insta')) return 'Instagram';
-    if (p.includes('facebook') || p.includes('fb')) return 'Facebook';
-    return 'YouTube';
-  };
-
-  const displayName = productTitle || brandName;
-  const subtitle = productTitle
-    ? `TRUSTED EXPERTS REVIEWING ${productTitle.toUpperCase()}`
-    : `TRUSTED EXPERTS BREAKING DOWN ${brandName.toUpperCase()}`;
-
-  if (!creatorContent?.length) {
-    return (
-      <InfluencerReviews
-        title="INFLUENCER & CREATOR REVIEWS"
-        subtitle={subtitle}
-        brandName={brandName}
-        fullWidth
-      />
-    );
-  }
-
-  const featured = creatorContent[0];
-  const featuredReview = {
-    image: featured.thumbnail,
-    title: featured.title,
-    excerpt: `Watch as creators break down ${displayName} — real opinions, verified reviews, and honest takes from Bangladesh's top voices.`,
-    authorName: featured.creatorHandle?.replace('@', '').toUpperCase() || brandName,
-    authorSub: mapPlatform(featured.platform),
-    authorLogo: brandName,
-    badgeText: 'FEATURED',
-    platform: mapPlatform(featured.platform),
-    videoUrl: featured.videoUrl,
-    stats: featured.views
-      ? { views: featured.views, likes: '—', duration: '—' }
-      : undefined,
-  };
-
-  const reviews = creatorContent.slice(1).map((item, index) => {
-    const platform = mapPlatform(item.platform);
-    return {
-      id: item.id || index,
-      image: item.thumbnail,
-      category: platform.toUpperCase(),
-      title: item.title,
-      authorName: item.creatorHandle?.replace('@', '') || 'Creator',
-      authorHandle: item.creatorHandle || '@creator',
-      authorAvatar: item.thumbnail,
-      platform,
-      aspectRatio:
-        platform === 'Instagram' || platform === 'TikTok'
-          ? ('portrait' as const)
-          : ('landscape' as const),
-      videoUrl: item.videoUrl,
-      stats: item.views ? { views: item.views } : undefined,
-    };
-  });
-
-  return (
-    <InfluencerReviews
-      title="INFLUENCER & CREATOR REVIEWS"
-      subtitle={subtitle}
-      featuredReview={featuredReview}
-      reviews={reviews}
-      fullWidth
-    />
-  );
 }
 
 interface OptionalAddonsModuleProps {
@@ -387,6 +301,7 @@ export function ProductDetailPage() {
 
   const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, isLoggedIn, currentUser } = useGlobalState();
   const { editMode: studioEditMode } = useStudioEdit();
+  const canUseProductStudio = useHasRole('brand', 'admin');
 
   const productList = allProducts.length > 0 ? allProducts : PRODUCTS;
   const brandList = allBrands.length > 0 ? allBrands : BRANDS;
@@ -989,7 +904,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      {studioEditMode && isLoggedIn && (
+      {studioEditMode && isLoggedIn && canUseProductStudio && (
         <div className="sticky top-0 z-[110] bg-[#1A1D4E] border-b border-white/10 px-4 py-3">
           <div className="max-w-[1080px] mx-auto flex flex-wrap items-center justify-between gap-3">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70 italic">
@@ -1279,6 +1194,9 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
         <div className="max-w-[1440px] mx-auto px-4 w-full">
           <div className={`${DETAIL_SINGLE_FEED}`}>
             <StudioWrap sectionId="product-specs">
+            <div className="mb-6">
+              <EmiProductAssistant product={product} inStock={!isOutOfStock} />
+            </div>
             <ProductSpecsOverview
               productTitle={product.title}
               specs={[
@@ -1295,10 +1213,12 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
             </StudioWrap>
 
             <StudioWrap sectionId="product-creator-reviews" className="scroll-mt-36 w-full">
-              <WithInfluencerReviews
+              <CreatorReviewsPreview
+                context="product"
+                productId={String(product.id)}
                 brandName={brandName}
                 productTitle={product?.title}
-                creatorContent={product?.creatorContent}
+                legacyCreatorContent={product?.creatorContent}
               />
             </StudioWrap>
 

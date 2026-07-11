@@ -2161,17 +2161,7 @@ export function BrandDetailPage() {
             )}
 
           {/* Creator reviews */}
-          <div id="creator-reviews-section" className="scroll-mt-36 w-full space-y-8">
-            <div className="text-left">
-              <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                Creator Reviews
-              </h2>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                Influencer reviews & official creator collaborations
-              </p>
-            </div>
-
-          <div className="scroll-mt-36 w-full">
+          <div id="creator-reviews-section" className="scroll-mt-36 w-full">
             {localClaimStatus !== "verified" ? (
               <div className="bg-white rounded-[5px] p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-sm border border-gray-100/80 py-12">
                 <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
@@ -2188,12 +2178,11 @@ export function BrandDetailPage() {
             ) : (
               <BrandInfluencerReviewsSection
                 brandName={brand.name}
+                brandId={brand.id}
                 brandLogo={brand.logo}
                 fullWidth
               />
             )}
-          </div>
-
           </div>
 
           <div id="spotlight-section" className="scroll-mt-36 w-full">

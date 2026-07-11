@@ -14,7 +14,7 @@ export function SpotlightDiscoveryNav() {
     >
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {SPOTLIGHT_DISCOVERY_NAV.map((item) => {
-          const active = item.href === current || (item.href === '/spotlight' && pathname === '/spotlight');
+          const active = item.href === current || (item.href === '/spotlight' && pathname === '/spotlight' && !search.includes('tab='));
           return (
             <Link
               key={item.id}

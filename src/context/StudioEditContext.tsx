@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { StudioKind } from '../types/studio';
 import { getStudioSectionById } from '../data/studioSections';
+import { useGlobalState } from './GlobalStateContext';
+import { canAccessStudioEdit } from '../lib/platform/roles';
 
 type StudioDraftStore = Record<string, string>;
 
@@ -57,10 +59,12 @@ export function StudioEditProvider({
   forcedEditMode = false,
 }: StudioEditProviderProps) {
   const [searchParams] = useSearchParams();
+  const { currentUser, isLoggedIn } = useGlobalState();
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const [draftRevision, setDraftRevision] = useState(0);
 
-  const editMode = forcedEditMode || searchParams.get('studioEdit') === '1';
+  const studioEditRequested = forcedEditMode || searchParams.get('studioEdit') === '1';
+  const editMode = studioEditRequested && isLoggedIn && canAccessStudioEdit(currentUser.role);
 
   const openEditor = useCallback((sectionId: string) => {
     setActiveSectionId(sectionId);

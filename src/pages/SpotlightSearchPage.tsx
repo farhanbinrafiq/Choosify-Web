@@ -8,8 +8,8 @@ export function SpotlightSearchPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <header className="mb-4 text-left">
-        <h1 className="text-2xl font-bold text-[#1a1a2e]">Search Spotlight</h1>
-        <p className="text-sm text-gray-500 mt-2">Find campaigns, creators, guides, collections, series, and live events.</p>
+        <h1 className="text-2xl font-bold text-[#1a1a2e]">Discover Spotlight</h1>
+        <p className="text-sm text-gray-500 mt-2">Discover campaigns, creators, guides, collections, series, and live events.</p>
       </header>
 
       <SpotlightDiscoveryNav />

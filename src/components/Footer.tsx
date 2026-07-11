@@ -12,7 +12,7 @@ const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
       { label: 'Spotlight', url: '/spotlight' },
       { label: 'Collections', url: '/spotlight/explore?tab=collections' },
       { label: 'Live', url: '/spotlight/calendar' },
-      { label: 'Guides', url: '/guides' },
+      { label: 'Discover & Learn', url: '/guides' },
       { label: 'Top Brands', url: '/brands' },
       { label: 'Best Deals', url: '/deals' },
     ],

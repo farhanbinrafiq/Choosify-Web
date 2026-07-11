@@ -682,7 +682,7 @@ export function CreatorProfilePage() {
 
                         if (isGuide) {
                           return (
-                            <Link key={video.id} to={`/guides/${video.associatedGuideId}`} className="block h-full cursor-pointer">
+                            <Link key={video.id} to={`/spotlight/content/${video.associatedGuideId}`} className="block h-full cursor-pointer">
                               {cardContent}
                             </Link>
                           );
@@ -761,7 +761,7 @@ export function CreatorProfilePage() {
 
                         if (isGuide) {
                           return (
-                            <Link key={reel.id} to={`/guides/${reel.associatedGuideId}`} className="block h-full cursor-pointer focus:outline-none">
+                            <Link key={reel.id} to={`/spotlight/content/${reel.associatedGuideId}`} className="block h-full cursor-pointer focus:outline-none">
                               {cardContent}
                             </Link>
                           );
@@ -860,7 +860,7 @@ export function CreatorProfilePage() {
 
                         if (isGuide) {
                           return (
-                            <Link key={blog.id} to={`/guides/${blog.associatedGuideId}`} className="block h-full cursor-pointer focus:outline-none">
+                            <Link key={blog.id} to={`/spotlight/content/${blog.associatedGuideId}`} className="block h-full cursor-pointer focus:outline-none">
                               {cardContent}
                             </Link>
                           );

@@ -60,8 +60,8 @@ export const STATIC_PAGE_SEO: Record<string, SeoMeta> = {
     description: 'Side-by-side comparison tool for products, brands, creators, and buying guides.',
   },
   '/guides': {
-    title: 'Buying Guides & Recommendations | Choosify',
-    description: 'Expert guides, reviews, and recommendations to help you choose the right product.',
+    title: 'Discover & Learn | Choosify',
+    description: 'Buying guides, recommendations, creator picks, and educational content to help you decide with confidence.',
     ogType: 'article',
   },
   '/blogs': {
@@ -70,8 +70,8 @@ export const STATIC_PAGE_SEO: Record<string, SeoMeta> = {
     ogType: 'article',
   },
   '/recommendations': {
-    title: 'Recommendations | Choosify',
-    description: 'Curated recommendations and editorial picks from the Choosify team.',
+    title: 'Discover & Learn | Choosify',
+    description: 'Buying guides, recommendations, creator picks, and educational content.',
     ogType: 'article',
   },
   '/creators': {
@@ -79,8 +79,8 @@ export const STATIC_PAGE_SEO: Record<string, SeoMeta> = {
     description: 'Discover creators sharing honest reviews and product recommendations.',
   },
   '/search': {
-    title: 'Search | Choosify',
-    description: 'Search products, brands, guides, and deals on Choosify.',
+    title: 'Discover | Choosify',
+    description: 'Discover products, brands, campaigns, guides, and creators across Choosify.',
   },
   '/about': {
     title: 'About Choosify',

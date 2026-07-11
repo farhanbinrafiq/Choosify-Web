@@ -41,7 +41,6 @@ import { CategorySubcategoryPanel } from '../components/CategorySubcategoryPanel
 import { buildCategoryDisplayList } from '../utils/categoryDisplay';
 import { buildPagePopularSearchTerms } from '../utils/pagePopularSearches';
 import { SpotlightHeroCarousel } from '../components/home/SpotlightHeroCarousel';
-import { DiscoverAndLearnSection } from '../components/home/DiscoverAndLearnSection';
 import { FeaturedBrandsTabsSection } from '../components/home/FeaturedBrandsTabsSection';
 import { PremiumCarousel } from '../components/home/PremiumCarousel';
 import { StudioWrap } from '../components/studio/StudioWrap';
@@ -773,10 +772,9 @@ export function HomePage() {
       { id: 'section-categories', label: 'Categories', icon: <LayoutGrid size={13} />, hidden: !sectionVisible('categories') },
       { id: 'section-spotlight-carousel', label: 'Spotlight', icon: <Flame size={13} />, hidden: !hasSpotlightCampaigns },
       { id: 'section-new-on-choosify', label: 'Products', icon: <ShoppingBag size={13} />, hidden: !sectionVisible('trending') },
-      { id: 'section-discover-learn', label: 'Discover', icon: <BookOpen size={13} />, hidden: !sectionVisible('recommended') || homeFeaturedGuideSlides.length === 0 },
       { id: 'section-featured-brands', label: 'Brands', icon: <Store size={13} />, hidden: !sectionVisible('featured-brands') },
     ],
-    [homeFeaturedGuideSlides.length, hasSpotlightCampaigns, sectionVisible],
+    [hasSpotlightCampaigns, sectionVisible],
   );
   const { activeId: homeActiveSectionId, scrollToSection: scrollToHomeSection } =
     useSectionScrollSpy(homeSectionNavItems);
@@ -795,7 +793,6 @@ export function HomePage() {
       { id: 'home-categories', label: '📂 Categories', active: false, onClick: () => jumpToHomeSection('section-categories') },
       { id: 'home-spotlight', label: '🔥 Spotlight', active: false, onClick: () => jumpToHomeSection('section-spotlight-carousel') },
       { id: 'home-products', label: '🛍 Products', active: false, onClick: () => jumpToHomeSection('section-new-on-choosify') },
-      { id: 'home-discover', label: '📚 Discover', active: false, onClick: () => jumpToHomeSection('section-discover-learn') },
       { id: 'home-brands', label: '🏷 Brands', active: false, onClick: () => jumpToHomeSection('section-featured-brands') },
     ],
     renderFilters: () => (
@@ -1046,15 +1043,6 @@ export function HomePage() {
               </div>
               )}
 
-              {sectionVisible('recommended') && homeFeaturedGuideSlides.length > 0 && (
-                <div id="section-discover-learn">
-                  <DiscoverAndLearnSection
-                    guideSlides={homeFeaturedGuideSlides}
-                    renderGuideCard={renderHomeGuideCarouselCard}
-                    creators={featuredCreators}
-                  />
-                </div>
-              )}
 
               {sectionVisible('featured-brands') && (
                 <FeaturedBrandsTabsSection

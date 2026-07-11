@@ -32,6 +32,7 @@ export const NOINDEX_PATH_PREFIXES = [
   '/post-offer',
   '/profile',
   '/overview',
+  '/marketing',
 ];
 
 export const SITEMAP_STATIC_PATHS: Array<{

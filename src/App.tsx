@@ -1,11 +1,12 @@
 import React, { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Link, Navigate, useParams } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { PageSeo } from './components/PageSeo';
 import { GoogleAnalyticsRouteTracker } from './components/GoogleAnalyticsRouteTracker';
 import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingOverlays } from './components/FloatingOverlays';
+import { EmiSidecar } from './components/emi/EmiSidecar';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { PageBreadcrumbsBar } from './components/PageBreadcrumbs';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
@@ -61,6 +62,11 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const MarketingLayout = lazy(() => import('./pages/marketing/MarketingLayout').then(m => ({ default: m.MarketingLayout })));
 const SpotlightCampaignsPage = lazy(() => import('./pages/marketing/SpotlightCampaignsPage').then(m => ({ default: m.SpotlightCampaignsPage })));
 const SpotlightCampaignEditorPage = lazy(() => import('./pages/marketing/SpotlightCampaignEditorPage').then(m => ({ default: m.SpotlightCampaignEditorPage })));
+const SpotlightPublisherStudioPage = lazy(() => import('./pages/marketing/SpotlightPublisherStudioPage'));
+const SpotlightOpportunityCenterPage = lazy(() => import('./pages/marketing/SpotlightOpportunityCenterPage'));
+const SpotlightIntelligencePage = lazy(() => import('./pages/marketing/SpotlightIntelligencePage').then(m => ({ default: m.SpotlightIntelligencePage })));
+const SpotlightContentPage = lazy(() => import('./pages/SpotlightContentPage').then(m => ({ default: m.SpotlightContentPage })));
+const LegacyGuideContentRedirect = lazy(() => import('./pages/LegacyGuideContentRedirect').then(m => ({ default: m.LegacyGuideContentRedirect })));
 const SpotlightDiscoverPage = lazy(() => import('./pages/SpotlightDiscoverPage').then(m => ({ default: m.SpotlightDiscoverPage })));
 const SpotlightCampaignPublicPage = lazy(() => import('./pages/SpotlightCampaignPublicPage').then(m => ({ default: m.SpotlightCampaignPublicPage })));
 const SpotlightExplorePage = lazy(() => import('./pages/SpotlightExplorePage').then(m => ({ default: m.SpotlightExplorePage })));
@@ -75,6 +81,9 @@ const PublisherProfilePage = lazy(() => import('./pages/PublisherProfilePage').t
 
 
 
+const ReviewDetailPage = lazy(() => import('./pages/ReviewDetailPage').then(m => ({ default: m.ReviewDetailPage })));
+
+import { RequireRole } from './components/auth/RequireRole';
 import { useGlobalState } from './context/GlobalStateContext';
 import { isNavPathEnabled } from './lib/featureFlags';
 import { perfRouteTransition } from './utils/performanceDev';
@@ -120,6 +129,11 @@ function MaintenanceGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function LegacyRecommendationRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={id ? `/spotlight/content/${id}` : '/spotlight?tab=recommendations'} replace />;
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useGlobalState();
   const location = useLocation();
@@ -155,7 +169,8 @@ function AppContent() {
             <Route path="/categories" element={<PageWrapper><CategoriesPage /></PageWrapper>} />
             <Route path="/deals" element={<PageWrapper><DealsPage /></PageWrapper>} />
             <Route path="/compare" element={<FeatureFlagRoute flag="enable_comparison_engine"><PageWrapper><ComparePage /></PageWrapper></FeatureFlagRoute>} />
-            <Route path="/guides" element={<PageWrapper><GuidesPage /></PageWrapper>} />
+            <Route path="/guides" element={<Navigate to="/spotlight?tab=guides" replace />} />
+            <Route path="/spotlight/content/:slug" element={<PageWrapper><SpotlightContentPage /></PageWrapper>} />
             <Route path="/spotlight" element={<PageWrapper><SpotlightDiscoverPage /></PageWrapper>} />
             <Route path="/spotlight/explore" element={<PageWrapper><SpotlightExplorePage /></PageWrapper>} />
             <Route path="/spotlight/search" element={<PageWrapper><SpotlightSearchPage /></PageWrapper>} />
@@ -166,11 +181,12 @@ function AppContent() {
             <Route path="/spotlight/live/:slug" element={<PageWrapper><InteractiveCommercePage /></PageWrapper>} />
             <Route path="/spotlight/:slug" element={<PageWrapper><SpotlightCampaignPublicPage /></PageWrapper>} />
             <Route path="/publisher/:slug" element={<PageWrapper><PublisherProfilePage /></PageWrapper>} />
-            <Route path="/blogs" element={<Navigate to="/guides" replace />} />
-            <Route path="/blogs/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
-            <Route path="/guides/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
-            <Route path="/recommendations" element={<PageWrapper><GuidesPage /></PageWrapper>} />
-            <Route path="/recommendations/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
+            <Route path="/blogs" element={<Navigate to="/spotlight?tab=blogs" replace />} />
+            <Route path="/blogs/:id" element={<PageWrapper><LegacyGuideContentRedirect /></PageWrapper>} />
+            <Route path="/guides/:id" element={<PageWrapper><LegacyGuideContentRedirect /></PageWrapper>} />
+            <Route path="/reviews/:slug" element={<PageWrapper><LegacyGuideContentRedirect /></PageWrapper>} />
+            <Route path="/recommendations" element={<Navigate to="/spotlight?tab=recommendations" replace />} />
+            <Route path="/recommendations/:id" element={<LegacyRecommendationRedirect />} />
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
             <Route path="/login" element={<LoginSignUpPage />} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
@@ -198,10 +214,27 @@ function AppContent() {
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />
             <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/marketing" element={<ProtectedRoute><MarketingLayout /></ProtectedRoute>}>
+            <Route
+              path="/marketing"
+              element={
+                <ProtectedRoute>
+                  <RequireRole roles={['brand', 'admin']} fallback="/dashboard">
+                    <MarketingLayout />
+                  </RequireRole>
+                </ProtectedRoute>
+              }
+            >
+              <Route path="studio" element={<SpotlightCampaignsPage />} />
+              <Route path="studio/new" element={<SpotlightPublisherStudioPage />} />
+              <Route path="studio/:id" element={<SpotlightPublisherStudioPage />} />
               <Route path="spotlight" element={<SpotlightCampaignsPage />} />
-              <Route path="spotlight/new" element={<SpotlightCampaignEditorPage />} />
-              <Route path="spotlight/:campaignId" element={<SpotlightCampaignEditorPage />} />
+              <Route path="spotlight/new" element={<SpotlightPublisherStudioPage />} />
+              <Route path="spotlight/:campaignId" element={<SpotlightPublisherStudioPage />} />
+              <Route path="spotlight/legacy/:campaignId" element={<SpotlightCampaignEditorPage />} />
+              <Route path="opportunity" element={<SpotlightOpportunityCenterPage />} />
+              <Route path="intelligence" element={<SpotlightIntelligencePage />} />
+              <Route path="intelligence/:section" element={<SpotlightIntelligencePage />} />
+              <Route path="intelligence/:section/:entityId" element={<SpotlightIntelligencePage />} />
             </Route>
             <Route path="/messages" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/messages/:threadId" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
@@ -212,6 +245,7 @@ function AppContent() {
       </AnimatePresence>
       </MaintenanceGate>
       {!isCompactShell && <FloatingOverlays />}
+      {!isCompactShell && <EmiSidecar />}
       {!isCompactShell && !isMessagesShell && <MobileBottomNav />}
       {!isCompactShell && !isMessagesShell && <Footer />}
     </div>

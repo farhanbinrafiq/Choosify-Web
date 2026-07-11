@@ -52,6 +52,7 @@ import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { EvaluationData, ComparisonProduct } from "../types/evaluation";
 import evaluationsData from "../data/evaluations.json";
 import { RecommendationMediaGallery } from "../components/RecommendationMediaGallery";
+import { SpotlightContentHero, type SpotlightHeroVariant } from "../components/spotlight/feed/SpotlightContentHero";
 import {
   DetailHeroSummaryBar,
   detailHeroSummaryActionPrimaryClass,
@@ -67,6 +68,7 @@ import { FollowButton } from "../components/FollowButton";
 import { useRegisterPageFilters, UniversalFilterRenderer } from "../components/FilterEngine";
 import { PopularSearchKeywords } from "../components/PopularSearchKeywords";
 import { buildGuidePopularSearchTerms } from "../utils/pagePopularSearches";
+import type { CatalogGuide } from "../types/catalog";
 
 const evaluations = evaluationsData as EvaluationData[];
 
@@ -144,15 +146,35 @@ const COMPARISON_DATA: ComparisonProduct[] = [
   },
 ];
 
-export function GuideDetailPage() {
+export function GuideDetailPage({
+  guideIdOverride,
+  spotlightGuideOverride,
+  spotlightHeroVariant,
+  spotlightLiveEmbedUrl,
+  spotlightVideoUrl,
+  spotlightPosterImage,
+  backHref,
+  backLabel = 'Back',
+}: {
+  guideIdOverride?: string;
+  spotlightGuideOverride?: CatalogGuide & { recommendedProducts?: string[]; date?: string };
+  spotlightHeroVariant?: SpotlightHeroVariant;
+  spotlightLiveEmbedUrl?: string;
+  spotlightVideoUrl?: string;
+  spotlightPosterImage?: string;
+  backHref?: string;
+  backLabel?: string;
+} = {}) {
   const heroRef = useRef<HTMLElement>(null);
-  const { id } = useParams();
+  const { id: routeId } = useParams();
+  const id = guideIdOverride ?? routeId;
   const navigate = useNavigate();
   const { allGuides, siteConfig, allBrands, addToCart } = useGlobalState();
   const [relatedPlatformFilter, setRelatedPlatformFilter] = useState<string>('all');
   const [relatedTopicFilter, setRelatedTopicFilter] = useState<string>('all');
 
   const guide =
+    spotlightGuideOverride ||
     allGuides.find((b) => String(b.id) === String(id) || (b as any).slug === id) ||
     allGuides[0] ||
     BLOGS.find((b) => b.id === Number(id)) ||
@@ -409,8 +431,28 @@ export function GuideDetailPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
 
         <div className="relative z-10">
+          {backHref && (
+            <div className="max-w-[1080px] mx-auto px-6 pt-4">
+              <Link
+                to={backHref}
+                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/70 hover:text-[#E8500A]"
+              >
+                <ArrowLeft size={14} /> {backLabel}
+              </Link>
+            </div>
+          )}
           <div className="w-full bg-transparent relative">
-            <RecommendationMediaGallery guide={guide} />
+            {spotlightHeroVariant ? (
+              <SpotlightContentHero
+                guide={guide}
+                variant={spotlightHeroVariant}
+                liveEmbedUrl={spotlightLiveEmbedUrl}
+                videoUrl={spotlightVideoUrl}
+                posterImage={spotlightPosterImage}
+              />
+            ) : (
+              <RecommendationMediaGallery guide={guide} />
+            )}
           </div>
 
           <div className="max-w-[1080px] mx-auto px-6 pb-6 text-left">

@@ -7,6 +7,7 @@ import { pickFeaturedCampaignOfDay } from './spotlightHomepage';
 import { listCampaignRecords } from '../services/spotlightCampaignStorage';
 import type { SpotlightDiscoverFilters } from '../types/spotlight/experience/filters';
 import { sortByDiscoveryScore } from './spotlightDiscoveryScore';
+import { maxItemsForSection, sortCommerceFirst, orderedSectionIds } from '../lib/spotlight/experience/sectionRegistry';
 
 const MS_DAY = 86_400_000;
 const MS_WEEK = MS_DAY * 7;
@@ -67,11 +68,13 @@ function filterItems(items: SpotlightContent[], filters: SpotlightDiscoverFilter
 function pickSection(
   id: SpotlightDiscoverSectionId,
   items: SpotlightContent[],
-  maxItems = 12,
+  maxItems?: number,
   viewAllHref?: string,
 ): SpotlightDiscoverSection | null {
   const meta = SPOTLIGHT_DISCOVER_SECTION_META[id];
-  const slice = items.slice(0, maxItems);
+  const limit = maxItems ?? maxItemsForSection(id);
+  const sorted = sortCommerceFirst(items);
+  const slice = sorted.slice(0, limit);
   if (!slice.length) return null;
   return {
     id,
@@ -79,7 +82,7 @@ function pickSection(
     subtitle: meta.subtitle,
     layout: meta.layout,
     items: slice,
-    maxItems,
+    maxItems: limit,
     viewAllHref,
   };
 }
@@ -173,41 +176,45 @@ export function buildSpotlightDiscoverSections(
     });
   }
 
-  const sectionBuckets: Array<[SpotlightDiscoverSectionId, SpotlightContent[], string?]> = [
-    ['continue_watching', continueWatching],
-    ['continue_browsing', continueBrowsing],
-    ['live_now', liveNow],
-    ['trending_now', trendingNow],
-    ['editors_picks', editorsPicks],
-    ['recommended_for_you', recommendedPlaceholder],
-    ['upcoming', upcoming],
-    ['ending_soon', endingSoon],
-    ['recently_added', recentlyAdded],
-    ['popular_this_week', popularWeek],
-    ['popular_this_month', popularMonth],
-    ['top_campaigns', topCampaigns],
-    ['top_creators', topCreators],
-    ['top_brands', topBrands],
-    ['top_services', topServices],
-    ['new_launches', newLaunches],
-    ['campaigns', campaigns, '/spotlight/explore?tab=campaigns'],
-    ['creator_picks', creatorPicks],
-    ['creator_reviews', creatorReviews],
-    ['brand_stories', brandStories],
-    ['recommendations', recommendations],
-    ['buying_guides', buyingGuides, '/guides'],
-    ['whats_on', whatsOn, '/whats-on'],
-    ['events', events],
-    ['announcements', announcements],
-    ['latest_reviews', latestReviews],
-    ['latest_videos', latestVideos],
-    ['latest_announcements', announcements],
-    ['trending', trendingNow],
-    ['series', seriesItems, '/spotlight/explore?tab=series'],
-  ];
+  const sectionBuckets: Partial<Record<SpotlightDiscoverSectionId, [SpotlightContent[], string?]>> = {
+    continue_watching: [continueWatching],
+    continue_browsing: [continueBrowsing],
+    live_now: [liveNow],
+    trending_now: [trendingNow],
+    editors_picks: [editorsPicks],
+    recommended_for_you: [recommendedPlaceholder],
+    upcoming: [upcoming],
+    ending_soon: [endingSoon],
+    recently_added: [recentlyAdded],
+    popular_this_week: [popularWeek],
+    popular_this_month: [popularMonth],
+    top_campaigns: [topCampaigns],
+    top_creators: [topCreators],
+    top_brands: [topBrands],
+    top_services: [topServices],
+    new_launches: [newLaunches],
+    campaigns: [campaigns, '/spotlight/explore?tab=campaigns'],
+    creator_picks: [creatorPicks],
+    creator_reviews: [creatorReviews],
+    brand_stories: [brandStories],
+    recommendations: [recommendations],
+    buying_guides: [buyingGuides, '/spotlight?tab=guides'],
+    whats_on: [whatsOn, '/whats-on'],
+    events: [events],
+    announcements: [announcements],
+    latest_reviews: [latestReviews],
+    latest_videos: [latestVideos],
+    latest_announcements: [announcements],
+    trending: [trendingNow],
+    series: [seriesItems, '/spotlight/explore?tab=series'],
+  };
 
-  for (const [id, bucket, viewAll] of sectionBuckets) {
-    const section = pickSection(id, bucket, 12, viewAll);
+  for (const id of orderedSectionIds()) {
+    if (id === 'featured_today' || id === 'collections') continue;
+    const bucket = sectionBuckets[id];
+    if (!bucket) continue;
+    const [items, viewAll] = bucket;
+    const section = pickSection(id, items, undefined, viewAll);
     if (section) sections.push(section);
   }
 

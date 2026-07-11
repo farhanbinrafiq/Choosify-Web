@@ -1,5 +1,7 @@
 # Spotlight Architecture
 
+> **Phase 5.2 update:** Spotlight is now Choosify's **complete discovery ecosystem** — not only campaigns. Internal model: `SpotlightContent` + `contentType`. Universal detail page: `/spotlight/content/:slug`. See [SPOTLIGHT_CONTENT_MODEL.md](./SPOTLIGHT_CONTENT_MODEL.md).
+
 **Sprint:** LE-005.1 — Spotlight Foundation & Architecture  
 **Status:** Architecture only — no UI, no data migration, no feed implementation
 

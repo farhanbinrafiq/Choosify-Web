@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, ShoppingBag, User, PlusCircle, ChevronRight, LogIn, 
   LayoutDashboard, Heart, MessageSquare, Settings, Briefcase, Package, ShieldCheck, 
-  FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X
+  FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X, MapPin
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { GlobalSearchBar } from './GlobalSearchBar';
@@ -151,6 +151,7 @@ export function Navbar() {
     { label: 'My Orders', path: '/profile/orders', icon: Package },
     { label: 'Messages', path: '/messages', icon: MessageSquare },
     { label: 'Saved Products', path: '/dashboard', tab: 'saved-products', icon: Heart },
+    { label: 'Addresses', path: '/dashboard', tab: 'addresses', icon: MapPin },
     { label: 'Settings', path: '/dashboard', tab: 'settings', icon: Settings },
   ];
 

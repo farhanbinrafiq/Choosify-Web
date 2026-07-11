@@ -18,13 +18,6 @@ export const PRIMARY_NAV_ITEMS: PrimaryNavItem[] = [
   { id: 'spotlight', path: '/spotlight', label: 'Spotlight', heroTitle: 'Spotlight' },
   { id: 'products', path: '/products', label: 'Products', heroTitle: 'Products' },
   { id: 'brands', path: '/brands', label: 'Brands', heroTitle: 'Brands' },
-  {
-    id: 'guides',
-    path: '/guides',
-    label: 'Discover',
-    labelWide: 'Discover',
-    heroTitle: 'Guides',
-  },
   { id: 'compare', path: '/compare', label: 'Compare', heroTitle: 'Compare' },
   { id: 'deals', path: '/deals', label: 'Deals', heroTitle: 'Deals' },
   { id: 'creators', path: '/creators', label: 'Creators', heroTitle: 'Creators' },

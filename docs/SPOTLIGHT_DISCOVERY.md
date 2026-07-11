@@ -1,6 +1,8 @@
-# Spotlight Discovery — Phase 4
+# Spotlight Discovery — Phase 4 → 5.2 Content Unification
 
-Choosify Spotlight becomes the **discovery homepage** — an immersive, modular browsing experience where users never feel lost.
+> **Phase 5.2:** The standalone Discover module is **retired**. `/guides` redirects to Spotlight. All editorial content (guides, reviews, recommendations, videos, blogs) is unified as `SpotlightContent`. See [SPOTLIGHT_CONTENT_MODEL.md](./SPOTLIGHT_CONTENT_MODEL.md).
+
+Choosify Spotlight is the **single discovery destination** — an immersive browsing experience where users never feel lost.
 
 ## Vision
 

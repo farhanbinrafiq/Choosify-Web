@@ -24,10 +24,12 @@ import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/F
 import { filterBrandPosts, getAllBrandPosts } from '../lib/brandPosts';
 import { BrandPostCard } from '../components/BrandPostCard';
 import { resolveSpotlightExperience } from '../utils/spotlightContentResolver';
+import { EmiSearchAssistant } from '../components/emi/EmiSearchAssistant';
 import { searchSpotlightContent } from '../utils/spotlightSearch';
 import { listSpotlightCollections } from '../utils/spotlightCollections';
 import { listSpotlightSeries } from '../utils/spotlightSeries';
 import type { SpotlightSearchResult } from '../types/spotlight/discovery/search';
+import { spotlightContentHref } from '../lib/spotlight/content';
 
 // Promo Codes & Brand Deals data
 const BRAND_DEALS = [
@@ -293,7 +295,7 @@ export function SearchPage() {
           activeId: activeTab,
           onNavigate: handleSearchNav,
           allLabel: 'All matches',
-          profileLabel: 'Search results',
+          profileLabel: 'Discover results',
         }
       : undefined,
   }, [rawQuery, activeTab, sortBy, maxPrice, categoryFilter, inStockOnly, categorySource, searchFilterCount, searchSectionNavItems, handleSearchNav]);
@@ -699,13 +701,18 @@ export function SearchPage() {
           sections={searchNavItems}
           activeId={activeTab}
           onNavigate={handleSearchNav}
-          allLabel="All matches"
-          profileLabel="Search results"
+          allLabel="Discover"
+          profileLabel="Discover results"
         />
       )}
 
       {/* Search results container */}
       <div id="search-results" className="max-w-7xl mx-auto px-6 py-10 scroll-mt-36">
+        {rawQuery ? (
+          <div className="mb-6 max-w-lg">
+            <EmiSearchAssistant query={rawQuery} />
+          </div>
+        ) : null}
         {!rawQuery ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
@@ -715,7 +722,7 @@ export function SearchPage() {
               Start Discovering
             </h3>
             <p className="text-xs text-gray-500 max-w-xs mt-1.5 leading-relaxed">
-              Discover amazing products, brands, campaigns, guides, and creators across Choosify.
+              Start discovering amazing products and experiences
             </p>
           </div>
         ) : searchResults.total === 0 ? (
@@ -825,7 +832,7 @@ export function SearchPage() {
                             </span>
                           )}
                           <Link 
-                            to={`/guides/${guide.id}`}
+                            to={spotlightContentHref(String(guide.slug ?? guide.id))}
                             className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-1 hover:underline"
                           >
                             Read Guide <ArrowRight size={10} />

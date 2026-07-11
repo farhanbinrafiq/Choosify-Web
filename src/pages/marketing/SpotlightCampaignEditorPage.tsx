@@ -91,7 +91,7 @@ export function SpotlightCampaignEditorPage() {
   const { draft, updateDraft, setStep } = useSpotlightCampaignWizard(isNew ? undefined : campaignId);
   const { allCatalogProducts } = useGlobalState();
 
-  const actor = mapUserRoleToCampaignActor(currentUser.role);
+  const actor = mapUserRoleToCampaignActor(currentUser.role) ?? 'seller';
 
   const qualityScore = useMemo(
     () => calculateCampaignQualityScore(draft, draft.linkedProductIds, allCatalogProducts),
@@ -260,6 +260,9 @@ export function SpotlightCampaignEditorPage() {
               value={draft.campaignName}
               onChange={(e) => updateDraft({ campaignName: e.target.value, headline: e.target.value })}
             />
+            <p className="text-xs text-gray-500 bg-[#F8FBFD] border border-[#e8edf2] rounded px-3 py-2">
+              Content type maps to Spotlight Content — guides, reviews, launches, live, and campaigns share one CMS and one detail page.
+            </p>
             <select
               className="w-full border rounded px-3 py-2"
               value={draft.campaignType}

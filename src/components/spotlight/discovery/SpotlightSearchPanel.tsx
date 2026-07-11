@@ -32,9 +32,9 @@ export function SpotlightSearchPanel({
             type="search"
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Search campaigns, creators, guides, live..."
+            placeholder="Discover campaigns, creators, guides, live..."
             className="w-full pl-10 pr-4 py-3 min-h-[48px] text-sm border border-[#e8edf2] rounded-[5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]"
-            aria-label="Search Spotlight"
+            aria-label="Discover Spotlight"
           />
         </div>
       </form>

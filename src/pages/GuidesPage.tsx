@@ -1288,8 +1288,8 @@ export function GuidesPage() {
         sections={guideSectionNavItems}
         activeId={activeSectionId}
         onNavigate={scrollToSection}
-        allLabel="Guides"
-        profileLabel="Guide library"
+        allLabel="Discover & Learn"
+        profileLabel="Discover & Learn"
       />
 
       <main className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>

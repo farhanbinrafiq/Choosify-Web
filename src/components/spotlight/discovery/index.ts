@@ -1,4 +1,5 @@
 export { SpotlightDiscoveryNav } from './SpotlightDiscoveryNav';
+export { SpotlightContentTabs } from './SpotlightContentTabs';
 export { SpotlightBreadcrumbs } from './SpotlightBreadcrumbs';
 export { SpotlightHubNav } from './SpotlightHubNav';
 export { SpotlightCollectionCard, SpotlightCollectionRow } from './SpotlightCollectionCard';
