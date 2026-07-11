@@ -1,12 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react';
 import { useSpotlightCampaignWizard } from '../../hooks/useSpotlightCampaignWizard';
 import { MediaManagerPanel } from '../../components/spotlight/cms/MediaManagerPanel';
-import { ProductLinkerPanel } from '../../components/spotlight/cms/ProductLinkerPanel';
+import { ProductMerchandisingPanel } from '../../components/spotlight/merchandising/ProductMerchandisingPanel';
 import { PlacementManagerPanel } from '../../components/spotlight/cms/PlacementManagerPanel';
-import { CampaignPreviewPanel } from '../../components/spotlight/cms/CampaignPreviewPanel';
+import { MerchandisingPreviewPanel } from '../../components/spotlight/merchandising/MerchandisingPreviewPanel';
+import { MerchantGuidancePanel } from '../../components/spotlight/merchandising/MerchantGuidancePanel';
 import { SPOTLIGHT_CAMPAIGN_TYPE_META } from '../../types/spotlight/campaignTypes';
 import type { SpotlightCampaignType } from '../../types/spotlight/campaignTypes';
 import {
@@ -23,6 +24,8 @@ import {
 } from '../../utils/spotlightCampaignValidation';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import { mapUserRoleToCampaignActor, canModerate, canPublish } from '../../utils/spotlightCampaignPermissions';
+import { calculateCampaignQualityScore, generateMerchantGuidance } from '../../utils/spotlightCampaignQuality';
+import { migrateLegacyToMerchandising } from '../../utils/spotlightMerchandisingOrdering';
 import { cn } from '../../lib/utils';
 
 const STEPS = [
@@ -74,6 +77,8 @@ function recordFromDraft(
     createdBy: existing?.createdBy ?? userId,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
+    merchandising: draft.merchandising,
+    campaignHealthScore: draft.merchandising?.qualityScore?.score,
   };
 }
 
@@ -84,8 +89,40 @@ export function SpotlightCampaignEditorPage() {
   const { currentUser } = useGlobalState();
   const isNew = !campaignId || campaignId === 'new';
   const { draft, updateDraft, setStep } = useSpotlightCampaignWizard(isNew ? undefined : campaignId);
+  const { allCatalogProducts } = useGlobalState();
 
   const actor = mapUserRoleToCampaignActor(currentUser.role);
+
+  const qualityScore = useMemo(
+    () => calculateCampaignQualityScore(draft, draft.linkedProductIds, allCatalogProducts),
+    [draft, allCatalogProducts],
+  );
+
+  const merchantGuidance = useMemo(
+    () => generateMerchantGuidance(draft, allCatalogProducts),
+    [draft, allCatalogProducts],
+  );
+
+  const handleMerchandisingChange = useCallback(
+    (
+      merchandising: NonNullable<typeof draft.merchandising>,
+      legacy: { linkedProductIds: string[]; primaryProductId?: string },
+    ) => {
+      updateDraft({
+        merchandising,
+        linkedProductIds: legacy.linkedProductIds,
+        primaryProductId: legacy.primaryProductId,
+      });
+    },
+    [updateDraft],
+  );
+
+  const previewLinks = useMemo(
+    () =>
+      draft.merchandising?.productLinks ??
+      migrateLegacyToMerchandising(draft.linkedProductIds, draft.primaryProductId).productLinks,
+    [draft.merchandising, draft.linkedProductIds, draft.primaryProductId],
+  );
 
   useEffect(() => {
     if (!isNew && campaignId) {
@@ -115,6 +152,7 @@ export function SpotlightCampaignEditorPage() {
           sellerId: existing.sellerId,
           sellerName: existing.sellerName,
           folderId: existing.folderId,
+          merchandising: existing.merchandising,
         });
       }
     }
@@ -195,6 +233,10 @@ export function SpotlightCampaignEditorPage() {
         </button>
       </div>
 
+      {(draft.step === 3 || draft.step === 6) && (
+        <MerchantGuidancePanel guidance={merchantGuidance} qualityScore={qualityScore.score} />
+      )}
+
       <ol className="flex flex-wrap gap-2">
         {STEPS.map((label, i) => (
           <li
@@ -257,12 +299,14 @@ export function SpotlightCampaignEditorPage() {
         )}
 
         {draft.step === 3 && (
-          <ProductLinkerPanel
+          <ProductMerchandisingPanel
+            key={draft.campaignId ?? 'new'}
+            merchandising={draft.merchandising}
             linkedProductIds={draft.linkedProductIds}
             primaryProductId={draft.primaryProductId}
-            onChange={(linkedProductIds, primaryProductId) =>
-              updateDraft({ linkedProductIds, primaryProductId })
-            }
+            brandId={draft.brandId ?? draft.linkedBrandIds[0]}
+            categoryId={draft.linkedCategoryIds[0]}
+            onChange={handleMerchandisingChange}
           />
         )}
 
@@ -333,10 +377,11 @@ export function SpotlightCampaignEditorPage() {
 
         {draft.step === 6 && (
           <div className="space-y-6">
-            <CampaignPreviewPanel
+            <MerchandisingPreviewPanel
               media={previewMedia}
               headline={draft.headline}
-              subHeadline={draft.subHeadline}
+              productLinks={previewLinks}
+              catalog={allCatalogProducts}
             />
             <div className="flex flex-wrap gap-3">
               <button type="button" onClick={saveDraft} className="px-4 py-2 border rounded text-sm font-bold">

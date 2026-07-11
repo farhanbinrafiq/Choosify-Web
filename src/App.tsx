@@ -6,6 +6,7 @@ import { PageSeo } from './components/PageSeo';
 import { GoogleAnalyticsRouteTracker } from './components/GoogleAnalyticsRouteTracker';
 import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingOverlays } from './components/FloatingOverlays';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { PageBreadcrumbsBar } from './components/PageBreadcrumbs';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
 import { DashboardProvider } from './context/DashboardContext';
@@ -60,6 +61,16 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const MarketingLayout = lazy(() => import('./pages/marketing/MarketingLayout').then(m => ({ default: m.MarketingLayout })));
 const SpotlightCampaignsPage = lazy(() => import('./pages/marketing/SpotlightCampaignsPage').then(m => ({ default: m.SpotlightCampaignsPage })));
 const SpotlightCampaignEditorPage = lazy(() => import('./pages/marketing/SpotlightCampaignEditorPage').then(m => ({ default: m.SpotlightCampaignEditorPage })));
+const SpotlightDiscoverPage = lazy(() => import('./pages/SpotlightDiscoverPage').then(m => ({ default: m.SpotlightDiscoverPage })));
+const SpotlightCampaignPublicPage = lazy(() => import('./pages/SpotlightCampaignPublicPage').then(m => ({ default: m.SpotlightCampaignPublicPage })));
+const SpotlightExplorePage = lazy(() => import('./pages/SpotlightExplorePage').then(m => ({ default: m.SpotlightExplorePage })));
+const SpotlightSearchPage = lazy(() => import('./pages/SpotlightSearchPage').then(m => ({ default: m.SpotlightSearchPage })));
+const SpotlightCalendarPage = lazy(() => import('./pages/SpotlightCalendarPage').then(m => ({ default: m.SpotlightCalendarPage })));
+const SpotlightCollectionPage = lazy(() => import('./pages/SpotlightCollectionPage').then(m => ({ default: m.SpotlightCollectionPage })));
+const SpotlightSeriesPage = lazy(() => import('./pages/SpotlightSeriesPage').then(m => ({ default: m.SpotlightSeriesPage })));
+const SpotlightStoryPage = lazy(() => import('./pages/SpotlightStoryPage').then(m => ({ default: m.SpotlightStoryPage })));
+const InteractiveCommercePage = lazy(() => import('./pages/InteractiveCommercePage').then(m => ({ default: m.InteractiveCommercePage })));
+const PublisherProfilePage = lazy(() => import('./pages/PublisherProfilePage').then(m => ({ default: m.PublisherProfilePage })));
 
 
 
@@ -145,6 +156,16 @@ function AppContent() {
             <Route path="/deals" element={<PageWrapper><DealsPage /></PageWrapper>} />
             <Route path="/compare" element={<FeatureFlagRoute flag="enable_comparison_engine"><PageWrapper><ComparePage /></PageWrapper></FeatureFlagRoute>} />
             <Route path="/guides" element={<PageWrapper><GuidesPage /></PageWrapper>} />
+            <Route path="/spotlight" element={<PageWrapper><SpotlightDiscoverPage /></PageWrapper>} />
+            <Route path="/spotlight/explore" element={<PageWrapper><SpotlightExplorePage /></PageWrapper>} />
+            <Route path="/spotlight/search" element={<PageWrapper><SpotlightSearchPage /></PageWrapper>} />
+            <Route path="/spotlight/calendar" element={<PageWrapper><SpotlightCalendarPage /></PageWrapper>} />
+            <Route path="/spotlight/stories" element={<PageWrapper><SpotlightStoryPage /></PageWrapper>} />
+            <Route path="/spotlight/collections/:slug" element={<PageWrapper><SpotlightCollectionPage /></PageWrapper>} />
+            <Route path="/spotlight/series/:slug" element={<PageWrapper><SpotlightSeriesPage /></PageWrapper>} />
+            <Route path="/spotlight/live/:slug" element={<PageWrapper><InteractiveCommercePage /></PageWrapper>} />
+            <Route path="/spotlight/:slug" element={<PageWrapper><SpotlightCampaignPublicPage /></PageWrapper>} />
+            <Route path="/publisher/:slug" element={<PageWrapper><PublisherProfilePage /></PageWrapper>} />
             <Route path="/blogs" element={<Navigate to="/guides" replace />} />
             <Route path="/blogs/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
             <Route path="/guides/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
@@ -191,6 +212,7 @@ function AppContent() {
       </AnimatePresence>
       </MaintenanceGate>
       {!isCompactShell && <FloatingOverlays />}
+      {!isCompactShell && !isMessagesShell && <MobileBottomNav />}
       {!isCompactShell && !isMessagesShell && <Footer />}
     </div>
   );
@@ -247,7 +269,7 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="pb-0 mobile-fab-safe sm:pb-0"
+      className="pb-14 lg:pb-0 mobile-fab-safe sm:pb-0"
     >
       <PageBreadcrumbsBar />
       {children}

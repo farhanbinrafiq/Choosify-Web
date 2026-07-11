@@ -1,6 +1,6 @@
 export interface SuggestionItem {
   id: string;
-  type: 'query' | 'product' | 'brand' | 'creator' | 'category' | 'recent' | 'popular' | 'trending';
+  type: 'query' | 'product' | 'brand' | 'creator' | 'category' | 'recent' | 'popular' | 'trending' | 'spotlight' | 'guide' | 'launch';
   title: string;
   subtitle?: string;
   image?: string;

@@ -1,7 +1,8 @@
 import type { SpotlightCampaignRecord, SpotlightCampaignWizardDraft } from '../types/spotlight/cms';
 import type { UniversalMedia } from '../components/media/types/mediaModel';
 import { getMediaById } from '../services/spotlightCampaignStorage';
-
+import { migrateLegacyToMerchandising } from './spotlightMerchandisingOrdering';
+import { validateWizardMerchandisingStep } from './spotlightMerchandisingValidation';
 export interface CampaignValidationIssue {
   field: string;
   message: string;
@@ -81,8 +82,12 @@ export function validateWizardStep(
   if (step === 2 && !draft.mediaIds.length) {
     push(issues, 'mediaIds', 'Upload at least one media asset.');
   }
-  if (step === 3 && !draft.linkedProductIds.length) {
-    push(issues, 'linkedProductIds', 'Attach at least one product.');
+  if (step === 3) {
+    const merch =
+      draft.merchandising ??
+      migrateLegacyToMerchandising(draft.linkedProductIds, draft.primaryProductId);
+    const merchResult = validateWizardMerchandisingStep(merch.productLinks);
+    issues.push(...merchResult.issues.map((i) => ({ field: i.field, message: i.message })));
   }
   if (step === 4 && !draft.placementSurfaces.length) {
     push(issues, 'placementSurfaces', 'Select at least one placement.');

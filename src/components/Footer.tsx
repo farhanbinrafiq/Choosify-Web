@@ -9,9 +9,11 @@ const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
     id: 'discover',
     title: 'DISCOVER',
     links: [
+      { label: 'Spotlight', url: '/spotlight' },
+      { label: 'Collections', url: '/spotlight/explore?tab=collections' },
+      { label: 'Live', url: '/spotlight/calendar' },
+      { label: 'Guides', url: '/guides' },
       { label: 'Top Brands', url: '/brands' },
-      { label: 'New Arrival', url: '/products' },
-      { label: 'Compare Tool', url: '/compare' },
       { label: 'Best Deals', url: '/deals' },
     ],
   },

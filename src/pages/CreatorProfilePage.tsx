@@ -19,6 +19,7 @@ import { ClaimProfileModal } from '../components/ClaimProfileModal';
 import { FollowButton } from '../components/FollowButton';
 import { useRegisterPageFilters } from '../components/FilterEngine';
 import { StudioWrap } from '../components/studio/StudioWrap';
+import { SpotlightIntegrationRail } from '../components/spotlight/SpotlightIntegrationRail';
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
@@ -617,6 +618,14 @@ export function CreatorProfilePage() {
                      </button>
                   </div>
                )}
+
+               <SpotlightIntegrationRail
+                 creatorId={creator.id}
+                 title="Creator Spotlight"
+                 subtitle="Campaigns, reviews, live events, and featured picks."
+                 source="creator"
+                 viewAllHref="/spotlight"
+               />
 
                {/* Dedicated Section 1: YouTube Videos */}
                <StudioWrap sectionId="creator-videos" className="scroll-mt-44 text-left">

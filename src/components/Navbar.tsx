@@ -239,7 +239,7 @@ export function Navbar() {
           <div className="flex items-center gap-1.5 sm:flex-1 sm:min-w-0 sm:gap-0">
             <GlobalSearchBar
               initialValue={searchQuery}
-              placeholder="Search products, brands, creators..."
+              placeholder="Discover products, brands, campaigns, guides..."
               onSubmit={(val) => {
                 setSearchQuery(val);
                 navigate(`/search?q=${encodeURIComponent(val)}`);

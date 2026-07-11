@@ -7,6 +7,7 @@ import type {
   SpotlightCampaignCta,
 } from './lifecycle';
 import type { SpotlightCampaignType } from './campaignTypes';
+import type { SpotlightCampaignMerchandising } from './merchandising/model';
 
 /** CMS folder labels — virtual folders, not separate DB collections */
 export type SpotlightCampaignFolderId =
@@ -66,6 +67,8 @@ export interface SpotlightCampaignWizardDraft {
   campaignTags: string[];
   folderId?: string;
   cta: SpotlightCampaignCta;
+  /** LE-005.4 merchandising engine state */
+  merchandising?: SpotlightCampaignMerchandising;
 }
 
 export interface SpotlightCampaignListFilters {

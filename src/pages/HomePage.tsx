@@ -40,9 +40,12 @@ import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
 import { CategorySubcategoryPanel } from '../components/CategorySubcategoryPanel';
 import { buildCategoryDisplayList } from '../utils/categoryDisplay';
 import { buildPagePopularSearchTerms } from '../utils/pagePopularSearches';
-import { TrendingBrandsCarousel } from '../components/home/TrendingBrandsCarousel';
+import { SpotlightHeroCarousel } from '../components/home/SpotlightHeroCarousel';
+import { DiscoverAndLearnSection } from '../components/home/DiscoverAndLearnSection';
+import { FeaturedBrandsTabsSection } from '../components/home/FeaturedBrandsTabsSection';
 import { PremiumCarousel } from '../components/home/PremiumCarousel';
 import { StudioWrap } from '../components/studio/StudioWrap';
+import { buildSpotlightHeroCarouselItems } from '../utils/spotlightHeroCarousel';
 
 type HomeGuideCarouselKind = 'youtube' | 'reels' | 'blog';
 
@@ -109,7 +112,7 @@ const getCategoryIcon = (category: string) => {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allCatalogProducts, allCatalogBrands, allBrands, allDeals, allCategories, allGuides, allPlacements, allCreators, homepageConfig, siteConfig, addToCart } = useGlobalState();
+  const { allCatalogProducts, allCatalogBrands, allBrands, allDeals, allCategories, allGuides, allCatalogGuides, allPlacements, allCreators, homepageConfig, siteConfig, addToCart } = useGlobalState();
   const { savedProducts, setSavedProducts, addToCompare } = useDashboard();
   
   const [activeTab, setActiveTab] = useState('FEED');
@@ -206,23 +209,6 @@ export function HomePage() {
     return () => observer.disconnect();
   }, []);
 
-  // Keyboard nav for brand carousel
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') setCarouselIndex(prev => (prev + 1) % CAROUSEL_BRANDS.length);
-      if (e.key === 'ArrowLeft') setCarouselIndex(prev => (prev - 1 + CAROUSEL_BRANDS.length) % CAROUSEL_BRANDS.length);
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [CAROUSEL_BRANDS.length]);
-
-  // Auto-advance carousel every 5 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCarouselIndex(prev => (prev + 1) % CAROUSEL_BRANDS.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [CAROUSEL_BRANDS.length]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setDragStartX(e.touches[0].clientX);
@@ -724,17 +710,73 @@ export function HomePage() {
     return slides;
   }, [homepageGuides]);
 
+  const hasSpotlightCampaigns = useMemo(() => {
+    const items = buildSpotlightHeroCarouselItems({
+      catalog: allCatalogProducts,
+      guides: allCatalogGuides,
+      creators: allCreators,
+      brandPosts: getAllBrandPosts(),
+      brandLogos: BRAND_IMAGES,
+    });
+    return items.length > 0;
+  }, [allCatalogProducts, allCatalogGuides, allCreators]);
+
+  const spotlightHeroItems = useMemo(
+    () =>
+      buildSpotlightHeroCarouselItems({
+        catalog: allCatalogProducts,
+        guides: allCatalogGuides,
+        creators: allCreators,
+        brandPosts: getAllBrandPosts(),
+        brandLogos: BRAND_IMAGES,
+      }),
+    [allCatalogProducts, allCatalogGuides, allCreators],
+  );
+
+  const trendingBrandTab = useMemo(
+    () => [...rightBrandsList].sort((a: any, b: any) => (b.ratings ?? 0) - (a.ratings ?? 0)).slice(0, 8),
+    [rightBrandsList],
+  );
+
+  const verifiedBrandTab = useMemo(
+    () => rightBrandsList.filter((b: any) => b.isVerified || (b.ratings ?? 0) >= 4.5).slice(0, 8),
+    [rightBrandsList],
+  );
+
+  const newBrandTab = useMemo(
+    () => [...rightBrandsList].sort((a: any, b: any) => String(b.id).localeCompare(String(a.id))).slice(0, 8),
+    [rightBrandsList],
+  );
+
+  const carouselLength = spotlightHeroItems.length || CAROUSEL_BRANDS.length;
+
+  useEffect(() => {
+    if (carouselLength <= 1) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') setCarouselIndex((prev) => (prev + 1) % carouselLength);
+      if (e.key === 'ArrowLeft') setCarouselIndex((prev) => (prev - 1 + carouselLength) % carouselLength);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [carouselLength]);
+
+  useEffect(() => {
+    if (carouselLength <= 1) return;
+    const timer = setInterval(() => {
+      setCarouselIndex((prev) => (prev + 1) % carouselLength);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [carouselLength]);
+
   const homeSectionNavItems = useMemo(
     () => [
-      { id: 'section-trending-brands', label: 'Brands', icon: <Store size={13} />, hidden: !sectionVisible('trending') },
-      { id: 'section-new-on-choosify', label: 'Products', icon: <ShoppingBag size={13} />, hidden: !sectionVisible('trending') },
-      { id: 'section-hot-deals', label: 'Deals', icon: <Flame size={13} />, hidden: !sectionVisible('deals') },
-      { id: 'section-recommendations', label: 'Picks', icon: <Sparkles size={13} />, hidden: !sectionVisible('recommended') || homeFeaturedGuideSlides.length === 0 },
-      { id: 'section-featured-creators', label: 'Creators', icon: <Users size={13} />, hidden: !sectionVisible('creators') || featuredCreators.length === 0 },
       { id: 'section-categories', label: 'Categories', icon: <LayoutGrid size={13} />, hidden: !sectionVisible('categories') },
-      { id: 'section-whats-on', label: 'Events', icon: <Megaphone size={13} />, hidden: whatsOnPosts.length === 0 },
+      { id: 'section-spotlight-carousel', label: 'Spotlight', icon: <Flame size={13} />, hidden: !hasSpotlightCampaigns },
+      { id: 'section-new-on-choosify', label: 'Products', icon: <ShoppingBag size={13} />, hidden: !sectionVisible('trending') },
+      { id: 'section-discover-learn', label: 'Discover', icon: <BookOpen size={13} />, hidden: !sectionVisible('recommended') || homeFeaturedGuideSlides.length === 0 },
+      { id: 'section-featured-brands', label: 'Brands', icon: <Store size={13} />, hidden: !sectionVisible('featured-brands') },
     ],
-    [featuredCreators.length, homeFeaturedGuideSlides.length, whatsOnPosts.length],
+    [homeFeaturedGuideSlides.length, hasSpotlightCampaigns, sectionVisible],
   );
   const { activeId: homeActiveSectionId, scrollToSection: scrollToHomeSection } =
     useSectionScrollSpy(homeSectionNavItems);
@@ -750,11 +792,11 @@ export function HomePage() {
       profileLabel: 'Home feed',
     },
     quickFilters: [
-      { id: 'home-brands', label: '🏬 Trending Brands', active: false, onClick: () => jumpToHomeSection('section-trending-brands') },
-      { id: 'home-products', label: '🛍️ New Products', active: false, onClick: () => jumpToHomeSection('section-new-on-choosify') },
-      { id: 'home-deals', label: '🔥 Hot Deals', active: false, onClick: () => jumpToHomeSection('section-hot-deals') },
-      { id: 'home-picks', label: '✨ Editor Picks', active: false, onClick: () => jumpToHomeSection('section-recommendations') },
-      { id: 'home-categories', label: '🗂️ Categories', active: false, onClick: () => jumpToHomeSection('section-categories') },
+      { id: 'home-categories', label: '📂 Categories', active: false, onClick: () => jumpToHomeSection('section-categories') },
+      { id: 'home-spotlight', label: '🔥 Spotlight', active: false, onClick: () => jumpToHomeSection('section-spotlight-carousel') },
+      { id: 'home-products', label: '🛍 Products', active: false, onClick: () => jumpToHomeSection('section-new-on-choosify') },
+      { id: 'home-discover', label: '📚 Discover', active: false, onClick: () => jumpToHomeSection('section-discover-learn') },
+      { id: 'home-brands', label: '🏷 Brands', active: false, onClick: () => jumpToHomeSection('section-featured-brands') },
     ],
     renderFilters: () => (
       <UniversalFilterRenderer
@@ -919,9 +961,43 @@ export function HomePage() {
           {/* MAIN FEED CONTENT PORTAL */}
           {activeTab === 'FEED' ? (
             <>
-              {sectionVisible('trending') && (
+              {sectionVisible('categories') && (
+              <div id="section-categories">
+              <StudioWrap sectionId="home-categories" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-100">
+                  <div className="text-left">
+                    <h2 className="text-base font-semibold text-[#1a1a2e]">
+                      Top <span className="text-[#E8500A]">Categories</span>
+                    </h2>
+                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">Explore by industry and niche</p>
+                  </div>
+                  <Link to="/categories" className="border border-[#e8edf2] hover:border-[#E8500A]/30 text-[#1a1a2e] hover:text-[#E8500A] text-[10px] font-medium uppercase tracking-wider rounded-lg px-4 py-2 bg-white transition-all shrink-0">
+                    Show All
+                  </Link>
+                </div>
+                <div className={cn(HOME_POPULAR_CATEGORY_GRID, 'text-left')}>
+                  {popularCategoriesList.map((cat) => {
+                    const isExpanded = expandedCategory === cat.name;
+                    return (
+                      <React.Fragment key={cat.id || cat.name}>
+                        <CategoryPhotoCard name={cat.name} productCount={cat.count} image={cat.image} onClick={() => setExpandedCategory(isExpanded ? null : cat.name)} isExpanded={isExpanded} />
+                        <AnimatePresence mode="sync">
+                          {isExpanded ? (
+                            <CategorySubcategoryPanel category={cat} onClose={() => setExpandedCategory(null)} products={allCatalogProducts ?? []} cmsTerms={siteConfig?.popularSearches} />
+                          ) : null}
+                        </AnimatePresence>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </StudioWrap>
+              </div>
+              )}
+
+              {hasSpotlightCampaigns && (
+              <div id="section-spotlight-carousel">
               <StudioWrap
-                sectionId="home-trending-brands"
+                sectionId="home-spotlight-carousel"
                 className="rounded-[5px] border border-white/10 p-3 sm:p-5 shadow-sm overflow-hidden"
                 style={{
                   backgroundColor: CAROUSEL_BG_COLORS[carouselIndex % CAROUSEL_BG_COLORS.length],
@@ -931,49 +1007,32 @@ export function HomePage() {
                 <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-white/10 pb-3 mb-4 gap-4">
                   <div className="text-left">
                     <div className="flex items-center gap-1">
-                      <span className="text-base font-semibold text-white">Trending</span>
-                      <span className="text-base font-semibold text-[#ff7c45]">Brands</span>
+                      <span className="text-base font-semibold text-white">Spotlight</span>
                     </div>
-                    <p className="text-[12px] text-white/50 mt-1 text-left">
-                      Connect with thousands of authentic shopper tests and verify brand credentials today.
-                    </p>
+                    <p className="text-[12px] text-white/50 mt-1">Live events, launches, campaigns, and creator picks.</p>
                   </div>
-                  <Link to="/brands" className="text-[12px] font-medium text-white/65 hover:text-white shrink-0 hover:underline">
-                    View All Brands
+                  <Link to="/spotlight" className="text-[12px] font-medium text-white/65 hover:text-white shrink-0 hover:underline">
+                    Explore Spotlight
                   </Link>
                 </div>
-
-                <TrendingBrandsCarousel
-                  carouselBrands={carouselBrands}
-                  carouselIndex={carouselIndex}
-                  setCarouselIndex={setCarouselIndex}
-                  navigate={navigate}
-                  handleTouchStart={handleTouchStart}
-                  handleTouchEnd={handleTouchEnd}
-                  handleMouseDown={handleMouseDown}
-                  handleMouseUpOrLeave={handleMouseUpOrLeave}
-                />
+                <SpotlightHeroCarousel items={spotlightHeroItems} carouselIndex={carouselIndex} setCarouselIndex={setCarouselIndex} />
               </StudioWrap>
+              </div>
               )}
 
               {sectionVisible('trending') && (
+              <div id="section-new-on-choosify">
               <StudioWrap sectionId="home-new-products" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
                   <div className="text-left">
                     <div className="flex items-center gap-1">
-                      <span className="text-base font-semibold text-[#1a1a2e]">New on</span>
-                      <span className="text-base font-semibold text-[#E8500A]">Choosify</span>
+                      <span className="text-base font-semibold text-[#1a1a2e]">Featured</span>
+                      <span className="text-base font-semibold text-[#E8500A]">Products</span>
                     </div>
-                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
-                      Fresh arrivals, latest reviews, and newly verified buying options in Bangladesh.
-                    </p>
+                    <p className="text-[12px] text-[#8a9bb0] mt-1">Curated picks to shop with confidence.</p>
                   </div>
-                  <Link to="/products" className="text-[12px] font-medium text-[#FF5B00] shrink-0 hover:underline">
-                    View All Products
-                  </Link>
+                  <Link to="/products" className="text-[12px] font-medium text-[#FF5B00] shrink-0 hover:underline">View All Products</Link>
                 </div>
-
-                {/* 4-column, 2-row Product Grid */}
                 <div className={PRODUCT_CARD_GRID}>
                   {allCatalogProducts
                     .filter((p) => p.isNewArrival || Number.parseInt(String(p.id).replace(/\D/g, ''), 10) % 3 === 0)
@@ -983,234 +1042,28 @@ export function HomePage() {
                       <ProductCard key={product.id} product={product} variant="grid" />
                     ))}
                 </div>
-
-                {/* Bottom CTA Button */}
-                <div className="text-center mt-6 pt-4 border-t border-gray-50">
-                  <Link 
-                    to="/products" 
-                    className="inline-flex items-center gap-1.5 text-sm font-black text-[#E8500A] hover:text-[#CF4400] transition-colors uppercase tracking-wider"
-                  >
-                    <span>Browse All Products</span>
-                    <ChevronRight size={16} />
-                  </Link>
-                </div>
               </StudioWrap>
-              )}
-
-              {sectionVisible('featured-brands') && (
-              <div 
-                id="section-spotlight-brands" 
-                className="p-6 md:p-8 shadow-sm text-left bg-white rounded-[5px] border border-[#e8edf2] mt-6"
-              >
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-100 pb-3 mb-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-[0.25em]">Sponsored Brands Spotlight</span>
-                      <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-[#E8500A]/90 border border-[#E8500A]/30 uppercase bg-[#E8500A]/10 rounded-full">AD</span>
-                    </div>
-                    <h2 className="text-base font-semibold text-[#1a1a2e] mt-1">SPOTLIGHT <span className="text-[#E8500A]">BRANDS</span></h2>
-                    <p className="text-xs text-gray-400 mt-1">Discover curated exclusive collections directly from official certified channels.</p>
-                  </div>
-                  <div>
-                    <span className="rounded-full px-2.5 py-1 text-[10px] font-extrabold tracking-wider bg-[#E8500A]/5 text-[#E8500A] border border-[#E8500A]/15 uppercase">
-                      Sponsored AD
-                    </span>
-                  </div>
-                </div>
-
-                {/* Premium Horizontal Carousel */}
-                <PremiumCarousel
-                  items={spotlightBrands}
-                  itemWidth={280}
-                  gap={20}
-                  renderCard={(brand) => {
-                    const fallback = BRANDS.find(b => b.id === brand.id);
-                    return (
-                      <div className="shrink-0 w-[280px]">
-                        <BrandCardDesign brand={mapBrandToCardDesign(brand, fallback)} />
-                      </div>
-                    );
-                  }}
-                />
               </div>
               )}
 
-              {sectionVisible('deals') && (
-              <StudioWrap sectionId="home-deals" className="bg-[#FFFFFF] border-t-2 border-[#E8500A] rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left mb-6">
-                
-                {/* Section Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-3 mb-4 gap-4">
-                  <div className="text-left">
-                    <div className="flex items-center gap-1">
-                      <span className="text-base font-semibold text-[#1a1a2e]">Hot</span>
-                      <span className="text-base font-semibold text-[#E8500A]">Deals</span>
-                    </div>
-                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
-                      Best ongoing deals, discounts and limited-time offers.
-                    </p>
-                  </div>
-
-                  <Link 
-                    to="/deals" 
-                    className="inline-flex items-center gap-1.5 hover:bg-gray-50 text-[#E8500A] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider rounded-lg transition-all"
-                  >
-                    View All Deals <ChevronRight size={14} />
-                  </Link>
-                </div>
-
-                {/* Hot Deals Carousel of featured Products */}
-                <PremiumCarousel
-                  items={featuredDeals}
-                  itemWidth={210}
-                  gap={16}
-                  renderCard={(product) => (
-                    <div className="w-[210px] shrink-0 flex flex-col h-full">
-                      <ProductCard product={product} variant="grid" />
-                    </div>
-                  )}
-                />
-              </StudioWrap>
-              )}
-
-              {sectionVisible('creators') && featuredCreators.length > 0 && (
-              <StudioWrap sectionId="home-creators" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4 pb-3 border-b border-gray-100">
-                  <div className="text-left">
-                    <h2 className="text-base font-semibold text-[#1a1a2e]">
-                      FEATURED <span className="text-[#E8500A]">CREATORS</span>
-                    </h2>
-                    <p className="text-[12px] text-[#8a9bb0] mt-1">
-                      Trusted reviewers and buying guides curated from the CMS.
-                    </p>
-                  </div>
-                  <Link
-                    to="/creators"
-                    className="inline-flex items-center gap-1.5 text-[#E8500A] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider transition-all shrink-0"
-                  >
-                    View All Creators <ChevronRight size={14} />
-                  </Link>
-                </div>
-                <PremiumCarousel
-                  items={featuredCreators}
-                  itemWidth={260}
-                  gap={16}
-                  renderCard={(creator: any) => (
-                    <div className="w-[260px] shrink-0">
-                      <CreatorCardDesign creator={creator} />
-                    </div>
-                  )}
-                />
-              </StudioWrap>
-              )}
-
               {sectionVisible('recommended') && homeFeaturedGuideSlides.length > 0 && (
-              <StudioWrap sectionId="home-recommendations" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm mt-6">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4 pb-3 border-b border-gray-100">
-                  <div className="text-left">
-                    <h2 className="text-base font-semibold text-[#1a1a2e]">
-                      FEATURED <span className="text-[#E8500A]">RECOMMENDATIONS</span>
-                    </h2>
-                    <p className="text-[12px] text-[#8a9bb0] mt-1">
-                      Swipe through YouTube guides, reels, and buying blogs in one feed.
-                    </p>
-                  </div>
-                  <Link
-                    to="/guides"
-                    className="inline-flex items-center gap-1.5 border border-[#e8edf2] hover:border-[#E8500A]/30 text-[#1a1a2e] hover:text-[#E8500A] text-[10px] font-medium uppercase tracking-wider rounded-lg px-4 py-2 bg-white transition-all shrink-0"
-                  >
-                    View All Guides
-                    <ChevronRight size={14} />
-                  </Link>
+                <div id="section-discover-learn">
+                  <DiscoverAndLearnSection
+                    guideSlides={homeFeaturedGuideSlides}
+                    renderGuideCard={renderHomeGuideCarouselCard}
+                    creators={featuredCreators}
+                  />
                 </div>
-
-                <PremiumCarousel
-                  items={homeFeaturedGuideSlides}
-                  itemWidth={252}
-                  gap={16}
-                  renderCard={(slide: HomeGuideCarouselSlide) => (
-                    <div className="w-full h-full flex items-start">
-                      {renderHomeGuideCarouselCard(slide)}
-                    </div>
-                  )}
-                />
-              </StudioWrap>
               )}
 
-              {sectionVisible('categories') && (
-              <StudioWrap sectionId="home-categories" className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm">
-                
-                {/* Section Header */}
-                <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-100">
-                  <div className="text-left">
-                    <h2 className="text-base font-semibold text-[#1a1a2e]">
-                      POPULAR <span className="text-[#E8500A]">CATEGORIES</span>
-                    </h2>
-                    <p className="text-[12px] text-[#8a9bb0] mt-1 text-left">
-                      EXPLORE BY INDUSTRY & NICHE
-                    </p>
-                  </div>
-                  
-                  {/* Show All Category Button on right */}
-                  <div className="flex shrink-0">
-                    <Link 
-                      to="/categories" 
-                      className="border border-[#e8edf2] hover:border-[#E8500A]/30 text-[#1a1a2e] hover:text-[#E8500A] text-[10px] font-medium uppercase tracking-wider rounded-lg px-4 py-2 bg-white transition-all hover:scale-[1.01] active:scale-95"
-                    >
-                      SHOW ALL CATEGORIES
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Categories Grid — photo-first tiles matching Categories page */}
-                <div className={cn(HOME_POPULAR_CATEGORY_GRID, 'text-left')}>
-                  {popularCategoriesList.map((cat) => {
-                    const isExpanded = expandedCategory === cat.name;
-                    return (
-                      <React.Fragment key={cat.id || cat.name}>
-                        <CategoryPhotoCard
-                          name={cat.name}
-                          productCount={cat.count}
-                          image={cat.image}
-                          onClick={() =>
-                            setExpandedCategory(isExpanded ? null : cat.name)
-                          }
-                          isExpanded={isExpanded}
-                        />
-
-                        <AnimatePresence mode="sync">
-                          {isExpanded ? (
-                            <CategorySubcategoryPanel
-                              category={cat}
-                              onClose={() => setExpandedCategory(null)}
-                              products={allCatalogProducts ?? []}
-                              cmsTerms={siteConfig?.popularSearches}
-                            />
-                          ) : null}
-                        </AnimatePresence>
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-
-                <PopularSearchKeywords
-                  title="Popular searches"
-                  terms={homePopularSearchTerms}
-                  className="mt-6 pt-6"
+              {sectionVisible('featured-brands') && (
+                <FeaturedBrandsTabsSection
+                  featuredBrands={spotlightBrands}
+                  trendingBrands={trendingBrandTab}
+                  verifiedBrands={verifiedBrandTab}
+                  newBrands={newBrandTab}
+                  brandFallback={BRANDS}
                 />
-              </StudioWrap>
-              )}
-
-              {whatsOnPosts.length > 0 && (
-              <StudioWrap sectionId="home-events" className="mt-6">
-              <BrandPostCarouselSection
-                posts={whatsOnPosts}
-                title="Events"
-                subtitle="Upcoming launches, festivals, and brand events from verified shops."
-                viewAllHref="/whats-on"
-                viewAllLabel="View All Events"
-              />
-              </StudioWrap>
               )}
             </>
           ) : (

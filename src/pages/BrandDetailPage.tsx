@@ -34,6 +34,7 @@ import {
   Facebook,
   Instagram,
   Megaphone,
+  Flame,
 } from "lucide-react";
 import { BRANDS, PRODUCTS } from "../constants";
 import { ProductCard } from "../components/ProductCard";
@@ -45,6 +46,7 @@ import { CardEngagementStrip } from "../components/CardEngagementStrip";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { StudioWrap } from "../components/studio/StudioWrap";
 import { BrandPostCarouselSection } from "../components/BrandPostCarouselSection";
+import { SpotlightIntegrationRail } from "../components/spotlight/SpotlightIntegrationRail";
 import { getBrandPostsByBrandId } from "../lib/brandPosts";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import { useCarousel } from "../hooks/useCarousel";
@@ -233,6 +235,11 @@ export function BrandDetailPage() {
         id: "creator-reviews-section",
         label: "Creator Reviews",
         icon: <Sparkles size={13} />,
+      },
+      {
+        id: "spotlight-section",
+        label: "Spotlight",
+        icon: <Flame size={13} />,
       },
       {
         id: "campaigns-section",
@@ -2187,6 +2194,16 @@ export function BrandDetailPage() {
             )}
           </div>
 
+          </div>
+
+          <div id="spotlight-section" className="scroll-mt-36 w-full">
+            <SpotlightIntegrationRail
+              brandId={String(brand.id)}
+              title="Spotlight"
+              subtitle="Campaigns, live events, announcements, and creator reviews."
+              source="brand"
+              viewAllHref="/spotlight"
+            />
           </div>
 
           {brandWhatsOnPosts.length > 0 && (

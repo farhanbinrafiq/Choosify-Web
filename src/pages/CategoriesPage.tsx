@@ -17,6 +17,7 @@ import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
 import { PLACEMENT_KEYS } from '../lib/placements';
+import { SpotlightIntegrationRail } from '../components/spotlight/SpotlightIntegrationRail';
 
 type CategoryItem = CategoryDisplayItem;
 
@@ -701,6 +702,16 @@ export function CategoriesPage() {
                 );
               })}
             </div>
+          )}
+
+          {(expandedCategory || (activeCategoryTab !== 'All Categories' && activeCategoryTab)) && (
+            <SpotlightIntegrationRail
+              title={`${expandedCategory ?? activeCategoryTab} Spotlight`}
+              subtitle="Latest launches, creator reviews, campaigns, and live events."
+              categoryName={expandedCategory ?? activeCategoryTab}
+              source="category"
+              viewAllHref="/spotlight/explore"
+            />
           )}
         </div>
 

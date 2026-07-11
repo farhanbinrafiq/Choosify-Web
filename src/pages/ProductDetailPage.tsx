@@ -60,6 +60,7 @@ import { slugifyPathSegment } from "../lib/seoHelpers";
 import { StudioWrap } from "../components/studio/StudioWrap";
 import { useStudioEdit } from "../context/StudioEditContext";
 import { CreateSpotlightCampaignButton } from "../components/spotlight/cms/CreateSpotlightCampaignButton";
+import { SpotlightIntegrationRail } from "../components/spotlight/SpotlightIntegrationRail";
 import type { CatalogProductSizeGuide } from "../types/catalog";
 
 function hasActiveSizeGuide(sizeGuide?: CatalogProductSizeGuide | null): boolean {
@@ -1300,6 +1301,14 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 creatorContent={product?.creatorContent}
               />
             </StudioWrap>
+
+            <SpotlightIntegrationRail
+              title="Featured in Spotlight"
+              subtitle="Related campaigns, live events, creator reviews, and buying guides."
+              productIds={[String(product.id)]}
+              source="product"
+              viewAllHref="/spotlight/search"
+            />
 
             {/* PUBLIC REVIEWS (ID: 'public-reviews-section') */}
             <StudioWrap

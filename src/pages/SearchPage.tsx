@@ -21,8 +21,13 @@ import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '../utils/overviewRegistry';
 import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
-import { filterBrandPosts } from '../lib/brandPosts';
+import { filterBrandPosts, getAllBrandPosts } from '../lib/brandPosts';
 import { BrandPostCard } from '../components/BrandPostCard';
+import { resolveSpotlightExperience } from '../utils/spotlightContentResolver';
+import { searchSpotlightContent } from '../utils/spotlightSearch';
+import { listSpotlightCollections } from '../utils/spotlightCollections';
+import { listSpotlightSeries } from '../utils/spotlightSeries';
+import type { SpotlightSearchResult } from '../types/spotlight/discovery/search';
 
 // Promo Codes & Brand Deals data
 const BRAND_DEALS = [
@@ -125,14 +130,14 @@ export function SearchPage() {
   const navigate = useNavigate();
   const rawQuery = searchParams.get('q') || '';
   const [localInput, setLocalInput] = useState(rawQuery);
-  const [activeTab, setActiveTab] = useState<'all' | 'products' | 'brands' | 'deals' | 'guides' | 'coupons' | 'categories' | 'influencers' | 'whats-on' | 'compares'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'products' | 'brands' | 'deals' | 'guides' | 'coupons' | 'categories' | 'influencers' | 'whats-on' | 'compares' | 'spotlight'>('all');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'default' | 'price_asc' | 'price_desc' | 'newest'>('default');
   const [maxPrice, setMaxPrice] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [inStockOnly, setInStockOnly] = useState(false);
   const { customOverviews } = useDashboard();
-  const { allCatalogProducts, allBrands, allCategories, allCreators, allGuides, siteConfig } = useGlobalState();
+  const { allCatalogProducts, allBrands, allCategories, allCreators, allGuides, allCatalogGuides, siteConfig } = useGlobalState();
   const productSource = allCatalogProducts;
   const brandSource = allBrands.length > 0
     ? allBrands.map((b) => ({ ...b, products: (b as any).followers ?? (b as any).products ?? 0, rating: (b as any).ratings ?? (b as any).rating ?? 0 }))
@@ -159,6 +164,7 @@ export function SearchPage() {
       { id: 'products', label: 'Products', icon: <ShoppingBag size={13} /> },
       { id: 'brands', label: 'Brands', icon: <Award size={13} /> },
       { id: 'deals', label: 'Deals', icon: <Tag size={13} /> },
+      { id: 'spotlight', label: 'Spotlight', icon: <Sparkle size={13} /> },
       { id: 'whats-on', label: 'Events', icon: <Sparkles size={13} /> },
       { id: 'guides', label: 'Guides', icon: <BookOpen size={13} /> },
       { id: 'coupons', label: 'Coupons', icon: <Percent size={13} /> },
@@ -193,7 +199,7 @@ export function SearchPage() {
             setLocalInput(val);
             setSearchParams(val ? { q: val } : {});
           }}
-          placeholder="Search all content..."
+          placeholder="Discover products, brands, campaigns, guides..."
           className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
         />
       </div>
@@ -417,6 +423,7 @@ export function SearchPage() {
         influencers: [],
         whatsOn: [],
         compares: [],
+        spotlight: [] as SpotlightSearchResult[],
         total: 0
       };
     }
@@ -603,6 +610,17 @@ export function SearchPage() {
       };
     }).filter(Boolean) as any[];
 
+    const allSpotlightContent = resolveSpotlightExperience({
+      catalog: productSource,
+      guides: allCatalogGuides,
+      creators: creatorSource as Parameters<typeof resolveSpotlightExperience>[0]['creators'],
+      brandPosts: getAllBrandPosts(),
+      brandLogos: {},
+    });
+    const spotlightCollections = listSpotlightCollections(allSpotlightContent);
+    const spotlightSeries = listSpotlightSeries(allSpotlightContent);
+    const matchedSpotlight = searchSpotlightContent(q, allSpotlightContent, spotlightCollections, spotlightSeries);
+
     // Sort all arrays by score priority descending
     const sortFn = (a: any, b: any) => b.score - a.score;
     matchedProducts.sort(sortFn);
@@ -616,7 +634,8 @@ export function SearchPage() {
 
     const total = matchedProducts.length + matchedBrands.length + matchedDeals.length + 
                   matchedGuides.length + matchedCoupons.length + matchedCategories.length + 
-                  matchedInfluencers.length + matchedWhatsOn.length + matchedCompares.length;
+                  matchedInfluencers.length + matchedWhatsOn.length + matchedCompares.length +
+                  matchedSpotlight.length;
 
     return {
       products: matchedProducts,
@@ -628,9 +647,10 @@ export function SearchPage() {
       influencers: matchedInfluencers,
       whatsOn: matchedWhatsOn,
       compares: matchedCompares,
+      spotlight: matchedSpotlight,
       total
     };
-  }, [rawQuery, filteredGuides, combinedCreators, customOverviews, productSource, brandSource, categorySource]);
+  }, [rawQuery, filteredGuides, combinedCreators, customOverviews, productSource, brandSource, categorySource, allCatalogGuides, creatorSource]);
 
   // Tab configurations
   const tabConfig = [
@@ -638,6 +658,7 @@ export function SearchPage() {
     { key: 'products', label: 'Products', count: filteredProducts.length },
     { key: 'brands', label: 'Brand Profiles', count: searchResults.brands.length },
     { key: 'deals', label: 'Deals', count: searchResults.deals.length },
+    { key: 'spotlight', label: 'Spotlight', count: searchResults.spotlight.length },
     { key: 'whats-on', label: 'Events', count: searchResults.whatsOn.length },
     { key: 'compares', label: 'Compare Results', count: searchResults.compares.length },
     { key: 'guides', label: 'Buying Guides', count: filteredGuides.length },
@@ -691,10 +712,10 @@ export function SearchPage() {
               <Search size={28} />
             </div>
             <h3 className="text-lg font-black uppercase tracking-tight text-gray-800">
-              Query Required
+              Start Discovering
             </h3>
             <p className="text-xs text-gray-500 max-w-xs mt-1.5 leading-relaxed">
-              Use the unified search bar above to look up products, brands, promo deals, categories or local influencers.
+              Discover amazing products, brands, campaigns, guides, and creators across Choosify.
             </p>
           </div>
         ) : searchResults.total === 0 ? (
@@ -1035,6 +1056,45 @@ export function SearchPage() {
                   </div>
                 )
               ) : null
+            )}
+
+            {/* 7b. SPOTLIGHT RESULTS */}
+            {(activeTab === 'all' || activeTab === 'spotlight') && searchResults.spotlight.length > 0 && (
+              <div className="bg-white rounded-[5px] border border-gray-200 p-6">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Sparkle size={15} className="text-[#E8500A]" />
+                    <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
+                      Spotlight ({searchResults.spotlight.length})
+                    </h2>
+                  </div>
+                  {activeTab === 'all' && searchResults.spotlight.length > 4 && (
+                    <button onClick={() => setActiveTab('spotlight')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                      See All <ChevronRight size={12} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {(activeTab === 'all' ? searchResults.spotlight.slice(0, 4) : searchResults.spotlight).map((item) => (
+                    <Link
+                      key={`${item.kind}-${item.entityId}`}
+                      to={item.href}
+                      className="flex items-center justify-between gap-3 p-3 rounded-[5px] border border-gray-100 hover:border-[#E8500A]/30 hover:bg-[#E8500A]/5 transition-colors group"
+                    >
+                      <div className="min-w-0 text-left">
+                        <p className="text-[12px] font-bold text-[#1A1D4E] truncate group-hover:text-[#E8500A]">{item.title}</p>
+                        {item.subtitle && (
+                          <p className="text-[10px] text-gray-400 truncate mt-0.5">{item.subtitle}</p>
+                        )}
+                      </div>
+                      <span className="shrink-0 text-[8px] font-black uppercase tracking-wider bg-[#E8500A]/10 text-[#E8500A] px-2 py-1 rounded-full">
+                        {item.kind}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             )}
 
             {/* 8. WHAT'S ON SECTION */}

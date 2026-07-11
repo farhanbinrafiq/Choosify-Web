@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Search, Folder, User, Clock, ArrowRight, Sparkles, X } from 'lucide-react';
+import { Search, Folder, User, Clock, ArrowRight, Sparkles, X, Flame, Rocket, BookOpen, Store, ShoppingBag, LayoutGrid } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { CATEGORIES } from '../constants';
 import { CREATORS } from '../data/creators';
@@ -9,6 +9,8 @@ import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 import { type SuggestionItem } from './search/searchTypes';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { resolveSpotlightExperience } from '../utils/spotlightContentResolver';
+import { getAllBrandPosts } from '../lib/brandPosts';
 
 interface GlobalSearchBarProps {
   initialValue?: string;
@@ -29,7 +31,7 @@ interface GlobalSearchBarProps {
 
 export function GlobalSearchBar({
   initialValue = '',
-  placeholder = "Search authentic Fashion hubs, Smart Gadgets & verified outlets...",
+  placeholder = "Discover products, brands, campaigns, guides...",
   className = '',
   onSubmit,
   variant = 'standard',
@@ -61,7 +63,7 @@ export function GlobalSearchBar({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const { customOverviews } = useDashboard();
-  const { allCatalogProducts, allBrands, allCategories, allCreators, siteConfig } = useGlobalState();
+  const { allCatalogProducts, allBrands, allCategories, allCreators, allCatalogGuides, siteConfig } = useGlobalState();
 
   const productSource = allCatalogProducts;
   const brandSource = allBrands.length > 0
@@ -187,7 +189,7 @@ export function GlobalSearchBar({
         top: rect.bottom + 8,
         left,
         width,
-        maxHeight: isMobileOverlay ? Math.min(385, window.innerHeight - rect.bottom - 16) : 385,
+        maxHeight: isMobileOverlay ? Math.min(520, window.innerHeight - rect.bottom - 16) : 520,
         visibility: 'visible',
         zIndex: 300,
       });
@@ -234,6 +236,119 @@ export function GlobalSearchBar({
     categorySource,
   });
 
+  const discoveryPanel = useMemo(() => {
+    const spotlightContent = resolveSpotlightExperience({
+      catalog: productSource,
+      guides: allCatalogGuides,
+      creators: creatorSource,
+      brandPosts: getAllBrandPosts(),
+      brandLogos: {},
+    });
+
+    const spotlightCampaigns: SuggestionItem[] = spotlightContent
+      .filter((c) => c.contentType === 'campaign' || c.isSponsored || c.contentType === 'announcement')
+      .slice(0, 4)
+      .map((c) => ({
+        id: `spotlight-${c.contentId}`,
+        type: 'spotlight' as const,
+        title: c.headline,
+        subtitle: c.publisher.name,
+        route: c.href,
+        badge: c.isLive ? 'Live' : 'Campaign',
+      }));
+
+    const newLaunches: SuggestionItem[] = spotlightContent
+      .filter((c) => c.contentType === 'new_launch' || c.contentType === 'event' || c.contentType === 'announcement')
+      .slice(0, 4)
+      .map((c) => ({
+        id: `launch-${c.contentId}`,
+        type: 'launch' as const,
+        title: c.headline,
+        subtitle: c.publisher.name,
+        route: c.href,
+        badge: 'Launch',
+      }));
+
+    const popularGuides: SuggestionItem[] = allCatalogGuides
+      .slice(0, 4)
+      .map((g) => ({
+        id: `guide-${g.id}`,
+        type: 'guide' as const,
+        title: g.title,
+        subtitle: g.category ?? 'Buying guide',
+        route: `/guides/${g.id}`,
+        badge: 'Guide',
+      }));
+
+    const featuredCreators: SuggestionItem[] = creatorSource.slice(0, 4).map((c) => ({
+      id: `creator-${c.id}`,
+      type: 'creator' as const,
+      title: c.name,
+      subtitle: c.handle ?? c.bio?.slice(0, 40),
+      route: `/creators/${c.id}`,
+      image: c.avatar,
+      badge: 'Creator',
+    }));
+
+    const trendingBrands: SuggestionItem[] = [...brandSource]
+      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      .slice(0, 4)
+      .map((b) => ({
+        id: `brand-${b.id}`,
+        type: 'brand' as const,
+        title: b.name,
+        subtitle: b.category,
+        route: `/brands/${b.id}`,
+        badge: 'Brand',
+      }));
+
+    const popularProducts: SuggestionItem[] = productSource
+      .filter((p) => p.isBestseller || p.isNewArrival)
+      .slice(0, 4)
+      .map((p) => ({
+        id: `product-pop-${p.id}`,
+        type: 'product' as const,
+        title: p.title,
+        subtitle: `${p.brandName} • BDT ${p.price}`,
+        route: `/products/${p.id}`,
+        image: p.image,
+        badge: 'Product',
+      }));
+
+    const topCategories: SuggestionItem[] = categorySource.slice(0, 6).map((c) => ({
+      id: `cat-${c.id}`,
+      type: 'category' as const,
+      title: c.name,
+      route: `/categories?q=${encodeURIComponent(c.name)}`,
+      badge: 'Category',
+    }));
+
+    return {
+      spotlightCampaigns,
+      newLaunches,
+      popularGuides,
+      featuredCreators,
+      trendingBrands,
+      popularProducts,
+      topCategories,
+    };
+  }, [productSource, allCatalogGuides, creatorSource, brandSource, categorySource]);
+
+  const combinedFlatSuggestions = useMemo(() => {
+    if (queryValue.trim()) return flatSuggestions;
+    const list: SuggestionItem[] = [...flatSuggestions];
+    list.push(
+      ...discoveryPanel.spotlightCampaigns,
+      ...discoveryPanel.newLaunches,
+      ...discoveryPanel.popularGuides,
+      ...discoveryPanel.featuredCreators,
+      ...discoveryPanel.trendingBrands,
+      ...discoveryPanel.popularProducts,
+      ...discoveryPanel.topCategories,
+    );
+    return list;
+  }, [queryValue, flatSuggestions, discoveryPanel]);
+
   // Keyboard controls
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
@@ -245,14 +360,14 @@ export function GlobalSearchBar({
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setActiveIndex(prev => (prev + 1 >= flatSuggestions.length ? 0 : prev + 1));
+      setActiveIndex(prev => (prev + 1 >= combinedFlatSuggestions.length ? 0 : prev + 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setActiveIndex(prev => (prev - 1 < 0 ? flatSuggestions.length - 1 : prev - 1));
+      setActiveIndex(prev => (prev - 1 < 0 ? combinedFlatSuggestions.length - 1 : prev - 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (activeIndex >= 0 && activeIndex < flatSuggestions.length) {
-        handleSelectSuggestion(flatSuggestions[activeIndex]);
+      if (activeIndex >= 0 && activeIndex < combinedFlatSuggestions.length) {
+        handleSelectSuggestion(combinedFlatSuggestions[activeIndex]);
       } else {
         handleSearchSubmit();
       }
@@ -570,7 +685,7 @@ export function GlobalSearchBar({
               <div className="flex flex-col text-left space-y-2 pt-4 md:pt-0 md:pl-4">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1">
                   <ArrowRight size={12} className="text-orange-primary animate-pulse" />
-                  Trending
+                  🔥 Trending Searches
                 </span>
                 <div className="flex flex-col space-y-1">
                   {suggestionsGrouped.trending.map((item, idx) => {
@@ -592,6 +707,63 @@ export function GlobalSearchBar({
                   })}
                 </div>
               </div>
+
+              {/* Discovery Hub — additional rails */}
+              {(() => {
+                const baseOffset = suggestionsGrouped.recent.length + suggestionsGrouped.popular.length + suggestionsGrouped.trending.length;
+                let offset = baseOffset;
+
+                const renderRail = (
+                  label: string,
+                  icon: React.ReactNode,
+                  items: SuggestionItem[],
+                ) => {
+                  if (!items.length) return null;
+                  const startIdx = offset;
+                  offset += items.length;
+                  return (
+                    <div className="flex flex-col text-left space-y-2 pt-4 border-t border-gray-100 md:col-span-3">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                        {icon}
+                        {label}
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {items.map((item, idx) => {
+                          const flatIdx = startIdx + idx;
+                          const isActive = activeIndex === flatIdx;
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => handleSelectSuggestion(item)}
+                              onMouseEnter={() => setActiveIndex(flatIdx)}
+                              className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold border transition-colors ${
+                                isActive
+                                  ? 'bg-[#E8500A]/10 text-[#E8500A] border-[#E8500A]/30'
+                                  : 'bg-gray-50 text-[#1A1A2E] border-gray-100 hover:border-[#E8500A]/20'
+                              }`}
+                            >
+                              {item.title}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                };
+
+                return (
+                  <>
+                    {renderRail('⭐ Spotlight Campaigns', <Flame size={12} className="text-[#E8500A]" />, discoveryPanel.spotlightCampaigns)}
+                    {renderRail('🚀 New Launches', <Rocket size={12} className="text-[#E8500A]" />, discoveryPanel.newLaunches)}
+                    {renderRail('📚 Popular Guides', <BookOpen size={12} className="text-[#E8500A]" />, discoveryPanel.popularGuides)}
+                    {renderRail('👤 Featured Creators', <User size={12} className="text-[#E8500A]" />, discoveryPanel.featuredCreators)}
+                    {renderRail('🏷 Trending Brands', <Store size={12} className="text-[#E8500A]" />, discoveryPanel.trendingBrands)}
+                    {renderRail('🛍 Popular Products', <ShoppingBag size={12} className="text-[#E8500A]" />, discoveryPanel.popularProducts)}
+                    {renderRail('📂 Top Categories', <LayoutGrid size={12} className="text-[#E8500A]" />, discoveryPanel.topCategories)}
+                  </>
+                );
+              })()}
 
             </div>
           ) : (
