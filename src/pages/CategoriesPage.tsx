@@ -1,810 +1,433 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { Check, Construction, LayoutGrid, PenTool, Search, Sparkles, Users, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import * as LucideIcons from 'lucide-react';
+import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
-import { useGlobalState } from '../context/GlobalStateContext';
-import { CategoryCardSkeleton } from '../components/Skeleton';
-import { CategoryPhotoCard } from '../components/CategoryPhotoCard';
-import { CategorySubcategoryPanel } from '../components/CategorySubcategoryPanel';
-import { buildCategoryDisplayList, type CategoryDisplayItem } from '../utils/categoryDisplay';
-import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
-import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
-import { StickySectionNav } from '../components/StickySectionNav';
-import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
-import { ListingAdRail } from '../components/ListingAdRail';
-import { AdSenseSlot } from '../components/AdSenseSlot';
-import { PLACEMENT_KEYS } from '../lib/placements';
-import { SpotlightIntegrationRail } from '../components/spotlight/SpotlightIntegrationRail';
 
-type CategoryItem = CategoryDisplayItem;
+interface CategoryCardData {
+  id: string;
+  name: string;
+  image: string;
+  icon: keyof typeof LucideIcons;
+  iconBg: string;
+  products: number;
+  brands: number;
+  deals: number;
+  description: string;
+}
 
 export function CategoriesPage() {
-  const { allCategories, allCatalogProducts, siteConfig } = useGlobalState();
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategoryTab, setActiveCategoryTab] = useState('All Categories');
-  const [isBrandsCollapsed, setIsBrandsCollapsed] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const [selectedPill, setSelectedPill] = useState<string>('ALL CATEGORIES');
 
-  // V2 Discovery Filter States
-  const [selectedCategoryType, setSelectedCategoryType] = useState<string | null>(null);
-  const [selectedCategoryStatus, setSelectedCategoryStatus] = useState<string | null>(null);
-  const [selectedAlphabetical, setSelectedAlphabetical] = useState<string | null>(null);
-  const [selectedAvailability, setSelectedAvailability] = useState<string | null>(null);
-  const [selectedContent, setSelectedContent] = useState<string | null>(null);
-  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
-
-  // Simulated content refresh loader that reacts to any discovery filter parameter change
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [
-    searchQuery, activeCategoryTab, 
-    selectedCategoryType, selectedCategoryStatus, 
-    selectedAlphabetical, selectedAvailability, selectedContent
-  ]);
-
-  const handleClearAllFilters = () => {
-    setSelectedCategoryType(null);
-    setSelectedCategoryStatus(null);
-    setSelectedAlphabetical(null);
-    setSelectedAvailability(null);
-    setSelectedContent(null);
-    setSearchQuery('');
-    setActiveCategoryTab('All Categories');
-  };
-
-  const matchCategoryType = (catName: string, type: string) => {
-    const name = catName.toLowerCase();
-    const t = type.toLowerCase();
-    if (t === 'electronics') {
-      return name.includes('tech') || name.includes('electronic') || name.includes('mobile') || name.includes('tv') || name.includes('wearable') || name.includes('gaming');
+  // Exact 10 categories from reference image with exact stats
+  const categories: CategoryCardData[] = [
+    {
+      id: 'fashion-lifestyle',
+      name: 'Fashion & Lifestyle',
+      image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=450&fit=crop',
+      icon: 'Shirt',
+      iconBg: 'bg-[#FF4A82]',
+      products: 320,
+      brands: 85,
+      deals: 18,
+      description: 'Discover the latest clothing trends, footwear, bags, and fashion accessories.'
+    },
+    {
+      id: 'jewelry-accessories',
+      name: 'Jewelry & Accessories',
+      image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&h=450&fit=crop',
+      icon: 'Gem',
+      iconBg: 'bg-[#9D3FE7]',
+      products: 248,
+      brands: 62,
+      deals: 12,
+      description: 'Elegant diamond rings, luxury watches, precious necklaces, and everyday jewelry.'
+    },
+    {
+      id: 'mobiles-phones',
+      name: 'Mobiles & Phones',
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=450&fit=crop',
+      icon: 'Smartphone',
+      iconBg: 'bg-[#2F80ED]',
+      products: 156,
+      brands: 35,
+      deals: 10,
+      description: 'Explore smartphones, tablets, smartwatches, and essential accessories.'
+    },
+    {
+      id: 'sporting-playstation',
+      name: 'Sporting & PlayStation',
+      image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&h=450&fit=crop',
+      icon: 'Dumbbell',
+      iconBg: 'bg-[#27AE60]',
+      products: 184,
+      brands: 48,
+      deals: 14,
+      description: 'Fitness gear, running shoes, console consoles, gaming controllers, and accessories.'
+    },
+    {
+      id: 'gaming-entertainment',
+      name: 'Gaming & Entertainment',
+      image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&h=450&fit=crop',
+      icon: 'Gamepad2',
+      iconBg: 'bg-[#6F52ED]',
+      products: 210,
+      brands: 55,
+      deals: 16,
+      description: 'RGB desktop builds, gaming keyboards, headsets, and immersive media systems.'
+    },
+    {
+      id: 'food-restaurants',
+      name: 'Food & Restaurants',
+      image: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&h=450&fit=crop',
+      icon: 'Utensils',
+      iconBg: 'bg-[#F2994A]',
+      products: 312,
+      brands: 78,
+      deals: 22,
+      description: 'Fresh organic groceries, restaurant deliveries, dining deals, and sweet bakes.'
+    },
+    {
+      id: 'tech-electronics',
+      name: 'Tech & Electronics',
+      image: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=600&h=450&fit=crop',
+      icon: 'Laptop',
+      iconBg: 'bg-[#1A5ED4]',
+      products: 582,
+      brands: 120,
+      deals: 30,
+      description: 'Premium laptops, development desktops, active headphones, and productivity tech.'
+    },
+    {
+      id: 'tv-appliances',
+      name: 'TV & Appliances',
+      image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600&h=450&fit=crop',
+      icon: 'Tv',
+      iconBg: 'bg-[#00D1B2]',
+      products: 268,
+      brands: 65,
+      deals: 15,
+      description: 'Modern smart TVs, smart home refrigerators, ovens, and helpful workspace devices.'
+    },
+    {
+      id: 'home-living',
+      name: 'Home & Living',
+      image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop',
+      icon: 'Home',
+      iconBg: 'bg-[#B57C48]',
+      products: 476,
+      brands: 95,
+      deals: 20,
+      description: 'Designer armchairs, workspace lighting, cozy beds, and modern lifestyle ornaments.'
+    },
+    {
+      id: 'baby-maternity',
+      name: 'Baby & Maternity',
+      image: 'https://images.unsplash.com/photo-1515488042361-404e9250afef?w=600&h=450&fit=crop',
+      icon: 'Smile',
+      iconBg: 'bg-[#FD7082]',
+      products: 198,
+      brands: 42,
+      deals: 10,
+      description: 'Organic baby food, adorable teddy bears, secure play toys, and cozy diapers.'
     }
-    if (t === 'fashion') {
-      return name.includes('fashion') || name.includes('jewelry') || name.includes('accessories') || name.includes('eyewear') || name.includes('fragrance') || name.includes('beauty');
-    }
-    if (t === 'beauty') {
-      return name.includes('beauty') || name.includes('personal care') || name.includes('fragrance');
-    }
-    if (t === 'home & living') {
-      return name.includes('home') || name.includes('living') || name.includes('appliance');
-    }
-    if (t === 'grocery') {
-      return name.includes('food') || name.includes('essential');
-    }
-    if (t === 'sports') {
-      return name.includes('activewear') || name.includes('fitness') || name.includes('wearable');
-    }
-    if (t === 'automotive') {
-      return name.includes('vehicle') || name.includes('automotive');
-    }
-    if (t === 'books') {
-      return name.includes('education') || name.includes('learning') || name.includes('book');
-    }
-    if (t === 'kids') {
-      return name.includes('family') || name.includes('kids') || name.includes('baby');
-    }
-    if (t === 'health') {
-      return name.includes('health') || name.includes('wellness') || name.includes('activity');
-    }
-    if (t === 'lifestyle') {
-      return name.includes('travel') || name.includes('hospitality') || name.includes('hobby') || name.includes('creativity') || name.includes('fashion');
-    }
-    if (t === 'services') {
-      return name.includes('education') || name.includes('travel') || name.includes('learning');
-    }
-    return false;
-  };
-
-  const matchCategoryStatus = (cat: CategoryItem, status: string) => {
-    const normStatus = status.toLowerCase();
-    const name = cat.name.toLowerCase();
-    if (normStatus === 'featured') {
-      return name.includes('fashion') || name.includes('tech') || name.includes('mobile') || name.includes('food');
-    }
-    if (normStatus === 'trending') {
-      return name.includes('mobile') || name.includes('tech') || name.includes('jewelry') || name.includes('gaming');
-    }
-    if (normStatus === 'editors-picks') {
-      return name.includes('travel') || name.includes('hobbies') || name.includes('eyewear') || name.includes('beauty');
-    }
-    if (normStatus === 'newly-added') {
-      return name.includes('vehicle') || name.includes('education') || name.includes('health') || name.includes('family');
-    }
-    if (normStatus === 'popular') {
-      return cat.count > 500;
-    }
-    return true;
-  };
-
-  const matchCategoryAvailability = (cat: CategoryItem, avail: string) => {
-    const norm = avail.toLowerCase();
-    if (norm === 'products') {
-      return cat.count > 0;
-    }
-    if (norm === 'brands') {
-      return cat.subcategories && cat.subcategories.length > 0;
-    }
-    if (norm === 'deals') {
-      return cat.count > 300;
-    }
-    if (norm === 'guides') {
-      const name = cat.name.toLowerCase();
-      return name.includes('fashion') || name.includes('tech') || name.includes('mobile') || name.includes('beauty');
-    }
-    return true;
-  };
-
-  const renderFilterPanel = () => {
-    return (
-      <FullSidebarFilterPanel
-        title="Category Discovery"
-        onReset={handleClearAllFilters}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchPlaceholder="Search categories, subcategories..."
-        activeChips={
-          <ActiveFilterChips
-            chips={[
-              selectedCategoryType ? { id: 'categoryType', label: `Type: ${selectedCategoryType}`, onRemove: () => setSelectedCategoryType(null) } : null,
-              selectedCategoryStatus ? { id: 'status', label: `Status: ${selectedCategoryStatus}`, onRemove: () => setSelectedCategoryStatus(null) } : null,
-              selectedAlphabetical ? { id: 'alphabetical', label: `Alphabetical: ${selectedAlphabetical}`, onRemove: () => setSelectedAlphabetical(null) } : null,
-              selectedAvailability ? { id: 'availability', label: `Availability: ${selectedAvailability}`, onRemove: () => setSelectedAvailability(null) } : null,
-              selectedContent ? { id: 'content', label: `Content: ${selectedContent}`, onRemove: () => setSelectedContent(null) } : null,
-              activeCategoryTab !== 'All Categories' ? { id: 'tab', label: `Tab: ${activeCategoryTab}`, onRemove: () => setActiveCategoryTab('All Categories') } : null,
-            ].filter(Boolean) as any[]}
-            onClearAll={handleClearAllFilters}
-          />
-        }
-        advancedSection={
-          <div className="flex flex-col gap-4">
-            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left font-sans">
-              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Availability</h3>
-              <div className="space-y-1">
-                {[
-                  { value: 'products', label: 'Categories with Products' },
-                  { value: 'brands', label: 'Categories with Brands' },
-                  { value: 'deals', label: 'Categories with Deals' },
-                  { value: 'guides', label: 'Categories with Buying Guides' }
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSelectedAvailability(selectedAvailability === opt.value ? null : opt.value)}
-                    className={cn(
-                      "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                      selectedAvailability === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                    )}
-                  >
-                    <span>{opt.label}</span>
-                    {selectedAvailability === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-                  </button>
-                ))}
-              </div>
-
-              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mt-4 mb-3">Content Availability</h3>
-              <div className="space-y-1">
-                {[
-                  { value: 'brands', label: 'Has Brands' },
-                  { value: 'creators', label: 'Has Creators' },
-                  { value: 'recs', label: 'Has Recommendations' },
-                  { value: 'whats-on', label: 'Has Events' }
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSelectedContent(selectedContent === opt.value ? null : opt.value)}
-                    className={cn(
-                      "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                      selectedContent === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                    )}
-                  >
-                    <span>{opt.label}</span>
-                    {selectedContent === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        }
-      >
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Type</h3>
-          <div className="space-y-1 max-h-56 overflow-y-auto no-scrollbar">
-            {[
-              { value: 'Electronics', label: 'Electronics Catalog' },
-              { value: 'Fashion', label: 'Fashion & Apparel' },
-              { value: 'Beauty', label: 'Beauty & Skincare' },
-              { value: 'Home & Living', label: 'Home & Living' },
-              { value: 'Grocery', label: 'Grocery & Essentials' },
-              { value: 'Sports', label: 'Sports & Activewear' },
-              { value: 'Automotive', label: 'Vehicles & Motoring' },
-              { value: 'Books', label: 'Books & Education' },
-              { value: 'Kids', label: 'Kids & Family' },
-              { value: 'Health', label: 'Health & Wellness' },
-              { value: 'Lifestyle', label: 'Travel & Lifestyle' },
-              { value: 'Services', label: 'Learning & Services' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedCategoryType(selectedCategoryType === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedCategoryType === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedCategoryType === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Status</h3>
-          <div className="space-y-1">
-            {[
-              { value: 'featured', label: 'Featured Categories' },
-              { value: 'trending', label: 'Trending Categories' },
-              { value: 'editors-picks', label: "Editor's Picks" },
-              { value: 'newly-added', label: 'Newly Added' },
-              { value: 'popular', label: 'Popular' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedCategoryStatus(selectedCategoryStatus === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedCategoryStatus === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedCategoryStatus === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Alphabetical</h3>
-          <div className="space-y-1">
-            {[
-              { value: 'a-z', label: 'Alphabetical: A–Z' },
-              { value: 'z-a', label: 'Alphabetical: Z–A' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedAlphabetical(selectedAlphabetical === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedAlphabetical === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedAlphabetical === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-      </FullSidebarFilterPanel>
-    );
-  };
-
-  const brandsYouFollow = [
-    { name: "AARONG", sub: "Traditional Handcrafted Products", init: "AA", bg: "bg-[#452a1b]" },
-    { name: "ADIDAS", sub: "Premium Athletic Wear", init: "AD", bg: "bg-black" },
-    { name: "COCA-COLA", sub: "Refreshing Quality Beverages", init: "CC", bg: "bg-[#E31B23]" },
-    { name: "STARBUCKS", sub: "Premium Coffee Blends", init: "SB", bg: "bg-[#00704A]" },
-    { name: "YELLOW", sub: "Modern Apparel & Fashion", init: "YL", bg: "bg-[#E9C400]" },
-    { name: "BATA SHOES", sub: "Premium Class Footwear", init: "BT", bg: "bg-[#C8102E]" }
   ];
 
-  const categoriesList = React.useMemo(
-    () => buildCategoryDisplayList(allCategories ?? [], allCatalogProducts ?? []),
-    [allCategories, allCatalogProducts],
-  );
+  // Map pill categories to filter the list
+  const filteredCategories = categories.filter((cat) => {
+    if (selectedPill === 'ALL CATEGORIES') return true;
+    if (selectedPill === 'Fashion' && (cat.id === 'fashion-lifestyle' || cat.id === 'jewelry-accessories')) return true;
+    if (selectedPill === 'Tech & Electronics' && (cat.id === 'tech-electronics' || cat.id === 'mobiles-phones' || cat.id === 'gaming-entertainment' || cat.id === 'tv-appliances')) return true;
+    if (selectedPill === 'Home & Living' && cat.id === 'home-living') return true;
+    if (selectedPill === 'Beauty & Health' && cat.id === 'baby-maternity') return true;
+    if (selectedPill === 'Sports & Outdoors' && cat.id === 'sporting-playstation') return true;
+    return false;
+  });
 
-  // Dynamic filter supporting the page search system and discovery state criteria
-  const filteredCategoriesList = React.useMemo(() => {
-    let result = [...categoriesList];
-
-    // 1. Filter by Search Query (dedicated category page search searches ONLY categories)
-    const q = searchQuery.toLowerCase().trim();
-    if (q) {
-      result = result.filter(cat => {
-        const nameMatch = cat.name.toLowerCase().includes(q);
-        const subcategoryMatch = cat.subcategories?.some(sub => sub.name.toLowerCase().includes(q)) || false;
-        return nameMatch || subcategoryMatch;
-      });
-    }
-
-    // 2. Filter by Category Tab (All Categories / Popular / Trending / New Arrivals / Top Rated)
-    if (activeCategoryTab === 'Popular') {
-      result = result.filter(cat => cat.count > 500);
-    } else if (activeCategoryTab === 'Trending') {
-      result = result.filter(cat => cat.name.includes('Mobile') || cat.name.includes('Tech') || cat.name.includes('Jewelry') || cat.name.includes('Gaming') || cat.name.includes('Fashion'));
-    } else if (activeCategoryTab === 'New Arrivals') {
-      result = result.filter(cat => cat.name.includes('Vehicle') || cat.name.includes('Education') || cat.name.includes('Health') || cat.name.includes('Family'));
-    } else if (activeCategoryTab === 'Top Rated') {
-      result = result.filter(cat => cat.name.includes('Fashion') || cat.name.includes('Tech') || cat.name.includes('Beauty') || cat.name.includes('Mobile') || cat.name.includes('Food'));
-    }
-
-    // 3. Filter by Category Type from Left Sidebar Panel
-    if (selectedCategoryType) {
-      result = result.filter(cat => matchCategoryType(cat.name, selectedCategoryType));
-    }
-
-    // 4. Filter by Category Status from Left Sidebar Panel
-    if (selectedCategoryStatus) {
-      result = result.filter(cat => matchCategoryStatus(cat, selectedCategoryStatus));
-    }
-
-    // 5. Filter by Availability from Sidebar
-    if (selectedAvailability) {
-      result = result.filter(cat => matchCategoryAvailability(cat, selectedAvailability));
-    }
-
-    // 6. Filter by Content Availability from Sidebar
-    if (selectedContent) {
-      result = result.filter(cat => {
-        const norm = selectedContent.toLowerCase();
-        if (norm === 'brands') {
-          return cat.subcategories && cat.subcategories.some(sub => sub.brands > 0);
-        }
-        if (norm === 'creators') {
-          return cat.name.includes('Fashion') || cat.name.includes('Tech') || cat.name.includes('Beauty') || cat.name.includes('Mobile');
-        }
-        if (norm === 'recs') {
-          return cat.count > 200;
-        }
-        if (norm === 'whats-on') {
-          return cat.count > 500;
-        }
-        return true;
-      });
-    }
-
-    // 7. Alphabetical sorting
-    if (selectedAlphabetical === 'a-z' || selectedAlphabetical === 'A–Z') {
-      result.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (selectedAlphabetical === 'z-a' || selectedAlphabetical === 'Z–A') {
-      result.sort((a, b) => b.name.localeCompare(a.name));
-    }
-
-    return result;
-  }, [searchQuery, activeCategoryTab, selectedCategoryType, selectedCategoryStatus, selectedAvailability, selectedContent, selectedAlphabetical, categoriesList]);
-
-  const handleCategoryClick = (catName: string) => {
-    setExpandedCategory(expandedCategory === catName ? null : catName);
+  const handleCategoryClick = (categoryName: string) => {
+    navigate(`/products?category=${encodeURIComponent(categoryName)}`);
   };
 
-  const sectionNavItems = useMemo(
-    () => [{ id: 'categories-main-display', label: 'Browse', icon: <LayoutGrid size={13} /> }],
-    [],
-  );
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
-
-  useRegisterPageFilters({
-    pageName: 'Categories',
-    scrollTargetId: 'categories-main-display',
-    renderSearch: () => (
-      <div className="relative">
-        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#E8500A]" />
-        </div>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search categories, subcategories..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
-        />
-      </div>
-    ),
-    quickFilters: [
-      {
-        id: 'all-categories',
-        label: 'All Categories',
-        active: !selectedCategoryStatus && !selectedCategoryType && !selectedAlphabetical && activeCategoryTab === 'All Categories',
-        onClick: handleClearAllFilters
-      },
-      {
-        id: 'trending-pill',
-        label: '🔥 Trending',
-        active: selectedCategoryStatus === 'trending' || activeCategoryTab === 'Trending',
-        onClick: () => {
-          setSelectedCategoryStatus(selectedCategoryStatus === 'trending' ? null : 'trending');
-          setActiveCategoryTab(activeCategoryTab === 'Trending' ? 'All Categories' : 'Trending');
-        }
-      },
-      {
-        id: 'featured-pill',
-        label: '★ Featured',
-        active: selectedCategoryStatus === 'featured',
-        onClick: () => {
-          setSelectedCategoryStatus(selectedCategoryStatus === 'featured' ? null : 'featured');
-        }
-      },
-      {
-        id: 'popular-pill',
-        label: '💎 Popular',
-        active: selectedCategoryStatus === 'popular' || activeCategoryTab === 'Popular',
-        onClick: () => {
-          setSelectedCategoryStatus(selectedCategoryStatus === 'popular' ? null : 'popular');
-          setActiveCategoryTab(activeCategoryTab === 'Popular' ? 'All Categories' : 'Popular');
-        }
-      },
-      {
-        id: 'new-pill',
-        label: '📅 New Arrivals',
-        active: selectedCategoryStatus === 'newly-added' || activeCategoryTab === 'New Arrivals',
-        onClick: () => {
-          setSelectedCategoryStatus(selectedCategoryStatus === 'newly-added' ? null : 'newly-added');
-          setActiveCategoryTab(activeCategoryTab === 'New Arrivals' ? 'All Categories' : 'New Arrivals');
-        }
-      }
-    ],
-    renderFilters: () => (
-      <div className="flex flex-col gap-4">
-        {/* Availability */}
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left font-sans">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Availability</h3>
-          <div className="space-y-1">
-            {[
-              { value: 'products', label: 'Categories with Products' },
-              { value: 'brands', label: 'Categories with Brands' },
-              { value: 'deals', label: 'Categories with Deals' },
-              { value: 'guides', label: 'Categories with Buying Guides' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedAvailability(selectedAvailability === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedAvailability === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedAvailability === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mt-4 mb-3">Content Availability</h3>
-          <div className="space-y-1">
-            {[
-              { value: 'brands', label: 'Has Brands' },
-              { value: 'creators', label: 'Has Creators' },
-              { value: 'recs', label: 'Has Recommendations' },
-              { value: 'whats-on', label: 'Has Events' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedContent(selectedContent === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedContent === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedContent === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Category Type */}
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Type</h3>
-          <div className="space-y-1 max-h-56 overflow-y-auto no-scrollbar">
-            {[
-              { value: 'Electronics', label: 'Electronics Catalog' },
-              { value: 'Fashion', label: 'Fashion & Apparel' },
-              { value: 'Beauty', label: 'Beauty & Skincare' },
-              { value: 'Home & Living', label: 'Home & Living' },
-              { value: 'Grocery', label: 'Grocery & Essentials' },
-              { value: 'Sports', label: 'Sports & Activewear' },
-              { value: 'Automotive', label: 'Vehicles & Motoring' },
-              { value: 'Books', label: 'Books & Education' },
-              { value: 'Kids', label: 'Kids & Family' },
-              { value: 'Health', label: 'Health & Wellness' },
-              { value: 'Lifestyle', label: 'Travel & Lifestyle' },
-              { value: 'Services', label: 'Learning & Services' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedCategoryType(selectedCategoryType === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedCategoryType === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedCategoryType === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Category Status */}
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Status</h3>
-          <div className="space-y-1">
-            {[
-              { value: 'featured', label: 'Featured Categories' },
-              { value: 'trending', label: 'Trending Categories' },
-              { value: 'editors-picks', label: "Editor's Picks" },
-              { value: 'newly-added', label: 'Newly Added' },
-              { value: 'popular', label: 'Popular' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedCategoryStatus(selectedCategoryStatus === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedCategoryStatus === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedCategoryStatus === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Alphabetical */}
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Alphabetical</h3>
-          <div className="space-y-1">
-            {[
-              { value: 'a-z', label: 'Alphabetical: A–Z' },
-              { value: 'z-a', label: 'Alphabetical: Z–A' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedAlphabetical(selectedAlphabetical === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedAlphabetical === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedAlphabetical === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    ),
-    activeFilterCount: (selectedCategoryType ? 1 : 0) +
-      (selectedCategoryStatus ? 1 : 0) +
-      (selectedAlphabetical ? 1 : 0) +
-      (selectedAvailability ? 1 : 0) +
-      (selectedContent ? 1 : 0) +
-      (activeCategoryTab !== 'All Categories' ? 1 : 0) +
-      (searchQuery ? 1 : 0),
-    onClearAll: handleClearAllFilters,
-    sectionNav: {
-      items: sectionNavItems,
-      activeId: activeSectionId,
-      onNavigate: scrollToSection,
-      allLabel: 'Categories',
-      profileLabel: 'Category hub',
-    },
-  }, [
-    searchQuery,
-    activeCategoryTab,
-    selectedCategoryType,
-    selectedCategoryStatus,
-    selectedAlphabetical,
-    selectedAvailability,
-    selectedContent,
-    sectionNavItems,
-    activeSectionId,
-    scrollToSection,
-  ]);
-
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <PageHeroBanner pageKey="categories" />
-      <HeroMarqueeTicker pageKey="categories" siteConfig={siteConfig} />
-
-      {/* ACTIVE FILTER CHIPS ROW */}
-      <ActiveFilterChips
-        chips={[
-          selectedCategoryType ? { id: 'categoryType', label: `Type: ${selectedCategoryType}`, onRemove: () => setSelectedCategoryType(null) } : null,
-          selectedCategoryStatus ? { id: 'status', label: `Status: ${selectedCategoryStatus}`, onRemove: () => setSelectedCategoryStatus(null) } : null,
-          selectedAlphabetical ? { id: 'alphabetical', label: `Alphabetical: ${selectedAlphabetical}`, onRemove: () => setSelectedAlphabetical(null) } : null,
-          selectedAvailability ? { id: 'availability', label: `Availability: ${selectedAvailability}`, onRemove: () => setSelectedAvailability(null) } : null,
-          selectedContent ? { id: 'content', label: `Content: ${selectedContent}`, onRemove: () => setSelectedContent(null) } : null,
-          activeCategoryTab !== 'All Categories' ? { id: 'tab', label: `Tab: ${activeCategoryTab}`, onRemove: () => setActiveCategoryTab('All Categories') } : null,
-        ].filter(Boolean) as any[]}
-        onClearAll={handleClearAllFilters}
-      />
-
-      <StickySectionNav
-        sections={sectionNavItems}
-        activeId={activeSectionId}
-        onNavigate={scrollToSection}
-        allLabel="Categories"
-        profileLabel="Category browse"
-      />
-
-      <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
-        {/* LEFT COLUMN: FULL FILTER PANEL */}
-        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-          {/* LEFT COLUMN SEARCH BAR */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <Search size={13} className="text-[#E8500A]" />
-            </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search categories, subcategories..."
-              className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
-            />
+    <div className="bg-[#F6F8FB] min-h-screen relative font-sans pb-16">
+      
+      {/* SECTION 1: UPPER GLOWING HERO BANNER - Deep violet to warm orange radial highlight */}
+      <div className="bg-gradient-to-r from-[#0C0A24] via-[#120F35] to-[#0D0B26] py-12 md:py-16 text-white relative overflow-hidden shadow-sm">
+        {/* Abstract grids and background blur glows exactly matching screenshot */}
+        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
+        <div className="absolute top-1/2 left-0 w-96 h-96 bg-purple-600/15 rounded-full blur-[130px] pointer-events-none -translate-y-1/2" />
+        <div className="absolute top-1/2 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-[130px] pointer-events-none -translate-y-1/2" />
+        
+        <div className="max-w-[1360px] mx-auto px-6 relative z-10">
+          
+          {/* Breadcrumb matching exact design */}
+          <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-5">
+            <Link to="/" className="hover:text-[#E8500A] transition-colors">Home</Link>
+            <LucideIcons.ChevronRight className="w-2.5 h-2.5 text-gray-600" />
+            <span className="text-white">Categories</span>
           </div>
 
-          <div id="categories-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
-            {renderFilterPanel()}
+          {/* Title & Subtitle */}
+          <h1 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tight text-white mb-3 max-w-xl text-left">
+            Shop by <span className="text-[#E8500A]">Categories</span>
+          </h1>
+          <p className="text-gray-300 text-xs md:text-sm font-semibold max-w-2xl mb-8 leading-relaxed text-left">
+            Explore 2,500+ products across every category. Discover, compare & shop from verified brands.
+          </p>
+
+          {/* Row of 5 Glowing Stat Boxes */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 max-w-5xl">
+            {[
+              { label: 'Products', value: '2,500+', icon: 'ShoppingBag', color: 'text-[#E8500A] bg-[#E8500A]/10' },
+              { label: 'Verified Brands', value: '500+', icon: 'ShieldCheck', color: 'text-[#2F80ED] bg-[#2F80ED]/10' },
+              { label: 'Deals & Offers', value: '120+', icon: 'Tag', color: 'text-[#27AE60] bg-[#27AE60]/10' },
+              { label: 'Buying Guides', value: '300+', icon: 'BookOpen', color: 'text-[#6F52ED] bg-[#6F52ED]/10' },
+              { label: 'Creators', value: '200+', icon: 'Users', color: 'text-[#FD7082] bg-[#FD7082]/10' }
+            ].map((stat, idx) => {
+              const Icon = (LucideIcons as any)[stat.icon] || LucideIcons.Package;
+              return (
+                <div 
+                  key={idx} 
+                  className="bg-[#12102E]/60 border border-white/5 rounded-2xl p-4 flex items-center gap-3.5 backdrop-blur-md hover:border-white/10 transition-colors"
+                >
+                  <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", stat.color)}>
+                    <Icon className="w-5 h-5 stroke-[2.2]" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-mono text-base font-black text-white leading-none">{stat.value}</p>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase mt-1 leading-none tracking-wider">{stat.label}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </aside>
-
-        <div id="categories-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10">
-          {isLoading ? (
-            <div className={CATEGORY_CARD_GRID}>
-              {Array.from({ length: 12 }).map((_, idx) => (
-                <CategoryCardSkeleton key={idx} />
-              ))}
-            </div>
-          ) : (
-            <div className={CATEGORY_CARD_GRID}>
-              {filteredCategoriesList.map((cat) => {
-                const isExpanded = expandedCategory === cat.name;
-
-                return (
-                  <React.Fragment key={cat.name}>
-                    <CategoryPhotoCard
-                      name={cat.name}
-                      productCount={cat.count}
-                      image={cat.image}
-                      onClick={() => handleCategoryClick(cat.name)}
-                      isExpanded={isExpanded}
-                    />
-
-                    <AnimatePresence mode="sync">
-                      {isExpanded ? (
-                        <CategorySubcategoryPanel
-                          category={cat}
-                          onClose={() => setExpandedCategory(null)}
-                          products={allCatalogProducts ?? []}
-                          cmsTerms={siteConfig?.popularSearches}
-                        />
-                      ) : null}
-                    </AnimatePresence>
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          )}
-
-          {(expandedCategory || (activeCategoryTab !== 'All Categories' && activeCategoryTab)) && (
-            <SpotlightIntegrationRail
-              title={`${expandedCategory ?? activeCategoryTab} Spotlight`}
-              subtitle="Latest launches, creator reviews, campaigns, and live events."
-              categoryName={expandedCategory ?? activeCategoryTab}
-              source="category"
-              viewAllHref="/spotlight/explore"
-            />
-          )}
         </div>
-
-        {/* RIGHT COLUMN: FOR BUSINESS & SELLERS CARD & SPONSORED AD */}
-        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-          <div 
-            id="section-sellers" 
-            className="bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
-            style={{ height: '464px' }}
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
-            
-            <div className="flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-3 border border-[#E8500A]/5 shrink-0 shadow-sm">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              
-              <h3 className="font-sans text-sm font-semibold uppercase tracking-tight text-[#1A1D4E] leading-snug">
-                For Business <span className="text-[#E8500A] italic">& Sellers</span>
-              </h3>
-              
-              <p className="text-[11px] text-gray-400 font-semibold mt-2 px-1 leading-relaxed max-w-[220px]">
-                Unlock exclusive tools, secure verified merchant badges, and scale your authentic local reach.
-              </p>
-            </div>
-
-            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
-              <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
-              <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
-                Gain entry to featured deal slots, exposure metrics, and buyer engagement streams.
-              </p>
-              
-              <Link 
-                to="/post-offer" 
-                className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
-              >
-                POST OFFER <PenTool className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            <div className="flex items-center justify-center gap-1.5 text-[8.5px] font-semibold text-[#8a9bb0] uppercase font-mono tracking-widest shrink-0">
-               <Users className="w-3.5 h-3.5 text-gray-400" /> 100k+ shopper log Daily
-            </div>
-          </div>
-
-          {/* Sponsored Ad Section */}
-          <ListingAdRail
-            sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_LANDSCAPE}
-            sponsoredVariant="landscape"
-            sponsoredDescription="New collection available from verified partners."
-            showAdSense
-            adSenseFormat="sidebar"
-          />
-        </aside>
       </div>
 
-      {/* Mobile / Tablet Filter Drawer */}
-      <AnimatePresence>
-        {isMobileDrawerOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileDrawerOpen(false)}
-              className="fixed inset-0 bg-black/60 z-50 lg:hidden"
-            />
-            {/* Drawer Panel */}
-            <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 bottom-0 w-4/5 max-w-xs bg-[#F0F4F9] z-50 p-5 overflow-y-auto lg:hidden shadow-2xl flex flex-col gap-4 text-left font-sans"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                <span className="text-[11px] font-black uppercase tracking-wider text-navy">Discovery Filters</span>
+      {/* SECTION 2: EXPLORE / QUICK FILTER BAR (Overlapping the banner) */}
+      <div className="max-w-[1360px] mx-auto px-4 -mt-6 relative z-30 mb-10">
+        <div className="bg-white rounded-2xl border border-[#e8edf2] shadow-sm p-3.5 flex items-center flex-wrap gap-2 justify-start md:justify-between">
+          <div className="flex items-center flex-wrap gap-2">
+            <span className="text-xs font-extrabold text-gray-400 uppercase tracking-wider px-2">Explore:</span>
+            
+            {[
+              'ALL CATEGORIES',
+              'Fashion',
+              'Tech & Electronics',
+              'Home & Living',
+              'Beauty & Health',
+              'Sports & Outdoors',
+              'More Categories'
+            ].map((pill) => {
+              const isActive = selectedPill === pill;
+              return (
                 <button
-                  type="button"
-                  onClick={() => setIsMobileDrawerOpen(false)}
-                  className="w-8 h-8 rounded-full border border-gray-200 hover:border-orange-primary flex items-center justify-center text-gray-400 hover:text-orange-primary bg-white cursor-pointer"
+                  key={pill}
+                  onClick={() => setSelectedPill(pill)}
+                  className={cn(
+                    "px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border cursor-pointer flex items-center gap-1",
+                    isActive
+                      ? "bg-[#FFF0E8] border-[#E8500A] text-[#E8500A]"
+                      : "bg-white border-gray-100 hover:border-gray-300 text-gray-600 hover:text-gray-900"
+                  )}
                 >
-                  <X className="w-4 h-4" />
+                  {pill} {pill !== 'ALL CATEGORIES' && <span className="opacity-50 font-sans ml-0.5 font-normal">&gt;</span>}
                 </button>
-              </div>
-              <div className="flex-1 pb-10">
-                {renderFilterPanel()}
-              </div>
-            </motion.div>
-          </>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 3: ALL CATEGORIES HEADER & ACTION BUTTONS */}
+      <div className="max-w-[1360px] mx-auto px-6 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
+        <div>
+          <h2 className="font-sans text-xl md:text-2xl font-black uppercase text-[#1A1D4E] tracking-tight leading-none mb-2">
+            All Categories
+          </h2>
+          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide leading-none">
+            Choose a category to explore products, brands, deals and more
+          </p>
+        </div>
+
+        {/* Categories action buttons matching visual mock */}
+        <div className="flex items-center gap-2 self-start md:self-auto">
+          <button className="flex items-center gap-2 px-4 py-2 border border-[#E8500A] bg-[#FFF0E8] rounded-xl text-[#E8500A] text-[10px] font-black uppercase tracking-wider cursor-pointer transition-colors hover:bg-orange-100/50">
+            <LucideIcons.Grid className="w-3.5 h-3.5" /> CATEGORIES
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 hover:border-gray-300 bg-white rounded-xl text-[#1A1D4E] text-[10px] font-black uppercase tracking-wider cursor-pointer transition-colors">
+            <LucideIcons.List className="w-3.5 h-3.5 text-gray-400" /> BROWSE
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 hover:border-gray-300 bg-white rounded-xl text-[#1A1D4E] text-[10px] font-black uppercase tracking-wider cursor-pointer transition-colors">
+            <LucideIcons.Sliders className="w-3.5 h-3.5 text-gray-400" /> FILTER
+          </button>
+        </div>
+      </div>
+
+      {/* SECTION 4: THE 10 CATEGORY CARDS GRID */}
+      <div className="max-w-[1360px] mx-auto px-6 mb-12">
+        {filteredCategories.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
+            <LucideIcons.PackageX className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 font-semibold text-sm uppercase tracking-wide">No categories found matching your filter.</p>
+            <button 
+              onClick={() => setSelectedPill('ALL CATEGORIES')}
+              className="mt-4 px-4 py-2 bg-[#E8500A] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer"
+            >
+              Reset Filter
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            {filteredCategories.map((cat) => {
+              const Icon = (LucideIcons as any)[cat.icon] || LucideIcons.Package;
+              return (
+                <div
+                  key={cat.id}
+                  onClick={() => handleCategoryClick(cat.name)}
+                  className="group cursor-pointer bg-white rounded-2xl border border-[#e8edf2] p-3 shadow-sm hover:border-[#E8500A]/30 hover:shadow-md transition-all duration-300 flex flex-col text-left"
+                >
+                  {/* Card Image Wrapper with aspect-[1.4] */}
+                  <div className="aspect-[1.4] w-full relative overflow-hidden bg-slate-900 rounded-xl mb-6 shrink-0">
+                    <img
+                      src={cat.image}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      alt={cat.name}
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none" />
+
+                    {/* Overlapping circle icon in lower-left corner of the image */}
+                    <div className="absolute -bottom-4 left-3.5 z-20">
+                      <div className={cn("w-9 h-9 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white", cat.iconBg)}>
+                        <Icon className="w-4 h-4 stroke-[2.5]" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Title & Stats */}
+                  <div className="px-1 pb-1 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="font-sans text-xs font-black uppercase text-[#1A1D4E] tracking-tight group-hover:text-[#E8500A] transition-colors leading-tight mb-1.5">
+                        {cat.name}
+                      </h3>
+                      <p className="text-[10px] text-gray-400 font-semibold leading-relaxed line-clamp-2 mb-4">
+                        {cat.description}
+                      </p>
+                    </div>
+
+                    {/* Stats footer line */}
+                    <div className="flex items-center justify-between text-[9px] font-bold border-t border-gray-100 pt-3 mt-1 uppercase tracking-wider text-gray-500">
+                      <span>
+                        <span className="text-[#E8500A] font-extrabold mr-0.5">{cat.products}</span> Products
+                      </span>
+                      <span className="text-gray-300">|</span>
+                      <span>
+                        <span className="text-[#E8500A] font-extrabold mr-0.5">{cat.brands}</span> Brands
+                      </span>
+                      <span className="text-gray-300">|</span>
+                      <span>
+                        <span className="text-[#E8500A] font-extrabold mr-0.5">{cat.deals}</span> Deals
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
-      </AnimatePresence>
+      </div>
+
+      {/* SECTION 5: VALUE PROPOSITIONS BAR / TRUST BAR */}
+      <div className="max-w-[1360px] mx-auto px-6 mb-10">
+        <div className="bg-white border border-[#e8edf2] rounded-2xl p-5 md:p-6 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          {[
+            { 
+              icon: 'ShieldCheck', 
+              color: 'bg-blue-50 text-blue-500', 
+              title: '100% Verified', 
+              desc: 'All products & brands are verified' 
+            },
+            { 
+              icon: 'Tag', 
+              color: 'bg-emerald-50 text-emerald-500', 
+              title: 'Best Price Guarantee', 
+              desc: 'Find the best prices with smart comparison' 
+            },
+            { 
+              icon: 'RotateCcw', 
+              color: 'bg-orange-50 text-orange-500', 
+              title: 'Easy Returns', 
+              desc: '7-day easy returns on eligible products' 
+            },
+            { 
+              icon: 'Lock', 
+              color: 'bg-indigo-50 text-indigo-500', 
+              title: 'Secure Payments', 
+              desc: '100% secure payments protected by SSL' 
+            },
+            { 
+              icon: 'Headphones', 
+              color: 'bg-purple-50 text-purple-500', 
+              title: '24/7 Support', 
+              desc: 'We are here to help you anytime' 
+            }
+          ].map((item, i) => {
+            const Icon = (LucideIcons as any)[item.icon] || LucideIcons.HelpCircle;
+            return (
+              <div key={i} className="flex items-start gap-3 text-left">
+                <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", item.color)}>
+                  <Icon className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h4 className="text-[10px] font-black uppercase text-[#1A1D4E] tracking-tight leading-none mb-1.5">{item.title}</h4>
+                  <p className="text-[9px] text-gray-400 font-bold leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* SECTION 6: POPULAR SEARCHES */}
+      <div className="max-w-[1360px] mx-auto px-6 text-left">
+        <div className="bg-white border border-[#e8edf2] rounded-2xl p-5 md:p-6 shadow-sm flex flex-col gap-4">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
+            <h3 className="font-sans text-[11px] font-black uppercase text-[#1A1D4E] tracking-wider leading-none">
+              Popular Searches
+            </h3>
+            <Link to="/products" className="text-[10px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-0.5 hover:text-[#CF4400] transition-colors">
+              View All <LucideIcons.ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {[
+              'iPhone 15', 
+              'Samsung S24', 
+              'AirPods Pro', 
+              'MacBook Air', 
+              'Sony WH-1000XM5', 
+              'Nike Air Max', 
+              'Galaxy Watch 6', 
+              'Home Appliances', 
+              'Gaming PC'
+            ].map((tag) => (
+              <Link
+                key={tag}
+                to={`/search?q=${encodeURIComponent(tag)}`}
+                className="px-3.5 py-2 bg-[#F6F8FB] hover:bg-[#FFF0E8] border border-[#e8edf2] hover:border-[#E8500A]/30 rounded-xl text-[10px] font-bold text-gray-600 hover:text-[#E8500A] transition-all flex items-center gap-1.5"
+              >
+                <LucideIcons.Search className="w-3 h-3 text-gray-400" />
+                {tag}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
