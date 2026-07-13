@@ -23,8 +23,7 @@ const DealsPage = lazy(() => import('./pages/DealsPage').then(m => ({ default: m
 const ComparePage = lazy(() => import('./pages/ComparePage').then(m => ({ default: m.ComparePage })));
 const GuidesPage = lazy(() => import('./pages/GuidesPage').then(m => ({ default: m.GuidesPage })));
 const ContentDetailsPage = lazy(() => import('./pages/ContentDetailsPage').then(m => ({ default: m.ContentDetailsPage })));
-const GuideProductsPage = lazy(() => import('./pages/GuideProductsPage').then(m => ({ default: m.GuideProductsPage })));
-const LoginSignUpPage = lazy(() => import('./pages/LoginSignUpPage').then(m => ({ default: m.LoginSignUpPage })));
+const AuthPage = lazy(() => import('./pages/AuthPage').then(m => ({ default: m.AuthPage })));
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
 const CreatorsPage = lazy(() => import('./pages/CreatorsPage').then(m => ({ default: m.CreatorsPage })));
@@ -67,7 +66,7 @@ function Overview() {
     { title: "08. Deals Page", id: "screen-8", content: <DealsPage /> },
     { title: "09. Compare Tool", id: "screen-9", content: <ComparePage /> },
     { title: "10. Discover", id: "screen-10", content: <GuidesPage /> },
-    { title: "12. Login / Sign Up", id: "screen-12", content: <LoginSignUpPage /> },
+    { title: "12. Login / Sign Up", id: "screen-12", content: <AuthPage /> },
     { title: "13. Post Your Offer", id: "screen-13", content: <PostOfferPage /> },
     { title: "14. Brand Wise Deals", id: "screen-14", content: <BrandDealsPage /> },
     { title: "15. Creators Directory", id: "screen-15", content: <CreatorsPage /> },
@@ -198,11 +197,10 @@ function AppContent() {
             <Route path="/discover" element={<PageWrapper><GuidesPage /></PageWrapper>} />
             <Route path="/discover/:id" element={<PageWrapper><ContentDetailsPage /></PageWrapper>} />
             <Route path="/guides" element={<Navigate to="/discover" replace />} />
-            <Route path="/guides/:id" element={<PageWrapper><ContentDetailsPage /></PageWrapper>} />
+            <Route path="/guides/:id" element={<Navigate to="/discover/:id" replace />} />
             <Route path="/recommendations" element={<Navigate to="/discover" replace />} />
-            <Route path="/recommendations/:id" element={<PageWrapper><ContentDetailsPage /></PageWrapper>} />
-            <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
-            <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
+            <Route path="/recommendations/:id" element={<Navigate to="/discover/:id" replace />} />
+            <Route path="/login" element={<PageWrapper><AuthPage /></PageWrapper>} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
             <Route path="/creators" element={<PageWrapper><CreatorsPage /></PageWrapper>} />

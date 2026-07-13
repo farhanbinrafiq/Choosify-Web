@@ -1,58 +1,20 @@
 import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  ChevronRight, Play, Bookmark, Share2, Award, CheckCircle2, XCircle, 
-  ThumbsUp, MessageSquare, Plus, Check, Star, ArrowUpRight, Youtube,
-  Trophy, TrendingUp, Cpu, Battery, Camera, Smartphone, HelpCircle, 
-  ShieldCheck, Info, Search
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { cn } from '../lib/utils';
+import { useParams, Link } from 'react-router-dom';
+import { HeroSection } from '../components/content/HeroSection';
+import { SummaryCard } from '../components/content/SummaryCard';
+import { Takeaways } from '../components/content/Takeaways';
+import { RecommendationsVerdict } from '../components/content/RecommendationsVerdict';
+import { Evaluations } from '../components/content/Evaluations';
+import { Accordion } from '../components/content/Accordion';
 import { ProductCard } from '../components/ProductCard';
-import { CreatorReviewCard } from '../components/CreatorReviewCard';
 import { PRODUCTS } from '../constants';
 import toast from 'react-hot-toast';
+import { ShieldCheck, Youtube, Star, ArrowRight, ChevronRight, Play, Bookmark, Share2, Plus, Check, Smartphone, Cpu, Camera, TrendingUp, CheckCircle2, XCircle, HelpCircle, Info } from 'lucide-react';
+import { cn } from '../lib/utils';
 
-// Reusable Sub-components
-
-function Accordion({ title, children, defaultOpen = false }: { title: string, children: React.ReactNode, defaultOpen?: boolean }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  return (
-    <div className=" rounded-xl overflow-hidden mb-4 bg-white hover:shadow-soft transition-shadow">
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-5 text-left bg-white focus:outline-none"
-      >
-        <div className="flex items-center gap-3">
-          <span className="font-bold text-[#000435] text-lg">{title}</span>
-        </div>
-        <div className={cn("w-8 h-8 rounded-full bg-body-bg flex items-center justify-center transition-transform duration-300", isOpen && "rotate-180")}>
-          <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 1L7 7L13 1" stroke="#000435" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="p-5 pt-0 ">
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 export function ContentDetailsPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   
   const [isSaved, setIsSaved] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -145,260 +107,23 @@ export function ContentDetailsPage() {
   return (
     <div className="bg-body-bg min-h-screen font-sans antialiased pb-20">
       
-      {/* 1. HERO SECTION */}
-      <section className="w-full bg-[#000435] text-white pt-10 pb-20 px-6 relative overflow-hidden">
-        {/* Abstract Background Elements */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-900/20 to-transparent pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-gradient-to-tr from-purple-900/20 to-transparent pointer-events-none" />
-        
-        <div className="max-w-[1440px] mx-auto relative z-10">
-          {/* Breadcrumb */}
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400 mb-8 font-medium">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight className="w-4 h-4" />
-            <Link to="/discover" className="hover:text-white transition-colors">Discover</Link>
-            <ChevronRight className="w-4 h-4" />
-            <Link to="/categories/buying-guides" className="hover:text-white transition-colors">Buying Guides</Link>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-white truncate max-w-[200px] sm:max-w-xs">{content.title}</span>
-          </div>
+      <HeroSection 
+        content={content} 
+        isSaved={isSaved} 
+        isFollowing={isFollowing} 
+        handleSave={handleSave} 
+        setIsFollowing={setIsFollowing} 
+      />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            
-            {/* Left Content */}
-            <div className="max-w-2xl">
-              <span className="inline-block bg-[#FF5B00] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-6">
-                {content.type}
-              </span>
-              
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-                {content.title}
-              </h1>
-              
-              <p className="text-lg text-slate-300 font-medium mb-8 leading-relaxed max-w-xl">
-                {content.subtitle}
-              </p>
-              
-              {/* Creator Info & Metadata */}
-              <div className="flex flex-wrap items-center gap-6 mb-10">
-                <div className="flex items-center gap-3">
-                  <img src={content.author.avatar} alt={content.author.name} className="w-12 h-12 rounded-full " />
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-bold text-white">{content.author.name}</span>
-                      {content.author.verified && <ShieldCheck className="w-4 h-4 text-emerald-400" />}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
-                      <span>Updated {content.date}</span>
-                      <span className="w-1 h-1 rounded-full bg-slate-600" />
-                      <span>{content.readTime}</span>
-                      <span className="w-1 h-1 rounded-full bg-slate-600" />
-                      <span>{content.views}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-4">
-                <button className="bg-[#FF5B00] hover:bg-[#EB4501] text-white px-8 py-3.5 rounded-full font-bold transition-all flex items-center gap-2 shadow-lg shadow-[#FF5B00]/20">
-                  <Play className="w-5 h-5 fill-white" /> Watch Video
-                </button>
-                <button 
-                  onClick={handleSave}
-                  className={cn(
-                    "px-6 py-3.5 rounded-full font-bold transition-all flex items-center gap-2",
-                    isSaved ? "bg-white text-[#000435]" : "bg-white/10 text-white hover:bg-white/20"
-                  )}
-                >
-                  <Bookmark className={cn("w-5 h-5", isSaved && "fill-[#000435]")} /> 
-                  {isSaved ? 'Saved' : 'Save'}
-                </button>
-                <button className="bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-full font-bold transition-all flex items-center gap-2 ">
-                  <Share2 className="w-5 h-5" /> Share
-                </button>
-                
-                <div className="flex-1 min-w-[200px] flex justify-end">
-                  <button 
-                    onClick={() => setIsFollowing(!isFollowing)}
-                    className="bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-full font-bold transition-all flex items-center gap-2  ml-auto"
-                  >
-                    {isFollowing ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-                    {isFollowing ? 'Following' : 'Follow'}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Image/Video */}
-            <div className="relative">
-              <div className="aspect-[4/3] md:aspect-video lg:aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl relative group">
-                <img src={content.coverImage} alt="Cover" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center  group-hover:scale-110 transition-transform">
-                  <Play className="w-8 h-8 text-white ml-1 fill-white" />
-                </button>
-                
-                {/* Pagination Dots (simulated) */}
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                  <div className="w-8 h-1.5 rounded-full bg-[#FF5B00]" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/50" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/50" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* MAIN CONTENT WRAPPER */}
       <main className="max-w-[1440px] mx-auto px-6 lg:px-12 -mt-10 relative z-20">
         
-        {/* 2. TOP SUMMARY CARD */}
-        <div className="bg-[#000435] rounded-[32px] p-8 md:p-10 flex flex-col lg:flex-row items-center gap-10 shadow-2xl mb-16 relative overflow-hidden ">
-          {/* Subtle Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
-          
-          <div className="w-full lg:w-[350px] shrink-0 bg-white/5 rounded-[24px] p-6  relative overflow-hidden flex flex-col">
-            <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-blue-500/20 to-transparent" />
-            <img src={content.overallWinner.image} alt={content.overallWinner.product} className="w-full h-48 object-contain mb-4 drop-shadow-xl z-10" />
-          </div>
+        <SummaryCard overallWinner={content.overallWinner} />
 
-          <div className="flex-1 text-white z-10">
-            <div className="flex items-center gap-2 mb-4">
-              <Trophy className="w-6 h-6 text-[#FF5B00]" />
-              <span className="text-xl font-extrabold uppercase tracking-wider text-white">OVERALL WINNER</span>
-            </div>
-            
-            <div className="flex flex-wrap items-start justify-between gap-8">
-              <div>
-                <span className="inline-block bg-[#FF5B00] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded mb-3">
-                  {content.overallWinner.badge}
-                </span>
-                <h2 className="text-3xl font-extrabold mb-3 leading-tight max-w-sm">{content.overallWinner.product}</h2>
-                <div className="flex items-center gap-2 mb-6 text-sm">
-                  <div className="flex text-[#FF5B00]">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  <span className="font-bold">{content.overallWinner.rating}</span>
-                  <span className="text-white/60">({content.overallWinner.reviewsCount})</span>
-                </div>
-                <Link to="/products/1" className="text-[#FF5B00] font-bold flex items-center gap-1 text-sm hover:text-[#EB4501] transition-colors group">
-                  View on Choosify <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
+        {content.takeaways && content.takeaways.length > 0 && <Takeaways takeaways={content.takeaways} />}
 
-              <div className="space-y-3">
-                {content.overallWinner.highlights.map((highlight, idx) => (
-                  <div key={idx} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                      <Check className="w-3 h-3 text-emerald-400" />
-                    </div>
-                    <span className="font-medium text-white/90">{highlight}</span>
-                  </div>
-                ))}
-              </div>
+        {content.verdict && <RecommendationsVerdict verdict={content.verdict} />}
 
-              <div className="bg-white/5  rounded-[20px] p-6 text-center min-w-[150px]">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Choosify Rating</div>
-                <div className="text-5xl font-extrabold text-[#FF5B00] mb-2">{content.overallWinner.score}</div>
-                <div className="text-sm font-medium text-slate-400 mb-3">Out of 10</div>
-                <div className="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-[10px] uppercase tracking-wider rounded-full">
-                  {content.overallWinner.scoreLabel}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. KEY TAKEAWAYS */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-6">KEY TAKEAWAYS</h2>
-          <div className="flex flex-wrap gap-4">
-            {content.takeaways.map((item, idx) => (
-              <div key={idx} className="bg-white rounded-[20px] p-6 flex items-start gap-4 flex-1 min-w-[250px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] ">
-                <div className="w-10 h-10 rounded-xl bg-body-bg flex items-center justify-center shrink-0 text-[#FF5B00]">
-                  <item.icon className="w-5 h-5" />
-                </div>
-                <p className="text-[#050B2C] font-medium text-sm leading-relaxed">{item.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 4. RECOMMENDATIONS & QUICK VERDICT */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-8 mb-16 items-start">
-          {/* Left Panel */}
-          <div>
-            <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-6">RECOMMENDATIONS &<br/>QUICK VERDICT</h2>
-            
-            <div className="space-y-4">
-              {/* Buy If */}
-              <div className="bg-white rounded-[20px] p-6 shadow-soft ">
-                <div className="flex items-center gap-2 mb-2 text-emerald-600 font-bold uppercase tracking-wider text-sm">
-                  <CheckCircle2 className="w-5 h-5" /> BUY IF YOU
-                </div>
-                <p className="text-slate-600 font-medium pl-7">{content.verdict.buyIf}</p>
-              </div>
-              
-              {/* Consider If */}
-              <div className="bg-white rounded-[20px] p-6 shadow-soft ">
-                <div className="flex items-center gap-2 mb-2 text-amber-500 font-bold uppercase tracking-wider text-sm">
-                  <HelpCircle className="w-5 h-5" /> CONSIDER IF
-                </div>
-                <p className="text-slate-600 font-medium pl-7">{content.verdict.considerIf}</p>
-              </div>
-
-              {/* Not For You If */}
-              <div className="bg-white rounded-[20px] p-6 shadow-soft ">
-                <div className="flex items-center gap-2 mb-2 text-red-500 font-bold uppercase tracking-wider text-sm">
-                  <XCircle className="w-5 h-5" /> NOT FOR YOU IF
-                </div>
-                <p className="text-slate-600 font-medium pl-7">{content.verdict.notForYouIf}</p>
-              </div>
-
-              {/* Quick Verdict */}
-              <div className="bg-white rounded-[20px] p-6 shadow-soft ">
-                <div className="flex items-center gap-2 mb-2 text-blue-600 font-bold uppercase tracking-wider text-sm">
-                  <Info className="w-5 h-5" /> VERDICT
-                </div>
-                <p className="text-slate-600 font-medium pl-7">{content.verdict.overall}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Panel */}
-          <div>
-            <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-6">WHY THIS WON</h2>
-            <div className="bg-[#000435] text-white rounded-[32px] p-8 md:p-10 shadow-xl ">
-              <h3 className="text-[#FF5B00] font-extrabold uppercase tracking-widest mb-4">THE VERDICT</h3>
-              <p className="text-xl md:text-2xl font-medium leading-relaxed mb-10 text-white/90">
-                {content.verdict.summary}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {content.verdict.chips.map((chip, idx) => (
-                  <span key={idx} className="bg-white/10  text-white font-bold text-sm px-5 py-2.5 rounded-full flex items-center gap-2 hover:bg-white/20 transition-colors cursor-default">
-                    <Check className="w-4 h-4 text-emerald-400" /> {chip}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 5. DETAIL EVALUATION */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-6">DETAIL EVALUATION</h2>
-          <div className="space-y-1">
-            {content.evaluations.map((evalItem, idx) => (
-              <Accordion key={evalItem.id} title={evalItem.title} defaultOpen={idx === 0}>
-                <p className="text-slate-600 font-medium leading-relaxed">{evalItem.content}</p>
-              </Accordion>
-            ))}
-          </div>
-        </div>
+        {content.evaluations && content.evaluations.length > 0 && <Evaluations evaluations={content.evaluations} />}
 
         {/* 6. OTHER PRODUCTS MENTIONED */}
         <div className="mb-16">
@@ -486,7 +211,7 @@ export function ContentDetailsPage() {
             <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-6">FREQUENTLY ASKED QUESTIONS</h2>
             <div className="space-y-1 mb-4">
               {content.faqs.map((faq, idx) => (
-                <Accordion key={idx} title={faq.question} defaultOpen={idx === 0}>
+                <Accordion title={faq.question} defaultOpen={idx === 0}>
                   <p className="text-slate-600 font-medium leading-relaxed">{faq.answer}</p>
                 </Accordion>
               ))}
@@ -588,12 +313,3 @@ export function ContentDetailsPage() {
   );
 }
 
-// ArrowRight icon was missing from imports, define simple component
-function ArrowRight({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
-  );
-}
