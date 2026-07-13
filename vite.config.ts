@@ -27,8 +27,8 @@ export default defineConfig(({ mode }) => {
           name: 'Choosify.bd — Verified Brand Discovery',
           short_name: 'Choosify',
           description: 'Bangladesh\'s only verified brand and product discovery platform. Buy with confidence — every brand on Choosify is verified.',
-          theme_color: '#18154c',
-          background_color: '#18154c',
+          theme_color: '#000435',
+          background_color: '#000435',
           display: 'standalone',
           orientation: 'portrait',
           scope: '/',
@@ -225,20 +225,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(new URL('.', import.meta.url).pathname),
-      },
-    },
-
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (!id.includes('node_modules')) return;
-            if (id.includes('react-dom') || id.includes('/react/')) return 'vendor-react';
-            if (id.includes('react-router')) return 'vendor-router';
-            if (id.includes('motion')) return 'vendor-motion';
-            if (id.includes('lucide-react')) return 'vendor-lucide';
-          },
-        },
       },
     },
 

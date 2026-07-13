@@ -1,10 +1,8 @@
 import React from 'react';
-import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, ArrowRight, ShoppingBag } from 'lucide-react';
 import { BLOGS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
-import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
 
 export function GuideProductsPage() {
   const { id } = useParams();
@@ -29,7 +27,8 @@ export function GuideProductsPage() {
   return (
     <div className="bg-choosify-feed min-h-screen pb-32">
       {/* Header Section */}
-      <PageHeroHeader>
+      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
+        <div className="absolute inset-0 hero-gradient pointer-events-none" />
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex items-center gap-6">
             <Link 
@@ -50,11 +49,11 @@ export function GuideProductsPage() {
             </div>
           </div>
         </div>
-      </PageHeroHeader>
+      </div>
 
       {/* Products Grid */}
       <div className="max-w-[1440px] mx-auto px-6 mt-8 relative z-20">
-        <div className={PRODUCT_CARD_GRID}>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
           {guideProducts.map(product => (
             <ProductCard key={product.id} product={product} variant="grid" />
           ))}

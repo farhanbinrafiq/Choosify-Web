@@ -1,20 +1,12 @@
-import React, { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, Link, Navigate, useParams } from 'react-router-dom';
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, useLocation, Link, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { PageSeo } from './components/PageSeo';
-import { GoogleAnalyticsRouteTracker } from './components/GoogleAnalyticsRouteTracker';
 import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingOverlays } from './components/FloatingOverlays';
-import { EmiSidecar } from './components/emi/EmiSidecar';
-import { MobileBottomNav } from './components/MobileBottomNav';
-import { PageBreadcrumbsBar } from './components/PageBreadcrumbs';
-import { BreadcrumbProvider } from './context/BreadcrumbContext';
 import { DashboardProvider } from './context/DashboardContext';
 import { GlobalStateProvider } from './context/GlobalStateContext';
 import { DrawerFilterProvider, FloatingFilterProvider } from './components/FilterEngine';
-import { StudioEditProvider } from './context/StudioEditContext';
-import { StudioEditPanel } from './components/studio/StudioEditPanel';
 import { Toaster } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'motion/react';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -34,8 +26,6 @@ const GuideDetailPage = lazy(() => import('./pages/GuideDetailPage').then(m => (
 const GuideProductsPage = lazy(() => import('./pages/GuideProductsPage').then(m => ({ default: m.GuideProductsPage })));
 const LoginSignUpPage = lazy(() => import('./pages/LoginSignUpPage').then(m => ({ default: m.LoginSignUpPage })));
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
-const WhatsOnPage = lazy(() => import('./pages/WhatsOnPage').then(m => ({ default: m.WhatsOnPage })));
-const BrandPostDetailPage = lazy(() => import('./pages/BrandPostDetailPage').then(m => ({ default: m.BrandPostDetailPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
 const CreatorsPage = lazy(() => import('./pages/CreatorsPage').then(m => ({ default: m.CreatorsPage })));
 const CreatorProfilePage = lazy(() => import('./pages/CreatorProfilePage').then(m => ({ default: m.CreatorProfilePage })));
@@ -43,11 +33,11 @@ const CreatorProfilePage = lazy(() => import('./pages/CreatorProfilePage').then(
 const SuggestBrandPage = lazy(() => import('./pages/SuggestBrandPage').then(m => ({ default: m.SuggestBrandPage })));
 const PartnershipPage = lazy(() => import('./pages/PartnershipPage').then(m => ({ default: m.PartnershipPage })));
 const AdvertisePage = lazy(() => import('./pages/AdvertisePage').then(m => ({ default: m.AdvertisePage })));
+const B2BSolutionsPage = lazy(() => import('./pages/B2BSolutionsPage').then(m => ({ default: m.B2BSolutionsPage })));
 const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
 const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
-const FAQPage = lazy(() => import('./pages/FAQPage').then(m => ({ default: m.FAQPage })));
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const BrandDealsPage = lazy(() => import('./pages/BrandDealsPage').then(m => ({ default: m.BrandDealsPage })));
@@ -55,84 +45,125 @@ const RetailCartPage = lazy(() => import('./pages/RetailCartPage').then(m => ({ 
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage').then(m => ({ default: m.OrderSuccessPage })));
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(m => ({ default: m.OrderTrackingPage })));
+const SellerIncomingOrdersPage = lazy(() => import('./pages/SellerIncomingOrdersPage').then(m => ({ default: m.SellerIncomingOrdersPage })));
+const SellerOrderDetailsPage = lazy(() => import('./pages/SellerOrderDetailsPage').then(m => ({ default: m.SellerOrderDetailsPage })));
 const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })));
 const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
-const EmiPage = lazy(() => import('./pages/EmiPage').then(m => ({ default: m.EmiPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-const MarketingLayout = lazy(() => import('./pages/marketing/MarketingLayout').then(m => ({ default: m.MarketingLayout })));
-const SpotlightCampaignsPage = lazy(() => import('./pages/marketing/SpotlightCampaignsPage').then(m => ({ default: m.SpotlightCampaignsPage })));
-const SpotlightCampaignEditorPage = lazy(() => import('./pages/marketing/SpotlightCampaignEditorPage').then(m => ({ default: m.SpotlightCampaignEditorPage })));
-const SpotlightPublisherStudioPage = lazy(() => import('./pages/marketing/SpotlightPublisherStudioPage'));
-const SpotlightOpportunityCenterPage = lazy(() => import('./pages/marketing/SpotlightOpportunityCenterPage'));
-const SpotlightIntelligencePage = lazy(() => import('./pages/marketing/SpotlightIntelligencePage').then(m => ({ default: m.SpotlightIntelligencePage })));
-const SpotlightContentPage = lazy(() => import('./pages/SpotlightContentPage').then(m => ({ default: m.SpotlightContentPage })));
-const LegacyGuideContentRedirect = lazy(() => import('./pages/LegacyGuideContentRedirect').then(m => ({ default: m.LegacyGuideContentRedirect })));
-const SpotlightDiscoverPage = lazy(() => import('./pages/SpotlightDiscoverPage').then(m => ({ default: m.SpotlightDiscoverPage })));
-const SpotlightCampaignPublicPage = lazy(() => import('./pages/SpotlightCampaignPublicPage').then(m => ({ default: m.SpotlightCampaignPublicPage })));
-const SpotlightExplorePage = lazy(() => import('./pages/SpotlightExplorePage').then(m => ({ default: m.SpotlightExplorePage })));
-const SpotlightSearchPage = lazy(() => import('./pages/SpotlightSearchPage').then(m => ({ default: m.SpotlightSearchPage })));
-const SpotlightCalendarPage = lazy(() => import('./pages/SpotlightCalendarPage').then(m => ({ default: m.SpotlightCalendarPage })));
-const SpotlightCollectionPage = lazy(() => import('./pages/SpotlightCollectionPage').then(m => ({ default: m.SpotlightCollectionPage })));
-const SpotlightSeriesPage = lazy(() => import('./pages/SpotlightSeriesPage').then(m => ({ default: m.SpotlightSeriesPage })));
-const SpotlightStoryPage = lazy(() => import('./pages/SpotlightStoryPage').then(m => ({ default: m.SpotlightStoryPage })));
-const InteractiveCommercePage = lazy(() => import('./pages/InteractiveCommercePage').then(m => ({ default: m.InteractiveCommercePage })));
-const PublisherProfilePage = lazy(() => import('./pages/PublisherProfilePage').then(m => ({ default: m.PublisherProfilePage })));
 
 
 
 
-const ReviewDetailPage = lazy(() => import('./pages/ReviewDetailPage').then(m => ({ default: m.ReviewDetailPage })));
+// Shell for all 15 screens overview
+function Overview() {
+  const screens = [
+    { title: "01. Homepage", id: "screen-1", content: <HomePage /> },
+    { title: "02. All Products", id: "screen-2", content: <AllProductsPage /> },
+    { title: "03. List View", id: "screen-3", content: <AllProductsPage /> },
+    { title: "04. All Brands", id: "screen-4", content: <BrandsPage /> },
+    { title: "05. All Categories", id: "screen-5", content: <CategoriesPage /> },
+    { title: "06. Brand Detail", id: "screen-6", content: <BrandDetailPage /> },
+    { title: "07. Product Detail", id: "screen-7", content: <ProductDetailPage /> },
+    { title: "08. Deals Page", id: "screen-8", content: <DealsPage /> },
+    { title: "09. Compare Tool", id: "screen-9", content: <ComparePage /> },
+    { title: "10. Discover", id: "screen-10", content: <GuidesPage /> },
+    { title: "12. Login / Sign Up", id: "screen-12", content: <LoginSignUpPage /> },
+    { title: "13. Post Your Offer", id: "screen-13", content: <PostOfferPage /> },
+    { title: "14. Brand Wise Deals", id: "screen-14", content: <BrandDealsPage /> },
+    { title: "15. Creators Directory", id: "screen-15", content: <CreatorsPage /> },
+    { title: "16. Creator Profile", id: "screen-16", content: <CreatorProfilePage /> },
+  ];
 
-import { RequireRole } from './components/auth/RequireRole';
-import { useGlobalState } from './context/GlobalStateContext';
-import { isNavPathEnabled } from './lib/featureFlags';
-import { perfRouteTransition } from './utils/performanceDev';
+  return (
+    <div className="flex bg-[#f4f7f9] h-screen overflow-hidden font-sans">
+      {/* Sidebar navigation */}
+      <aside className="w-64 bg-navy border-r border-white/10 flex flex-col shrink-0">
+        <div className="p-6 border-b border-white/5">
+           <div className="flex items-center gap-2 mb-1">
+              <div className="w-5 h-5 border-2 border-orange-primary rounded-full flex items-center justify-center">
+                <div className="w-2 h-2 border-2 border-orange-primary rounded-full"></div>
+              </div>
+              <span className="text-white font-bold tracking-tight lowercase">choosify.bd</span>
+           </div>
+           <div className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Design System v1.0</div>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 space-y-1 no-scrollbar">
+          <div className="text-[9px] uppercase tracking-widest text-white/30 mb-4 px-2 font-black">13-Screen Stack</div>
+          {screens.map((screen) => (
+            <a
+              key={screen.id}
+              href={`#${screen.id}`}
+              className="block px-3 py-2 rounded text-[#D6E1EC]/60 hover:text-white hover:bg-white/5 text-[11px] font-semibold transition-all border border-transparent hover:border-white/5"
+            >
+              {screen.title}
+            </a>
+          ))}
+        </div>
+        
+        <div className="p-4 bg-black/20 text-center">
+           <button className="w-full py-2 bg-orange-primary text-white text-[10px] font-bold uppercase tracking-widest rounded shadow-lg shadow-orange-primary/20">
+              Export PDF
+           </button>
+        </div>
+      </aside>
 
-function FeatureFlagRoute({
-  flag,
-  fallback = '/',
-  children,
-}: {
-  flag: string;
-  fallback?: string;
-  children: React.ReactNode;
-}) {
-  const { isFeatureEnabled } = useGlobalState();
-  if (!isFeatureEnabled(flag)) {
-    return <Navigate to={fallback} replace />;
-  }
-  return <>{children}</>;
+      {/* Main Preview Area */}
+      <main className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
+        <Suspense fallback={<LoadingFallback />}>
+          <div className="p-12 space-y-32">
+            {screens.map((screen) => (
+              <div key={screen.id}>
+                <ScreenPreview title={screen.title} id={screen.id}>
+                  {screen.content}
+                </ScreenPreview>
+              </div>
+            ))}
+          </div>
+        </Suspense>
+        
+        <footer className="py-20 text-center border-t border-gray-200">
+          <div className="flex items-center justify-center gap-2 mb-4 opacity-30 grayscale saturate-0">
+            <div className="w-6 h-6 border-2 border-navy rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 border-2 border-navy rounded-full"></div>
+            </div>
+            <span className="text-navy font-bold tracking-tight lowercase">choosify.bd</span>
+          </div>
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">Bangladesh's Most Trusted Product Discovery Platform</p>
+        </footer>
+      </main>
+    </div>
+  );
 }
 
-function MaintenanceGate({ children }: { children: React.ReactNode }) {
-  const { isFeatureEnabled } = useGlobalState();
-  const location = useLocation();
-  const allowedDuringMaintenance = ['/login', '/contact', '/about'];
-  if (
-    isFeatureEnabled('maintenance_mode') &&
-    !allowedDuringMaintenance.some((path) => location.pathname.startsWith(path))
-  ) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A1F] text-white p-8">
-        <div className="text-center max-w-md space-y-4">
-          <h1 className="text-2xl font-black uppercase tracking-tight italic">Maintenance Mode</h1>
-          <p className="text-white/60 text-sm">
-            Choosify is undergoing scheduled updates. Please check back soon or contact support.
-          </p>
-          <Link to="/contact" className="inline-block text-orange-primary font-bold text-sm uppercase tracking-widest">
-            Contact Support
-          </Link>
+function ScreenPreview({ title, children, id }: { title: string, children: React.ReactNode, id: string }) {
+  return (
+    <div id={id} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      <div className="flex items-center justify-between border-b-2 border-navy/10 pb-4">
+        <div className="flex items-baseline gap-4">
+          <h2 className="text-3xl font-black text-navy uppercase tracking-tighter italic">{title}</h2>
+          <span className="text-[10px] text-gray-400 font-black tracking-widest uppercase">Responsive Desktop</span>
+        </div>
+        <div className="flex items-center gap-2">
+           <div className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded text-[10px] font-bold text-gray-500 uppercase">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-accent"></div>
+              Active View
+           </div>
+           <div className="px-3 py-1 bg-navy text-white text-[10px] font-bold rounded uppercase tracking-widest">1440 × 900</div>
         </div>
       </div>
-    );
-  }
-  return <>{children}</>;
+      <div className="w-full bg-white shadow-high-density overflow-hidden border border-gray-100 rounded-lg relative aspect-video">
+        <div className="h-full overflow-y-auto">
+          <Navbar />
+          {children}
+          <Footer />
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function LegacyRecommendationRedirect() {
-  const { id } = useParams<{ id: string }>();
-  return <Navigate to={id ? `/spotlight/content/${id}` : '/spotlight?tab=recommendations'} replace />;
-}
+import { useGlobalState } from './context/GlobalStateContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useGlobalState();
@@ -145,22 +176,17 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const location = useLocation();
-  const isCompactShell = location.pathname === '/login';
-  const isMessagesShell = location.pathname.startsWith('/messages');
-
-  useEffect(() => {
-    perfRouteTransition(location.pathname);
-  }, [location.pathname]);
+  const isOverview = location.pathname === '/overview';
+  const { mode } = useGlobalState();
 
   return (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
-      {/* Navbar renders on the auth page too, so users can get back home via the logo */}
-      <Navbar />
-      <MaintenanceGate>
+      {!isOverview && <Navbar />}
       <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
           <Routes location={location}>
             <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
+            <Route path="/overview" element={<Overview />} />
             <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
             <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
             <Route path="/brands" element={<PageWrapper><BrandsPage /></PageWrapper>} />
@@ -168,74 +194,36 @@ function AppContent() {
             <Route path="/brands/:id/products" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
             <Route path="/categories" element={<PageWrapper><CategoriesPage /></PageWrapper>} />
             <Route path="/deals" element={<PageWrapper><DealsPage /></PageWrapper>} />
-            <Route path="/compare" element={<FeatureFlagRoute flag="enable_comparison_engine"><PageWrapper><ComparePage /></PageWrapper></FeatureFlagRoute>} />
-            <Route path="/guides" element={<Navigate to="/spotlight?tab=guides" replace />} />
-            <Route path="/spotlight/content/:slug" element={<PageWrapper><SpotlightContentPage /></PageWrapper>} />
-            <Route path="/spotlight" element={<PageWrapper><SpotlightDiscoverPage /></PageWrapper>} />
-            <Route path="/spotlight/explore" element={<PageWrapper><SpotlightExplorePage /></PageWrapper>} />
-            <Route path="/spotlight/search" element={<PageWrapper><SpotlightSearchPage /></PageWrapper>} />
-            <Route path="/spotlight/calendar" element={<PageWrapper><SpotlightCalendarPage /></PageWrapper>} />
-            <Route path="/spotlight/stories" element={<PageWrapper><SpotlightStoryPage /></PageWrapper>} />
-            <Route path="/spotlight/collections/:slug" element={<PageWrapper><SpotlightCollectionPage /></PageWrapper>} />
-            <Route path="/spotlight/series/:slug" element={<PageWrapper><SpotlightSeriesPage /></PageWrapper>} />
-            <Route path="/spotlight/live/:slug" element={<PageWrapper><InteractiveCommercePage /></PageWrapper>} />
-            <Route path="/spotlight/:slug" element={<PageWrapper><SpotlightCampaignPublicPage /></PageWrapper>} />
-            <Route path="/publisher/:slug" element={<PageWrapper><PublisherProfilePage /></PageWrapper>} />
-            <Route path="/blogs" element={<Navigate to="/spotlight?tab=blogs" replace />} />
-            <Route path="/blogs/:id" element={<PageWrapper><LegacyGuideContentRedirect /></PageWrapper>} />
-            <Route path="/guides/:id" element={<PageWrapper><LegacyGuideContentRedirect /></PageWrapper>} />
-            <Route path="/reviews/:slug" element={<PageWrapper><LegacyGuideContentRedirect /></PageWrapper>} />
-            <Route path="/recommendations" element={<Navigate to="/spotlight?tab=recommendations" replace />} />
-            <Route path="/recommendations/:id" element={<LegacyRecommendationRedirect />} />
+            <Route path="/compare" element={<PageWrapper><ComparePage /></PageWrapper>} />
+            <Route path="/guides" element={<PageWrapper><GuidesPage /></PageWrapper>} />
+            <Route path="/guides/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
+            <Route path="/recommendations" element={<PageWrapper><GuidesPage /></PageWrapper>} />
+            <Route path="/recommendations/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
-            <Route path="/login" element={<LoginSignUpPage />} />
+            <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/whats-on" element={<PageWrapper><WhatsOnPage /></PageWrapper>} />
-            <Route path="/whats-on/:slug" element={<PageWrapper><BrandPostDetailPage /></PageWrapper>} />
-            <Route path="/customer-favorite" element={<Navigate to="/whats-on" replace />} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
-            <Route path="/emi" element={<FeatureFlagRoute flag="enable_emi_assistant"><PageWrapper><EmiPage /></PageWrapper></FeatureFlagRoute>} />
-            <Route path="/creators" element={<FeatureFlagRoute flag="creator_hub"><PageWrapper><CreatorsPage /></PageWrapper></FeatureFlagRoute>} />
-            <Route path="/creators/:id" element={<FeatureFlagRoute flag="creator_hub"><PageWrapper><CreatorProfilePage /></PageWrapper></FeatureFlagRoute>} />
+            <Route path="/creators" element={<PageWrapper><CreatorsPage /></PageWrapper>} />
+            <Route path="/creators/:id" element={<PageWrapper><CreatorProfilePage /></PageWrapper>} />
             
             <Route path="/suggest-brand" element={<PageWrapper><SuggestBrandPage /></PageWrapper>} />
             <Route path="/partnership" element={<PageWrapper><PartnershipPage /></PageWrapper>} />
             <Route path="/advertise" element={<PageWrapper><AdvertisePage /></PageWrapper>} />
+            <Route path="/b2b" element={<PageWrapper><B2BSolutionsPage /></PageWrapper>} />
             <Route path="/terms" element={<PageWrapper><TermsPage /></PageWrapper>} />
             <Route path="/privacy" element={<PageWrapper><PrivacyPage /></PageWrapper>} />
             <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
             <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
-            <Route path="/faq" element={<PageWrapper><FAQPage /></PageWrapper>} />
 
-            <Route path="/brand-deals" element={<FeatureFlagRoute flag="enable_brand_deals_page"><PageWrapper><BrandDealsPage /></PageWrapper></FeatureFlagRoute>} />
+            <Route path="/brand-deals" element={<PageWrapper><BrandDealsPage /></PageWrapper>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
             <Route path="/checkout" element={<ProtectedRoute><PageWrapper><CheckoutPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/order-success/:orderId" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />
+            <Route path="/seller/orders" element={<ProtectedRoute><PageWrapper><SellerIncomingOrdersPage /></PageWrapper></ProtectedRoute>} />
+            <Route path="/seller/orders/:id" element={<ProtectedRoute><PageWrapper><SellerOrderDetailsPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
-            <Route
-              path="/marketing"
-              element={
-                <ProtectedRoute>
-                  <RequireRole roles={['brand', 'admin']} fallback="/dashboard">
-                    <MarketingLayout />
-                  </RequireRole>
-                </ProtectedRoute>
-              }
-            >
-              <Route path="studio" element={<SpotlightCampaignsPage />} />
-              <Route path="studio/new" element={<SpotlightPublisherStudioPage />} />
-              <Route path="studio/:id" element={<SpotlightPublisherStudioPage />} />
-              <Route path="spotlight" element={<SpotlightCampaignsPage />} />
-              <Route path="spotlight/new" element={<SpotlightPublisherStudioPage />} />
-              <Route path="spotlight/:campaignId" element={<SpotlightPublisherStudioPage />} />
-              <Route path="spotlight/legacy/:campaignId" element={<SpotlightCampaignEditorPage />} />
-              <Route path="opportunity" element={<SpotlightOpportunityCenterPage />} />
-              <Route path="intelligence" element={<SpotlightIntelligencePage />} />
-              <Route path="intelligence/:section" element={<SpotlightIntelligencePage />} />
-              <Route path="intelligence/:section/:entityId" element={<SpotlightIntelligencePage />} />
-            </Route>
+            <Route path="/cashbook*" element={<Navigate to="/" replace />} />
             <Route path="/messages" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/messages/:threadId" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/profile/orders" element={<ProtectedRoute><PageWrapper><CustomerOrdersPage /></PageWrapper></ProtectedRoute>} />
@@ -243,11 +231,8 @@ function AppContent() {
           </Routes>
         </Suspense>
       </AnimatePresence>
-      </MaintenanceGate>
-      {!isCompactShell && <FloatingOverlays />}
-      {!isCompactShell && <EmiSidecar />}
-      {!isCompactShell && !isMessagesShell && <MobileBottomNav />}
-      {!isCompactShell && !isMessagesShell && <Footer />}
+      {!isOverview && <FloatingOverlays />}
+      {!isOverview && <Footer />}
     </div>
   );
 }
@@ -275,16 +260,9 @@ export default function App() {
               }} 
             />
             <ScrollToTop />
-            <GoogleAnalyticsRouteTracker />
-            <PageSeo />
             <DrawerFilterProvider>
               <FloatingFilterProvider>
-                <StudioEditProvider>
-                <BreadcrumbProvider>
-                  <AppContent />
-                </BreadcrumbProvider>
-                <StudioEditPanel />
-                </StudioEditProvider>
+                <AppContent />
               </FloatingFilterProvider>
             </DrawerFilterProvider>
             <PWAInstallPrompt />
@@ -303,9 +281,8 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="pb-14 lg:pb-0 mobile-fab-safe sm:pb-0"
+      className="pb-0"
     >
-      <PageBreadcrumbsBar />
       {children}
     </motion.div>
   );
@@ -318,22 +295,10 @@ function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = React.useState(false);
 
   React.useEffect(() => {
-    const dismissed = localStorage.getItem('pwa-prompt-dismissed');
-    if (dismissed) {
-      const daysSince =
-        (Date.now() - Number(dismissed)) / (1000 * 60 * 60 * 24);
-      if (daysSince < 7) return;
-    }
-
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      const dismissedAgain = localStorage.getItem('pwa-prompt-dismissed');
-      if (dismissedAgain) {
-        const daysSinceDismiss =
-          (Date.now() - Number(dismissedAgain)) / (1000 * 60 * 60 * 24);
-        if (daysSinceDismiss < 7) return;
-      }
+      // Only show after 30 seconds to not interrupt initial browse
       setTimeout(() => setShowPrompt(true), 30000);
     };
     window.addEventListener('beforeinstallprompt', handler);
@@ -354,11 +319,22 @@ function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
+    // Don't show again for 7 days
     localStorage.setItem(
-      'pwa-prompt-dismissed',
+      'pwa-prompt-dismissed', 
       String(Date.now())
     );
   };
+
+  // Check if dismissed recently
+  React.useEffect(() => {
+    const dismissed = localStorage.getItem('pwa-prompt-dismissed');
+    if (dismissed) {
+      const daysSince = 
+        (Date.now() - Number(dismissed)) / (1000 * 60 * 60 * 24);
+      if (daysSince < 7) setShowPrompt(false);
+    }
+  }, []);
 
   // Don't show if already installed as PWA
   if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -368,8 +344,7 @@ function PWAInstallPrompt() {
   if (!showPrompt) return null;
 
   return (
-    <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] left-3 right-3 
-                    sm:bottom-[120px]
+    <div className="fixed bottom-[120px] left-3 right-3 
                     lg:left-auto lg:right-6 lg:bottom-[200px] 
                     lg:w-80 z-[150] 
                     choosify-dark-gradient border border-white/10 

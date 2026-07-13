@@ -1,4 +1,4 @@
-export type UserRole = 'customer' | 'seller' | 'brand' | 'creator' | 'moderator' | 'admin';
+export type UserRole = 'customer' | 'seller' | 'wholesaler' | 'creator' | 'admin';
 
 export interface User {
   id: string;
@@ -37,6 +37,7 @@ export interface Seller {
     supportedRegions: string[];
   };
   sponsoredStatus: boolean;
+  wholesaleEnabled: boolean;
   disputeHistory: {
     totalDisputes: number;
     resolvedDisputes: number;
@@ -45,8 +46,6 @@ export interface Seller {
 
 export interface Brand {
   id: number;
-  catalogId?: string;
-  slug?: string;
   name: string;
   logo: string;
   verifiedStatus: boolean;
@@ -54,21 +53,33 @@ export interface Brand {
   ratings: number;
   sponsoredFlag: boolean;
   featuredFlag: boolean;
+  wholesaleSupport: boolean;
   category?: string;
   claimStatus?: 'community' | 'pending' | 'verified';
 }
 
-export interface CommerceProduct {
+export type ProductModeType = 'retail' | 'wholesale';
+
+export interface BulkPriceSlab {
+  minQuantity: number;
+  price: number;
+}
+
+export interface Product {
   id: number;
-  catalogId?: string;
-  slug?: string;
   title: string;
   image: string;
+  mode_type: ProductModeType;
+  moq?: number;
+  quantitySlabs?: BulkPriceSlab[];
+  bulkPricing?: boolean;
   codSupport: boolean;
-  stock: number;
+  quotationSupport: boolean;
+  stock: number; // 0 for out of stock, positive for quantity in stock
   sellerId: string;
   brandId: number;
   brand?: string;
+  pricingTiers?: BulkPriceSlab[];
   price: number;
   description: string;
   category?: string;
@@ -79,7 +90,7 @@ export interface CommerceProduct {
   discountPercent?: number;
   originalPrice?: number;
   promoCode?: string;
-  dealValidUntil?: string;
+  dealValidUntil?: string; // ISO date string
   tags?: string[];
   featuredFlag?: boolean;
   publishedAt?: string;
@@ -126,10 +137,10 @@ export interface Order {
 
 export interface BuyerReputation {
   userId: string;
-  reputationScore: number;
-  codTrustScore: number;
-  cancellationRatio: number;
-  refusalRatio: number;
+  reputationScore: number; // 0 - 100
+  codTrustScore: number;   // 0 - 100
+  cancellationRatio: number; // percentage
+  refusalRatio: number;      // percentage
 }
 
 export type ReportType = 'seller' | 'product' | 'brand';
@@ -138,7 +149,7 @@ export interface Report {
   report_id: string;
   reporter_id: string;
   type: ReportType;
-  targetId: string;
+  targetId: string; // seller_id or product_id or brand_id
   reason: string;
   description: string;
   evidence?: string;

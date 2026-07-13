@@ -61,31 +61,6 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
-export function mapBrandToCardDesign(brand: any, fallback?: any) {
-  const originalBrand = fallback || brand;
-  const category = brand.category || originalBrand?.category || 'Fashion';
-  const bestFor = category === 'Fashion' ? 'Footwear' : category === 'Tech' || category === 'Electronics' ? 'Electronics' : category;
-  const priceRange =
-    originalBrand?.priceRange ||
-    (category === 'Fashion' ? '৳500-2000' : '৳5000-25000');
-
-  return {
-    id: brand.id,
-    name: brand.name,
-    logo: brand.logo || brand.avatar || brand.name?.slice(0, 2)?.toUpperCase() || 'BR',
-    category,
-    bestFor,
-    priceRange,
-    rating: brand.rating || brand.ratings || 4.8,
-    reviewCount: brand.reviewCount ?? brand.reviews ?? (Math.floor((brand.followers || 8400) * 0.1) || 840),
-    isFeatured: !!(brand.isFeatured || brand.featuredFlag),
-    isHot: !!brand.isHot,
-    successScore: brand.successScore || (brand.recommended ? parseInt(String(brand.recommended), 10) : undefined) || Math.round((brand.rating || 4.8) * 20),
-    tagline: brand.tagline || brand.description || originalBrand?.description || 'Traditional & contemporary clothing',
-    coverImage: brand.coverImage,
-  };
-}
-
 export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }: BrandCardDesignProps) {
   const reviewsCount = brand.reviews ?? brand.reviewCount ?? 840;
   const bestForText = brand.bestFor ?? brand.category ?? 'Fashion';
@@ -113,7 +88,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
     <Link
       to={`/brands/${brand.id}`}
       onClick={onClick}
-      className="block w-full min-w-0 h-full bg-white rounded-[10px] border border-[#e8edf2] hover:shadow-lg hover:border-orange-primary/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative"
+      className="block w-[335px] max-w-[335px] min-w-[335px] bg-white rounded-[12px] border border-[#e8edf2] hover:shadow-lg hover:border-[#E8500A]/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative shrink-0"
     >
       {/* FEATURED BADGE */}
       {brand.isFeatured && (
@@ -125,14 +100,14 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
       )}
       {brand.isHot && !brand.isFeatured && (
         <div className="absolute top-3 right-3 z-20">
-          <span className="bg-orange-deep text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
+          <span className="bg-orange-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
             Hot
           </span>
         </div>
       )}
 
       {/* COVER PHOTO SECTION */}
-      <div className="relative w-full h-[112px] bg-gradient-to-r from-heading/10 to-orange-primary/10 overflow-hidden shrink-0">
+      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#1A1D4E]/10 to-[#E8500A]/10 overflow-hidden shrink-0">
         <img 
           src={coverUrl}
           alt={`${brand.name} cover`}
@@ -143,8 +118,8 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
       </div>
 
       {/* LOGO - overlapping cover at bottom-left */}
-      <div className="absolute top-[72px] left-3 z-10">
-        <div className="w-16 h-16 rounded-[8px] border-[3px] border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
+      <div className="absolute top-[96px] left-4 z-10">
+        <div className="w-[80px] h-[80px] rounded-[8px] border-4 border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
           {brand.logo.startsWith('http') || brand.logo.startsWith('/') ? (
             <img 
               src={brand.logo} 
@@ -153,18 +128,18 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
               loading="lazy"
             />
           ) : (
-            <span className="text-xl font-black text-heading tracking-tight">{brand.logo}</span>
+            <span className="text-2xl font-black text-[#1A1D4E] tracking-tight">{brand.logo}</span>
           )}
         </div>
       </div>
 
       {/* BRAND INFO SECTION */}
-      <div className="px-3 pt-11 pb-2.5 text-left flex-1 flex flex-col justify-center min-w-0">
-        <h3 className="text-sm font-black text-heading uppercase line-clamp-1 mb-1 leading-tight tracking-tight">
+      <div className="px-4 pt-14 pb-3 text-left flex-1 flex flex-col justify-center min-w-0">
+        <h3 className="text-base font-black text-[#1A1D4E] uppercase line-clamp-1 mb-1 leading-tight tracking-tight">
           {brand.name}
         </h3>
         
-        <p className="text-[11px] text-gray-500 mb-1.5 line-clamp-1 leading-normal font-medium">
+        <p className="text-xs text-gray-500 mb-2 line-clamp-1 leading-normal font-medium">
           {taglineText}
         </p>
         
@@ -181,7 +156,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
               />
             ))}
           </div>
-          <span className="text-xs font-bold text-heading">
+          <span className="text-xs font-bold text-[#1A1D4E]">
             {brand.rating.toFixed(1)}
           </span>
           <span className="text-[11px] text-gray-400">
@@ -191,14 +166,14 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
       </div>
 
       {/* STATS SECTION - 3 COLUMNS */}
-      <div className="border-t border-b border-[#e8edf2] px-3 py-2.5 bg-[#F8FBFD] shrink-0">
+      <div className="border-t border-b border-[#e8edf2] px-4 py-3 bg-[#F8FBFD] shrink-0">
         <div className="grid grid-cols-3 gap-1">
           {/* Column 1: Best For */}
           <div className="text-center min-w-0">
             <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
               Best For
             </div>
-            <div className="text-xs font-black text-heading truncate leading-tight">
+            <div className="text-xs font-black text-[#1A1D4E] truncate leading-tight">
               {bestForText}
             </div>
           </div>
@@ -208,7 +183,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
             <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
               Price Range
             </div>
-            <div className="text-xs font-black text-orange-primary truncate leading-tight">
+            <div className="text-xs font-black text-[#E8500A] truncate leading-tight">
               {priceText}
             </div>
           </div>
@@ -218,8 +193,8 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
             <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1 leading-none">
               Success
             </div>
-            <div className="relative w-9 h-9 shrink-0">
-              <svg viewBox="0 0 44 44" className="w-9 h-9 -rotate-90">
+            <div className="relative w-11 h-11 shrink-0">
+              <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
                 {/* Background track */}
                 <circle
                   cx="22"
@@ -254,10 +229,10 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
       </div>
 
       {/* CTA BUTTON */}
-      <div className="px-3 py-2.5 shrink-0 bg-white">
+      <div className="px-4 py-3 shrink-0 bg-white">
         <button 
           type="button"
-          className="w-full py-2 bg-heading hover:bg-navy text-white text-[10px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group"
+          className="w-full py-2.5 bg-[#1A1D4E] hover:bg-[#0F0F2E] text-white text-[11px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group"
         >
           Visit Brand
           <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>

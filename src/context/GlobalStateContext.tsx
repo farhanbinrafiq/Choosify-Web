@@ -1,43 +1,30 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { CommerceProduct, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
-import { CREATORS } from '../data/creators';
-import { loadMockCatalog } from '../data/loadMockCatalog';
-import { buildFallbackBrandsFromMock, buildMappedProductsFromMock } from '../utils/mockCatalogHydration';
-import { perfApiCall } from '../utils/performanceDev';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { ProductModeType, Product, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
+import { PRODUCTS, BRANDS } from '../constants';
 import { toast } from 'react-hot-toast';
-import { catalogApi } from '../services/catalogApi';
-import { hydrateBrandPostsFromApi } from '../lib/brandPosts';
-import { FEATURE_FLAG_DEFAULTS, isFlagEnabled, normalizeFeatureFlags } from '../lib/featureFlags';
-import { operationsApi } from '../services/operationsApi';
-import type { CatalogBrand, CatalogCategory, CatalogCreator, CatalogDeal, CatalogGuide, CatalogPlacement, CatalogProduct, CatalogProductDetail, HomepageConfig, SiteConfig } from '../types/catalog';
-import { mapCatalogCreator, mapCatalogGuide } from '../utils/editorialMappers';
-import { commerceProductToCatalog, resolveCatalogProducts } from '../utils/productNormalize';
-import type { Creator } from '../data/creators';
 
 declare module '../types/schemas' {
-  interface SubOrderItem {
-    image?: string;
-    brand?: string;
-    variantLabel?: string;
-    variantSku?: string;
-    notes?: string;
-  }
-
   interface Order {
     promoCode?: string;
     promoDiscount?: number;
     promoType?: string;
-    subtotal?: number;
-    deliveryTotal?: number;
-    paymentMethod?: 'cod' | 'credit';
-    shipping?: {
-      fullName: string;
-      phone: string;
-      address: string;
-      region: string;
-      deliveryNotes?: string;
-    };
   }
+}
+
+export interface B2BRfq {
+  id: string;
+  item: string;
+  category: string;
+  quantity: number;
+  targetPrice?: number;
+  status: 'pending' | 'replied' | 'ordered';
+  date: string;
+  notes: string;
+  supplierName?: string;
+  supplierAvatar?: string;
+  pricePerUnit?: number;
+  totalOfferPrice?: number;
+  responseNotes?: string;
 }
 
 export interface CartItem {
@@ -48,7 +35,10 @@ export interface CartItem {
 }
 
 export interface GlobalStateContextType {
+  mode: ProductModeType;
+  setMode: (mode: ProductModeType) => void;
   retailCart: CartItem[];
+  wholesaleCart: CartItem[];
   addToCart: (product: any, quantity: number, selectedVariant?: any) => void;
   removeFromCart: (productId: number) => void;
   updateCartQuantity: (productId: number, quantity: number) => void;
@@ -69,19 +59,10 @@ export interface GlobalStateContextType {
   buyerReputations: BuyerReputation[];
   sellers: Seller[];
   allBrands: Brand[];
-  allProducts: CommerceProduct[];
-  allCatalogProducts: CatalogProduct[];
-  allCatalogBrands: CatalogBrand[];
-  allCategories: CatalogCategory[];
-  allDeals: CatalogDeal[];
-  allCreators: Creator[];
-  allCatalogCreators: CatalogCreator[];
-  allGuides: ReturnType<typeof mapCatalogGuide>[];
-  allCatalogGuides: CatalogGuide[];
-  allPlacements: CatalogPlacement[];
-  productDetailsById: Record<string, CatalogProductDetail>;
-  homepageConfig: HomepageConfig | null;
-  siteConfig: import('../types/catalog').SiteConfig | null;
+  allProducts: Product[];
+  rfqs: B2BRfq[];
+  submitRfq: (rfq: Omit<B2BRfq, 'id' | 'date' | 'status'>) => void;
+  acceptQuotation: (rfqId: string) => void;
   activeVideo: { url: string; title: string; isVertical?: boolean } | null;
   openVideo: (url: string, title: string, isVertical?: boolean) => void;
   closeVideo: () => void;
@@ -91,8 +72,6 @@ export interface GlobalStateContextType {
   creatorClaimStatuses: Record<string, 'verified' | 'pending' | 'community'>;
   getCreatorClaimStatus: (creatorIdOrName: string) => 'verified' | 'pending' | 'community';
   updateCreatorClaimStatus: (creatorIdOrName: string, status: 'verified' | 'pending' | 'community') => void;
-  featureFlags: Record<string, boolean>;
-  isFeatureEnabled: (key: string) => boolean;
 }
 
 const DEFAULT_USER: User = {
@@ -140,6 +119,7 @@ const INITIAL_SELLERS: Seller[] = [
       supportedRegions: ['Dhaka', 'Chittagong', 'Sylhet']
     },
     sponsoredStatus: true,
+    wholesaleEnabled: true,
     disputeHistory: { totalDisputes: 5, resolvedDisputes: 5 }
   },
   {
@@ -154,6 +134,7 @@ const INITIAL_SELLERS: Seller[] = [
       supportedRegions: ['All Bangladesh']
     },
     sponsoredStatus: true,
+    wholesaleEnabled: true,
     disputeHistory: { totalDisputes: 2, resolvedDisputes: 2 }
   },
   {
@@ -168,6 +149,7 @@ const INITIAL_SELLERS: Seller[] = [
       supportedRegions: ['All Bangladesh']
     },
     sponsoredStatus: false,
+    wholesaleEnabled: true,
     disputeHistory: { totalDisputes: 12, resolvedDisputes: 11 }
   },
   {
@@ -182,7 +164,36 @@ const INITIAL_SELLERS: Seller[] = [
       supportedRegions: ['Dhaka']
     },
     sponsoredStatus: false,
+    wholesaleEnabled: false,
     disputeHistory: { totalDisputes: 1, resolvedDisputes: 1 }
+  }
+];
+
+const INITIAL_RFQS: B2BRfq[] = [
+  {
+    id: "RFQ-5219",
+    item: "High-density custom dyed cotton Polo shirts with company logo embroidery",
+    category: "Fashion & Lifestyle",
+    quantity: 500,
+    targetPrice: 320,
+    status: "replied",
+    date: "2 hours ago",
+    notes: "We need custom sizes distributed globally. S-XXL. Split ratios: 1:2:2:1.",
+    supplierName: "Epyllion Trade Syndicate",
+    supplierAvatar: "ET",
+    pricePerUnit: 300,
+    totalOfferPrice: 150000,
+    responseNotes: "Special vendor rate offered for prompt dispatch. Bulk tax certificate invoice generated."
+  },
+  {
+    id: "RFQ-8812",
+    item: "Original Bulk Samsung A35 lots for employee rewards program",
+    category: "Mobile & Phones",
+    quantity: 35,
+    targetPrice: 35000,
+    status: "pending",
+    date: "1 day ago",
+    notes: "Require authentic BSTI verified products. Brand warranty sheets must be pre-filled."
   }
 ];
 
@@ -191,8 +202,18 @@ const GlobalStateContext = createContext<GlobalStateContextType | undefined>(und
 let _pendingPromo: { code: string; discount: number; type: 'flat' | 'percentage' } | null = null;
 
 export function GlobalStateProvider({ children }: { children: React.ReactNode }) {
+  const [mode, setModeState] = useState<ProductModeType>(() => {
+    const saved = localStorage.getItem('choosify_mode');
+    return (saved as ProductModeType) || 'retail';
+  });
+
   const [retailCart, setRetailCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem('choosify_retail_cart');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [wholesaleCart, setWholesaleCart] = useState<CartItem[]>(() => {
+    const saved = localStorage.getItem('choosify_wholesale_cart');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -333,9 +354,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     setBrandClaimStatuses(prev => {
       const key = String(brandNameOrId).toLowerCase().trim();
       const updated = { ...prev, [key]: status };
-      const foundBrand = mockBrandsRef.current.find(
-        (b) => String(b.id) === key || b.name.toLowerCase().trim() === key,
-      );
+      const foundBrand = BRANDS.find(b => String(b.id) === key || b.name.toLowerCase().trim() === key);
       if (foundBrand) {
         updated[String(foundBrand.id)] = status;
         updated[foundBrand.name.toLowerCase().trim()] = status;
@@ -382,9 +401,71 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     return () => window.removeEventListener('choosify-promo-applied', handlePromo as EventListener);
   }, []);
 
+  const [rfqs, setRfqs] = useState<B2BRfq[]>(() => {
+    const saved = localStorage.getItem('choosify_b2b_rfqs');
+    return saved ? JSON.parse(saved) : INITIAL_RFQS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('choosify_b2b_rfqs', JSON.stringify(rfqs));
+  }, [rfqs]);
+
+  const submitRfq = (newRfqData: Omit<B2BRfq, 'id' | 'date' | 'status'>) => {
+    const rfqId = `RFQ-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newRfq: B2BRfq = {
+      ...newRfqData,
+      id: rfqId,
+      date: 'Just now',
+      status: 'pending'
+    };
+    setRfqs(prev => [newRfq, ...prev]);
+    toast.success(`Broadcasting RFQ ${rfqId} to verified South Asian Wholesalers!`);
+
+    // Dynamic reply simulation
+    setTimeout(() => {
+      setRfqs(prev => 
+        prev.map(q => {
+          if (q.id === rfqId) {
+            const calculatedPerUnit = q.targetPrice ? Math.round(Number(q.targetPrice) * 0.95) : 340;
+            return {
+              ...q,
+              status: 'replied',
+              supplierName: q.category.includes('Tech') || q.category.includes('Mobile') ? 'Bengal Tech Distributors' : 'Epyllion Trade Syndicate',
+              supplierAvatar: q.category.includes('Tech') || q.category.includes('Mobile') ? 'BT' : 'ET',
+              pricePerUnit: calculatedPerUnit,
+              totalOfferPrice: calculatedPerUnit * q.quantity,
+              responseNotes: 'Verified commercial wholesale catalog rate authorized direct dispatch.'
+            };
+          }
+          return q;
+        })
+      );
+      toast.success(`You received a direct seller quote for ${rfqId}! Check 'Live RFQs' tab.`);
+    }, 4500);
+  };
+
+  const acceptQuotation = (rfqId: string) => {
+    setRfqs(prev => 
+      prev.map(q => q.id === rfqId ? { ...q, status: 'ordered' } : q)
+    );
+    toast.success('Quota offer accepted and invoice dispatched to Wholesale Settlement!');
+  };
+
+  const setMode = (newMode: ProductModeType) => {
+    setModeState(newMode);
+    localStorage.setItem('choosify_mode', newMode);
+    toast.success(`Switched to ${newMode === 'retail' ? 'Retail' : 'Wholesale / B2B'} Mode`, {
+      id: 'mode-switch-toast'
+    });
+  };
+
   useEffect(() => {
     localStorage.setItem('choosify_retail_cart', JSON.stringify(retailCart));
   }, [retailCart]);
+
+  useEffect(() => {
+    localStorage.setItem('choosify_wholesale_cart', JSON.stringify(wholesaleCart));
+  }, [wholesaleCart]);
 
   useEffect(() => {
     localStorage.setItem('choosify_reports', JSON.stringify(reports));
@@ -394,213 +475,337 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     localStorage.setItem('choosify_orders', JSON.stringify(orders));
   }, [orders]);
 
-  const [catalogBrands, setCatalogBrands] = useState<CatalogBrand[] | null>(null);
-  const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[] | null>(null);
-  const [catalogCategories, setCatalogCategories] = useState<CatalogCategory[]>([]);
-  const [catalogDeals, setCatalogDeals] = useState<CatalogDeal[]>([]);
-  const [catalogCreators, setCatalogCreators] = useState<CatalogCreator[]>([]);
-  const [catalogGuides, setCatalogGuides] = useState<CatalogGuide[]>([]);
-  const [catalogPlacements, setCatalogPlacements] = useState<CatalogPlacement[]>([]);
-  const [productDetailsById, setProductDetailsById] = useState<Record<string, CatalogProductDetail>>({});
-  const [homepageConfig, setHomepageConfig] = useState<HomepageConfig | null>(null);
-  const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null);
-  const [featureFlags, setFeatureFlags] = useState<Record<string, boolean>>(() => ({
-    ...FEATURE_FLAG_DEFAULTS,
-  }));
-  const [mockMappedProducts, setMockMappedProducts] = useState<CommerceProduct[]>([]);
-  const [mockFallbackBrands, setMockFallbackBrands] = useState<Brand[]>([]);
-  const [mockGuideFallback, setMockGuideFallback] = useState<ReturnType<typeof mapCatalogGuide>[]>([]);
-  const mockBrandsRef = useRef<Array<{ id: number; name: string }>>([]);
-  const lastCatalogFetchAt = useRef(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    loadMockCatalog().then(({ products, brands, blogs }) => {
-      if (cancelled) return;
-      mockBrandsRef.current = brands;
-      setMockMappedProducts(buildMappedProductsFromMock(products));
-      setMockFallbackBrands(buildFallbackBrandsFromMock(brands, getBrandClaimStatus));
-      setMockGuideFallback(blogs as unknown as ReturnType<typeof mapCatalogGuide>[]);
-    });
-    return () => {
-      cancelled = true;
+  // Combine static brands with schema rules
+  const allBrands: Brand[] = BRANDS.map(b => {
+    const status = getBrandClaimStatus(b.id);
+    return {
+      id: b.id,
+      name: b.name,
+      logo: b.logo,
+      verifiedStatus: status === 'verified',
+      followers: Math.floor(b.products * 12.3),
+      ratings: b.rating,
+      sponsoredFlag: b.id === 1 || b.id === 2 || b.id === 10,
+      featuredFlag: b.id === 3 || b.id === 11,
+      wholesaleSupport: b.id !== 9, // Everything except Pickaboo aggregates wholesale
+      category: b.category,
+      claimStatus: status
     };
-  }, []);
+  });
 
-  useEffect(() => {
-    let cancelled = false;
+  // Map products statically into retail catalog and wholesale catalog
+  // Map products statically into retail catalog and wholesale catalog
+  const getVariantsForProduct = (productId: number, basePrice: number, baseImage: string): any[] | undefined => {
+    if (productId === 1) {
+      // Samsung Galaxy S24 Ultra
+      const colors = ["Titanium Gray", "Titanium Yellow", "Titanium Violet"];
+      const storages = ["256GB", "512GB", "1TB"];
+      const colorImages: { [color: string]: string } = {
+        "Titanium Gray": baseImage,
+        "Titanium Yellow": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&h=400&fit=crop",
+        "Titanium Violet": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&h=400&fit=crop"
+      };
+      const variants: any[] = [];
+      colors.forEach(color => {
+        storages.forEach(storage => {
+          let priceDiff = 0;
+          if (storage === "512GB") priceDiff = 10000;
+          if (storage === "1TB") priceDiff = 25000;
 
-    async function hydrateCatalogFromApi(force = false) {
-      const now = Date.now();
-      if (!force && now - lastCatalogFetchAt.current < 30_000) return;
+          let stock = 15;
+          if (color === "Titanium Yellow" && storage === "512GB") stock = 0;
+          if (color === "Titanium Violet" && storage === "256GB") stock = 0;
 
-      try {
-        const [products, brands, categories, deals, homepage, site, creators, guides, placements] = await perfApiCall(
-          'catalog-hydrate',
-          () =>
-            Promise.all([
-              catalogApi.listProducts(),
-              catalogApi.listBrands(),
-              catalogApi.listCategories(),
-              catalogApi.listDeals(),
-              catalogApi.getHomepage(),
-              catalogApi.getSiteConfig(),
-              catalogApi.listCreators(),
-              catalogApi.listGuides(),
-              catalogApi.listPlacements(),
-            ]),
-        );
-        await hydrateBrandPostsFromApi();
-        const flags = await operationsApi.getFeatureFlags().catch(() => ({}));
-        if (cancelled) return;
-        lastCatalogFetchAt.current = Date.now();
-        setCatalogProducts(products);
-        setCatalogBrands(brands);
-        setCatalogCategories(categories);
-        setCatalogDeals(deals);
-        setCatalogCreators(creators.length ? creators : homepage.featuredCreators || []);
-        setCatalogGuides(guides.length ? guides : homepage.featuredGuides || []);
-        setCatalogPlacements(placements);
-        setHomepageConfig(homepage.homepage);
-        setSiteConfig(site);
-        setFeatureFlags((prev) => normalizeFeatureFlags({ ...prev, ...flags }));
-
-        const detailEntries = await Promise.all(
-          products.slice(0, 12).map(async (product) => {
-            const detail = await catalogApi.getProductDetail(product.id);
-            return detail ? ([product.id, detail] as const) : null;
-          }),
-        );
-        const detailsMap: Record<string, CatalogProductDetail> = {};
-        detailEntries.forEach((entry) => {
-          if (entry) detailsMap[entry[0]] = entry[1];
+          variants.push({
+            sku: `S24U-${color.split(' ')[1].toUpperCase()}-${storage}`,
+            attributes: {
+              color,
+              storage
+            },
+            price: basePrice + priceDiff,
+            stock,
+            image: colorImages[color]
+          });
         });
-        setProductDetailsById(detailsMap);
-      } catch (error) {
-        console.warn('[GlobalStateContext] Catalog API unavailable, using static fallback.', error);
-      }
+      });
+      return variants;
     }
 
-    const onFocus = () => {
-      hydrateCatalogFromApi();
-    };
+    if (productId === 2) {
+      // Sony WH-1000XM5
+      return [
+        {
+          sku: "WH5-SILVER",
+          attributes: { color: "Platinum Silver" },
+          price: basePrice,
+          stock: 12,
+          image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop"
+        },
+        {
+          sku: "WH5-BLACK",
+          attributes: { color: "Midnight Black" },
+          price: basePrice,
+          stock: 18,
+          image: baseImage
+        }
+      ];
+    }
 
-    hydrateCatalogFromApi(true);
-    window.addEventListener('focus', onFocus);
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        hydrateCatalogFromApi();
-      }
-    }, 60_000);
+    if (productId === 3) {
+      // Apple MacBook Air M3 (Simulated as Out of Stock)
+      const rams = ["8GB", "16GB", "24GB"];
+      const storages = ["256GB", "512GB"];
+      const variants: any[] = [];
+      rams.forEach(ram => {
+        storages.forEach(storage => {
+          let priceDiff = 0;
+          if (ram === "16GB") priceDiff += 20000;
+          if (ram === "24GB") priceDiff += 40000;
+          if (storage === "512GB") priceDiff += 20000;
 
-    return () => {
-      cancelled = true;
-      window.removeEventListener('focus', onFocus);
-      window.clearInterval(interval);
-    };
-  }, []);
+          variants.push({
+            sku: `MBA3-${ram}-${storage}`,
+            attributes: {
+              ram,
+              storage
+            },
+            price: basePrice + priceDiff,
+            stock: 0,
+            image: baseImage
+          });
+        });
+      });
+      return variants;
+    }
 
-  const toNumericId = (value: string, fallback: number): number => {
-    const numeric = Number(value.replace(/[^0-9]/g, ''));
-    return Number.isFinite(numeric) && numeric > 0 ? numeric : fallback;
+    if (productId === 4) {
+      // Nike Air Max 270 React
+      const colors = ["Obsidian Black", "Hyper Crimson", "Electric Blue"];
+      const sizes = ["40", "41", "42", "43", "44"];
+      const colorImages: { [color: string]: string } = {
+        "Obsidian Black": baseImage,
+        "Hyper Crimson": "https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400&h=400&fit=crop",
+        "Electric Blue": "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&h=400&fit=crop"
+      };
+      const variants: any[] = [];
+      colors.forEach(color => {
+        sizes.forEach(size => {
+          let priceDiff = 0;
+          if (color === "Hyper Crimson") priceDiff = 400;
+          if (color === "Electric Blue") priceDiff = 600;
+
+          let stock = 8;
+          if (color === "Obsidian Black" && size === "42") stock = 0;
+          if (color === "Hyper Crimson" && size === "40") stock = 0;
+          if (color === "Electric Blue" && size === "44") stock = 0;
+
+          variants.push({
+            sku: `NIKE-${color.split(' ')[1].toUpperCase()}-${size}`,
+            attributes: {
+              color,
+              size
+            },
+            price: basePrice + priceDiff,
+            stock,
+            image: colorImages[color]
+          });
+        });
+      });
+      return variants;
+    }
+
+    if (productId === 6) {
+      // Apex Men's Ultima Pro Runner
+      const colors = ["Stealth Black", "Neon Lime", "Carbon Grey"];
+      const sizes = ["39", "40", "41", "42", "43"];
+      const colorImages: { [color: string]: string } = {
+        "Stealth Black": baseImage,
+        "Neon Lime": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=400&fit=crop",
+        "Carbon Grey": "https://images.unsplash.com/photo-1539185441755-769473a23570?w=400&h=400&fit=crop"
+      };
+      const variants: any[] = [];
+      colors.forEach(color => {
+        sizes.forEach(size => {
+          let priceDiff = 0;
+          if (color === "Neon Lime") priceDiff = 150;
+          if (color === "Carbon Grey") priceDiff = 250;
+
+          let stock = 12;
+          if (color === "Stealth Black" && size === "41") stock = 0;
+          if (color === "Neon Lime" && size === "39") stock = 0;
+          if (color === "Carbon Grey" && size === "43") stock = 0;
+
+          variants.push({
+            sku: `APEX-${color.split(' ')[1].toUpperCase()}-${size}`,
+            attributes: {
+              color,
+              size
+            },
+            price: basePrice + priceDiff,
+            stock,
+            image: colorImages[color]
+          });
+        });
+      });
+      return variants;
+    }
+
+    if (productId === 8) {
+      // Xiaomi Redmi Note 13 Pro
+      const rams = ["8GB", "12GB"];
+      const storages = ["256GB", "512GB"];
+      const variants: any[] = [];
+      rams.forEach(ram => {
+        storages.forEach(storage => {
+          let priceDiff = 0;
+          if (ram === "12GB") priceDiff += 4000;
+          if (storage === "512GB") priceDiff += 4000;
+
+          let stock = 16;
+          if (ram === "12GB" && storage === "512GB") stock = 3;
+
+          variants.push({
+            sku: `XIAOMI-${ram}-${storage}`,
+            attributes: {
+              ram,
+              storage
+            },
+            price: basePrice + priceDiff,
+            stock,
+            image: baseImage
+          });
+        });
+      });
+      return variants;
+    }
+
+    return undefined;
   };
 
-  const apiBrands: Brand[] = (catalogBrands || []).map((brand, idx) => {
-    const status = getBrandClaimStatus(brand.id);
-    return {
-      id: toNumericId(brand.id, idx + 1),
-      catalogId: brand.id,
-      slug: brand.slug,
-      name: brand.name,
-      logo: brand.logo || brand.name.slice(0, 2).toUpperCase(),
-      verifiedStatus: brand.verifiedStatus || status === 'verified',
-      followers: brand.followers || 0,
-      ratings: brand.ratings || 0,
-      sponsoredFlag: brand.sponsoredFlag,
-      featuredFlag: brand.featuredFlag,
-      category: brand.category,
-      claimStatus: status,
-    };
+  const mappedProducts: Product[] = [];
+  
+  // Create Retail Products
+  PRODUCTS.forEach(p => {
+    const cleanPrice = parseFloat(p.price.replace(/,/g, '')) || 5000;
+    mappedProducts.push({
+      id: p.id,
+      title: p.title,
+      image: p.image,
+      brand: p.brand,
+      mode_type: 'retail',
+      codSupport: p.id !== 1, // High value products might not have COD
+      quotationSupport: false,
+      stock: p.id === 3 ? 0 : p.id === 5 ? 3 : 58, // Simulate Out of stock for MacBook
+      sellerId: p.brand === 'Samsung' ? 'seller-samsung' : p.brand === 'Apple' ? 'seller-apple' : p.brand === 'Apex' ? 'seller-apex' : 'seller-general',
+      brandId: p.brand === 'Samsung' ? 1 : p.brand === 'Apple' ? 2 : p.brand === 'Apex' ? 3 : 4,
+      price: cleanPrice,
+      description: p.description || `Full verified ${p.title} with complete manufacturer accessory bundle and native local warranty coverage.`,
+      category: p.category,
+      variants: getVariantsForProduct(p.id, cleanPrice, p.image)
+    });
   });
 
-  const apiProducts: CommerceProduct[] = (catalogProducts || []).map((product, idx) => {
-    const normalizedId = toNumericId(product.id, idx + 1);
-    const normalizedBrandId = toNumericId(product.brandId, idx + 1);
-    return {
-      id: normalizedId,
-      catalogId: product.id,
-      slug: product.slug,
-      title: product.title,
-      image: product.image || '',
+  // Create Wholesale Products (ID mapping shifted upwards by 1000 to keep unique)
+  PRODUCTS.forEach(p => {
+    const cleanPrice = parseFloat(p.price.replace(/,/g, '')) || 5000;
+    const moq = p.category === 'Fashion & Lifestyle' ? 100 : 10;
+    const pricingTiers = [
+      { minQuantity: moq, price: Math.floor(cleanPrice * 0.85) },
+      { minQuantity: moq * 3, price: Math.floor(cleanPrice * 0.78) },
+      { minQuantity: moq * 10, price: Math.floor(cleanPrice * 0.70) }
+    ];
+
+    mappedProducts.push({
+      id: p.id + 1000, // Unique wholesale IDs
+      title: `[BULK] ${p.title}`,
+      image: p.image,
+      brand: p.brand,
+      mode_type: 'wholesale',
+      moq: moq,
+      quantitySlabs: pricingTiers,
+      bulkPricing: true,
       codSupport: true,
-      stock: typeof product.stock === 'number' ? product.stock : 0,
-      sellerId: `seller-${(product.brandName || 'platform').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
-      brandId: normalizedBrandId,
-      brand: product.brandName,
-      price: product.price || 0,
-      description: product.description || '',
-      category: product.categoryName || 'General',
-      variants: undefined,
-      rating: 4.5,
-      isDeal: product.isDeal,
-      dealType: product.dealType,
-      discountPercent: product.discountPercent,
-      originalPrice: product.originalPrice,
-      promoCode: product.promoCode,
-      dealValidUntil: product.dealValidUntil,
-      featuredFlag: product.featuredFlag,
-      isNewArrival: product.isNewArrival,
-      isBestseller: product.isBestseller,
-    };
+      quotationSupport: true,
+      stock: 5000,
+      sellerId: p.brand === 'Samsung' ? 'seller-samsung' : p.brand === 'Apple' ? 'seller-apple' : p.brand === 'Apex' ? 'seller-apex' : 'seller-general',
+      brandId: p.brand === 'Samsung' ? 1 : p.brand === 'Apple' ? 2 : p.brand === 'Apex' ? 3 : 4,
+      pricingTiers: pricingTiers,
+      price: pricingTiers[0].price,
+      description: `Premium Wholesale B2B offering for ${p.title}. Standard business invoices generated automatically. Standard COD logistics available.`,
+      category: p.category
+    });
   });
-
-  const allBrands: Brand[] = apiBrands.length > 0 ? apiBrands : mockFallbackBrands;
-  const allCategories: CatalogCategory[] = catalogCategories;
-  const allDeals: CatalogDeal[] = catalogDeals;
-  const allCreators: Creator[] = catalogCreators.length > 0 ? catalogCreators.map(mapCatalogCreator) : CREATORS;
-  const allGuides =
-    catalogGuides.length > 0
-      ? catalogGuides.map(mapCatalogGuide)
-      : mockGuideFallback;
-  const allPlacements: CatalogPlacement[] = catalogPlacements;
 
   const addToCart = (product: any, quantity: number, selectedVariant?: any) => {
-    setRetailCart(prev => {
-      const existing = prev.find(item => 
-        item.product.id === product.id && 
-        ((!item.selectedVariant && !selectedVariant) || 
-         (item.selectedVariant?.sku === selectedVariant?.sku))
-      );
-      if (existing) {
-        return prev.map(item => 
-          (item.product.id === product.id && 
-           ((!item.selectedVariant && !selectedVariant) || 
-            (item.selectedVariant?.sku === selectedVariant?.sku)))
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
+    if (mode === 'retail') {
+      setRetailCart(prev => {
+        // Find existing with same product ID and exact same variant combination
+        const existing = prev.find(item => 
+          item.product.id === product.id && 
+          ((!item.selectedVariant && !selectedVariant) || 
+           (item.selectedVariant?.sku === selectedVariant?.sku))
         );
+        if (existing) {
+          return prev.map(item => 
+            (item.product.id === product.id && 
+             ((!item.selectedVariant && !selectedVariant) || 
+              (item.selectedVariant?.sku === selectedVariant?.sku)))
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+        }
+        // Save unique composite ID for this cart item row
+        const uniqueCartItemId = Date.now() + Math.floor(Math.random() * 1000);
+        return [...prev, { id: uniqueCartItemId, product, quantity, selectedVariant }];
+      });
+    } else {
+      // MOQ validation for Wholesale
+      const minQty = product.moq || 10;
+      if (quantity < minQty) {
+        toast.error(`Minimum Order Quantity (MOQ) for this B2B product is ${minQty} units.`);
+        return;
       }
-      const uniqueCartItemId = Date.now() + Math.floor(Math.random() * 1000);
-      return [...prev, { id: uniqueCartItemId, product, quantity, selectedVariant }];
-    });
-    toast.success(`Added ${quantity} units to your cart`);
+      setWholesaleCart(prev => {
+        const existing = prev.find(item => item.id === product.id);
+        if (existing) {
+          return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item);
+        }
+        return [...prev, { id: product.id, product, quantity }];
+      });
+    }
+    toast.success(`Added ${quantity} units to your ${mode === 'retail' ? 'Retail' : 'Wholesale'} Cart`);
   };
 
   const removeFromCart = (productId: number) => {
-    setRetailCart(prev => prev.filter(item => item.id !== productId));
+    if (mode === 'retail') {
+      setRetailCart(prev => prev.filter(item => item.id !== productId));
+    } else {
+      setWholesaleCart(prev => prev.filter(item => item.id !== productId));
+    }
     toast.success('Removed from cart');
   };
 
   const updateCartQuantity = (productId: number, quantity: number) => {
-    setRetailCart(prev => prev.map(item => item.id === productId ? { ...item, quantity } : item));
+    if (mode === 'retail') {
+      setRetailCart(prev => prev.map(item => item.id === productId ? { ...item, quantity } : item));
+    } else {
+      const item = wholesaleCart.find(i => i.id === productId);
+      const minQty = item?.product?.moq || 10;
+      if (quantity < minQty) {
+        toast.error(`Cannot set quantity below Minimum Order Quantity (${minQty}) in Wholesale Mode.`);
+        return;
+      }
+      setWholesaleCart(prev => prev.map(item => item.id === productId ? { ...item, quantity } : item));
+    }
   };
 
   const clearCart = () => {
-    setRetailCart([]);
+    if (mode === 'retail') setRetailCart([]);
+    else setWholesaleCart([]);
   };
 
   const createOrder = (isCOD: boolean): Order | null => {
-    const currentCart = retailCart;
+    const currentCart = mode === 'retail' ? retailCart : wholesaleCart;
     if (currentCart.length === 0) {
       toast.error('Your cart is empty');
       return null;
@@ -620,7 +825,25 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       }
     }
 
-    const processItemPrice = (item: CartItem) => item.product.price;
+    // Dynamic Slabs calculations for wholesale prices
+    const processItemPrice = (item: CartItem) => {
+      const baseProduct = item.product;
+      if (mode === 'retail') return baseProduct.price;
+      
+      const slabs = baseProduct.pricingTiers || baseProduct.quantitySlabs || [];
+      if (slabs.length === 0) return baseProduct.price;
+      
+      // Fine-tune pricing based on slab
+      let applicablePrice = baseProduct.price;
+      const sortedSlabs = [...slabs].sort((a,b) => b.minQuantity - a.minQuantity);
+      for (const slab of sortedSlabs) {
+        if (item.quantity >= slab.minQuantity) {
+          applicablePrice = slab.price;
+          break;
+        }
+      }
+      return applicablePrice;
+    };
 
     // Group items by seller
     const itemsBySeller: { [sellerId: string]: CartItem[] } = {};
@@ -650,7 +873,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       });
 
       const subTotal = subItems.reduce((acc, it) => acc + (it.price * it.quantity), 0);
-      const deliveryFee = 120;
+      const deliveryFee = mode === 'retail' ? 120 : 1500; // Wholesale is heavier freight shipping
       
       overallTotal += subTotal + deliveryFee;
 
@@ -732,7 +955,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   const addOrder = (order: Order) => {
     setOrders(prev => [order, ...prev]);
-    operationsApi.createOrder(order as unknown as Record<string, unknown>).catch(() => {});
   };
 
   const updateSubOrderStatus = (parentOrderId: string, sellerId: string, nextStatus: 'pending' | 'dispatched' | 'transit' | 'delivered') => {
@@ -776,28 +998,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     });
   };
 
-  const productSource = apiProducts.length > 0 ? apiProducts : mockMappedProducts;
-  const allProducts = productSource;
-  const allCatalogProducts = resolveCatalogProducts(catalogProducts, productSource);
-  const allCatalogBrands = catalogBrands?.length
-    ? catalogBrands
-    : allBrands.map((brand, idx) => ({
-        id: brand.catalogId || String(brand.id),
-        slug: brand.slug || String(brand.id),
-        name: brand.name,
-        category: brand.category || 'General',
-        description: '',
-        logo: brand.logo,
-        verifiedStatus: brand.verifiedStatus,
-        claimStatus: brand.claimStatus || 'community',
-        followers: brand.followers || 0,
-        ratings: brand.ratings || 0,
-        featuredFlag: Boolean(brand.featuredFlag),
-        sponsoredFlag: Boolean(brand.sponsoredFlag),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } satisfies CatalogBrand));
-  const allCatalogGuides = catalogGuides;
+  // Filter products by active mode to ensure data separation
+  const allProducts = mappedProducts.filter(p => p.mode_type === mode);
 
   const [activeVideo, setActiveVideo] = useState<{ url: string; title: string; isVertical?: boolean } | null>(null);
 
@@ -811,7 +1013,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   return (
     <GlobalStateContext.Provider value={{
+      mode,
+      setMode,
       retailCart,
+      wholesaleCart,
       addToCart,
       removeFromCart,
       updateCartQuantity,
@@ -833,18 +1038,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       sellers: INITIAL_SELLERS,
       allBrands,
       allProducts,
-      allCatalogProducts,
-      allCatalogBrands,
-      allCategories,
-      allDeals,
-      allCreators,
-      allCatalogCreators: catalogCreators,
-      allGuides,
-      allCatalogGuides,
-      allPlacements,
-      productDetailsById,
-      homepageConfig,
-      siteConfig,
+      rfqs,
+      submitRfq,
+      acceptQuotation,
       activeVideo,
       openVideo,
       closeVideo,
@@ -853,9 +1049,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       updateBrandClaimStatus,
       creatorClaimStatuses,
       getCreatorClaimStatus,
-      updateCreatorClaimStatus,
-      featureFlags,
-      isFeatureEnabled: (key: string) => isFlagEnabled(featureFlags, key),
+      updateCreatorClaimStatus
     }}>
       {children}
     </GlobalStateContext.Provider>

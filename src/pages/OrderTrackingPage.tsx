@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { PageHeroHeader } from '../components/PageHeroHeader';
+import React, { useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { operationsApi, type TrackedShipment } from '../services/operationsApi';
 import { Truck, CheckCircle, ShieldAlert, ArrowLeft, ChevronRight, Clock, MapPin, Package, Settings } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -20,31 +18,17 @@ export function OrderTrackingPage() {
   });
 
   const order = selectedOrderId ? (orders.find(o => o.orderId === selectedOrderId) || null) : null;
-  const [remoteShipment, setRemoteShipment] = useState<TrackedShipment | null>(null);
+
   const [searchId, setSearchId] = useState('');
 
-  useEffect(() => {
-    if (!selectedOrderId) {
-      setRemoteShipment(null);
-      return;
-    }
-    operationsApi.trackShipment(selectedOrderId).then(setRemoteShipment).catch(() => setRemoteShipment(null));
-  }, [selectedOrderId]);
-
-  const handleSearchOrder = async () => {
+  const handleSearchOrder = () => {
     if (!searchId.trim()) return;
     const found = orders.find((x: any) => x.orderId.toUpperCase() === searchId.trim().toUpperCase());
     if (found) {
       setSelectedOrderId(found.orderId);
       toast.success(`Lot Ticket "${searchId.toUpperCase()}" loaded!`);
-      return;
-    }
-    try {
-      await operationsApi.trackShipment(searchId.trim());
-      setSelectedOrderId(searchId.trim().toUpperCase());
-      toast.success(`Tracking loaded for "${searchId.toUpperCase()}"`);
-    } catch {
-      toast.error(`Ticket "${searchId.toUpperCase()}" not found.`);
+    } else {
+      toast.error(`Ticket "${searchId.toUpperCase()}" not found in current local session DB.`);
       setSelectedOrderId(null);
     }
   };
@@ -81,7 +65,8 @@ export function OrderTrackingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Header Panel */}
-      <PageHeroHeader>
+      <div className="w-full relative overflow-hidden shrink-0 border-b border-white/5">
+        <div className="absolute inset-0 hero-gradient pointer-events-none" />
         <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-1 text-[9px] text-gray-500 uppercase tracking-widest font-black italic mb-1">
@@ -114,7 +99,7 @@ export function OrderTrackingPage() {
             </div>
           )}
         </div>
-      </PageHeroHeader>
+      </div>
 
       {/* Main Track Grid */}
       <div className="max-w-4xl mx-auto w-full px-4 py-12 flex-1">
@@ -217,17 +202,6 @@ export function OrderTrackingPage() {
                 </div>
               )}
 
-              {remoteShipment && (
-                <div className="mb-6 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-slate-700">
-                  <div className="font-bold text-orange-700 uppercase text-xs tracking-widest mb-1">Live shipment status</div>
-                  <div>Courier: {remoteShipment.courier} · Tracking: {remoteShipment.trackingNumber}</div>
-                  <div className="capitalize">Status: {remoteShipment.status.replace(/_/g, ' ')}</div>
-                  {remoteShipment.trackingEvents[0] && (
-                    <div className="text-xs text-slate-500 mt-1">{remoteShipment.trackingEvents[0].description}</div>
-                  )}
-                </div>
-              )}
-
               {/* Graphical Stepper */}
               <div className={`relative pt-4 pb-8 ${order.status === 'cancelled' ? 'opacity-40' : ''}`}>
                 {/* Connecting pipeline */}
@@ -316,7 +290,7 @@ export function OrderTrackingPage() {
 
                       <div className="text-[10px] font-medium text-navy space-y-0.5 pt-1 border-t border-gray-100/50">
                         {sub.items.map((it: any, iIdx: number) => (
-                          <div key={iIdx}>â€¢ {it.productTitle} x {it.quantity} units</div>
+                          <div key={iIdx}>• {it.productTitle} x {it.quantity} units</div>
                         ))}
                       </div>
                     </div>
@@ -327,7 +301,7 @@ export function OrderTrackingPage() {
                       </div>
                       <div className="pt-2 text-right">
                         <span className="text-[8px] font-black text-gray-400 block leading-none">SPLIT CARRIER PRICE</span>
-                        <span className="text-sm font-black text-navy italic">à§³{(sub.items.reduce((sum: number, x: any) => sum + (x.price * x.quantity), 0) + sub.deliveryFee).toLocaleString()}</span>
+                        <span className="text-sm font-black text-navy italic">৳{(sub.items.reduce((sum: number, x: any) => sum + (x.price * x.quantity), 0) + sub.deliveryFee).toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -340,7 +314,7 @@ export function OrderTrackingPage() {
         {/* Continue routing */}
         <div className="text-center pt-8">
           <Link to="/" className="text-xs font-black text-navy uppercase tracking-widest italic hover:text-orange-primary transition-all">
-            â† Settle back to Catalog Feed
+            ← Settle back to Catalog Feed
           </Link>
         </div>
       </div>

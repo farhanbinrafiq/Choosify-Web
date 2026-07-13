@@ -1,7 +1,325 @@
 export const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1560393464-5c69a73c5770?w=800&h=800&fit=crop';
 
-export { CATEGORIES } from './data/categories';
+export const CATEGORIES = [
+  { id: 'fashion', name: 'Fashion & Lifestyle', icon: 'Shirt' },
+  { id: 'jewelry', name: 'Jewelry & Accessories', icon: 'Gem' },
+  { id: 'mobile', name: 'Mobile & Phones', icon: 'Smartphone' },
+  { id: 'sporting', name: 'Sporting & Playstation', icon: 'Gamepad2' },
+  { id: 'gaming', name: 'Gaming & Entertainment', icon: 'Monitor' },
+  { id: 'food', name: 'Food & Restaurants', icon: 'Utensils' },
+  { id: 'tech', name: 'Tech & Electronics', icon: 'Cpu' },
+  { id: 'appliances', name: 'TV & Appliances', icon: 'Tv' },
+  { id: 'home', name: 'Home & Living', icon: 'Home' },
+  { id: 'baby', name: 'Baby & Maternity', icon: 'Baby' },
+];
 
-export { PRODUCTS } from './data/mockProducts';
-export { BRANDS } from './data/mockBrands';
-export { BLOGS } from './data/mockBlogs';
+export const PRODUCTS = [
+  {
+    id: 1,
+    title: 'Samsung Galaxy S24 Ultra',
+    brand: 'Samsung',
+    price: '145,000',
+    originalPrice: '155,000',
+    rating: 4.8,
+    reviews: 128,
+    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+    tag: 'NEW',
+    stores: [
+      { name: 'Daraz', price: '145,000', delivery: '2-3 Days', rating: 4.5, link: 'https://daraz.com.bd' },
+      { name: 'Pickaboo', price: '146,500', delivery: '1-2 Days', rating: 4.8, link: 'https://pickaboo.com' },
+      { name: 'Gadget & Gear', price: '148,000', delivery: 'Instant', rating: 4.9, link: 'https://gadgetandgear.com' }
+    ],
+    category: 'Mobile & Phones',
+    description: 'The Samsung Galaxy S24 Ultra is the ultimate AI-powered flagship smartphone, featuring a 200MP camera and a stunning titanium design.',
+    pros: ['Top-tier Display', 'Excellent Zoom Camera', 'Long Battery Life'],
+    cons: ['Very Expensive', 'Large and Heavy'],
+    bestForTags: ['Power Users', 'Gamers', 'Photography Enthusiasts'],
+    locations: ['Jamuna Future Park, Level 4', 'Bashundhara City, Level 5']
+  },
+  {
+    id: 2,
+    title: 'Sony WH-1000XM5 Noise Cancelling Headphones',
+    brand: 'Sony',
+    price: '38,500',
+    originalPrice: '42,000',
+    rating: 4.9,
+    reviews: 86,
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+    tag: 'HOT',
+    stores: [
+      { name: 'Pickaboo', price: '38,500', delivery: '1-2 Days', rating: 4.8, link: '#' },
+      { name: 'Star Tech', price: '39,000', delivery: '2-4 Days', rating: 4.7, link: '#' }
+    ],
+    category: 'Tech & Electronics'
+  },
+  {
+    id: 3,
+    title: 'Apple MacBook Air M3',
+    brand: 'Apple',
+    price: '128,000',
+    rating: 4.7,
+    reviews: 54,
+    image: 'https://images.unsplash.com/photo-1496181133227-f83bb023945d?w=400&h=400&fit=crop',
+    tag: 'NEW',
+    stores: ['Daraz', 'Ryan PC'],
+    category: 'Tech & Electronics'
+  },
+  {
+    id: 4,
+    title: 'Nike Air Max 270 React',
+    brand: 'Nike',
+    price: '12,500',
+    originalPrice: '15,000',
+    rating: 4.5,
+    reviews: 210,
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
+    tag: 'SALE',
+    stores: ['Daraz'],
+    category: 'Fashion & Lifestyle'
+  },
+  {
+    id: 5,
+    title: 'LG C3 55" OLED EVO TV',
+    brand: 'LG',
+    price: '185,000',
+    rating: 4.9,
+    reviews: 42,
+    image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&h=400&fit=crop',
+    tag: 'HOT',
+    stores: ['Pickaboo'],
+    category: 'TV & Appliances'
+  },
+  {
+    id: 6,
+    title: 'Apex Men\'s Ultima Pro Runner',
+    brand: 'Apex',
+    price: '3,200',
+    originalPrice: '4,500',
+    rating: 4.9,
+    reviews: 312,
+    image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=400&fit=crop',
+    tag: 'NEW',
+    stores: ['Apex', 'Daraz'],
+    category: 'Fashion & Lifestyle'
+  },
+  {
+    id: 7,
+    title: 'Samsung Galaxy A35 5G',
+    brand: 'Samsung',
+    price: '34,500',
+    rating: 4.4,
+    reviews: 45,
+    image: 'https://images.unsplash.com/photo-1563897539633-7374c276c212?w=400&h=400&fit=crop',
+    tag: 'BUDGET',
+    stores: ['Pickaboo', 'Daraz'],
+    category: 'Mobile & Phones'
+  },
+  {
+    id: 8,
+    title: 'Xiaomi Redmi Note 13 Pro',
+    brand: 'Xiaomi',
+    price: '31,999',
+    rating: 4.6,
+    reviews: 156,
+    image: 'https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=400&h=400&fit=crop',
+    tag: 'VALUE',
+    stores: ['Xiaomi Store', 'Daraz'],
+    category: 'Mobile & Phones'
+  },
+  {
+    id: 9,
+    title: 'Poco X6 Pro',
+    brand: 'Poco',
+    price: '35,000',
+    rating: 4.7,
+    reviews: 89,
+    image: 'https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=400&h=400&fit=crop',
+    tag: 'GAMING',
+    stores: ['Daraz', 'Pickaboo'],
+    category: 'Mobile & Phones'
+  },
+  {
+    id: 10,
+    title: 'Realme 12 Pro+',
+    brand: 'Realme',
+    price: '38,000',
+    rating: 4.5,
+    reviews: 67,
+    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
+    tag: 'HOT',
+    stores: ['Daraz'],
+    category: 'Mobile & Phones'
+  },
+  {
+    id: 11,
+    title: 'Choosify Brand Verification Hub Suite',
+    brand: 'Choosify',
+    price: '0',
+    originalPrice: '0',
+    rating: 5.0,
+    reviews: 24,
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop',
+    tag: 'PLATFORM',
+    stores: [
+      { name: 'Choosify', price: 'FREE', delivery: 'Instant', rating: 5.0, link: 'https://choosify.com' }
+    ],
+    category: 'Marketplace',
+    description: 'The definitive suite for authentic brand listing, claims verification, content auditing, and consumer discovery matching on the Choosify platform.',
+    pros: ['Completely transparent peer-reviews', 'Active fraud protection auditing', 'Zero cost for verified consumers'],
+    cons: ['Requires strict commercial business credentials to list'],
+    bestForTags: ['Consumer Discovery', 'Brand Validation', 'Trust & Verification'],
+    locations: ['GULSHAN-2, DHAKA 1212']
+  },
+  {
+    id: 12,
+    title: 'FFF Custom Apparel Production & Sourcing',
+    brand: 'FFF Sourcing Ltd',
+    price: '1,500',
+    originalPrice: '1,800',
+    rating: 4.9,
+    reviews: 15,
+    image: 'https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=400&h=400&fit=crop',
+    tag: 'B2B SOURCING',
+    stores: [
+      { name: 'FFF Sourcing', price: 'Contact for Quote', delivery: 'Custom Lead Time', rating: 4.9, link: 'https://fff.com.bd' }
+    ],
+    category: 'Sourcing',
+    description: 'End-to-end B2B apparel sourcing, quality assurance, vendor compliance coordination, and custom fabric development for international retail brands.',
+    pros: ['100% compliant local manufacturers', 'Rigorous multi-stage quality control audits', 'Dedicated English-speaking merchant support'],
+    cons: ['MOQ (Minimum Order Quantity) of 1,000 units per style'],
+    bestForTags: ['Garment Manufacturing', 'Quality Control', 'Buying House Services'],
+    locations: ['Uttara, Sector 3, Dhaka']
+  }
+];
+
+export const BRANDS = [
+  { id: 1, name: 'Samsung', logo: 'S', products: 120, rating: 4.8, category: 'Electronics' },
+  { id: 2, name: 'Apple', logo: 'A', products: 85, rating: 4.9, category: 'Tech' },
+  { id: 3, name: 'Apex', logo: 'Ap', products: 450, rating: 4.6, category: 'Fashion' },
+  { id: 4, name: 'Bata', logo: 'B', products: 380, rating: 4.5, category: 'Fashion' },
+  { id: 5, name: 'Sony', logo: 'So', products: 95, rating: 4.7, category: 'Electronics' },
+  { id: 6, name: 'Lotto', logo: 'L', products: 210, rating: 4.4, category: 'Sports' },
+  { id: 7, name: 'La Reve', logo: 'LR', products: 150, rating: 4.6, category: 'Fashion' },
+  { id: 8, name: 'Perfume World', logo: 'PW', products: 320, rating: 4.8, category: 'Beauty' },
+  { id: 9, name: 'Pickaboo', logo: 'P', products: 540, rating: 4.7, category: 'Tech' },
+  { id: 10, name: 'Aarong', logo: 'Aa', products: 1200, rating: 4.9, category: 'Ethnic' },
+  { id: 11, name: 'Yellow', logo: 'Y', products: 800, rating: 4.8, category: 'Fashion' },
+  { id: 12, name: 'Sailor', logo: 'Sa', products: 640, rating: 4.8, category: 'Fashion' },
+  { id: 13, name: 'Ecstasy', logo: 'Ec', products: 210, rating: 4.4, category: 'Fashion' },
+  { id: 14, name: 'Richman', logo: 'R', products: 310, rating: 4.6, category: 'Fashion' },
+  { id: 15, name: 'Star Tech', logo: 'ST', products: 1950, rating: 4.8, category: 'Tech' },
+  { id: 16, name: 'Choosify', logo: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1782468737/717067140_122103081177325182_5170626542063953926_n_fiefp6.jpg', products: 1, rating: 5.0, category: 'Marketplace' },
+  { id: 17, name: 'FFF Sourcing Ltd', logo: 'FFF', products: 1, rating: 4.9, category: 'Sourcing' },
+];
+
+export const BLOGS = [
+  {
+    id: 1,
+    title: 'Top 10 Smartphones to Buy in 2026',
+    author: 'Farhan Rafiq',
+    date: 'May 12, 2026',
+    image: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=1200&h=800&fit=crop',
+    excerpt: 'Looking for a new phone? We\'ve compiled the best options available in the market right now, from titanium flagships to budget-friendly powerhouses.',
+    type: 'article',
+    readTime: '15 MIN READ',
+    views: '125K',
+    shares: '12K',
+    category: 'MOBILE'
+  },
+  {
+    id: 2,
+    title: 'TOP 10 SMARTPHONES TO BUY IN 2026',
+    author: 'Farhan Bin Rafiq',
+    date: 'May 17, 2026',
+    image: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=600&h=1000&fit=crop',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-young-man-wearing-virtual-reality-glasses-4384-large.mp4',
+    excerpt: 'Top 10 Smartphones to Buy in 2026. Find the best phone deals...',
+    duration: '8:10',
+    type: 'reels',
+    readTime: 'REELS',
+    views: '4.2M',
+    shares: '250K',
+    category: 'MOBILE'
+  },
+  {
+    id: 3,
+    title: 'Is the S24 Ultra Still Worth It in Late 2026?',
+    author: 'Sarah Jenkins',
+    date: 'May 14, 2026',
+    image: 'https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=1200&h=675&fit=crop',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-taking-photos-with-a-smartphone-34356-large.mp4',
+    excerpt: 'We revisit Samsung\'s titanium giant after 6 months of heavy usage to see if it holds up.',
+    duration: '12:45',
+    type: 'video',
+    readTime: '12 MIN VIDEO',
+    views: '540K',
+    shares: '45K',
+    category: 'MOBILE'
+  },
+  {
+    id: 4,
+    title: 'Apex vs Bata: The Ultimate Sports Shoe Battle',
+    author: 'Sarah Jenkins',
+    date: 'May 10, 2026',
+    image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&h=600&fit=crop',
+    excerpt: 'We put the top two local giants against each other in this durability and comfort test...',
+    type: 'article',
+    readTime: '8 MIN READ',
+    views: '8K',
+    shares: '120',
+    category: 'FASHION'
+  },
+  {
+    id: 5,
+    title: 'Morning Skincare Routine for Dry Skin',
+    author: 'Sarah Jenkins',
+    date: 'May 18, 2026',
+    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&h=1000&fit=crop',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-girl-cleaning-her-face-with-tonic-4389-large.mp4',
+    type: 'shorts',
+    readTime: 'SHORTS',
+    views: '95K',
+    shares: '12K',
+    category: 'BEAUTY'
+  },
+  {
+    id: 6,
+    title: 'Playstation 5 Pro Review: Is it really worth the upgrade?',
+    author: 'Sarah Jenkins',
+    date: 'May 21, 2026',
+    image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=800&h=450&fit=crop',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-digital-game-interface-with-colorful-shapes-4589-large.mp4',
+    duration: '15:20',
+    type: 'video',
+    readTime: '15 MIN VIDEO',
+    views: '1.2M',
+    shares: '85K',
+    category: 'GAMING'
+  },
+  {
+    id: 7,
+    title: 'Luxury Watches Every Man Should Own',
+    author: 'Imtiaz Ahmed',
+    date: 'May 22, 2026',
+    image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800&h=1000&fit=crop',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-hand-applying-cream-on-the-skin-of-another-hand-4688-large.mp4',
+    type: 'reels',
+    readTime: 'REELS',
+    views: '850K',
+    shares: '42K',
+    category: 'FASHION'
+  },
+  {
+    id: 8,
+    title: 'Best Coffee Machines for Barista Quality',
+    author: 'Imtiaz Ahmed',
+    date: 'May 19, 2026',
+    image: 'https://images.unsplash.com/photo-1510972527921-ce03766a1cf1?w=800&h=1000&fit=crop',
+    excerpt: 'Manual vs Automatic: Which one is right for your kitchen counter? We test the top 5 models...',
+    type: 'article',
+    readTime: '10 MIN READ',
+    views: '18K',
+    shares: '540',
+    category: 'HOME'
+  }
+];

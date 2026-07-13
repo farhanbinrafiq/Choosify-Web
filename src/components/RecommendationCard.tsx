@@ -5,7 +5,7 @@ import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
 
 export function RecommendationCard(props: any) {
-  const { guide, index, variant } = props;
+  const { guide, index, variant, isDashboard = false } = props;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
 
@@ -85,7 +85,7 @@ export function RecommendationCard(props: any) {
             "absolute inset-0 flex items-center justify-center z-10 transition-all duration-500",
             isHovering ? "opacity-0 scale-[1.2]" : "opacity-100 scale-100"
           )}>
-            <div className="w-16 h-16 rounded-full bg-play-red flex items-center justify-center border-2 border-white/20">
+            <div className="w-16 h-16 rounded-full bg-[#E02424] flex items-center justify-center border-2 border-white/20">
               <Play className="text-white fill-white ml-1" size={24} />
             </div>
           </div>
@@ -158,7 +158,7 @@ export function RecommendationCard(props: any) {
             "absolute inset-0 flex items-center justify-center z-10 transition-all duration-500",
             isHovering ? "opacity-0 scale-[1.2]" : "opacity-100 scale-100"
           )}>
-            <div className="w-12 h-12 rounded-full bg-play-red flex items-center justify-center border border-white/20">
+            <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center border border-white/20">
               <Play className="text-white fill-white ml-0.5" size={18} />
             </div>
           </div>
@@ -181,12 +181,20 @@ export function RecommendationCard(props: any) {
   return (
     <Link 
       to={`/guides/${guide.id}`} 
-      className="group cursor-pointer block bg-white rounded-[5px] overflow-hidden border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 flex flex-col h-full"
+      className="group cursor-pointer block bg-white rounded-[5px] overflow-hidden border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 flex flex-col shrink-0"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      style={isDashboard ? {
+        boxSizing: 'border-box',
+        width: '199.5px',
+        height: '268.5px'
+      } : undefined}
     >
       {/* Media Source */}
-      <div className="overflow-hidden relative bg-gray-50 shrink-0 aspect-[16/10]">
+      <div className={cn(
+        "overflow-hidden relative bg-gray-50 shrink-0",
+        isDashboard ? "h-[120px]" : "aspect-[16/10]"
+      )}>
         {guide.videoUrl ? (
           <div className="relative w-full h-full">
             <video
@@ -202,12 +210,12 @@ export function RecommendationCard(props: any) {
               "absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-transparent transition-all duration-500",
               isHovering ? "opacity-0" : "opacity-100"
             )}>
-              <div className="w-14 h-14 rounded-full bg-play-red flex items-center justify-center border border-white/20">
-                <Play className="text-white fill-white ml-0.5" size={20} />
+              <div className={cn("rounded-full bg-red-600 flex items-center justify-center border border-white/20", isDashboard ? "w-10 h-10" : "w-14 h-14")}>
+                <Play className="text-white fill-white ml-0.5" size={isDashboard ? 14 : 20} />
               </div>
             </div>
             {guide.duration && (
-              <div className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-mono text-white">
+              <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[8px] font-mono text-white">
                 {guide.duration}
               </div>
             )}
@@ -223,52 +231,55 @@ export function RecommendationCard(props: any) {
         )}
 
         {/* Badges */}
-        <div className="absolute top-4 left-4 z-10">
-          <div className="bg-white px-2.5 py-1 rounded flex items-center gap-1.5 border border-gray-100 w-max">
-            <BookOpen size={11} className="text-orange-primary" />
-            <span className="text-[9px] font-mono text-gray-500 leading-none">{guide.readTime || '5 MIN READ'}</span>
+        <div className={cn("absolute top-3 left-3 z-10", isDashboard && "scale-[0.8] origin-top-left")}>
+          <div className="bg-white px-2 py-0.5 rounded flex items-center gap-1 border border-gray-100 w-max">
+            <BookOpen size={10} className="text-orange-primary" />
+            <span className="text-[8px] font-mono text-gray-500 leading-none">{guide.readTime || '5 MIN'}</span>
           </div>
         </div>
 
         {/* Brand Overlay */}
-        <div className="absolute top-4 right-4 z-10">
+        <div className={cn("absolute top-3 right-3 z-10", isDashboard && "scale-[0.8] origin-top-right")}>
            {isVideo ? (
-             <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 text-white">
-                <Youtube size={14} />
+             <div className="w-6 h-6 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 text-white">
+                <Youtube size={12} />
              </div>
            ) : (
-             <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 text-white">
-                <BookOpen size={12} />
+             <div className="w-6 h-6 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 text-white">
+                <BookOpen size={10} />
              </div>
            )}
         </div>
       </div>
 
-      <div className="p-4 flex-1 flex flex-col min-w-0 bg-white">
-        <div className="flex-1 flex flex-col text-left">
-          <h3 className="text-xs font-semibold uppercase text-[#1a1a2e] group-hover:text-orange-primary transition-colors leading-snug line-clamp-2 mb-1">
+      <div className={cn("flex-grow flex flex-col min-w-0 bg-white text-left justify-between", isDashboard ? "p-2.5" : "p-4")}>
+        <div className="flex-1 flex flex-col">
+          <h3 className={cn(
+            "font-semibold uppercase text-[#1a1a2e] group-hover:text-orange-primary transition-colors leading-snug line-clamp-2",
+            isDashboard ? "text-[10px] mb-0.5" : "text-xs mb-1"
+          )}>
             {guide.title}
           </h3>
           
-          <p className="text-gray-400 text-[11px] leading-relaxed mb-3 line-clamp-2">
+          <p className={cn(
+            "text-gray-400 leading-relaxed",
+            isDashboard ? "text-[8.5px] line-clamp-2 mb-1" : "text-[11px] line-clamp-2 mb-3"
+          )}>
             {guide.excerpt || "Explore our comprehensive breakdown and technical deep-dive into this revolutionary product."}
           </p>
         </div>
         
-        <div className="pt-3 border-t border-gray-100 flex items-center justify-between mt-auto">
-          <div className="flex items-center gap-4 text-[10px] font-mono text-gray-400">
+        <div className={cn("border-t border-gray-100 flex items-center justify-between mt-auto", isDashboard ? "pt-1.5" : "pt-3")}>
+          <div className="flex items-center gap-3 text-[9px] font-mono text-gray-400">
             <span className="flex items-center gap-1 cursor-pointer">
-              <Heart size={13} className="text-rose-500" /> {guide.views || '12K'}
+              <Heart size={11} className="text-rose-500" /> {guide.views || '12K'}
             </span>
             <span className="flex items-center gap-1">
-              <Eye size={13} /> {guide.views || '1.2k'}
-            </span>
-            <span className="flex items-center gap-1 hidden sm:flex">
-              <Share2 size={13} /> {guide.shares || '450'}
+              <Eye size={11} /> {guide.views || '1.2k'}
             </span>
           </div>
-          <div className="w-6 h-6 rounded-full bg-gray-50 text-gray-600 group-hover:bg-orange-primary group-hover:text-white transition-colors flex items-center justify-center">
-            <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+          <div className={cn("rounded-full bg-gray-50 text-gray-600 group-hover:bg-orange-primary group-hover:text-white transition-colors flex items-center justify-center", isDashboard ? "w-5 h-5" : "w-6 h-6")}>
+            <ArrowRight size={isDashboard ? 10 : 12} className="group-hover:translate-x-0.5 transition-transform" />
           </div>
         </div>
       </div>

@@ -1,19 +1,11 @@
-import React, { useState, memo } from 'react';
-import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers, ImageOff, Plus, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
+import React, { useState } from 'react';
+import { Star, Heart, ExternalLink, Bookmark, ArrowRight, Layers, ImageOff, Plus, ChevronLeft, ChevronRight, ShoppingCart, LayoutGrid } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PLACEHOLDER_IMAGE } from '../constants';
-import { OptimizedImage } from './OptimizedImage';
-import { resolveProductBadges } from '../utils/productBadges';
-import { CardEngagementStrip } from './CardEngagementStrip';
-import { ProductStatusBadge, ProductStatusBadgeStack, collectProductBadgeLabels } from './ProductStatusBadge';
 import toast from 'react-hot-toast';
-
-const CARD_ACTION_BTN =
-  'w-7 h-7 rounded-full border flex items-center justify-center bg-white border-gray-100 shadow-sm transition-transform hover:scale-105';
-const CARD_ACTION_ICON = 12;
 
 function getProductCardImages(product: any): string[] {
   const mainImage = product.image || PLACEHOLDER_IMAGE;
@@ -203,7 +195,6 @@ function ProductCardImageCarousel({ images, alt, containerClassName }: { images:
         src={images[idx]}
         alt={alt}
         loading="lazy"
-        decoding="async"
         onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE; }}
         className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
       />
@@ -236,7 +227,7 @@ function ProductCardImageCarousel({ images, alt, containerClassName }: { images:
               onClick={(e) => handleDotClick(e, i)}
               className={cn(
                 "h-1 rounded-full transition-all duration-300 border-none p-0 cursor-pointer",
-                idx === i ? "w-2.5 bg-orange-primary" : "w-1 bg-white/60 hover:bg-white"
+                idx === i ? "w-2.5 bg-[#FF5B00]" : "w-1 bg-white/60 hover:bg-white"
               )}
             />
           ))}
@@ -246,13 +237,14 @@ function ProductCardImageCarousel({ images, alt, containerClassName }: { images:
   );
 }
 
-export const ProductCard = memo(function ProductCard({ 
+export function ProductCard({ 
   product, 
-  variant: variantProp = 'grid',
+  variant = 'grid',
   showCountdown = false,
   imageContainerStyle,
   titleStyle,
-  isGuideDetail = false
+  isGuideDetail = false,
+  isDashboard = false
 }: { 
   product: any, 
   variant?: 'grid' | 'list' | 'compact' | 'featured',
@@ -260,29 +252,15 @@ export const ProductCard = memo(function ProductCard({
   key?: React.Key,
   imageContainerStyle?: React.CSSProperties,
   titleStyle?: React.CSSProperties,
-  isGuideDetail?: boolean
+  isGuideDetail?: boolean,
+  isDashboard?: boolean
 }) {
-  const variant = variantProp === 'compact' ? 'grid' : variantProp;
   const navigate = useNavigate();
-  const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
-  const { allBrands, addToCart, siteConfig } = useGlobalState();
+  const { savedProducts, setSavedProducts, addToCompare, comparedProducts, setComparedProducts } = useDashboard();
+  const { mode, allBrands, addToCart } = useGlobalState();
 
   const brandObj = allBrands?.find((b: any) => b.id === product.brandId);
   const brandName = brandObj ? brandObj.name : (product.brand || 'APEX');
-  const cmsBadges = resolveProductBadges(product, siteConfig);
-  const statusBadgeLabels = collectProductBadgeLabels(product, cmsBadges);
-
-  const renderStatusBadges = (className = 'absolute top-2 left-2 z-20', align: 'start' | 'end' = 'start') => {
-    if (!statusBadgeLabels.length) return null;
-    return (
-      <ProductStatusBadgeStack
-        labels={statusBadgeLabels}
-        className={className}
-        align={align}
-        size="sm"
-      />
-    );
-  };
   
   const isSaved = savedProducts.some(p => p.id === product.id);
   const isInCompare = comparedProducts.some(p => p.id === product.id);
@@ -305,7 +283,6 @@ export const ProductCard = memo(function ProductCard({
 
   const stock = product.stock || 12;
   const soldPercent = product.soldPercent || 85;
-  const engagementType = product.tag === 'SALE' ? 'deal' as const : 'product' as const;
 
   const StockProgress = ({ sm = false }: { sm?: boolean }) => (
     <div className={cn("flex flex-col gap-1.5", sm ? "w-full mb-3" : "w-full mb-6")}>
@@ -323,48 +300,72 @@ export const ProductCard = memo(function ProductCard({
     return (
       <div 
         onClick={() => navigate(`/products/${product.id}`)}
-        className="bg-white rounded-[5px] p-5 md:p-6 h-full flex flex-col md:flex-row gap-6 relative overflow-hidden group border border-[#e8edf2] hover:border-orange-primary/30 transition-all duration-300 cursor-pointer"
+        className="bg-white rounded-[5px] p-5 md:p-6 h-full flex flex-col md:flex-row gap-6 relative overflow-hidden group border border-[#e8edf2] hover:border-[#E8500A]/30 transition-all duration-300 cursor-pointer"
       >
          {/* Background accent */}
          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-xl group-hover:scale-125 transition-transform duration-500" />
          
-         <div className="relative z-20 flex-shrink-0 w-full md:w-[45%] xl:w-[40%] aspect-[16/10] md:h-full bg-gray-50 rounded-[5px] flex items-center justify-center p-6 overflow-hidden">
+         <div className="relative z-20 flex-shrink-0 w-full md:w-[45%] xl:w-[40%] aspect-[16/10] md:h-full bg-gray-50 rounded-[5px] flex items-center justify-center p-3 md:p-4 overflow-hidden">
             <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
                 <button 
                   onClick={toggleSave}
                   className={cn(
-                    "w-9 h-9 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-sm",
-                    isSaved ? "bg-orange-primary border-orange-primary text-white" : "border-gray-200 text-orange-primary bg-white"
+                    "w-8 h-8 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-none",
+                    isSaved ? "bg-[#E8500A] border-[#E8500A] text-white" : "border-gray-200 text-[#E8500A] bg-white"
                   )}
                 >
-                   <Bookmark size={15} className={isSaved ? "fill-current" : ""} />
+                   <Bookmark size={14} className={isSaved ? "fill-current" : ""} />
                 </button>
                 <button 
                    onClick={handleCompare}
-                   title="Add to Compare"
                    className={cn(
-                     "w-9 h-9 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-sm bg-white",
+                     "w-8 h-8 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-none bg-white",
                      isInCompare ? "bg-emerald-600 border-emerald-600 text-white" : "border-gray-200 text-blue-600"
                    )}
                 >
-                   <Layers size={15} />
+                   <Layers size={14} />
                  </button>
+                 <button
+                   onClick={(e) => {
+                     e.preventDefault();
+                     e.stopPropagation();
+                     if (comparedProducts.length >= 4) {
+                       toast.error('Comparison limit reached (4 products max)');
+                       return;
+                     }
+                     const alreadyAdded = comparedProducts.some((p: any) => String(p.id) === String(product.id));
+                     if (alreadyAdded) {
+                       toast('Already in comparison');
+                       return;
+                     }
+                     setComparedProducts((prev: any[]) => [product, ...prev]);
+                     toast.success('Added to compare!');
+                   }}
+                   title="Add to Compare"
+                   className={cn(
+                     "w-8 h-8 rounded-full border flex items-center justify-center transition-transform hover:scale-105 z-20 shadow-none bg-white",
+                     isInCompare ? "bg-emerald-600 border-emerald-600 text-white" : "border-gray-200 text-blue-600"
+                   )}
+                 >
+                   <LayoutGrid size={14} />
+                 </button>
+                 <button className="hidden" onClick={() => {}}>
+                </button>
              </div>
             
             <ProductCardImageCarousel 
               images={getProductCardImages(product)} 
               alt={product.title} 
-              containerClassName="absolute inset-0 p-6 z-10"
+              containerClassName="absolute inset-0 p-3 md:p-4 z-10"
             />
-            {renderStatusBadges('absolute top-3 left-3 z-20', 'start')}
          </div>
   
          <div className="relative z-10 flex-1 flex flex-col justify-center py-2 px-1">
             <div className="flex items-center justify-between mb-4">
                <div className="flex items-center gap-2">
                   <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{brandName}</span>
-                  <div className="bg-orange-primary/10 text-orange-primary text-[9.5px] font-semibold px-2.5 py-1 rounded flex items-center gap-1 uppercase tracking-wide leading-none">
-                     <Star size={11} className="fill-current text-orange-primary" /> FEATURED
+                  <div className="bg-[#E8500A]/10 text-[#E8500A] text-[9.5px] font-semibold px-2.5 py-1 rounded flex items-center gap-1 uppercase tracking-wide leading-none">
+                     <Star size={11} className="fill-current text-[#E8500A]" /> FEATURED
                   </div>
                </div>
                {product.discount && (
@@ -386,186 +387,478 @@ export const ProductCard = memo(function ProductCard({
             <div className="flex items-end justify-between gap-4 pt-4 border-t border-gray-150 select-none shrink-0 w-full">
                <div className="flex flex-col text-left min-w-0">
                   <span className="text-[9px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">SPECIAL VALUE</span>
-                  <span className="text-2xl font-mono font-bold text-orange-primary leading-none whitespace-nowrap">BDT {product.price}</span>
+                  <span className="text-2xl font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">BDT {product.price}</span>
                </div>
                
                <button 
                  type="button" 
-                 onClick={(e) => { e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); } else { addToCart(product, 1); } }} 
-                 className="w-10 h-10 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+                 onClick={(e) => { e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); } else { const qty = mode === 'retail' ? 1 : (product.moq || 10); addToCart(product, qty); } }} 
+                 className="w-10 h-10 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
                  aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
                  title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
                >
                  {isGuideDetail ? <ArrowRight size={16} className="stroke-[2.5]" /> : <ShoppingCart size={16} className="stroke-[2.5]" />}
                </button>
             </div>
-            <CardEngagementStrip
-              entityType={engagementType}
-              entityId={product.id}
-              payload={product}
-              onClickCapture={(e) => e.stopPropagation()}
-            />
          </div>
       </div>
     );
   }
 
-  if (variant === 'list') {
+  if (variant === 'compact') {
     return (
-      <div className="bg-white rounded-[5px] border border-[#e8edf2] hover:border-orange-primary/30 hover:scale-[1.005] transition-all duration-300 flex gap-5 p-4 group cursor-pointer text-left shadow-none" onClick={() => navigate(`/products/${product.id}`)}>
-        <div className="w-36 md:w-40 h-36 md:h-40 flex-shrink-0 bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-3 select-none">
-          <ProductCardImageCarousel 
-            images={getProductCardImages(product)} 
-            alt={product.title} 
-            containerClassName="absolute inset-0 p-3"
-          />
-          <div className="absolute top-2 left-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1.5">
-            <button 
-              onClick={toggleSave}
-              className={cn(
-                CARD_ACTION_BTN,
-                isSaved ? "text-orange-primary" : "text-gray-400 hover:text-orange-primary"
-              )}
-            >
-               <Bookmark size={CARD_ACTION_ICON} className={isSaved ? "fill-current" : ""} />
-            </button>
-            <button 
-              onClick={handleCompare}
-              title="Add to Compare"
-              className={cn(
-                 CARD_ACTION_BTN,
-                 isInCompare ? "text-green-600" : "text-gray-400 hover:text-blue-500"
-              )}
-            >
-               <Layers size={CARD_ACTION_ICON} />
-            </button>
-          </div>
-          {renderStatusBadges('absolute top-2 right-2 z-20', 'end')}
+      <div 
+        onClick={() => navigate(`/products/${product.id}`)}
+        className="bg-white rounded-[5px] p-3 flex flex-col border border-[#e8edf2] hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer group relative w-full min-h-[270px] md:min-h-[290px] h-full box-border animate-in fade-in"
+      >
+        <div 
+          className="w-full h-[155px] md:h-[175px] bg-gray-50 rounded-[5px] relative overflow-hidden flex items-center justify-center p-1 md:p-1.5 select-none shrink-0"
+          style={imageContainerStyle}
+        >
+            <div className="absolute top-2 left-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+               <button 
+                 onClick={toggleSave}
+                 className={cn(
+                    "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
+                    isSaved ? "text-[#E8500A]" : "text-gray-400 hover:text-[#E8500A]"
+                 )}
+               >
+                  <Bookmark size={10} className={isSaved ? "fill-current" : ""} />
+               </button>
+               <button 
+                 onClick={handleCompare}
+                 className={cn(
+                    "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
+                    isInCompare ? "text-green-600" : "text-gray-400 hover:text-blue-500"
+                 )}
+               >
+                  <Layers size={10} />
+               </button>
+               <button
+                 onClick={(e) => {
+                   e.preventDefault();
+                   e.stopPropagation();
+                   if (comparedProducts.length >= 4) {
+                     toast.error('Comparison limit reached (4 products max)');
+                     return;
+                   }
+                   const alreadyAdded = comparedProducts.some((p: any) => String(p.id) === String(product.id));
+                   if (alreadyAdded) {
+                     toast('Already in comparison');
+                     return;
+                   }
+                   setComparedProducts((prev: any[]) => [product, ...prev]);
+                   toast.success('Added to compare!');
+                 }}
+                 title="Add to Compare"
+                 className={cn(
+                   "w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-100 shadow-none",
+                   isInCompare ? "text-green-600" : "text-gray-400 hover:text-blue-500"
+                 )}
+               >
+                 <LayoutGrid size={14} />
+               </button>
+               <button className="hidden" onClick={() => {}}>
+               </button>
+            </div>
+            
+            <ProductCardImageCarousel 
+              images={getProductCardImages(product)} 
+              alt={product.title} 
+              containerClassName="absolute inset-0 p-1 md:p-1.5"
+            />
         </div>
-        <div className="flex-1 flex flex-col py-0.5 justify-between min-w-0">
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-1.5">
-              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">{brandName}</span>
-              {statusBadgeLabels[0] ? (
-                <ProductStatusBadge label={statusBadgeLabels[0]} size="sm" />
-              ) : null}
+        
+        <div className="flex flex-col pt-2 flex-grow min-h-0 text-left justify-between select-none">
+          <div className="flex flex-col gap-1 w-full">
+            <div className="flex items-center justify-between gap-1 w-full leading-none">
+              <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider truncate max-w-[80px]">{brandName}</span>
+              <div className="flex items-center gap-0.5 shrink-0 ml-auto bg-gray-50 px-1 py-0.5 rounded leading-none">
+                <Star size={7} className="fill-orange-primary text-orange-primary" />
+                <span className="text-[8.5px] font-semibold text-gray-500">4.8</span>
+              </div>
             </div>
-            <h3 className="text-sm font-semibold text-[#1a1a2e] leading-snug line-clamp-1 mb-1.5 group-hover:text-orange-primary transition-colors">
-              {product.title}
-            </h3>
-            <div className="flex items-center gap-1 select-none">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} size={10} className={cn(i < Math.floor(product.rating || 4) ? "fill-orange-primary text-orange-primary" : "text-gray-100")} />
-              ))}
-              <span className="text-[9px] text-gray-400 font-medium ml-1.5 uppercase tracking-wide">( {product.reviews || 0} REVIEWS )</span>
-            </div>
-          </div>
+            
+            {mode === 'wholesale' && (
+              <div className="flex flex-wrap gap-1 mt-0.5">
+                <span className="bg-orange-primary/10 text-[#E8500A] text-[6.5px] font-semibold px-1 rounded uppercase tracking-wider leading-none">
+                  Wholesale Approved
+                </span>
+              </div>
+            )}
 
-                    <div className="flex items-center justify-between mt-auto gap-4 pt-3.5 border-t border-gray-100">
-            <div className="flex flex-col text-left">
-              <span className="text-lg font-bold text-orange-primary font-mono leading-none">BDT {product.price.toLocaleString()}</span>
-              {product.originalPrice && (
-                <span className="text-[11px] text-gray-300 line-through font-mono mt-0.5 leading-none">BDT {product.originalPrice}</span>
-              )}
-            </div>
-            <button 
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
-                addToCart(product, 1);
-                toast.success(`Successfully added ${product.title} to your cart!`);
-              }}
-              className="w-10 h-10 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
-              aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
-              title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
-            >
-              {isGuideDetail ? <ArrowRight size={16} className="stroke-[2.5]" /> : <ShoppingCart size={16} className="stroke-[2.5]" />}
-            </button>
+            <h4 className="text-[11px] font-semibold text-[#1a1a2e] leading-snug line-clamp-1 group-hover:text-orange-primary transition-colors min-h-[14px] truncate leading-none mt-1">
+              {product.title}
+            </h4>
           </div>
-          <CardEngagementStrip
-            entityType={engagementType}
-            entityId={product.id}
-            payload={product}
-            onClickCapture={(e) => e.stopPropagation()}
-          />
+          
+                    <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
+             <div className="flex flex-col text-left min-w-0">
+                <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">
+                  {mode === 'wholesale' ? 'Bulk Price' : 'Market Price'}
+                </span>
+                <div className="flex flex-col text-left justify-center">
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#E8500A] leading-none whitespace-nowrap">BDT {product.price.toLocaleString()}</span>
+                  {product.originalPrice ? (
+                    <span className="text-[8px] font-mono text-gray-400 line-through leading-none mt-0.5 whitespace-nowrap">৳{product.originalPrice}</span>
+                  ) : (
+                    <span className="text-[8px] font-mono text-transparent select-none leading-none mt-0.5 whitespace-nowrap">Placeholder</span>
+                  )}
+                </div>
+             </div>
+             
+             <button 
+                type="button" 
+                onClick={(e) => { 
+                  e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
+                  const qty = mode === 'retail' ? 1 : (product.moq || 10); 
+                  addToCart(product, qty); 
+                  toast.success(`Successfully added ${product.title} to your cart!`);
+                }} 
+                className="w-8 h-8 rounded-full hover:bg-[#CF4400] text-white bg-[#E8500A] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
+                aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
+                title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
+             >
+                {isGuideDetail ? <ArrowRight size={13} className="stroke-[2.5]" /> : <ShoppingCart size={13} className="stroke-[2.5]" />}
+               </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  if (variant === 'list') {
+    // Enrich with high fidelity reference-image properties
+    const categoryLabel = product.categoryLabel || (product.category ? String(product.category).split('&')[0].trim().toUpperCase() : 'TECH');
+    const ratingVal = product.rating || 4.7;
+    const reviewsCountText = product.reviewsText || (product.reviews ? (product.reviews >= 1000 ? `${(product.reviews/1000).toFixed(1)}K` : `${product.reviews}`) : '120');
+    const displayPrice = typeof product.price === 'string' ? parseFloat(product.price.replace(/,/g, '')) : product.price;
+    const origPrice = product.originalPrice ? (typeof product.originalPrice === 'string' ? parseFloat(product.originalPrice.replace(/,/g, '')) : product.originalPrice) : null;
+    
+    // Calculate saveText dynamically if not present
+    let saveText = product.saveText;
+    if (!saveText && origPrice && displayPrice) {
+      const savings = origPrice - displayPrice;
+      if (savings > 0) {
+        const pct = Math.round((savings / origPrice) * 100);
+        saveText = `Save ৳${savings.toLocaleString()} (${pct}%)`;
+      }
+    }
+    if (!saveText) saveText = '—';
+
+    // Specific high fidelity mapping for hearts and bookmarks based on reference image
+    const heartsCount = product.hearts || (100 + (product.id * 77) % 1300);
+    const bookmarksCount = product.bookmarks || (10 + (product.id * 31) % 400);
+
+    // Specific high fidelity badges mapping
+    let badges = product.badges;
+    if (!badges) {
+      badges = [];
+      if (product.id === 1 || product.id === 7 || product.id === 1001 || product.id === 1007) {
+        badges.push({ text: 'FEATURED', type: 'featured' });
+      } else if (product.id === 2 || product.id === 1002) {
+        badges.push({ text: 'BEST SELLER', type: 'bestseller' });
+      } else if (product.id === 8 || product.id === 1008) {
+        badges.push({ text: 'BEST DEAL', type: 'bestdeal' });
+      } else if (product.id === 6 || product.id === 11 || product.id === 1006 || product.id === 1011 || product.tag === 'NEW') {
+        badges.push({ text: 'NEW', type: 'new' });
+      }
+
+      if (origPrice && displayPrice) {
+        const pct = Math.round(((origPrice - displayPrice) / origPrice) * 100);
+        if (pct > 0) {
+          badges.push({ text: `-${pct}%`, type: 'discount' });
+        }
+      }
+    }
+
+    return (
+      <div 
+        onClick={() => navigate(`/products/${product.id}`)}
+        className="bg-white rounded-xl border border-gray-200 hover:border-[#FF5B00]/40 transition-all duration-300 flex flex-col md:flex-row gap-5 p-4 group cursor-pointer text-left hover:shadow-md relative overflow-hidden"
+      >
+        <div className="w-full md:w-44 h-44 bg-gray-50 rounded-xl relative overflow-hidden flex items-center justify-center p-2 select-none shrink-0">
+          <ProductCardImageCarousel 
+            images={getProductCardImages(product)} 
+            alt={product.title} 
+            containerClassName="absolute inset-0 p-2"
+          />
+          
+          {/* Top-left Badges inside carousel */}
+          <div className="absolute top-3 left-3 z-25 flex flex-wrap gap-1.5 pointer-events-none">
+            {badges.map((badge, idx) => {
+              let badgeStyle = "bg-gray-800 text-white";
+              if (badge.type === 'featured') badgeStyle = "bg-[#0F172A] text-white";
+              else if (badge.type === 'bestseller') badgeStyle = "bg-[#F97316] text-white";
+              else if (badge.type === 'bestdeal') badgeStyle = "bg-[#F59E0B] text-white";
+              else if (badge.type === 'new') badgeStyle = "bg-[#10B981] text-white";
+              else if (badge.type === 'discount') badgeStyle = "bg-[#EF4444] text-white";
+              
+              return (
+                <span 
+                  key={idx} 
+                  className={cn(
+                    "text-[9px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wide leading-none",
+                    badgeStyle
+                  )}
+                >
+                  {badge.type === 'featured' && <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />}
+                  {badge.text}
+                </span>
+              );
+            })}
+          </div>
+
+          {/* Float Action buttons on hover */}
+          <div className="absolute top-3 right-3 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-1.5">
+            <button 
+              onClick={toggleSave}
+              className={cn(
+                "w-7 h-7 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-150 shadow-sm",
+                isSaved ? "text-[#FF5B00] border-[#FF5B00]/20" : "text-gray-400 hover:text-[#FF5B00]"
+              )}
+            >
+               <Bookmark size={12} className={isSaved ? "fill-current" : ""} />
+            </button>
+            <button 
+              onClick={handleCompare}
+              className={cn(
+                 "w-7 h-7 rounded-full border flex items-center justify-center transition-transform hover:scale-105 bg-white border-gray-150 shadow-sm",
+                 isInCompare ? "text-green-600 border-green-200" : "text-gray-400 hover:text-blue-500"
+              )}
+            >
+               <Layers size={12} />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col justify-between py-1 min-w-0">
+          <div>
+            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">
+              {categoryLabel}
+            </div>
+            
+            <h3 className="text-base font-extrabold text-gray-900 tracking-tight leading-snug line-clamp-2 group-hover:text-[#FF5B00] transition-colors mb-2">
+              {product.title}
+            </h3>
+
+            <div className="flex items-center gap-1 select-none mb-4">
+              <Star size={14} className="fill-[#F97316] text-[#F97316]" />
+              <span className="text-xs font-bold text-gray-800 ml-0.5">{ratingVal}</span>
+              <span className="text-xs font-medium text-gray-400">({reviewsCountText})</span>
+            </div>
+
+            {mode === 'wholesale' && (
+              <div className="flex flex-wrap gap-1 mb-3">
+                <span className="bg-[#FF5B00]/10 text-[#FF5B00] text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wide leading-none">
+                  WHOLESALE APPROVED
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-end justify-between gap-4 pt-3 border-t border-gray-100">
+            <div className="flex flex-col text-left">
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-black text-[#EF4444]">৳{displayPrice.toLocaleString()}</span>
+                {origPrice && (
+                  <span className="text-xs font-bold text-gray-300 line-through">৳{origPrice.toLocaleString()}</span>
+                )}
+              </div>
+              <div className="text-xs font-bold text-[#10B981] mt-0.5">
+                {saveText}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 text-gray-400">
+                <button 
+                  onClick={toggleSave}
+                  className="flex items-center gap-1.5 hover:text-[#FF5B00] transition-colors bg-transparent border-0 cursor-pointer p-0"
+                >
+                  <Heart size={15} className={isSaved ? "fill-[#FF5B00] text-[#FF5B00]" : ""} />
+                  <span className="text-xs font-bold">{heartsCount.toLocaleString()}</span>
+                </button>
+                <span className="text-gray-200">|</span>
+                <button 
+                  onClick={handleCompare}
+                  className="flex items-center gap-1.5 hover:text-blue-500 transition-colors bg-transparent border-0 cursor-pointer p-0"
+                >
+                  <Layers size={14} className={isInCompare ? "text-green-500" : ""} />
+                  <span className="text-xs font-bold">{bookmarksCount.toLocaleString()}</span>
+                </button>
+              </div>
+
+              <button 
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
+                  const qty = mode === 'retail' ? 1 : (product.moq || 10);
+                  addToCart(product, qty);
+                  toast.success(`Successfully added ${product.title} to your cart!`);
+                }}
+                className="w-10 h-10 rounded-full hover:bg-[#E04F00] text-white bg-[#FF5B00] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-105 active:scale-95"
+                aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
+                title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
+              >
+                {isGuideDetail ? <ArrowRight size={16} className="stroke-[2.5]" /> : <ShoppingCart size={16} className="stroke-[2.5]" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Enrich with high fidelity reference-image properties
+  const categoryLabel = product.categoryLabel || (product.category ? String(product.category).split('&')[0].trim().toUpperCase() : 'TECH');
+  const ratingVal = product.rating || 4.7;
+  const reviewsCountText = product.reviewsText || (product.reviews ? (product.reviews >= 1000 ? `${(product.reviews/1000).toFixed(1)}K` : `${product.reviews}`) : '120');
+  const displayPrice = typeof product.price === 'string' ? parseFloat(product.price.replace(/,/g, '')) : product.price;
+  const origPrice = product.originalPrice ? (typeof product.originalPrice === 'string' ? parseFloat(product.originalPrice.replace(/,/g, '')) : product.originalPrice) : null;
+  
+  // Calculate saveText dynamically if not present
+  let saveText = product.saveText;
+  if (!saveText && origPrice && displayPrice) {
+    const savings = origPrice - displayPrice;
+    if (savings > 0) {
+      const pct = Math.round((savings / origPrice) * 100);
+      saveText = `Save ৳${savings.toLocaleString()} (${pct}%)`;
+    }
+  }
+  if (!saveText) saveText = '—';
+
+  // Specific high fidelity mapping for hearts and bookmarks based on reference image
+  const heartsCount = product.hearts || (100 + (product.id * 77) % 1300);
+  const bookmarksCount = product.bookmarks || (10 + (product.id * 31) % 400);
+
+  // Specific high fidelity badges mapping
+  let badges = product.badges;
+  if (!badges) {
+    badges = [];
+    if (product.id === 1 || product.id === 7 || product.id === 1001 || product.id === 1007) {
+      badges.push({ text: 'FEATURED', type: 'featured' });
+    } else if (product.id === 2 || product.id === 1002) {
+      badges.push({ text: 'BEST SELLER', type: 'bestseller' });
+    } else if (product.id === 8 || product.id === 1008) {
+      badges.push({ text: 'BEST DEAL', type: 'bestdeal' });
+    } else if (product.id === 6 || product.id === 11 || product.id === 1006 || product.id === 1011 || product.tag === 'NEW') {
+      badges.push({ text: 'NEW', type: 'new' });
+    }
+
+    if (origPrice && displayPrice) {
+      const pct = Math.round(((origPrice - displayPrice) / origPrice) * 100);
+      if (pct > 0) {
+        badges.push({ text: `-${pct}%`, type: 'discount' });
+      }
+    }
+  }
+
+  const isCustomFluid = !isDashboard && !isGuideDetail;
+
   return (
     <div 
       className={cn(
-        "bg-white rounded-[5px] p-2.5 shadow-none hover:border-orange-primary/30 hover:shadow-md transition-all duration-300 group flex flex-col relative border border-[#e8edf2] overflow-hidden cursor-pointer w-full max-w-full min-w-0 h-full self-stretch",
-        isGuideDetail && "min-h-0"
+        "bg-white rounded-xl border border-gray-200 hover:border-[#FF5B00]/40 hover:shadow-md transition-all duration-300 group flex flex-col relative p-3 overflow-hidden cursor-pointer w-full text-left"
       )}
       onClick={() => navigate(`/products/${product.id}`)}
       id={`product-${product.id}`}
-      style={{
-        boxSizing: 'border-box'
+      style={isCustomFluid ? undefined : {
+        boxSizing: 'border-box' as const,
+        width: isDashboard ? '199.5px' : '229.328px',
+        height: isDashboard ? '268.5px' : '411px'
       }}
     >
+      {/* Badges and Image carousel */}
       <div className={cn(
-        "relative w-full aspect-[4/3] bg-gray-50 overflow-hidden flex items-center justify-center rounded-[5px] shrink-0",
-        isGuideDetail ? "p-2.5" : "p-2"
+        "relative w-full bg-gray-50 overflow-hidden flex items-center justify-center rounded-lg shrink-0",
+        isDashboard ? "h-[120px] p-1" : "h-[160px] p-2"
       )}>
         <ProductCardImageCarousel 
           images={getProductCardImages(product)} 
           alt={product.title} 
           containerClassName="absolute inset-0 p-2"
         />
-        {renderStatusBadges('absolute top-2 left-2 z-20', 'start')}
-        <div className="absolute top-2 right-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1.5">
+
+        {/* Top-left Badge Pills */}
+        <div className="absolute top-2 left-2 z-25 flex flex-wrap gap-1 pointer-events-none">
+          {badges.map((badge, idx) => {
+            let badgeStyle = "bg-gray-800 text-white";
+            if (badge.type === 'featured') badgeStyle = "bg-[#0F172A] text-white";
+            else if (badge.type === 'bestseller') badgeStyle = "bg-[#F97316] text-white";
+            else if (badge.type === 'bestdeal') badgeStyle = "bg-[#F59E0B] text-white";
+            else if (badge.type === 'new') badgeStyle = "bg-[#10B981] text-white";
+            else if (badge.type === 'discount') badgeStyle = "bg-[#EF4444] text-white";
+            
+            return (
+              <span 
+                key={idx} 
+                className={cn(
+                  "text-[8px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 uppercase tracking-wide leading-none",
+                  badgeStyle
+                )}
+              >
+                {badge.type === 'featured' && <span className="w-1 h-1 rounded-full bg-blue-400 animate-pulse" />}
+                {badge.text}
+              </span>
+            );
+          })}
+        </div>
+
+        {/* Saved/Compare Quick action overlay on Hover */}
+        <div className="absolute top-2 right-2 z-25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col gap-1">
           <button 
             onClick={toggleSave}
             className={cn(
-              CARD_ACTION_BTN,
-              isSaved ? "text-orange-primary" : "text-gray-400 hover:text-orange-primary"
+              "w-6 h-6 rounded-full border flex items-center justify-center bg-white border-gray-150 shadow-sm transition-transform hover:scale-105",
+              isSaved ? "text-[#FF5B00] border-[#FF5B00]/15" : "text-gray-400 hover:text-[#FF5B00]"
             )}
           >
-             <Bookmark size={CARD_ACTION_ICON} className={isSaved ? "fill-current" : ""} />
+             <Bookmark size={10} className={isSaved ? "fill-current" : ""} />
           </button>
           <button 
             onClick={handleCompare}
-            title="Add to Compare"
             className={cn(
-              CARD_ACTION_BTN,
-              isInCompare ? "text-green-500" : "text-gray-400 hover:text-blue-500"
+              "w-6 h-6 rounded-full border flex items-center justify-center bg-white border-gray-150 shadow-sm transition-transform hover:scale-105",
+              isInCompare ? "text-green-500 border-green-200" : "text-gray-400 hover:text-blue-500"
             )}
           >
-             <Layers size={CARD_ACTION_ICON} />
+             <Layers size={10} />
           </button>
         </div>
       </div>
       
-      <div className="pt-1.5 flex flex-col flex-grow min-h-0 text-left justify-between">
+      {/* Product Information */}
+      <div className="pt-2 flex flex-col flex-grow min-h-0 justify-between">
         <div>
-          <div className="flex items-center gap-1.5 mb-1 w-full justify-between leading-none">
-            <span className="text-orange-primary font-medium uppercase text-[7.5px] tracking-wider truncate max-w-[80px]">{brandName}</span>
-            <div className="flex items-center gap-0.5 shrink-0 ml-auto bg-gray-50 px-1 py-0.5 rounded leading-none">
-              <Star size={7} className="fill-orange-primary text-orange-primary" />
-              <span className="text-[7.5px] font-semibold text-gray-500">4.8</span>
-            </div>
+          <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+            {categoryLabel}
           </div>
 
           <h3 className={cn(
-            "font-semibold text-[#1a1a2e] group-hover:text-orange-primary transition-colors leading-snug break-words",
-            isGuideDetail ? "text-xs line-clamp-1" : "text-[10px] line-clamp-1"
+            "font-extrabold text-gray-900 group-hover:text-[#FF5B00] transition-colors leading-tight mb-1 line-clamp-2",
+            isDashboard ? "text-[11px]" : "text-[13px]"
           )}>
             {product.title}
           </h3>
 
-          {/* New Recommendation Snapshot Section */}
+          <div className="flex items-center gap-1 select-none mb-1.5">
+            <Star size={11} className="fill-[#F97316] text-[#F97316]" />
+            <span className="text-[10px] font-bold text-gray-800">{ratingVal}</span>
+            <span className="text-[10px] font-medium text-gray-400">({reviewsCountText})</span>
+          </div>
+
+          {/* New Recommendation Snapshot Section for Guide Detail */}
           {isGuideDetail && (() => {
              const recData = getRecommendationData(product);
              return (
-                <div className="mt-2 pt-1.5 border-t border-dashed border-gray-150 text-left">
-                   <div className="text-[7.5px] font-black text-orange-primary uppercase tracking-wider mb-1 leading-none font-mono">
+                <div className="mt-2 pt-1.5 border-t border-dashed border-gray-200 text-left">
+                   <div className="text-[7.5px] font-black text-[#FF5B00] uppercase tracking-wider mb-1 leading-none font-mono">
                       RECOMMENDATION ON THIS
                    </div>
                    <div className="flex flex-wrap gap-1 max-h-[30px] overflow-hidden leading-none">
                       {recData.tags.map((tag) => (
-                         <span key={tag} className="px-1 py-0.5 text-[6.5px] font-bold bg-orange-primary/5 text-orange-primary rounded-full uppercase tracking-wider font-sans border border-orange-primary/10 whitespace-nowrap inline-block">
+                         <span key={tag} className="px-1 py-0.5 text-[6.5px] font-bold bg-[#FF5B00]/5 text-[#FF5B00] rounded-full uppercase tracking-wider font-sans border border-[#FF5B00]/10 whitespace-nowrap inline-block">
                             {tag}
                          </span>
                       ))}
@@ -580,49 +873,65 @@ export const ProductCard = memo(function ProductCard({
           })()}
         </div>
         
-                <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-2.5 w-full select-none shrink-0 overflow-hidden">
+        {/* Pricing & Footer Actions */}
+        <div className="mt-auto pt-2 border-t border-gray-100 flex flex-col gap-2">
+          {/* Prices Row */}
           <div className="flex flex-col text-left min-w-0">
-             <span className="text-[6.5px] font-medium text-gray-400 uppercase tracking-widest leading-none mb-1">
-               Market Price
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[14px] font-black text-[#EF4444] leading-none whitespace-nowrap">
+                ৳{displayPrice.toLocaleString()}
               </span>
-              <div className="flex flex-col text-left justify-center">
-                <span className="text-[10px] sm:text-[11px] font-mono font-bold text-orange-primary leading-none whitespace-nowrap">
-                  BDT {product.price.toLocaleString()}
+              {origPrice && (
+                <span className="text-[10px] font-bold text-gray-300 line-through leading-none whitespace-nowrap">
+                  ৳{origPrice.toLocaleString()}
                 </span>
-                {product.originalPrice ? (
-                  <span className="text-[8px] font-mono text-gray-400 line-through leading-none mt-0.5 whitespace-nowrap">
-                    ৳{product.originalPrice}
-                  </span>
-                ) : (
-                  <span className="text-[8px] font-mono text-transparent select-none leading-none mt-0.5 whitespace-nowrap">
-                    Placeholder
-                  </span>
-                )}
-              </div>
+              )}
+            </div>
+            <div className="text-[10px] font-bold text-[#10B981] mt-0.5 leading-none">
+              {saveText}
+            </div>
           </div>
-          
-          <button 
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
-              addToCart(product, 1);
-              toast.success(`Successfully added ${product.title} to your cart!`);
-            }}
-            className="w-8 h-8 rounded-full hover:bg-orange-deep text-white bg-orange-primary cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-[1.05] active:scale-95"
-            aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
-            title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
-          >
-             {isGuideDetail ? <ArrowRight size={13} className="stroke-[2.5]" /> : <ShoppingCart size={13} className="stroke-[2.5]" />}
-          </button>
+
+          {/* Social icons & Add to Cart */}
+          <div className="flex items-center justify-between gap-1 mt-1">
+            <div className="flex items-center gap-2 text-gray-400 shrink-0">
+              <button 
+                onClick={toggleSave}
+                className="flex items-center gap-1 hover:text-[#FF5B00] transition-colors bg-transparent border-0 cursor-pointer p-0"
+                title="Heart"
+              >
+                <Heart size={12} className={isSaved ? "fill-[#FF5B00] text-[#FF5B00]" : ""} />
+                <span className="text-[9.5px] font-bold">{heartsCount.toLocaleString()}</span>
+              </button>
+              <span className="text-gray-200 text-[10px]">|</span>
+              <button 
+                onClick={handleCompare}
+                className="flex items-center gap-1 hover:text-blue-500 transition-colors bg-transparent border-0 cursor-pointer p-0"
+                title="Bookmark"
+              >
+                <Bookmark size={11} className={isSaved ? "fill-current text-[#FF5B00]" : ""} />
+                <span className="text-[9.5px] font-bold">{bookmarksCount.toLocaleString()}</span>
+              </button>
+            </div>
+
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation(); if (isGuideDetail) { navigate(`/products/${product.id}`); return; }
+                const qty = mode === 'retail' ? 1 : (product.moq || 10);
+                addToCart(product, qty);
+                toast.success(`Successfully added ${product.title} to your cart!`);
+              }}
+              className="w-7 h-7 rounded-full hover:bg-[#E04F00] text-white bg-[#FF5B00] cursor-pointer transition-all duration-200 shrink-0 border-0 flex items-center justify-center shadow-md hover:scale-105 active:scale-95 p-0"
+              aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
+              title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
+            >
+               {isGuideDetail ? <ArrowRight size={11} className="stroke-[2.5]" /> : <ShoppingCart size={11} className="stroke-[2.5]" />}
+            </button>
+          </div>
         </div>
-        <CardEngagementStrip
-          entityType={engagementType}
-          entityId={product.id}
-          payload={product}
-          onClickCapture={(e) => e.stopPropagation()}
-        />
       </div>
     </div>
   );
-});
+}
 

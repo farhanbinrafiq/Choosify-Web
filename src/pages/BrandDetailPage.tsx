@@ -1,2400 +1,1351 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import {
-  Search,
-  Youtube,
-  Star,
-  ChevronDown,
-  CheckCircle2,
-  Bookmark,
-  ChevronLeft,
-  ChevronRight,
-  Zap,
-  TrendingUp,
-  HelpCircle,
-  AlertCircle,
-  Share2,
-  MessageCircle,
-  BarChart3,
-  Users,
-  Play,
-  Smartphone,
-  Gift,
-  Shirt,
-  Info,
-  Package,
-  DollarSign,
-  ShieldCheck,
-  ThumbsUp,
-  Heart,
-  X,
-  ArrowRight,
-  Lock,
-  Sparkles,
-  Clock,
-  Facebook,
-  Instagram,
-  Megaphone,
-  Flame,
-} from "lucide-react";
-import { BRANDS, PRODUCTS } from "../constants";
-import { ProductCard } from "../components/ProductCard";
-import { motion, AnimatePresence } from "motion/react";
-import { cn } from "../lib/utils";
-import { DETAIL_SINGLE_FEED, DETAIL_FEED_GRID_5 } from "../lib/pageLayout";
-import { StickySectionNav } from "../components/StickySectionNav";
-import { CardEngagementStrip } from "../components/CardEngagementStrip";
-import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
-import { StudioWrap } from "../components/studio/StudioWrap";
-import { BrandPostCarouselSection } from "../components/BrandPostCarouselSection";
-import { SpotlightIntegrationRail } from "../components/spotlight/SpotlightIntegrationRail";
-import { getBrandPostsByBrandId } from "../lib/brandPosts";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
-import { useCarousel } from "../hooks/useCarousel";
-import { ReportModal } from "../components/ReportModal";
-import { useGlobalState } from "../context/GlobalStateContext";
 import { toast } from "react-hot-toast";
-import { BrandOverviewSection } from "../components/BrandOverviewSection";
-import { FollowButton } from "../components/FollowButton";
-import { ClaimProfileModal } from "../components/ClaimProfileModal";
-import {
-  DragScrollContainer,
-  UniversalFilterRenderer,
-  ActiveFilterChips,
-  FilterProfile,
-  CategorySmartFilters,
-  useRegisterPageFilters,
-} from "../components/FilterEngine";
-import { PaginationBar } from "../components/PaginationBar";
-import { PublicReviewCard } from "../components/PublicReviewCard";
-import { TikTokIcon } from "../components/brand/TikTokIcon";
-import { BrandInfluencerReviewsSection } from "../components/brand/BrandInfluencerReviewsSection";
+import { motion, AnimatePresence } from "motion/react";
+import { 
+  Home, ChevronRight, Star, Heart, Share2, Calendar, MapPin, 
+  Globe, Package, ShieldCheck, Award, RotateCcw, Lock, Clock,
+  Search, ChevronLeft, Check, ThumbsUp, ExternalLink, ArrowUpRight,
+  Bookmark, Mail, Info, HelpCircle, BadgePercent, Sparkles
+} from "lucide-react";
+
+// Import our custom-generated premium Samsung products illustration collage
+// @ts-expect-error raw image asset import
+import samsungHeroImg from "../assets/images/samsung_hero_products_1783877011850.jpg";
+
+// TikTok Icon Custom SVG
+function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
+    </svg>
+  );
+}
+
+// Brand Detail Interfaces
+interface ProductCardData {
+  id: string;
+  title: string;
+  price: number;
+  originalPrice?: number;
+  discountBadge?: string;
+  customBadge?: { text: string; type: "seller" | "new" };
+  rating: number;
+  reviewCount: number;
+  image: string;
+}
+
+interface CreatorReview {
+  author: string;
+  role: string;
+  avatar: string;
+  rating: number;
+  timeAgo: string;
+  comment: string;
+}
 
 export function BrandDetailPage() {
-  const brandHeroRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
   const { id } = useParams();
-  const {
-    allBrands,
-    allProducts,
-    getBrandClaimStatus,
-    updateBrandClaimStatus,
-    brandClaimStatuses,
-  } = useGlobalState();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isReportOpen, setIsReportOpen] = useState(false);
-  const [isLoved, setIsLoved] = useState(false);
+  
+  // States
+  const [activeTab, setActiveTab] = useState("OVERVIEW");
   const [isFollowed, setIsFollowed] = useState(false);
-  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
-
-  // Filter States (from Brand Products page)
-  const [activeFilter, setActiveFilter] = useState("Full Experience"); // Show Component View Selector
-  const [searchFilter, setSearchFilter] = useState("");
-  const [currentSearchInput, setCurrentSearchInput] = useState("");
-
-  // New Filter V2 States
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [priceRangeV2, setPriceRangeV2] = useState<[number, number | null]>([
-    0,
-    null,
-  ]);
-  const [customPriceInputs, setCustomPriceInputs] = useState({
-    min: "",
-    max: "",
-  });
-  const [availabilityFilter, setAvailabilityFilter] = useState<string | null>(
-    null,
-  );
-  const [ratingFilter, setRatingFilter] = useState<string | null>(null);
-  const [votesFilter, setVotesFilter] = useState<string | null>(null);
-  const [warrantyFilter, setWarrantyFilter] = useState<string | null>(null);
-  const [deliveryFilter, setDeliveryFilter] = useState<string | null>(null);
-
-  // Deal filters
-  const [discountFilter, setDiscountFilter] = useState<string | null>(null);
-  const [couponFilter, setCouponFilter] = useState<string | null>(null);
-  const [expiryFilter, setExpiryFilter] = useState<string | null>(null);
-
-  // Brand filters
-  const [productLineFilter, setProductLineFilter] = useState<string | null>(
-    null,
-  );
-  const [featuredCollectionFilter, setFeaturedCollectionFilter] = useState<
-    string | null
-  >(null);
-  const [officialStoreFilter, setOfficialStoreFilter] = useState<string | null>(
-    null,
-  );
-  const [countryFilter, setCountryFilter] = useState<string | null>(null);
-
-  // Quick action filters managed at core
-  const [dealsOnlyFilter, setDealsOnlyFilter] = useState(false);
-  const [couponsOnlyFilter, setCouponsOnlyFilter] = useState(false);
-  const [verifiedOnlyFilter, setVerifiedOnlyFilter] = useState(false);
-  const [inStockOnlyFilter, setInStockOnlyFilter] = useState(false);
-  const [featuredOnlyFilter, setFeaturedOnlyFilter] = useState(false);
-
-  // Sort State
-  const [sortOption, setSortOption] = useState<string>("default");
-
-  // Smart filters specs State
-  const [smartSpecs, setSmartSpecs] = useState<Record<string, string>>({});
-
+  const [likedProducts, setLikedProducts] = useState<string[]>([]);
+  const [currentCreatorReviewIdx, setCurrentCreatorReviewIdx] = useState(0);
+  const [creatorReviewLikes, setCreatorReviewLikes] = useState<Record<number, number>>({});
+  const [publicReviewLikes, setPublicReviewLikes] = useState<Record<string, number>>({});
+  const [votedPublicReviews, setVotedPublicReviews] = useState<string[]>([]);
+  
+  // Auto-slide Creator Reviews
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const timer = setInterval(() => {
+      setCurrentCreatorReviewIdx((prev) => (prev + 1) % CREATOR_REVIEWS.length);
+    }, 8000);
+    return () => clearInterval(timer);
   }, []);
 
-  // Dynamically resolve brand or fallback to Sailor/fashion-oriented layout
-  const brandSource = allBrands.length > 0 ? allBrands : BRANDS;
-  const productSource = allProducts.length > 0 ? allProducts : PRODUCTS;
-
-  const brand =
-    brandSource.find(
-      (b) =>
-        String(b.id) === id ||
-        b.name.toLowerCase().replace(/\s+/g, "-") ===
-          String(id).toLowerCase() ||
-        b.name.toLowerCase() === String(id).toLowerCase(),
-    ) ||
-    brandSource.find((b) => b.name === "Sailor") ||
-    brandSource[2];
-
-  const brandWhatsOnPosts = useMemo(
-    () => getBrandPostsByBrandId(Number(brand.id)).slice(0, 6),
-    [brand.id],
-  );
-
-  const [localClaimStatus, setLocalClaimStatus] = useState<
-    "verified" | "pending" | "community"
-  >(() => getBrandClaimStatus(brand.id));
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 10;
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    activeFilter,
-    searchFilter,
-    selectedCategory,
-    priceRangeV2,
-    availabilityFilter,
-    ratingFilter,
-    votesFilter,
-    warrantyFilter,
-    deliveryFilter,
-    discountFilter,
-    couponFilter,
-    expiryFilter,
-    productLineFilter,
-    featuredCollectionFilter,
-    officialStoreFilter,
-    countryFilter,
-    dealsOnlyFilter,
-    couponsOnlyFilter,
-    verifiedOnlyFilter,
-    inStockOnlyFilter,
-    featuredOnlyFilter,
-    smartSpecs,
-  ]);
-
-  useEffect(() => {
-    setLocalClaimStatus(getBrandClaimStatus(brand.id));
-  }, [brand, brandClaimStatuses]);
-
-  // Resolve products listed under this brand
-  const brandNameLower = brand.name.toLowerCase();
-  const brandProducts = productSource.filter(
-    (p: any) =>
-      p.brandId === brand.id ||
-      (p.brand && p.brand.toLowerCase() === brandNameLower),
-  );
-
-  const previewShowProductCatalogSection =
-    localClaimStatus !== "verified" || brandProducts.length > 0;
-  const previewShowDealsSection =
-    localClaimStatus !== "verified" ||
-    brandProducts.some((p: any) => p.discount || p.tag === "SALE" || p.tag === "HOT");
-
-  const sectionNavItems = useMemo(
-    () => [
-      {
-        id: "deals-section",
-        label: "Deals",
-        icon: <Gift size={13} />,
-        hidden: !previewShowDealsSection,
-      },
-      {
-        id: "products-section",
-        label: "Products",
-        icon: <Package size={13} />,
-        hidden: !previewShowProductCatalogSection,
-      },
-      {
-        id: "creator-reviews-section",
-        label: "Creator Reviews",
-        icon: <Sparkles size={13} />,
-      },
-      {
-        id: "spotlight-section",
-        label: "Spotlight",
-        icon: <Flame size={13} />,
-      },
-      {
-        id: "campaigns-section",
-        label: "Events",
-        icon: <Megaphone size={13} />,
-        hidden: brandWhatsOnPosts.length === 0,
-      },
-      {
-        id: "public-reviews-section",
-        label: "Public Reviews",
-        icon: <MessageCircle size={13} />,
-      },
-      {
-        id: "brand-overview-section",
-        label: "Brand Overview",
-        icon: <Info size={13} />,
-      },
-    ],
-    [previewShowDealsSection, previewShowProductCatalogSection, brandWhatsOnPosts.length],
-  );
-
-  const { activeId: activeSectionId, scrollToSection } =
-    useSectionScrollSpy(sectionNavItems);
-
-  // Dynamic Categories options
-  const dynamicCategories = Array.from(
-    new Set(brandProducts.map((p: any) => p.category).filter(Boolean)),
-  ).map((catName: any) => {
-    const count = brandProducts.filter(
-      (p: any) => p.category === catName,
-    ).length;
-    return { name: catName, count: count };
-  });
-  const defaultCats = [
-    { name: "Mobile", count: 12 },
-    { name: "Headphone", count: 8 },
-    { name: "Chargers & Batteries", count: 5 },
-    { name: "Accessories", count: 7 },
-  ];
-  const finalCategoriesList =
-    dynamicCategories.length > 0 ? dynamicCategories : defaultCats;
-
-  useRegisterPageFilters(
-    {
-      pageName: brand.name,
-      renderSearch: () => (
-        <div className="relative">
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <Search size={13} className="text-[#E8500A]" />
-          </div>
-          <input
-            type="text"
-            value={currentSearchInput}
-            onChange={(e) => setCurrentSearchInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") setSearchFilter(currentSearchInput);
-            }}
-            placeholder="Search products of this brand..."
-            className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
-          />
-        </div>
-      ),
-      quickFilters: [
-        {
-          id: "all-products",
-          label: "All Products",
-          active:
-            !dealsOnlyFilter &&
-            !couponsOnlyFilter &&
-            !verifiedOnlyFilter &&
-            !inStockOnlyFilter &&
-            !featuredOnlyFilter,
-          onClick: () => {
-            setDealsOnlyFilter(false);
-            setCouponsOnlyFilter(false);
-            setVerifiedOnlyFilter(false);
-            setInStockOnlyFilter(false);
-            setFeaturedOnlyFilter(false);
-          },
-        },
-        {
-          id: "deals-only",
-          label: "Deals",
-          active: dealsOnlyFilter,
-          onClick: () => setDealsOnlyFilter(!dealsOnlyFilter),
-        },
-        {
-          id: "coupons-only",
-          label: "Coupons Available",
-          active: couponsOnlyFilter,
-          onClick: () => setCouponsOnlyFilter(!couponsOnlyFilter),
-        },
-        {
-          id: "verified",
-          label: "Verified Store",
-          active: verifiedOnlyFilter,
-          onClick: () => setVerifiedOnlyFilter(!verifiedOnlyFilter),
-        },
-        {
-          id: "in-stock",
-          label: "In Stock",
-          active: inStockOnlyFilter,
-          onClick: () => setInStockOnlyFilter(!inStockOnlyFilter),
-        },
-        {
-          id: "featured",
-          label: "Featured",
-          active: featuredOnlyFilter,
-          onClick: () => setFeaturedOnlyFilter(!featuredOnlyFilter),
-        },
-        {
-          id: "sort",
-          label:
-            sortOption === "default"
-              ? "Sort Selection"
-              : `Sort: ${
-                  sortOption === "price-asc"
-                    ? "৳ Low to High"
-                    : sortOption === "price-desc"
-                      ? "৳ High to Low"
-                      : sortOption === "rating-desc"
-                        ? "Top Rating"
-                        : "Best Discount"
-                }`,
-          active: sortOption !== "default",
-          onClick: () => {
-            setSortOption((prev) => {
-              if (prev === "default") return "price-asc";
-              if (prev === "price-asc") return "price-desc";
-              if (prev === "price-desc") return "rating-desc";
-              if (prev === "rating-desc") return "discount-desc";
-              return "default";
-            });
-          },
-        },
-      ],
-      renderFilters: () => (
-        <div className="flex flex-col gap-4">
-          <CategorySmartFilters
-            category={brand.category || "Fashion & Clothing"}
-            activeSpecs={smartSpecs}
-            onSpecChange={(specKey, val) => {
-              setSmartSpecs((prev) => ({ ...prev, [specKey]: val || "" }));
-            }}
-          />
-
-          <UniversalFilterRenderer
-            profile={{
-              entity: "products",
-              filters: [
-                {
-                  id: "price_custom",
-                  name: "Price Scope (BDT)",
-                  type: "price_custom",
-                },
-                {
-                  id: "category",
-                  name: "Categories",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "All Categories" },
-                    ...finalCategoriesList.map((cat) => ({
-                      value: cat.name,
-                      label: cat.name,
-                      count: cat.count,
-                    })),
-                  ],
-                },
-                {
-                  id: "availability",
-                  name: "Availability",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "All Items" },
-                    { value: "in-stock", label: "In Stock" },
-                    { value: "out-of-stock", label: "Out of Stock" },
-                  ],
-                },
-                {
-                  id: "rating",
-                  name: "Average Rating",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "All Ratings" },
-                    { value: "4.8", label: "4.8★ & Up" },
-                    { value: "4.5", label: "4.5★ & Up" },
-                    { value: "4.0", label: "4.0★ & Up" },
-                  ],
-                },
-                {
-                  id: "votes",
-                  name: "Audience Votes",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "Any Vote Count" },
-                    { value: "500", label: "500+ Votes" },
-                    { value: "300", label: "300+ Votes" },
-                    { value: "100", label: "100+ Votes" },
-                  ],
-                },
-              ],
-            }}
-            activeFilters={{
-              price_custom: true,
-              category: selectedCategory,
-              availability: availabilityFilter,
-              rating: ratingFilter,
-              votes: votesFilter,
-            }}
-            onFilterChange={(filterId, val) => {
-              const cleanVal = val === "all" ? null : val;
-              if (filterId === "category") setSelectedCategory(cleanVal);
-              if (filterId === "availability") setAvailabilityFilter(cleanVal);
-              if (filterId === "rating") setRatingFilter(cleanVal);
-              if (filterId === "votes") setVotesFilter(cleanVal);
-            }}
-            customPriceInputs={customPriceInputs}
-            setCustomPriceInputs={setCustomPriceInputs}
-            onCustomPriceApply={(min, max) => {
-              setPriceRangeV2([min, max]);
-            }}
-          />
-
-          <UniversalFilterRenderer
-            profile={{
-              entity: "products",
-              filters: [
-                {
-                  id: "warranty",
-                  name: "Warranty Scope",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "Any Warranty" },
-                    { value: "standard", label: "Standard Brand Warranty" },
-                    { value: "extended", label: "Extended Merchant Warranty" },
-                    { value: "none", label: "No Warranty" },
-                  ],
-                },
-                {
-                  id: "delivery",
-                  name: "Shipping Speed",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "Any Shipping" },
-                    { value: "free", label: "Free Delivery" },
-                    { value: "express", label: "Next Day Express" },
-                  ],
-                },
-                {
-                  id: "discount",
-                  name: "Promo Discount Min",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "Any Discount" },
-                    { value: "50", label: "50% Off & Above" },
-                    { value: "30", label: "30% Off & Above" },
-                    { value: "15", label: "15% Off & Above" },
-                  ],
-                },
-                {
-                  id: "coupon",
-                  name: "Coupon Support",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "All Offers" },
-                    { value: "yes", label: "Exclusive Coupon Codes" },
-                    { value: "no", label: "Direct Pricing Markdown" },
-                  ],
-                },
-                {
-                  id: "expiry",
-                  name: "Offer Validity Status",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "Any Validity" },
-                    { value: "active", label: "Active Codes" },
-                    { value: "expiring-soon", label: "Expiring Within 48 Hrs" },
-                  ],
-                },
-                {
-                  id: "product_line",
-                  name: "Product Category Line",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "All Lines" },
-                    { value: "premium", label: "Premium Signature Line" },
-                    { value: "casual", label: "Everyday Casual Line" },
-                    { value: "budget", label: "Value Budget Line" },
-                  ],
-                },
-                {
-                  id: "featured_collection",
-                  name: "Featured Campaign",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "All Collections" },
-                    { value: "summer", label: "Summer Air" },
-                    { value: "winter", label: "Winter Cozy" },
-                    { value: "festive", label: "Festive / Eid Special" },
-                  ],
-                },
-                {
-                  id: "official_store",
-                  name: "Official Outlet Sourced",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "All Stores" },
-                    { value: "yes", label: "Official Store Only" },
-                    { value: "no", label: "Third-party Retailer" },
-                  ],
-                },
-                {
-                  id: "country",
-                  name: "Country of Origin",
-                  type: "single_select",
-                  options: [
-                    { value: "all", label: "All Countries" },
-                    { value: "Bangladesh", label: "Bangladesh" },
-                    { value: "China", label: "China" },
-                    { value: "Vietnam", label: "Vietnam" },
-                    { value: "India", label: "India" },
-                  ],
-                },
-              ],
-            }}
-            activeFilters={{
-              warranty: warrantyFilter,
-              delivery: deliveryFilter,
-              discount: discountFilter,
-              coupon: couponFilter,
-              expiry: expiryFilter,
-              product_line: productLineFilter,
-              featured_collection: featuredCollectionFilter,
-              official_store: officialStoreFilter,
-              country: countryFilter,
-            }}
-            onFilterChange={(filterId, val) => {
-              const cleanVal = val === "all" ? null : val;
-              if (filterId === "warranty") setWarrantyFilter(cleanVal);
-              if (filterId === "delivery") setDeliveryFilter(cleanVal);
-              if (filterId === "discount") setDiscountFilter(cleanVal);
-              if (filterId === "coupon") setCouponFilter(cleanVal);
-              if (filterId === "expiry") setExpiryFilter(cleanVal);
-              if (filterId === "product_line") setProductLineFilter(cleanVal);
-              if (filterId === "featured_collection")
-                setFeaturedCollectionFilter(cleanVal);
-              if (filterId === "official_store")
-                setOfficialStoreFilter(cleanVal);
-              if (filterId === "country") setCountryFilter(cleanVal);
-            }}
-          />
-        </div>
-      ),
-      activeFilterCount:
-        (selectedCategory ? 1 : 0) +
-        (priceRangeV2[0] > 0 || priceRangeV2[1] !== null ? 1 : 0) +
-        (availabilityFilter ? 1 : 0) +
-        (ratingFilter ? 1 : 0) +
-        (votesFilter ? 1 : 0) +
-        (warrantyFilter ? 1 : 0) +
-        (deliveryFilter ? 1 : 0) +
-        (discountFilter ? 1 : 0) +
-        (couponFilter ? 1 : 0) +
-        (expiryFilter ? 1 : 0) +
-        (productLineFilter ? 1 : 0) +
-        (featuredCollectionFilter ? 1 : 0) +
-        (officialStoreFilter ? 1 : 0) +
-        (countryFilter ? 1 : 0) +
-        (dealsOnlyFilter ? 1 : 0) +
-        (couponsOnlyFilter ? 1 : 0) +
-        (verifiedOnlyFilter ? 1 : 0) +
-        (inStockOnlyFilter ? 1 : 0) +
-        (featuredOnlyFilter ? 1 : 0) +
-        Object.values(smartSpecs).filter(Boolean).length,
-      onClearAll: clearAllFilters,
-      sectionNav: {
-        items: sectionNavItems,
-        activeId: activeSectionId,
-        onNavigate: scrollToSection,
-        allLabel: "Brand",
-        profileLabel: "Brand profile",
-      },
-    },
-    [
-      currentSearchInput,
-      searchFilter,
-      selectedCategory,
-      priceRangeV2,
-      customPriceInputs,
-      availabilityFilter,
-      ratingFilter,
-      votesFilter,
-      warrantyFilter,
-      deliveryFilter,
-      discountFilter,
-      couponFilter,
-      expiryFilter,
-      productLineFilter,
-      featuredCollectionFilter,
-      officialStoreFilter,
-      countryFilter,
-      dealsOnlyFilter,
-      couponsOnlyFilter,
-      verifiedOnlyFilter,
-      inStockOnlyFilter,
-      featuredOnlyFilter,
-      sortOption,
-      smartSpecs,
-      sectionNavItems,
-      activeSectionId,
-      scrollToSection,
-    ],
-  );
-
-  // Filters Engine Implementation V2
-  const filteredProducts = useMemo(() => {
-    return brandProducts.filter((p: any) => {
-      // 1. Search Box
-      if (
-        searchFilter &&
-        !p.title.toLowerCase().includes(searchFilter.toLowerCase())
-      ) {
-        return false;
-      }
-
-      // 2. Category
-      if (selectedCategory && p.category !== selectedCategory) {
-        return false;
-      }
-
-      // 3. Price Scope (V2 Range)
-      const priceNum =
-        typeof p.price === "number"
-          ? p.price
-          : parseInt(String(p.price).replace(/[^0-9]/g, "")) || 0;
-      if (priceNum < priceRangeV2[0]) {
-        return false;
-      }
-      if (priceRangeV2[1] !== null && priceNum > priceRangeV2[1]) {
-        return false;
-      }
-
-      // 4. Availability
-      if (availabilityFilter === "in-stock" && p.inStock === false)
-        return false;
-      if (availabilityFilter === "out-of-stock" && p.inStock !== false)
-        return false;
-      if (inStockOnlyFilter && p.inStock === false) return false;
-
-      // 5. Avg Rating
-      const ratingVal = p.rating || 4.2;
-      if (ratingFilter && ratingFilter !== "all") {
-        if (ratingVal < parseFloat(ratingFilter)) return false;
-      }
-
-      // 6. Votes / Reviews
-      const reviewVal = p.reviews || 0;
-      if (votesFilter && votesFilter !== "all") {
-        if (reviewVal < parseInt(votesFilter)) return false;
-      }
-
-      // 7. Warranty Filter (mock check)
-      if (warrantyFilter) {
-        const mappedWarranty =
-          p.id % 3 === 0 ? "standard" : p.id % 3 === 1 ? "extended" : "none";
-        if (mappedWarranty !== warrantyFilter) return false;
-      }
-
-      // 8. Delivery Filter
-      if (deliveryFilter) {
-        let mappedDelivery = "paid";
-        if (p.id % 3 === 0) mappedDelivery = "free";
-        else if (p.id % 3 === 1) mappedDelivery = "express";
-        if (mappedDelivery !== deliveryFilter) return false;
-      }
-
-      // 9. Discount Filter (min discount %)
-      const discPercent =
-        p.discount ||
-        (p.originalPrice
-          ? Math.round(
-              ((parseInt(String(p.originalPrice).replace(/[^0-9]/g, "")) -
-                priceNum) /
-                parseInt(String(p.originalPrice).replace(/[^0-9]/g, ""))) *
-                100,
-            )
-          : 0);
-      if (discountFilter) {
-        if (discPercent < parseInt(discountFilter)) return false;
-      }
-
-      // 10. Coupon Available Filter
-      if (couponFilter === "yes" && p.id % 2 !== 0) return false;
-      if (couponFilter === "no" && p.id % 2 === 0) return false;
-
-      // 11. Expiry Filter
-      if (expiryFilter === "active" && p.id % 6 === 5) return false;
-      if (expiryFilter === "expired" && p.id % 6 !== 5) return false;
-
-      // 12. Country of Origin
-      if (countryFilter) {
-        const mappedOrigin =
-          p.id % 4 === 0
-            ? "Bangladesh"
-            : p.id % 4 === 1
-              ? "China"
-              : p.id % 4 === 2
-                ? "Vietnam"
-                : "India";
-        if (mappedOrigin !== countryFilter) return false;
-      }
-
-      // 13. Brand Product Line / Featured Collections
-      if (productLineFilter) {
-        const mappedLine =
-          p.id % 3 === 0 ? "premium" : p.id % 3 === 1 ? "standard" : "budget";
-        if (mappedLine !== productLineFilter) return false;
-      }
-      if (featuredCollectionFilter) {
-        const mappedColl =
-          p.id % 3 === 0 ? "summer" : p.id % 3 === 1 ? "winter" : "festive";
-        if (mappedColl !== featuredCollectionFilter) return false;
-      }
-      if (officialStoreFilter === "yes" && p.id % 3 === 2) return false;
-      if (officialStoreFilter === "no" && p.id % 3 !== 2) return false;
-
-      // Quick Toolbar triggers
-      if (
-        dealsOnlyFilter &&
-        !p.discount &&
-        !p.originalPrice &&
-        p.tag !== "SALE"
-      )
-        return false;
-      if (couponsOnlyFilter && p.id % 2 !== 0) return false;
-      if (verifiedOnlyFilter && localClaimStatus !== "verified") return false;
-      if (featuredOnlyFilter && !p.tag) return false;
-
-      // 14. Smart Specs (Category smart filters)
-      for (const [specKey, specVal] of Object.entries(smartSpecs)) {
-        if (specVal) {
-          const valHash = ((p.id || 0) + specKey.length) % 3;
-          if (specKey === "size") {
-            const sizeVal = p.id % 3 === 0 ? "m" : p.id % 3 === 1 ? "l" : "xl";
-            if (sizeVal !== specVal) return false;
-          } else if (specKey === "gender") {
-            const genderVal =
-              p.id % 3 === 0 ? "men" : p.id % 3 === 1 ? "women" : "unisex";
-            if (genderVal !== specVal) return false;
-          } else if (specKey === "ram") {
-            const ramVal =
-              p.id % 3 === 0 ? "8gb" : p.id % 3 === 1 ? "12gb" : "16gb";
-            if (ramVal !== specVal) return false;
-          } else if (specKey === "storage") {
-            const storageVal =
-              p.id % 3 === 0 ? "128gb" : p.id % 3 === 1 ? "256gb" : "512gb";
-            if (storageVal !== specVal) return false;
-          } else if (specKey === "battery") {
-            const battVal = p.id % 3 === 0 ? "4500-5000" : "5000plus";
-            if (battVal !== specVal) return false;
-          } else {
-            if (valHash !== 0) return false;
-          }
-        }
-      }
-
-      return true;
-    });
-  }, [
-    brandProducts,
-    searchFilter,
-    selectedCategory,
-    priceRangeV2,
-    availabilityFilter,
-    ratingFilter,
-    votesFilter,
-    warrantyFilter,
-    deliveryFilter,
-    discountFilter,
-    couponFilter,
-    expiryFilter,
-    productLineFilter,
-    featuredCollectionFilter,
-    officialStoreFilter,
-    countryFilter,
-    dealsOnlyFilter,
-    couponsOnlyFilter,
-    verifiedOnlyFilter,
-    inStockOnlyFilter,
-    featuredOnlyFilter,
-    smartSpecs,
-    localClaimStatus,
-  ]);
-
-  // Dynamic Sorting Engine
-  const sortedProducts = useMemo(() => {
-    const list = [...filteredProducts] as any[];
-    if (sortOption === "price-asc") {
-      return list.sort((a, b) => {
-        const prA =
-          typeof a.price === "number"
-            ? a.price
-            : parseInt(String(a.price).replace(/[^0-9]/g, "")) || 0;
-        const prB =
-          typeof b.price === "number"
-            ? b.price
-            : parseInt(String(b.price).replace(/[^0-9]/g, "")) || 0;
-        return prA - prB;
-      });
+  // Handle Liking a Product
+  const toggleLikeProduct = (productId: string, productTitle: string) => {
+    if (likedProducts.includes(productId)) {
+      setLikedProducts(prev => prev.filter(x => x !== productId));
+      toast.success(`Removed ${productTitle} from wishlist`);
+    } else {
+      setLikedProducts(prev => [...prev, productId]);
+      toast.success(`Added ${productTitle} to wishlist!`, { icon: "❤️" });
     }
-    if (sortOption === "price-desc") {
-      return list.sort((a, b) => {
-        const prA =
-          typeof a.price === "number"
-            ? a.price
-            : parseInt(String(a.price).replace(/[^0-9]/g, "")) || 0;
-        const prB =
-          typeof b.price === "number"
-            ? b.price
-            : parseInt(String(b.price).replace(/[^0-9]/g, "")) || 0;
-        return prB - prA;
-      });
-    }
-    if (sortOption === "rating-desc") {
-      return list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    }
-    if (sortOption === "discount-desc") {
-      return list.sort((a, b) => {
-        const discA = a.discount || 0;
-        const discB = b.discount || 0;
-        return discB - discA;
-      });
-    }
-    return list;
-  }, [filteredProducts, sortOption]);
-
-  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
-  const paginatedProducts = sortedProducts.slice(
-    (currentPage - 1) * productsPerPage,
-    currentPage * productsPerPage,
-  );
-
-  // Extract deals (with specific tags or Sale flags)
-  const filteredDeals = sortedProducts.filter(
-    (p: any) =>
-      p.tag === "SALE" || p.tag === "HOT" || p.tag === "NEW" || p.discount,
-  );
-  // Guarantee always active deals fallback
-  const finalDeals =
-    filteredDeals.length > 0 ? filteredDeals : sortedProducts.slice(0, 3);
-
-  const hasCatalogProducts = filteredProducts.length > 0;
-  const hasCatalogDeals = finalDeals.length > 0;
-  const showProductCatalogSection =
-    localClaimStatus !== "verified" || hasCatalogProducts;
-  const showDealsSection = localClaimStatus !== "verified" || hasCatalogDeals;
-
-  // Counts
-  const totalDealsFound = finalDeals.length;
-  const totalProductsFound = sortedProducts.length || brandProducts.length;
-
-  function clearAllFilters() {
-    setSelectedCategory(null);
-    setPriceRangeV2([0, null]);
-    setCustomPriceInputs({ min: "", max: "" });
-    setAvailabilityFilter(null);
-    setRatingFilter(null);
-    setVotesFilter(null);
-    setWarrantyFilter(null);
-    setDeliveryFilter(null);
-    setDiscountFilter(null);
-    setCouponFilter(null);
-    setExpiryFilter(null);
-    setProductLineFilter(null);
-    setFeaturedCollectionFilter(null);
-    setOfficialStoreFilter(null);
-    setCountryFilter(null);
-    setDealsOnlyFilter(false);
-    setCouponsOnlyFilter(false);
-    setVerifiedOnlyFilter(false);
-    setInStockOnlyFilter(false);
-    setFeaturedOnlyFilter(false);
-    setSortOption("default");
-    setSmartSpecs({});
-    setSearchFilter("");
-    setCurrentSearchInput("");
-  }
-
-  const [productLineIndex, setProductLineIndex] = useState(1);
-
-  const carouselItems = [
-    {
-      name: "Premium Comfort",
-      category: "Classic Collection",
-      img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=800&fit=crop",
-    },
-    {
-      name: `${brand.name} Eid Collection`,
-      category: "Modern Fit",
-      img: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=1200&h=800&fit=crop",
-    },
-    {
-      name: "Royal Edition",
-      category: "Luxury Series",
-      img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=800&fit=crop",
-    },
-    {
-      name: "Festive Spirit",
-      category: "Seasonal Wear",
-      img: "https://images.unsplash.com/photo-1511741454500-ddbf7ef33554?w=1200&h=800&fit=crop",
-    },
-  ];
-
-  const handleProductLineNext = () =>
-    setProductLineIndex((prev) => (prev + 1) % carouselItems.length);
-  const handleProductLinePrev = () =>
-    setProductLineIndex(
-      (prev) => (prev - 1 + carouselItems.length) % carouselItems.length,
-    );
-
-  const getBrandOverviews = (brandName: string) => {
-    const name = brandName.toLowerCase();
-    if (name.includes("choosify")) {
-      return {
-        address:
-          "CHOOSE-HQ, SUITE 5A, METROPOLITAN TOWERS, GULSHAN-2, DHAKA 1212.",
-        website: "choosify.com",
-        map: "https://www.google.com/maps",
-        email: "hello@choosify.com",
-        phone: "09612246673",
-        priceRange: "BDT - FREE ACCESS",
-        ageRange: "AGE: 15 - 65",
-        audience: "SHOPPERS, CREATORS, VERIFIED OUTLETS & SMART BUYERS",
-        services: [
-          "TRANSPARENT COMMUNITY COMPARISONS",
-          "VERIFIED OUTLET REVIEWS & INSIGHTS",
-          "ACTIVE PROMO CODES & CAMPAIGNS",
-          "INFLUENCER INSIGHTS & EXPERIENCES",
-          "RETAIL DEAL DISCOVERY & PRICE TRACKING",
-          "REAL-TIME PRICE HISTORY TRACKER",
-        ],
-        tags: [
-          "#BrandDiscovery",
-          "#ProductComparison",
-          "#Deals",
-          "#Recommendations",
-          "#Creators",
-          "#Marketplace",
-          "#ConsumerInsights",
-          "#ShoppingGuides",
-        ],
-      };
-    }
-    if (name.includes("fff")) {
-      return {
-        address:
-          "FFF SOURCING HQ, PLOT 12, ROAD 4, SECTOR 3, UTTARA, DHAKA 1230 BANGLADESH.",
-        website: "fff.com.bd",
-        map: "https://www.google.com/maps",
-        email: "sourcing@fff.com.bd",
-        phone: "+8801711223344",
-        priceRange: "BDT - CUSTOM QUOTES",
-        ageRange: "AGE: 18 - 60",
-        audience: "INTERNATIONAL FASHION BRANDS, RETAILERS, IMPORTERS",
-        services: [
-          "GARMENT SOURCING",
-          "BUYING HOUSE SERVICES",
-          "APPAREL MANUFACTURING COORDINATION",
-          "QUALITY CONTROL",
-          "VENDOR MANAGEMENT",
-          "PRODUCT DEVELOPMENT",
-          "EXPORT SUPPORT",
-          "COMPLIANCE MANAGEMENT",
-        ],
-        tags: [
-          "#GarmentSourcing",
-          "#BuyingHouse",
-          "#ApparelManufacturing",
-          "#BangladeshExports",
-          "#FashionProduction",
-          "#QualityControl",
-          "#VendorManagement",
-          "#TextileIndustry",
-        ],
-      };
-    }
-    if (
-      name.includes("sailor") ||
-      name.includes("la reve") ||
-      name.includes("yellow") ||
-      name.includes("aarong") ||
-      name.includes("ethnic") ||
-      name.includes("fashion") ||
-      name.includes("apex") ||
-      name.includes("bata") ||
-      name.includes("lotto")
-    ) {
-      return {
-        address:
-          "GRAND SHOPPING MALL, HOUSE 2, ROAD 2, SECTOR 92. 1500 - DHAKA BANGLADESH.",
-        website: "www.website.com",
-        map: "https://www.google.com/maps",
-        email: "fashion@gmail.com",
-        phone: "01234456789",
-        priceRange: "BDT - 500",
-        ageRange: "AGE: 12 - 40",
-        audience: "MALE, FEMALE, YOUTH & KIDS",
-        services: [
-          "90 DAYS RETURN WITH REFUND POLICY",
-          "FULL COD ENTIRE BANGLADESH",
-          "6 MONTHS WARRANTY ALL PRODUCT",
-          "CUSTOM GIFT BOX AVAILABLE",
-          "3 HOURS DELIVERY INSIDE DHAKA METRO",
-          "ONLINE & OFFLINE ORDER FACILITIES.",
-        ],
-        tags: [
-          "#premium buyers",
-          "#quality driven",
-          "#ethnic wear",
-          "#fashion",
-          "#eid collection",
-          "#trend setter",
-          "#old money",
-          "#summer collection",
-          "#beach wear",
-        ],
-      };
-    }
-
-    return {
-      address: "JAMUNA FUTURE PARK, LEVEL 4, SHOP 22B, DHAKA BANGLADESH.",
-      website: `www.${name}.com.bd`,
-      map: "https://www.google.com/maps",
-      email: `support@${name}.com`,
-      phone: "09612345678",
-      priceRange: "BDT 5,000 - 150,000",
-      ageRange: "AGE: 18 - 60",
-      audience: "TECH ENTHUSIASTS, PROFESSIONALS",
-      services: [
-        "7 DAYS REPLACEMENT WARRANTY",
-        "100% ORIGINAL PRODUCT GUARANTEE",
-        "OFFICIAL BRAND WARRANTY",
-        "EMI AVAILABLE UP TO 24 MONTHS",
-        "EXPRESS HOME DELIVERY",
-        "SECURE CARD & MOBILE PAYMENTS",
-      ],
-      tags: [
-        "#tech",
-        "#gadgets",
-        "#original",
-        "#official warranty",
-        "#smart choice",
-        "#power user",
-        "#premium build",
-        "#trending tech",
-      ],
-    };
   };
 
-  const brandPromos = [
-    {
-      title: "First Order Gift",
-      discount: "BDT 500 FLAT",
-      code: `${brand.name.toUpperCase()}500`,
-      expiry: "Valid till June 30",
-    },
-    {
-      title: "Eid Celebration Offer",
-      discount: "BDT 1,000 FLAT",
-      code: "EID26",
-      expiry: "Minimum purchase BDT 4,000",
-    },
-    {
-      title: "Limited VIP Discount",
-      discount: "20% FLAT OFF",
-      code: `${brand.name.toUpperCase()}20`,
-      expiry: "For New Registries",
-    },
-  ];
-
-  const overviewData = getBrandOverviews(brand.name);
-
-  const getPopularCategoryPreviews = () => {
-    const cat = (brand.category || "").toLowerCase();
-    const name = brand.name.toLowerCase();
-    if (name.includes("choosify")) {
-      return [
-        {
-          label: "BRANDS",
-          img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop",
-        },
-        {
-          label: "PRODUCTS",
-          img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=600&fit=crop",
-        },
-        {
-          label: "CREATORS",
-          img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=600&fit=crop",
-        },
-      ];
+  // Follow Brand trigger
+  const handleFollowBrand = () => {
+    setIsFollowed(!isFollowed);
+    if (!isFollowed) {
+      toast.success("You are now following Samsung! Get instant notifications on new deals.", { icon: "🔔" });
+    } else {
+      toast.success("Unfollowed Samsung");
     }
-    if (name.includes("fff")) {
-      return [
-        {
-          label: "SOURCING",
-          img: "https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=400&h=600&fit=crop",
-        },
-        {
-          label: "EXPORT",
-          img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=600&fit=crop",
-        },
-        {
-          label: "GARMENTS",
-          img: "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=400&h=600&fit=crop",
-        },
-      ];
-    }
-    if (
-      name.includes("sailor") ||
-      name.includes("la reve") ||
-      name.includes("yellow") ||
-      name.includes("aarong") ||
-      cat.includes("fashion") ||
-      cat.includes("lifestyle") ||
-      cat.includes("clothing") ||
-      cat.includes("ethnic")
-    ) {
-      return [
-        {
-          label: "PANJABI",
-          img: "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=400&h=600&fit=crop",
-        },
-        {
-          label: "SUIT",
-          img: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=600&fit=crop",
-        },
-        {
-          label: "WESTERN",
-          img: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=600&fit=crop",
-        },
-      ];
-    }
-    if (
-      cat.includes("shoe") ||
-      cat.includes("footwear") ||
-      name.includes("bata") ||
-      name.includes("apex") ||
-      name.includes("lotto")
-    ) {
-      return [
-        {
-          label: "CASUAL",
-          img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=600&fit=crop",
-        },
-        {
-          label: "SNEAKERS",
-          img: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=600&fit=crop",
-        },
-        {
-          label: "FORMAL",
-          img: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400&h=600&fit=crop",
-        },
-      ];
-    }
-    return [
-      {
-        label: "MOBILES",
-        img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=600&fit=crop",
-      },
-      {
-        label: "GEAR",
-        img: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&h=600&fit=crop",
-      },
-      {
-        label: "WEARABLES",
-        img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=600&fit=crop",
-      },
-    ];
   };
 
-  const popularCats = getPopularCategoryPreviews();
+  // Explore Products action
+  const handleExploreProducts = () => {
+    toast.success("Scrolling to Top Products...");
+    const element = document.getElementById("top-products-section");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
-  const renderBrandLogo = (brandObj: any) => {
-    const term = brandObj.name.toLowerCase();
-    if (term.includes("choosify")) {
-      return (
-        <img
-          src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1782468737/717067140_122103081177325182_5170626542063953926_n_fiefp6.jpg"
-          className="w-full h-full object-cover"
-          alt="Choosify Brand"
-          referrerPolicy="no-referrer"
-        />
-      );
+  // Share brand trigger
+  const handleShareBrand = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Samsung Brand Page Link copied to clipboard!", { icon: "🔗" });
+  };
+
+  // DATASETS (Reflecting Samsung exactly as shown in the reference image)
+  
+  const STATS_ITEMS = [
+    { label: "Founded", value: "1937", icon: Calendar, color: "text-blue-500 bg-blue-50" },
+    { label: "Headquarters", value: "South Korea", icon: MapPin, color: "text-indigo-500 bg-indigo-50" },
+    { label: "Countries", value: "200+", icon: Globe, color: "text-teal-500 bg-teal-50" },
+    { label: "Products Sold", value: "1,000,000+", icon: Package, color: "text-purple-500 bg-purple-50" },
+    { label: "Verified Reviews", value: "12.4K", icon: Star, color: "text-amber-500 bg-amber-50 animate-pulse" },
+    { label: "Buyer Protection", value: "98%", icon: ShieldCheck, color: "text-emerald-500 bg-emerald-50" }
+  ];
+
+  const FEATURED_COLLECTIONS = [
+    {
+      title: "Galaxy S Series",
+      subtitle: "Smartphones",
+      count: "24 Products",
+      image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80"
+    },
+    {
+      title: "QLED 8K Series",
+      subtitle: "Televisions",
+      count: "18 Products",
+      image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&q=80"
+    },
+    {
+      title: "Bespoke Collection",
+      subtitle: "Home Appliances",
+      count: "32 Products",
+      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&q=80"
+    },
+    {
+      title: "Galaxy Watch Series",
+      subtitle: "Wearables",
+      count: "12 Products",
+      image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&q=80"
+    },
+    {
+      title: "Galaxy Buds Series",
+      subtitle: "Audio",
+      count: "16 Products",
+      image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&q=80"
     }
-    if (term.includes("fff")) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center bg-[#1E293B] w-full text-[#F1F5F9] px-2 py-3 select-none">
-          <span className="font-space tracking-wider text-[28px] font-black leading-none">
-            FFF
-          </span>
-          <span className="text-[6px] tracking-[0.2em] font-mono text-gray-400 font-bold uppercase mt-1.5">
-            SOURCING LTD
-          </span>
-        </div>
-      );
+  ];
+
+  const TOP_PRODUCTS: ProductCardData[] = [
+    {
+      id: "samsung-s24",
+      title: "Samsung Galaxy S24 Ultra",
+      price: 124900,
+      originalPrice: 146900,
+      discountBadge: "-15%",
+      rating: 4.8,
+      reviewCount: 1200,
+      image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80"
+    },
+    {
+      id: "samsung-qled-55",
+      title: 'Samsung 55" QLED 4K TV',
+      price: 89900,
+      originalPrice: 104000,
+      customBadge: { text: "BEST SELLER", type: "seller" },
+      rating: 4.7,
+      reviewCount: 980,
+      image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&q=80"
+    },
+    {
+      id: "samsung-refrig",
+      title: "Samsung Bespoke 4-Door Refrigerator",
+      price: 152900,
+      originalPrice: 189900,
+      discountBadge: "-20%",
+      rating: 4.8,
+      reviewCount: 532,
+      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&q=80"
+    },
+    {
+      id: "samsung-watch-6",
+      title: "Samsung Galaxy Watch6 Classic 47mm",
+      price: 32900,
+      originalPrice: 37400,
+      discountBadge: "-12%",
+      rating: 4.7,
+      reviewCount: 713,
+      image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&q=80"
+    },
+    {
+      id: "samsung-buds-2",
+      title: "Samsung Galaxy Buds2 Pro",
+      price: 15900,
+      originalPrice: 19400,
+      discountBadge: "-18%",
+      rating: 4.6,
+      reviewCount: 421,
+      image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&q=80"
+    },
+    {
+      id: "samsung-frame-65",
+      title: 'Samsung The Frame 65" QLED TV',
+      price: 159900,
+      customBadge: { text: "NEW", type: "new" },
+      rating: 4.8,
+      reviewCount: 215,
+      image: "https://images.unsplash.com/photo-1461151304267-38535e780c79?w=400&q=80"
     }
-    if (term.includes("sailor")) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center bg-[#17192C] w-full text-white px-2 py-3 select-none">
-          <span className="font-serif tracking-widest text-[24px] font-bold leading-none uppercase">
-            sailor
-          </span>
-          <span className="text-[6px] tracking-[0.25em] font-mono text-gray-400 font-bold uppercase mt-1.5">
-            by epyllion
-          </span>
-        </div>
-      );
+  ];
+
+  const TRUST_ITEMS = [
+    {
+      title: "Official Warranty",
+      desc: "100% authentic products with official warranty",
+      linkText: "LEARN MORE",
+      icon: Award,
+      color: "text-blue-600 bg-blue-50 border border-blue-100"
+    },
+    {
+      title: "Exclusive Offers",
+      desc: "Special discounts and bank offers",
+      linkText: "EXPLORE DEALS",
+      icon: BadgePercent,
+      color: "text-orange-600 bg-orange-50 border border-orange-100"
+    },
+    {
+      title: "Easy Returns",
+      desc: "7-day easy returns on eligible products",
+      linkText: "RETURN POLICY",
+      icon: RotateCcw,
+      color: "text-teal-600 bg-teal-50 border border-teal-100"
+    },
+    {
+      title: "Secure Payments",
+      desc: "100% secure payments protected by SSL",
+      linkText: "PAYMENT INFO",
+      icon: Lock,
+      color: "text-indigo-600 bg-indigo-50 border border-indigo-100"
     }
-    if (term.includes("apex")) {
-      return (
-        <div className="flex items-center justify-center h-full text-center bg-[#EB1C24] w-full text-white font-black italic tracking-tighter text-3xl select-none">
-          apex
-        </div>
-      );
+  ];
+
+  const CREATOR_REVIEWS: CreatorReview[] = [
+    {
+      author: "Ashraful Islam",
+      role: "Verified Buyer",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80",
+      rating: 5,
+      timeAgo: "2 days ago",
+      comment: "Best smartphone experience ever! The camera, performance and design are just outstanding. The integration with One UI is super smooth and battery lasts easily over a day."
+    },
+    {
+      author: "Samia Rahman",
+      role: "Tech Influencer",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
+      rating: 5,
+      timeAgo: "1 week ago",
+      comment: "The Bespoke TV collection and The Frame is an absolute masterpiece. It blends into my living room like real art. Picture quality of QLED is unmatched in this price range."
+    },
+    {
+      author: "Zeeshan Khan",
+      role: "Verified Professional",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
+      rating: 4,
+      timeAgo: "3 days ago",
+      comment: "Highly recommend Galaxy Buds2 Pro for audiophiles. Active Noise Canceling is amazing, blocks Dhaka's traffic sounds completely during my daily commute."
     }
-    if (term.includes("bata")) {
-      return (
-        <div className="flex items-center justify-center h-full text-center bg-[#E60012] w-full text-white font-black text-4xl select-none">
-          Bata
-        </div>
-      );
+  ];
+
+  const NEWS_STORIES = [
+    {
+      title: "Samsung Unveils Next Generation AI-Powered TV Lineup",
+      date: "May 10, 2025",
+      category: "News",
+      image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=200&q=80"
+    },
+    {
+      title: "Galaxy S24 Series One UI 7 Update Rollout Begins",
+      date: "May 08, 2025",
+      category: "Updates",
+      image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=200&q=80"
+    },
+    {
+      title: "Samsung Expands Bespoke Home Solutions in Bangladesh",
+      date: "May 05, 2025",
+      category: "Stories",
+      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80"
     }
-    if (term.includes("aarong")) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center bg-[#AC1F24] w-full text-white px-2 py-2 select-none">
-          <span className="font-serif tracking-widest text-[22px] font-extrabold leading-none uppercase">
-            aarong
-          </span>
-        </div>
-      );
+  ];
+
+  const PUBLIC_REVIEWS = [
+    {
+      id: "pub-1",
+      author: "Tanvir Hasan",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80",
+      product: "Samsung Galaxy S24 Ultra",
+      timeAgo: "2 days ago",
+      helpfulCount: 124,
+      rating: 5,
+      comment: "I have been using Samsung products for years and they never disappoint. Excellent build quality, stellar display, and amazing camera performance."
+    },
+    {
+      id: "pub-2",
+      author: "Nusrat Jahan",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80",
+      product: "Samsung Bespoke 4-Door Refrigerator",
+      timeAgo: "5 days ago",
+      helpfulCount: 80,
+      rating: 5,
+      comment: "The Bespoke refrigerator is perfect for our home. Stylish modern design, super efficient cooling, and customizable door panels are awesome!"
     }
-    if (term.includes("yellow")) {
-      return (
-        <div className="flex items-center justify-center h-full text-center bg-[#FFF100] w-full text-navy font-black text-3xl select-none">
-          YELLOW
-        </div>
-      );
+  ];
+
+  const SIMILAR_BRANDS = [
+    { name: "Apple", identity: "Premium", quality: "PREMIUM", price: "High (৳৳৳৳)", rating: 4.6 },
+    { name: "Xiaomi", identity: "High", quality: "HIGH", price: "Mid (৳৳)", rating: 4.5 },
+    { name: "OnePlus", identity: "High", quality: "HIGH", price: "Mid-High (৳৳৳)", rating: 4.4 },
+    { name: "Google", identity: "Premium", quality: "PREMIUM", price: "High (৳৳৳৳)", rating: 4.3 }
+  ];
+
+  // Rating details distribution values
+  const ratingDistribution = [
+    { stars: 5, count: "9.6K", percent: 77 },
+    { stars: 4, count: "2.1K", percent: 17 },
+    { stars: 3, count: "524", percent: 4 },
+    { stars: 2, count: "123", percent: 1 },
+    { stars: 1, count: "58", percent: 1 }
+  ];
+
+  // Helpful clicks handler
+  const handleReviewHelpful = (id: string, isCreator = false) => {
+    if (isCreator) {
+      setCreatorReviewLikes(prev => ({
+        ...prev,
+        [currentCreatorReviewIdx]: (prev[currentCreatorReviewIdx] || 0) + 1
+      }));
+      toast.success("Marked creator review as helpful!");
+    } else {
+      if (votedPublicReviews.includes(id)) {
+        toast.error("You have already voted this review as helpful.");
+        return;
+      }
+      setVotedPublicReviews(prev => [...prev, id]);
+      setPublicReviewLikes(prev => ({
+        ...prev,
+        [id]: (prev[id] || 0) + 1
+      }));
+      toast.success("Marked review as helpful!");
     }
-    return (
-      <div className="w-full h-full bg-gradient-to-br from-navy to-[#2A2E6B] flex items-center justify-center text-4xl font-extrabold text-white">
-        {brandObj.logo || brandObj.name.substring(0, 2)}
-      </div>
-    );
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed">
-      {/* 1. Brand Hero Section */}
-      <motion.section
-        ref={brandHeroRef}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="hero-gradient relative pt-10 pb-12 border-b border-white/5"
-      >
-        <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
-        </div>
-
-
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
-          <div className="flex flex-col lg:grid lg:grid-cols-[1.5fr_1fr] xl:grid-cols-[1.6fr_1fr] gap-8 xl:gap-12 lg:items-stretch w-full">
-            {/* Left Side: Brand Profile Details & Info */}
-            <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left gap-6 order-1 lg:order-none lg:justify-between lg:h-full">
-              <div className="w-full flex-1 flex flex-col items-center lg:items-start gap-6">
-                <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white relative shrink-0 mx-auto lg:mx-0">
-                  {renderBrandLogo(brand)}
-                  {localClaimStatus === "verified" && (
-                    <div className="absolute -top-1.5 -right-1.5 w-7 h-7 bg-[#E8500A] rounded-full flex items-center justify-center text-white border-2 border-[#10133A] shadow-lg">
-                      <CheckCircle2
-                        size={13}
-                        fill="currentColor"
-                        className="text-white stroke-[#E8500A]"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="w-full flex-1 flex flex-col items-center lg:items-start">
-                  <div className="flex flex-col sm:flex-row items-center gap-3 mb-2 flex-wrap justify-center lg:justify-start">
-                    <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none text-center lg:text-left">
-                      {brand.name}
-                    </h1>
-                    {localClaimStatus === "verified" && (
-                      <div className="bg-[#4DBC15] px-3 py-1 rounded-full flex items-center gap-2 shadow-md">
-                        <ShieldCheck size={11} className="text-white" />
-                        <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">
-                          Verified Brand Owner
-                        </span>
-                      </div>
-                    )}
-                    {localClaimStatus === "pending" && (
-                      <div className="bg-amber-500/80 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2 shadow-md border border-white/10">
-                        <HelpCircle size={11} className="text-white" />
-                        <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">
-                          Ownership Verification Pending
-                        </span>
-                      </div>
-                    )}
-                    {localClaimStatus === "community" && (
-                      <div className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2 shadow-sm border border-white/5">
-                        <Users size={11} className="text-white/70" />
-                        <span className="text-[9px] font-black text-white/90 uppercase tracking-widest italic whitespace-nowrap">
-                          Community Brand Profile
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <p className="text-[10px] md:text-[11px] font-extrabold text-[#E8500A]/90 uppercase tracking-[0.2em] mb-3 text-center lg:text-left">
-                    {brand.category || "Fashion & Clothing"} • Premium Showcase
-                  </p>
-
-                  <p className="text-xs md:text-sm font-medium text-white/70 max-w-md mb-4 text-center lg:text-left leading-relaxed">
-                    Experience the perfect balance of elite-tier product
-                    selections, verified customer rankings, and high-quality
-                    local trust.
-                  </p>
-
-                  <div className="flex items-center gap-4 flex-wrap justify-center lg:justify-start">
-                    <div className="flex items-center gap-2">
-                      <Heart
-                        size={14}
-                        className="text-[#E8500A] fill-current"
-                      />
-                      <span className="text-white font-extrabold text-[9px] md:text-[10px] uppercase tracking-widest italic whitespace-nowrap">
-                        50,000 Love This Brand
-                      </span>
-                    </div>
-                    <div className="h-4 w-px bg-white/15 hidden sm:block" />
-                    <div className="flex items-center gap-2">
-                      <TrendingUp size={14} className="text-green-accent" />
-                      <span className="text-white font-extrabold text-[9px] md:text-[10px] uppercase tracking-widest italic whitespace-nowrap">
-                        Score: 92/100
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action buttons */}
-                <div className="flex flex-wrap gap-3.5 justify-center lg:justify-start text-white w-full">
-                  {/*
-                       <button 
-                         onClick={() => setIsLoved(!isLoved)}
-                         className={cn(
-                           "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
-                           isLoved 
-                             ? "bg-white text-[#E8500A] border-white shadow-white/5" 
-                             : "bg-[#E8500A] text-white border-[#E8500A]/30 hover:bg-[#ff5d14]"
-                         )}
-                       >
-                          <Heart size={14} className={cn("transition-colors", isLoved && "fill-current text-[#E8500A]")} />
-                          {isLoved ? "Loved" : "Love Brand"}
-                       </button>
-                       
-                       <button 
-                         onClick={() => {
-                           setIsFollowed(!isFollowed);
-                           toast.success(isFollowed ? `Unfollowed ${brand.name}` : `Following ${brand.name} for exclusive drops!`);
-                         }}
-                         className={cn(
-                           "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer",
-                           isFollowed
-                             ? "bg-[#4DBC15] text-white border-[#4DBC15]" 
-                             : "bg-white text-[#1A1D4E] border-white hover:bg-gray-50"
-                         )}
-                       >
-                          {isFollowed ? "Following" : "Follow the Brand"}
-                       </button>
-
-                       <button 
-                       */}
-                  <button
-                    onClick={() => setIsLoved(!isLoved)}
-                    className={cn(
-                      "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
-                      isLoved
-                        ? "bg-white text-[#E8500A] border-white shadow-white/5"
-                        : "bg-[#E8500A] text-white border-[#E8500A]/30 hover:bg-[#ff5d14]",
-                    )}
-                  >
-                    <Heart
-                      size={14}
-                      className={cn(
-                        "transition-colors",
-                        isLoved && "fill-current text-[#E8500A]",
-                      )}
-                    />
-                    {isLoved ? "Loved" : "Love Brand"}
-                  </button>
-
-                  <FollowButton
-                    id={String(brand.id)}
-                    name={brand.name}
-                    type="brand"
-                    className="px-6 md:px-8 py-3.5 md:py-4.5 rounded-full"
-                  />
-
-                  {localClaimStatus === "community" && (
-                    <button
-                      onClick={() => {
-                        setIsClaimModalOpen(true);
-                        return;
-                        setTimeout(() => {
-                          updateBrandClaimStatus(brand.id, "pending");
-                          toast.success(
-                            "Claim submitted successfully! Status changed to Pending Review.",
-                            { duration: 5000 },
-                          );
-                        }, 1500);
-                      }}
-                      className="text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer bg-white text-navy border-white hover:bg-gray-100 flex items-center gap-1.5"
-                    >
-                      <ShieldCheck size={14} className="shrink-0" />
-                      <span>Claim Ownership</span>
-                    </button>
-                  )}
-
-                  {localClaimStatus === "pending" && (
-                    <div className="text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-md bg-amber-500 text-white border border-amber-500/35 italic flex items-center gap-1.5 select-none hover:cursor-default">
-                      <Clock size={14} className="shrink-0" />
-                      <span>Verification Pending</span>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={() => scrollToSection("public-reviews-section")}
-                    className="bg-transparent text-white border border-white/20 hover:bg-white/10 hover:border-white/40 text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all italic cursor-pointer"
-                  >
-                    Write a Review
-                  </button>
-                </div>
-              </div>
-
-              {/* Desktop Social links */}
-              <div className="hidden lg:flex items-center gap-4 mt-2 flex-wrap justify-start">
-                <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">
-                  Find Us On
-                </span>
-                <div className="flex items-center gap-5">
-                  <a
-                    href="#"
-                    className="group flex flex-col items-center gap-1.5 focus:outline-none"
-                  >
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                      <Facebook size={20} />
-                    </div>
-                    <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                      Facebook
-                    </span>
-                  </a>
-                  <a
-                    href="#"
-                    className="group flex flex-col items-center gap-1.5 focus:outline-none"
-                  >
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                      <Instagram size={20} />
-                    </div>
-                    <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                      Instagram
-                    </span>
-                  </a>
-                  <a
-                    href="#"
-                    className="group flex flex-col items-center gap-1.5 focus:outline-none"
-                  >
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                      <TikTokIcon size={20} />
-                    </div>
-                    <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                      TikTok
-                    </span>
-                  </a>
-                  <a
-                    href="#"
-                    className="group flex flex-col items-center gap-1.5 focus:outline-none"
-                  >
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                      <Youtube size={20} />
-                    </div>
-                    <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                      YouTube
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Side: Score card */}
-            <div className="w-full lg:w-full max-w-md relative order-3 lg:order-none flex flex-col justify-between h-auto lg:h-full mx-auto lg:mx-0 gap-5 lg:gap-4">
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-white relative overflow-hidden group mb-auto">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/10 blur-2xl rounded-full translate-x-1/3 -translate-y-1/3" />
-
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <div className="text-[9px] font-black uppercase text-[#4DBC15] tracking-widest mb-0.5">
-                      Choosify Score
-                    </div>
-                    <div className="text-5xl font-black italic">
-                      4.3 <span className="text-xl text-white/55">/5</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex gap-0.5 justify-end mb-1">
-                      {[1, 2, 3, 4].map((i) => (
-                        <Star
-                          key={i}
-                          size={13}
-                          className="fill-[#E8500A] text-[#E8500A]"
-                        />
-                      ))}
-                      <Star size={13} className="text-white/20 fill-white/20" />
-                    </div>
-                    <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">
-                      Based on 500+ Reviews
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3.5 mb-6">
-                  {[
-                    { label: "Quality", value: 85, color: "bg-[#E8500A]" },
-                    { label: "Service", value: 90, color: "bg-[#4DBC15]" },
-                    { label: "Value", value: 81, color: "bg-[#E8500A]" },
-                    { label: "Delivery", value: 90, color: "bg-[#4DBC15]" },
-                    { label: "Packaging", value: 75, color: "bg-[#4DBC15]" },
-                  ].map((m, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="w-16 text-[9px] font-bold uppercase tracking-wider text-white/60">
-                        {m.label}
-                      </div>
-                      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${m.value}%` }}
-                          transition={{ delay: 0.3, duration: 0.8 }}
-                          className={cn("h-full rounded-full", m.color)}
-                        />
-                      </div>
-                      <div className="w-8 text-[9px] font-black text-right text-white/80">
-                        {m.value}%
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between pt-5 border-t border-white/10">
-                  <div className="text-center w-full">
-                    <div className="text-4xl font-black text-[#50DC17] leading-none mb-1">
-                      85%
-                    </div>
-                    <div className="text-[9px] font-black text-white/50 uppercase tracking-widest">
-                      Of Buyers Recommend This Brand
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile Social links */}
-            <div className="flex lg:hidden items-center gap-3 sm:gap-4 mt-8 flex-wrap justify-center order-5 w-full">
-              <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">
-                Find Us On
-              </span>
-              <div className="flex items-center gap-3.5 sm:gap-6 justify-center flex-wrap">
-                {/* Facebook */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
-                  <a
-                    href="#"
-                    className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
-                    aria-label="Facebook"
-                  >
-                    <Facebook size={18} />
-                  </a>
-                  <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                    Facebook
-                  </span>
-                </div>
-
-                {/* Instagram */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
-                  <a
-                    href="#"
-                    className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
-                    aria-label="Instagram"
-                  >
-                    <Instagram size={18} />
-                  </a>
-                  <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                    Instagram
-                  </span>
-                </div>
-
-                {/* TikTok */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
-                  <a
-                    href="#"
-                    className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
-                    aria-label="TikTok"
-                  >
-                    <TikTokIcon size={18} />
-                  </a>
-                  <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                    TikTok
-                  </span>
-                </div>
-
-                {/* YouTube */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
-                  <a
-                    href="#"
-                    className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
-                    aria-label="YouTube"
-                  >
-                    <Youtube size={18} />
-                  </a>
-                  <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                    YouTube
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* 2. SECTION SUMMARY BAR */}
-      <div className="w-full hero-gradient text-white py-4.5 border-y border-white/5 font-space font-black italic uppercase tracking-[0.2em] text-[11px] md:text-xs">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-wrap justify-center sm:justify-around items-center gap-y-4 gap-x-8 text-center">
-          <CardEngagementStrip
-            variant="hero"
-            entityType="brand"
-            entityId={brand.id}
-            payload={brand as unknown as Record<string, unknown>}
-            showShare
-            shareUrl={typeof window !== 'undefined' ? window.location.href : undefined}
-          />
-          <div className="hidden sm:block h-4 w-px bg-white/20" />
-          <div className="flex items-center gap-2">
-            <span className="text-[#E8500A] text-lg font-space font-black">
-              ★
-            </span>
-            <span>{totalDealsFound} Deals Found</span>
-          </div>
-          <div className="hidden sm:block h-4 w-px bg-white/20" />
-          <div className="flex items-center gap-2">
-            <span className="text-[#E8500A] text-lg font-space font-black">
-              ✦
-            </span>
-            <span>{totalProductsFound} Products Found</span>
-          </div>
-          <div className="hidden sm:block h-4 w-px bg-white/20" />
-          <div className="flex items-center gap-2">
-            <span className="text-[#E8500A] text-lg font-space font-black">
-              🎁
-            </span>
-            <span>3 Promo Codes Found</span>
-          </div>
-        </div>
+    <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-gray-800 pb-20 select-none font-sans">
+      
+      {/* 1. BREADCRUMB */}
+      <div className="w-full max-w-[1440px] mx-auto px-6 md:px-10 py-4 text-left select-none shrink-0">
+        <nav className="text-xs font-semibold text-gray-400 flex items-center gap-1.5 uppercase tracking-wider">
+          <Link to="/" className="hover:text-[#FF5B00] transition-colors">Home</Link>
+          <span className="text-gray-300 font-bold">&gt;</span>
+          <Link to="/brands" className="hover:text-[#FF5B00] transition-colors">Brands</Link>
+          <span className="text-gray-300 font-bold">&gt;</span>
+          <span className="text-gray-800 font-bold">Samsung</span>
+        </nav>
       </div>
 
-      {/* ACTIVE FILTER CHIPS ROW */}
-      <ActiveFilterChips
-        chips={
-          [
-            selectedCategory
-              ? {
-                  id: "category",
-                  label: `Category: ${selectedCategory}`,
-                  onRemove: () => setSelectedCategory(null),
-                }
-              : null,
-            priceRangeV2[0] > 0 || priceRangeV2[1] !== null
-              ? {
-                  id: "price",
-                  label: `Price: ৳${priceRangeV2[0].toLocaleString()}–${priceRangeV2[1] !== null ? `৳${priceRangeV2[1].toLocaleString()}` : "Max"}`,
-                  onRemove: () => {
-                    setCustomPriceInputs({ min: "", max: "" });
-                    setPriceRangeV2([0, null]);
-                  },
-                }
-              : null,
-            availabilityFilter
-              ? {
-                  id: "availability",
-                  label: `Stock: ${availabilityFilter}`,
-                  onRemove: () => setAvailabilityFilter(null),
-                }
-              : null,
-            ratingFilter
-              ? {
-                  id: "rating",
-                  label: `Min Rating: ${ratingFilter}★`,
-                  onRemove: () => setRatingFilter(null),
-                }
-              : null,
-            votesFilter
-              ? {
-                  id: "votes",
-                  label: `Min Votes: ${votesFilter}♥`,
-                  onRemove: () => setVotesFilter(null),
-                }
-              : null,
-            warrantyFilter
-              ? {
-                  id: "warranty",
-                  label: `Warranty: ${warrantyFilter}`,
-                  onRemove: () => setWarrantyFilter(null),
-                }
-              : null,
-            deliveryFilter
-              ? {
-                  id: "delivery",
-                  label: `Delivery: ${deliveryFilter}`,
-                  onRemove: () => setDeliveryFilter(null),
-                }
-              : null,
-            discountFilter
-              ? {
-                  id: "discount",
-                  label: `Min Discount: ${discountFilter}%`,
-                  onRemove: () => setDiscountFilter(null),
-                }
-              : null,
-            couponFilter
-              ? {
-                  id: "coupon",
-                  label: `Coupons: ${couponFilter}`,
-                  onRemove: () => setCouponFilter(null),
-                }
-              : null,
-            expiryFilter
-              ? {
-                  id: "expiry",
-                  label: `Expiry: ${expiryFilter}`,
-                  onRemove: () => setExpiryFilter(null),
-                }
-              : null,
-            productLineFilter
-              ? {
-                  id: "product_line",
-                  label: `Line: ${productLineFilter}`,
-                  onRemove: () => setProductLineFilter(null),
-                }
-              : null,
-            featuredCollectionFilter
-              ? {
-                  id: "featured_collection",
-                  label: `Collection: ${featuredCollectionFilter}`,
-                  onRemove: () => setFeaturedCollectionFilter(null),
-                }
-              : null,
-            officialStoreFilter
-              ? {
-                  id: "official_store",
-                  label: `Official: ${officialStoreFilter}`,
-                  onRemove: () => setOfficialStoreFilter(null),
-                }
-              : null,
-            countryFilter
-              ? {
-                  id: "country",
-                  label: `Origin: ${countryFilter}`,
-                  onRemove: () => setCountryFilter(null),
-                }
-              : null,
-            dealsOnlyFilter
-              ? {
-                  id: "deals_only",
-                  label: "Deals Only",
-                  onRemove: () => setDealsOnlyFilter(false),
-                }
-              : null,
-            couponsOnlyFilter
-              ? {
-                  id: "coupons_only",
-                  label: "Coupons Only",
-                  onRemove: () => setCouponsOnlyFilter(false),
-                }
-              : null,
-            verifiedOnlyFilter
-              ? {
-                  id: "verified_only",
-                  label: "Verified Only",
-                  onRemove: () => setVerifiedOnlyFilter(false),
-                }
-              : null,
-            inStockOnlyFilter
-              ? {
-                  id: "instock_only",
-                  label: "In Stock Only",
-                  onRemove: () => setInStockOnlyFilter(false),
-                }
-              : null,
-            featuredOnlyFilter
-              ? {
-                  id: "featured_only",
-                  label: "Featured Only",
-                  onRemove: () => setFeaturedOnlyFilter(false),
-                }
-              : null,
-            ...Object.entries(smartSpecs).map(([key, val]) =>
-              val
-                ? {
-                    id: `smart-${key}`,
-                    label: `${key.toUpperCase()}: ${val}`,
-                    onRemove: () =>
-                      setSmartSpecs((prev) => ({
-                        ...prev,
-                        [key]: null as any,
-                      })),
-                  }
-                : null,
-            ),
-          ].filter(Boolean) as any[]
-        }
-        onClearAll={clearAllFilters}
-      />
+      {/* 2. Brand Hero Section */}
+      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-6 shrink-0">
+        <div className="bg-gradient-to-r from-[#030312] via-[#090A22] to-[#121338] rounded-3xl relative overflow-hidden flex flex-col md:flex-row items-stretch border border-white/5 shadow-2xl min-h-[460px]">
+          
+          {/* Glowing Ambient Light Spots */}
+          <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-[#FF5B00]/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <StickySectionNav
-        sections={sectionNavItems}
-        activeId={activeSectionId}
-        onNavigate={scrollToSection}
-        allLabel="Brand"
-        profileLabel="Brand profile"
-      />
-
-      {/* 4. Unified Scrollable Body Wrapper */}
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-8">
-        <div className={`${DETAIL_SINGLE_FEED}`}>
-            {/* Brand Claim Acquisition Card (Part 6) */}
-            {(localClaimStatus === "community" ||
-              localClaimStatus === "pending") && (
-              <div className="bg-gradient-to-r from-[#FFF0E8]/50 to-[#FFE5D9]/30 border-2 border-[#FFE5D9] rounded-[5px] p-6 md:p-8 shadow-xs flex flex-col md:flex-row items-center gap-6 text-left animate-fade-in relative overflow-hidden mb-6">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/5 blur-xl rounded-full" />
-                <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center shrink-0 font-bold text-[#E8500A]">
-                  <ShieldCheck className="w-6 h-6 text-[#E8500A]" />
-                </div>
-                <div className="flex-1 space-y-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-[#FFF0E8] text-[#E8500A] border border-[#FFE5D9]">
-                    {localClaimStatus === "pending"
-                      ? "Verification Pending Review"
-                      : "Claim Acquisition Panel"}
-                  </span>
-                  <h4 className="text-sm font-black text-navy uppercase tracking-tight leading-none mb-1 font-space">
-                    {localClaimStatus === "pending"
-                      ? "Ownership Claim Under Active Review"
-                      : "Are you an authorized representative of this brand?"}
-                  </h4>
-                  <p className="text-xs text-gray-600 font-semibold leading-relaxed">
-                    {localClaimStatus === "pending"
-                      ? "Our moderators are actively processing your submitted credentials relative to this brand representative request. Complete access will be unlocked shortly."
-                      : "This community brand profile contains curated information from public web indexes. Claim ownership to configure your premium merchant storefront, sync inventory, and unlock the seller suite."}
-                  </p>
-
-                  {/* Benefits Grid */}
-                  <div className="pt-2">
-                    <p className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest mb-2 font-mono">
-                      Claim ownership to:
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-700 font-bold text-left">
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
-                        <span>Add products</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
-                        <span>Launch promotions</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
-                        <span>Publish coupons</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
-                        <span>Collaborate with creators</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:col-span-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
-                        <span>
-                          Access business insights & store diagnostics
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="shrink-0 w-full md:w-auto self-stretch flex items-center justify-center">
-                  {localClaimStatus === "community" ? (
-                    <button
-                      onClick={() => {
-                        toast.loading(
-                          "Initiating secure brand ownership verification link...",
-                          { duration: 1500 },
-                        );
-                        setTimeout(() => {
-                          updateBrandClaimStatus(brand.id, "pending");
-                          toast.success(
-                            "Verification link generated! Ready for credential matching review.",
-                          );
-                        }, 1500);
-                      }}
-                      className="w-full md:w-auto px-6 py-4 bg-[#E8500A] hover:bg-[#ff5d14] text-white font-black uppercase text-[10px] tracking-widest italic rounded-full shadow-lg hover:shadow-[#E8500A]/30 active:scale-95 transition-all text-center cursor-pointer border-none"
-                    >
-                      Claim Ownership
-                    </button>
-                  ) : (
-                    <div className="px-5 py-3.5 bg-amber-500/10 border border-amber-500/30 rounded-[5px] flex flex-col items-center gap-1 text-center shrink-0">
-                      <span className="text-[8px] font-black text-amber-700 uppercase tracking-wider">
-                        ● Verification Active
-                      </span>
-                      <span className="text-[10px] font-black text-navy uppercase italic">
-                        Under Review
-                      </span>
-                    </div>
-                  )}
-                </div>
+          {/* Left Block (Text and Logo) */}
+          <div className="flex-1 p-8 md:p-12 text-left relative z-10 flex flex-col justify-between">
+            
+            {/* Solder / Logo and Slogan Header Row */}
+            <div className="flex flex-col sm:flex-row items-start gap-6 mb-6">
+              {/* Samsung Authentic White Logo Container */}
+              <div className="w-24 h-24 sm:w-28 sm:h-28 bg-white rounded-2xl flex items-center justify-center shadow-lg shrink-0 border border-gray-150 p-3">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg" 
+                  alt="Samsung Logo" 
+                  className="w-full object-contain"
+                />
               </div>
-            )}
 
-            {/* A. DEALS SECTION */}
-            {showDealsSection && (
-              <StudioWrap sectionId="brand-deals" className="scroll-mt-36">
-                <div className="mb-6 text-left">
-                  <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                    Exclusive Deals
-                  </h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                    Deals, promo codes & exclusive offers
-                  </p>
+              <div className="flex-1">
+                {/* Brand status badge */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-400/20 rounded-full text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2.5">
+                  <Check className="w-3 h-3 text-blue-400 stroke-[3px]" />
+                  <span>Verified Brand</span>
                 </div>
 
-                {localClaimStatus !== "verified" ? (
-                  <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-10">
-                    <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
-                      <Lock className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight">
-                      Active Exclusive Deals Locked
-                    </h3>
-                    <p className="text-xs text-gray-500 font-bold max-w-sm">
-                      Merchant-published coupons, flash discounts, and
-                      promotional banners are locked until ownership is
-                      verified.
-                    </p>
-                    {localClaimStatus === "community" && (
-                      <button
-                        onClick={() => {
-                          toast.loading(
-                            "Initiating secure brand verification link...",
-                            { duration: 1500 },
-                          );
-                          setTimeout(() => {
-                            updateBrandClaimStatus(brand.id, "pending");
-                            toast.success(
-                              "Verification submission parsed! Your status is now Pending Review.",
-                            );
-                          }, 1500);
-                        }}
-                        className="bg-[#E8500A] hover:bg-[#ff5d14] text-white py-2 px-6 rounded-full text-[10px] font-black uppercase tracking-wider italic mt-2 cursor-pointer transition-all border-none"
-                      >
-                        Claim Brand Ownership
-                      </button>
-                    )}
-                    {localClaimStatus === "pending" && (
-                      <div className="text-[10px] font-black text-amber-600 uppercase italic tracking-widest mt-2">
-                        Ownership Verification Under Review
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className={DETAIL_FEED_GRID_5}>
-                    {finalDeals.map((product: any, i: number) => (
-                      <ProductCard
-                        key={product.id || i}
-                        product={product}
-                        variant="grid"
-                      />
-                    ))}
-                    {brandPromos.map((promo, idx) => (
-                      <div
-                        key={`promo-${idx}`}
-                        className="bg-white border border-[#e8edf2] p-3.5 rounded-[5px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all shadow-sm h-full"
-                      >
-                        <div className="w-7 h-7 rounded-lg bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
-                          <Gift size={14} />
-                        </div>
-                        <h4 className="text-xs font-semibold text-[#1A1D4E] uppercase tracking-wider mb-0.5">
-                          {promo.title}
-                        </h4>
-                        <div className="text-sm font-semibold text-[#E8500A] uppercase mb-3 leading-none">
-                          {promo.discount}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(promo.code);
-                            toast.success(
-                              `Promo Code "${promo.code}" copied to clipboard!`,
-                            );
-                          }}
-                          className="w-full py-2 bg-white rounded-lg border border-dashed border-[#e8edf2] hover:border-[#E8500A] font-mono text-xs font-semibold text-[#1A1D4E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer shadow-xs"
-                        >
-                          <span className="text-[8px] text-gray-400 font-sans tracking-wide uppercase font-semibold">
-                            PROMO CODE
-                          </span>
-                          <span>{promo.code}</span>
-                        </button>
-                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2 block">
-                          {promo.expiry}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </StudioWrap>
-            )}
-
-            {/* B. PRODUCTS SECTION */}
-            {showProductCatalogSection && (
-              <StudioWrap sectionId="brand-catalog" className="scroll-mt-36">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 text-left">
-                  <div>
-                    <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                      Products
-                    </h2>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                      Full authorized selection available
-                    </p>
-                  </div>
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic font-mono bg-white border border-gray-150 rounded-full px-4 py-2">
-                    Showing{" "}
-                    <span className="text-[#1A1D4E] font-black">
-                      {filteredProducts.length}
-                    </span>{" "}
-                    items
-                  </span>
-                </div>
-
-                {localClaimStatus !== "verified" ? (
-                  <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-12">
-                    <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
-                      <Lock className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight">
-                      Products Locked
-                    </h3>
-                    <p className="text-xs text-gray-500 font-bold max-w-sm">
-                      The full catalog, price list sync, inventory metrics, and
-                      product grids are locked. Currently unclaimed profiles are
-                      restricted from showing merchant content.
-                    </p>
-                    {localClaimStatus === "community" && (
-                      <button
-                        onClick={() => {
-                          toast.loading(
-                            "Initiating secure brand verification link...",
-                            { duration: 1500 },
-                          );
-                          setTimeout(() => {
-                            updateBrandClaimStatus(brand.id, "pending");
-                            toast.success(
-                              "Verification submission parsed! Your status is now Pending Review.",
-                            );
-                          }, 1500);
-                        }}
-                        className="bg-[#E8500A] hover:bg-[#ff5d14] text-white py-2 px-6 rounded-full text-[10px] font-black uppercase tracking-wider italic mt-2 cursor-pointer transition-all border-none"
-                      >
-                        Claim Brand Ownership
-                      </button>
-                    )}
-                    {localClaimStatus === "pending" && (
-                      <div className="text-[10px] font-black text-amber-600 uppercase italic tracking-widest mt-2">
-                        Verification Pending Review
-                      </div>
-                    )}
-                  </div>
-                ) : filteredProducts.length > 0 ? (
-                  <div className={DETAIL_FEED_GRID_5}>
-                    {paginatedProducts.map((product: any, i: number) => (
-                      <ProductCard
-                        key={product.id || i}
-                        product={product}
-                        variant="grid"
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-16 text-center bg-white border border-gray-150 rounded-3xl text-gray-400 text-xs font-black uppercase space-y-2">
-                    <p>No Products Match Chosen Criteria.</p>
-                    <button
-                      onClick={clearAllFilters}
-                      className="text-[#E8500A] underline hover:text-[#ff5d14] text-[10px]"
-                    >
-                      Clear Selections
-                    </button>
-                  </div>
-                )}
-
-                {localClaimStatus === "verified" && totalPages > 1 && (
-                  <PaginationBar
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    showingCount={paginatedProducts.length}
-                    totalCount={filteredProducts.length}
-                    onPageChange={setCurrentPage}
-                  />
-                )}
-              </StudioWrap>
-            )}
-
-          {/* Creator reviews */}
-          <div id="creator-reviews-section" className="scroll-mt-36 w-full">
-            {localClaimStatus !== "verified" ? (
-              <div className="bg-white rounded-[5px] p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-sm border border-gray-100/80 py-12">
-                <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
-                  <Lock className="w-5 h-5" />
-                </div>
-                <h3 className="text-sm font-black text-navy uppercase tracking-tight">
-                  Creator Collaborations Locked
-                </h3>
-                <p className="text-xs text-gray-500 font-bold max-w-sm mb-1">
-                  Professional influencer reviews and creator campaign
-                  collaborations are locked until ownership is verified.
+                <h1 className="text-4xl md:text-[52px] font-black tracking-tight text-white leading-none">
+                  Samsung
+                </h1>
+                <p className="text-lg md:text-xl font-bold text-gray-300 mt-2 tracking-tight">
+                  Innovation that inspires the world
                 </p>
               </div>
-            ) : (
-              <BrandInfluencerReviewsSection
-                brandName={brand.name}
-                brandId={brand.id}
-                brandLogo={brand.logo}
-                fullWidth
-              />
-            )}
-          </div>
-
-          <div id="spotlight-section" className="scroll-mt-36 w-full">
-            <SpotlightIntegrationRail
-              brandId={String(brand.id)}
-              title="Spotlight"
-              subtitle="Campaigns, live events, announcements, and creator reviews."
-              source="brand"
-              viewAllHref="/spotlight"
-            />
-          </div>
-
-          {brandWhatsOnPosts.length > 0 && (
-            <div id="campaigns-section" className="scroll-mt-36 w-full">
-              <BrandPostCarouselSection
-                posts={brandWhatsOnPosts}
-                badgeLabel="Events"
-                showSponsoredBadge={false}
-                title="Events"
-                subtitle="Official brand events, launches, and festival announcements."
-                viewAllHref="/whats-on"
-                viewAllLabel="Explore all events"
-              />
             </div>
-          )}
 
-          <div
-            id="public-reviews-section"
-            className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80"
-          >
-            <div className="text-center mb-8 border-b border-gray-100 pb-5">
-              <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
-                Public Reviews
-              </h3>
-              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
-                Verified Customer Experiences
+            {/* Ratings & Slogan block */}
+            <div className="mb-6">
+              {/* Stars and metrics row */}
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold text-gray-300 tracking-wide uppercase mb-4 border-b border-white/5 pb-4">
+                <div className="flex items-center gap-1 text-amber-400">
+                  <Star className="w-4 h-4 fill-current text-amber-400" />
+                  <span className="text-white">4.8/5</span>
+                  <span className="text-gray-400 font-medium lowercase">(12.4K reviews)</span>
+                </div>
+                <div className="h-4 w-px bg-white/10 hidden sm:block"></div>
+                <div>
+                  <span className="text-emerald-400">98%</span> Positive Feedback
+                </div>
+                <div className="h-4 w-px bg-white/10 hidden sm:block"></div>
+                <div className="text-purple-400 font-extrabold">
+                  #1 Most Trusted Brand
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-400 leading-relaxed max-w-xl">
+                Discover the latest smartphones, TVs, home appliances and more from Samsung – a global leader in technology and innovation.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-              {[
-                {
-                  name: "Tanvir Hasan",
-                  date: "2 weeks ago",
-                  purchaseDate: "April 2024",
-                  comment: `The material quality of the new ${brand.name} collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect.`,
-                  rating: 5,
-                  verified: true,
-                  productImages: [
-                    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
-                    "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop",
-                  ],
-                  dp: "https://i.pravatar.cc/150?u=tanvir",
-                  helpful: 124,
-                },
-                {
-                  name: "Nusrat Jahan",
-                  date: "1 month ago",
-                  purchaseDate: "March 2024",
-                  comment:
-                    "Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the collection.",
-                  rating: 4.8,
-                  verified: true,
-                  productImages: [
-                    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop",
-                  ],
-                  dp: "https://i.pravatar.cc/150?u=nusrat",
-                  helpful: 89,
-                },
-              ].map((review, i) => (
-                <PublicReviewCard
-                  key={i}
-                  review={review}
-                  onHelpfulClick={() => toast.success("Marked as helpful!")}
-                />
-              ))}
-            </div>
-
-            <div className="mt-8 flex justify-center">
-              <button
-                onClick={() => toast.success("Loading all customer reviews...")}
-                className="px-10 py-3.5 border border-[#1A1D4E] text-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white transition-all text-[9.5px] font-black uppercase tracking-widest rounded-full italic cursor-pointer"
+            {/* Actions Row */}
+            <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-white/5">
+              <button 
+                onClick={handleExploreProducts}
+                className="px-6 py-3.5 bg-[#FF5B00] hover:bg-[#E8500A] text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-lg hover:shadow-[#FF5B00]/20 flex items-center gap-2 cursor-pointer border-0 active:scale-95"
               >
-                Load More Reviews
+                <span>Explore Products</span>
+                <ArrowUpRight className="w-4 h-4" />
+              </button>
+
+              <button 
+                onClick={handleFollowBrand}
+                className={`px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer border flex items-center gap-2 ${
+                  isFollowed 
+                    ? "bg-white text-gray-900 border-white" 
+                    : "bg-transparent text-white border-white/20 hover:border-white hover:bg-white/5"
+                }`}
+              >
+                <Heart className={`w-4 h-4 ${isFollowed ? "fill-red-500 text-red-500" : ""}`} />
+                <span>{isFollowed ? "Following Brand" : "Follow Brand"}</span>
+              </button>
+
+              {/* Share Circular Button */}
+              <button 
+                onClick={handleShareBrand}
+                className="w-11 h-11 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all cursor-pointer"
+                title="Share Brand"
+              >
+                <Share2 className="w-4 h-4" />
               </button>
             </div>
-          </div>
 
-          <BrandOverviewSection
-            brandName={brand.name}
-            overviewData={overviewData}
-            claimStatus={'claimStatus' in brand ? brand.claimStatus : undefined}
-          />
-
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left font-sans w-full">
-            <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <ShieldCheck size={14} className="text-green-500 shrink-0" />
-              Verified Sourcing
-            </h4>
-            <p className="text-[10px] text-gray-400 leading-relaxed font-semibold">
-              Each listed bargain point is validated against native brand
-              catalogs. Rest assured, checkout is immediate, safe, and
-              transparent.
-            </p>
-          </div>
-        </div>
-
-        {/* TRUST STATEMENT BACKGROUND BANNER */}
-        <div className="w-full hero-gradient rounded-[5px] p-8 md:p-12 text-center text-white relative overflow-hidden shadow-lg border border-white/5">
-          <div className="relative z-10 space-y-4">
-            <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto text-[#4DBC15] border border-white/10">
-              <ShieldCheck size={24} />
+            {/* Social Media List Row */}
+            <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-3 pt-4 border-t border-white/5">
+              <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Find Us On</span>
+              <div className="flex flex-wrap items-center gap-3">
+                {[
+                  { label: "Facebook", link: "https://facebook.com/samsung", icon: FacebookIcon },
+                  { label: "Instagram", link: "https://instagram.com/samsung", icon: InstagramIcon },
+                  { label: "TikTok", link: "https://tiktok.com/@samsung", icon: TikTokIcon },
+                  { label: "YouTube", link: "https://youtube.com/samsung", icon: YoutubeIcon },
+                  { label: "Website", link: "https://samsung.com", icon: Globe }
+                ].map((social, idx) => {
+                  const IconComp = social.icon;
+                  return (
+                    <a 
+                      key={idx}
+                      href={social.link} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 hover:text-white transition-all text-[11px] font-bold"
+                    >
+                      <IconComp className="w-3.5 h-3.5" />
+                      <span>{social.label}</span>
+                    </a>
+                  );
+                })}
+              </div>
             </div>
-            <h3 className="font-space font-black italic text-2xl tracking-tight uppercase">
-              CHOOSIFY.BD TRUST STATEMENT
-            </h3>
-            <p className="text-sm text-gray-300 font-semibold leading-relaxed max-w-2xl mx-auto italic">
-              "Only verified sellers and completely unbiased, authentic brand
-              experiences are list on Choosify."
-            </p>
+
+          </div>
+
+          {/* Right Product Image Collage (Visualizing beautiful modern Samsung collage) */}
+          <div className="w-full md:w-[45%] lg:w-[50%] min-h-[300px] md:min-h-full relative overflow-hidden shrink-0">
+            {/* Absolute gradients blending edge to dark */}
+            <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#030312] via-transparent to-transparent z-10 pointer-events-none" />
+            <img 
+              src={samsungHeroImg} 
+              alt="Samsung Tech Collage Banner" 
+              className="w-full h-full object-cover object-center scale-100 md:scale-105 transition-transform duration-1000"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+
+        </div>
+      </section>
+
+      {/* 3. Stats Summary Row Grid Bar (Clean White Box below the hero) */}
+      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-8 shrink-0">
+        <div className="bg-white border border-gray-150 rounded-2xl py-6 px-4 md:px-8 shadow-sm">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-6 items-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
+            {STATS_ITEMS.map((stat, idx) => {
+              const StatIcon = stat.icon;
+              return (
+                <div key={idx} className="flex items-center gap-4 px-4 first:pl-0 last:pr-0 pt-4 md:pt-0">
+                  <div className={`w-11 h-11 rounded-full ${stat.color} flex items-center justify-center shrink-0 shadow-xs`}>
+                    <StatIcon className="w-5 h-5" />
+                  </div>
+                  <div className="text-left min-w-0">
+                    <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider leading-none">
+                      {stat.label}
+                    </p>
+                    <h4 className="text-base font-black text-gray-900 mt-1.5 leading-none truncate">
+                      {stat.value}
+                    </h4>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
+      </section>
 
-        {/* Similar Brands Comparison Table */}
-        <div className="bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80">
-          <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-8 text-center italic">
-            Similar Brands Comparison
+      {/* 4. Horizontal Navigation Tab Strip */}
+      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-8 shrink-0">
+        <div className="border-b border-gray-200">
+          <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
+            {[
+              "OVERVIEW",
+              "PRODUCTS",
+              "COLLECTIONS",
+              "DEALS",
+              "REVIEWS",
+              "GUIDES",
+              "NEWS & STORIES"
+            ].map((tab) => {
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    setActiveTab(tab);
+                    toast.success(`Navigating to ${tab}`);
+                    const targetEl = document.getElementById(`${tab.toLowerCase().replace(" & ", "-")}-section`);
+                    if (targetEl) {
+                      targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }}
+                  className={`py-4 px-1 text-xs font-black tracking-widest border-b-[3px] transition-all cursor-pointer relative uppercase whitespace-nowrap outline-none ${
+                    isActive 
+                      ? "border-[#FF5B00] text-[#FF5B00]" 
+                      : "border-transparent text-gray-500 hover:text-gray-900"
+                  }`}
+                >
+                  {tab}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. OVERVIEW / FEATURED COLLECTIONS SECTION */}
+      <section id="overview-section" className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left">
+        <div className="flex items-center justify-between mb-6 border-b border-gray-150 pb-3.5">
+          <div>
+            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
+              Featured Collections
+            </h3>
+            <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">
+              Curated product series &bull; Designed for brilliance
+            </p>
+          </div>
+          <button 
+            onClick={() => toast.success("Redirecting to all collections...")}
+            className="text-xs font-black text-[#FF5B00] hover:text-[#E8500A] transition-colors uppercase tracking-widest flex items-center gap-1 group"
+          >
+            <span>View all collections</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
+
+        {/* Collections Horizontal List Layout */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
+          {FEATURED_COLLECTIONS.map((col, idx) => (
+            <div 
+              key={idx}
+              onClick={() => toast.success(`Viewing ${col.title} collection!`)}
+              className="bg-white rounded-2xl border border-gray-200/80 p-4 hover:shadow-lg hover:border-blue-500/20 transition-all duration-300 cursor-pointer group"
+            >
+              {/* Product illustration image with wrapper border */}
+              <div className="aspect-square bg-gray-50 rounded-xl overflow-hidden mb-4 border border-gray-100 flex items-center justify-center">
+                <img 
+                  src={col.image} 
+                  alt={col.title} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+
+              <div>
+                <h4 className="text-sm font-black text-gray-900 group-hover:text-[#FF5B00] transition-colors leading-tight">
+                  {col.title}
+                </h4>
+                <p className="text-[11px] text-gray-400 font-bold mt-1 uppercase tracking-wider leading-none">
+                  {col.subtitle}
+                </p>
+                <div className="mt-3.5 pt-2.5 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-gray-500">
+                    {col.count}
+                  </span>
+                  <div className="w-5 h-5 rounded-full bg-gray-50 group-hover:bg-[#FF5B00] group-hover:text-white flex items-center justify-center text-gray-400 transition-colors">
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 6. TOP PRODUCTS GRID SECTION */}
+      <section id="products-section" className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left scroll-mt-24">
+        <div id="top-products-section" className="flex items-center justify-between mb-6 border-b border-gray-150 pb-3.5">
+          <div>
+            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
+              Top Products
+            </h3>
+            <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">
+              Top-selling Samsung devices in Bangladesh
+            </p>
+          </div>
+          <button 
+            onClick={() => toast.success("Redirecting to all products...")}
+            className="text-xs font-black text-[#FF5B00] hover:text-[#E8500A] transition-colors uppercase tracking-widest flex items-center gap-1 group"
+          >
+            <span>View all products</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
+
+        {/* Six Column Products Responsive Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-5">
+          {TOP_PRODUCTS.map((prod) => {
+            const isLiked = likedProducts.includes(prod.id);
+            return (
+              <div 
+                key={prod.id}
+                className="bg-white rounded-2xl border border-gray-200/80 hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden group h-[340px]"
+              >
+                {/* Thumb Box */}
+                <div className="relative aspect-square bg-gray-50 overflow-hidden shrink-0 p-3 flex items-center justify-center border-b border-gray-100">
+                  <img 
+                    src={prod.image} 
+                    alt={prod.title} 
+                    className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                    referrerPolicy="no-referrer"
+                  />
+
+                  {/* Ribbon badges floating */}
+                  {prod.discountBadge && (
+                    <span className="absolute top-2.5 left-2.5 bg-red-500 text-white text-[9px] font-black tracking-widest px-2 py-0.5 rounded shadow-xs uppercase">
+                      {prod.discountBadge}
+                    </span>
+                  )}
+                  {prod.customBadge && (
+                    <span className={`absolute top-2.5 left-2.5 text-white text-[8px] font-extrabold tracking-widest px-2 py-0.5 rounded shadow-xs uppercase ${
+                      prod.customBadge.type === "seller" ? "bg-amber-500" : "bg-teal-500"
+                    }`}>
+                      {prod.customBadge.text}
+                    </span>
+                  )}
+                </div>
+
+                {/* Content Box */}
+                <div className="p-3 flex-1 flex flex-col justify-between text-left">
+                  
+                  {/* Title and stats */}
+                  <div>
+                    <h4 className="text-[12px] font-black text-gray-900 tracking-tight leading-snug line-clamp-2 group-hover:text-[#FF5B00] transition-colors">
+                      {prod.title}
+                    </h4>
+                    
+                    {/* Stars ratings */}
+                    <div className="flex items-center gap-1 text-[10px] text-amber-500 font-extrabold mt-1.5">
+                      <Star className="w-3 h-3 fill-current" />
+                      <span>{prod.rating}</span>
+                      <span className="text-gray-400 font-bold">({prod.reviewCount})</span>
+                    </div>
+                  </div>
+
+                  {/* Prices & Actions Footer Row */}
+                  <div className="mt-3.5 pt-3.5 border-t border-gray-100 flex items-center justify-between">
+                    <div>
+                      <div className="text-[13px] font-black text-orange-600 leading-none">
+                        ৳{prod.price.toLocaleString()}
+                      </div>
+                      {prod.originalPrice && (
+                        <div className="text-[10px] text-gray-400 line-through font-semibold mt-1">
+                          ৳{prod.originalPrice.toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Wishlist Heart Toggle button */}
+                    <button
+                      onClick={() => toggleLikeProduct(prod.id, prod.title)}
+                      className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                        isLiked 
+                          ? "bg-red-50 border-red-200 text-red-500" 
+                          : "bg-gray-50 border-gray-100 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                      }`}
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-current" : ""}`} />
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 7. TRUST BADGES / GUARANTEE ROW */}
+      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 shrink-0">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+          {TRUST_ITEMS.map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <div 
+                key={idx}
+                className="bg-white border border-gray-150 rounded-2xl p-5 flex items-start gap-4 hover:shadow-md transition-all duration-300 text-left cursor-pointer"
+                onClick={() => toast.success(`Viewing policy details of: ${item.title}`)}
+              >
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${item.color}`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-sm font-black text-gray-900 leading-tight">
+                    {item.title}
+                  </h4>
+                  <p className="text-[11px] text-gray-400 font-bold leading-normal mt-1">
+                    {item.desc}
+                  </p>
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-extrabold text-[#FF5B00] hover:text-[#E8500A] uppercase tracking-wider mt-2.5">
+                    <span>{item.linkText}</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 8. GRID OF THREE PANELS (Why Samsung? / Creator reviews / News & Stories) */}
+      <section id="reviews-section" className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          
+          {/* Panel 1: Why Choose Samsung */}
+          <div className="lg:col-span-3 bg-white border border-gray-150 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+            <div>
+              <h3 className="text-base font-black text-gray-900 uppercase tracking-tight pb-3 border-b border-gray-150">
+                Why Choose Samsung?
+              </h3>
+
+              <div className="flex flex-col gap-5 mt-5">
+                {[
+                  { title: "Global Technology Leader", desc: "Pioneering innovation across mobile, TV, home appliances and more.", icon: Sparkles, iconCol: "text-blue-500 bg-blue-50" },
+                  { title: "Trusted by Millions", desc: "#1 most trusted brand in Bangladesh and worldwide.", icon: Award, iconCol: "text-[#FF5B00] bg-orange-50" },
+                  { title: "Built for the Future", desc: "Sustainable innovation for a better tomorrow.", icon: ShieldCheck, iconCol: "text-emerald-500 bg-emerald-50" }
+                ].map((item, idx) => {
+                  const ItemIcon = item.icon;
+                  return (
+                    <div key={idx} className="flex gap-3.5">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${item.iconCol}`}>
+                        <ItemIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-gray-900 leading-tight">
+                          {item.title}
+                        </h4>
+                        <p className="text-[10px] text-gray-400 font-bold mt-1 leading-normal">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button 
+              onClick={() => toast.success("Opening Samsung Global Info...")}
+              className="w-full py-3.5 bg-gray-50 border border-gray-100 hover:bg-gray-100 hover:border-gray-200 text-[#FF5B00] font-black rounded-xl text-[10px] uppercase tracking-widest transition-all duration-200 cursor-pointer text-center"
+            >
+              Discover Samsung
+            </button>
+          </div>
+
+          {/* Panel 2: Creator Reviews (Interactive sliding panel) */}
+          <div className="lg:col-span-5 bg-white border border-gray-150 rounded-3xl p-6 flex flex-col justify-between shadow-sm relative overflow-hidden">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-gray-150">
+                <h3 className="text-base font-black text-gray-900 uppercase tracking-tight">
+                  Creator Reviews
+                </h3>
+                <button 
+                  onClick={() => toast.success("Opening reviews analytics panel...")}
+                  className="text-[10px] font-black text-[#FF5B00] hover:text-[#E8500A] uppercase tracking-wider"
+                >
+                  View All Reviews &gt;
+                </button>
+              </div>
+
+              {/* Big Score Header */}
+              <div className="flex gap-6 items-start mt-4 mb-5 pb-5 border-b border-gray-100">
+                <div className="text-left">
+                  <div className="text-4xl font-black text-gray-900 tracking-tight leading-none">4.8</div>
+                  <div className="flex items-center gap-0.5 text-amber-400 mt-2">
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                  </div>
+                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-2">
+                    12.4K Reviews
+                  </div>
+                </div>
+
+                {/* Vertical Divider */}
+                <div className="w-px h-16 bg-gray-150"></div>
+
+                {/* Small Rating Bars */}
+                <div className="flex-1 flex flex-col gap-1.5">
+                  {ratingDistribution.map((r, index) => (
+                    <div key={index} className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
+                      <span className="w-2 text-right">{r.stars}</span>
+                      <Star className="w-2.5 h-2.5 fill-current text-amber-400" />
+                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-400" style={{ width: `${r.percent}%` }}></div>
+                      </div>
+                      <span className="w-7 text-right">{r.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* active Creator review box */}
+              <div className="min-h-[140px]">
+                <AnimatePresence mode="wait">
+                  <motion.div 
+                    key={currentCreatorReviewIdx}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100 bg-gray-50">
+                        <img 
+                          src={CREATOR_REVIEWS[currentCreatorReviewIdx].avatar} 
+                          alt={CREATOR_REVIEWS[currentCreatorReviewIdx].author} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-xs font-black text-gray-900">
+                            {CREATOR_REVIEWS[currentCreatorReviewIdx].author}
+                          </h4>
+                          <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 rounded text-[8px] font-extrabold uppercase tracking-wide">
+                            {CREATOR_REVIEWS[currentCreatorReviewIdx].role}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex text-amber-400">
+                            {Array.from({ length: CREATOR_REVIEWS[currentCreatorReviewIdx].rating }).map((_, i) => (
+                              <Star key={i} className="w-2.5 h-2.5 fill-current" />
+                            ))}
+                          </div>
+                          <span className="text-[10px] text-gray-400 font-bold">{CREATOR_REVIEWS[currentCreatorReviewIdx].timeAgo}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-[11.5px] text-gray-500 font-medium leading-relaxed italic mt-3">
+                      "{CREATOR_REVIEWS[currentCreatorReviewIdx].comment}"
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Slider navigation controls */}
+            <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-4">
+              <div className="flex gap-1.5">
+                {CREATOR_REVIEWS.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentCreatorReviewIdx(i)}
+                    className={`h-2 rounded-full transition-all cursor-pointer ${
+                      i === currentCreatorReviewIdx ? "w-5 bg-[#FF5B00]" : "w-2 bg-gray-200"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button 
+                  onClick={() => handleReviewHelpful(String(currentCreatorReviewIdx), true)}
+                  className="px-3 py-1.5 rounded-lg border border-gray-150 bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-gray-800 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  <ThumbsUp className="w-3 h-3" />
+                  <span>Helpful ({creatorReviewLikes[currentCreatorReviewIdx] || 0})</span>
+                </button>
+
+                <div className="flex gap-1">
+                  <button 
+                    onClick={() => setCurrentCreatorReviewIdx(prev => (prev - 1 + CREATOR_REVIEWS.length) % CREATOR_REVIEWS.length)}
+                    className="w-7 h-7 rounded-lg border border-gray-150 bg-white hover:bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-800 cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => setCurrentCreatorReviewIdx(prev => (prev + 1) % CREATOR_REVIEWS.length)}
+                    className="w-7 h-7 rounded-lg border border-gray-150 bg-white hover:bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-800 cursor-pointer"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Panel 3: News & Stories */}
+          <div id="news-stories-section" className="lg:col-span-4 bg-white border border-gray-150 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-gray-150">
+                <h3 className="text-base font-black text-gray-900 uppercase tracking-tight">
+                  Latest News & Stories
+                </h3>
+                <button 
+                  onClick={() => toast.success("Redirecting to blog/stories section...")}
+                  className="text-[10px] font-black text-[#FF5B00] hover:text-[#E8500A] uppercase tracking-wider"
+                >
+                  View All &gt;
+                </button>
+              </div>
+
+              {/* News Rows list */}
+              <div className="flex flex-col gap-4 mt-4">
+                {NEWS_STORIES.map((news, idx) => (
+                  <div 
+                    key={idx}
+                    onClick={() => toast.success(`Opening news article: ${news.title}`)}
+                    className="flex gap-3.5 items-center group cursor-pointer border-b border-gray-100 last:border-b-0 pb-4 last:pb-0"
+                  >
+                    {/* Left side preview */}
+                    <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative">
+                      <img 
+                        src={news.image} 
+                        alt="News thumb" 
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    
+                    {/* Right side content */}
+                    <div className="min-w-0 flex-1 text-left">
+                      <span className="text-[8px] font-extrabold text-[#FF5B00] bg-orange-50 border border-orange-100 px-2 py-0.5 rounded uppercase tracking-wider">
+                        {news.category}
+                      </span>
+                      <h4 className="text-xs font-black text-gray-900 tracking-tight leading-snug line-clamp-2 mt-1.5 group-hover:text-[#FF5B00] transition-colors">
+                        {news.title}
+                      </h4>
+                      <p className="text-[10px] text-gray-400 font-semibold mt-1">
+                        {news.date}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button 
+              onClick={() => toast.success("Subscribing to newsletter feeds...")}
+              className="w-full py-3.5 bg-[#0B0C23] hover:bg-[#FF5B00] text-white font-black rounded-xl text-[10px] uppercase tracking-widest transition-all duration-300 shadow-sm cursor-pointer border-0 mt-5"
+            >
+              Subscribe To News Updates
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 9. BRAND OVERVIEW DETAILS GRID PANEL */}
+      <section id="guides-section" className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left">
+        <div className="bg-white border border-gray-150 rounded-3xl p-6 md:p-8 shadow-sm">
+          <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight pb-3.5 border-b border-gray-150 mb-6">
+            Brand Overview
           </h3>
 
-          <div className="overflow-x-auto no-scrollbar rounded-[5px] border border-gray-100">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-wider italic">
-                  <th className="py-4.5 px-6">Brand Identity</th>
-                  <th className="py-4.5 px-6 text-center">Quality</th>
-                  <th className="py-4.5 px-6 text-center">Price Range</th>
-                  <th className="py-4.5 px-6 text-center">Rating</th>
-                  <th className="py-2.5 px-6 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+            
+            {/* Box A: About Samsung */}
+            <div className="flex flex-col justify-between">
+              <div>
+                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-3">
+                  About Samsung
+                </h4>
+                <p className="text-[13px] text-gray-500 font-bold leading-relaxed mb-4">
+                  Samsung inspires the world and shapes the future with transformative ideas and technologies. From smartphones and TVs to home appliances and semiconductors, Samsung is committed to creating a better world through innovation and sustainability.
+                </p>
+              </div>
+              <button 
+                onClick={() => toast.success("Loading full Samsung brand history...")}
+                className="inline-flex items-center gap-1.5 text-xs font-black text-[#FF5B00] hover:text-[#E8500A] uppercase tracking-wider mt-2 cursor-pointer self-start"
+              >
+                <span>Learn More About Samsung</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Box B: Contact information */}
+            <div className="flex flex-col gap-4 bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none border-b border-gray-200/60 pb-2.5 flex items-center gap-2">
+                <Globe className="w-3.5 h-3.5" />
+                <span>Contact Information</span>
+              </h4>
+
+              <div className="flex flex-col gap-3.5 text-xs font-bold text-gray-600 mt-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Email</span>
+                  <a href="mailto:support@samsung.com" className="text-gray-900 hover:text-[#FF5B00] transition-colors font-extrabold">
+                    support@samsung.com
+                  </a>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Website</span>
+                  <a href="https://www.samsung.com" target="_blank" rel="noreferrer" className="text-gray-900 hover:text-[#FF5B00] transition-colors font-extrabold flex items-center gap-1">
+                    <span>www.samsung.com</span>
+                    <ExternalLink className="w-3 h-3 text-gray-400" />
+                  </a>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Phone</span>
+                  <span className="text-gray-900 font-extrabold">09613-726726</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Box C: Price & Audience Info */}
+            <div className="flex flex-col gap-4 bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none border-b border-gray-200/60 pb-2.5 flex items-center gap-2">
+                <Award className="w-3.5 h-3.5" />
+                <span>Price & Audience</span>
+              </h4>
+
+              <div className="flex flex-col gap-3 text-xs font-bold text-gray-600 mt-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Brand Level</span>
+                  <div className="flex text-amber-500 gap-0.5">
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Price Range</span>
+                  <span className="text-gray-900 font-extrabold">BDT 5,000 - 199,000</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Audience Focus</span>
+                  <span className="text-gray-900 font-extrabold">All Demographics</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Focus Segments</span>
+                  <span className="text-gray-900 font-extrabold uppercase text-[10px]">Tech Enthusiasts, Professionals</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-gray-150">
+            
+            {/* Box D: Shop Address & Links */}
+            <div className="flex flex-col gap-3">
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-[#FF5B00]" />
+                <span>Shop Address & Links</span>
+              </h4>
+              <p className="text-[12px] text-gray-600 font-bold leading-relaxed mt-1">
+                Samsung Electronics Bangladesh, Level 12, Bashundhara R/A, Dhaka 1229 Bangladesh.
+              </p>
+              <button 
+                onClick={() => toast.success("Opening shop address map guide...")}
+                className="inline-flex items-center gap-1.5 text-xs font-black text-[#FF5B00] hover:text-[#E8500A] uppercase tracking-wider mt-2 cursor-pointer self-start"
+              >
+                <span>View On Map</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Box E: Services & Specialties */}
+            <div className="flex flex-col gap-3">
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none flex items-center gap-2">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Services & Specialties</span>
+              </h4>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] font-extrabold text-gray-600 mt-2">
                 {[
-                  {
-                    name: "Apex Shoes",
-                    id: 3,
-                    logo: "Ap",
-                    quality: "Premium",
-                    price: "High (৳৳৳)",
-                    score: "4.8",
-                  },
-                  {
-                    name: "Aarong Brand",
-                    id: 10,
-                    logo: "Aa",
-                    quality: "Elite",
-                    price: "Mid (৳৳)",
-                    score: "4.7",
-                  },
-                  {
-                    name: "Lotto Wear",
-                    id: 6,
-                    logo: "L",
-                    quality: "Basic",
-                    price: "Economy (৳)",
-                    score: "4.2",
-                  },
-                  {
-                    name: "Yellow Shop",
-                    id: 11,
-                    logo: "Y",
-                    quality: "Fashion",
-                    price: "Premium (৳৳৳)",
-                    score: "4.5",
-                  },
-                ].map((item, idx) => (
-                  <tr
+                  "1 Year Brand Warranty",
+                  "Official Product Warranty",
+                  "Genuine Product Guarantee",
+                  "After Sales Support",
+                  "Doorstep Service",
+                  "Easy EMI & Bank Installments"
+                ].map((serv, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3px] shrink-0" />
+                    <span>{serv}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Box F: Best For category pills */}
+            <div className="flex flex-col gap-3">
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none flex items-center gap-2">
+                <Star className="w-3.5 h-3.5 text-amber-500" />
+                <span>Best For</span>
+              </h4>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {[
+                  "Smartphones",
+                  "Televisions",
+                  "Home Appliances",
+                  "Wearables",
+                  "Audio",
+                  "Accessories",
+                  "Gaming",
+                  "Home Entertainment"
+                ].map((tag, idx) => (
+                  <span 
                     key={idx}
-                    className="hover:bg-gray-50/50 transition-colors"
+                    className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-150 rounded-lg text-[9px] font-black text-gray-500 hover:text-[#FF5B00] transition-colors uppercase tracking-wider cursor-pointer"
                   >
-                    <td className="py-4.5 px-6 text-left">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#1A1D4E] text-white font-extrabold flex items-center justify-center text-[10px]">
-                          {item.logo}
-                        </div>
-                        <span className="font-extrabold text-[#1A1D4E] italic">
-                          {item.name}
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom verified sourcing row */}
+          <div className="mt-8 pt-5 border-t border-gray-100 flex items-center gap-3 bg-emerald-500/5 rounded-2xl p-4 border border-emerald-500/10 text-left">
+            <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Check className="w-4 h-4 stroke-[3px]" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-emerald-800 uppercase tracking-tight">Verified Sourcing</h4>
+              <p className="text-[11px] text-emerald-600 font-bold mt-1">
+                Each Samsung product is verified against official brand catalogs. Real assurance, checked & re-verified for authenticity, safety, and quality.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 10. PUBLIC REVIEWS ROW (Tanvir Hasan & Nusrat Jahan) */}
+      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left">
+        <div className="flex items-center justify-between mb-6 border-b border-gray-150 pb-3.5">
+          <div>
+            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
+              Public Reviews
+            </h3>
+            <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">
+              Feedback from certified Samsung device owners
+            </p>
+          </div>
+          <button 
+            onClick={() => toast.success("Opening public reviews catalog...")}
+            className="text-xs font-black text-[#FF5B00] hover:text-[#E8500A] transition-colors uppercase tracking-widest flex items-center gap-1 group"
+          >
+            <span>View all reviews</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
+
+        {/* Double Column Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {PUBLIC_REVIEWS.map((review) => (
+            <div 
+              key={review.id}
+              className="bg-white border border-gray-150 rounded-3xl p-6 hover:shadow-md transition-all duration-300 text-left flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-full overflow-hidden border border-gray-150 bg-gray-50">
+                      <img 
+                        src={review.avatar} 
+                        alt={review.author} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="text-xs font-black text-gray-900 leading-none">
+                          {review.author}
+                        </h4>
+                        <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-600 rounded text-[8px] font-extrabold uppercase tracking-wide">
+                          Verified Buyer
                         </span>
                       </div>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[10px] font-bold text-[#FF5B00] uppercase tracking-wide">Reviewing:</span>
+                        <span className="text-[10px] text-gray-500 font-extrabold truncate max-w-[150px]">{review.product}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="flex text-amber-400 gap-0.5">
+                      {Array.from({ length: review.rating }).map((_, i) => (
+                        <Star key={i} className="w-3 h-3 fill-current" />
+                      ))}
+                    </div>
+                    <span className="text-[10px] text-gray-400 font-bold mt-1.5 block">
+                      {review.timeAgo}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-[12px] text-gray-500 font-bold leading-relaxed italic">
+                  "{review.comment}"
+                </p>
+              </div>
+
+              {/* Helpful footer */}
+              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+                <button 
+                  onClick={() => handleReviewHelpful(review.id)}
+                  className={`px-4 py-1.5 rounded-lg border text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
+                    votedPublicReviews.includes(review.id)
+                      ? "bg-[#FF5B00]/5 border-[#FF5B00]/20 text-[#FF5B00]"
+                      : "bg-gray-50 border-gray-200 text-gray-400 hover:text-gray-800"
+                  }`}
+                >
+                  <ThumbsUp className="w-3.5 h-3.5" />
+                  <span>Helpful ({review.helpfulCount + (publicReviewLikes[review.id] || 0)})</span>
+                </button>
+
+                <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Purchase Verified</span>
+                </span>
+              </div>
+
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 11. TRUST STATEMENT STATEMENT BANNER */}
+      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 shrink-0">
+        <div className="bg-[#0D0B26] border border-white/5 rounded-2xl py-6 px-8 flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left shadow-lg">
+          <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
+            <ShieldCheck className="w-5 h-5 stroke-[2.5px]" />
+          </div>
+          <div>
+            <h4 className="text-sm font-black text-white uppercase tracking-wider">
+              Choosify.bd Trust Statement
+            </h4>
+            <p className="text-xs text-gray-400 italic mt-1 font-semibold">
+              "Only verified sellers and completely unbiased, authentic brand experiences are list on Choosify."
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 12. SIMILAR BRANDS COMPARISON TABLE */}
+      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left">
+        <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight pb-3.5 border-b border-gray-150 mb-6">
+          Similar Brands Comparison
+        </h3>
+
+        <div className="bg-white border border-gray-150 rounded-3xl overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-150 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  <th className="py-4 px-6">Brand Identity</th>
+                  <th className="py-4 px-6">Quality</th>
+                  <th className="py-4 px-6">Price Range</th>
+                  <th className="py-4 px-6">Rating</th>
+                  <th className="py-4 px-6 text-right">Compare</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-xs font-bold text-gray-600">
+                {SIMILAR_BRANDS.map((brand, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="py-4 px-6 flex items-center gap-3">
+                      {/* Circle letter icon */}
+                      <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-150 flex items-center justify-center text-gray-900 font-black">
+                        {brand.name.substring(0, 1)}
+                      </div>
+                      <span className="text-sm font-black text-gray-900">{brand.name}</span>
                     </td>
-                    <td className="py-4.5 px-6 text-center">
-                      <span className="px-2.5 py-0.5 bg-[#4DBC15]/10 text-[#4DBC15] text-[8px] font-black uppercase rounded tracking-wider italic">
-                        {item.quality}
+                    <td className="py-4 px-6">
+                      <span className={`px-2 py-1.5 text-[9px] font-black rounded-lg uppercase tracking-wider ${
+                        brand.quality === "PREMIUM" 
+                          ? "bg-purple-50 text-purple-600 border border-purple-100" 
+                          : "bg-blue-50 text-blue-600 border border-blue-100"
+                      }`}>
+                        {brand.quality}
                       </span>
                     </td>
-                    <td className="py-4.5 px-6 text-center text-[10px] font-semibold text-gray-500 italic">
-                      {item.price}
+                    <td className="py-4 px-6">
+                      <span className="text-gray-900 font-extrabold">{brand.price}</span>
                     </td>
-                    <td className="py-4.5 px-6 text-center">
-                      <div className="flex items-center justify-center gap-1 text-[11px] font-extrabold text-navy italic">
-                        <Star
-                          size={10}
-                          className="fill-[#E8500A] text-[#E8500A]"
-                        />
-                        <span>{item.score}</span>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-1 font-extrabold text-amber-500">
+                        <Star className="w-3.5 h-3.5 fill-current" />
+                        <span>{brand.rating}</span>
                       </div>
                     </td>
-                    <td className="py-4.5 px-6 text-right">
-                      <button
-                        onClick={() => navigate(`/brands/${item.id}`)}
-                        className="px-4 py-1.5 border border-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white text-[#1A1D4E] font-black text-[9px] uppercase tracking-wider rounded-full italic transition-all inline-block cursor-pointer"
+                    <td className="py-4 px-6 text-right">
+                      <button 
+                        onClick={() => toast.success(`Comparing Samsung with ${brand.name}...`)}
+                        className="px-4.5 py-2 bg-gray-50 hover:bg-[#FF5B00] hover:text-white border border-gray-150 hover:border-[#FF5B00] text-gray-500 font-black rounded-lg text-[10px] uppercase tracking-wider transition-all cursor-pointer"
                       >
-                        Visit
+                        Compare
                       </button>
                     </td>
                   </tr>
@@ -2403,26 +1354,36 @@ export function BrandDetailPage() {
             </table>
           </div>
         </div>
-      </div>
+      </section>
 
-      <ReportModal
-        isOpen={isReportOpen}
-        onClose={() => setIsReportOpen(false)}
-        type="brand"
-        targetId={String(brand.id)}
-        targetName={brand.name}
-      />
-
-      <ClaimProfileModal
-        isOpen={isClaimModalOpen}
-        onClose={() => setIsClaimModalOpen(false)}
-        targetType="brand"
-        targetId={brand.id}
-        targetName={brand.name}
-        onClaimSubmitted={() => {
-          setLocalClaimStatus("pending");
-        }}
-      />
     </div>
+  );
+}
+
+// Simple Icon Fallbacks for Facebook/Instagram/Youtube
+function FacebookIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  );
+}
+
+function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
+function YoutubeIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+      <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor" />
+    </svg>
   );
 }

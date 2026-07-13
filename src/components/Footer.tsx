@@ -1,78 +1,6 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Facebook, Instagram, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useGlobalState } from '../context/GlobalStateContext';
-import type { SiteFooterColumn } from '../types/catalog';
-
-const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
-  {
-    id: 'discover',
-    title: 'DISCOVER',
-    links: [
-      { label: 'Spotlight', url: '/spotlight' },
-      { label: 'Collections', url: '/spotlight/explore?tab=collections' },
-      { label: 'Live', url: '/spotlight/calendar' },
-      { label: 'Discover & Learn', url: '/guides' },
-      { label: 'Top Brands', url: '/brands' },
-      { label: 'Best Deals', url: '/deals' },
-    ],
-  },
-  {
-    id: 'company',
-    title: 'COMPANY',
-    links: [
-      { label: 'Suggest a brand', url: '/suggest-brand' },
-      { label: 'Partnership', url: '/partnership' },
-      { label: 'Advertise', url: '/advertise' },
-    ],
-  },
-  {
-    id: 'legal',
-    title: 'LEGAL',
-    links: [
-      { label: 'Terms', url: '/terms' },
-      { label: 'Policy', url: '/privacy' },
-      { label: 'FAQ', url: '/faq' },
-      { label: 'Contact us', url: '/contact' },
-      { label: 'About', url: '/about' },
-    ],
-  },
-];
-
-const REQUIRED_FOOTER_LINKS: Array<{ label: string; url: string; columnId?: string }> = [
-  { label: 'FAQ', url: '/faq', columnId: 'legal' },
-];
-
-function ensureFooterLinks(columns: SiteFooterColumn[]): SiteFooterColumn[] {
-  const nextColumns = columns.map((column) => ({
-    ...column,
-    links: [...column.links],
-  }));
-
-  for (const required of REQUIRED_FOOTER_LINKS) {
-    const targetColumn =
-      nextColumns.find((column) => column.id === required.columnId) ||
-      nextColumns.find((column) => column.id.toLowerCase().includes('legal')) ||
-      nextColumns[nextColumns.length - 1];
-
-    if (!targetColumn) continue;
-
-    const alreadyPresent = targetColumn.links.some(
-      (link) => link.url === required.url || link.label.toLowerCase() === required.label.toLowerCase(),
-    );
-
-    if (!alreadyPresent) {
-      const policyIndex = targetColumn.links.findIndex((link) => link.url === '/privacy');
-      if (policyIndex >= 0) {
-        targetColumn.links.splice(policyIndex + 1, 0, { label: required.label, url: required.url });
-      } else {
-        targetColumn.links.push({ label: required.label, url: required.url });
-      }
-    }
-  }
-
-  return nextColumns;
-}
 
 // Perfect inline SVG for TikTok
 function TikTokIcon({ size = 20 }: { size?: number }) {
@@ -89,25 +17,6 @@ function TikTokIcon({ size = 20 }: { size?: number }) {
 }
 
 export function Footer() {
-  const { siteConfig } = useGlobalState();
-  const footer = siteConfig?.footer;
-  const socialLinks = (siteConfig?.socialLinks || [])
-    .filter((link) => link.isVisible)
-    .sort((a, b) => a.order - b.order);
-
-  const renderSocialIcon = (platform: string) => {
-    const normalized = platform.toLowerCase();
-    if (normalized.includes('instagram')) return <Instagram size={20} />;
-    if (normalized.includes('tiktok')) return <TikTokIcon size={20} />;
-    if (normalized.includes('youtube')) return <Youtube size={20} />;
-    return <Facebook size={20} />;
-  };
-
-  const footerColumns = useMemo(
-    () => ensureFooterLinks(footer?.columns?.length ? footer.columns : DEFAULT_FOOTER_COLUMNS),
-    [footer?.columns],
-  );
-
   return (
     <footer 
       className="w-full footer-brand-gradient text-gray-400 font-sans relative overflow-hidden" 
@@ -125,8 +34,7 @@ export function Footer() {
             
             {/* Tagline (no logo in this area) */}
             <p className="text-white/65 text-[14px] leading-relaxed max-w-[280px] mb-8 font-normal text-center md:text-left mx-auto md:mx-0">
-              {footer?.description ||
-                "Bangladesh's Smartest Product Discovery Platform. Find The Best Brand, Compare Price, And Shop With Confidence"}
+              Bangladesh's Smartest Product Discovery Platform. Find The Best Brand, Compare Price, And Shop With Confidence
             </p>
 
             {/* Connect With Us Section */}
@@ -136,54 +44,145 @@ export function Footer() {
 
             {/* Social icons row */}
             <div className="flex items-center justify-center md:justify-start gap-4 sm:gap-6 flex-wrap">
-              {(socialLinks.length ? socialLinks : [
-                { id: 'fb', platform: 'Facebook', url: 'https://www.facebook.com/choosify.bd', isVisible: true, order: 0 },
-                { id: 'ig', platform: 'Instagram', url: 'https://www.instagram.com/choosify.bd/', isVisible: true, order: 1 },
-                { id: 'tt', platform: 'TikTok', url: 'https://www.tiktok.com/@choosify5', isVisible: true, order: 2 },
-                { id: 'yt', platform: 'YouTube', url: 'https://www.youtube.com/@choosifybd', isVisible: true, order: 3 },
-              ]).map((social) => (
-              <div key={social.id} className="flex flex-col items-center gap-2 group cursor-pointer">
+              
+              {/* Facebook */}
+              <div className="flex flex-col items-center gap-2 group cursor-pointer">
                 <a 
-                  href={social.url}
+                  href="https://www.facebook.com/choosify.bd" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
-                  aria-label={`Visit Choosify on ${social.platform}`}
-                  title={`Visit Choosify on ${social.platform}`}
+                  aria-label="Visit Choosify on Facebook"
+                  title="Visit Choosify on Facebook"
                 >
-                  {renderSocialIcon(social.platform)}
+                  <Facebook size={20} />
                 </a>
                 <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                  {social.platform}
+                  Facebook
                 </span>
               </div>
-              ))}
+
+              {/* Instagram */}
+              <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                <a 
+                  href="https://www.instagram.com/choosify.bd/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  aria-label="Visit Choosify on Instagram"
+                  title="Visit Choosify on Instagram"
+                >
+                  <Instagram size={20} />
+                </a>
+                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                  Instagram
+                </span>
+              </div>
+
+              {/* TikTok */}
+              <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                <a 
+                  href="https://www.tiktok.com/@choosify5" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  aria-label="Visit Choosify on TikTok"
+                  title="Visit Choosify on TikTok"
+                >
+                  <TikTokIcon size={20} />
+                </a>
+                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                  TikTok
+                </span>
+              </div>
+
+              {/* YouTube */}
+              <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                <a 
+                  href="https://www.youtube.com/@choosifybd" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  aria-label="Visit Choosify on YouTube"
+                  title="Visit Choosify on YouTube"
+                >
+                  <Youtube size={20} />
+                </a>
+                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                  YouTube
+                </span>
+              </div>
+
             </div>
 
           </div>
 
           {/* Right Section containing Columns 2, 3, 4 */}
           <div className="md:col-span-7 lg:col-span-6 grid grid-cols-2 sm:grid-cols-3 gap-8 md:gap-12">
-            {footerColumns.map((column, idx) => (
-            <div key={column.id} className={`flex flex-col ${idx === 2 ? 'col-span-2 sm:col-span-1' : ''}`}>
+            
+            {/* Column 2: DISCOVER */}
+            <div className="flex flex-col">
               <h4 className="text-white font-semibold uppercase tracking-[0.1em] text-[13px] mb-[20px]">
-                {column.title}
+                DISCOVER
               </h4>
               <div className="flex flex-col leading-[2.2]">
-                {column.links.map((link) => (
-                  link.url.startsWith('http') ? (
-                    <a key={`${column.id}-${link.label}`} href={link.url} className="text-white/65 text-[14px] hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
-                      {link.label}
-                    </a>
-                  ) : (
-                    <Link key={`${column.id}-${link.label}`} to={link.url} className="text-white/65 text-[14px] hover:text-white transition-colors">
-                      {link.label}
-                    </Link>
-                  )
-                ))}
+                <Link to="/brands" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  Top Brands
+                </Link>
+                <Link to="/products" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  New Arrival
+                </Link>
+                <Link to="/compare" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  Compare Tool
+                </Link>
+                <Link to="/deals" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  Best Deals
+                </Link>
               </div>
             </div>
-            ))}
+
+            {/* Column 3: COMPANY */}
+            <div className="flex flex-col">
+              <h4 className="text-white font-semibold uppercase tracking-[0.1em] text-[13px] mb-[20px]">
+                COMPANY
+              </h4>
+              <div className="flex flex-col leading-[2.2]">
+                <Link to="/suggest-brand" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  Suggest a brand
+                </Link>
+                <Link to="/partnership" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  Partnership
+                </Link>
+                <Link to="/advertise" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  Advertise
+                </Link>
+                <Link to="/b2b" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  b2b
+                </Link>
+              </div>
+            </div>
+
+            {/* Column 4: LEGAL */}
+            <div className="flex flex-col col-span-2 sm:col-span-1">
+              <h4 className="text-white font-semibold uppercase tracking-[0.1em] text-[13px] mb-[20px]">
+                LEGAL
+              </h4>
+              <div className="flex flex-col leading-[2.2]">
+                <Link to="/terms" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  Terms
+                </Link>
+                <Link to="/privacy" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  Policy
+                </Link>
+                <Link to="/contact" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  Contact us
+                </Link>
+                <Link to="/about" className="text-white/65 text-[14px] hover:text-white transition-colors">
+                  About
+                </Link>
+              </div>
+            </div>
+
           </div>
 
         </div>

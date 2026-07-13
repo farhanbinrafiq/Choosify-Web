@@ -164,7 +164,7 @@ export const DEFAULT_DYNAMIC_GUIDE: DynamicGuideData = {
   ]
 };
 
-import { BLOGS } from '../data/mockBlogs';
+import { BLOGS } from '../constants';
 export const mockGuides = BLOGS.map(g => ({
   ...g,
   tags: [g.category, g.type, g.author.split(' ')[0], 'guide', 'buying']

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -31,6 +31,7 @@ import {
   CalendarDays,
   Check,
   X,
+  BookOpen,
   Facebook,
   Twitter,
   ShieldCheck,
@@ -39,25 +40,13 @@ import {
   Award,
   User,
   Gift,
-  Clock,
-  RefreshCw,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { BLOGS, PRODUCTS } from "../constants";
 import { cn } from "../lib/utils";
-import { PRODUCT_CARD_GRID, DETAIL_SINGLE_FEED, GUIDE_MEDIA_GRID } from "../lib/pageLayout";
-import { renderGuideMediaCard } from "./GuidesPage";
-import { StickySectionNav } from "../components/StickySectionNav";
-import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { EvaluationData, ComparisonProduct } from "../types/evaluation";
 import evaluationsData from "../data/evaluations.json";
 import { RecommendationMediaGallery } from "../components/RecommendationMediaGallery";
-import { SpotlightContentHero, type SpotlightHeroVariant } from "../components/spotlight/feed/SpotlightContentHero";
-import {
-  DetailHeroSummaryBar,
-  detailHeroSummaryActionPrimaryClass,
-  detailHeroSummaryActionSecondaryClass,
-} from "../components/DetailHeroSummaryBar";
 import { DYNAMIC_GUIDES, DEFAULT_DYNAMIC_GUIDE } from "../data/mockGuides";
 import { CATEGORY_SPEC_CONFIGS } from "../data/guideSpecConfigs";
 import { ProductCard } from "../components/ProductCard";
@@ -65,10 +54,7 @@ import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
 import toast from "react-hot-toast";
 import { FollowButton } from "../components/FollowButton";
-import { useRegisterPageFilters, UniversalFilterRenderer } from "../components/FilterEngine";
-import { PopularSearchKeywords } from "../components/PopularSearchKeywords";
-import { buildGuidePopularSearchTerms } from "../utils/pagePopularSearches";
-import type { CatalogGuide } from "../types/catalog";
+import { useRegisterPageFilters } from "../components/FilterEngine";
 
 const evaluations = evaluationsData as EvaluationData[];
 
@@ -146,121 +132,28 @@ const COMPARISON_DATA: ComparisonProduct[] = [
   },
 ];
 
-export function GuideDetailPage({
-  guideIdOverride,
-  spotlightGuideOverride,
-  spotlightHeroVariant,
-  spotlightLiveEmbedUrl,
-  spotlightVideoUrl,
-  spotlightPosterImage,
-  backHref,
-  backLabel = 'Back',
-}: {
-  guideIdOverride?: string;
-  spotlightGuideOverride?: CatalogGuide & { recommendedProducts?: string[]; date?: string };
-  spotlightHeroVariant?: SpotlightHeroVariant;
-  spotlightLiveEmbedUrl?: string;
-  spotlightVideoUrl?: string;
-  spotlightPosterImage?: string;
-  backHref?: string;
-  backLabel?: string;
-} = {}) {
-  const heroRef = useRef<HTMLElement>(null);
-  const { id: routeId } = useParams();
-  const id = guideIdOverride ?? routeId;
+export function GuideDetailPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { allGuides, siteConfig, allBrands, addToCart } = useGlobalState();
-  const [relatedPlatformFilter, setRelatedPlatformFilter] = useState<string>('all');
-  const [relatedTopicFilter, setRelatedTopicFilter] = useState<string>('all');
 
-  const guide =
-    spotlightGuideOverride ||
-    allGuides.find((b) => String(b.id) === String(id) || (b as any).slug === id) ||
-    allGuides[0] ||
-    BLOGS.find((b) => b.id === Number(id)) ||
-    BLOGS[0];
-
-  const guideSectionNavItems = useMemo(
-    () => [
-      { id: "winner", label: "Winner", icon: <Award size={13} /> },
-      { id: "why-won", label: "Why It Won", icon: <CheckCircle2 size={13} /> },
-      { id: "quick-verdict", label: "Verdict", icon: <Zap size={13} /> },
-      { id: "takeaways", label: "Takeaways", icon: <Sparkles size={13} /> },
-      { id: "top-3", label: "Top 3", icon: <Star size={13} /> },
-      { id: "all-products", label: "Products", icon: <ShoppingBag size={13} /> },
-      { id: "review-context", label: "Reviewed", icon: <Package size={13} /> },
-      { id: "reviewer-profile", label: "Reviewer", icon: <User size={13} /> },
-    ],
-    [],
-  );
-
-  const { activeId: activeSectionId, scrollToSection } =
-    useSectionScrollSpy(guideSectionNavItems);
+  // Find the blog/guide. Fallback to first if not found
+  const guide = BLOGS.find((b) => b.id === Number(id)) || BLOGS[0];
 
   useRegisterPageFilters({
     pageName: guide ? guide.title : 'Guide Details',
     renderSearch: null,
     quickFilters: [
       { id: 'article', label: '📖 Editorial Guide', active: true, onClick: () => {} },
-      { id: 'products', label: '🛒 Recommended Products', active: false, onClick: () => document.getElementById('top-3')?.scrollIntoView({ behavior: 'smooth' }) },
-      { id: 'specs', label: '📊 Spec Breakdown', active: false, onClick: () => document.getElementById('specs')?.scrollIntoView({ behavior: 'smooth' }) },
+      { id: 'products', label: '🛒 Recommended Products', active: false, onClick: () => {} },
+      { id: 'specs', label: '📊 Spec Breakdown', active: false, onClick: () => {} }
     ],
-    renderFilters: () => (
-      <UniversalFilterRenderer
-        profile={{
-          entity: 'guides',
-          filters: [
-            {
-              id: 'platform',
-              name: 'Platform',
-              type: 'single_select',
-              options: [
-                { value: 'all', label: 'All platforms' },
-                { value: 'youtube', label: 'YouTube' },
-                { value: 'reels', label: 'Reels / Shorts' },
-                { value: 'blog', label: 'Blog / Article' },
-              ],
-            },
-            {
-              id: 'topic',
-              name: 'Topic',
-              type: 'single_select',
-              options: [
-                { value: 'all', label: 'All topics' },
-                { value: 'mobile', label: 'Mobile & Tech' },
-                { value: 'fashion', label: 'Fashion' },
-                { value: 'home', label: 'Home & Living' },
-              ],
-            },
-          ],
-        }}
-        activeFilters={{
-          platform: relatedPlatformFilter,
-          topic: relatedTopicFilter,
-        }}
-        onFilterChange={(filterId, value) => {
-          if (filterId === 'platform') setRelatedPlatformFilter(value || 'all');
-          if (filterId === 'topic') setRelatedTopicFilter(value || 'all');
-        }}
-      />
-    ),
-    activeFilterCount:
-      (relatedPlatformFilter !== 'all' ? 1 : 0) + (relatedTopicFilter !== 'all' ? 1 : 0),
-    onClearAll: () => {
-      setRelatedPlatformFilter('all');
-      setRelatedTopicFilter('all');
-    },
-    sectionNav: {
-      items: guideSectionNavItems,
-      activeId: activeSectionId,
-      onNavigate: scrollToSection,
-      allLabel: 'Guide',
-      profileLabel: 'Guide detail',
-    },
-  }, [guide, relatedPlatformFilter, relatedTopicFilter, guideSectionNavItems, activeSectionId, scrollToSection]);
+    renderFilters: null,
+    activeFilterCount: 0,
+    onClearAll: null
+  }, [guide]);
 
-  const guideId = guide?.id;
-  const dynamicData = DYNAMIC_GUIDES[Number(guideId)] || {
+  const guideId = Number(id);
+  const dynamicData = DYNAMIC_GUIDES[guideId] || {
     ...DEFAULT_DYNAMIC_GUIDE,
     id: guide.id,
     title: guide.title,
@@ -278,7 +171,6 @@ export function GuideDetailPage({
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
-  const [activeProductIdx, setActiveProductIdx] = useState(0);
 
   const [interactions, setInteractions] = useState({
     loved: 1000,
@@ -358,39 +250,81 @@ export function GuideDetailPage({
 
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } =
     useDashboard();
+  const { mode, allBrands, addToCart } = useGlobalState();
 
-  const relatedGuides = useMemo(() => {
-    return allGuides
-      .filter((b) => String(b.id) !== String(guide.id))
-      .filter((b) => {
-        if (relatedPlatformFilter !== 'all') {
-          const type = String((b as any).type || (b as any).contentType || '').toLowerCase();
-          if (relatedPlatformFilter === 'youtube' && !type.includes('youtube') && !type.includes('video')) return false;
-          if (relatedPlatformFilter === 'reels' && !type.includes('reel') && !type.includes('short')) return false;
-          if (relatedPlatformFilter === 'blog' && !type.includes('blog') && !type.includes('article')) return false;
-        }
-        if (relatedTopicFilter !== 'all') {
-          const cat = String(b.category || '').toLowerCase();
-          if (relatedTopicFilter === 'mobile' && !cat.includes('mobile') && !cat.includes('tech')) return false;
-          if (relatedTopicFilter === 'fashion' && !cat.includes('fashion')) return false;
-          if (relatedTopicFilter === 'home' && !cat.includes('home') && !cat.includes('living')) return false;
-        }
-        return true;
-      })
-      .slice(0, 4);
-  }, [allGuides, guide.id, relatedPlatformFilter, relatedTopicFilter]);
+  const [activeSection, setActiveSection] = useState("all");
+  const [activeProductIdx, setActiveProductIdx] = useState(0);
 
-  const guidePopularSearchTerms = useMemo(
-    () =>
-      buildGuidePopularSearchTerms({
-        cmsTerms: siteConfig?.popularSearches,
-        guideTitle: guide.title,
-        guideCategory: guide.category,
-        guideTags: (guide as any).tags,
-        relatedGuideTitles: relatedGuides.map((g) => g.title),
-      }),
-    [siteConfig?.popularSearches, guide, relatedGuides],
-  );
+  // ScrollSpy Active Section Detection
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 220; // offset matches sticky selector
+
+      const sections = [
+        { id: "all-section", name: "all" },
+        { id: "winner", name: "winner" },
+        { id: "why-won", name: "why-won" },
+        { id: "quick-verdict", name: "quick-verdict" },
+        { id: "takeaways", name: "takeaways" },
+        { id: "top-3", name: "top-3" },
+        { id: "all-products", name: "all-products" },
+        { id: "reviewer-profile", name: "reviewer-profile" },
+      ];
+
+      if (window.scrollY < 200) {
+        setActiveSection("all");
+        return;
+      }
+
+      let currentSection = "all";
+      for (const section of sections) {
+        const el = document.getElementById(section.id);
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.pageYOffset;
+          const height = el.offsetHeight;
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            currentSection = section.name;
+          }
+        }
+      }
+      setActiveSection(currentSection);
+
+      // Active product section scrollspy
+      let activeProd = 0;
+      for (let i = 0; i < displayProducts.length; i++) {
+        const el = document.getElementById(`prod-sec-${i}`);
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.pageYOffset;
+          if (window.scrollY + 250 >= top) {
+            activeProd = i;
+          }
+        }
+      }
+      setActiveProductIdx(activeProd);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [displayProducts]);
+
+  const scrollToSection = (id: string) => {
+    if (id === "all-section" || id === "all") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setActiveSection("all");
+    } else {
+      const el = document.getElementById(id);
+      if (el) {
+        const offset = 180; // Offset for navbar + sticky selectors
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        });
+        setActiveSection(id);
+      }
+    }
+  };
 
   const handleViewProducts = () => {
     if (allGuideProducts.length > 6) {
@@ -400,149 +334,356 @@ export function GuideDetailPage({
     }
   };
 
-  const overallWinnerProduct = displayProducts[0] || allGuideProducts[0] || PRODUCTS[0];
-  const bestBudgetProduct = useMemo(() => {
-    if (!allGuideProducts.length) return PRODUCTS[1] || PRODUCTS[0];
-    return [...allGuideProducts].sort((a, b) => {
-      const priceA = parseFloat(String(a.price || 0).replace(/,/g, ""));
-      const priceB = parseFloat(String(b.price || 0).replace(/,/g, ""));
-      return priceA - priceB;
-    })[0];
-  }, [allGuideProducts]);
-
-  const formatProductLabel = (product?: { brand?: string; title?: string }) => {
-    if (!product) return "TBD";
-    const label = `${product.brand || ""} ${product.title || ""}`.trim();
-    return label.length > 42 ? `${label.slice(0, 39)}…` : label;
-  };
-
-  const guideReadTime =
-    (guide as { readTime?: string }).readTime?.replace(/_/g, " ") || "12 Min Read";
-  const guideLastUpdated = "June 2026";
-
   return (
     <div className="bg-white min-h-screen">
-      {/* Unified Guide Hero — breadcrumbs, media, guide info, and summary in one section */}
-      <section
-        ref={heroRef}
-        className="relative w-full choosify-dark-gradient border-b border-white/5"
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.18),transparent_42%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
-
-        <div className="relative z-10">
-          {backHref && (
-            <div className="max-w-[1080px] mx-auto px-6 pt-4">
-              <Link
-                to={backHref}
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/70 hover:text-[#E8500A]"
-              >
-                <ArrowLeft size={14} /> {backLabel}
-              </Link>
+      {/* Breadcrumb & Meta Meta (PRD Requirement) */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          <div className="flex items-center gap-3 text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
+            <Link
+              to="/"
+              className="hover:text-orange-primary transition-colors"
+            >
+              Home
+            </Link>
+            <ChevronRight size={12} />
+            <Link
+              to="/guides"
+              className="hover:text-orange-primary transition-colors"
+            >
+              Recommendations
+            </Link>
+            <ChevronRight size={12} />
+            <span className="text-navy text-left">{guide.title}</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 text-[10px] font-black text-navy uppercase tracking-widest italic bg-gray-50 px-4 py-2 rounded-full">
+              <CalendarDays size={14} className="text-orange-primary" />
+              Published May 12, 2026
             </div>
-          )}
-          <div className="w-full bg-transparent relative">
-            {spotlightHeroVariant ? (
-              <SpotlightContentHero
-                guide={guide}
-                variant={spotlightHeroVariant}
-                liveEmbedUrl={spotlightLiveEmbedUrl}
-                videoUrl={spotlightVideoUrl}
-                posterImage={spotlightPosterImage}
-              />
-            ) : (
-              <RecommendationMediaGallery guide={guide} />
-            )}
+            <div className="flex items-center gap-2 text-[10px] font-black text-navy uppercase tracking-widest italic bg-orange-primary/5 px-4 py-2 rounded-full border border-orange-primary/10">
+              <BookOpen size={14} className="text-orange-primary" />8 Min Read
+            </div>
           </div>
-
-          <div className="max-w-[1080px] mx-auto px-6 pb-6 text-left">
-            <h1 className="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-tight mb-4 font-sans drop-shadow-xl">
-              {guide.title}
-            </h1>
-
-            <p className="text-white/85 text-sm md:text-base font-medium italic uppercase tracking-wider leading-relaxed max-w-4xl font-sans">
-              {guide.excerpt ||
-                "An in-depth expert curation guiding your next big decision, backed by extensive testing and research."}
-            </p>
-          </div>
-
-          <DetailHeroSummaryBar
-            actionsPlacement="bottom-center"
-            items={[
-              {
-                id: 'published',
-                icon: CalendarDays,
-                label: `Published ${guide.date || 'May 12, 2026'}`,
-              },
-              {
-                id: 'read-time',
-                icon: Clock,
-                label: guideReadTime,
-              },
-              {
-                id: 'products-reviewed',
-                icon: Package,
-                label: `${allGuideProducts.length || 8} Products Reviewed`,
-              },
-              {
-                id: 'winner',
-                icon: Award,
-                wide: true,
-                label: `Winner: ${formatProductLabel(overallWinnerProduct)}`,
-              },
-              {
-                id: 'best-budget',
-                icon: Gift,
-                wide: true,
-                label: `Best Budget: ${formatProductLabel(bestBudgetProduct)}`,
-              },
-              {
-                id: 'updated',
-                icon: RefreshCw,
-                label: `Updated ${guideLastUpdated}`,
-              },
-            ]}
-            actions={
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    toast.success('Guide saved to your dashboard!');
-                  }}
-                  className={detailHeroSummaryActionSecondaryClass}
-                >
-                  <Bookmark size={13} className="text-[#E8500A]" />
-                  Save
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                    toast.success('Share link copied to clipboard!');
-                  }}
-                  className={detailHeroSummaryActionPrimaryClass}
-                >
-                  <Share2 size={13} />
-                  Share
-                </button>
-              </>
-            }
-          />
         </div>
-      </section>
+      </div>
 
-      <StickySectionNav
-        sections={guideSectionNavItems}
-        activeId={activeSectionId}
-        onNavigate={scrollToSection}
-        allLabel="Guide"
-        profileLabel="Guide sections"
-      />
+      {/* Theater Mode Media Area - Centered 1080px with deep black side letterboxing */}
+      <div className="w-full bg-[#000000] relative">
+        <RecommendationMediaGallery guide={guide} />
+      </div>
+
+      {/* Guide Information Panel - Placed completely below the theater media area */}
+      <div className="w-full choosify-dark-gradient py-14 px-6 border-b border-white/15 relative overflow-hidden">
+        {/* Layer 1 Base & Multi-layered Ambient Light Glows */}
+        {/* Top-Right Ambient Orange Glow */}
+        <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-br from-[#F97316]/20 to-transparent rounded-full blur-[140px] -translate-y-1/3 translate-x-1/4 pointer-events-none mix-blend-plus-lighter opacity-90" />
+        
+        {/* Mid-Center Warm Atmospheric Lighting Orb */}
+        <div className="absolute top-1/2 left-2/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.15),transparent_70%)] pointer-events-none mix-blend-color-dodge" />
+        
+        {/* Bottom-Left Soft Glow */}
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#F97316]/12 to-transparent rounded-full blur-[120px] translate-y-1/4 -translate-x-1/4 pointer-events-none mix-blend-screen opacity-80" />
+
+        <div className="max-w-[1080px] mx-auto text-left relative z-10">
+          {/* Guide Title */}
+          <h1 className="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-tight mb-4 font-sans drop-shadow-xl">
+            {guide.title}
+          </h1>
+
+          {/* Guide Description */}
+          <p className="text-white/85 text-sm md:text-base font-medium italic uppercase tracking-wider leading-relaxed mb-8 max-w-4xl font-sans text-shadow">
+            {guide.excerpt ||
+              "An in-depth expert curation guiding your next big decision, backed by extensive testing and research."}
+          </p>
+
+          {/* Guide Statistics — Premium solid design matching Product Details Page Hero */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 bg-white/[0.04] rounded-[5px] p-6 border border-white/10 shadow-lg mb-8">
+            <div className="flex flex-col text-left">
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
+                Published Date
+              </span>
+              <span className="text-sm font-black text-white uppercase italic tracking-tighter">
+                {guide.date}
+              </span>
+            </div>
+            <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
+                Read Time
+              </span>
+              <span className="text-sm font-black text-white uppercase italic tracking-tighter">
+                12 Minutes
+              </span>
+            </div>
+            <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
+                Audience
+              </span>
+              <span className="text-sm font-black text-[#F97316] uppercase italic tracking-tighter">
+                ENTHUSIASTS
+              </span>
+            </div>
+            <div className="flex flex-col text-left border-l border-white/10 pl-4 md:pl-6">
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic mb-1">
+                Last Updated
+              </span>
+              <span className="text-sm font-black text-white uppercase italic tracking-tighter">
+                June 2026
+              </span>
+            </div>
+          </div>
+
+          {/* Guide Actions */}
+          <div className="flex flex-wrap items-center gap-4 mb-8">
+            <button
+              onClick={() => {
+                toast.success("Guide saved to your dashboard!");
+              }}
+              className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/15 border border-white/15 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic cursor-pointer shadow-lg"
+            >
+              <Bookmark size={14} className="text-[#F97316]" />
+              Save Guide
+            </button>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast.success("Share link copied to clipboard!");
+              }}
+              className="flex items-center gap-2 px-6 py-3 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all italic border-none cursor-pointer shadow-lg hover:scale-102 active:scale-98"
+            >
+              <Share2 size={14} />
+              Share Guide
+            </button>
+          </div>
+
+          {/* Reviewer Information — Premium solid design matching Product Details Page Hero */}
+          <div className="flex items-center gap-5 bg-white/[0.03] rounded-[5px] p-6 border border-white/10 max-w-2xl shadow-lg">
+            <div className="w-14 h-14 rounded-full border-2 border-[#F97316] p-0.5 shadow-[0_0_20px_rgba(249,115,22,0.3)] shrink-0">
+              <img
+                src={`https://i.pravatar.cc/150?u=${guide.author}`}
+                className="w-full h-full rounded-full object-cover"
+                alt={guide.author}
+              />
+            </div>
+            <div className="text-left">
+              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic block mb-1">
+                Recommended By
+              </span>
+              <h4 className="text-base font-black text-white uppercase italic leading-none">
+                {guide.author}
+              </h4>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      size={10}
+                      className={
+                        star <= 4
+                          ? "text-[#E8500A] fill-current"
+                          : "text-white/20"
+                      }
+                    />
+                  ))}
+                </div>
+                <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic ml-1 underline underline-offset-2">
+                  Pro Contributor
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* GUIDE SUMMARY BAR */}
+      <div className="w-full bg-[#FAF9F5] border-b border-gray-100 py-4 shadow-xs text-left">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1 font-mono">
+              PRODUCTS REVIEWED
+            </span>
+            <span className="text-sm font-black text-navy uppercase italic">
+              {allGuideProducts.length || 8} ITEMS
+            </span>
+          </div>
+          <div className="flex flex-col text-left border-l border-gray-100 pl-4 md:pl-6">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1 font-mono">
+              OVERALL WINNER
+            </span>
+            <span className="text-sm font-black text-[#E8500A] uppercase italic truncate">
+              {displayProducts[0]
+                ? `${displayProducts[0].brand} ${displayProducts[0].title}`
+                : "Samsung Galaxy S26 Ultra"}
+            </span>
+          </div>
+          <div className="flex flex-col text-left border-l border-gray-100 pl-4 md:pl-6">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1 font-mono">
+              BEST BUDGET
+            </span>
+            <span className="text-sm font-black text-blue-500 uppercase italic truncate">
+              {(() => {
+                const cheapest = [...allGuideProducts].sort((a, b) => {
+                  const priceA = parseFloat(
+                    String(a.price || 0).replace(/,/g, ""),
+                  );
+                  const priceB = parseFloat(
+                    String(b.price || 0).replace(/,/g, ""),
+                  );
+                  return priceA - priceB;
+                })[0];
+                return cheapest
+                  ? `${cheapest.brand} ${cheapest.title}`
+                  : "Samsung Galaxy A56";
+              })()}
+            </span>
+          </div>
+          <div className="flex flex-col text-left border-l border-gray-100 pl-4 md:pl-6">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1 font-mono">
+              LAST UPDATED
+            </span>
+            <span className="text-sm font-black text-navy uppercase italic">
+              June 2026
+            </span>
+          </div>
+        </div>
+      </div>
 
       <div id="all-section" className="scroll-mt-36">
-        <div className="max-w-[1440px] mx-auto px-4 py-5 w-full">
-          <div className={`${DETAIL_SINGLE_FEED}`}>
-            <main className="flex flex-col gap-12 w-full">
+        <div className="max-w-[1680px] mx-auto px-4 py-5 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-[190px_minmax(0,1fr)_200px] xl:grid-cols-[210px_minmax(0,1fr)_220px] 2xl:grid-cols-[230px_minmax(0,1fr)_240px] gap-4 items-start w-full relative">
+            {/* LEFT SIDEBAR */}
+            <aside className="hidden lg:flex flex-col gap-6 lg:sticky lg:top-[160px] pb-10 flex-shrink-0">
+              {/* SECTION 1: WHAT IS DISCUSSED */}
+              <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
+                  <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
+                    <span className="w-1.5 h-3 bg-[#E8500A] rounded-full inline-block" />
+                    What is discussed?
+                  </h3>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {displayProducts.map((p, idx) => {
+                    const isActive = activeProductIdx === idx;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          const el = document.getElementById(`prod-sec-${idx}`);
+                          if (el) {
+                            const offset = 180;
+                            const elementPosition =
+                              el.getBoundingClientRect().top;
+                            const offsetPosition =
+                              elementPosition + window.pageYOffset - offset;
+                            window.scrollTo({
+                              top: offsetPosition,
+                              behavior: "smooth",
+                            });
+                            setActiveProductIdx(idx);
+                          }
+                        }}
+                        className={cn(
+                          "w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left cursor-pointer",
+                          isActive
+                            ? "bg-[#E8500A]/5 border-[#E8500A]/30 text-[#E8500A] shadow-sm animate-pulse-slow"
+                            : "bg-white border-gray-100 text-navy hover:border-gray-200",
+                        )}
+                      >
+                        <span className="text-xs font-semibold tracking-tight shrink-0">
+                          {idx + 1}.
+                        </span>
+                        <div className="w-8 h-8 rounded bg-gray-50 border border-[#e8edf2] p-0.5 shrink-0 overflow-hidden flex items-center justify-center">
+                          <img
+                            src={p.image}
+                            className="w-full h-full object-contain"
+                            alt=""
+                          />
+                        </div>
+                        <span className="text-[11px] font-semibold uppercase truncate tracking-tight">
+                          {p.brand} {p.title}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* SECTION 2: HOW THIS REVIEW WAS MADE */}
+              <div className="bg-white rounded-[5px] p-4 border border-gray-100 shadow-sm text-left">
+                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">
+                  HOW THIS REVIEW WAS MADE
+                </h4>
+                <div className="space-y-2 text-left">
+                  {[
+                    {
+                      label: "Tested For 30 Days",
+                      icon: (
+                        <CalendarDays size={13} className="text-[#E8500A]" />
+                      ),
+                    },
+                    {
+                      label: "Compared With 8 Competitors",
+                      icon: <Layers size={13} className="text-[#1B5CFF]" />,
+                    },
+                    {
+                      label: "Real World Usage",
+                      icon: <Globe size={13} className="text-emerald-500" />,
+                    },
+                    {
+                      label: "No Sponsored Placement",
+                      icon: (
+                        <ShieldCheck size={13} className="text-purple-500" />
+                      ),
+                    },
+                  ].map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg text-[10px] font-semibold text-navy uppercase tracking-wider"
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* SECTION 3: WAS THIS HELPFUL? */}
+              <div className="bg-white rounded-[5px] border border-gray-100 p-4 shadow-sm text-center">
+                <h4 className="text-[10px] font-black text-navy uppercase tracking-widest mb-3 italic">
+                  WAS THIS HELPFUL?
+                </h4>
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-3 leading-relaxed">
+                  YOUR FEEDBACK HELPS TO MAINTAIN OUR 100% UNBIASED STATUS.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      toggleInteraction("isHelpful");
+                      toast.success("Thank you for your feedback!");
+                    }}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-[10px] font-black uppercase tracking-wider italic transition-all active:scale-95 border cursor-pointer",
+                      interactions.isHelpful
+                        ? "bg-[#1B5CFF] text-white border-[#1B5CFF]"
+                        : "bg-gray-50 text-gray-400 hover:text-[#1B5CFF] border-gray-100 hover:bg-[#1B5CFF]/10",
+                    )}
+                  >
+                    <CheckCircle2 size={11} /> YES
+                  </button>
+                  <button
+                    onClick={() => {
+                      toast.success("We'll work to improve our guides!");
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-[10px] font-semibold text-gray-500 hover:text-red-500 hover:bg-red-50 hover:border-red-100 uppercase tracking-wider bg-gray-50 border border-[#e8edf2] transition-colors cursor-pointer"
+                  >
+                    <X size={11} /> NO
+                  </button>
+                </div>
+              </div>
+            </aside>
+
+            {/* CENTER COLUMN (PRIMARY CONTENT AREA) */}
+            <main className="flex-1 min-w-0 flex flex-col gap-12">
               {/* SECTION 1: #1 OVERALL WINNER PRODUCT */}
               <div id="winner" className="scroll-mt-36">
                 <div className="mb-4 text-left">
@@ -1041,7 +1182,7 @@ export function GuideDetailPage({
                     High-tier alternative models evaluated
                   </p>
                 </div>
-                <div className={PRODUCT_CARD_GRID}>
+                <div className="grid gap-4 justify-items-center justify-center" style={{ gridTemplateColumns: 'repeat(auto-fill, 229.328px)' }}>
                   {displayProducts.slice(1, 4).map((product, idx) => (
                     <div
                       key={product.id}
@@ -1069,7 +1210,7 @@ export function GuideDetailPage({
                   </p>
                 </div>
 
-                <div className={PRODUCT_CARD_GRID}>
+                <div className="grid gap-4 md:gap-5 justify-items-center justify-center" style={{ gridTemplateColumns: 'repeat(auto-fill, 229.328px)' }}>
                   {displayProducts.map((product) => (
                     <ProductCard
                       key={product.id}
@@ -1091,107 +1232,10 @@ export function GuideDetailPage({
                   </div>
                 )}
 
-                {/* What was reviewed + how this review was made — above reviewer profile */}
-                <div
-                  id="review-context"
-                  className="grid grid-cols-1 lg:grid-cols-2 gap-5 scroll-mt-36 mt-12"
-                >
-                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
-                    <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
-                      <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
-                        <span className="w-1.5 h-3 bg-[#E8500A] rounded-full inline-block" />
-                        What Was Reviewed
-                      </h3>
-                      <span className="text-[9px] font-black text-[#E8500A] uppercase tracking-widest">
-                        {displayProducts.length} items
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-2 max-h-[320px] overflow-y-auto no-scrollbar">
-                      {displayProducts.map((p, idx) => {
-                        const isActive = activeProductIdx === idx;
-                        return (
-                          <button
-                            key={p.id}
-                            type="button"
-                            onClick={() => {
-                              const el = document.getElementById(`prod-sec-${idx}`);
-                              if (el) {
-                                const top =
-                                  el.getBoundingClientRect().top + window.pageYOffset - 200;
-                                window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-                                setActiveProductIdx(idx);
-                              }
-                            }}
-                            className={cn(
-                              "w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left cursor-pointer",
-                              isActive
-                                ? "bg-[#E8500A]/5 border-[#E8500A]/30 text-[#E8500A] shadow-sm"
-                                : "bg-white border-gray-100 text-navy hover:border-gray-200",
-                            )}
-                          >
-                            <span className="text-xs font-black tracking-tight shrink-0 w-5">
-                              {idx + 1}.
-                            </span>
-                            <div className="w-8 h-8 rounded bg-gray-50 border border-[#e8edf2] p-0.5 shrink-0 overflow-hidden flex items-center justify-center">
-                              <img
-                                src={p.image}
-                                className="w-full h-full object-contain"
-                                alt=""
-                              />
-                            </div>
-                            <span className="text-[11px] font-semibold uppercase truncate tracking-tight">
-                              {p.brand} {p.title}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
-                    <h4 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none pb-3 mb-3 border-b border-[#e8edf2]">
-                      <span className="w-1.5 h-3 bg-[#1B5CFF] rounded-full inline-block" />
-                      How This Review Was Made
-                    </h4>
-                    <div className="space-y-2">
-                      {[
-                        {
-                          label: "Tested For 30 Days",
-                          icon: <CalendarDays size={13} className="text-[#E8500A]" />,
-                        },
-                        {
-                          label: `Compared With ${Math.max(displayProducts.length, 3)} Competitors`,
-                          icon: <Layers size={13} className="text-[#1B5CFF]" />,
-                        },
-                        {
-                          label: "Real World Usage",
-                          icon: <Globe size={13} className="text-emerald-500" />,
-                        },
-                        {
-                          label: "No Sponsored Placement",
-                          icon: <ShieldCheck size={13} className="text-purple-500" />,
-                        },
-                      ].map((item, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-2 p-2.5 bg-gray-50 rounded-lg text-[10px] font-semibold text-navy uppercase tracking-wider border border-gray-100"
-                        >
-                          {item.icon}
-                          <span>{item.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="mt-4 text-[11px] text-gray-500 leading-relaxed font-semibold">
-                      Choosify editorial reviews combine hands-on testing, verified retail pricing,
-                      and creator field notes before any product earns a ranking.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Reviewer profile */}
+                {/* SECTION: REVIEWER PROFILE (Mobile/Tablet Viewports) */}
                 <div
                   id="reviewer-profile"
-                  className="bg-white border border-[#e8edf2] rounded-[5px] p-6 shadow-sm flex flex-col items-center text-center scroll-mt-36 mt-8 animate-in fade-in duration-300"
+                  className="lg:hidden bg-white border border-[#e8edf2] rounded-[5px] p-6 shadow-sm flex flex-col items-center text-center scroll-mt-36 mt-12 animate-in fade-in duration-300"
                 >
                   <div className="w-20 h-20 rounded-full border-2 border-orange-primary/20 p-0.5 mb-4 shrink-0">
                     <img
@@ -1265,6 +1309,223 @@ export function GuideDetailPage({
                 </div>
               </div>
             </main>
+
+            {/* RIGHT SIDEBAR */}
+            <aside className="hidden lg:flex flex-col gap-6 lg:sticky lg:top-[160px] pb-10 flex-shrink-0">
+              {/* SECTION 1: REVIEWER PROFILE */}
+              <div
+                id="reviewer-profile-desktop"
+                className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm flex flex-col items-center text-center scroll-mt-36"
+              >
+                <div className="w-20 h-20 rounded-full border-2 border-orange-primary/20 p-0.5 mb-4 shrink-0">
+                  <img
+                    src={creator.avatar}
+                    className="w-full h-full object-cover rounded-full"
+                    alt={creator.name}
+                  />
+                </div>
+
+                <h4 className="text-base font-black text-navy italic tracking-tighter uppercase mb-1 leading-none">
+                  {creator.name}
+                </h4>
+                <span className="text-[8px] font-black text-orange-primary uppercase tracking-widest italic bg-orange-primary/5 px-2.5 py-1 rounded border border-orange-primary/10 mb-4">
+                  {creator.verifiedStatus}
+                </span>
+
+                <p className="text-[11px] font-bold text-gray-500 italic mb-4 leading-relaxed line-clamp-4 text-left">
+                  {creator.bio}
+                </p>
+
+                <div className="flex gap-4 justify-center mb-5 shrink-0">
+                  {creator.socials.facebook && (
+                    <a
+                      href={creator.socials.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
+                      aria-label="Facebook"
+                    >
+                      <Facebook size={20} />
+                    </a>
+                  )}
+                  {creator.socials.twitter && (
+                    <a
+                      href={creator.socials.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
+                      aria-label="Twitter"
+                    >
+                      <Twitter size={20} />
+                    </a>
+                  )}
+                  {creator.socials.youtube && (
+                    <a
+                      href={creator.socials.youtube}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
+                      aria-label="YouTube"
+                    >
+                      <Youtube size={20} />
+                    </a>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-2.5 w-full mt-2">
+                  <FollowButton
+                    id={`creator-${creator.name}`}
+                    name={creator.name}
+                    type="creator"
+                    className="flex-1 py-3 rounded-xl border border-[#e8edf2] text-[10px]"
+                  />
+                  <Link
+                    to={`/creators/${creator.id || 'creator-farhan'}`}
+                    className="flex-1 py-3 rounded-xl bg-[#E8500A] hover:bg-[#CF4400] text-center text-white text-[10px] font-black uppercase tracking-wider transition-all duration-300 transform hover:scale-[1.03] active:scale-95 border border-transparent cursor-pointer inline-flex items-center justify-center select-none shadow-md italic shadow-orange-primary/10"
+                  >
+                    Visit Profile
+                  </Link>
+                </div>
+              </div>
+
+              {/* SECTION 2: REVIEW CREDIBILITY */}
+              <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+                <h5 className="text-[10px] font-black text-navy uppercase tracking-widest mb-3 italic font-space">
+                  REVIEW CREDIBILITY
+                </h5>
+                <div className="space-y-2 border-l border-orange-primary/15 pl-3">
+                  <div className="flex flex-col text-[10px] text-left">
+                    <span className="text-gray-400 uppercase font-semibold">
+                      Last Updated
+                    </span>
+                    <span className="text-navy font-semibold">June 2026</span>
+                  </div>
+                  <div className="flex flex-col text-[10px] text-left">
+                    <span className="text-gray-400 uppercase font-semibold">
+                      Last Verified
+                    </span>
+                    <span className="text-navy font-semibold">2 Hours Ago</span>
+                  </div>
+                  <div className="flex flex-col text-[10px] text-left">
+                    <span className="text-gray-400 uppercase font-semibold">
+                      Review Date
+                    </span>
+                    <span className="text-navy font-semibold">
+                      {guide.date || "May 2026"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col text-[10px] text-left">
+                    <span className="text-gray-400 uppercase font-semibold">
+                      Research Window
+                    </span>
+                    <span className="text-navy font-semibold">
+                      30 Continuous Days
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3: QUICK TIP */}
+              <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2 font-space">
+                  QUICK TIP
+                </span>
+                <p className="text-[11px] font-medium text-navy leading-relaxed opacity-80 pl-1">
+                  {creator.quickTip ||
+                    "Always prioritize verified supplier badges when exploring premium electronics to guarantee genuine warranty and support."}
+                </p>
+              </div>
+
+              {/* SECTION 4: RELATED GUIDES */}
+              <div className="bg-white border border-gray-100 rounded-[5px] p-4 shadow-sm text-left">
+                <h5 className="text-[10px] font-black text-navy uppercase tracking-widest mb-3 italic font-space">
+                  RELATED GUIDES
+                </h5>
+                <div className="space-y-3">
+                  {BLOGS.filter((b) => b.id !== guide.id)
+                    .slice(0, 3)
+                    .map((g) => (
+                      <Link
+                        key={g.id}
+                        to={`/guides/${g.id}`}
+                        className="flex gap-2 items-center group"
+                      >
+                        <div className="w-9 h-9 rounded bg-gray-50 border border-[#e8edf2] p-0.5 overflow-hidden shrink-0 flex items-center justify-center">
+                          <img
+                            src={g.image}
+                            className="w-full h-full object-cover rounded"
+                            alt=""
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0 flex flex-col items-start gap-0.5">
+                          <span className="text-xs font-semibold uppercase tracking-tight text-navy group-hover:text-orange-primary text-left transition-colors line-clamp-2 leading-tight">
+                            {g.title}
+                          </span>
+                          <span className="text-[8px] text-gray-400 font-medium block">
+                            May 2026
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                </div>
+              </div>
+
+              {/* SECTION 5: SPONSORED BLOCK */}
+              {(guide.id === 1 ||
+                (guide as any).isSponsored ||
+                (dynamicData as any).isSponsoredContent) && (
+                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden">
+                  <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[8px] font-black uppercase tracking-widest block w-fit mx-auto mb-4 font-mono">
+                    SPONSORED
+                  </span>
+                  <p className="text-xs font-black uppercase italic tracking-tighter mb-2">
+                    AARONG HERITAGE SHOPPING BRAND
+                  </p>
+                  <p className="text-[10px] text-gray-300 font-medium uppercase mb-4 leading-normal">
+                    New Collection Available. Free Delivery on all Purchases.
+                  </p>
+                  <div className="w-full aspect-square rounded-xl overflow-hidden mb-5 border border-white/10 shadow-lg">
+                    <img
+                      src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400"
+                      className="w-full h-full object-cover"
+                      alt="Sponsored"
+                    />
+                  </div>
+                  <button className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-full transition-all cursor-pointer border-0 font-bold">
+                    Shop Now
+                  </button>
+                </div>
+              )}
+            </aside>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Call for help */}
+      <div className="max-w-[1440px] mx-auto px-6 w-full mb-12">
+        <div className="bg-[#1A1A2E] rounded-[10px] p-20 text-center relative overflow-hidden group shadow-3xl">
+          <div className="absolute top-0 right-0 w-[400px] h-full bg-blue-600/10 blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-full bg-orange-primary/10 blur-[100px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+          <div className="relative z-10 max-w-2xl mx-auto">
+            <span className="text-[10px] font-black text-orange-primary italic tracking-[0.5em] mb-8 block uppercase">
+              NEED PERSONAL HELP?
+            </span>
+            <h2 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter leading-none mb-8 uppercase">
+              Let our experts find the perfect match for you.
+            </h2>
+            <p className="text-white/40 text-sm font-bold uppercase tracking-widest italic mb-12">
+              Message us directly on Facebook or WhatsApp for free consultation.
+            </p>
+
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+              <button className="px-12 py-5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-[0.2em] italic rounded-[10px] shadow-2xl shadow-orange-primary/20 hover:scale-105 transition-all flex items-center gap-3 cursor-pointer border-0 font-bold">
+                Contact On WhatsApp <ArrowRight size={16} />
+              </button>
+              <button className="px-12 py-5 bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-[0.2em] italic rounded-[10px] hover:bg-white/10 transition-all cursor-pointer">
+                Community Forum
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1272,34 +1533,73 @@ export function GuideDetailPage({
       {/* Related Recommendations (End of Page) */}
       <div className="max-w-[1440px] mx-auto px-6 w-full mb-32">
         <section className="pt-20 border-t border-gray-100">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10 text-left">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 text-left">
             <div>
-              <h3 className="text-3xl md:text-4xl font-black text-navy italic tracking-tighter uppercase mb-3">
+              <h3 className="text-5xl font-black text-navy italic tracking-tighter uppercase mb-4">
                 You May Also Like
               </h3>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic leading-relaxed">
-                More expert recommendations — YouTube, Reels, and blog guides.
+                More expert recommendations to help you decide wisely.
               </p>
             </div>
             <Link
               to="/guides"
-              className="px-8 py-3.5 bg-navy text-white rounded-full text-[10px] font-black uppercase tracking-widest italic hover:bg-[#E8500A] transition-all shadow-lg shrink-0"
+              className="px-10 py-5 bg-navy text-white rounded-full text-[11px] font-black uppercase tracking-widest italic hover:bg-[#E8500A] transition-all shadow-xl font-bold"
             >
               View All Recommendations
             </Link>
           </div>
 
-          <div className={GUIDE_MEDIA_GRID}>
-            {relatedGuides.map((g) => (
-              <div key={g.id}>{renderGuideMediaCard(g)}</div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {BLOGS.filter((b) => b.id !== guide.id)
+              .slice(0, 3)
+              .map((g, i) => (
+                <Link
+                  key={i}
+                  to={`/guides/${g.id}`}
+                  className="group cursor-pointer block bg-[#FDFDFD] rounded-[5px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-500 shadow-xl shadow-gray-100/50"
+                >
+                  <div className="aspect-[16/10] overflow-hidden relative font-bold">
+                    <img
+                      src={g.image}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      alt="Guide"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+                        <BookOpen size={12} className="text-[#E8500A]" />
+                        <span className="text-[10px] font-black text-navy uppercase tracking-widest italic">
+                          {g.readTime || "5 min read"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-8 text-left">
+                    <h3 className="text-lg font-black text-navy uppercase tracking-tighter mb-4 group-hover:text-orange-primary transition-colors leading-tight italic line-clamp-2">
+                      {g.title}
+                    </h3>
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest italic line-clamp-2 mb-8">
+                      {g.excerpt}
+                    </p>
+                    <div className="flex items-center justify-between pt-6 border-t border-gray-50">
+                      <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
+                        <span className="flex items-center gap-1.5">
+                          <Heart size={12} className="text-pink-500" />{" "}
+                          {g.views || "12k"}
+                        </span>
+                        <span className="flex items-center gap-1.5 opacity-50 font-bold">
+                          • {g.shares || "450"} Shared
+                        </span>
+                      </div>
+                      <ArrowRight
+                        size={16}
+                        className="text-[#E8500A] group-hover:translate-x-2 transition-transform"
+                      />
+                    </div>
+                  </div>
+                </Link>
+              ))}
           </div>
-
-          <PopularSearchKeywords
-            title="Popular searches for this guide"
-            terms={guidePopularSearchTerms}
-            className="mt-10 pt-10 border-t border-gray-100"
-          />
         </section>
       </div>
     </div>

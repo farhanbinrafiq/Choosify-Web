@@ -1,19 +1,16 @@
-import React, { lazy, Suspense } from 'react';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { LoadingFallback } from '../components/LoadingFallback';
-
-const CompareEngine = lazy(() =>
-  import('../components/CompareEngine').then((module) => ({ default: module.CompareEngine })),
-);
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ProductCard } from '../components/ProductCard';
+import { PRODUCTS } from '../constants';
+import { CompareEngine } from '../components/CompareEngine';
 
 export function ComparePage() {
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <PageHeroBanner pageKey="compare" />
       <main className="w-full">
-        <Suspense fallback={<LoadingFallback />}>
-          <CompareEngine />
-        </Suspense>
+        <CompareEngine />
       </main>
     </div>
   );

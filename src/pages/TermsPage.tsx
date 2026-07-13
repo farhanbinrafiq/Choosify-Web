@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Shield, Scale, FileText, ArrowRight } from 'lucide-react';
-import { StaticPageHero } from '../components/StaticPageHero';
 
 export function TermsPage() {
   const [activeSection, setActiveSection] = useState('intro');
@@ -59,9 +58,16 @@ export function TermsPage() {
       />
 
       {/* 1. HERO SECTION */}
-      <StaticPageHero>
+      <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
         <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-black uppercase tracking-widest mb-6">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight size={10} className="text-white/20" />
+            <span className="text-white">Terms of Service</span>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column */}
             <div className="lg:col-span-8 space-y-4 text-left">
@@ -90,7 +96,7 @@ export function TermsPage() {
             </div>
           </div>
         </div>
-      </StaticPageHero>
+      </section>
 
       {/* 2. BODY CONTENT SECTION */}
       <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] py-16">
@@ -161,7 +167,7 @@ export function TermsPage() {
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-4" />
               <p className="text-gray-600 text-xs md:text-sm font-semibold">
-                Sellers who claim brand profiles or post coupon offers on Choosify must adhere to high standards of commercial honesty:
+                Sellers who claim brand profiles, submit wholesale products, or post coupon offers on Choosify must adhere to high standards of commercial honesty:
               </p>
               <ul className="pl-5 list-disc text-xs md:text-sm text-gray-500 font-semibold space-y-2">
                 <li>Sellers must guarantee the authenticity of listed items. Listing replica, counterfeit, or misleadingly branded goods is strictly prohibited and subject to immediate ban.</li>

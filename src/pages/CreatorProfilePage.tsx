@@ -1,7 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
-import { StickySectionNav } from '../components/StickySectionNav';
-import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'motion/react';
@@ -18,15 +15,13 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { ClaimProfileModal } from '../components/ClaimProfileModal';
 import { FollowButton } from '../components/FollowButton';
 import { useRegisterPageFilters } from '../components/FilterEngine';
-import { StudioWrap } from '../components/studio/StudioWrap';
-import { SpotlightIntegrationRail } from '../components/spotlight/SpotlightIntegrationRail';
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
       fill="currentColor"
     >
       <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
@@ -34,39 +29,17 @@ function TikTokIcon({ size = 20 }: { size?: number }) {
   );
 }
 
-/** Up to 4 cards per row on xl; scales down on smaller viewports */
-const CREATOR_CONTENT_GRID =
-  'grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5';
-
 export function CreatorProfilePage() {
-  const creatorHeroRef = useRef<HTMLElement>(null);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses } = useGlobalState();
 
   // Find creator or fallback safely to first creator
   const creator = CREATORS.find(c => c.id === id) || CREATORS[0];
-  const creatorSectionNavItems = [
-    { id: 'videos-section', label: 'Videos', icon: <Youtube size={13} /> },
-    { id: 'reels-section', label: 'Reels', icon: <Instagram size={13} /> },
-    { id: 'blogs-section', label: 'Blogs', icon: <BookOpen size={13} /> },
-    { id: 'brand-reviews-section', label: 'Reviews', icon: <ShieldCheck size={13} /> },
-    { id: 'creator-overview-section', label: 'Overview', icon: <Award size={13} /> },
-  ];
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(
-    creatorSectionNavItems,
-  );
 
   useRegisterPageFilters({
     pageName: creator ? creator.name : 'Creator Profile',
     renderSearch: null,
-    sectionNav: {
-      items: creatorSectionNavItems,
-      activeId: activeSectionId,
-      onNavigate: scrollToSection,
-      allLabel: 'Creator',
-      profileLabel: 'Creator profile',
-    },
     quickFilters: [
       { id: 'about', label: 'ℹ️ About', active: true, onClick: () => {} },
       { id: 'collabs', label: '🤝 Collaborations', active: false, onClick: () => {} },
@@ -116,8 +89,73 @@ export function CreatorProfilePage() {
   // Submit Outcome Status
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  // Active section for sticky navigation scrollspy
+  const [activeSection, setActiveSection] = useState('all');
   const [searchFilter, setSearchFilter] = useState('');
   const [currentSearchInput, setCurrentSearchInput] = useState('');
+
+  // Auto-scrollspy effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 220;
+
+      const sections = [
+        { id: 'videos-section', name: 'videos' },
+        { id: 'reels-section', name: 'reels' },
+        { id: 'blogs-section', name: 'blogs' },
+        { id: 'brand-reviews-section', name: 'reviews' },
+        { id: 'creator-overview-section', name: 'overview' }
+      ];
+
+      if (window.scrollY < 200) {
+        setActiveSection('all');
+        return;
+      }
+
+      let currentSection = 'all';
+      for (const section of sections) {
+        const el = document.getElementById(section.id);
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.pageYOffset;
+          const height = el.offsetHeight;
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            currentSection = section.name;
+          }
+        }
+      }
+      setActiveSection(currentSection);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToSection = (idStr: string) => {
+    if (idStr === 'all') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setActiveSection('all');
+    } else {
+      const el = document.getElementById(idStr);
+      if (el) {
+        const offset = 180;
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+        
+        const nameMap: { [key: string]: string } = {
+          'videos-section': 'videos',
+          'reels-section': 'reels',
+          'blogs-section': 'blogs',
+          'brand-reviews-section': 'reviews',
+          'creator-overview-section': 'overview'
+        };
+        setActiveSection(nameMap[idStr] || 'all');
+      }
+    }
+  };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -303,16 +341,25 @@ export function CreatorProfilePage() {
       
       {/* 1. CREATOR HERO SECTION */}
       <motion.section 
-        ref={creatorHeroRef}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="hero-gradient relative pt-10 pb-12 border-b border-white/5"
+        className="hero-gradient relative pt-10 pb-12 overflow-hidden border-b border-white/5"
       >
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
         </div>
 
+        {/* Global Breadcrumbs in Hero Area */}
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full mb-6 text-left">
+          <div className="flex items-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight size={10} className="text-white/20" />
+            <Link to="/creators" className="hover:text-white transition-colors">Creators</Link>
+            <ChevronRight size={10} className="text-white/20" />
+            <span className="text-white">{creator.name}</span>
+          </div>
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
             <div className="flex flex-col lg:grid lg:grid-cols-[1.5fr_1fr] xl:grid-cols-[1.6fr_1fr] gap-8 xl:gap-12 lg:items-stretch w-full">
@@ -593,18 +640,77 @@ export function CreatorProfilePage() {
          </div>
       </div>
 
-      <StickySectionNav
-        sections={creatorSectionNavItems}
-        activeId={activeSectionId}
-        onNavigate={scrollToSection}
-        allLabel="Creator"
-        profileLabel="Creator profile"
-      />
-
       {/* 4. UNIFIED SCROLLABLE BODY WRAPPER */}
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full">
-         <div className={`${DETAIL_SINGLE_FEED}`}>
-            <main className="w-full pb-10 space-y-16">
+      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-16">
+         
+         <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
+            
+            {/* COLUMN 1: SIDEBAR FILTERS (Adaptation Of Brand design filtering columns) */}
+            <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in text-left">
+               <div className="flex flex-col gap-6">
+                  {/* Active selection helper */}
+                  {searchFilter && (
+                     <div className="bg-white rounded-[5px] p-4.5 shadow-sm border border-[#e8edf2]">
+                        <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-4 flex items-center justify-between">
+                           Active Selection
+                           <button onClick={() => {setSearchFilter(''); setCurrentSearchInput('');}} className="text-orange-primary hover:underline text-[9px] font-black uppercase cursor-pointer border-0 bg-transparent">Clear</button>
+                        </h3>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-[#e8edf2] rounded-lg text-[10px] font-semibold text-gray-600 uppercase tracking-wide hover:bg-gray-100 transition-all cursor-pointer">
+                          <span>Search: {searchFilter}</span>
+                          <X size={10} className="text-[#E8500A]" />
+                        </div>
+                     </div>
+                  )}
+
+                  {/* Specialty quick stats filters */}
+                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm font-sans flex flex-col gap-2.5">
+                     <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-1.5">Strategic Focus</h3>
+                     <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between text-xs font-semibold text-navy">
+                           <span>Category:</span>
+                           <span className="text-orange-primary font-bold italic uppercase">{creator.bestFor}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs font-semibold text-navy">
+                           <span>Base Region:</span>
+                           <span className="text-gray-500 font-bold uppercase">Bangladesh</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs font-semibold text-navy">
+                           <span>Hub Channels:</span>
+                           <span className="text-gray-500 font-bold uppercase">{creator.platforms.length} PLATFORMS</span>
+                        </div>
+                     </div>
+                  </div>
+
+                  {/* POST OFFER BRIEFING AD */}
+                  <div className="bg-[#0A0A1F] text-white rounded-[5px] p-5 border border-white/5 relative overflow-hidden flex flex-col justify-between h-96 relative">
+                     <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/10 rounded-full blur-2xl pointer-events-none" />
+                     
+                     <div className="flex flex-col items-start relative z-10">
+                        <div className="w-9 h-9 rounded-full bg-white/15 text-orange-primary flex items-center justify-center mb-4">
+                           <Award className="w-4 h-4" />
+                        </div>
+                        <h4 className="font-sans text-xs font-semibold uppercase tracking-wider mb-1">Direct Brand Outreach</h4>
+                        <p className="text-[10px] text-gray-400 font-semibold leading-relaxed mb-4">
+                           Skip platform fees. Choosify facilitates structured brand discovery with direct email responses.
+                        </p>
+                     </div>
+
+                     <div className="border border-dashed border-white/10 rounded-xl p-3 text-center my-1 relative z-10 bg-white/5">
+                        <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest block mb-2">FINALIZED OUTREACH STATUS</span>
+                        <p className="text-[11px] font-bold text-[#E8500A] uppercase tracking-wide mb-3">Structured collaboration request briefs</p>
+                        <button 
+                          onClick={() => { if (localClaimStatus !== "verified") { toast.error("Collaboration request is locked for unclaimed creator profiles."); return; } setIsModalOpen(true); }}
+                          className="w-full py-2 bg-orange-primary hover:bg-[#CF4400] text-white text-[9px] font-black rounded-lg uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer border-0"
+                        >
+                          PROPOSE BRIEFING <Sparkles size={11} />
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </aside>
+
+            {/* COLUMN 2: MIDDLE FEED (Dedicated content rows) */}
+            <main className="min-w-0 pb-10 space-y-16 lg:col-span-1">
                
                {/* Search Active Notification indicator */}
                {searchFilter && (
@@ -619,25 +725,17 @@ export function CreatorProfilePage() {
                   </div>
                )}
 
-               <SpotlightIntegrationRail
-                 creatorId={creator.id}
-                 title="Creator Spotlight"
-                 subtitle="Campaigns, reviews, live events, and featured picks."
-                 source="creator"
-                 viewAllHref="/spotlight"
-               />
-
                {/* Dedicated Section 1: YouTube Videos */}
-               <StudioWrap sectionId="creator-videos" className="scroll-mt-44 text-left">
+               <section id="videos-section" className="scroll-mt-44 text-left">
                   <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
                      <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
                         <Youtube className="text-red-650 text-[#FF0000]" size={20} /> Featured YouTube Videos
                      </h3>
-                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest hidden sm:inline">Up to 4 per row</span>
+                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest">Landscape Row</span>
                   </div>
 
                   {filteredVideos.length > 0 ? (
-                    <div className={CREATOR_CONTENT_GRID}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {filteredVideos.map(video => {
                         const isGuide = !!video.associatedGuideId;
                         const cardContent = (
@@ -682,7 +780,7 @@ export function CreatorProfilePage() {
 
                         if (isGuide) {
                           return (
-                            <Link key={video.id} to={`/spotlight/content/${video.associatedGuideId}`} className="block h-full cursor-pointer">
+                            <Link key={video.id} to={`/guides/${video.associatedGuideId}`} className="block h-full cursor-pointer">
                               {cardContent}
                             </Link>
                           );
@@ -700,19 +798,19 @@ export function CreatorProfilePage() {
                         No videos matched search phrase.
                      </div>
                   )}
-               </StudioWrap>
+               </section>
 
                {/* Dedicated Section 2: Shorts & Reels */}
-               <StudioWrap sectionId="creator-reels" className="scroll-mt-44 text-left">
+               <section id="reels-section" className="scroll-mt-44 text-left">
                   <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
                      <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
                         <Instagram className="text-pink-650 text-[#C13584]" size={20} /> Influencer Reels & Shorts
                      </h3>
-                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest hidden sm:inline">Up to 4 per row</span>
+                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest">Vertical Grid</span>
                   </div>
 
                   {filteredReels.length > 0 ? (
-                    <div className={CREATOR_CONTENT_GRID}>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {filteredReels.map(reel => {
                         const isGuide = !!reel.associatedGuideId;
                         const cardContent = (
@@ -761,7 +859,7 @@ export function CreatorProfilePage() {
 
                         if (isGuide) {
                           return (
-                            <Link key={reel.id} to={`/spotlight/content/${reel.associatedGuideId}`} className="block h-full cursor-pointer focus:outline-none">
+                            <Link key={reel.id} to={`/guides/${reel.associatedGuideId}`} className="block h-full cursor-pointer focus:outline-none">
                               {cardContent}
                             </Link>
                           );
@@ -779,103 +877,83 @@ export function CreatorProfilePage() {
                        No shorts/reels matched search phrase.
                     </div>
                   )}
-               </StudioWrap>
+               </section>
 
                {/* Dedicated Section 3: Insights & Case Blogs */}
-               <StudioWrap sectionId="creator-blogs" className="scroll-mt-44 text-left">
+               <section id="blogs-section" className="scroll-mt-44 text-left">
                   <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
                      <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
                         <BookOpen className="text-orange-primary" size={20} /> Research Blogs & Case Essays
                      </h3>
-                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest hidden sm:inline">Up to 4 per row</span>
+                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest">Separate Section</span>
                   </div>
 
                   {filteredBlogs.length > 0 ? (
-                    <div className={CREATOR_CONTENT_GRID}>
+                    <div className="space-y-4">
                       {filteredBlogs.map(blog => {
                         const isGuide = !!blog.associatedGuideId;
-                        const cardContent = (
-                          <div className="bg-white border border-[#e8edf2] rounded-[5px] overflow-hidden group hover:border-[#E8500A]/35 transition-all shadow-sm relative h-full flex flex-col">
+                        return (
+                          <div key={blog.id} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 hover:border-orange-primary/10 transition-colors flex flex-col md:flex-row gap-6 shadow-sm relative overflow-hidden">
+                            {/* Visual Indicator Badge */}
+                            <div className="absolute top-4 right-4 z-10">
+                              {isGuide ? (
+                                <span className="bg-[#E8500A] text-white text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-[#E8500A]/10 shadow-xs">
+                                  Full Guide
+                                </span>
+                              ) : (
+                                <span className="bg-gray-50 text-gray-500 text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-gray-200">
+                                  Article
+                                </span>
+                              )}
+                            </div>
+
                             {blog.thumbnail && (
-                              <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden shrink-0">
-                                <img
-                                  src={blog.thumbnail}
-                                  alt={blog.title}
-                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              <div className="w-full md:w-48 h-32 rounded-[5px] overflow-hidden shrink-0 bg-gray-55 relative object-cover">
+                                <img 
+                                  src={blog.thumbnail} 
+                                  alt={blog.title} 
+                                  className="w-full h-full object-cover"
                                   referrerPolicy="no-referrer"
                                 />
-                                <div className="absolute top-3 left-3 z-10">
-                                  {isGuide ? (
-                                    <span className="bg-[#E8500A] text-white text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-white/10 shadow-sm">
-                                      Full Guide
-                                    </span>
-                                  ) : (
-                                    <span className="bg-white/95 text-gray-600 text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-[#e8edf2] shadow-sm">
-                                      Article
-                                    </span>
-                                  )}
-                                </div>
                               </div>
                             )}
 
-                            <div className="p-4 flex-1 flex flex-col">
-                              {!blog.thumbnail && (
-                                <div className="mb-2">
-                                  {isGuide ? (
-                                    <span className="bg-[#E8500A] text-white text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px]">
-                                      Full Guide
-                                    </span>
-                                  ) : (
-                                    <span className="bg-gray-50 text-gray-500 text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-gray-200">
-                                      Article
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-
-                              <div className="flex items-center gap-2 text-[9px] font-mono font-bold text-gray-500 uppercase mb-2">
+                            <div className="flex-1 flex flex-col justify-center">
+                              <div className="flex items-center gap-4 text-[9px] font-mono font-bold text-gray-500 uppercase mb-2">
                                 <span className="flex items-center gap-1"><Clock size={10} /> {blog.readTime}</span>
                                 <span>•</span>
-                                <span className="truncate">{blog.date}</span>
+                                <span>{blog.date}</span>
                               </div>
+                              
+                              {isGuide ? (
+                                <Link to={`/guides/${blog.associatedGuideId}`}>
+                                  <h4 className="text-base md:text-lg font-extrabold text-[#10133A] hover:text-orange-primary transition-colors tracking-tight mb-2 italic">
+                                    {blog.title}
+                                  </h4>
+                                </Link>
+                              ) : (
+                                <a href={blog.url && blog.url !== '#' ? blog.url : "https://medium.com"} target="_blank" rel="noopener noreferrer">
+                                  <h4 className="text-base md:text-lg font-extrabold text-[#10133A] hover:text-orange-primary transition-colors tracking-tight mb-2 italic">
+                                    {blog.title}
+                                  </h4>
+                                </a>
+                              )}
 
-                              <h4 className="text-xs md:text-sm font-extrabold text-navy line-clamp-2 leading-snug group-hover:text-orange-primary transition-colors mb-2 italic">
-                                {blog.title}
-                              </h4>
-
-                              <p className="text-[11px] text-gray-500 leading-relaxed line-clamp-3 mb-3 flex-1">
+                              <p className="text-xs text-gray-400 font-semibold leading-relaxed mb-4">
                                 {blog.excerpt}
                               </p>
 
-                              <span className="text-[10px] font-black uppercase tracking-widest text-[#E8500A] inline-flex items-center gap-1 mt-auto">
-                                {isGuide ? (
-                                  <>Read Guide <ChevronRight size={10} /></>
-                                ) : (
-                                  <>Read Article <ExternalLink size={10} /></>
-                                )}
-                              </span>
+                              {isGuide ? (
+                                <Link to={`/guides/${blog.associatedGuideId}`} className="text-[10px] font-black uppercase tracking-widest text-[#E8500A] hover:underline inline-flex items-center gap-1">
+                                  Read Guide <ChevronRight size={10} />
+                                </Link>
+                              ) : (
+                                <a href={blog.url && blog.url !== '#' ? blog.url : "https://medium.com"} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:underline inline-flex items-center gap-1">
+                                  Read Article <ExternalLink size={10} />
+                                </a>
+                              )}
                             </div>
                           </div>
-                        );
-
-                        if (isGuide) {
-                          return (
-                            <Link key={blog.id} to={`/spotlight/content/${blog.associatedGuideId}`} className="block h-full cursor-pointer focus:outline-none">
-                              {cardContent}
-                            </Link>
-                          );
-                        }
-
-                        return (
-                          <a
-                            key={blog.id}
-                            href={blog.url && blog.url !== '#' ? blog.url : 'https://medium.com'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block h-full cursor-pointer focus:outline-none"
-                          >
-                            {cardContent}
-                          </a>
                         );
                       })}
                     </div>
@@ -884,12 +962,52 @@ export function CreatorProfilePage() {
                        No insights matched search phrase.
                     </div>
                   )}
-               </StudioWrap>
+               </section>
 
             </main>
 
+            {/* COLUMN 3: RIGHT PANEL ACCENTS (Campaign promo widgets) */}
+            <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in text-left">
+               {/* REACH EXCELLENCE HIGHLIGHT */}
+               <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm space-y-4">
+                  <div className="w-10 h-10 rounded-xl bg-orange-primary/10 text-orange-primary flex items-center justify-center p-0 mb-1">
+                     <Award size={20} />
+                  </div>
+                  <h4 className="text-sm font-black text-[#1A1D4E] uppercase tracking-wider italic leading-none">Reach Excellence</h4>
+                  <p className="text-[11px] text-gray-400 font-semibold leading-relaxed">
+                     Verified digital advocate highlighting niche specialties, custom content metrics, and strategic target alignment.
+                  </p>
+                  <div className="p-3 bg-gray-50/50 rounded-[5px] border border-[#e8edf2]/80 flex flex-col gap-1.5 font-mono text-[9.5px]">
+                     <div className="flex items-center justify-between text-[#1A1D4E]">
+                        <span>Campaign Response:</span>
+                        <span className="font-extrabold text-orange-primary">~24 HOURS</span>
+                     </div>
+                     <div className="flex items-center justify-between text-[#1A1D4E]">
+                        <span>Completion Rate:</span>
+                        <span className="font-extrabold text-green-500">98% SUCCESS</span>
+                     </div>
+                  </div>
+               </div>
+
+               {/* CREATOR COLLAB BANNER */}
+               <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-center relative overflow-hidden">
+                  <span className="text-[8px] font-bold text-orange-primary bg-[#FFF0E8] border border-[#FFF0E8] px-3.5 py-1.5 rounded-full uppercase tracking-widest block mx-auto w-fit mb-4">ACTIVE DISCOVERY</span>
+                  <p className="text-gray-400 text-[10px] font-semibold uppercase leading-relaxed mb-4">
+                     Click to submit a structured strategic collaboration request directly to {creator.name}.
+                  </p>
+                  <button 
+                     onClick={() => setIsModalOpen(true)}
+                     className="w-full py-2.5 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-orange-primary transform hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest border-0 cursor-pointer"
+                  >
+                     ASK FOR BRANDING
+                  </button>
+               </div>
+            </aside>
+
+         </div>
+
          {/* SECTION 5 — BRAND REVIEWS */}
-         <StudioWrap sectionId="creator-brand-reviews" className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80 text-left">
+         <div id="brand-reviews-section" className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80 text-left">
             <div className="text-center mb-8 border-b border-gray-100 pb-5">
                <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
                   Brand Reviews
@@ -923,10 +1041,10 @@ export function CreatorProfilePage() {
                   Load More Reviews
                </button>
             </div>
-         </StudioWrap>
+         </div>
 
          {/* SECTION 6 — CREATOR OVERVIEW */}
-         <StudioWrap sectionId="creator-overview" className="bg-white rounded-[5px] p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36 text-left">
+         <div id="creator-overview-section" className="bg-white rounded-[5px] p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36 text-left">
             <div className="text-center mb-8 border-b border-gray-100 pb-5">
                <h3 className="text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-1">
                   Creator Overview
@@ -1118,9 +1236,8 @@ export function CreatorProfilePage() {
                   </div>
                </div>
             )}
-         </StudioWrap>
-
          </div>
+
       </div>
 
       {/* =======================================================

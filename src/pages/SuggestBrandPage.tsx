@@ -5,8 +5,6 @@ import {
   ChevronRight, Plus, CheckCircle, Info, Star, Award, ShieldCheck, 
   Globe, Send, HelpCircle, ArrowRight
 } from 'lucide-react';
-import { StaticPageHero } from '../components/StaticPageHero';
-import { operationsApi } from '../services/operationsApi';
 
 export function SuggestBrandPage() {
   useEffect(() => {
@@ -23,21 +21,11 @@ export function SuggestBrandPage() {
 
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.brandName || !formData.website) {
       alert('Please fill in the Brand Name and Website fields.');
       return;
-    }
-    try {
-      await operationsApi.submitLead({
-        brandName: formData.brandName,
-        email: formData.website,
-        message: `Category: ${formData.category}\nCountry: ${formData.country}\nReason: ${formData.reason}`,
-        source: 'suggest-brand',
-      });
-    } catch {
-      // still show success UX
     }
     setSubmitted(true);
   };
@@ -45,9 +33,16 @@ export function SuggestBrandPage() {
   return (
     <div className="min-h-screen bg-[#F0F8FF] font-sans">
       {/* 1. HERO SECTION */}
-      <StaticPageHero>
+      <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
         <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-black uppercase tracking-widest mb-6">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight size={10} className="text-white/20" />
+            <span className="text-white">Suggest a Brand</span>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column: Title & Description */}
             <div className="lg:col-span-7 space-y-4 text-left">
@@ -73,7 +68,7 @@ export function SuggestBrandPage() {
                 <div className="absolute -top-10 -right-10 w-24 h-24 bg-orange-primary/10 rounded-full blur-2xl pointer-events-none" />
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-full bg-orange-primary/10 border border-orange-primary/20 flex items-center justify-center text-orange-primary text-lg">
-                    ðŸ’¡
+                    💡
                   </div>
                   <div>
                     <h3 className="text-white text-xs font-black uppercase tracking-wider">Discovery Engine</h3>
@@ -87,7 +82,7 @@ export function SuggestBrandPage() {
             </div>
           </div>
         </div>
-      </StaticPageHero>
+      </section>
 
       {/* 2. BODY CONTENT SECTION */}
       <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] py-16">
@@ -162,15 +157,15 @@ export function SuggestBrandPage() {
               </p>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-0 list-none text-xs text-gray-500 font-semibold">
                 {[
-                  'âœ“ Premium brand listing placement in search results',
-                  'âœ“ Direct verification badge to showcase credibility',
-                  'âœ“ Instant review tracking & customer feedback cycles',
-                  'âœ“ Access to compare tools highlighting key selling points',
-                  'âœ“ Ability to post deals, promos, and discount vouchers',
-                  'âœ“ Targeted campaign spots reaching high-intent buyers'
+                  '✓ Premium brand listing placement in search results',
+                  '✓ Direct verification badge to showcase credibility',
+                  '✓ Instant review tracking & customer feedback cycles',
+                  '✓ Access to compare tools highlighting key selling points',
+                  '✓ Ability to post deals, promos, and discount vouchers',
+                  '✓ Targeted campaign spots reaching high-intent buyers'
                 ].map((benefit, i) => (
                   <li key={i} className="flex items-center gap-2">
-                    <span className="text-orange-primary">â˜…</span>
+                    <span className="text-orange-primary">★</span>
                     <span>{benefit.substring(2)}</span>
                   </li>
                 ))}
@@ -280,7 +275,7 @@ export function SuggestBrandPage() {
                     className="py-12 px-2 text-center flex flex-col items-center justify-center space-y-6"
                   >
                     <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-500 flex items-center justify-center text-3xl">
-                      âœ“
+                      ✓
                     </div>
                     <div>
                       <h3 className="text-base font-black text-navy uppercase tracking-widest italic mb-1">Thank You!</h3>

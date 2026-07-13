@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  ChevronRight, Compass, ShieldCheck, HelpCircle, Award,
+import { 
+  ChevronRight, Compass, ShieldCheck, HelpCircle, Award, 
   Sparkles, Layers, Users, Zap, Calendar, Heart, ArrowRight
 } from 'lucide-react';
-import { StaticPageHero } from '../components/StaticPageHero';
 
 export function AboutPage() {
   const navigate = useNavigate();
@@ -67,9 +66,16 @@ export function AboutPage() {
   return (
     <div className="min-h-screen bg-[#F0F8FF] font-sans">
       {/* 1. HERO SECTION */}
-      <StaticPageHero>
+      <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
         <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-black uppercase tracking-widest mb-6">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight size={10} className="text-white/20" />
+            <span className="text-white">About Us</span>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column */}
             <div className="lg:col-span-7 space-y-4 text-left">
@@ -99,7 +105,7 @@ export function AboutPage() {
             </div>
           </div>
         </div>
-      </StaticPageHero>
+      </section>
 
       {/* 2. BODY CONTENT SECTION */}
       <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] py-16 text-left">

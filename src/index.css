@@ -1,10 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display:ital@0;1&display=swap');
 @import "tailwindcss";
 
-:root {
-  --choosify-navbar-height: 6.5rem;
-}
-
 @theme {
   --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
@@ -12,8 +8,6 @@
   --font-dm-sans: "DM Sans", sans-serif;
   
   --color-navy: #000435;
-  --color-ink: #0A0A1F;
-  --color-heading: #1A1D4E;
   --color-green-accent: #07DD05;
   --color-orange-primary: #FF5B00;
   --color-orange-deep: #EB4501;
@@ -21,64 +15,17 @@
   --color-ice-blue: #F0F8FF;
   --color-choosify-feed: #F0F8FF;
   --color-alert-red: #FF000D;
-  --color-play-red: #E02424;
-  --color-surface-selected: #FFF0E8;
   --color-royal-blue: #2323FF;
 
   @keyframes marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
   }
-
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes slide-in-from-bottom {
-    from { opacity: 0; transform: translateY(1rem); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes zoom-in {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
 }
 
 @layer utilities {
   .animate-marquee {
     animation: marquee 30s linear infinite;
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.4s ease-out both;
-  }
-
-  .animate-in {
-    animation-duration: 0.5s;
-    animation-timing-function: ease-out;
-    animation-fill-mode: both;
-  }
-
-  .fade-in {
-    animation-name: fade-in;
-  }
-
-  .slide-in-from-bottom-4 {
-    animation-name: slide-in-from-bottom;
-  }
-
-  .zoom-in {
-    animation-name: zoom-in;
-  }
-
-  .duration-700 {
-    animation-duration: 700ms;
-  }
-
-  .duration-1000 {
-    animation-duration: 1000ms;
   }
 }
 
@@ -93,7 +40,7 @@
 }
 
 .card-primary:hover {
-  border-color: color-mix(in srgb, var(--color-orange-primary) 30%, transparent);
+  border-color: rgba(232, 80, 10, 0.3);
   box-shadow: 0 10px 30px rgba(0, 4, 53, 0.08);
 }
 
@@ -107,7 +54,7 @@
 }
 
 .card-secondary:hover {
-  border-color: color-mix(in srgb, var(--color-orange-primary) 25%, transparent);
+  border-color: rgba(232, 80, 10, 0.25);
   box-shadow: 0 6px 18px rgba(0, 4, 53, 0.05);
 }
 
@@ -139,66 +86,8 @@
   background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
 }
 
-.choosify-detail-hero-summary__meta {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem 1rem;
-  align-items: start;
-}
-
-@media (min-width: 640px) {
-  .choosify-detail-hero-summary__meta {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem 1.25rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .choosify-detail-hero-summary__meta {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .choosify-detail-hero-summary__meta {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-.choosify-detail-hero-summary__item--wide {
-  grid-column: span 2;
-}
-
-@media (min-width: 640px) {
-  .choosify-detail-hero-summary__item--wide {
-    grid-column: span 2;
-  }
-}
-
-@media (min-width: 1024px) {
-  .choosify-detail-hero-summary__item--wide {
-    grid-column: span 2;
-  }
-}
-
 .hero-gradient {
   background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
-}
-
-@keyframes hero-scroll-cue-bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.85;
-  }
-  50% {
-    transform: translateY(5px);
-    opacity: 1;
-  }
-}
-
-.choosify-hero-scroll-cue {
-  animation: hero-scroll-cue-bounce 1.6s ease-in-out infinite;
 }
 
 .button-gradient {
@@ -244,45 +133,6 @@
   background: #000435;
 }
 
-/* Navbar search — fills space between logo and actions */
-.choosify-navbar-hero-search {
-  width: 100%;
-  max-width: none;
-}
-
-.choosify-navbar-hero-search form {
-  padding: 2px;
-}
-
-.choosify-navbar-hero-search form .bg-white {
-  min-height: 2.25rem;
-}
-
-@media (min-width: 768px) {
-  .choosify-navbar-hero-search form .bg-white {
-    min-height: 2.5rem;
-  }
-}
-
-.choosify-navbar-hero-search form input {
-  height: 2.25rem !important;
-}
-
-@media (min-width: 768px) {
-  .choosify-navbar-hero-search form input {
-    height: 2.5rem !important;
-  }
-}
-
-.choosify-navbar-categories {
-  background: linear-gradient(180deg, #0d0d28 0%, #000435 100%);
-}
-
-/* Sticky page section nav sits flush below the two-row navbar */
-.choosify-sticky-section-nav {
-  top: var(--choosify-navbar-height, 6.5rem);
-}
-
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -290,510 +140,6 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-/* Omni search suggestions — reset inherited nav/hero text colors */
-.choosify-omni-search-dropdown {
-  color: #1a1a2e !important;
-  background: #ffffff !important;
-}
-
-.choosify-omni-search-dropdown h4,
-.choosify-omni-search-dropdown span,
-.choosify-omni-search-dropdown p {
-  color: inherit;
-}
-
-.choosify-omni-search-dropdown .text-gray-400,
-.choosify-omni-search-dropdown .text-gray-500 {
-  color: #6b7280 !important;
-}
-
-/* Horizontal touch scroll rows — sticky nav, quick filters, carousels.
-   No scroll-behavior:smooth here: it animates the drag handler's scrollLeft
-   writes and makes swiping feel rubbery. Programmatic scrolls pass
-   behavior:'smooth' explicitly instead. */
-.choosify-touch-scroll-row,
-.choosify-sticky-nav-track {
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  touch-action: pan-x;
-  scrollbar-width: none;
-}
-
-.choosify-touch-scroll-row::-webkit-scrollbar,
-.choosify-sticky-nav-track::-webkit-scrollbar {
-  display: none;
-}
-
-.choosify-sticky-nav-track {
-  width: 100%;
-  min-width: 0;
-  padding-bottom: 2px;
-}
-
-/* Prevent 3-column page grids from bleeding into adjacent columns */
-.choosify-page-shell {
-  align-items: start;
-}
-
-/* ── Progressive shell: stack (<1024) → browse (2-col) → full (3-col @ 2xl) ── */
-
-@media (min-width: 1024px) and (max-width: 1535.98px) {
-  .choosify-page-shell {
-    grid-template-columns: minmax(188px, 208px) minmax(0, 1fr);
-  }
-
-  .choosify-page-shell:not(.choosify-page-shell--detail-product)
-    > .choosify-sidebar-right,
-  .choosify-page-shell:not(.choosify-page-shell--detail-product)
-    > aside.choosify-sidebar-right,
-  .choosify-page-shell:not(.choosify-page-shell--no-right-rail):not(.choosify-page-shell--feed-only):not(.choosify-page-shell--detail-product)
-    > .choosify-sidebar-right,
-  .choosify-page-shell:not(.choosify-page-shell--no-right-rail):not(.choosify-page-shell--feed-only):not(.choosify-page-shell--detail-product)
-    > aside:last-of-type:not(:only-of-type):not(.choosify-sidebar-left) {
-    display: none !important;
-  }
-}
-
-@media (min-width: 1280px) and (max-width: 1535.98px) {
-  .choosify-page-shell {
-    grid-template-columns: minmax(204px, 224px) minmax(0, 1fr);
-  }
-}
-
-@media (min-width: 1536px) {
-  .choosify-page-shell:not(.choosify-page-shell--no-right-rail):not(.choosify-page-shell--feed-only) {
-    grid-template-columns: minmax(220px, 248px) minmax(0, 1fr) minmax(230px, 260px);
-  }
-
-  .choosify-page-shell.choosify-page-shell--no-right-rail,
-  .choosify-page-shell.choosify-page-shell--feed-only {
-    grid-template-columns: minmax(220px, 248px) minmax(0, 1fr);
-  }
-}
-
-/* Optional feed-only profile: hide both sidebars @ lg+, single full-width column */
-@media (min-width: 1024px) {
-  .choosify-page-shell--feed-only > .choosify-sidebar-left,
-  .choosify-page-shell--feed-only > .choosify-sidebar-right,
-  .choosify-page-shell--feed-only > aside {
-    display: none !important;
-  }
-
-  .choosify-page-shell--feed-only {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.choosify-page-shell > aside,
-.choosify-page-grid > aside,
-.choosify-page-shell > .choosify-sidebar-left,
-.choosify-page-shell > .choosify-sidebar-right,
-.choosify-page-grid > .choosify-sidebar-left,
-.choosify-page-grid > .choosify-sidebar-right,
-.choosify-page-shell > main,
-.choosify-page-grid > main,
-.choosify-page-shell > section,
-.choosify-page-grid > section,
-.choosify-page-shell > div,
-.choosify-page-grid > div,
-[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] > aside,
-[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] > main,
-[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] > section {
-  min-width: 0;
-  max-width: 100%;
-}
-
-.choosify-page-shell > main,
-.choosify-page-grid > main,
-.choosify-page-shell > section.choosify-middle-feed,
-.choosify-page-grid > section.choosify-middle-feed,
-.choosify-page-shell > div.choosify-middle-feed,
-.choosify-page-grid > div.choosify-middle-feed,
-.choosify-middle-feed {
-  width: 100%;
-  padding-inline: clamp(0.35rem, 1.1vw, 1rem);
-}
-
-/* Full-width sections below catalog shell on detail pages */
-.choosify-detail-feed {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  width: 100%;
-  min-width: 0;
-  grid-column: 1 / -1;
-}
-
-.choosify-sidebar-left,
-.choosify-sidebar-right {
-  align-self: start;
-  overflow: hidden;
-}
-
-/* Product detail: specs | center feed | pricing — all three share one grid row so
-   no blank band appears next to the sidebars */
-@media (min-width: 1024px) {
-  .choosify-page-shell--detail-product {
-    grid-template-columns: minmax(188px, 218px) minmax(0, 1fr) minmax(220px, 260px);
-  }
-
-  .choosify-page-shell--detail-product > .choosify-sidebar-left {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .choosify-page-shell--detail-product > .choosify-middle-feed {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .choosify-page-shell--detail-product > .choosify-sidebar-right,
-  .choosify-page-shell--detail-product > .choosify-sidebar-right--product {
-    display: flex !important;
-    grid-column: 3;
-    grid-row: 1;
-  }
-}
-
-@media (min-width: 1280px) {
-  .choosify-page-shell--detail-product {
-    grid-template-columns: minmax(204px, 234px) minmax(0, 1fr) minmax(240px, 280px);
-  }
-}
-
-@media (min-width: 1536px) {
-  .choosify-page-shell--detail-product {
-    grid-template-columns: minmax(220px, 248px) minmax(0, 1fr) minmax(250px, 300px);
-  }
-}
-
-.choosify-sidebar-left > *,
-.choosify-sidebar-right > * {
-  min-width: 0;
-  max-width: 100%;
-}
-
-/* ── Unified card grids ─────────────────────────────────────────────
- * Product cards: up to 5 per row (column count scales with viewport).
- * Brand & creator cards: up to 4 per row.
- * Cards fill their grid track; layout adds/removes columns, not card scale.
- */
-
-/* Product cards — 2 → 3 → 4 → 5 columns; rows stretch so cards match height */
-.choosify-product-grid,
-.choosify-detail-feed-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(0.75rem, 1.15vw, 1.25rem);
-  align-items: stretch;
-  justify-items: stretch;
-}
-
-@media (min-width: 768px) {
-  .choosify-product-grid,
-  .choosify-detail-feed-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .choosify-product-grid,
-  .choosify-detail-feed-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .choosify-product-grid,
-  .choosify-detail-feed-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-/* Category browse cards — same 5-col cap as products; fixed card footprint */
-.choosify-category-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(0.75rem, 1.15vw, 1.25rem);
-  align-items: stretch;
-  justify-items: stretch;
-}
-
-@media (min-width: 768px) {
-  .choosify-category-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .choosify-category-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .choosify-category-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-/* Home popular categories — fixed 5 per row on tablet+; 2 cols on small phones */
-.choosify-home-category-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(0.75rem, 1.15vw, 1.25rem);
-  align-items: stretch;
-  justify-items: stretch;
-}
-
-@media (min-width: 768px) {
-  .choosify-home-category-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-.choosify-category-grid > *,
-.choosify-category-card {
-  min-width: 0;
-  max-width: 100%;
-  width: 100%;
-}
-
-.choosify-category-card {
-  min-height: 7.375rem;
-  box-sizing: border-box;
-}
-
-/* Photo-first category tiles — image fills top, label below (Categories page) */
-.choosify-category-photo-card {
-  min-height: 0;
-  height: auto;
-}
-
-.choosify-category-photo-card .aspect-\[4\/3\] {
-  min-height: 7rem;
-}
-
-@media (min-width: 768px) {
-  .choosify-category-photo-card .aspect-\[4\/3\] {
-    min-height: 8.5rem;
-  }
-}
-
-/* Brand, creator & guide media cards — max 4 columns */
-.choosify-brand-grid,
-.choosify-creator-grid,
-.choosify-guide-media-grid {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: clamp(0.75rem, 1.15vw, 1.25rem);
-  align-items: stretch;
-  justify-items: stretch;
-}
-
-/* Guide media rows mix reels (9:16) and horizontal cards — keep natural heights */
-.choosify-guide-media-grid {
-  align-items: start;
-}
-
-@media (min-width: 520px) {
-  .choosify-brand-grid,
-  .choosify-creator-grid,
-  .choosify-guide-media-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 768px) {
-  .choosify-brand-grid,
-  .choosify-creator-grid,
-  .choosify-guide-media-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .choosify-brand-grid,
-  .choosify-creator-grid,
-  .choosify-guide-media-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .choosify-brand-grid,
-  .choosify-creator-grid,
-  .choosify-guide-media-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-/* What's On feed — max 4 cards per row; columns scale down on smaller viewports */
-.choosify-whats-on-grid {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: clamp(0.65rem, 1vw, 1rem);
-  align-items: stretch;
-  justify-items: stretch;
-}
-
-@media (min-width: 520px) {
-  .choosify-whats-on-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 768px) {
-  .choosify-whats-on-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .choosify-whats-on-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* Creator review grid — lead row (max 2), dense rows (responsive 4–5 cols) */
-.choosify-creator-hybrid-grid {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: clamp(0.75rem, 1.15vw, 1.25rem);
-  align-items: start;
-}
-
-/* Row 1: always at most 2 cards */
-.choosify-creator-hybrid-grid[data-row-tier="lead"] {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-@media (min-width: 640px) {
-  .choosify-creator-hybrid-grid[data-row-tier="lead"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* Single card in lead row */
-.choosify-creator-hybrid-grid[data-row-tier="lead"][data-row-size="1"] {
-  justify-items: stretch;
-}
-
-.choosify-creator-hybrid-grid[data-row-tier="lead"][data-row-size="1"] > .choosify-creator-hybrid-card[data-format="landscape"] {
-  grid-column: 1 / -1;
-}
-
-@media (min-width: 640px) {
-  .choosify-creator-hybrid-grid[data-row-tier="lead"][data-row-size="1"] > .choosify-creator-hybrid-card[data-format="portrait"] {
-    grid-column: 1 / -1;
-    max-width: 22rem;
-    justify-self: center;
-  }
-}
-
-/* Row 2+: responsive density (reels + YouTube share the same grid) */
-.choosify-creator-hybrid-grid[data-row-tier="dense"] {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-@media (min-width: 640px) {
-  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 768px) {
-  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-.choosify-product-grid > *,
-.choosify-detail-feed-grid > *,
-.choosify-category-grid > *,
-.choosify-home-category-grid > *,
-.choosify-brand-grid > *,
-.choosify-creator-grid > *,
-.choosify-guide-media-grid > *,
-.choosify-whats-on-grid > *,
-.choosify-creator-hybrid-grid > * {
-  min-width: 0;
-  max-width: 100%;
-  width: 100%;
-}
-
-/* Wrapper divs and cards fill the stretched row height so same-type cards match */
-.choosify-product-grid > *,
-.choosify-detail-feed-grid > *,
-.choosify-category-grid > *,
-.choosify-home-category-grid > *,
-.choosify-brand-grid > *,
-.choosify-creator-grid > *,
-.choosify-whats-on-grid > * {
-  height: 100%;
-}
-
-.choosify-detail-single-feed > section,
-.choosify-detail-single-feed > div {
-  min-width: 0;
-  max-width: 100%;
-}
-
-/* Listing pages — single full-width feed; side rails hidden (filters via floating UI) */
-.choosify-listing-feed-only {
-  grid-template-columns: minmax(0, 1fr) !important;
-}
-
-@media (min-width: 1024px) {
-  .choosify-listing-feed-only > .choosify-sidebar-left,
-  .choosify-listing-feed-only > aside.choosify-sidebar-left,
-  .choosify-listing-feed-only > aside:first-of-type:not(.choosify-middle-feed):not(.choosify-listing-single-feed),
-  .choosify-listing-feed-only > .choosify-sidebar-right,
-  .choosify-listing-feed-only > aside.choosify-sidebar-right,
-  .choosify-listing-feed-only > aside:last-of-type:not(.choosify-middle-feed):not(.choosify-listing-single-feed) {
-    display: none !important;
-  }
-
-  .choosify-listing-feed-only > main,
-  .choosify-listing-feed-only > .choosify-middle-feed,
-  .choosify-listing-feed-only > div.choosify-middle-feed,
-  .choosify-listing-feed-only > .choosify-listing-single-feed,
-  .choosify-listing-feed-only > section.choosify-middle-feed {
-    grid-column: 1 / -1;
-    width: 100%;
-  }
-}
-
-.choosify-listing-single-feed > * {
-  min-width: 0;
-  max-width: 100%;
-}
-
-
-/* Keep product cards inside their grid tracks */
-.choosify-page-shell main [class*="grid-cols-"] > *,
-.choosify-page-grid main [class*="grid-cols-"] > *,
-.choosify-middle-feed [class*="grid-cols-"] > *,
-[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] main [class*="grid-cols-"] > *,
-[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] section [class*="grid-cols-"] > * {
-  min-width: 0;
-  max-width: 100%;
 }
 
 /* MOBILE RESPONSIVE FIXES — CHOOSIFY.BD HERO SECTION */
@@ -830,12 +176,11 @@
     padding-bottom: 0px !important;
   }
 
-  /* Constrain navbar to full viewport width — clip horizontal only so hamburger isn't clipped */
+  /* Constrain navbar to full viewport width */
   header, nav, .navbar {
     width: 100% !important;
     max-width: 100vw !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow: hidden !important;
     box-sizing: border-box !important;
   }
 
@@ -846,13 +191,6 @@
     position: relative !important;
     right: auto !important;
     margin-right: 16px !important;
-  }
-}
-
-/* Mobile FAB clearance for single action hub */
-@media (max-width: 640px) {
-  .mobile-fab-safe {
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
@@ -900,25 +238,5 @@
   [class*="nav-right"] {
     padding-right: 12px !important;    /* increase right padding of the right nav cluster */
   }
-}
-
-@keyframes choosify-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-.choosify-skeleton {
-  background: linear-gradient(
-    90deg,
-    #e8edf2 0%,
-    #f4f7fb 45%,
-    #e8edf2 90%
-  );
-  background-size: 200% 100%;
-  animation: choosify-shimmer 1.35s ease-in-out infinite;
 }
 
