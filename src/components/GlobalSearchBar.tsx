@@ -27,7 +27,7 @@ interface SuggestionItem {
 
 export function GlobalSearchBar({
   initialValue = '',
-  placeholder = "Search authentic Fashion hubs, Smart Gadgets & verified outlets...",
+  placeholder = "Discover products, brands, deals, creators, buying guides...",
   className = '',
   onSubmit,
   variant = 'standard'
@@ -375,7 +375,7 @@ export function GlobalSearchBar({
           className="relative w-full bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300"
         >
           <div className="flex items-center bg-white rounded-full">
-            <div className="pl-4 text-[#E8500A] shrink-0">
+            <div className="pl-4 text-[#FF5B00] shrink-0">
               <Search className="w-4 h-4" />
             </div>
             <input 
@@ -397,7 +397,7 @@ export function GlobalSearchBar({
             />
             <button 
               type="submit"
-              className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#FF5B00] hover:from-[#FF5B00] hover:to-[#EB4501] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
             >
               DISCOVER
             </button>
@@ -433,7 +433,7 @@ export function GlobalSearchBar({
                           onClick={() => handleSelectSuggestion(item)}
                           onMouseEnter={() => setActiveIndex(flatIdx)}
                           className={`group flex items-center justify-between px-2.5 py-1.5 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors ${
-                            isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                            isActive ? 'bg-[#FF5B00]/5 text-[#FF5B00]' : 'text-navy hover:bg-gray-50'
                           }`}
                         >
                           <span className="truncate">{item.title}</span>
@@ -467,7 +467,7 @@ export function GlobalSearchBar({
                         onClick={() => handleSelectSuggestion(item)}
                         onMouseEnter={() => setActiveIndex(flatIdx)}
                         className={`px-2.5 py-1.5 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
-                          isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                          isActive ? 'bg-[#FF5B00]/5 text-[#FF5B00]' : 'text-navy hover:bg-gray-50'
                         }`}
                       >
                         <span className="text-[#FF5B00]">•</span>
@@ -494,10 +494,10 @@ export function GlobalSearchBar({
                         onClick={() => handleSelectSuggestion(item)}
                         onMouseEnter={() => setActiveIndex(flatIdx)}
                         className={`px-2.5 py-1.5 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
-                          isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                          isActive ? 'bg-[#FF5B00]/5 text-[#FF5B00]' : 'text-navy hover:bg-gray-50'
                         }`}
                       >
-                        <span className="text-[#E8500A] font-black">↑</span>
+                        <span className="text-[#FF5B00] font-black">↑</span>
                         <span className="truncate">{item.title}</span>
                       </div>
                     );
@@ -532,7 +532,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center gap-2.5 px-3 py-2 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                              isActive ? 'bg-[#FF5B00]/5 text-[#FF5B00]' : 'text-navy hover:bg-gray-50'
                             }`}
                           >
                             <Search size={12} className="opacity-40" />
@@ -558,7 +558,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center gap-3 px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                              isActive ? 'bg-[#FF5B00]/5 text-[#FF5B00]' : 'text-navy hover:bg-gray-50'
                             }`}
                           >
                             {item.image ? (
@@ -598,7 +598,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center justify-between px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                              isActive ? 'bg-[#FF5B00]/5 text-[#FF5B00]' : 'text-navy hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 text-left">
@@ -609,7 +609,7 @@ export function GlobalSearchBar({
                                 <h4 className="text-[11.5px] font-bold truncate leading-snug flex items-center gap-1">
                                   {item.title}
                                   {item.badge === 'Verified' && (
-                                    <span className="text-[#E8500A] text-[9px]" title="Verified Brand">🛡️</span>
+                                    <span className="text-[#FF5B00] text-[9px]" title="Verified Brand">🛡️</span>
                                   )}
                                 </h4>
                                 <p className="text-[9.5px] text-gray-400 font-semibold truncate mt-0.5">{item.subtitle}</p>
@@ -639,7 +639,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center justify-between px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                              isActive ? 'bg-[#FF5B00]/5 text-[#FF5B00]' : 'text-navy hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 text-left">
@@ -679,7 +679,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center justify-between px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-navy hover:bg-gray-50'
+                              isActive ? 'bg-[#FF5B00]/5 text-[#FF5B00]' : 'text-navy hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex items-center gap-2.5 text-left min-w-0">

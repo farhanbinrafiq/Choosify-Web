@@ -361,7 +361,7 @@ export function PostOfferPage() {
                            type="checkbox" 
                            checked={isDeal}
                            onChange={(e) => setIsDeal(e.target.checked)}
-                           className="w-5 h-5 rounded accent-[#E8500A]" 
+                           className="w-5 h-5 rounded accent-[#FF5B00]" 
                          />
                          <span className="text-xs font-black uppercase text-navy tracking-wider">Is this a promotional deal?</span>
                       </label>
@@ -432,7 +432,7 @@ export function PostOfferPage() {
                            type="checkbox" 
                            checked={agreeToTerms}
                            onChange={(e) => setAgreeToTerms(e.target.checked)}
-                           className="w-5 h-5 rounded accent-[#E8500A]" 
+                           className="w-5 h-5 rounded accent-[#FF5B00]" 
                          />
                          <span className="text-xs font-black uppercase text-navy tracking-wider">I agree to the terms of service and guarantee product authenticity.</span>
                       </label>
@@ -463,14 +463,14 @@ export function PostOfferPage() {
                   <button 
                      type="button"
                      onClick={saveDraft}
-                     className="flex-1 px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 italic"
+                     className="flex-1 px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 italic"
                   >
                      Save Draft
                   </button>
                   <button 
                      type="button"
                      onClick={handleContinue}
-                     className="flex-[2] px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 italic"
+                     className="flex-[2] px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 italic"
                   >
                     {step === 4 ? (
                       <>Submit Offer <CheckCircle2 size={18} /></>

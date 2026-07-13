@@ -91,7 +91,7 @@ export function PublicReviewCard({
           <div className="flex items-center gap-3">
             <div className={cn(
               "w-12 h-12 rounded-[5px] overflow-hidden border-2 p-0.5 shrink-0 bg-white",
-              isDark ? "border-[#F96500]/45" : "border-[#E8500A]"
+              isDark ? "border-[#F96500]/45" : "border-[#FF5B00]"
             )}>
               <img src={avatarUrl} className="w-full h-full object-cover rounded-[3px]" alt={review.name} />
             </div>
@@ -127,7 +127,7 @@ export function PublicReviewCard({
                   className={cn(
                     "fill-current", 
                     star <= ratingNum 
-                      ? (isDark ? "text-[#F96500]" : "text-[#E8500A]") 
+                      ? (isDark ? "text-[#F96500]" : "text-[#FF5B00]") 
                       : (isDark ? "text-white/10" : "text-gray-200")
                   )} 
                 />

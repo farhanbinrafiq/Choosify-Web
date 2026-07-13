@@ -543,7 +543,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       senderName: sender === 'user' ? 'Me' : 'Support',
       avatar: sender === 'user' ? undefined : 'https://i.pravatar.cc/150?u=support'
     };
-    setMessages(prev => [...prev, newMessage]);
+    setMessages(prev => [...prev, newMessage as any]);
     if (sender === 'user') {
       toast.success('Message sent to curator');
       // Sync into the active general thread too

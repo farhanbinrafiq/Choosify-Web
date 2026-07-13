@@ -29,7 +29,7 @@ export interface FilterDefinition {
 }
 
 export interface FilterProfile {
-  entity: 'products' | 'brands' | 'deals' | 'creators' | 'recommendations';
+  entity: 'products' | 'brands' | 'deals' | 'creators' | 'recommendations' | 'categories' | 'guides';
   filters: FilterDefinition[];
 }
 
@@ -540,7 +540,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
       <div className="max-w-[1440px] mx-auto px-6 w-full flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] whitespace-nowrap">{title}</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#E8500A]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00]" />
         </div>
 
         <div className="flex-1 min-w-0 pr-2">
@@ -553,7 +553,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
                   className={cn(
                     "px-4 py-2 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 border shrink-0 hover:scale-[1.02] active:scale-[0.98]",
                     filter.active
-                      ? "bg-[#E8500A] text-white border-transparent shadow-xs font-black italic"
+                      ? "bg-[#FF5B00] text-white border-transparent shadow-xs font-black italic"
                       : "bg-white border-[#e8edf2] text-gray-550 hover:border-[#1A1D4E]/25 hover:text-[#1A1D4E]"
                   )}
                 >
@@ -566,7 +566,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
             {onOpenFullFilters && (
               <button
                 onClick={onOpenFullFilters}
-                className="px-4 py-2 rounded-full text-[10.5px] font-black uppercase tracking-widest text-[#E8500A] bg-orange-primary/5 hover:bg-orange-primary/10 border border-dashed border-[#E8500A]/30 flex items-center gap-1 shrink-0 cursor-pointer"
+                className="px-4 py-2 rounded-full text-[10.5px] font-black uppercase tracking-widest text-[#FF5B00] bg-orange-primary/5 hover:bg-orange-primary/10 border border-dashed border-[#FF5B00]/30 flex items-center gap-1 shrink-0 cursor-pointer"
               >
                 <span>More Filters</span>
                 <span className="font-mono text-xs">▼</span>
@@ -605,12 +605,12 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
           {chips.map((chip, idx) => (
             <div
               key={`${chip.id}-${idx}`}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F4F8FA] border border-[#D9E6ED] rounded-[4px] text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider shadow-2xs hover:border-[#E8500A]/30 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F4F8FA] border border-[#D9E6ED] rounded-[4px] text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider shadow-2xs hover:border-[#FF5B00]/30 transition-all"
             >
               <span>{chip.label}</span>
               <button
                 onClick={chip.onRemove}
-                className="text-[#E8500A] hover:text-[#CF4400] transition-colors p-[1.5px] rounded-full hover:bg-red-500/10 cursor-pointer border-none bg-none flex items-center justify-center"
+                className="text-[#FF5B00] hover:text-[#EB4501] transition-colors p-[1.5px] rounded-full hover:bg-red-500/10 cursor-pointer border-none bg-none flex items-center justify-center"
                 aria-label={`Remove filter ${chip.label}`}
               >
                 <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -622,7 +622,7 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
 
           <button
             onClick={onClearAll}
-            className="text-[10px] font-extrabold text-[#E8500A] uppercase tracking-widest hover:text-[#CF4400] ml-3 transition-colors cursor-pointer border-none bg-transparent hover:underline"
+            className="text-[10px] font-extrabold text-[#FF5B00] uppercase tracking-widest hover:text-[#EB4501] ml-3 transition-colors cursor-pointer border-none bg-transparent hover:underline"
           >
             Clear All
           </button>
@@ -970,7 +970,7 @@ export function FullSidebarFilterPanel({
       get setSearchQuery() { return latestPropsRef.current.setSearchQuery; },
       get onSearchSubmit() { return latestPropsRef.current.onSearchSubmit; },
       get searchPlaceholder() { return latestPropsRef.current.searchPlaceholder; },
-      get quickFilters() { return latestPropsRef.current.quickFilters; },
+      get quickFilters() { return latestPropsRef.current!.quickFilters; },
       get activeChips() { return latestPropsRef.current.activeChips; },
       get sorting() { return latestPropsRef.current.sorting; },
       get fullFilters() {
@@ -992,7 +992,7 @@ export function FullSidebarFilterPanel({
           <>
             <button
               onClick={() => setIsOpen(false)}
-              className="flex-1 py-3 bg-[#E8500A] text-white hover:bg-[#CF4400] font-sans text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs border-none"
+              className="flex-1 py-3 bg-[#FF5B00] text-white hover:bg-[#EB4501] font-sans text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs border-none"
             >
               Apply Filters
             </button>
@@ -1027,7 +1027,7 @@ export function FullSidebarFilterPanel({
         {onReset && (
           <button
             onClick={onReset}
-            className="text-[9px] font-bold text-[#E8500A] hover:text-[#CF4400] uppercase tracking-wider transition-colors border-none bg-none cursor-pointer"
+            className="text-[9px] font-bold text-[#FF5B00] hover:text-[#EB4501] uppercase tracking-wider transition-colors border-none bg-none cursor-pointer"
           >
             Reset All
           </button>
@@ -1153,16 +1153,16 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
               exit={{ scale: 0, opacity: 0, y: 15 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 cursor-pointer bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40 focus:outline-none group"
+              className="w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 cursor-pointer bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#FF5B00]/40 focus:outline-none group"
               title="Filters & Search"
             >
               <div className="flex items-center gap-2">
-                <Filter size={15} className="text-[#8a9bb0] group-hover:text-[#E8500A] transition-colors" />
+                <Filter size={15} className="text-[#8a9bb0] group-hover:text-[#FF5B00] transition-colors" />
                 <span className="text-[10px] font-black uppercase tracking-wider">
                   Filters & Search
                 </span>
               </div>
-              <ChevronRight size={14} className="text-[#8a9bb0] group-hover:text-[#E8500A] group-hover:translate-x-1 transition-all" />
+              <ChevronRight size={14} className="text-[#8a9bb0] group-hover:text-[#FF5B00] group-hover:translate-x-1 transition-all" />
             </motion.button>
           </div>
         )}
@@ -1198,11 +1198,11 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
               {/* Drawer Header */}
               <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02] shrink-0">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                  <div className="w-9 h-9 rounded-full bg-[#FF5B00]/10 flex items-center justify-center text-[#FF5B00]">
                     <Filter size={16} />
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase tracking-widest text-[#E8500A] font-extrabold text-left">Consolidated discovery</div>
+                    <div className="text-[10px] uppercase tracking-widest text-[#FF5B00] font-extrabold text-left">Consolidated discovery</div>
                     <h3 className="text-sm font-black uppercase italic tracking-wider text-left">Filter & Search Panel</h3>
                   </div>
                 </div>
@@ -1228,10 +1228,10 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                           activeFiltersData.onSearchSubmit(activeFiltersData.searchQuery || '');
                         }
                       }}
-                      className="relative w-full bg-[#0A0B1E]/5 p-1 rounded-full border border-gray-200 focus-within:border-[#E8500A]/40 transition-all duration-300"
+                      className="relative w-full bg-[#0A0B1E]/5 p-1 rounded-full border border-gray-200 focus-within:border-[#FF5B00]/40 transition-all duration-300"
                     >
                       <div className="flex items-center bg-white rounded-full overflow-hidden">
-                        <div className="pl-4 text-[#E8500A] shrink-0">
+                        <div className="pl-4 text-[#FF5B00] shrink-0">
                           <Search className="w-4 h-4" />
                         </div>
                         <input
@@ -1247,7 +1247,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                         />
                         <button
                           type="submit"
-                          className="absolute right-1.5 top-1.5 bottom-1.5 px-4 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                          className="absolute right-1.5 top-1.5 bottom-1.5 px-4 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#FF5B00] hover:from-[#FF5B00] hover:to-[#EB4501] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
                         >
                           Search
                         </button>
@@ -1257,11 +1257,11 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                 )}
 
                 {/* 2. Quick Filters */}
-                {activeFiltersData.quickFilters && (
+                {activeFiltersData!.quickFilters && (
                   <div className="flex flex-col gap-2">
                     <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Quick Filters</div>
                     <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3 shadow-sm">
-                      {activeFiltersData.quickFilters}
+                      {activeFiltersData!.quickFilters}
                     </div>
                   </div>
                 )}
@@ -1364,7 +1364,7 @@ export function RegisterPageFilters({
       get setSearchQuery() { return latestPropsRef.current.setSearchQuery; },
       get onSearchSubmit() { return latestPropsRef.current.onSearchSubmit; },
       get searchPlaceholder() { return latestPropsRef.current.searchPlaceholder; },
-      get quickFilters() { return latestPropsRef.current.quickFilters; },
+      get quickFilters() { return latestPropsRef.current!.quickFilters; },
       get activeChips() { return latestPropsRef.current.activeChips; },
       get sorting() { return latestPropsRef.current.sorting; },
       get fullFilters() { return latestPropsRef.current.fullFilters; },
@@ -1389,9 +1389,9 @@ export interface FloatingFilterConfig {
   // The page search bar — render prop
   renderSearch: (() => React.ReactNode) | null;
   // Active filter count for the badge
-  activeFilterCount: number;
+  activeFilterCount?: number;
   // Quick filter bar chips for this page
-  quickFilters: QuickFilter[];
+  quickFilters?: QuickFilter[];
   // Page name for the drawer header
   pageName: string;
   // Clear all filters for this page
@@ -1410,9 +1410,13 @@ const defaultConfig: FloatingFilterConfig = {
 export const FloatingFilterContext = createContext<{
   config: FloatingFilterConfig;
   setConfig: (config: FloatingFilterConfig) => void;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 }>({
   config: defaultConfig,
   setConfig: () => {},
+  isOpen: false,
+  setIsOpen: () => {},
 });
 
 export function useFloatingFilter() {
@@ -1422,8 +1426,9 @@ export function useFloatingFilter() {
 // Provider — wrap App with this
 export function FloatingFilterProvider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<FloatingFilterConfig>(defaultConfig);
+  const [isOpen, setIsOpen] = useState(false);
   return (
-    <FloatingFilterContext.Provider value={{ config, setConfig }}>
+    <FloatingFilterContext.Provider value={{ config, setConfig, isOpen, setIsOpen }}>
       {children}
     </FloatingFilterContext.Provider>
   );
@@ -1440,6 +1445,14 @@ export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[
   const prevDepsRef = useRef<any[] | undefined>(undefined);
   const prevConfigRef = useRef<FloatingFilterConfig | undefined>(undefined);
 
+  // Cleanup on unmount to clear registered filters
+  useEffect(() => {
+    return () => {
+      setConfig(defaultConfig);
+    };
+  }, []);
+
+  // Update registered filter config when dependencies or contents change
   useEffect(() => {
     if (typeof window !== 'undefined' && (window.location.pathname.includes('/overview') || window.location.hash.includes('overview'))) {
       return;
@@ -1462,9 +1475,7 @@ export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[
         const isSame = 
           prev.pageName === config.pageName &&
           prev.activeFilterCount === config.activeFilterCount &&
-          prev.quickFilters.length === config.quickFilters.length &&
-          prev.quickFilters.every((q, i) => {
-            const target = config.quickFilters[i];
+          (prev.quickFilters?.length || 0) === (config.quickFilters?.length || 0) &&          (prev.quickFilters || []).every((q, i) => {            const target = (config.quickFilters || [])[i];
             return target && q.id === target.id && q.label === target.label && q.active === target.active;
           });
         shouldUpdate = !isSame;
@@ -1475,7 +1486,7 @@ export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[
       const delegate: FloatingFilterConfig = {
         pageName: config.pageName,
         activeFilterCount: config.activeFilterCount,
-        quickFilters: config.quickFilters,
+        quickFilters: config?.quickFilters || [],
         get onClearAll() { return latestConfigRef.current.onClearAll; },
         get renderFilters() { return latestConfigRef.current.renderFilters; },
         get renderSearch() { return latestConfigRef.current.renderSearch; }
@@ -1484,10 +1495,6 @@ export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[
     }
     
     prevConfigRef.current = config;
-
-    return () => {
-      setConfig(defaultConfig);
-    };
   }); // Runs on every render to manually check dependency/config updates safely
 }
 

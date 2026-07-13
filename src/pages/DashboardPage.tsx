@@ -52,7 +52,7 @@ import toast from 'react-hot-toast';
 // Hex Colors as per instruction
 const COLORS = {
   navy: '#0A0A1F',
-  orange: '#E8500A',
+  orange: '#FF5B00',
   green: '#059669',
 };
 
@@ -67,14 +67,14 @@ const SidebarItem = ({ icon: Icon, label, active, badge, onClick }: any) => (
     )}
   >
     {active && (
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-[#E8500A] rounded-r-full" />
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-[#FF5B00] rounded-r-full" />
     )}
     <div className="flex items-center gap-3.5 relative z-10">
-      <Icon size={16} className={cn(active ? "text-[#E8500A]" : "text-gray-450 group-hover:text-white transition-colors")} />
+      <Icon size={16} className={cn(active ? "text-[#FF5B00]" : "text-gray-450 group-hover:text-white transition-colors")} />
       <span className="text-[10px] uppercase tracking-[0.15em] font-black italic">{label}</span>
     </div>
     {badge && badge > 0 && (
-      <span className="bg-[#E8500A] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full relative z-10">
+      <span className="bg-[#FF5B00] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full relative z-10">
         {badge}
       </span>
     )}
@@ -86,7 +86,7 @@ const TabItem = ({ label, active, onClick }: any) => (
     onClick={onClick}
     className={cn(
       "flex-shrink-0 px-6 py-4 text-[10px] font-black uppercase tracking-widest italic transition-all border-b-2 bg-transparent cursor-pointer",
-      active ? "border-[#E8500A] text-navy" : "border-transparent text-gray-400 hover:text-navy"
+      active ? "border-[#FF5B00] text-navy" : "border-transparent text-gray-400 hover:text-navy"
     )}
   >
     {label}
@@ -98,7 +98,7 @@ const MetricBox = ({ title, value, linkText, onClick, icon: Icon, iconColor, bgH
   <div 
     onClick={onClick}
     className={cn(
-      "bg-white border border-gray-100 rounded-2xl p-5 hover:border-[#E8500A]/20 transition-all cursor-pointer shadow-sm flex flex-col justify-between h-[135px] text-left group select-none",
+      "bg-white border border-gray-100 rounded-2xl p-5 hover:border-[#FF5B00]/20 transition-all cursor-pointer shadow-sm flex flex-col justify-between h-[135px] text-left group select-none",
       bgHover
     )}
   >
@@ -110,7 +110,7 @@ const MetricBox = ({ title, value, linkText, onClick, icon: Icon, iconColor, bgH
     </div>
     <div className="mt-4">
       <h5 className="text-[10px] font-black text-gray-800 uppercase tracking-wider mb-1 line-clamp-1">{title}</h5>
-      <span className="text-[8px] font-black text-[#E8500A] uppercase tracking-widest flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+      <span className="text-[8px] font-black text-[#FF5B00] uppercase tracking-widest flex items-center gap-1 group-hover:translate-x-1 transition-transform">
         {linkText} <span>→</span>
       </span>
     </div>
@@ -154,44 +154,13 @@ const RecommendationBox = () => (
     </div>
     <div className="flex-1 p-5 flex flex-col justify-between bg-gradient-to-br from-white to-gray-50/50">
       <div className="space-y-2 text-left">
-        <span className="text-[9px] font-black text-[#E8500A] uppercase tracking-[0.2em] block">Recommended For You</span>
+        <span className="text-[9px] font-black text-[#FF5B00] uppercase tracking-[0.2em] block">Recommended For You</span>
         <h4 className="text-xs font-black text-navy uppercase leading-tight tracking-tight line-clamp-3">Best Noise Cancelling Headphones in 2025</h4>
         <p className="text-[10px] text-gray-500 font-medium leading-relaxed">Top picks based on your recent views and interests.</p>
       </div>
-      <button className="text-[10px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-1.5 hover:translate-x-1 transition-transform border-none bg-transparent cursor-pointer text-left self-start p-0 font-sans">
+      <button className="text-[10px] font-black text-[#FF5B00] uppercase tracking-wider flex items-center gap-1.5 hover:translate-x-1 transition-transform border-none bg-transparent cursor-pointer text-left self-start p-0 font-sans">
         Discover Now <span className="text-sm font-bold">→</span>
       </button>
-    </div>
-  </div>
-);
-
-// Recommended Product with orange cart button
-const RecommendedProductCard = ({ item }: { item: any }) => (
-  <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-[310px] w-full text-left relative group">
-    <div className="h-32 w-full flex items-center justify-center p-2 bg-gray-50/50 rounded-xl relative overflow-hidden">
-      <img src={item.image} alt={item.title} className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" />
-    </div>
-    <div className="mt-4 flex-grow flex flex-col justify-between">
-      <div className="space-y-1">
-        <h4 className="text-[11px] font-bold text-gray-800 tracking-tight leading-snug line-clamp-2 h-8">{item.title}</h4>
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs font-extrabold text-[#E8500A]">BDT {item.price}</span>
-          {item.originalPrice && (
-            <span className="text-[10px] text-gray-400 line-through">BDT {item.originalPrice}</span>
-          )}
-        </div>
-      </div>
-      
-      <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
-        <div className="flex items-center gap-1">
-          <Star size={10} className="text-amber-400 fill-amber-400" />
-          <span className="text-[10px] font-bold text-gray-700">{item.rating}</span>
-          <span className="text-[10px] text-gray-400">({item.reviews})</span>
-        </div>
-        <button className="w-8 h-8 rounded-full bg-[#E8500A] text-white flex items-center justify-center hover:bg-[#CF4400] transition-colors border-none cursor-pointer shadow-md shadow-[#E8500A]/20">
-          <ShoppingBag size={12} />
-        </button>
-      </div>
     </div>
   </div>
 );
@@ -214,7 +183,7 @@ const TopCategoriesList = () => {
           return (
             <div key={i} className="flex items-center justify-between group cursor-pointer hover:bg-gray-50/50 p-1.5 rounded-lg transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 group-hover:text-[#E8500A] group-hover:bg-[#E8500A]/5 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 group-hover:text-[#FF5B00] group-hover:bg-[#FF5B00]/5 transition-colors">
                   <Icon size={14} />
                 </div>
                 <div className="text-left">
@@ -227,7 +196,7 @@ const TopCategoriesList = () => {
           );
         })}
       </div>
-      <button className="text-[9px] font-black text-[#E8500A] uppercase tracking-widest text-left hover:translate-x-1 transition-transform border-none bg-transparent cursor-pointer p-0 mt-2 self-start flex items-center gap-1 font-sans">
+      <button className="text-[9px] font-black text-[#FF5B00] uppercase tracking-widest text-left hover:translate-x-1 transition-transform border-none bg-transparent cursor-pointer p-0 mt-2 self-start flex items-center gap-1 font-sans">
         Explore All Categories <span className="text-xs font-bold">→</span>
       </button>
     </div>
@@ -274,7 +243,7 @@ const RecentOrdersList = () => {
               </div>
               <div className="text-left min-w-0">
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-[9px] font-bold text-[#E8500A]">{order.id}</span>
+                  <span className="text-[9px] font-bold text-[#FF5B00]">{order.id}</span>
                   <span className="text-[10px] font-bold text-gray-800 truncate max-w-[150px] sm:max-w-xs">{order.title}</span>
                 </div>
                 <span className="text-[10px] text-gray-500 font-medium">{order.price}</span>
@@ -292,7 +261,7 @@ const RecentOrdersList = () => {
           </div>
         ))}
       </div>
-      <button className="text-[9px] font-black text-[#E8500A] uppercase tracking-widest text-left hover:translate-x-1 transition-transform border-none bg-transparent cursor-pointer p-0 mt-3 self-start flex items-center gap-1 font-sans">
+      <button className="text-[9px] font-black text-[#FF5B00] uppercase tracking-widest text-left hover:translate-x-1 transition-transform border-none bg-transparent cursor-pointer p-0 mt-3 self-start flex items-center gap-1 font-sans">
         View All Orders <span className="text-xs font-bold">→</span>
       </button>
     </div>
@@ -303,8 +272,8 @@ const RecentOrdersList = () => {
 const ActivitySummaryCard = () => {
   const metrics = [
     { title: '18', desc: 'Products Viewed', change: '↑ 12%', icon: Clock, circleColor: 'bg-blue-50 text-blue-500 border border-blue-100' },
-    { title: '7', desc: 'Guides Read', change: '↑ 8%', icon: BookOpen, circleColor: 'bg-orange-50 text-[#E8500A] border border-orange-100' },
-    { title: '3', desc: 'Reviews Written', change: '↑ 50%', icon: Star, circleColor: 'bg-orange-50 text-[#E8500A] border border-orange-100' },
+    { title: '7', desc: 'Guides Read', change: '↑ 8%', icon: BookOpen, circleColor: 'bg-orange-50 text-[#FF5B00] border border-orange-100' },
+    { title: '3', desc: 'Reviews Written', change: '↑ 50%', icon: Star, circleColor: 'bg-orange-50 text-[#FF5B00] border border-orange-100' },
     { title: '2', desc: 'Orders Placed', change: '↑ 100%', icon: ShoppingBag, circleColor: 'bg-blue-50 text-blue-500 border border-blue-100' },
   ];
 
@@ -333,7 +302,7 @@ const ActivitySummaryCard = () => {
         </div>
         <div className="relative shrink-0 flex items-center justify-center">
           <Trophy size={28} className="text-amber-400 animate-bounce" />
-          <div className="absolute -top-1 -right-1 bg-[#E8500A] text-white text-[7px] font-black px-1.5 py-0.5 rounded-full">+24</div>
+          <div className="absolute -top-1 -right-1 bg-[#FF5B00] text-white text-[7px] font-black px-1.5 py-0.5 rounded-full">+24</div>
         </div>
       </div>
     </div>
@@ -343,7 +312,7 @@ const ActivitySummaryCard = () => {
 // Premium user badge and date info
 const PremiumBadgeCard = () => (
   <div className="bg-gradient-to-r from-white to-gray-50/50 border border-gray-100 rounded-2xl p-4.5 shadow-sm flex items-center justify-between max-w-sm w-full gap-4 relative overflow-hidden group">
-    <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/5 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 group-hover:scale-125 transition-transform duration-500" />
+    <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF5B00]/5 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 group-hover:scale-125 transition-transform duration-500" />
     <div className="flex items-center gap-3.5 relative z-10">
       <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 shrink-0">
         <Trophy size={18} />
@@ -359,7 +328,7 @@ const PremiumBadgeCard = () => (
     
     <div className="relative z-10 w-12 h-12 flex items-center justify-center shrink-0">
       <div className="w-10 h-10 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center">
-        <Star size={20} className="text-[#E8500A] fill-[#E8500A]" />
+        <Star size={20} className="text-[#FF5B00] fill-[#FF5B00]" />
       </div>
     </div>
   </div>
@@ -463,7 +432,7 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
         <div className="text-left">
           <span className="text-[11px] font-black text-gray-400 uppercase tracking-[0.25em] block mb-2">Welcome back,</span>
           <h2 className="text-4xl font-black text-navy uppercase italic tracking-tighter leading-none mb-3">
-            Hi, <span className="text-[#E8500A]">Mr. Farhan!</span>
+            Hi, <span className="text-[#FF5B00]">Mr. Farhan!</span>
           </h2>
           <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em] italic">Bangladesh's Smartest Product Discovery Platform</p>
         </div>
@@ -535,11 +504,11 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
         <div className="lg:col-span-9 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-black text-navy uppercase italic tracking-wider flex items-center gap-2">
-              <span className="text-[#E8500A]">●</span> Recently Viewed
+              <span className="text-[#FF5B00]">●</span> Recently Viewed
             </h3>
             <button 
               onClick={() => onTabChange && onTabChange('recently-viewed')}
-              className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#E8500A] transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1 font-sans"
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#FF5B00] transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1 font-sans"
             >
               View all history <span>→</span>
             </button>
@@ -565,15 +534,27 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
         <div className="lg:col-span-9 space-y-4">
           <div className="text-left">
             <h3 className="text-sm font-black text-navy uppercase italic tracking-wider flex items-center gap-2">
-              <span className="text-[#E8500A]">●</span> Recommended For You
+              <span className="text-[#FF5B00]">●</span> Recommended For You
             </h3>
             <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mt-1">Personalized recommendations based on your activity</p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {recommendedItems.map((item) => (
-              <RecommendedProductCard key={item.id} item={item} />
-            ))}
+            {recommendedItems.map((item) => {
+              const formattedItem = {
+                id: item.id,
+                title: item.title,
+                price: parseFloat(item.price.replace(/,/g, '')),
+                originalPrice: item.originalPrice ? parseFloat(item.originalPrice.replace(/,/g, '')) : undefined,
+                image: item.image,
+                brand: '',
+                discount: '',
+                badge: '',
+                rating: item.rating,
+                reviews: item.reviews.toString(),
+              };
+              return <ProductCard key={item.id} product={formattedItem} isDashboard={true} />;
+            })}
           </div>
         </div>
 
@@ -593,11 +574,11 @@ const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void 
         <div className="lg:col-span-8 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-black text-navy uppercase italic tracking-wider flex items-center gap-2">
-              <span className="text-[#E8500A]">●</span> Recent Orders
+              <span className="text-[#FF5B00]">●</span> Recent Orders
             </h3>
             <button 
               onClick={() => onTabChange && onTabChange('overview')}
-              className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#E8500A] transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1 font-sans"
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#FF5B00] transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1 font-sans"
             >
               View all orders <span>→</span>
             </button>
@@ -628,7 +609,7 @@ const SavedProductsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Vault</span> <span className="text-gray-400 text-2xl">({savedProducts.length})</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#FF5B00]">Vault</span> <span className="text-gray-400 text-2xl">({savedProducts.length})</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your curated list of premium desires</p>
         </div>
         <div className="flex items-center gap-4 bg-white border border-[#e8edf2] rounded-full px-6 py-2 shadow-sm">
@@ -642,27 +623,9 @@ const SavedProductsSection = () => {
       </div>
 
       {savedProducts.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 justify-items-center gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {savedProducts.map((p) => (
-            <div key={p.id} className="relative group shrink-0" style={{ width: '199.5px', height: '268.5px' }}>
-              <button 
-                onClick={() => {
-                  addToCart(p, 1);
-                  toast.success('Added to cart!');
-                }}
-                className="absolute top-4 right-14 z-30 w-8 h-8 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-[#E8500A]/20 hover:bg-[#E8500A] hover:text-white cursor-pointer"
-                title="Add to Cart"
-              >
-                <ShoppingBag size={14} />
-              </button>
-              <button 
-                onClick={() => removeSavedProduct(p.id)}
-                className="absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-red-500/20 hover:bg-red-500 hover:text-white"
-              >
-                <Trash2 size={14} />
-              </button>
-              <ProductCard product={p} variant="grid" isDashboard={true} />
-            </div>
+            <ProductCard key={p.id} product={p} isDashboard={true} />
           ))}
         </div>
       ) : (
@@ -672,7 +635,7 @@ const SavedProductsSection = () => {
           </div>
           <h3 className="text-xl font-black text-[#1a1a2e] italic uppercase tracking-widest mb-4">Vault is empty</h3>
           <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">Start exploring Choosify.bd and save products you love to your personal vault.</p>
-          <Link to="/products" className="px-12 py-4 bg-[#E8500A] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-xl shadow-[#E8500A]/10 hover:scale-105 transition-all animate-none">Start Browsing</Link>
+          <Link to="/products" className="px-12 py-4 bg-[#FF5B00] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-xl shadow-[#FF5B00]/10 hover:scale-105 transition-all animate-none">Start Browsing</Link>
         </div>
       )}
     </div>
@@ -687,7 +650,7 @@ const SavedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Brands</span> <span className="text-gray-450 text-2xl">({savedBrands.length})</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#FF5B00]">Brands</span> <span className="text-gray-450 text-2xl">({savedBrands.length})</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">☆ Bookmarked partners for later reference</p>
         </div>
       </div>
@@ -697,7 +660,7 @@ const SavedBrandsSection = () => {
           {savedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-4.5 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm shrink-0"
+              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-4.5 hover:border-[#FF5B00]/30 transition-all text-center flex flex-col justify-between shadow-sm shrink-0"
               style={{
                 boxSizing: 'border-box',
                 width: '199.5px',
@@ -722,16 +685,16 @@ const SavedBrandsSection = () => {
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-sm font-black text-[#1a1a2e] uppercase italic mb-1.5 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <h4 className="text-sm font-black text-[#1a1a2e] uppercase italic mb-1.5 truncate group-hover:text-[#FF5B00] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
+                    <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#FF5B00] fill-current text-current" : "text-gray-150"} />
                   ))}
                   <span className="text-[8.5px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-lg text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#FF5B00]/50 hover:bg-[#FF5B00]/5 rounded-lg text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center">
                 Visit Brand Hub
               </Link>
             </div>
@@ -741,7 +704,7 @@ const SavedBrandsSection = () => {
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Store size={64} className="mb-8 text-gray-300" />
           <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No Saved Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Browse All Brands</Link>
+          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#FF5B00] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Browse All Brands</Link>
         </div>
       )}
     </div>
@@ -756,7 +719,7 @@ const LovedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Loved <span className="text-[#E8500A]">Brands</span> <span className="text-gray-400 text-2xl">({lovedBrands.length})</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Loved <span className="text-[#FF5B00]">Brands</span> <span className="text-gray-400 text-2xl">({lovedBrands.length})</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">♥ Brands you reacted to with love</p>
         </div>
       </div>
@@ -766,7 +729,7 @@ const LovedBrandsSection = () => {
           {lovedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-4.5 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm shrink-0"
+              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-4.5 hover:border-[#FF5B00]/30 transition-all text-center flex flex-col justify-between shadow-sm shrink-0"
               style={{
                 boxSizing: 'border-box',
                 width: '199.5px',
@@ -791,16 +754,16 @@ const LovedBrandsSection = () => {
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-sm font-black text-[#1a1a2e] uppercase italic mb-1.5 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <h4 className="text-sm font-black text-[#1a1a2e] uppercase italic mb-1.5 truncate group-hover:text-[#FF5B00] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
+                    <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#FF5B00] fill-current text-current" : "text-gray-150"} />
                   ))}
                   <span className="text-[8.5px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-lg text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#FF5B00]/50 hover:bg-[#FF5B00]/5 rounded-lg text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center">
                 Visit Brand Hub
               </Link>
             </div>
@@ -810,7 +773,7 @@ const LovedBrandsSection = () => {
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Heart size={64} className="mb-8 text-rose-500" />
           <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No Loved Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore Brands</Link>
+          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#FF5B00] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore Brands</Link>
         </div>
       )}
     </div>
@@ -825,7 +788,7 @@ const FollowedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Followed <span className="text-[#E8500A]">Partners</span> <span className="text-gray-400 text-2xl">({followedBrands.length})</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Followed <span className="text-[#FF5B00]">Partners</span> <span className="text-gray-400 text-2xl">({followedBrands.length})</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">⚡ Subscribed to receive updates and deals</p>
         </div>
       </div>
@@ -835,7 +798,7 @@ const FollowedBrandsSection = () => {
           {followedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-4.5 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm shrink-0"
+              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-4.5 hover:border-[#FF5B00]/30 transition-all text-center flex flex-col justify-between shadow-sm shrink-0"
               style={{
                 boxSizing: 'border-box',
                 width: '199.5px',
@@ -847,7 +810,7 @@ const FollowedBrandsSection = () => {
                   e.stopPropagation();
                   toggleFollowBrand(brand);
                 }}
-                className="absolute top-3 right-3 text-[#E8500A] hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer font-black text-[8px] tracking-wider uppercase"
+                className="absolute top-3 right-3 text-[#FF5B00] hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer font-black text-[8px] tracking-wider uppercase"
               >
                 Unfollow
               </button>
@@ -860,16 +823,16 @@ const FollowedBrandsSection = () => {
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-sm font-black text-[#1a1a2e] uppercase italic mb-1.5 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <h4 className="text-sm font-black text-[#1a1a2e] uppercase italic mb-1.5 truncate group-hover:text-[#FF5B00] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
+                    <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#FF5B00] fill-current text-current" : "text-gray-150"} />
                   ))}
                   <span className="text-[8.5px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/30 hover:bg-[#E8500A]/5 rounded-lg text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center justify-between flex items-center px-3">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#FF5B00]/30 hover:bg-[#FF5B00]/5 rounded-lg text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center justify-between flex items-center px-3">
                 <span>Updates</span>
                 <span className="bg-[#059669] text-[6px] text-white font-black px-1 py-0.5 rounded-full uppercase scale-90">Live</span>
               </Link>
@@ -880,7 +843,7 @@ const FollowedBrandsSection = () => {
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Store size={64} className="mb-8 text-gray-300" />
           <p className="text-[11px] font-black text-[#1a1a2e ] uppercase tracking-widest italic leading-relaxed font-black mb-4">No Followed Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore and Follow Brands</Link>
+          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#FF5B00] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore and Follow Brands</Link>
         </div>
       )}
     </div>
@@ -899,7 +862,7 @@ const RecentlyViewedSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Recently <span className="text-[#E8500A]">Viewed</span> <span className="text-gray-400 text-2xl">({recentlyViewed.length})</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Recently <span className="text-[#FF5B00]">Viewed</span> <span className="text-gray-400 text-2xl">({recentlyViewed.length})</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">🕒 Products you recently browsed</p>
         </div>
         {recentlyViewed.length > 0 && (
@@ -913,19 +876,17 @@ const RecentlyViewedSection = () => {
       </div>
 
       {recentlyViewed.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 justify-items-center gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {recentlyViewed.map((p) => (
-            <div key={p.id} className="relative group shrink-0" style={{ width: '199.5px', height: '268.5px' }}>
-              <ProductCard product={p} variant="grid" isDashboard={true} />
-            </div>
+            <ProductCard key={p.id} product={p} isDashboard={true} />
           ))}
         </div>
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
-          <Clock size={64} className="mb-8 text-[#E8500A]" />
+          <Clock size={64} className="mb-8 text-[#FF5B00]" />
           <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No recently viewed products</p>
           <p className="text-[10px] font-bold text-gray-405 uppercase mt-2 italic">Product views will automatically populate this section.</p>
-          <Link to="/products" className="mt-8 px-10 py-3 bg-[#E8500A] text-white font-black uppercase tracking-widest italic shadow-xl">Go To Directory</Link>
+          <Link to="/products" className="mt-8 px-10 py-3 bg-[#FF5B00] text-white font-black uppercase tracking-widest italic shadow-xl">Go To Directory</Link>
         </div>
       )}
     </div>
@@ -946,7 +907,7 @@ const CompareToolSection = () => {
            <button className="px-8 py-3 bg-white border border-gray-200 text-navy rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 flex items-center gap-2 cursor-pointer shadow-sm">
               <Send size={14} /> Share Link
            </button>
-           <Link to="/compare" className="px-8 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#E8500A]/10 hover:scale-105 active:scale-95 transition-all animate-none">Full View</Link>
+           <Link to="/compare" className="px-8 py-3 bg-[#FF5B00] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#FF5B00]/10 hover:scale-105 active:scale-95 transition-all animate-none">Full View</Link>
         </div>
       </div>
 
@@ -970,7 +931,7 @@ const CompareToolSection = () => {
                        </button>
                        <img src={p.image} className="w-20 h-20 object-contain mb-6" alt="" />
                        <h5 className="text-[11px] font-black text-[#1a1a2e ] italic uppercase text-center line-clamp-1">{p.title}</h5>
-                       <span className="text-[10px] font-bold text-[#E8500A] mt-1 italic">BDT {p.price}</span>
+                       <span className="text-[10px] font-bold text-[#FF5B00] mt-1 italic">BDT {p.price}</span>
                      </>
                    ) : (
                      <button className="w-16 h-16 rounded-full border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 hover:border-gray-400 hover:text-gray-500 transition-all bg-transparent cursor-pointer">
@@ -987,7 +948,7 @@ const CompareToolSection = () => {
                   { label: 'Rating', values: comparedProducts.map(p => p.rating + '/5.0') },
                   { label: 'Market Value', values: comparedProducts.map(() => 'Premium') },
                   { label: 'In Stock', values: comparedProducts.map(() => 'Yes (Dhaka)'), color: 'text-[#059669]' },
-                  { label: 'Expert Score', values: comparedProducts.map(() => '92/100'), color: 'text-[#E8500A]' }
+                  { label: 'Expert Score', values: comparedProducts.map(() => '92/100'), color: 'text-[#FF5B00]' }
                 ].map((row, i) => (
                   <div key={i} className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-gray-150">
                      <div className="p-6 bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase italic tracking-widest">{row.label}</div>
@@ -1031,7 +992,7 @@ const MessagesSection = () => {
             <h2 className="text-lg md:text-xl font-black text-navy italic uppercase tracking-tighter mb-4">Inbox</h2>
             <div className="relative">
                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-               <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/30 transition-all" placeholder="Search chats..." />
+               <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#FF5B00]/30 transition-all" placeholder="Search chats..." />
             </div>
          </div>
          <div className="flex-1 overflow-y-auto no-scrollbar">
@@ -1039,7 +1000,7 @@ const MessagesSection = () => {
               <button 
                 key={i} 
                 onClick={() => setActiveChat(i)}
-                className={cn("w-full p-6 flex gap-4 text-left border-b border-gray-100 transition-all hover:bg-gray-50 bg-transparent border-none cursor-pointer", i === 1 && "bg-gray-50/50 border-r-2 border-[#E8500A]")}
+                className={cn("w-full p-6 flex gap-4 text-left border-b border-gray-100 transition-all hover:bg-gray-50 bg-transparent border-none cursor-pointer", i === 1 && "bg-gray-50/50 border-r-2 border-[#FF5B00]")}
               >
                  <div className="relative">
                     <img src={`https://i.pravatar.cc/150?u=${i + 20}`} className="w-12 h-12 rounded-full object-cover" alt="" />
@@ -1084,7 +1045,7 @@ const MessagesSection = () => {
               <div key={m.id} className={cn("flex flex-col max-w-[90%] md:max-w-[80%]", m.sender === 'user' ? "ml-auto items-end" : "mr-auto items-start")}>
                  <div className={cn(
                    "px-5 py-3 md:px-6 md:py-4 rounded-[16px] md:rounded-[20px] mb-2 text-[11px] md:text-xs font-bold leading-relaxed",
-                   m.sender === 'user' ? "bg-[#E8500A] text-white rounded-tr-none shadow-md shadow-[#E8500A]/10 italic" : "bg-white text-navy rounded-tl-none border border-gray-200"
+                   m.sender === 'user' ? "bg-[#FF5B00] text-white rounded-tr-none shadow-md shadow-[#FF5B00]/10 italic" : "bg-white text-navy rounded-tl-none border border-gray-200"
                  )}>
                     {m.text}
                  </div>
@@ -1099,12 +1060,12 @@ const MessagesSection = () => {
                  value={inputText}
                  onChange={(e) => setInputText(e.target.value)}
                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                 className="w-full h-12 md:h-14 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/30 transition-all" 
+                 className="w-full h-12 md:h-14 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#FF5B00]/30 transition-all" 
                  placeholder="Type message..." 
                />
                <button 
                  onClick={handleSend}
-                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#E8500A] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#E8500A]/10 border-none cursor-pointer"
+                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#FF5B00] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#FF5B00]/10 border-none cursor-pointer"
                >
                   <Send size={16} />
                </button>
@@ -1126,12 +1087,12 @@ const NotificationsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Notification <span className="text-[#E8500A]">Center</span></h2>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Notification <span className="text-[#FF5B00]">Center</span></h2>
           <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Updates on your curated world</p>
         </div>
         <button 
           onClick={markAllAsRead}
-          className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic hover:underline border-none bg-transparent cursor-pointer"
+          className="text-[10px] font-black text-[#FF5B00] uppercase tracking-widest italic hover:underline border-none bg-transparent cursor-pointer"
         >
           Mark all as read
         </button>
@@ -1144,15 +1105,15 @@ const NotificationsSection = () => {
               key={n.id} 
               className={cn(
                 "p-8 bg-white border border-[#e8edf2] rounded-[5px] flex items-start gap-6 transition-all hover:bg-gray-50 relative overflow-hidden group shadow-sm",
-                !n.read && "border-[#E8500A]/30 bg-[#E8500A]/5"
+                !n.read && "border-[#FF5B00]/30 bg-[#FF5B00]/5"
               )}
             >
-              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#E8500A]" />}
+              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#FF5B00]" />}
               <div className={cn(
                 "w-12 h-12 rounded-lg flex items-center justify-center shrink-0 shadow-sm",
                 n.type === 'price' ? "bg-[#059669]/10 text-[#059669]" : 
-                n.type === 'reply' ? "bg-[#E8500A]/10 text-[#E8500A]" : 
-                "bg-[#E8500A]/15 text-[#E8500A]"
+                n.type === 'reply' ? "bg-[#FF5B00]/10 text-[#FF5B00]" : 
+                "bg-[#FF5B00]/15 text-[#FF5B00]"
               )}>
                 {n.type === 'price' ? <TrendingUp size={24} /> : n.type === 'reply' ? <MessageSquare size={24} /> : <Bell size={24} />}
               </div>
@@ -1202,12 +1163,12 @@ const SettingsSection = () => {
     <div className="max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
        <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Profile <span className="text-[#E8500A]">Master</span></h2>
+            <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Profile <span className="text-[#FF5B00]">Master</span></h2>
             <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Configure your discovery experience</p>
           </div>
           <button 
             onClick={handleSave}
-            className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
+            className="px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
           >
             Save Changes
           </button>
@@ -1216,9 +1177,9 @@ const SettingsSection = () => {
        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="space-y-8">
              <div className="flex flex-col items-center p-8 bg-white border border-[#e8edf2] rounded-[5px] relative overflow-hidden group shadow-sm">
-                <div className="absolute inset-0 bg-gradient-to-b from-[#E8500A]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-b from-[#FF5B00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative w-32 h-32 mb-6 cursor-pointer group/avatar">
-                   <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-full h-full rounded-full object-cover border-4 border-[#E8500A]/30 transition-all group-hover/avatar:border-navy" alt="Profile" />
+                   <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-full h-full rounded-full object-cover border-4 border-[#FF5B00]/30 transition-all group-hover/avatar:border-navy" alt="Profile" />
                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
                       <Plus className="text-white" size={32} />
                    </div>
@@ -1233,7 +1194,7 @@ const SettingsSection = () => {
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Full Display Name</label>
                       <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
+                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/50 shadow-sm" 
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Your full name"
@@ -1242,7 +1203,7 @@ const SettingsSection = () => {
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Email Address</label>
                       <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
+                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/50 shadow-sm" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="your@email.com"
@@ -1251,7 +1212,7 @@ const SettingsSection = () => {
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Phone Number</label>
                       <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
+                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/50 shadow-sm" 
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+880 1XXX-XXXXXX"
@@ -1260,7 +1221,7 @@ const SettingsSection = () => {
                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Delivery Address</label>
                       <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm" 
+                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/50 shadow-sm" 
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
                         placeholder="Your address, Dhaka, Bangladesh"
@@ -1299,7 +1260,7 @@ const SettingsSection = () => {
              <div className="space-y-6">
                 <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Security Zone</h3>
                 <button className="w-full py-4 bg-white border border-gray-200 rounded-lg text-[10px] font-black text-navy uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-3 cursor-pointer shadow-sm">
-                   <ShieldCheck size={16} className="text-[#E8500A]" /> Reset Multi-Factor Auth
+                   <ShieldCheck size={16} className="text-[#FF5B00]" /> Reset Multi-Factor Auth
                 </button>
                 <button className="w-full py-4 bg-red-50 border border-red-100 rounded-lg text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all cursor-pointer">
                    Deactivate Curator Account
@@ -1361,7 +1322,7 @@ const AdminOverviewsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700 text-left">
       <div>
         <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">
-          Overviews <span className="text-[#E8500A]">Manager</span>
+          Overviews <span className="text-[#FF5B00]">Manager</span>
         </h2>
         <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">
           Add dynamic overview sections to brands or products in real-time
@@ -1372,7 +1333,7 @@ const AdminOverviewsSection = () => {
         {/* Form Column */}
         <div className="lg:col-span-1 bg-white border border-gray-150 rounded-[5px] p-6 shadow-sm">
           <h3 className="text-sm font-black text-navy uppercase tracking-wider mb-4 border-b border-gray-150 pb-2 flex items-center gap-2">
-            <span className="text-[#E8500A]">✦</span> Create Section
+            <span className="text-[#FF5B00]">✦</span> Create Section
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -1463,7 +1424,7 @@ const AdminOverviewsSection = () => {
 
             <button
               type="submit"
-              className="w-full bg-[#E8500A] hover:bg-[#ff5d14] text-white py-3 rounded text-[11px] font-black uppercase tracking-widest cursor-pointer select-none shadow-md transition-colors"
+              className="w-full bg-[#FF5B00] hover:bg-[#ff5d14] text-white py-3 rounded text-[11px] font-black uppercase tracking-widest cursor-pointer select-none shadow-md transition-colors"
             >
               Add Section
             </button>
@@ -1474,7 +1435,7 @@ const AdminOverviewsSection = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white border border-gray-150 rounded-[5px] p-6 shadow-sm">
             <h3 className="text-sm font-black text-navy uppercase tracking-wider mb-4 border-b border-gray-150 pb-2 flex items-center gap-2">
-              <span className="text-[#E8500A]">✦</span> Active Custom Sections ({customOverviews?.length || 0})
+              <span className="text-[#FF5B00]">✦</span> Active Custom Sections ({customOverviews?.length || 0})
             </h3>
 
             {customOverviews?.length === 0 ? (
@@ -1648,7 +1609,7 @@ const AdminCampaignsSection = () => {
             
             <button
               onClick={handleCreateNew}
-              className="px-6 py-2.5 bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white rounded-full text-[10px] font-black tracking-widest uppercase transition-all shadow-md italic cursor-pointer animate-pulse"
+              className="px-6 py-2.5 bg-gradient-to-r from-[#FF5B00] to-[#FF5B00] hover:from-[#FF5B00] hover:to-[#EB4501] text-white rounded-full text-[10px] font-black tracking-widest uppercase transition-all shadow-md italic cursor-pointer animate-pulse"
             >
               + Create Campaign
             </button>
@@ -1899,7 +1860,7 @@ const AdminCampaignsSection = () => {
               <button
                 type="button"
                 onClick={handleSave}
-                className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
+                className="px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
               >
                 Save Campaign
               </button>
@@ -1987,7 +1948,7 @@ export function DashboardPage() {
       case 'saved-recommendations': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
            <div>
-              <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Guides</span></h2>
+              <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#FF5B00]">Guides</span></h2>
               <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Knowledge bookmarks for your next big buy</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 justify-items-center gap-8">
@@ -2019,7 +1980,7 @@ export function DashboardPage() {
       case 'my-reviews': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
             <div>
-               <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">My <span className="text-[#E8500A]">Reviews</span></h2>
+               <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">My <span className="text-[#FF5B00]">Reviews</span></h2>
                <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your community contributions and feedback</p>
             </div>
             <div className="space-y-6">
@@ -2027,7 +1988,7 @@ export function DashboardPage() {
                  reviews.map((r, idx) => {
                    const productImage = PRODUCTS.find(p => p.title === r.product)?.image || PLACEHOLDER_IMAGE;
                    return (
-                     <div key={r.id || idx} className="bg-white border border-[#e8edf2] rounded-xl p-6 flex flex-col sm:flex-row gap-6 hover:border-[#E8500A]/20 transition-all shadow-sm">
+                     <div key={r.id || idx} className="bg-white border border-[#e8edf2] rounded-xl p-6 flex flex-col sm:flex-row gap-6 hover:border-[#FF5B00]/20 transition-all shadow-sm">
                        <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 flex items-center justify-center shrink-0">
                          <img src={productImage} alt={r.product} className="w-full h-full object-contain" onError={handleImageError} />
                        </div>
@@ -2038,7 +1999,7 @@ export function DashboardPage() {
                          </div>
                          <div className="flex items-center gap-1.5 mb-3">
                            {[1, 2, 3, 4, 5].map(s => (
-                             <Star key={s} size={12} className={s <= Math.floor(r.rating || 5) ? "text-[#E8500A] fill-[#E8500A]" : "text-gray-250"} />
+                             <Star key={s} size={12} className={s <= Math.floor(r.rating || 5) ? "text-[#FF5B00] fill-[#FF5B00]" : "text-gray-250"} />
                            ))}
                            <span className="text-[10px] font-bold text-gray-400">({r.rating || '5'}.0)</span>
                          </div>
@@ -2076,11 +2037,11 @@ export function DashboardPage() {
           <div className="p-8 border-b border-white/5">
             <Link to="/" className="flex flex-col items-start group text-white select-none">
               <div className="flex gap-1.5 mb-2.5">
-                <div className="w-4 h-4 rounded-full border-2 border-[#E8500A] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-[#E8500A] rounded-full animate-ping" />
+                <div className="w-4 h-4 rounded-full border-2 border-[#FF5B00] flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-[#FF5B00] rounded-full animate-ping" />
                 </div>
-                <div className="w-4 h-4 rounded-full border-2 border-[#E8500A] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-[#E8500A] rounded-full" />
+                <div className="w-4 h-4 rounded-full border-2 border-[#FF5B00] flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-[#FF5B00] rounded-full" />
                 </div>
               </div>
               <span className="text-xl font-black tracking-tight text-white block">choosify.bd</span>
@@ -2131,15 +2092,15 @@ export function DashboardPage() {
 
             {/* Promo Member card in sidebar */}
             <div className="mx-6 my-8 p-5 rounded-2xl bg-gradient-to-br from-[#12132D] to-[#0A0B1A] border border-white/5 text-left relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-[#E8500A]/5 rounded-full blur-xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-16 h-16 bg-[#FF5B00]/5 rounded-full blur-xl pointer-events-none" />
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-[#E8500A] text-xs font-sans">🔥</span>
+                <span className="text-[#FF5B00] text-xs font-sans">🔥</span>
                 <span className="text-[10px] font-black text-white uppercase tracking-wider">Premium Member</span>
               </div>
               <p className="text-[9px] text-gray-400 font-medium leading-relaxed mb-4">
                 Enjoy early access to handpicked deals, priority premium support, and exclusive rewards.
               </p>
-              <button onClick={() => toast.success('Premium benefits are active!')} className="w-full py-2 bg-white/5 hover:bg-[#E8500A] border border-white/10 hover:border-transparent text-white rounded-xl text-[8.5px] font-black uppercase tracking-widest transition-colors cursor-pointer text-center font-sans">
+              <button onClick={() => toast.success('Premium benefits are active!')} className="w-full py-2 bg-white/5 hover:bg-[#FF5B00] border border-white/10 hover:border-transparent text-white rounded-xl text-[8.5px] font-black uppercase tracking-widest transition-colors cursor-pointer text-center font-sans">
                 View Benefits
               </button>
             </div>
@@ -2157,7 +2118,7 @@ export function DashboardPage() {
               }}
               className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white/5 border border-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic hover:bg-white/10 transition-all cursor-pointer"
             >
-               <LogOut size={14} className="text-[#E8500A]" /> Curator Log Out
+               <LogOut size={14} className="text-[#FF5B00]" /> Curator Log Out
             </button>
           </div>
         </aside>

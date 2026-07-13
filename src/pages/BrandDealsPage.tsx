@@ -91,14 +91,14 @@ export function BrandDealsPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#E8500A]" />
+          <Search size={13} className="text-[#FF5B00]" />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search brand deals, promo codes or specific brands..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
         />
       </div>
     ),
@@ -237,9 +237,9 @@ export function BrandDealsPage() {
 
             {/* SEARCH BAR — placed inside hero section at bottom */}
             <div className="relative w-full max-w-2xl mx-auto mt-6">
-              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#E8500A]/30 transition-all duration-300">
+              <div className="relative w-full bg-gray-50/50 p-1 rounded-full border border-gray-200/80 shadow-inner focus-within:border-[#FF5B00]/30 transition-all duration-300">
                 <div className="flex items-center bg-white rounded-full">
-                  <div className="pl-4 text-[#E8500A] shrink-0">
+                  <div className="pl-4 text-[#FF5B00] shrink-0">
                     <Search className="w-4 h-4" />
                   </div>
                   <input 
@@ -251,7 +251,7 @@ export function BrandDealsPage() {
                   />
                   <button 
                     onClick={() => setSearchQuery(searchQuery)}
-                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
+                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#FF5B00] hover:from-[#FF5B00] hover:to-[#EB4501] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
                   >
                     Search
                   </button>
@@ -281,316 +281,12 @@ export function BrandDealsPage() {
         }}
       />
 
-      {/* CORE THREE-COLUMN SYSTEM LAYOUT INTEGRATION */}
+      {/* CORE SINGLE-COLUMN WORKSPACE LAYOUT */}
       <div className="w-full bg-[#F3F9FF]/30 min-h-screen py-8">
-        <div id="brand-deals-main" className="scroll-mt-36 max-w-[1440px] mx-auto px-4 py-5 w-full grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start relative">
+        <div id="brand-deals-main" className="scroll-mt-36 max-w-[1200px] mx-auto px-6 py-5 w-full space-y-6">
           
-          {/* Left Sidebar */}
-          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
-            {/* LEFT COLUMN SEARCH BAR */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <Search size={13} className="text-[#E8500A]" />
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search brand deals, promo codes or specific brands..."
-                className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
-              />
-            </div>
-
-            <QuickAccessCard />
-
-            {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
-            <div id="brand-deals-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
-              <FullSidebarFilterPanel
-                title="Filter Brand Deals"
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                searchPlaceholder="Search active brand deals..."
-                quickFilters={
-                  <QuickFilterBar
-                    title="Brand Deals Quick Specs"
-                    onOpenFullFilters={() => {}}
-                    filters={[
-                      { id: 'verified', label: '✓ Verified Partners Only', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
-                      { id: 'top-rated', label: '⭐ Top Rated (4.7+)', active: popularityFilter === 'high', onClick: () => setPopularityFilter(popularityFilter === 'high' ? 'all' : 'high') },
-                      { id: 'cat-fashion', label: '👗 Fashion Channel', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
-                      { id: 'cat-electronics', label: '💻 Electronics Channel', active: selectedCategory === 'Electronics', onClick: () => setSelectedCategory(selectedCategory === 'Electronics' ? null : 'Electronics') },
-                    ]}
-                  />
-                }
-                activeChips={
-                  <ActiveFilterChips
-                    chips={[
-                      selectedLetter ? { id: 'letter', label: `Starts with: ${selectedLetter}`, onRemove: () => setSelectedLetter(null) } : null,
-                      selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
-                      verificationFilter !== 'all' ? { id: 'verification', label: `Verification: ${verificationFilter === 'verified' ? 'Verified Only' : 'Unverified Only'}`, onRemove: () => setVerificationFilter('all') } : null,
-                      popularityFilter !== 'all' ? { id: 'popularity', label: `Popularity: ${popularityFilter === 'high' ? 'Top-Rated' : 'Regular'}`, onRemove: () => setPopularityFilter('all') } : null,
-                      searchQuery ? { id: 'search', label: `Query: ${searchQuery}`, onRemove: () => setSearchQuery('') } : null
-                    ].filter(Boolean) as any[]}
-                    onClearAll={() => {
-                      setSelectedLetter(null);
-                      setSelectedCategory(null);
-                      setVerificationFilter('all');
-                      setPopularityFilter('all');
-                      setSearchQuery('');
-                      setActiveTab('All');
-                    }}
-                  />
-                }
-                onReset={() => {
-                  setSelectedLetter(null);
-                  setSelectedCategory(null);
-                  setVerificationFilter('all');
-                  setPopularityFilter('all');
-                  setSearchQuery('');
-                  setActiveTab('All');
-                }}
-                advancedSection={
-                  <div className="flex flex-col gap-4">
-                    {/* Initial Index selection A-Z */}
-                    <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-2">
-                      <h3 className="text-[11px] font-black text-[#8a9bb0] uppercase tracking-wider mb-2">Alpha search (A-Z)</h3>
-                      <div className="grid grid-cols-5 gap-1.5 max-h-32 overflow-y-auto no-scrollbar">
-                        <button 
-                          onClick={() => setSelectedLetter(null)}
-                          className={cn(
-                            "col-span-5 py-1.5 rounded-[5px] text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
-                            selectedLetter === null ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                          )}
-                        >
-                          All Initials
-                        </button>
-                        {letters.map((letter) => (
-                          <button 
-                            key={letter} 
-                            onClick={() => setSelectedLetter(letter)}
-                            className={cn(
-                              "h-5.5 rounded-[5px] text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
-                              selectedLetter === letter ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                            )}
-                          >
-                            {letter}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                }
-              >
-                <UniversalFilterRenderer
-                  profile={{
-                    entity: 'brands',
-                    filters: [
-                      {
-                        id: 'category',
-                        name: 'Category Hub',
-                        type: 'single_select',
-                        options: [
-                          { value: 'all', label: 'All Categories' },
-                          ...dynamicCategories.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
-                        ]
-                      },
-                      {
-                        id: 'verification',
-                        name: 'Verification Channel',
-                        type: 'single_select',
-                        options: [
-                          { value: 'all', label: 'All Claim Statuses' },
-                          { value: 'verified', label: 'Verified Claims Only' },
-                          { value: 'unverified', label: 'Unverified Channels' }
-                        ]
-                      },
-                      {
-                        id: 'popularity',
-                        name: 'Popularity Tier',
-                        type: 'single_select',
-                        options: [
-                          { value: 'all', label: 'All Tiers' },
-                          { value: 'high', label: '⭐ Top Rated (4.7+)' },
-                          { value: 'normal', label: 'Regular Deals' }
-                        ]
-                      }
-                    ]
-                  }}
-                  activeFilters={{
-                    category: selectedCategory || 'all',
-                    verification: verificationFilter,
-                    popularity: popularityFilter
-                  }}
-                  onFilterChange={(filterId, value) => {
-                    if (filterId === 'category') {
-                      setSelectedCategory(value === 'all' || !value ? null : value);
-                    } else if (filterId === 'verification') {
-                      setVerificationFilter(value as any);
-                    } else if (filterId === 'popularity') {
-                      setPopularityFilter(value as any);
-                    }
-                  }}
-                />
-              </FullSidebarFilterPanel>
-            </div>
-
-            {/* Promo spotlight card */}
-            <div className="bg-gradient-to-br from-[#0A0A1F] to-[#16163F] text-white rounded-[5px] border border-[#ff5b00]/10 p-5 shadow-lg relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
-              <div className="absolute top-0 right-0 w-28 h-28 bg-[#FF5B00]/10 rounded-full blur-2xl pointer-events-none" />
-              
-              <div>
-                <span className="px-2.5 py-1 rounded-[5px] bg-[#FF5B00] text-white text-[8.5px] font-black uppercase tracking-widest italic leading-none">
-                  SPOTLIGHT DEAL
-                </span>
-                <h3 className="font-sans text-lg font-black italic uppercase tracking-tight text-white text-left leading-snug mt-4">
-                  EXCLUSIVE S26 <span className="text-[#FF5B00]">BUNDLE PACKS</span>
-                </h3>
-                <p className="text-[11px] text-white/50 font-semibold mt-2 leading-relaxed">
-                  Unlock dynamic distributor pricing structures on Samsung Mobile nodes and premium accessories under distributor backing.
-                </p>
-              </div>
-              
-              <button 
-                onClick={() => navigate('/brands/1/products')}
-                className="w-full py-3 bg-[#FF5B00] hover:bg-[#E8500A] text-white font-black rounded-[5px] text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all mt-4 italic shadow-md shadow-orange-primary/10 cursor-pointer border-0"
-              >
-                Explore S26 Deals <ArrowRight size={13} />
-              </button>
-            </div>
-
-            {/* Platform Compliance Verified badge card */}
-            <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-left font-sans">
-              <h4 className="text-[11px] font-bold text-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <ShieldCheck size={14} className="text-green-500 shrink-0" />
-                Verified Sourcing
-              </h4>
-              <p className="text-[10px] text-gray-400 leading-relaxed font-semibold">
-                Each listed discount slot is cross-verified against official brand inventories. No mock promotions, no user redirection loops, 100% direct checkouts.
-              </p>
-            </div>
-          </aside>
-
           {/* B. MIDDLE COLUMN - BRAND WISE LISTINGS */}
-          <main className="min-w-0 space-y-8 font-sans">
-            
-            {/* Tablet/Mobile Collapsible Filter Card */}
-            <div id="brand-deals-mobile-filters" className="lg:hidden bg-white rounded-[5px] p-4 border border-[#e8edf2] shadow-sm mb-6 font-sans">
-              <div 
-                className="flex items-center justify-between cursor-pointer" 
-                onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5 leading-none">
-                    <Filter size={11} className="text-[#E8500A]" />
-                    ADVANCED FILTER PANEL:
-                  </span>
-                  <span className="px-2 py-0.5 bg-[#E8500A]/10 text-[#E8500A] text-[9px] font-black uppercase rounded-[3px] leading-none">
-                    {selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all' || selectedLetter ? 'Active Filters' : 'None'}
-                  </span>
-                </div>
-                <span className="text-[9.5px] font-black text-[#E8500A] uppercase tracking-widest">
-                  {isMobileFilterOpen ? 'Hide Filters ▲' : 'Show Filters ▼'}
-                </span>
-              </div>
-              
-              {isMobileFilterOpen && (
-                <div className="mt-4 pt-4 border-t border-gray-100/80 flex flex-col gap-4">
-                  <UniversalFilterRenderer
-                    profile={{
-                      entity: 'brands',
-                      filters: [
-                        {
-                          id: 'category',
-                          name: 'Category Hub',
-                          type: 'single_select',
-                          options: [
-                            { value: 'all', label: 'All Categories' },
-                            ...dynamicCategories.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
-                          ]
-                        },
-                        {
-                          id: 'verification',
-                          name: 'Verification Channel',
-                          type: 'single_select',
-                          options: [
-                            { value: 'all', label: 'All Claim Statuses' },
-                            { value: 'verified', label: 'Verified Claims Only' },
-                            { value: 'unverified', label: 'Unverified Channels' }
-                          ]
-                        },
-                        {
-                          id: 'popularity',
-                          name: 'Popularity Tier',
-                          type: 'single_select',
-                          options: [
-                            { value: 'all', label: 'All Tiers' },
-                            { value: 'high', label: '⭐ Top Rated (4.7+)' },
-                            { value: 'normal', label: 'Regular Deals' }
-                          ]
-                        }
-                      ]
-                    }}
-                    activeFilters={{
-                      category: selectedCategory || 'all',
-                      verification: verificationFilter,
-                      popularity: popularityFilter
-                    }}
-                    onFilterChange={(filterId, value) => {
-                      if (filterId === 'category') {
-                        setSelectedCategory(value === 'all' || !value ? null : value);
-                      } else if (filterId === 'verification') {
-                        setVerificationFilter(value as any);
-                      } else if (filterId === 'popularity') {
-                        setPopularityFilter(value as any);
-                      }
-                    }}
-                  />
-
-                  {/* Alphabet Selection in Mobile View */}
-                  <div className="bg-[#f8fbfd] rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-2 mt-2">
-                    <h3 className="text-[11px] font-black text-[#8a9bb0] uppercase tracking-wider mb-2">Alpha Search (A-Z)</h3>
-                    <div className="grid grid-cols-6 sm:grid-cols-9 gap-1.5 max-h-32 overflow-y-auto no-scrollbar">
-                      <button 
-                        onClick={() => setSelectedLetter(null)}
-                        className={cn(
-                          "col-span-6 sm:col-span-9 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
-                          selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                        )}
-                      >
-                        All Brands
-                      </button>
-                      {letters.map((letter) => (
-                        <button 
-                          key={letter} 
-                          onClick={() => setSelectedLetter(letter)}
-                          className={cn(
-                            "h-8 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
-                            selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
-                          )}
-                        >
-                          {letter}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setSelectedLetter(null);
-                      setSelectedCategory(null);
-                      setVerificationFilter('all');
-                      setPopularityFilter('all');
-                      setSearchQuery('');
-                      setActiveTab('All');
-                      setIsMobileFilterOpen(false);
-                    }}
-                    className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-black rounded-[5px] text-[10px] uppercase tracking-widest transition-all italic border-0"
-                  >
-                    Reset All Filters
-                  </button>
-                </div>
-              )}
-            </div>
+          <main className="min-w-0 space-y-8 font-sans w-full">
             
             {/* Header info bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8edf2]">
@@ -615,7 +311,7 @@ export function BrandDealsPage() {
                     setVerificationFilter('all');
                     setPopularityFilter('all');
                   }}
-                  className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#e8edf2] px-3.5 py-2 rounded-[5px] shadow-sm self-start sm:self-auto hover:text-[#CF4400]"
+                  className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#e8edf2] px-3.5 py-2 rounded-[5px] shadow-sm self-start sm:self-auto hover:text-[#EB4501]"
                 >
                   Reset All Filters
                 </button>
@@ -698,7 +394,7 @@ export function BrandDealsPage() {
                   <p className="text-xs text-gray-400 font-semibold max-w-sm">No partners match your selected criteria. Try resetting the search input or alphabet letter filter.</p>
                   <button 
                     onClick={() => {setSelectedLetter(null); setSearchQuery(''); setActiveTab('All');}}
-                    className="px-5 py-2.5 bg-orange-primary hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-[5px] transition-all italic shadow-md"
+                    className="px-5 py-2.5 bg-orange-primary hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-[5px] transition-all italic shadow-md"
                   >
                     Clear All Filters
                   </button>
@@ -706,34 +402,6 @@ export function BrandDealsPage() {
               )}
             </div>
           </main>
-
-          {/* C. RIGHT COLUMN - OFFERS PROMOTIONS SIDEBAR */}
-          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in font-sans">
-            
-            {/* Offline Sourcing Request */}
-            <div className="bg-white rounded-[5px] p-5 shadow-sm border border-[#e8edf2] text-left flex flex-col justify-between" style={{ height: '240px' }}>
-              <div>
-                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                  PARTNER SOLUTIONS
-                </span>
-                <h4 className="text-xs font-semibold text-navy uppercase tracking-wide leading-none mt-2">
-                  REQUEST COUPE TAGS
-                </h4>
-                <p className="text-[10px] text-gray-400 leading-relaxed font-semibold mt-2.5">
-                  Are you managing a distribution node or seeking bulk slot discounts? Request verified platform onboarding tags seamlessly.
-                </p>
-              </div>
-              
-              <button 
-                onClick={() => navigate('/post-offer')}
-                className="w-full py-3 bg-white border-2 border-gray-150 hover:border-navy text-navy font-black rounded-[5px] text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all italic cursor-pointer"
-              >
-                Submit Partnership Query
-              </button>
-            </div>
-
-          </aside>
-
         </div>
       </div>
 

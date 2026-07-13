@@ -128,7 +128,7 @@ export function SearchPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#E8500A]" />
+          <Search size={13} className="text-[#FF5B00]" />
         </div>
         <input
           type="text"
@@ -139,7 +139,7 @@ export function SearchPage() {
             setSearchParams(val ? { q: val } : {});
           }}
           placeholder="Search all content..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
         />
       </div>
     ),
@@ -561,7 +561,7 @@ export function SearchPage() {
               >
                 {tab.label}
                 <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-full ${
-                  activeTab === tab.key ? 'bg-[#E8500A] text-white' : 'bg-gray-250 text-gray-500'
+                  activeTab === tab.key ? 'bg-[#FF5B00] text-white' : 'bg-gray-250 text-gray-500'
                 }`}>
                   {tab.count}
                 </span>
@@ -611,25 +611,25 @@ export function SearchPage() {
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                   <div className="flex items-center gap-2">
-                    <ShoppingBag size={15} className="text-[#E8500A]" />
+                    <ShoppingBag size={15} className="text-[#FF5B00]" />
                     <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
                       Products library ({searchResults.products.length})
                     </h2>
                   </div>
                   {activeTab === 'all' && searchResults.products.length > 4 && (
-                    <button onClick={() => setActiveTab('products')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                    <button onClick={() => setActiveTab('products')} className="text-[10px] font-black uppercase text-[#FF5B00] hover:underline flex items-center gap-1">
                       See All Matches <ChevronRight size={12} />
                     </button>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center justify-center gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                   {(activeTab === 'all' ? searchResults.products.slice(0, 6) : searchResults.products).map((product) => (
                     <div key={product.id} className="flex flex-col justify-between h-full group">
                       <ProductCard product={product} />
                       {product.matchOverview && (
                         <div className="mt-2.5 p-2 bg-orange-primary/5 border border-orange-primary/10 rounded-[4px] text-left">
-                          <p className="text-[7.5px] font-black uppercase text-[#E8500A] tracking-wider mb-0.5">
+                          <p className="text-[7.5px] font-black uppercase text-[#FF5B00] tracking-wider mb-0.5">
                             MATCHED IN {product.matchOverview.sectionName}
                           </p>
                           <p className="text-[8.5px] text-gray-600 font-bold leading-normal truncate italic uppercase">
@@ -649,7 +649,7 @@ export function SearchPage() {
                 <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                   <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                     <div className="flex items-center gap-2">
-                      <Sparkles size={15} className="text-[#E8500A]" />
+                      <Sparkles size={15} className="text-[#FF5B00]" />
                       <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
                         Expert Guides & Recommendations ({searchResults.guides.length})
                       </h2>
@@ -657,7 +657,7 @@ export function SearchPage() {
                     {activeTab === 'all' && searchResults.guides.length > 3 && (
                       <button 
                         onClick={() => setActiveTab('guides')} 
-                        className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1"
+                        className="text-[10px] font-black uppercase text-[#FF5B00] hover:underline flex items-center gap-1"
                       >
                         See All Guides <ChevronRight size={12} />
                       </button>
@@ -672,7 +672,7 @@ export function SearchPage() {
                       >
                         <div>
                           {guide.category && (
-                            <span className="inline-block bg-orange-primary/10 text-[#E8500A] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-2">
+                            <span className="inline-block bg-orange-primary/10 text-[#FF5B00] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-2">
                               {guide.category}
                             </span>
                           )}
@@ -691,7 +691,7 @@ export function SearchPage() {
                           )}
                           <Link 
                             to={`/guides/${guide.id}`}
-                            className="text-[9px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-1 hover:underline"
+                            className="text-[9px] font-black text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 hover:underline"
                           >
                             Read Guide <ArrowRight size={10} />
                           </Link>
@@ -724,13 +724,13 @@ export function SearchPage() {
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                   <div className="flex items-center gap-2">
-                    <Award size={15} className="text-[#E8500A]" />
+                    <Award size={15} className="text-[#FF5B00]" />
                     <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
                       Authorized Brands ({searchResults.brands.length})
                     </h2>
                   </div>
                   {activeTab === 'all' && searchResults.brands.length > 3 && (
-                    <button onClick={() => setActiveTab('brands')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                    <button onClick={() => setActiveTab('brands')} className="text-[10px] font-black uppercase text-[#FF5B00] hover:underline flex items-center gap-1">
                       See All Brands <ChevronRight size={12} />
                     </button>
                   )}
@@ -749,13 +749,13 @@ export function SearchPage() {
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                   <div className="flex items-center gap-2">
-                    <Tag size={15} className="text-[#E8500A]" />
+                    <Tag size={15} className="text-[#FF5B00]" />
                     <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
                       Active Campaigns & Deals ({searchResults.deals.length})
                     </h2>
                   </div>
                   {activeTab === 'all' && searchResults.deals.length > 3 && (
-                    <button onClick={() => setActiveTab('deals')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                    <button onClick={() => setActiveTab('deals')} className="text-[10px] font-black uppercase text-[#FF5B00] hover:underline flex items-center gap-1">
                       See All Deals <ChevronRight size={12} />
                     </button>
                   )}
@@ -765,7 +765,7 @@ export function SearchPage() {
                   {(activeTab === 'all' ? searchResults.deals.slice(0, 3) : searchResults.deals).map((deal, idx) => (
                     <div
                       key={idx}
-                      className="border border-dashed border-[#E8500A]/35 rounded-[5px] p-4 bg-orange-primary/[0.02] hover:bg-orange-primary/[0.04] flex gap-4 text-left transition-colors relative"
+                      className="border border-dashed border-[#FF5B00]/35 rounded-[5px] p-4 bg-orange-primary/[0.02] hover:bg-orange-primary/[0.04] flex gap-4 text-left transition-colors relative"
                     >
                       {deal.type === 'product_deal' ? (
                         <>
@@ -782,13 +782,13 @@ export function SearchPage() {
                               </h4>
                             </div>
                             <div className="flex items-baseline gap-1.5 mt-1">
-                              <span className="text-xs font-mono font-bold text-[#E8500A]">BDT {deal.price}</span>
+                              <span className="text-xs font-mono font-bold text-[#FF5B00]">BDT {deal.price}</span>
                               {deal.originalPrice && (
                                 <span className="text-[9px] text-gray-400 line-through">BDT {deal.originalPrice}</span>
                               )}
                             </div>
                           </div>
-                          <Link to={`/products/${deal.id}`} className="absolute bottom-4 right-4 text-[9px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-0.5">
+                          <Link to={`/products/${deal.id}`} className="absolute bottom-4 right-4 text-[9px] font-black text-[#FF5B00] uppercase tracking-wider flex items-center gap-0.5">
                             Shop <ChevronRight size={10} />
                           </Link>
                         </>
@@ -802,11 +802,11 @@ export function SearchPage() {
                             <h4 className="font-bold text-xs uppercase text-[#1A1D4E] mt-0.5">
                               {deal.brand}
                             </h4>
-                            <p className="text-[10px] font-semibold text-[#E8500A] mt-0.5 truncate uppercase">
+                            <p className="text-[10px] font-semibold text-[#FF5B00] mt-0.5 truncate uppercase">
                               {deal.title}
                             </p>
                           </div>
-                          <Link to={`/brands/${deal.id}`} className="absolute bottom-4 right-4 text-[9px] font-black text-[#E8500A] uppercase tracking-wider flex items-center gap-0.5">
+                          <Link to={`/brands/${deal.id}`} className="absolute bottom-4 right-4 text-[9px] font-black text-[#FF5B00] uppercase tracking-wider flex items-center gap-0.5">
                             View <ChevronRight size={10} />
                           </Link>
                         </>
@@ -822,7 +822,7 @@ export function SearchPage() {
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                   <div className="flex items-center gap-2">
-                    <Percent size={15} className="text-[#E8500A]" />
+                    <Percent size={15} className="text-[#FF5B00]" />
                     <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
                       Promo Codes & Brand Coupons ({searchResults.coupons.length})
                     </h2>
@@ -839,7 +839,7 @@ export function SearchPage() {
                         <h4 className="font-black text-xs uppercase text-[#1A1D4E]">
                           {coupon.brandName}
                         </h4>
-                        <p className="text-[10px] text-[#E8500A] font-bold mt-1 uppercase tracking-wide">
+                        <p className="text-[10px] text-[#FF5B00] font-bold mt-1 uppercase tracking-wide">
                           {coupon.discount}
                         </p>
                       </div>
@@ -850,7 +850,7 @@ export function SearchPage() {
                         </div>
                         <button
                           onClick={() => handleCopyCode(coupon.code)}
-                          className="p-1 px-3 bg-[#E8500A]/5 hover:bg-[#E8500A] text-[#E8500A] hover:text-white rounded text-[8px] font-semibold uppercase tracking-wider transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+                          className="p-1 px-3 bg-[#FF5B00]/5 hover:bg-[#FF5B00] text-[#FF5B00] hover:text-white rounded text-[8px] font-semibold uppercase tracking-wider transition-all flex items-center gap-1 shrink-0 cursor-pointer"
                         >
                           {copiedCode === coupon.code ? <Check size={10} /> : <Copy size={10} />}
                           {copiedCode === coupon.code ? 'Copied' : 'Copy'}
@@ -867,7 +867,7 @@ export function SearchPage() {
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                   <div className="flex items-center gap-2">
-                    <FolderOpen size={15} className="text-[#E8500A]" />
+                    <FolderOpen size={15} className="text-[#FF5B00]" />
                     <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
                       Designated Categories ({searchResults.categories.length})
                     </h2>
@@ -895,13 +895,13 @@ export function SearchPage() {
                 <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                   <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                     <div className="flex items-center gap-2">
-                      <User size={15} className="text-[#E8500A]" />
+                      <User size={15} className="text-[#FF5B00]" />
                       <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
                         Professional Influencers & Creators ({searchResults.influencers.length})
                       </h2>
                     </div>
                     {activeTab === 'all' && searchResults.influencers.length > 2 && (
-                      <button onClick={() => setActiveTab('influencers')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                      <button onClick={() => setActiveTab('influencers')} className="text-[10px] font-black uppercase text-[#FF5B00] hover:underline flex items-center gap-1">
                         See All Creators <ChevronRight size={12} />
                       </button>
                     )}
@@ -928,19 +928,19 @@ export function SearchPage() {
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                   <div className="flex items-center gap-2">
-                    <Heart size={15} className="text-[#E8500A] fill-[#E8500A]" />
+                    <Heart size={15} className="text-[#FF5B00] fill-[#FF5B00]" />
                     <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
                       Customer Favorites ({searchResults.favorites.length})
                     </h2>
                   </div>
                   {activeTab === 'all' && searchResults.favorites.length > 4 && (
-                    <button onClick={() => setActiveTab('favorites')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                    <button onClick={() => setActiveTab('favorites')} className="text-[10px] font-black uppercase text-[#FF5B00] hover:underline flex items-center gap-1">
                       See All Favorites <ChevronRight size={12} />
                     </button>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 justify-items-center gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                   {(activeTab === 'all' ? searchResults.favorites.slice(0, 6) : searchResults.favorites).map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -953,13 +953,13 @@ export function SearchPage() {
               <div className="bg-white rounded-[5px] border border-gray-200 p-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3.5 mb-6">
                   <div className="flex items-center gap-2">
-                    <Layers size={15} className="text-[#E8500A]" />
+                    <Layers size={15} className="text-[#FF5B00]" />
                     <h2 className="text-sm font-black uppercase tracking-widest text-[#0A0A1F]">
                       Matched Multi-Dimensional Comparisons ({searchResults.compares.length})
                     </h2>
                   </div>
                   {activeTab === 'all' && searchResults.compares.length > 3 && (
-                    <button onClick={() => setActiveTab('compares')} className="text-[10px] font-black uppercase text-[#E8500A] hover:underline flex items-center gap-1">
+                    <button onClick={() => setActiveTab('compares')} className="text-[10px] font-black uppercase text-[#FF5B00] hover:underline flex items-center gap-1">
                       See All Comparisons <ChevronRight size={12} />
                     </button>
                   )}
@@ -973,14 +973,14 @@ export function SearchPage() {
                       className="border border-[#e8edf2] hover:border-orange-primary/30 rounded-[5px] p-4 flex flex-col justify-between bg-white hover:shadow-soft transition-all text-left"
                     >
                       <div>
-                        <span className="bg-orange-primary/10 text-[#E8500A] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-2 inline-block">
+                        <span className="bg-orange-primary/10 text-[#FF5B00] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-2 inline-block">
                           {compareRow.category} Comparisons
                         </span>
                         <h4 className="font-bold text-xs uppercase text-[#1A1D4E]">
                           {compareRow.title}
                         </h4>
                       </div>
-                      <span className="mt-4 text-[9px] text-[#E8500A] font-black uppercase tracking-wider flex items-center gap-0.5">
+                      <span className="mt-4 text-[9px] text-[#FF5B00] font-black uppercase tracking-wider flex items-center gap-0.5">
                         Open Side-By-Side Matrix <ChevronRight size={10} />
                       </span>
                     </Link>

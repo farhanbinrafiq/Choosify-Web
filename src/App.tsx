@@ -22,7 +22,7 @@ const BrandDetailPage = lazy(() => import('./pages/BrandDetailPage').then(m => (
 const DealsPage = lazy(() => import('./pages/DealsPage').then(m => ({ default: m.DealsPage })));
 const ComparePage = lazy(() => import('./pages/ComparePage').then(m => ({ default: m.ComparePage })));
 const GuidesPage = lazy(() => import('./pages/GuidesPage').then(m => ({ default: m.GuidesPage })));
-const GuideDetailPage = lazy(() => import('./pages/GuideDetailPage').then(m => ({ default: m.GuideDetailPage })));
+const ContentDetailsPage = lazy(() => import('./pages/ContentDetailsPage').then(m => ({ default: m.ContentDetailsPage })));
 const GuideProductsPage = lazy(() => import('./pages/GuideProductsPage').then(m => ({ default: m.GuideProductsPage })));
 const LoginSignUpPage = lazy(() => import('./pages/LoginSignUpPage').then(m => ({ default: m.LoginSignUpPage })));
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
@@ -195,10 +195,12 @@ function AppContent() {
             <Route path="/categories" element={<PageWrapper><CategoriesPage /></PageWrapper>} />
             <Route path="/deals" element={<PageWrapper><DealsPage /></PageWrapper>} />
             <Route path="/compare" element={<PageWrapper><ComparePage /></PageWrapper>} />
-            <Route path="/guides" element={<PageWrapper><GuidesPage /></PageWrapper>} />
-            <Route path="/guides/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
-            <Route path="/recommendations" element={<PageWrapper><GuidesPage /></PageWrapper>} />
-            <Route path="/recommendations/:id" element={<PageWrapper><GuideDetailPage /></PageWrapper>} />
+            <Route path="/discover" element={<PageWrapper><GuidesPage /></PageWrapper>} />
+            <Route path="/discover/:id" element={<PageWrapper><ContentDetailsPage /></PageWrapper>} />
+            <Route path="/guides" element={<Navigate to="/discover" replace />} />
+            <Route path="/guides/:id" element={<PageWrapper><ContentDetailsPage /></PageWrapper>} />
+            <Route path="/recommendations" element={<Navigate to="/discover" replace />} />
+            <Route path="/recommendations/:id" element={<PageWrapper><ContentDetailsPage /></PageWrapper>} />
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
             <Route path="/login" element={<PageWrapper><LoginSignUpPage /></PageWrapper>} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />

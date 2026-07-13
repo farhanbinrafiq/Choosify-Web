@@ -8,6 +8,7 @@ import {
   Heart, Calendar, Flame, ShieldCheck, Zap, LayoutGrid, MessageSquare
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
 
 // ==========================================
 // DATA STRUCTURES
@@ -241,6 +242,59 @@ export function GuidesPage() {
   const [followedCreators, setFollowedCreators] = useState<string[]>([]);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
+  useRegisterPageFilters({
+    pageName: 'Discover & Guides',
+    renderSearch: () => (
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={13} className="text-[#FF5B00]" />
+        </div>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search guides, reviews, collections..."
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
+        />
+      </div>
+    ),
+    renderFilters: () => (
+      <div className="flex flex-col gap-4 mt-4">
+        <UniversalFilterRenderer
+          profile={{
+            entity: 'guides',
+            filters: [
+              {
+                id: 'content-type',
+                name: 'Content Type',
+                type: 'multi_select',
+                options: [
+                  { value: 'buying-guide', label: 'Buying Guide' },
+                  { value: 'review', label: 'Review' },
+                  { value: 'comparison', label: 'Comparison' },
+                  { value: 'tutorial', label: 'Tutorial' }
+                ]
+              },
+              {
+                id: 'media',
+                name: 'Media Type',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Media' },
+                  { value: 'video', label: 'Video Only' },
+                  { value: 'article', label: 'Articles Only' }
+                ]
+              }
+            ]
+          }}
+          activeFilters={{}}
+          onFilterChange={() => {}}
+        />
+      </div>
+    ),
+    onClearAll: () => setSearchQuery('')
+  }, [searchQuery]);
+
   const navigationTabs = [
     { name: 'All', icon: LayoutGrid },
     { name: 'Buying Guides', icon: BookOpen },
@@ -319,131 +373,135 @@ export function GuidesPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-gray-800 pb-16 font-sans">
       
-      {/* Top Breadcrumb Navigation */}
-      <div className="w-full max-w-7xl mx-auto px-6 md:px-10 py-4 text-left">
-        <nav className="text-xs font-semibold text-gray-400 flex items-center gap-1.5 uppercase tracking-wider">
-          <Link to="/" className="hover:text-[#FF5B00] transition-colors">Home</Link>
-          <span className="text-gray-300 font-bold">&gt;</span>
-          <span className="text-[#FF5B00] font-bold">Discover</span>
-        </nav>
-      </div>
+      {/* 1. EDGE-TO-EDGE HERO SECTION WITH INTEGRATED BREADCRUMBS */}
+      <section className="w-full bg-gradient-to-br from-[#050616] via-[#0A0C24] to-[#121538] py-12 md:py-16 relative overflow-hidden shrink-0">
+        
+        {/* Glowing Ambient Light Effects */}
+        <div className="absolute top-0 left-1/4 w-[450px] h-[450px] bg-[#FF5B00]/8 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* 1. HERO SECTION */}
-      <section className="max-w-7xl mx-auto w-full px-6 md:px-10 mb-8">
-        <div className="bg-gradient-to-br from-[#050616] via-[#0A0C24] to-[#121538] rounded-3xl p-8 md:p-12 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10 border border-slate-800 shadow-xl min-h-[440px]">
+        {/* Constrained Content Container */}
+        <div className="max-w-7xl mx-auto w-full px-6 md:px-10 relative z-10">
           
-          {/* Glowing Ambient Light Effects */}
-          <div className="absolute top-0 left-1/4 w-[450px] h-[450px] bg-[#FF5B00]/8 rounded-full blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+          {/* Breadcrumb row inside the hero */}
+          <nav className="text-xs font-semibold text-gray-400 flex items-center gap-1.5 uppercase tracking-wider mb-8 select-none">
+            <Link to="/" className="hover:text-[#FF5B00] transition-colors">Home</Link>
+            <span className="text-gray-500 font-bold">&gt;</span>
+            <span className="text-white font-bold">Discover</span>
+          </nav>
 
-          {/* Left Text Block */}
-          <div className="max-w-xl text-left relative z-10 flex-1">
-            <span className="text-xs font-black tracking-widest text-[#FF5B00] uppercase block mb-3">
-              DISCOVER.
-            </span>
-            <h1 className="text-4xl md:text-5xl lg:text-[54px] font-black tracking-tight text-white leading-tight uppercase font-sans">
-              Smarter Choices,<br />
-              Better <span className="text-[#FF5B00]">Decisions.</span>
-            </h1>
-            <p className="text-sm text-slate-300 font-medium mt-4 leading-relaxed max-w-lg">
-              Explore expert guides, creator reviews, videos, collections, brand stories and real experiences.
-            </p>
-
-            {/* INTEGRATED SEARCH BAR */}
-            <div className="relative w-full max-w-lg mt-8">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-20">
-                <Search className="w-4 h-4 text-slate-400" />
-              </div>
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Discover..." 
-                className="w-full h-13 pl-11 pr-28 bg-white/10 backdrop-blur-md border border-white/15 focus:border-[#FF5B00]/50 rounded-2xl text-xs font-bold text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#FF5B00]/40 transition-all shadow-lg"
-              />
-              <button 
-                onClick={() => toast.success(`Searching for "${searchQuery}"`)}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-6 bg-[#FF5B00] hover:bg-orange-600 active:scale-95 text-white text-[11px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center transition-all shadow-md cursor-pointer border-none"
-              >
-                Search
-              </button>
-            </div>
-
-            {/* Trending Searches Row */}
-            <div className="flex flex-wrap items-center gap-2 mt-5 text-[11px] font-bold text-slate-400">
-              <span className="font-semibold uppercase tracking-wider text-slate-500">Trending searches:</span>
-              {['iPhone 15 Pro Max', 'Best Laptops 2025', 'Running Shoes', 'Smartwatches', 'Air Fryer'].map((term) => (
-                <button
-                  key={term}
-                  onClick={() => handleTrendingSearchClick(term)}
-                  className="hover:text-white transition-colors cursor-pointer text-slate-400 font-bold border-none bg-transparent p-0"
-                >
-                  {term},
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Right Product Image Collage */}
-          <div className="relative w-full max-w-[500px] h-[320px] hidden lg:block shrink-0">
-            {/* Background Laptop screen */}
-            <div className="absolute top-4 right-10 w-[360px] h-[240px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-              <img 
-                src="https://images.unsplash.com/photo-1496181130204-755241544e35?w=500&q=80" 
-                className="w-full h-full object-cover grayscale opacity-30"
-                alt="Laptop Backdrop"
-              />
-            </div>
-
-            {/* Canon Camera overlay */}
-            <div className="absolute top-2 right-0 w-[170px] h-[130px] rounded-xl overflow-hidden border border-white/15 shadow-xl transform rotate-3 bg-[#0A0B22]">
-              <img 
-                src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300&q=80" 
-                className="w-full h-full object-cover"
-                alt="Canon Camera"
-              />
-            </div>
-
-            {/* Headphones overlay */}
-            <div className="absolute -bottom-2 right-[180px] w-[170px] h-[140px] rounded-xl overflow-hidden border border-white/15 shadow-2xl transform -rotate-6 bg-[#0A0B22]">
-              <img 
-                src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80" 
-                className="w-full h-full object-cover"
-                alt="Headphones"
-              />
-            </div>
-
-            {/* Red running shoe overlay */}
-            <div className="absolute bottom-6 left-2 w-[150px] h-[110px] rounded-xl overflow-hidden border border-white/15 shadow-xl transform rotate-12 bg-[#0A0B22]">
-              <img 
-                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80" 
-                className="w-full h-full object-cover"
-                alt="Red shoe"
-              />
-            </div>
-
-            {/* EDITOR'S PICK INTERACTIVE BANNER */}
-            <div className="absolute bottom-4 right-2 bg-[#08081A]/95 border border-white/15 rounded-2xl p-4 shadow-2xl text-left w-[240px] backdrop-blur-md">
-              <div className="flex items-center justify-between">
-                <span className="text-[9px] font-black tracking-widest text-[#FF5B00] uppercase bg-[#FF5B00]/10 px-2 py-0.5 rounded">
-                  Editor's Pick
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00] animate-pulse" />
-              </div>
-              <h4 className="text-xs font-black text-white mt-2 leading-snug">
-                Best Tech of Summer 2025
-              </h4>
-              <p className="text-[10px] text-slate-400 mt-1">
-                12 min read
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
+            
+            {/* Left Text Block */}
+            <div className="max-w-xl text-left relative z-10 flex-1">
+              <span className="text-xs font-black tracking-widest text-[#FF5B00] uppercase block mb-3">
+                DISCOVER.
+              </span>
+              <h1 className="text-4xl md:text-5xl lg:text-[54px] font-black tracking-tight text-white leading-tight uppercase font-sans">
+                Smarter Choices,<br />
+                Better <span className="text-[#FF5B00]">Decisions.</span>
+              </h1>
+              <p className="text-sm text-slate-300 font-medium mt-4 leading-relaxed max-w-lg">
+                Explore expert guides, creator reviews, videos, collections, brand stories and real experiences.
               </p>
-              <div className="flex items-center justify-end mt-2">
-                <div 
-                  onClick={() => handleTrendingSearchClick('Best Tech of Summer 2025')}
-                  className="w-7 h-7 rounded-full bg-[#FF5B00]/10 text-[#FF5B00] hover:bg-[#FF5B00] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+
+              {/* INTEGRATED SEARCH BAR */}
+              <div className="relative w-full max-w-lg mt-8">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-20">
+                  <Search className="w-4 h-4 text-slate-400" />
+                </div>
+                <input 
+                  type="text" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search Discover..." 
+                  className="w-full h-13 pl-11 pr-28 bg-white/10 backdrop-blur-md border border-white/15 focus:border-[#FF5B00]/50 rounded-2xl text-xs font-bold text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#FF5B00]/40 transition-all shadow-lg"
+                />
+                <button 
+                  onClick={() => toast.success(`Searching for "${searchQuery}"`)}
+                  className="absolute right-1.5 top-1.5 bottom-1.5 px-6 bg-[#FF5B00] hover:bg-orange-600 active:scale-95 text-white text-[11px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center transition-all shadow-md cursor-pointer border-none"
                 >
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  Search
+                </button>
+              </div>
+
+              {/* Trending Searches Row */}
+              <div className="flex flex-wrap items-center gap-2 mt-5 text-[11px] font-bold text-slate-400">
+                <span className="font-semibold uppercase tracking-wider text-slate-500">Trending searches:</span>
+                {['iPhone 15 Pro Max', 'Best Laptops 2025', 'Running Shoes', 'Smartwatches', 'Air Fryer'].map((term) => (
+                  <button
+                    key={term}
+                    onClick={() => handleTrendingSearchClick(term)}
+                    className="hover:text-white transition-colors cursor-pointer text-slate-400 font-bold border-none bg-transparent p-0"
+                  >
+                    {term},
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Product Image Collage */}
+            <div className="relative w-full max-w-[500px] h-[320px] hidden lg:block shrink-0">
+              {/* Background Laptop screen */}
+              <div className="absolute top-4 right-10 w-[360px] h-[240px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                <img 
+                  src="https://images.unsplash.com/photo-1496181130204-755241544e35?w=500&q=80" 
+                  className="w-full h-full object-cover grayscale opacity-30"
+                  alt="Laptop Backdrop"
+                />
+              </div>
+
+              {/* Canon Camera overlay */}
+              <div className="absolute top-2 right-0 w-[170px] h-[130px] rounded-xl overflow-hidden border border-white/15 shadow-xl transform rotate-3 bg-[#0A0B22]">
+                <img 
+                  src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300&q=80" 
+                  className="w-full h-full object-cover"
+                  alt="Canon Camera"
+                />
+              </div>
+
+              {/* Headphones overlay */}
+              <div className="absolute -bottom-2 right-[180px] w-[170px] h-[140px] rounded-xl overflow-hidden border border-white/15 shadow-2xl transform -rotate-6 bg-[#0A0B22]">
+                <img 
+                  src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80" 
+                  className="w-full h-full object-cover"
+                  alt="Headphones"
+                />
+              </div>
+
+              {/* Red running shoe overlay */}
+              <div className="absolute bottom-6 left-2 w-[150px] h-[110px] rounded-xl overflow-hidden border border-white/15 shadow-xl transform rotate-12 bg-[#0A0B22]">
+                <img 
+                  src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80" 
+                  className="w-full h-full object-cover"
+                  alt="Red shoe"
+                />
+              </div>
+
+              {/* EDITOR'S PICK INTERACTIVE BANNER */}
+              <div className="absolute bottom-4 right-2 bg-[#08081A]/95 border border-white/15 rounded-2xl p-4 shadow-2xl text-left w-[240px] backdrop-blur-md">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-black tracking-widest text-[#FF5B00] uppercase bg-[#FF5B00]/10 px-2 py-0.5 rounded">
+                    Editor's Pick
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00] animate-pulse" />
+                </div>
+                <h4 className="text-xs font-black text-white mt-2 leading-snug">
+                  Best Tech of Summer 2025
+                </h4>
+                <p className="text-[10px] text-slate-400 mt-1">
+                  12 min read
+                </p>
+                <div className="flex items-center justify-end mt-2">
+                  <div 
+                    onClick={() => handleTrendingSearchClick('Best Tech of Summer 2025')}
+                    className="w-7 h-7 rounded-full bg-[#FF5B00]/10 text-[#FF5B00] hover:bg-[#FF5B00] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
                 </div>
               </div>
+
             </div>
 
           </div>

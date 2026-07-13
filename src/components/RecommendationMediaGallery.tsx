@@ -138,7 +138,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
                   <button
                     type="button"
                     onClick={() => setIsMuted(prev => !prev)}
-                    className="absolute bottom-4 right-4 z-30 flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black text-white hover:text-[#E8500A] font-bold text-[10px] rounded-xl border border-white/10 shadow-lg tracking-wider transition-colors"
+                    className="absolute bottom-4 right-4 z-30 flex items-center gap-1.5 px-3.5 py-2 bg-black/80 hover:bg-black text-white hover:text-[#FF5B00] font-bold text-[10px] rounded-xl border border-white/10 shadow-lg tracking-wider transition-colors"
                   >
                     {isMuted ? (
                       <>
@@ -154,7 +154,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
                   </button>
 
                   {/* Leftcorner indicator badge */}
-                  <span className="absolute top-4 left-4 bg-[#E8500A] text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full italic animate-pulse">
+                  <span className="absolute top-4 left-4 bg-[#FF5B00] text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full italic animate-pulse">
                     PLAYING VIDEO PREVIEW
                   </span>
                 </div>
@@ -179,7 +179,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
                   {/* Visual guideline loupe marker overlay */}
                   {!isZooming && (
                     <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm text-white border border-white/10 px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow-sm opacity-60 group-hover:opacity-100 transition-opacity">
-                      <ZoomIn size={12} className="text-[#E8500A]" /> Hover To Magnify
+                      <ZoomIn size={12} className="text-[#FF5B00]" /> Hover To Magnify
                     </div>
                   )}
                 </div>
@@ -223,7 +223,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
                   className={cn(
                     "relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden border-2 bg-black/40 transition-all flex items-center justify-center p-1 cursor-pointer",
                     isActive 
-                      ? "border-[#E8500A] scale-105 shadow-md shadow-[#E8500A]/10" 
+                      ? "border-[#FF5B00] scale-105 shadow-md shadow-[#FF5B00]/10" 
                       : "border-white/10 hover:border-white/40 opacity-70 hover:opacity-100"
                   )}
                 >
@@ -265,7 +265,7 @@ export function RecommendationMediaGallery({ guide }: RecommendationMediaGallery
                 onClick={() => setCarouselIndex(i)}
                 className={cn(
                   "h-1.5 transition-all duration-300 rounded-full border-none p-0",
-                  carouselIndex === i ? "w-10 bg-[#E8500A]" : "w-2 bg-white/20 hover:bg-white/40"
+                  carouselIndex === i ? "w-10 bg-[#FF5B00]" : "w-2 bg-white/20 hover:bg-white/40"
                 )}
               />
             ))}

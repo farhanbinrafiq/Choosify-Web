@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ArrowLeft, Youtube, Instagram, Facebook, Award, Heart, Check, 
+  Youtube, Instagram, Facebook, Award, Heart, Check, 
   ExternalLink, Mail, Phone, Video, Send, FileText, CheckCircle2, 
-  AlertCircle, Sparkles, BookOpen, Clock, Play, ShieldCheck, TrendingUp, Info, 
-  ChevronRight, Share2, Bookmark, Flame, Star, X, MessageCircle, BarChart3, Users, Package, Gift, Search, Lock
+  Sparkles, BookOpen, Clock, Play, ShieldCheck, Info, 
+  ChevronRight, Share2, Bookmark, Flame, Star, MessageCircle, Users, 
+  Laptop, Smartphone, Cpu, Headphones, Camera, Gamepad, Trophy, MapPin, Briefcase, GraduationCap, Globe, ChevronLeft
 } from 'lucide-react';
-import { CREATORS, Creator } from '../data/creators';
+import { CREATORS } from '../data/creators';
 import { cn } from '../lib/utils';
-import { PublicReviewCard } from '../components/PublicReviewCard';
-import { useGlobalState } from '../context/GlobalStateContext';
-import { ClaimProfileModal } from '../components/ClaimProfileModal';
 import { FollowButton } from '../components/FollowButton';
-import { useRegisterPageFilters } from '../components/FilterEngine';
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
@@ -31,52 +28,13 @@ function TikTokIcon({ size = 20 }: { size?: number }) {
 
 export function CreatorProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses } = useGlobalState();
-
-  // Find creator or fallback safely to first creator
-  const creator = CREATORS.find(c => c.id === id) || CREATORS[0];
-
-  useRegisterPageFilters({
-    pageName: creator ? creator.name : 'Creator Profile',
-    renderSearch: null,
-    quickFilters: [
-      { id: 'about', label: 'ℹ️ About', active: true, onClick: () => {} },
-      { id: 'collabs', label: '🤝 Collaborations', active: false, onClick: () => {} },
-      { id: 'reviews', label: '⭐ Reviews', active: false, onClick: () => {} }
-    ],
-    renderFilters: null,
-    activeFilterCount: 0,
-    onClearAll: null
-  }, [creator]);
-
-  const [localClaimStatus, setLocalClaimStatus] = useState<'verified' | 'pending' | 'community'>(() => getCreatorClaimStatus(creator.id));
-  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
-
-  useEffect(() => {
-    setLocalClaimStatus(getCreatorClaimStatus(creator.id));
-  }, [creator.id, creatorClaimStatuses]);
-
-  // Augmented details matching standard rating system
-  const rating = creator.id === 'creator-farhan' ? 4.9 :
-                 creator.id === 'creator-sarah' ? 4.8 :
-                 creator.id === 'creator-mily' ? 4.9 :
-                 creator.id === 'creator-imtiaz' ? 4.7 : 4.6;
-
-  const reviewsCount = creator.id === 'creator-farhan' ? 240 :
-                       creator.id === 'creator-sarah' ? 190 :
-                       creator.id === 'creator-mily' ? 150 :
-                       creator.id === 'creator-imtiaz' ? 80 : 70;
-
-  const followersCount = creator.id === 'creator-farhan' ? '450K Base' :
-                         creator.id === 'creator-sarah' ? '310K Base' :
-                         creator.id === 'creator-mily' ? '210K Base' :
-                         creator.id === 'creator-imtiaz' ? '180K Base' : '180K Base';
+  
+  // Find creator (defaults to Farhan Bin Rafiq)
+  const creator = CREATORS.find(c => c.id === id) || CREATORS.find(c => c.id === 'creator-farhan') || CREATORS[0];
 
   // Interaction States
-  const [isJoined, setIsJoined] = useState(false); // follow state
-  const [isLoved, setIsLoved] = useState(false); // love favorite state
-  const [isModalOpen, setIsModalOpen] = useState(false); // structured brief outreach modal state
+  const [isLoved, setIsLoved] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   // Structured Brief Outreach Form States
   const [productDetails, setProductDetails] = useState('');
@@ -90,29 +48,31 @@ export function CreatorProfilePage() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // Active section for sticky navigation scrollspy
-  const [activeSection, setActiveSection] = useState('all');
-  const [searchFilter, setSearchFilter] = useState('');
-  const [currentSearchInput, setCurrentSearchInput] = useState('');
+  const [activeSection, setActiveSection] = useState('overview');
+
+  // Carousel slider index for community reviews
+  const [reviewIndex, setReviewIndex] = useState(0);
 
   // Auto-scrollspy effect
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 220;
+      const scrollPosition = window.scrollY + 250;
 
       const sections = [
+        { id: 'featured-content', name: 'guides' },
         { id: 'videos-section', name: 'videos' },
-        { id: 'reels-section', name: 'reels' },
-        { id: 'blogs-section', name: 'blogs' },
         { id: 'brand-reviews-section', name: 'reviews' },
-        { id: 'creator-overview-section', name: 'overview' }
+        { id: 'collections-section', name: 'collections' },
+        { id: 'deals-section', name: 'deals' },
+        { id: 'about-section', name: 'about' }
       ];
 
-      if (window.scrollY < 200) {
-        setActiveSection('all');
+      if (window.scrollY < 300) {
+        setActiveSection('overview');
         return;
       }
 
-      let currentSection = 'all';
+      let currentSection = 'overview';
       for (const section of sections) {
         const el = document.getElementById(section.id);
         if (el) {
@@ -131,13 +91,13 @@ export function CreatorProfilePage() {
   }, []);
 
   const scrollToSection = (idStr: string) => {
-    if (idStr === 'all') {
+    if (idStr === 'overview') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      setActiveSection('all');
+      setActiveSection('overview');
     } else {
       const el = document.getElementById(idStr);
       if (el) {
-        const offset = 180;
+        const offset = 120;
         const elementPosition = el.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - offset;
         window.scrollTo({
@@ -146,13 +106,14 @@ export function CreatorProfilePage() {
         });
         
         const nameMap: { [key: string]: string } = {
+          'featured-content': 'guides',
           'videos-section': 'videos',
-          'reels-section': 'reels',
-          'blogs-section': 'blogs',
           'brand-reviews-section': 'reviews',
-          'creator-overview-section': 'overview'
+          'collections-section': 'collections',
+          'deals-section': 'deals',
+          'about-section': 'about'
         };
-        setActiveSection(nameMap[idStr] || 'all');
+        setActiveSection(nameMap[idStr] || 'overview');
       }
     }
   };
@@ -164,7 +125,7 @@ export function CreatorProfilePage() {
       return;
     }
     setSubmitSuccess(true);
-    toast.success('Structured collaboration request finalized!');
+    toast.success('Recommendation request dispatched successfully!');
   };
 
   const resetFormAndModal = () => {
@@ -178,181 +139,17 @@ export function CreatorProfilePage() {
     setContactPhone('');
   };
 
-  // Safe filtering of items based on inline search phrase
-  const filteredVideos = creator.videos.filter(v => 
-    v.title.toLowerCase().includes(searchFilter.toLowerCase().trim())
-  );
-  
-  const filteredReels = creator.reels.filter(r => 
-    r.title.toLowerCase().includes(searchFilter.toLowerCase().trim())
-  );
-
-  const filteredBlogs = creator.blogs.filter(b => 
-    b.title.toLowerCase().includes(searchFilter.toLowerCase().trim()) ||
-    b.excerpt?.toLowerCase().includes(searchFilter.toLowerCase().trim())
-  );
-
-  // Brand Reviews Support
-  const getBrandReviewsForCreator = (creatorId: string) => {
-    switch (creatorId) {
-      case 'creator-farhan':
-        return [
-          {
-            name: "Apex Footwear Ltd. (Marketing)",
-            date: "3 weeks ago",
-            purchaseDate: "May 2026",
-            comment: "Farhan delivered exceptionally high-quality smartphone integration video for our new smart-infused winter sneaker line. Communication was lightning fast and the content yielded a 15% increase in conversion rates!",
-            rating: 5,
-            verified: true,
-            productImages: [
-              "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop"
-            ],
-            dp: "https://i.pravatar.cc/150?u=apex",
-            helpful: 42
-          },
-          {
-            name: "Yellow Clothing (Sponsorship Lead)",
-            date: "1 month ago",
-            purchaseDate: "April 2026",
-            comment: "Excellent video review quality. Farhan explained our fabric tech and winter jacket line styling perfectly in one of his Tech & Lifestyle integration videos. Deliverables were provided on time with detailed metrics.",
-            rating: 4.8,
-            verified: true,
-            productImages: [
-              "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop"
-            ],
-            dp: "https://i.pravatar.cc/150?u=yellow",
-            helpful: 28
-          }
-        ];
-      case 'creator-sarah':
-        return [
-          {
-            name: "La Mode Bridal & Casuals",
-            date: "2 weeks ago",
-            purchaseDate: "May 2026",
-            comment: "Sarah's reel showcasing our casual cotton kurtis went viral within 48 hours! Her aesthetics match our brand perfectly. Over 3,000 direct store clicks recorded in Bangladesh.",
-            rating: 5,
-            verified: true,
-            productImages: [
-              "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=400&fit=crop"
-            ],
-            dp: "https://i.pravatar.cc/150?u=lamode",
-            helpful: 55
-          },
-          {
-            name: "Sajgoj Wear (Brand Executive)",
-            date: "1 month ago",
-            purchaseDate: "March 2026",
-            comment: "Super professional and punctual. Sarah created a dedicated skincare and cosmetics lookbook. Excellent lighting, editing, and natural product presentation.",
-            rating: 4.7,
-            verified: true,
-            productImages: [
-               "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=400&fit=crop"
-            ],
-            dp: "https://i.pravatar.cc/150?u=sajgoj",
-            helpful: 31
-          }
-        ];
-      case 'creator-imtiaz':
-        return [
-          {
-            name: "Dhaka Dine-In Group",
-            date: "1 week ago",
-            purchaseDate: "June 2026",
-            comment: "Imtiaz's spicy vlogging style brought massive foot traffic to our Dhanmondi branch relaunch. The video was deeply engaging, high-energy, and completely worth the budget.",
-            rating: 5,
-            verified: true,
-            productImages: [
-               "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=400&fit=crop"
-            ],
-            dp: "https://i.pravatar.cc/150?u=dhakadine",
-            helpful: 19
-          },
-          {
-            name: "Secret Recipe BD",
-            date: "3 weeks ago",
-            purchaseDate: "May 2026",
-            comment: "Great enthusiasm and on-time delivery. Imtiaz did an amazing job breaking down our special recipe cheese cakes. Easy to coordinate and very responsive.",
-            rating: 4.5,
-            verified: true,
-            productImages: [
-               "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=400&h=400&fit=crop"
-            ],
-            dp: "https://i.pravatar.cc/150?u=secretrecipe",
-            helpful: 14
-          }
-        ];
-      case 'creator-mily':
-        return [
-          {
-            name: "Sailor Fashion (Marketing Lead)",
-            date: "4 days ago",
-            purchaseDate: "June 2026",
-            comment: "Mily's travel lookbook featuring our summer outfits was exceptionally beautiful. Her cinematography is film-grade. We will definitely work with her again!",
-            rating: 5,
-            verified: true,
-            productImages: [
-               "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=400&fit=crop"
-            ],
-            dp: "https://i.pravatar.cc/150?u=sailor",
-            helpful: 67
-          },
-          {
-            name: "Cats Eye Lifestyle",
-            date: "1 month ago",
-            purchaseDate: "April 2026",
-            comment: "Highly professional. Mily made sure our casual blazer line was presented with high luxury appeal. Very pleased with the metrics.",
-            rating: 4.8,
-            verified: true,
-            productImages: [
-               "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&h=400&fit=crop"
-            ],
-            dp: "https://i.pravatar.cc/150?u=catseye",
-            helpful: 41
-          }
-        ];
-      default:
-        return [
-          {
-            name: "Daraz BD Sponsor Rep",
-            date: "2 weeks ago",
-            purchaseDate: "May 2026",
-            comment: "Excellent collaboration experience. Highly professional and clean delivery parameters. Our click-through rates beat expectations.",
-            rating: 4.8,
-            verified: true,
-            productImages: [
-               "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop"
-            ],
-            dp: "https://i.pravatar.cc/150?u=daraz",
-            helpful: 12
-          }
-        ];
-    }
-  };
-
-  const allReviews = getBrandReviewsForCreator(creator.id);
-  const filteredReviews = allReviews.filter(r => 
-    r.name.toLowerCase().includes(searchFilter.toLowerCase().trim()) ||
-    r.comment.toLowerCase().includes(searchFilter.toLowerCase().trim())
-  );
-
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed">
+    <div className="flex flex-col min-h-screen bg-[#F5F8FD]">
       
       {/* 1. CREATOR HERO SECTION */}
-      <motion.section 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="hero-gradient relative pt-10 pb-12 overflow-hidden border-b border-white/5"
-      >
-        <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
-        </div>
+      <section className="bg-gradient-to-br from-[#020516] to-[#120F26] relative pt-8 pb-16 overflow-hidden border-b border-white/5 select-none text-left">
+        {/* Glow Effects */}
+        <div className="absolute top-1/4 -left-1/4 w-96 h-96 rounded-full bg-[#FF5B00]/15 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 -right-1/4 w-96 h-96 rounded-full bg-purple-600/10 blur-3xl pointer-events-none" />
 
-        {/* Global Breadcrumbs in Hero Area */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full mb-6 text-left">
-          <div className="flex items-center gap-1.5 text-white/40 text-[9px] font-black uppercase tracking-widest">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full mb-6">
+          <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-semibold tracking-wider uppercase">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight size={10} className="text-white/20" />
             <Link to="/creators" className="hover:text-white transition-colors">Creators</Link>
@@ -362,1121 +159,1165 @@ export function CreatorProfilePage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
-            <div className="flex flex-col lg:grid lg:grid-cols-[1.5fr_1fr] xl:grid-cols-[1.6fr_1fr] gap-8 xl:gap-12 lg:items-stretch w-full">
-              
-              {/* Left Side: Creator Profile Details */}
-              <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left gap-6 order-1 lg:order-none lg:justify-between lg:h-full">
-                 <div className="w-full flex-1 flex flex-col items-center lg:items-start gap-6">
-                    {/* Rounded Frame for profile image */}
-                    <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white relative shrink-0 mx-auto lg:mx-0 object-cover">
-                       <img src={creator.avatar} className="w-full h-full object-cover" alt={creator.name} referrerPolicy="no-referrer" />
-                       {localClaimStatus === 'verified' && (
-                          <div className="absolute -top-1.5 -right-1.5 w-7 h-7 bg-orange-primary rounded-full flex items-center justify-center text-white border-2 border-[#10133A] shadow-lg">
-                             <CheckCircle2 size={13} fill="currentColor" className="text-white stroke-orange-primary" />
-                          </div>
-                       )}
-                    </div>
-
-                    <div className="w-full flex-1 flex flex-col items-center lg:items-start">
-                       <div className="flex flex-col sm:flex-row items-center gap-3 mb-2 flex-wrap justify-center lg:justify-start">
-                          <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none text-center lg:text-left">{creator.name}</h1>
-                          {localClaimStatus === 'verified' && (
-                             <div className="bg-[#4DBC15] px-3 py-1 rounded-full flex items-center gap-2 shadow-md">
-                                <ShieldCheck size={11} className="text-white" />
-                                <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">Verified Creator</span>
-                             </div>
-                          )}
-                          {localClaimStatus === 'pending' && (
-                             <div className="bg-amber-500 px-3 py-1 rounded-full flex items-center gap-2 shadow-md">
-                                <Info size={11} className="text-white" />
-                                <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap animate-pulse">Verification Pending</span>
-                             </div>
-                          )}
-                          {localClaimStatus === 'community' && (
-                             <div className="bg-white/10 border border-white/20 px-3 py-1 rounded-full flex items-center gap-2 shadow-md">
-                                <Info size={11} className="text-white/60" />
-                                <span className="text-[9px] font-black text-white/80 uppercase tracking-widest italic whitespace-nowrap">Community Creator Profile</span>
-                             </div>
-                          )}
-                       </div>
-                       
-                       <p className="text-[10px] md:text-[11px] font-extrabold text-orange-primary/90 uppercase tracking-[0.2em] mb-3 text-center lg:text-left">
-                         {creator.handle} • Best For {creator.bestFor}
-                       </p>
-
-                       <p className="text-xs md:text-sm font-medium text-white/70 max-w-md mb-4 text-center lg:text-left leading-relaxed">
-                         {creator.bio}
-                       </p>
-
-                       <div className="flex items-center gap-4 flex-wrap justify-center lg:justify-start">
-                          <div className="flex items-center gap-2">
-                             <Heart size={14} className="text-orange-primary fill-current" />
-                             <span className="text-white font-extrabold text-[9px] md:text-[10px] uppercase tracking-widest italic whitespace-nowrap">{followersCount} Followers</span>
-                          </div>
-                          <div className="h-4 w-px bg-white/15 hidden sm:block" />
-                          <div className="flex items-center gap-2">
-                             <TrendingUp size={14} className="text-green-acc text-green-500" />
-                             <span className="text-white font-extrabold text-[9px] md:text-[10px] uppercase tracking-widest italic whitespace-nowrap">Trust Score: {creator.score}/100</span>
-                          </div>
-                       </div>
-                    </div>
-
-                    {/* CTA buttons */}
-                    <div className="flex flex-wrap gap-3.5 justify-center lg:justify-start text-white w-full">
-                       
-                       {/* Loved CTA */}
-                       <button 
-                         onClick={() => {
-                           const newState = !isLoved;
-                           setIsLoved(newState);
-                           toast.success(newState ? `Added ${creator.name} to favorites!` : `Removed ${creator.name} from favorites`);
-                         }}
-                         className={cn(
-                           "text-[10px] md:text-[11px] font-black uppercase px-5 md:px-6 lg:px-8 py-3 md:py-3.5 lg:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
-                           isLoved 
-                             ? "bg-white text-orange-primary border-white shadow-white/5" 
-                             : "bg-orange-primary text-white border-orange-primary/30 hover:bg-[#ff5d14]"
-                         )}
-                       >
-                          <Heart size={14} className={cn("transition-colors", isLoved && "fill-current text-orange-primary")} />
-                          {isLoved ? "Loved" : "Love Creator"}
-                       </button>
-
-                       {/* Follow CTA */}
-                       <FollowButton 
-                         id={creator.id}
-                         name={creator.name}
-                         type="creator"
-                         className="px-5 md:px-6 lg:px-8 py-3 md:py-3.5 lg:py-4.5 rounded-full"
-                       />
-
-                       {/* Ask For Branding CTA */}
-                        <button 
-                          onClick={() => {
-                             if (localClaimStatus !== 'verified') {
-                                toast.error("Business Tools Locked — Creator must claim this profile to activate campaign briefs.", { duration: 4000 });
-                             } else {
-                                setIsModalOpen(true);
-                             }
-                          }}
-                          className={cn(
-                             "text-[10px] md:text-[11px] font-black uppercase px-5 md:px-6 lg:px-8 py-3 md:py-3.5 lg:py-4.5 rounded-full tracking-wider transition-all italic cursor-pointer flex items-center gap-1.5",
-                             localClaimStatus !== 'verified'
-                               ? "bg-white/5 text-white/45 border border-white/10 cursor-not-allowed opacity-65"
-                               : "bg-transparent text-white border border-white/20 hover:bg-white/10 hover:border-white/40"
-                          )}
-                        >
-                           {localClaimStatus !== 'verified' ? <Lock size={13} className="text-white/40" /> : <Sparkles size={13} />}
-                           Ask For Branding
-                           {localClaimStatus !== 'verified' && <span className="text-[7.5px] text-white/40 bg-white/5 border border-white/10 px-1 py-0.5 rounded ml-1 tracking-widest font-mono font-black">LOCKED</span>}
-                        </button>
-
-                        {localClaimStatus === 'community' && (
-                           <button 
-                             onClick={() => {
-                                toast.loading("Initiating secure creator identity matching...", { duration: 1500 });
-                                setTimeout(() => {
-                                   updateCreatorClaimStatus(creator.id, 'pending');
-                                   toast.success("Claim submitted successfully! Creator profile status changed to Pending Review.", { duration: 5000 });
-                                }, 1500);
-                             }}
-                             className="text-[10px] md:text-[11px] font-black uppercase px-5 md:px-6 lg:px-8 py-3 md:py-3.5 lg:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer bg-white text-navy border-white hover:bg-gray-100 flex items-center gap-1.5"
-                           >
-                              <ShieldCheck size={14} className="shrink-0" />
-                              <span>Claim Profile</span>
-                           </button>
-                        )}
-
-                        {localClaimStatus === 'pending' && (
-                           <div className="text-[10px] md:text-[11px] font-black uppercase px-5 md:px-6 lg:px-8 py-3 md:py-3.5 lg:py-4.5 rounded-full tracking-wider shadow-md bg-amber-500 text-white border border-amber-500/35 italic flex items-center gap-1.5 select-none hover:cursor-default">
-                              <Clock size={14} className="shrink-0" />
-                              <span>Verification Pending</span>
-                           </div>
-                        )}
-                    </div>
-                 </div>
-
-                  {/* Find Us On Indicators */}
-                  <div className="hidden lg:flex items-center gap-4 mt-2 flex-wrap justify-start">
-                     <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-orange-primary pb-1 italic">Find Us On</span>
-                     <div className="flex items-center gap-5">
-                        {creator.platforms.map(platform => {
-                           let platformUrl = "#";
-                           let iconComp = <Youtube size={20} />;
-                           
-                           if (platform === 'YouTube') {
-                              iconComp = <Youtube size={20} />;
-                           } else if (platform === 'Instagram') {
-                              iconComp = <Instagram size={20} />;
-                           } else if (platform === 'Facebook') {
-                              iconComp = <Facebook size={20} />;
-                           } else if (platform === 'TikTok') {
-                              iconComp = <TikTokIcon size={20} />;
-                           }
-
-                           return (
-                             <a key={platform} href={platformUrl} className="group flex flex-col items-center gap-1.5 focus:outline-none">
-                                <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                                  {iconComp}
-                                </div>
-                                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">{platform}</span>
-                             </a>
-                           );
-                        })}
-                     </div>
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-8 xl:gap-12 lg:items-center">
+            
+            {/* Left Side: Profile Information */}
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 text-center md:text-left">
+              {/* Profile Squircle */}
+              <div className="relative shrink-0">
+                <div className="w-28 h-28 md:w-36 md:h-36 rounded-[32px] overflow-hidden border-4 border-white/10 shadow-2xl bg-[#09091E]">
+                  <img 
+                    src={creator.avatar} 
+                    className="w-full h-full object-cover" 
+                    alt={creator.name} 
+                    referrerPolicy="no-referrer" 
+                  />
+                </div>
+                {/* Verified Circle Badge */}
+                <div className="absolute -top-1 -right-1 w-7 h-7 bg-[#FF5B00] rounded-full flex items-center justify-center text-white border-2 border-[#020516] shadow-lg">
+                  <Check size={14} className="stroke-[3]" />
+                </div>
               </div>
 
-              {/* Right Side: Trust scoring scorecard card */}
-              <div className="w-full lg:w-full max-w-md relative order-3 lg:order-none lg:flex lg:flex-col lg:justify-between lg:h-full">
-                 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-white relative overflow-hidden group mb-auto text-left">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 blur-2xl rounded-full translate-x-1/3 -translate-y-1/3" />
-                    
-                    <div className="flex justify-between items-start mb-6">
-                       <div>
-                          <div className="text-[9px] font-black uppercase text-[#4DBC15] tracking-widest mb-0.5">Trust Score</div>
-                          <div className="text-5xl font-black italic">{rating} <span className="text-xl text-white/55">/5</span></div>
-                       </div>
-                       <div className="text-right">
-                          <div className="flex gap-0.5 justify-end mb-1">
-                             {[1, 2, 3, 4, 5].map(i => (
-                               <Star key={i} size={13} className={cn("fill-orange-primary text-orange-primary", i > Math.floor(rating) && "text-white/20 fill-white/20")} />
-                             ))}
-                          </div>
-                          <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Based on {reviewsCount}+ Deliveries</div>
-                       </div>
-                    </div>
-
-                    <div className="space-y-3.5 mb-6">
-                       {[
-                          { label: "Reach", value: creator.score - 5, color: "bg-orange-primary" },
-                          { label: "Alignment", value: creator.score + 2 > 100 ? 100 : creator.score + 2, color: "bg-[#4DBC15]" },
-                          { label: "Engagement", value: creator.score - 8, color: "bg-orange-primary" },
-                          { label: "Quality", value: creator.score + 4 > 100 ? 100 : creator.score + 4, color: "bg-[#4DBC15]" },
-                          { label: "Conversion", value: creator.score - 2, color: "bg-[#4DBC15]" }
-                       ].map((m, i) => (
-                          <div key={i} className="flex items-center gap-3">
-                             <div className="w-16 text-[9px] font-bold uppercase tracking-wider text-white/60">{m.label}</div>
-                             <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                                <motion.div 
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${m.value}%` }}
-                                  transition={{ delay: 0.3, duration: 0.8 }}
-                                  className={cn("h-full rounded-full", m.color)} 
-                                />
-                             </div>
-                             <div className="w-8 text-[9px] font-black text-right text-white/80">{m.value}%</div>
-                          </div>
-                       ))}
-                    </div>
-
-                    <div className="flex items-center justify-between pt-5 border-t border-white/10">
-                       <div className="text-center w-full">
-                          <div className="text-4xl font-black text-[#50DC17] leading-none mb-1">{creator.score}%</div>
-                          <div className="text-[9px] font-black text-white/50 uppercase tracking-widest">Trust Recommendation Ratio</div>
-                       </div>
-                    </div>
-                 </div>
-
-                 {/* Save / share bookmarks */}
-                 <div className="absolute lg:relative -bottom-6 lg:bottom-auto right-4 lg:right-auto flex items-center lg:justify-end gap-3 z-20 mt-4 lg:mt-0 lg:pt-2.5">
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(window.location.href);
-                        toast.success("Profile link copied to clipboard!");
-                      }}
-                      className="w-11 h-11 rounded-full bg-white text-navy shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-100"
-                    >
-                       <Share2 size={16} />
-                    </button>
-                    <button 
-                      onClick={() => toast.success(`${creator.name} added to your bookmarks!`)}
-                      className="w-11 h-11 rounded-full bg-white text-navy shadow-xl border border-gray-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer hover:bg-gray-100"
-                    >
-                       <Bookmark size={15} />
-                    </button>
-                 </div>
-              </div>
-
-                {/* Mobile platform Find Us On indicators */}
-                <div className="flex lg:hidden items-center gap-3 sm:gap-4 mt-8 flex-wrap justify-center order-5 w-full">
-                   <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-orange-primary pb-1 italic">Find Us On</span>
-                   <div className="flex items-center gap-3.5 sm:gap-5 justify-center flex-wrap">
-                     {creator.platforms.map(platform => (
-                       <a key={platform} href="#" className="group flex flex-col items-center gap-1.5 focus:outline-none">
-                          <div className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                            {platform === 'YouTube' && <Youtube size={18} />}
-                            {platform === 'Instagram' && <Instagram size={18} />}
-                            {platform === 'Facebook' && <Facebook size={18} />}
-                            {platform === 'TikTok' && <TikTokIcon size={18} />}
-                          </div>
-                          <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">{platform}</span>
-                       </a>
-                     ))}
-                   </div>
+              {/* Identity Metadata */}
+              <div className="flex-1 flex flex-col items-center md:items-start">
+                <div className="flex items-center gap-2 mb-1 bg-cyan-400/10 px-2.5 py-1 rounded-md border border-cyan-400/20">
+                  <CheckCircle2 size={12} className="text-cyan-400 fill-cyan-400/10" />
+                  <span className="text-[9px] font-black tracking-widest text-cyan-400 uppercase">VERIFIED CREATOR</span>
                 </div>
 
-            </div>
-        </div>
-      </motion.section>
+                <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight mb-1">
+                  {creator.name}
+                </h1>
 
-      {/* 2. SECTION SUMMARY BAR */}
-      <div className="w-full hero-gradient text-white py-4.5 border-y border-white/5 font-space font-black italic uppercase tracking-[0.2em] text-[11px] md:text-xs">
-         <div className="max-w-[1440px] mx-auto px-6 flex flex-wrap justify-center sm:justify-around items-center gap-y-4 gap-x-12 text-center">
-            <div className="flex items-center gap-2">
-               <span className="text-orange-primary text-lg font-space font-black">▶</span>
-               <span>{creator.videos.length} YouTube Videos</span>
-            </div>
-            <div className="hidden sm:block h-4 w-px bg-white/20" />
-            <div className="flex items-center gap-2">
-               <span className="text-orange-primary text-lg font-space font-black">✦</span>
-               <span>{creator.reels.length} Reels & Shorts</span>
-            </div>
-            <div className="hidden sm:block h-4 w-px bg-white/20" />
-            <div className="flex items-center gap-2">
-               <span className="text-orange-primary text-lg font-space font-black">✍</span>
-               <span>{creator.blogs.length} Case Blogs</span>
-            </div>
-         </div>
-      </div>
+                <p className="text-xs md:text-sm font-bold text-[#FF5B00] tracking-wide mb-3 uppercase">
+                  Sr. Tech Analyst & Digital Product Researcher
+                </p>
 
-      {/* 4. UNIFIED SCROLLABLE BODY WRAPPER */}
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-16">
-         
-         <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_260px] xl:grid-cols-[280px_minmax(0,1fr)_310px] gap-4 items-start w-full relative">
-            
-            {/* COLUMN 1: SIDEBAR FILTERS (Adaptation Of Brand design filtering columns) */}
-            <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in text-left">
-               <div className="flex flex-col gap-6">
-                  {/* Active selection helper */}
-                  {searchFilter && (
-                     <div className="bg-white rounded-[5px] p-4.5 shadow-sm border border-[#e8edf2]">
-                        <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-4 flex items-center justify-between">
-                           Active Selection
-                           <button onClick={() => {setSearchFilter(''); setCurrentSearchInput('');}} className="text-orange-primary hover:underline text-[9px] font-black uppercase cursor-pointer border-0 bg-transparent">Clear</button>
-                        </h3>
-                        <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-[#e8edf2] rounded-lg text-[10px] font-semibold text-gray-600 uppercase tracking-wide hover:bg-gray-100 transition-all cursor-pointer">
-                          <span>Search: {searchFilter}</span>
-                          <X size={10} className="text-[#E8500A]" />
-                        </div>
-                     </div>
-                  )}
+                {/* Inline Badges list */}
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-white/60 text-xs font-semibold mb-4">
+                  <span className="flex items-center gap-1.5"><MapPin size={13} className="text-[#FF5B00]" /> Dhaka, Bangladesh</span>
+                  <span className="text-white/20">•</span>
+                  <span className="flex items-center gap-1.5"><Briefcase size={13} className="text-[#FF5B00]" /> 10+ Years Experience</span>
+                  <span className="text-white/20">•</span>
+                  <span className="flex items-center gap-1.5"><GraduationCap size={13} className="text-[#FF5B00]" /> Tech & Consumer Expert</span>
+                </div>
 
-                  {/* Specialty quick stats filters */}
-                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm font-sans flex flex-col gap-2.5">
-                     <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider mb-1.5">Strategic Focus</h3>
-                     <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-xs font-semibold text-navy">
-                           <span>Category:</span>
-                           <span className="text-orange-primary font-bold italic uppercase">{creator.bestFor}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs font-semibold text-navy">
-                           <span>Base Region:</span>
-                           <span className="text-gray-500 font-bold uppercase">Bangladesh</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs font-semibold text-navy">
-                           <span>Hub Channels:</span>
-                           <span className="text-gray-500 font-bold uppercase">{creator.platforms.length} PLATFORMS</span>
-                        </div>
-                     </div>
-                  </div>
+                <p className="text-white/75 text-sm md:text-base leading-relaxed max-w-xl mb-6">
+                  {creator.bio}
+                </p>
 
-                  {/* POST OFFER BRIEFING AD */}
-                  <div className="bg-[#0A0A1F] text-white rounded-[5px] p-5 border border-white/5 relative overflow-hidden flex flex-col justify-between h-96 relative">
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/10 rounded-full blur-2xl pointer-events-none" />
-                     
-                     <div className="flex flex-col items-start relative z-10">
-                        <div className="w-9 h-9 rounded-full bg-white/15 text-orange-primary flex items-center justify-center mb-4">
-                           <Award className="w-4 h-4" />
-                        </div>
-                        <h4 className="font-sans text-xs font-semibold uppercase tracking-wider mb-1">Direct Brand Outreach</h4>
-                        <p className="text-[10px] text-gray-400 font-semibold leading-relaxed mb-4">
-                           Skip platform fees. Choosify facilitates structured brand discovery with direct email responses.
-                        </p>
-                     </div>
+                {/* CTA Action Row */}
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 w-full">
+                  <FollowButton 
+                    id={creator.id}
+                    name={creator.name}
+                    type="creator"
+                    className="!px-6 !py-3 rounded-full !text-xs !font-bold !bg-[#FF5B00] hover:!bg-[#E05000] !text-white !border-none shadow-lg tracking-wider uppercase font-space transition-transform duration-200"
+                  />
 
-                     <div className="border border-dashed border-white/10 rounded-xl p-3 text-center my-1 relative z-10 bg-white/5">
-                        <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest block mb-2">FINALIZED OUTREACH STATUS</span>
-                        <p className="text-[11px] font-bold text-[#E8500A] uppercase tracking-wide mb-3">Structured collaboration request briefs</p>
-                        <button 
-                          onClick={() => { if (localClaimStatus !== "verified") { toast.error("Collaboration request is locked for unclaimed creator profiles."); return; } setIsModalOpen(true); }}
-                          className="w-full py-2 bg-orange-primary hover:bg-[#CF4400] text-white text-[9px] font-black rounded-lg uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer border-0"
-                        >
-                          PROPOSE BRIEFING <Sparkles size={11} />
-                        </button>
-                     </div>
-                  </div>
-               </div>
-            </aside>
-
-            {/* COLUMN 2: MIDDLE FEED (Dedicated content rows) */}
-            <main className="min-w-0 pb-10 space-y-16 lg:col-span-1">
-               
-               {/* Search Active Notification indicator */}
-               {searchFilter && (
-                  <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4 text-xs font-bold text-navy flex items-center justify-between">
-                     <span>Filtered content matching &ldquo;{searchFilter}&rdquo;</span>
-                     <button 
-                       onClick={() => {setSearchFilter(''); setCurrentSearchInput('');}}
-                       className="text-orange-primary hover:underline uppercase text-[10px] font-black border-0 bg-transparent cursor-pointer"
-                     >
-                       Reset filters
-                     </button>
-                  </div>
-               )}
-
-               {/* Dedicated Section 1: YouTube Videos */}
-               <section id="videos-section" className="scroll-mt-44 text-left">
-                  <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
-                     <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
-                        <Youtube className="text-red-650 text-[#FF0000]" size={20} /> Featured YouTube Videos
-                     </h3>
-                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest">Landscape Row</span>
-                  </div>
-
-                  {filteredVideos.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {filteredVideos.map(video => {
-                        const isGuide = !!video.associatedGuideId;
-                        const cardContent = (
-                          <div className="bg-white border border-[#e8edf2] rounded-[5px] overflow-hidden group hover:border-[#E8500A]/35 transition-all shadow-sm relative h-full flex flex-col">
-                            <div className="relative aspect-video bg-black overflow-hidden select-none">
-                              <img 
-                                src={video.thumbnail} 
-                                alt={video.title} 
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                referrerPolicy="no-referrer"
-                              />
-                              
-                              {/* Content Type Badge */}
-                              {isGuide ? (
-                                <div className="absolute top-3 left-3 z-10 bg-[#E8500A] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-[6px] shadow-sm flex items-center gap-1.5 border border-white/10">
-                                  <Award size={10} className="stroke-[2.5]" /> Full Guide
-                                </div>
-                              ) : (
-                                <div className="absolute top-3 left-3 z-10 bg-black/75 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-[6px] shadow-sm flex items-center gap-1.5 border border-white/10">
-                                  <Video size={10} className="stroke-[2.5]" /> Video
-                                </div>
-                              )}
-
-                              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                                <div className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                                  <Play size={16} className="fill-white stroke-none ml-0.5" />
-                                </div>
-                              </div>
-                              <span className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider text-white">
-                                {video.duration}
-                              </span>
-                            </div>
-
-                            <div className="p-4 flex-1 flex flex-col justify-between">
-                              <h4 className="text-xs md:text-sm font-extrabold text-navy line-clamp-2 leading-snug group-hover:text-orange-primary transition-colors mb-2 italic">
-                                {video.title}
-                              </h4>
-                              <span className="text-[10px] font-mono text-gray-500">{video.views}</span>
-                            </div>
-                          </div>
-                        );
-
-                        if (isGuide) {
-                          return (
-                            <Link key={video.id} to={`/guides/${video.associatedGuideId}`} className="block h-full cursor-pointer">
-                              {cardContent}
-                            </Link>
-                          );
-                        } else {
-                          return (
-                            <button key={video.id} type="button" onClick={() => openVideo(video.url, video.title, false)} className="block w-full text-left focus:outline-none h-full cursor-pointer">
-                              {cardContent}
-                            </button>
-                          );
-                        }
-                      })}
-                    </div>
-                  ) : (
-                     <div className="py-12 bg-white rounded-[5px] border border-[#e8edf2] text-center text-gray-500 text-xs font-black uppercase tracking-wider">
-                        No videos matched search phrase.
-                     </div>
-                  )}
-               </section>
-
-               {/* Dedicated Section 2: Shorts & Reels */}
-               <section id="reels-section" className="scroll-mt-44 text-left">
-                  <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
-                     <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
-                        <Instagram className="text-pink-650 text-[#C13584]" size={20} /> Influencer Reels & Shorts
-                     </h3>
-                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest">Vertical Grid</span>
-                  </div>
-
-                  {filteredReels.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {filteredReels.map(reel => {
-                        const isGuide = !!reel.associatedGuideId;
-                        const cardContent = (
-                          <div className="bg-white border border-[#e8edf2] rounded-[5px] overflow-hidden group hover:border-[#E8500A]/35 transition-all shadow-sm relative h-full flex flex-col">
-                            <div className="relative aspect-[9/16] bg-black overflow-hidden select-none">
-                              <img 
-                                src={reel.thumbnail} 
-                                alt={reel.title} 
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                referrerPolicy="no-referrer"
-                              />
-                              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-all" />
-                              
-                              {/* Content Type Badge */}
-                              {isGuide ? (
-                                <div className="absolute top-3 left-3 z-10 bg-[#E8500A] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-[6px] shadow-sm flex items-center gap-1.5 border border-white/10">
-                                  <Award size={10} className="stroke-[2.5]" /> Full Guide
-                                </div>
-                              ) : (
-                                <div className="absolute top-3 left-3 z-10 bg-[#C13584] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-[6px] shadow-sm flex items-center gap-1.5 border border-white/10">
-                                  <Play size={10} className="stroke-[2.5]" /> Reel
-                                </div>
-                              )}
-
-                              <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
-                                <span className="text-[9px] font-mono font-extrabold bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded text-white">
-                                  {reel.views}
-                                </span>
-                                <span className="text-[9px] font-mono font-extrabold bg-[#C13584] px-1.5 py-0.5 rounded text-white flex items-center gap-0.5">
-                                  ♥ {reel.likes}
-                                </span>
-                              </div>
-
-                              <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
-                                <Video size={10} className="stroke-[2.5]" />
-                              </div>
-                            </div>
-
-                            <div className="p-3 flex-1 flex flex-col justify-between">
-                              <p className="text-[11px] font-black text-gray-800 line-clamp-2 leading-relaxed italic">
-                                {reel.title}
-                              </p>
-                            </div>
-                          </div>
-                        );
-
-                        if (isGuide) {
-                          return (
-                            <Link key={reel.id} to={`/guides/${reel.associatedGuideId}`} className="block h-full cursor-pointer focus:outline-none">
-                              {cardContent}
-                            </Link>
-                          );
-                        } else {
-                          return (
-                            <button key={reel.id} type="button" onClick={() => openVideo(reel.url, reel.title, true)} className="block w-full text-left focus:outline-none h-full cursor-pointer">
-                              {cardContent}
-                            </button>
-                          );
-                        }
-                      })}
-                    </div>
-                  ) : (
-                    <div className="py-12 bg-white rounded-[5px] border border-[#e8edf2] text-center text-gray-500 text-xs font-black uppercase tracking-wider">
-                       No shorts/reels matched search phrase.
-                    </div>
-                  )}
-               </section>
-
-               {/* Dedicated Section 3: Insights & Case Blogs */}
-               <section id="blogs-section" className="scroll-mt-44 text-left">
-                  <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
-                     <h3 className="text-lg md:text-xl font-black uppercase tracking-tight italic text-navy flex items-center gap-2 leading-none">
-                        <BookOpen className="text-orange-primary" size={20} /> Research Blogs & Case Essays
-                     </h3>
-                     <span className="text-[9px] text-[#8a9bb0] font-bold uppercase tracking-widest">Separate Section</span>
-                  </div>
-
-                  {filteredBlogs.length > 0 ? (
-                    <div className="space-y-4">
-                      {filteredBlogs.map(blog => {
-                        const isGuide = !!blog.associatedGuideId;
-                        return (
-                          <div key={blog.id} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 hover:border-orange-primary/10 transition-colors flex flex-col md:flex-row gap-6 shadow-sm relative overflow-hidden">
-                            {/* Visual Indicator Badge */}
-                            <div className="absolute top-4 right-4 z-10">
-                              {isGuide ? (
-                                <span className="bg-[#E8500A] text-white text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-[#E8500A]/10 shadow-xs">
-                                  Full Guide
-                                </span>
-                              ) : (
-                                <span className="bg-gray-50 text-gray-500 text-[8.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded-[6px] border border-gray-200">
-                                  Article
-                                </span>
-                              )}
-                            </div>
-
-                            {blog.thumbnail && (
-                              <div className="w-full md:w-48 h-32 rounded-[5px] overflow-hidden shrink-0 bg-gray-55 relative object-cover">
-                                <img 
-                                  src={blog.thumbnail} 
-                                  alt={blog.title} 
-                                  className="w-full h-full object-cover"
-                                  referrerPolicy="no-referrer"
-                                />
-                              </div>
-                            )}
-
-                            <div className="flex-1 flex flex-col justify-center">
-                              <div className="flex items-center gap-4 text-[9px] font-mono font-bold text-gray-500 uppercase mb-2">
-                                <span className="flex items-center gap-1"><Clock size={10} /> {blog.readTime}</span>
-                                <span>•</span>
-                                <span>{blog.date}</span>
-                              </div>
-                              
-                              {isGuide ? (
-                                <Link to={`/guides/${blog.associatedGuideId}`}>
-                                  <h4 className="text-base md:text-lg font-extrabold text-[#10133A] hover:text-orange-primary transition-colors tracking-tight mb-2 italic">
-                                    {blog.title}
-                                  </h4>
-                                </Link>
-                              ) : (
-                                <a href={blog.url && blog.url !== '#' ? blog.url : "https://medium.com"} target="_blank" rel="noopener noreferrer">
-                                  <h4 className="text-base md:text-lg font-extrabold text-[#10133A] hover:text-orange-primary transition-colors tracking-tight mb-2 italic">
-                                    {blog.title}
-                                  </h4>
-                                </a>
-                              )}
-
-                              <p className="text-xs text-gray-400 font-semibold leading-relaxed mb-4">
-                                {blog.excerpt}
-                              </p>
-
-                              {isGuide ? (
-                                <Link to={`/guides/${blog.associatedGuideId}`} className="text-[10px] font-black uppercase tracking-widest text-[#E8500A] hover:underline inline-flex items-center gap-1">
-                                  Read Guide <ChevronRight size={10} />
-                                </Link>
-                              ) : (
-                                <a href={blog.url && blog.url !== '#' ? blog.url : "https://medium.com"} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:underline inline-flex items-center gap-1">
-                                  Read Article <ExternalLink size={10} />
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="py-12 bg-white rounded-[5px] border border-[#e8edf2] text-center text-gray-500 text-xs font-black uppercase tracking-wider">
-                       No insights matched search phrase.
-                    </div>
-                  )}
-               </section>
-
-            </main>
-
-            {/* COLUMN 3: RIGHT PANEL ACCENTS (Campaign promo widgets) */}
-            <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in text-left">
-               {/* REACH EXCELLENCE HIGHLIGHT */}
-               <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm space-y-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-primary/10 text-orange-primary flex items-center justify-center p-0 mb-1">
-                     <Award size={20} />
-                  </div>
-                  <h4 className="text-sm font-black text-[#1A1D4E] uppercase tracking-wider italic leading-none">Reach Excellence</h4>
-                  <p className="text-[11px] text-gray-400 font-semibold leading-relaxed">
-                     Verified digital advocate highlighting niche specialties, custom content metrics, and strategic target alignment.
-                  </p>
-                  <div className="p-3 bg-gray-50/50 rounded-[5px] border border-[#e8edf2]/80 flex flex-col gap-1.5 font-mono text-[9.5px]">
-                     <div className="flex items-center justify-between text-[#1A1D4E]">
-                        <span>Campaign Response:</span>
-                        <span className="font-extrabold text-orange-primary">~24 HOURS</span>
-                     </div>
-                     <div className="flex items-center justify-between text-[#1A1D4E]">
-                        <span>Completion Rate:</span>
-                        <span className="font-extrabold text-green-500">98% SUCCESS</span>
-                     </div>
-                  </div>
-               </div>
-
-               {/* CREATOR COLLAB BANNER */}
-               <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-center relative overflow-hidden">
-                  <span className="text-[8px] font-bold text-orange-primary bg-[#FFF0E8] border border-[#FFF0E8] px-3.5 py-1.5 rounded-full uppercase tracking-widest block mx-auto w-fit mb-4">ACTIVE DISCOVERY</span>
-                  <p className="text-gray-400 text-[10px] font-semibold uppercase leading-relaxed mb-4">
-                     Click to submit a structured strategic collaboration request directly to {creator.name}.
-                  </p>
                   <button 
-                     onClick={() => setIsModalOpen(true)}
-                     className="w-full py-2.5 bg-navy text-white text-[9px] font-black rounded-lg shadow-md hover:bg-orange-primary transform hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest border-0 cursor-pointer"
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-6 py-3 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold tracking-wider uppercase text-xs flex items-center gap-2 transition-all cursor-pointer"
                   >
-                     ASK FOR BRANDING
+                    <MessageCircle size={14} />
+                    Ask For Recommendation
                   </button>
-               </div>
-            </aside>
 
-         </div>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success("Profile link copied to clipboard!");
+                    }}
+                    className="w-11 h-11 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-white flex items-center justify-center transition-all cursor-pointer"
+                    title="Share Profile"
+                  >
+                    <Share2 size={15} />
+                  </button>
+                </div>
 
-         {/* SECTION 5 — BRAND REVIEWS */}
-         <div id="brand-reviews-section" className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80 text-left">
-            <div className="text-center mb-8 border-b border-gray-100 pb-5">
-               <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
-                  Brand Reviews
-               </h3>
-               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
-                  Verified Brand Collaboration Experiences & Feedback
-               </p>
+                {/* Social media connections */}
+                <div className="mt-6 flex flex-col items-center md:items-start gap-2 w-full">
+                  <span className="text-white/40 text-[9px] font-bold uppercase tracking-[0.2em]">Follow Me On</span>
+                  <div className="flex items-center gap-2.5">
+                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all">
+                      <Youtube size={16} />
+                    </a>
+                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all">
+                      <Instagram size={16} />
+                    </a>
+                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all">
+                      <TikTokIcon size={16} />
+                    </a>
+                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all">
+                      <Facebook size={16} />
+                    </a>
+                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all">
+                      <Globe size={16} />
+                    </a>
+                  </div>
+                </div>
+
+              </div>
             </div>
 
-            {filteredReviews.length > 0 ? (
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                  {filteredReviews.map((review, i) => (
-                     <PublicReviewCard
-                        key={i}
-                        review={review}
-                        onHelpfulClick={() => toast.success("Marked as helpful!")}
-                     />
-                  ))}
-               </div>
-            ) : (
-               <div className="py-12 bg-white rounded-[5px] border border-gray-100 text-center text-gray-400 text-xs font-black uppercase tracking-wider">
-                  No brand reviews matched search phrase.
-               </div>
-            )}
-
-            <div className="mt-8 flex justify-center">
-               <button 
-                  onClick={() => toast.success("All verified brand reviews are synchronized and loaded.")} 
-                  className="px-10 py-3.5 border border-[#1A1D4E] text-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white transition-all text-[9.5px] font-black uppercase tracking-widest rounded-full italic cursor-pointer bg-white"
-               >
-                  Load More Reviews
-               </button>
-            </div>
-         </div>
-
-         {/* SECTION 6 — CREATOR OVERVIEW */}
-         <div id="creator-overview-section" className="bg-white rounded-[5px] p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36 text-left">
-            <div className="text-center mb-8 border-b border-gray-100 pb-5">
-               <h3 className="text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-1">
-                  Creator Overview
-               </h3>
-               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic font-mono bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
-                  Detailed overview of this creator
-               </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-left">
-               {/* 1. About & Connections */}
-               <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 flex flex-col justify-between group hover:shadow-md transition-shadow">
-                  <div>
-                     <div className="flex items-center gap-2.5 mb-4">
-                        <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                           <Award size={16} className="text-[#E8500A]" />
-                        </div>
-                        <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">Background & Bio</h4>
-                     </div>
-                     <div className="text-xs text-gray-500 font-semibold leading-relaxed space-y-2 text-left">
-                        <p className="italic">"{creator.bio}"</p>
-                        <div className="pt-2">
-                           <span className="text-[#E8500A] font-black">SUPPORTED PLATFORMS:</span>{' '}
-                           <span className="text-[#1A1D4E] uppercase font-black">{creator.platforms.join(', ')}</span>
-                        </div>
-                     </div>
+            {/* Right Side: Trust scoring glass panel */}
+            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-[28px] p-6 text-white shadow-2xl relative overflow-hidden flex flex-col justify-between h-full max-w-sm lg:ml-auto w-full">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF5B00]/10 blur-2xl rounded-full translate-x-1/3 -translate-y-1/3" />
+              
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <div className="text-[10px] font-black uppercase text-emerald-400 tracking-widest mb-0.5">Trust Score</div>
+                  <div className="text-5xl font-black tracking-tight italic">
+                    4.9 <span className="text-xl text-white/55 font-normal">/5</span>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-gray-200/50">
-                     <a 
-                        href="#" 
-                        onClick={(e) => { e.preventDefault(); toast.success('Redirecting to primary video channel...'); }} 
-                        className="text-[10px] font-black text-[#E8500A] uppercase tracking-wider hover:underline flex items-center gap-1"
-                     >
-                        Visit Primary Channel <span>➜</span>
-                     </a>
+                </div>
+                <div className="text-right">
+                  <div className="flex gap-0.5 justify-end mb-1">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <Star key={i} size={13} className="fill-[#FF5B00] text-[#FF5B00]" />
+                    ))}
                   </div>
-               </div>
+                  <div className="text-[8.5px] font-bold text-white/40 uppercase tracking-wider">Based on 12.4K Reviews</div>
+                </div>
+              </div>
 
-               {/* 2. Collaboration Preferences */}
-               <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-                  <div>
-                     <div className="flex items-center gap-2.5 mb-4">
-                        <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                           <Mail size={16} className="text-[#E8500A]" />
-                        </div>
-                        <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">Collaboration Contacts</h4>
-                     </div>
-                     <div className="text-xs text-gray-500 font-semibold leading-relaxed space-y-3 text-left">
-                        <p className="flex items-center gap-2 truncate"><span className="text-[#1A1D4E] font-black">EMAIL:</span> <span className="font-mono">{creator.email}</span></p>
-                        <p className="flex items-center gap-2 truncate"><span className="text-[#1A1D4E] font-black">PHONE:</span> <span className="font-mono">{creator.phone}</span></p>
-                        <p className="flex items-center gap-2"><span className="text-[#1A1D4E] font-black">RESPONSE:</span> 24-48 Hours</p>
-                     </div>
+              {/* Progress Rating Bars */}
+              <div className="space-y-3 mb-6">
+                {[
+                  { label: "Research", value: 4.9 },
+                  { label: "Transparency", value: 4.9 },
+                  { label: "Quality", value: 4.8 },
+                  { label: "Helpfulness", value: 4.9 },
+                  { label: "Consistency", value: 4.8 }
+                ].map((m, i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-white/70 tracking-wide uppercase">
+                      <span>{m.label}</span>
+                      <span>{m.value}/5</span>
+                    </div>
+                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-[#FF5B00] rounded-full transition-all duration-1000" 
+                        style={{ width: `${(m.value / 5) * 100}%` }}
+                      />
+                    </div>
                   </div>
-               </div>
+                ))}
+              </div>
 
-               {/* 3. Audience Profile */}
-               <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-                  <div>
-                     <div className="flex items-center gap-2.5 mb-4">
-                        <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                           <Users size={16} className="text-[#E8500A]" />
-                        </div>
-                        <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">Audience & Reach</h4>
-                     </div>
-                     <div className="text-xs text-gray-500 font-semibold leading-relaxed space-y-2 text-left">
-                        <p><span className="text-[#1A1D4E] font-black">REACH:</span> <span className="font-black text-[#E8500A]">{followersCount}</span></p>
-                        <p className="uppercase"><span className="text-[#1A1D4E] font-black">DEMOGRAPHICS:</span> 18-34 Years (74%)</p>
-                        <p className="uppercase text-[#E8500A]"><span className="text-[#1A1D4E] font-black">TOP FEED:</span> Bangladesh Market</p>
-                     </div>
-                  </div>
-               </div>
+              {/* Bottom recommendation block */}
+              <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                <div className="text-center w-full">
+                  <div className="text-4xl font-black text-emerald-400 leading-none mb-1">98%</div>
+                  <div className="text-[9px] font-black text-white/50 uppercase tracking-widest">Recommendation Rate</div>
+                </div>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-               {/* 4. Specialties & Format */}
-               <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-2.5 mb-4 border-b border-gray-200/50 pb-3">
-                     <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                        <Sparkles size={16} className="text-[#E8500A]" />
-                     </div>
-                     <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">Formats & Specializations</h4>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-                     {[
-                        "Dedicated Sponsorship Video",
-                        "Sponsorship Shoutout / Placement",
-                        "Short Form Reels & Videos",
-                        "Social Media Photo Feature",
-                        "Creator Consultation Panel",
-                        "Niche Affiliate Marketing"
-                     ].map((srv, idx) => (
-                        <div key={idx} className="text-[10px] text-gray-600 font-bold uppercase tracking-wide flex items-start gap-2">
-                           <span className="text-[#E8500A] text-xs leading-none">•</span>
-                           <span>{srv}</span>
-                        </div>
-                     ))}
-                  </div>
-               </div>
+          </div>
+        </div>
+      </section>
 
-               {/* 5. Best For #Tags */}
-               <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-2.5 mb-4 border-b border-gray-200/50 pb-3">
-                     <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                        <Flame size={16} className="text-[#E8500A]" />
-                     </div>
-                     <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">Hashtags & Focus Topics</h4>
-                  </div>
-                  <div className="flex flex-wrap gap-2 text-left">
-                     {[`#${creator.bestFor}BD`, ...creator.bestForTags.map(tag => `#${tag.replace(/\s+/g, '')}`), '#DhakaCreators', '#BrandingBD'].map((tag, idx) => (
-                        <span key={idx} className="text-[9px] font-black text-[#E8500A] bg-[#FFF0E8] px-3 py-1.5 rounded-full uppercase tracking-wider border border-[#E8500A]/5 select-none hover:scale-105 transition-all duration-100">
-                           {tag}
-                        </span>
-                     ))}
-                  </div>
-               </div>
-            </div>
+      {/* 2. FLOATING STATISTICS CARD */}
+      <div className="relative z-20 -mt-10 max-w-7xl mx-auto w-full px-4 md:px-8 select-none">
+        <div className="bg-white rounded-3xl p-5 md:p-6 shadow-[0_10px_30px_rgba(5,11,44,0.06)] border border-[#EEF2F7] grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-y-4 md:gap-y-0 text-left md:divide-x divide-gray-100">
+          
+          {[
+            { label: "Followers", value: "12.4K", icon: Users },
+            { label: "Guides Published", value: "254", icon: BookOpen },
+            { label: "Total Views", value: "1.2M+", icon: Play },
+            { label: "Positive Feedback", value: "98%", icon: Heart },
+            { label: "Avg Rating", value: "4.9/5", icon: Star },
+            { label: "Expert Awards", value: "32", icon: Trophy }
+          ].map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <div key={idx} className="flex items-center gap-3.5 px-3 py-1 first:pt-0 sm:pt-0 md:pl-4 first:pl-0">
+                <div className="w-10 h-10 rounded-2xl bg-[#FF5B00]/10 text-[#FF5B00] flex items-center justify-center shrink-0">
+                  <Icon size={18} />
+                </div>
+                <div>
+                  <div className="text-lg font-extrabold text-[#050B2C] leading-none mb-0.5">{stat.value}</div>
+                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{stat.label}</div>
+                </div>
+              </div>
+            );
+          })}
 
-            {/* Dynamic Claiming Experience Integration */}
-            {localClaimStatus === 'community' && (
-               <div className="mt-8 p-6 bg-gradient-to-r from-orange-55 to-amber-50 rounded-[5px] border-2 border-orange-200 shadow-xs flex flex-col md:flex-row items-center gap-6 animate-fade-in text-left">
-                  <div className="w-12 h-12 rounded-full bg-orange-primary/10 flex items-center justify-center shrink-0 font-bold text-orange-primary">
-                     <Sparkles className="w-5 h-5 text-orange-primary" />
-                  </div>
-                  <div className="flex-1 space-y-2">
-                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-800">
-                        Community Creator Profile
-                     </span>
-                     <h4 className="text-sm font-black text-navy uppercase tracking-tight leading-none mb-1">Claim Your Creator Profile</h4>
-                     <p className="text-xs text-gray-600 font-semibold leading-relaxed">
-                        This creator profile contains publicly available information and platform-curated content. This profile has not yet been claimed by the creator.
-                     </p>
-                     
-                     {/* Benefits Section */}
-                     <div className="pt-2">
-                        <p className="text-[10px] font-black text-navy uppercase tracking-widest mb-2">Claim your profile to:</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                           <div className="flex items-center gap-1.5 text-xs text-gray-700 font-bold">
-                              <Check className="w-3.5 h-3.5 text-green-600 shrink-0" />
-                              <span>Manage creator information & bio</span>
-                           </div>
-                           <div className="flex items-center gap-1.5 text-xs text-gray-700 font-bold">
-                              <Check className="w-3.5 h-3.5 text-green-600 shrink-0" />
-                              <span>Showcase verified social content & reels</span>
-                           </div>
-                           <div className="flex items-center gap-1.5 text-xs text-gray-700 font-bold">
-                              <Check className="w-3.5 h-3.5 text-green-600 shrink-0" />
-                              <span>Collaborate directly with brands</span>
-                           </div>
-                           <div className="flex items-center gap-1.5 text-xs text-gray-700 font-bold">
-                              <Check className="w-3.5 h-3.5 text-green-600 shrink-0" />
-                              <span>Receive official campaign invitations</span>
-                           </div>
-                           <div className="flex items-center gap-1.5 text-xs text-gray-700 font-bold sm:col-span-2">
-                              <Check className="w-3.5 h-3.5 text-green-600 shrink-0" />
-                              <span>Access exhaustive audience & creator analytics</span>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                  <div className="shrink-0 w-full md:w-auto self-stretch flex items-center justify-center">
-                     <button 
-                        onClick={() => {
-                           toast.loading("Initiating secure creator registration link...", { duration: 1500 });
-                           setTimeout(() => {
-                              updateCreatorClaimStatus(creator.id, 'pending'); toast.success("Verification link generated! Ready for social credential matching review.");
-                           }, 1500);
-                        }}
-                        className="w-full md:w-auto px-6 py-3.5 bg-orange-primary hover:bg-[#ff5d14] text-white font-black uppercase text-[10px] tracking-widest italic rounded-full shadow-lg hover:shadow-orange-primary/20 active:scale-95 transition-all text-center cursor-pointer border-none"
-                     >
-                        Claim Creator Profile
-                     </button>
-                  </div>
-               </div>
-            )}
-
-            {localClaimStatus === 'pending' && (
-               <div className="mt-8 p-6 bg-amber-50 rounded-[5px] border-2 border-amber-200 shadow-xs flex items-center gap-4 animate-fade-in text-left">
-                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                     <Clock className="w-5 h-5 text-amber-700 animate-pulse" />
-                  </div>
-                  <div className="flex-1">
-                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 mb-1">
-                        Ownership Verification Pending
-                     </span>
-                     <h4 className="text-sm font-black text-navy uppercase tracking-tight leading-none mb-1">Claim Review Underway</h4>
-                     <p className="text-xs text-gray-600 font-semibold leading-relaxed">
-                        Our moderators are actively reviewing your submitted credentials against this creator's public profile link. Expected completion in 12-24 hours.
-                     </p>
-                  </div>
-               </div>
-            )}
-         </div>
-
+        </div>
       </div>
 
-      {/* =======================================================
-          OUTREACH STRUCTURAL BRIEF WINDOW DIALOG SYSTEM
-          ======================================================= */}
+      {/* 3. STICKY NAVIGATION TABS */}
+      <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-b border-[#EEF2F7] shadow-sm py-3 mt-8 select-none">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-1">
+            {[
+              { id: 'overview', label: 'Overview', icon: ShieldCheck },
+              { id: 'featured-content', label: 'Guides', count: '254', icon: BookOpen },
+              { id: 'videos-section', label: 'Videos', count: '128', icon: Video },
+              { id: 'brand-reviews-section', label: 'Reviews', count: '1.2K', icon: Star },
+              { id: 'collections-section', label: 'Collections', count: '48', icon: FolderIcon },
+              { id: 'deals-section', label: 'Deals', count: '56', icon: Flame },
+              { id: 'about-section', label: 'About', icon: Info }
+            ].map((tab) => {
+              const TabIcon = tab.icon;
+              const normalizedName = tab.id === 'overview' ? 'overview' : 
+                                     tab.id === 'featured-content' ? 'guides' :
+                                     tab.id === 'videos-section' ? 'videos' :
+                                     tab.id === 'brand-reviews-section' ? 'reviews' :
+                                     tab.id === 'collections-section' ? 'collections' :
+                                     tab.id === 'deals-section' ? 'deals' : 'about';
+              
+              const isSectionActive = activeSection === normalizedName;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => scrollToSection(tab.id)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all uppercase tracking-wide cursor-pointer",
+                    isSectionActive 
+                      ? "text-[#FF5B00] bg-[#FF5B00]/5" 
+                      : "text-gray-500 hover:text-[#050B2C] hover:bg-gray-50"
+                  )}
+                >
+                  <TabIcon size={14} />
+                  <span>{tab.label}</span>
+                  {tab.count && (
+                    <span className={cn(
+                      "text-[9px] px-1.5 py-0.5 rounded-md font-mono font-bold ml-0.5",
+                      isSectionActive ? "bg-[#FF5B00] text-white" : "bg-gray-100 text-gray-400"
+                    )}>
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="hidden lg:flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Active Collaboration Channel</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. MAIN CONTENT SECTION */}
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-10 w-full flex flex-col gap-12">
+        
+        {/* ==================== FEATURED CONTENT ==================== */}
+        <section id="featured-content" className="scroll-mt-32 text-left">
+          <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
+            <h2 className="text-xl md:text-2xl font-black text-[#050B2C] tracking-tight uppercase italic flex items-center gap-2">
+              <Award className="text-[#FF5B00]" size={22} />
+              Featured Content
+            </h2>
+            <button 
+              onClick={() => toast.success("Redirecting to all guides and reviews content pool...")}
+              className="text-xs font-black text-[#FF5B00] hover:underline uppercase tracking-widest flex items-center gap-1 border-0 bg-transparent cursor-pointer"
+            >
+              View All Content <span>➔</span>
+            </button>
+          </div>
+
+          {/* 4 Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+            
+            {/* Card 1: Buying Guide */}
+            <div className="bg-white border border-[#EEF2F7] rounded-3xl overflow-hidden group hover:shadow-xl transition-all h-full flex flex-col relative">
+              <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop" 
+                  alt="Best Running Shoes for 2025" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute top-3 left-3 bg-[#FF5B00] text-white text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
+                  BUYING GUIDE
+                </div>
+              </div>
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#050B2C] leading-snug group-hover:text-[#FF5B00] transition-colors mb-2">
+                    Best Running Shoes for 2025
+                  </h3>
+                  <p className="text-xs text-gray-400 font-semibold mb-4 leading-relaxed line-clamp-2">
+                    An exhaustively researched breakdown of the top athletic performance models arriving this season.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
+                  <Clock size={11} />
+                  <span>12 min read</span>
+                  <span>•</span>
+                  <span>May 8, 2025</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Creator Review */}
+            <div className="bg-white border border-[#EEF2F7] rounded-3xl overflow-hidden group hover:shadow-xl transition-all h-full flex flex-col relative">
+              <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=400&fit=crop" 
+                  alt="30 Day Review: Samsung S24 Ultra" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute top-3 left-3 bg-purple-600 text-white text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
+                  CREATOR REVIEW
+                </div>
+                {/* Central Play Button Overlay */}
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-[#FF5B00] text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                    <Play size={18} className="fill-white stroke-none ml-0.5" />
+                  </div>
+                </div>
+              </div>
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#050B2C] leading-snug group-hover:text-[#FF5B00] transition-colors mb-2">
+                    30 Day Review: Samsung S24 Ultra
+                  </h3>
+                  <p className="text-xs text-gray-400 font-semibold mb-4 leading-relaxed line-clamp-2">
+                    A thorough look into daily performance, photography capabilities, and AI-enabled features.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
+                  <Video size={11} />
+                  <span>18 min video</span>
+                  <span>•</span>
+                  <span>May 5, 2025</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Collection */}
+            <div className="bg-white border border-[#EEF2F7] rounded-3xl overflow-hidden group hover:shadow-xl transition-all h-full flex flex-col relative">
+              <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=400&fit=crop" 
+                  alt="Minimal Desk Setup Ideas for 2025" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute top-3 left-3 bg-blue-600 text-white text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
+                  COLLECTION
+                </div>
+              </div>
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#050B2C] leading-snug group-hover:text-[#FF5B00] transition-colors mb-2">
+                    Minimal Desk Setup Ideas for 2025
+                  </h3>
+                  <p className="text-xs text-gray-400 font-semibold mb-4 leading-relaxed line-clamp-2">
+                    A curated selection of accessories, task lights, and cable organizers to maximize focus and aesthetics.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
+                  <Globe size={11} />
+                  <span>8 items</span>
+                  <span>•</span>
+                  <span>May 3, 2025</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4: Brand Story */}
+            <div className="bg-white border border-[#EEF2F7] rounded-3xl overflow-hidden group hover:shadow-xl transition-all h-full flex flex-col relative">
+              <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=400&fit=crop" 
+                  alt="Behind Aarong's Summer Collection" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute top-3 left-3 bg-amber-600 text-white text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm">
+                  BRAND STORY
+                </div>
+              </div>
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#050B2C] leading-snug group-hover:text-[#FF5B00] transition-colors mb-2">
+                    Behind Aarong's Summer Collection
+                  </h3>
+                  <p className="text-xs text-gray-400 font-semibold mb-4 leading-relaxed line-clamp-2">
+                    Taking a detailed look at indigenous fabric production, regional patterns, and tailoring methodologies.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
+                  <Clock size={11} />
+                  <span>10 min read</span>
+                  <span>•</span>
+                  <span>Apr 30, 2025</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Float scroll chevron arrow */}
+            <button 
+              onClick={() => toast.success("Browsing next set of items...")}
+              className="absolute right-[-14px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white border border-gray-150 shadow-lg hover:scale-110 active:scale-95 transition-all text-[#050B2C] flex items-center justify-center cursor-pointer"
+            >
+              <ChevronRight size={16} />
+            </button>
+
+          </div>
+        </section>
+
+        {/* ==================== EXPERTISE & REVIEWS DUAL SECTION ==================== */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left mt-4">
+          
+          {/* Left Column: Expertise & Topics */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
+              <h2 className="text-xl md:text-2xl font-black text-[#050B2C] tracking-tight uppercase italic flex items-center gap-2">
+                <Sparkles className="text-[#FF5B00]" size={20} />
+                Expertise & Topics
+              </h2>
+            </div>
+
+            {/* Grid of 6 White Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {[
+                { title: "Smartphones", count: "128 Guides", icon: Smartphone },
+                { title: "Laptops", count: "96 Guides", icon: Laptop },
+                { title: "PC Components", count: "82 Guides", icon: Cpu },
+                { title: "Audio", count: "76 Guides", icon: Headphones },
+                { title: "Cameras", count: "64 Guides", icon: Camera },
+                { title: "Gaming", count: "52 Guides", icon: Gamepad }
+              ].map((exp, i) => {
+                const ExpIcon = exp.icon;
+                return (
+                  <div 
+                    key={i} 
+                    className="bg-white border border-[#EEF2F7] rounded-2xl p-4.5 flex items-center gap-3.5 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => toast.success(`Viewing comprehensive ${exp.title} research guidelines.`)}
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-gray-50 text-[#FF5B00] flex items-center justify-center shrink-0 border border-gray-100">
+                      <ExpIcon size={20} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-[#050B2C] uppercase tracking-wide leading-tight mb-0.5">{exp.title}</h4>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{exp.count}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right Column: Latest Reviews */}
+          <div>
+            <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
+              <h2 className="text-xl md:text-2xl font-black text-[#050B2C] tracking-tight uppercase italic flex items-center gap-2">
+                <Star className="text-[#FF5B00]" size={20} />
+                Latest Reviews
+              </h2>
+              <button 
+                onClick={() => scrollToSection('brand-reviews-section')}
+                className="text-[10px] font-black text-[#FF5B00] hover:underline uppercase tracking-widest border-none bg-transparent cursor-pointer"
+              >
+                View All ➔
+              </button>
+            </div>
+
+            {/* Vertical list of 3 rows */}
+            <div className="space-y-4">
+              {[
+                { 
+                  num: "1", 
+                  title: "Samsung Galaxy S24 Ultra", 
+                  stars: 4.9, 
+                  date: "May 5, 2025", 
+                  img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=120&h=120&fit=crop" 
+                },
+                { 
+                  num: "2", 
+                  title: "Sony WH-1000XM5 Headphones", 
+                  stars: 4.8, 
+                  date: "Apr 28, 2025", 
+                  img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=120&h=120&fit=crop" 
+                },
+                { 
+                  num: "3", 
+                  title: "Dell XPS 15 (2024)", 
+                  stars: 4.7, 
+                  date: "Apr 20, 2025", 
+                  img: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=120&h=120&fit=crop" 
+                }
+              ].map((rev, i) => (
+                <div key={i} className="bg-white border border-[#EEF2F7] rounded-2xl p-3 flex items-center gap-4 hover:shadow-md transition-shadow relative">
+                  <span className="text-sm font-black text-gray-300 w-4 text-center shrink-0">{rev.num}</span>
+                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
+                    <img src={rev.img} alt={rev.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-xs font-extrabold text-[#050B2C] leading-snug truncate hover:text-[#FF5B00] cursor-pointer" onClick={() => toast.success(`Viewing review metadata: ${rev.title}`)}>
+                      {rev.title}
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex gap-0.5 text-[#FF5B00]">
+                        {[1, 2, 3, 4, 5].map(starNum => (
+                          <Star key={starNum} size={9} className="fill-current" />
+                        ))}
+                      </div>
+                      <span className="text-[9.5px] font-bold text-gray-400">{rev.stars}</span>
+                      <span className="text-gray-300 text-[9px]">•</span>
+                      <span className="text-[9.5px] font-semibold text-gray-400">{rev.date}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </section>
+
+        {/* ==================== WHY FOLLOW FARHAN STRIP ==================== */}
+        <section className="bg-[#050B2C] text-white rounded-3xl p-8 md:p-10 shadow-xl relative overflow-hidden text-center mt-4 select-none">
+          {/* Radial light */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#FF5B00]/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <h2 className="text-2xl font-black uppercase italic tracking-tight mb-8">
+            Why Follow {creator.name.split(' ')[0]}?
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 relative z-10 text-left">
+            {[
+              { 
+                title: "In-Depth Research", 
+                desc: "Detailed analysis and real world testing", 
+                icon: Globe 
+              },
+              { 
+                title: "Honest Reviews", 
+                desc: "Unbiased opinions you can trust", 
+                icon: CheckCircle2 
+              },
+              { 
+                title: "Smart Recommendations", 
+                desc: "Curated picks based on your needs", 
+                icon: Sparkles 
+              },
+              { 
+                title: "Always Updated", 
+                desc: "Latest trends and market insights", 
+                icon: Clock 
+              }
+            ].map((col, idx) => {
+              const ColIcon = col.icon;
+              return (
+                <div key={idx} className="space-y-3.5">
+                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-[#FF5B00] border border-white/15">
+                    <ColIcon size={20} />
+                  </div>
+                  <h4 className="text-sm font-extrabold tracking-wide uppercase">{col.title}</h4>
+                  <p className="text-xs text-white/60 leading-relaxed font-medium">{col.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ==================== INFORMATION GRID (3 COLUMNS) ==================== */}
+        <section id="about-section" className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-left mt-4 scroll-mt-32">
+          
+          {/* Column 1: Creator Overview */}
+          <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 md:p-8 hover:shadow-xl transition-all flex flex-col justify-between">
+            <div>
+              <h3 className="text-lg font-black text-[#050B2C] uppercase italic tracking-tight pb-4 border-b border-gray-100 mb-6 flex items-center gap-2">
+                <Info size={18} className="text-[#FF5B00]" />
+                Creator Overview
+              </h3>
+
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <Award size={12} className="text-[#FF5B00]" /> Background & Bio
+                  </h4>
+                  <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                    Senior Tech Analyst & Digital Product Researcher with 10+ years of experience analyzing electronic imports, consumer durables, and PC components in the Bangladesh market. I help consumers make smarter buying decisions through detailed research, comparison, and real-world testing.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <Sparkles size={12} className="text-[#FF5B00]" /> Areas of Expertise
+                  </h4>
+                  <p className="text-xs text-[#050B2C] font-extrabold tracking-wide">
+                    Smartphones, Laptops, PC Components, Audio, Cameras, Gaming, Home Tech & More
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <Globe size={12} className="text-[#FF5B00]" /> Content Platforms
+                  </h4>
+                  <p className="text-xs text-[#050B2C] font-extrabold tracking-wide uppercase">
+                    YouTube, Instagram, TikTok, Facebook, Website
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-6 mt-6 border-t border-gray-100">
+              <a href="#" onClick={(e) => { e.preventDefault(); toast.success("Redirecting to subscriber dashboard hub..."); }} className="text-[10px] font-black uppercase text-[#FF5B00] tracking-widest hover:underline flex items-center gap-1">
+                Explore Analytics <span>➜</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Column 2: Partnerships & Collaborations */}
+          <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 md:p-8 hover:shadow-xl transition-all flex flex-col justify-between">
+            <div>
+              <h3 className="text-lg font-black text-[#050B2C] uppercase italic tracking-tight pb-4 border-b border-gray-100 mb-6 flex items-center gap-2">
+                <Users size={18} className="text-[#FF5B00]" />
+                Partnerships & Collabs
+              </h3>
+
+              <div className="space-y-6">
+                {/* Brand Logos */}
+                <div>
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">TOP BRAND PARTNERS</h4>
+                  <div className="grid grid-cols-3 gap-2 text-center select-none">
+                    <span className="py-2.5 px-3 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-black tracking-widest text-[#0066CC]">SAMSUNG</span>
+                    <span className="py-2.5 px-3 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-black tracking-widest text-[#FF6700]">Xiaomi</span>
+                    <span className="py-2.5 px-3 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-black tracking-widest text-[#505050]">ASUS</span>
+                    <span className="py-2.5 px-3 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-black tracking-widest text-[#000000]">SONY</span>
+                    <span className="py-2.5 px-3 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-black tracking-widest text-[#0085C3]">DELL</span>
+                    <span className="py-2.5 px-3 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-black tracking-widest text-[#83B81A]">acer</span>
+                  </div>
+                </div>
+
+                {/* Collaboration Types */}
+                <div>
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5">COLLABORATION TYPES</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {["Product Reviews", "Brand Stories", "Buying Guides", "Tech Analysis", "Comparisons", "Live Sessions"].map((badgeText, idx) => (
+                      <span key={idx} className="px-2.5 py-1 bg-gray-100 border border-gray-100 text-[#050B2C] text-[9px] font-bold uppercase rounded-lg">
+                        {badgeText}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-6 mt-6 border-t border-gray-100">
+              <button onClick={() => setIsModalOpen(true)} className="text-[10px] font-black uppercase text-[#FF5B00] tracking-widest hover:underline flex items-center gap-1 border-0 bg-transparent cursor-pointer">
+                Propose Collaboration <span>➜</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Column 3: Contact & Reach */}
+          <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 md:p-8 hover:shadow-xl transition-all flex flex-col justify-between">
+            <div>
+              <h3 className="text-lg font-black text-[#050B2C] uppercase italic tracking-tight pb-4 border-b border-gray-100 mb-6 flex items-center gap-2">
+                <Mail size={18} className="text-[#FF5B00]" />
+                Contact & Reach
+              </h3>
+
+              <div className="space-y-5">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-gray-55 flex items-center justify-center border border-gray-100 shrink-0 text-[#FF5B00]">
+                    <Mail size={16} />
+                  </div>
+                  <div>
+                    <h5 className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Business Inquiries</h5>
+                    <p className="text-xs font-mono font-bold text-[#050B2C] break-all">farhan.tech@researcher.com</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-gray-55 flex items-center justify-center border border-gray-100 shrink-0 text-[#FF5B00]">
+                    <Clock size={16} />
+                  </div>
+                  <div>
+                    <h5 className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Response Time</h5>
+                    <p className="text-xs font-bold text-[#050B2C]">24 - 48 Hours</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-gray-55 flex items-center justify-center border border-gray-100 shrink-0 text-[#FF5B00]">
+                    <MessageCircle size={16} />
+                  </div>
+                  <div>
+                    <h5 className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Preferred Contact</h5>
+                    <p className="text-xs font-bold text-[#050B2C]">Email Callback Handler</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-gray-55 flex items-center justify-center border border-gray-100 shrink-0 text-[#FF5B00]">
+                    <MapPin size={16} />
+                  </div>
+                  <div>
+                    <h5 className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Location</h5>
+                    <p className="text-xs font-bold text-[#050B2C]">Dhaka, Bangladesh</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-6 mt-6 border-t border-gray-100 text-gray-400 text-[10px] font-bold uppercase tracking-wider leading-relaxed">
+              For collaboration opportunities and partnerships
+            </div>
+          </div>
+
+        </section>
+
+        {/* ==================== BRAND REVIEWS (SCROLLABLE & INTERACTIVE LIST) ==================== */}
+        <section id="brand-reviews-section" className="scroll-mt-32 w-full bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-[#EEF2F7] text-left mt-4 select-none">
+          <div className="text-center mb-8 border-b border-gray-100 pb-5">
+            <h3 className="text-xl md:text-2xl font-black text-[#050B2C] tracking-tight uppercase mb-1">
+              Verified Brand Reviews
+            </h3>
+            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
+              Experiences shared by Domestic and International product partners
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Review 1 */}
+            <div className="p-5 rounded-2xl border border-[#EEF2F7] bg-gray-50/50 hover:bg-white hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center border border-blue-200">
+                      AP
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-[#050B2C]">Apex Footwear Ltd.</h4>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase">May 2026 • Verified Partner</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-0.5 text-[#FF5B00]">
+                    {[1, 2, 3, 4, 5].map(starNum => <Star key={starNum} size={11} className="fill-current" />)}
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600 font-medium leading-relaxed italic mb-4">
+                  "Farhan delivered exceptionally high-quality smartphone integration video for our new smart-infused winter sneaker line. Communication was lightning fast and the content yielded a 15% increase in conversion rates!"
+                </p>
+              </div>
+              <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                <span>Campaign: Smart Footwear Launch</span>
+                <span className="text-[#FF5B00] cursor-pointer" onClick={() => toast.success("Feedback marked as helpful!")}>Helpful (42)</span>
+              </div>
+            </div>
+
+            {/* Review 2 */}
+            <div className="p-5 rounded-2xl border border-[#EEF2F7] bg-gray-50/50 hover:bg-white hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#FF6700]/10 text-[#FF6700] font-bold flex items-center justify-center border border-[#FF6700]/20">
+                      XM
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-[#050B2C]">Xiaomi BD Sponsorships</h4>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase">Apr 2026 • Verified Partner</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-0.5 text-[#FF5B00]">
+                    {[1, 2, 3, 4, 5].map(starNum => <Star key={starNum} size={11} className="fill-current" />)}
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600 font-medium leading-relaxed italic mb-4">
+                  "Unparalleled technical precision in analysis. Farhan provided a breakdown of our high refresh display tech that perfectly resonated with both hardcore enthusiasts and casual shoppers alike."
+                </p>
+              </div>
+              <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                <span>Campaign: Redmi Note Review Series</span>
+                <span className="text-[#FF5B00] cursor-pointer" onClick={() => toast.success("Feedback marked as helpful!")}>Helpful (35)</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="mt-8 flex justify-center">
+            <button 
+              onClick={() => toast.success("All verified brand reviews are loaded successfully.")} 
+              className="px-10 py-3.5 border border-[#050B2C] text-[#050B2C] hover:bg-[#050B2C] hover:text-white transition-all text-[10px] font-black uppercase tracking-widest rounded-full bg-white cursor-pointer"
+            >
+              Load More Reviews
+            </button>
+          </div>
+        </section>
+
+        {/* ==================== COMMUNITY TESTIMONIALS (What The Community Says) ==================== */}
+        <section className="scroll-mt-32 w-full text-left select-none">
+          <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
+            <h2 className="text-xl md:text-2xl font-black text-[#050B2C] tracking-tight uppercase italic flex items-center gap-2">
+              <Users className="text-[#FF5B00]" size={22} />
+              What The Community Says
+            </h2>
+            <button 
+              onClick={() => toast.success("Showing comprehensive community comments dashboard...")}
+              className="text-xs font-black text-[#FF5B00] hover:underline uppercase tracking-widest flex items-center gap-1 border-0 bg-transparent cursor-pointer"
+            >
+              View All Reviews <span>➔</span>
+            </button>
+          </div>
+
+          {/* Testimonial cards list (3-column layout) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+            
+            {/* Card 1 */}
+            <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm flex flex-col justify-between h-full hover:shadow-md transition-shadow relative">
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                      <img src="https://i.pravatar.cc/150?u=tanvir" className="w-full h-full object-cover" alt="Tanvir" referrerPolicy="no-referrer" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-[#050B2C]">Tanvir Hossain</h4>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <CheckCircle2 size={10} className="text-green-500 fill-green-500/10" />
+                        <span className="text-[9px] text-green-500 font-extrabold tracking-wide uppercase">Verified Buyer</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-0.5 text-[#FF5B00]">
+                    {[1, 2, 3, 4, 5].map(i => <Star key={i} size={10} className="fill-current" />)}
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-600 font-medium leading-relaxed italic mb-4">
+                  "Farhan bhai's reviews are so detailed and honest. Always helps me make the right decision!"
+                </p>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                <span className="text-[9.5px] font-bold text-[#050B2C] bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-md flex items-center gap-1 cursor-pointer" onClick={() => toast.success("Opening referenced Samsung S24 Ultra review parameters...")}>
+                  📖 Samsung Galaxy S24 Ultra Review
+                </span>
+              </div>
+            </div>
+
+            {/* Card 2 */}
+            <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm flex flex-col justify-between h-full hover:shadow-md transition-shadow relative">
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                      <img src="https://i.pravatar.cc/150?u=nusrat" className="w-full h-full object-cover" alt="Nusrat" referrerPolicy="no-referrer" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-[#050B2C]">Nusrat Jahan</h4>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <CheckCircle2 size={10} className="text-green-500 fill-green-500/10" />
+                        <span className="text-[9px] text-green-500 font-extrabold tracking-wide uppercase">Verified Buyer</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-0.5 text-[#FF5B00]">
+                    {[1, 2, 3, 4, 5].map(i => <Star key={i} size={10} className="fill-current" />)}
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-600 font-medium leading-relaxed italic mb-4">
+                  "The most reliable tech reviewer in Bangladesh. His buying guides are gold!"
+                </p>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                <span className="text-[9.5px] font-bold text-[#050B2C] bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-md flex items-center gap-1 cursor-pointer" onClick={() => toast.success("Opening referenced Laptop Guide...")}>
+                  📖 Best Laptop Guide 2025
+                </span>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm flex flex-col justify-between h-full hover:shadow-md transition-shadow relative">
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                      <img src="https://i.pravatar.cc/150?u=rashed" className="w-full h-full object-cover" alt="Rashed" referrerPolicy="no-referrer" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-[#050B2C]">Rashed Ahmed</h4>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <CheckCircle2 size={10} className="text-green-500 fill-green-500/10" />
+                        <span className="text-[9px] text-green-500 font-extrabold tracking-wide uppercase">Verified Buyer</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-0.5 text-[#FF5B00]">
+                    {[1, 2, 3, 4, 5].map(i => <Star key={i} size={10} className="fill-current" />)}
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-600 font-medium leading-relaxed italic mb-4">
+                  "Love how he explains everything in simple terms. Super helpful for beginners like me."
+                </p>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                <span className="text-[9.5px] font-bold text-[#050B2C] bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-md flex items-center gap-1 cursor-pointer" onClick={() => toast.success("Opening referenced PC Build Guide...")}>
+                  📖 PC Build Guide
+                </span>
+              </div>
+            </div>
+
+            {/* Carousel navigation controls on sides */}
+            <button 
+              onClick={() => toast.success("Switched to preceding testimonial reviews...")}
+              className="absolute left-[-14px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white border border-gray-150 shadow-lg hover:scale-110 active:scale-95 transition-all text-[#050B2C] flex items-center justify-center cursor-pointer"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button 
+              onClick={() => toast.success("Switched to succeeding testimonial reviews...")}
+              className="absolute right-[-14px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white border border-gray-150 shadow-lg hover:scale-110 active:scale-95 transition-all text-[#050B2C] flex items-center justify-center cursor-pointer"
+            >
+              <ChevronRight size={16} />
+            </button>
+
+          </div>
+
+          {/* Indicators dots */}
+          <div className="flex justify-center items-center gap-2 mt-6">
+            <span className="w-2 h-2 rounded-full bg-[#FF5B00]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+          </div>
+        </section>
+
+      </main>
+
+      {/* ==================== OUTREACH COLLABORATION DIALOG SYSTEM ==================== */}
       <AnimatePresence>
-         {isModalOpen && (
-           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none">
-             <motion.div 
-               initial={{ opacity: 0, scale: 0.95 }}
-               animate={{ opacity: 1, scale: 1 }}
-               exit={{ opacity: 0, scale: 0.95 }}
-               transition={{ duration: 0.2 }}
-               className="bg-[#09091E] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl"
-             >
-               
-               {/* Modal Header */}
-               <div className="bg-[#030310] px-6 py-4 border-b border-white/5 flex items-center justify-between">
-                 <div className="flex items-center gap-2">
-                   <FileText className="text-orange-primary" size={16} />
-                   <h3 className="text-sm font-black uppercase tracking-widest text-white italic">
-                     Request Collaboration
-                   </h3>
-                 </div>
-                 <button 
-                   onClick={resetFormAndModal}
-                   className="text-gray-400 hover:text-white text-xs font-bold font-mono tracking-widest uppercase transition-colors cursor-pointer border-0 bg-transparent"
-                 >
-                   [Dismiss]
-                 </button>
-               </div>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[#09091E] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl"
+            >
+              
+              {/* Modal Header */}
+              <div className="bg-[#030310] px-6 py-4 border-b border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="text-[#FF5B00]" size={16} />
+                  <h3 className="text-sm font-black uppercase tracking-widest text-white italic">
+                    Request Recommendation / Collab
+                  </h3>
+                </div>
+                <button 
+                  onClick={resetFormAndModal}
+                  className="text-gray-400 hover:text-white text-xs font-bold font-mono tracking-widest uppercase transition-colors cursor-pointer border-0 bg-transparent"
+                >
+                  [Dismiss]
+                </button>
+              </div>
 
-               {/* Modal Core Area */}
-               <div className="p-6 overflow-y-auto max-h-[80vh] text-left">
-                 
-                 {!submitSuccess ? (
-                   // Campaign Proposing Structured Form
-                   <form onSubmit={handleFormSubmit} className="space-y-5">
-                     
-                     {/* Asset name */}
-                     <div>
-                       <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
-                         1. Brand / Product Name *
-                       </label>
-                       <input
-                         type="text"
-                         required
-                         value={productDetails}
-                         onChange={(e) => setProductDetails(e.target.value)}
-                         placeholder="e.g. Acme Tech Airflow Pro ANC Earbuds"
-                         className="w-full px-4 py-2.5 bg-[#030310] border border-white/10 rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-orange-primary"
-                       />
-                       <span className="text-[8px] text-gray-500 mt-1 block">What product or asset category are you promoting?</span>
-                     </div>
+              {/* Modal Body Area */}
+              <div className="p-6 overflow-y-auto max-h-[80vh] text-left">
+                
+                {!submitSuccess ? (
+                  <form onSubmit={handleFormSubmit} className="space-y-5">
+                    
+                    {/* Brand / Product details */}
+                    <div>
+                      <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
+                        1. Brand / Product Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={productDetails}
+                        onChange={(e) => setProductDetails(e.target.value)}
+                        placeholder="e.g. Acme Tech Airflow Pro ANC Earbuds"
+                        className="w-full px-4 py-2.5 bg-[#030310] border border-white/10 rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-[#FF5B00]"
+                      />
+                    </div>
 
-                     {/* Collab Format Type */}
-                     <div>
-                       <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
-                         2. Campaign Format Type *
-                       </label>
-                       <select
-                         value={collabType}
-                         onChange={(e) => setCollabType(e.target.value)}
-                         className="w-full px-4 py-2.5 bg-[#030310] border border-white/10 rounded-xl text-xs text-white outline-none focus:border-orange-primary appearance-none cursor-pointer"
-                       >
-                         <option value="Product Review">Product Review</option>
-                         <option value="Sponsored Post">Sponsored Post</option>
-                         <option value="Video Feature">Video Feature</option>
-                         <option value="Social Campaign">Social Campaign</option>
-                         <option value="Other">Other</option>
-                       </select>
-                     </div>
+                    {/* Campaign type */}
+                    <div>
+                      <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
+                        2. Campaign Format Type *
+                      </label>
+                      <select
+                        value={collabType}
+                        onChange={(e) => setCollabType(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-[#030310] border border-white/10 rounded-xl text-xs text-white outline-none focus:border-[#FF5B00] appearance-none cursor-pointer"
+                      >
+                        <option value="Product Review">Product Review</option>
+                        <option value="Sponsored Post">Sponsored Post</option>
+                        <option value="Video Feature">Video Feature</option>
+                        <option value="Social Campaign">Social Campaign</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
 
-                     {/* Campaign Requirements */}
-                     <div>
-                       <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
-                         3. Campaign Requirements *
-                       </label>
-                       <textarea
-                         required
-                         rows={4}
-                         value={requirements}
-                         onChange={(e) => setRequirements(e.target.value)}
-                         placeholder="Explain the review scope, delivery format (e.g. a dedicated video feature vs organic Instagram short), and core product highlights..."
-                         className="w-full px-4 py-2.5 bg-[#030310] border border-white/10 rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-orange-primary resize-none"
-                       />
-                       <span className="text-[8px] text-gray-500 mt-1 block">Detailed requirements description for this creator.</span>
-                     </div>
+                    {/* Campaign Requirements */}
+                    <div>
+                      <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
+                        3. Campaign Requirements *
+                      </label>
+                      <textarea
+                        required
+                        rows={4}
+                        value={requirements}
+                        onChange={(e) => setRequirements(e.target.value)}
+                        placeholder="Explain your review parameters, budget limit, or launch schedule..."
+                        className="w-full px-4 py-2.5 bg-[#030310] border border-white/10 rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-[#FF5B00] resize-none"
+                      />
+                    </div>
 
-                     {/* Optional budget range details */}
-                     <div>
-                       <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
-                         4. Estimated Campaign Budget (Optional)
-                       </label>
-                       <input
-                         type="text"
-                         value={budgetRange}
-                         onChange={(e) => setBudgetRange(e.target.value)}
-                         placeholder="e.g. BDT 30,000 - 50,000"
-                         className="w-full px-4 py-2.5 bg-[#030310] border border-white/10 rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-orange-primary"
-                       />
-                     </div>
+                    {/* Budget range */}
+                    <div>
+                      <label className="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
+                        4. Estimated Campaign Budget (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={budgetRange}
+                        onChange={(e) => setBudgetRange(e.target.value)}
+                        placeholder="e.g. BDT 30,000 - 50,000"
+                        className="w-full px-4 py-2.5 bg-[#030310] border border-white/10 rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-[#FF5B00]"
+                      />
+                    </div>
 
-                     {/* Contact detail callbacks */}
-                     <div className="border-t border-white/5 pt-4 space-y-4">
-                       <span className="block text-[9px] font-black uppercase tracking-widest text-gray-400">
-                         5. Optional Callback Channels
-                       </span>
-                       
-                       <div className="grid grid-cols-2 gap-4">
-                         <div>
-                           <label className="block text-[8px] font-bold text-gray-450 uppercase mb-1">Email</label>
-                           <input
-                             type="email"
-                             value={contactEmail}
-                             onChange={(e) => setContactEmail(e.target.value)}
-                             placeholder="marketing@acme.com"
-                             className="w-full px-3 py-2 bg-[#030310] border border-white/10 rounded-lg text-xs text-white placeholder-gray-600 outline-none focus:border-orange-primary"
-                           />
-                         </div>
+                    {/* Contact callback channel */}
+                    <div className="border-t border-white/5 pt-4 space-y-4">
+                      <span className="block text-[9px] font-black uppercase tracking-widest text-gray-400">
+                        5. Callback Channel (At least one)
+                      </span>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[8px] font-bold text-gray-400 uppercase mb-1">Email</label>
+                          <input
+                            type="email"
+                            value={contactEmail}
+                            onChange={(e) => setContactEmail(e.target.value)}
+                            placeholder="marketing@acme.com"
+                            className="w-full px-3 py-2 bg-[#030310] border border-white/10 rounded-lg text-xs text-white placeholder-gray-600 outline-none focus:border-[#FF5B00]"
+                          />
+                        </div>
 
-                         <div>
-                           <label className="block text-[8px] font-bold text-gray-450 uppercase mb-1">Phone Number</label>
-                           <input
-                             type="tel"
-                             value={contactPhone}
-                             onChange={(e) => setContactPhone(e.target.value)}
-                             placeholder="+880 17..."
-                             className="w-full px-3 py-2 bg-[#030310] border border-white/10 rounded-lg text-xs text-white placeholder-gray-600 outline-none focus:border-orange-primary"
-                           />
-                         </div>
-                       </div>
-                     </div>
+                        <div>
+                          <label className="block text-[8px] font-bold text-gray-400 uppercase mb-1">Phone Number</label>
+                          <input
+                            type="tel"
+                            value={contactPhone}
+                            onChange={(e) => setContactPhone(e.target.value)}
+                            placeholder="+880 17..."
+                            className="w-full px-3 py-2 bg-[#030310] border border-white/10 rounded-lg text-xs text-white placeholder-gray-600 outline-none focus:border-[#FF5B00]"
+                          />
+                        </div>
+                      </div>
+                    </div>
 
-                     {/* CTA Actions */}
-                     <div className="pt-3 flex justify-end gap-3">
-                       <button
-                         type="button"
-                         onClick={resetFormAndModal}
-                         className="px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-wider text-gray-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer border-0 bg-transparent"
-                       >
-                         Cancel
-                       </button>
-                       <button
-                         type="submit"
-                         className="px-5 py-2.5 rounded-lg bg-orange-primary hover:bg-[#CF4400] text-white text-[9px] font-black uppercase tracking-widest italic flex items-center gap-1.5 shadow-md cursor-pointer border-0"
-                       >
-                         Submit Briefing <Send size={11} />
-                       </button>
-                     </div>
+                    {/* CTA Actions */}
+                    <div className="pt-3 flex justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={resetFormAndModal}
+                        className="px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-wider text-gray-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer border-0 bg-transparent"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-5 py-2.5 rounded-lg bg-[#FF5B00] hover:bg-[#E05000] text-white text-[9px] font-black uppercase tracking-widest italic flex items-center gap-1.5 shadow-md cursor-pointer border-0"
+                      >
+                        Submit Request <Send size={11} />
+                      </button>
+                    </div>
 
-                   </form>
-                 ) : (
-                   // Campaign proposed successful outcome screen
-                   <div className="space-y-6">
-                     
-                     <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex items-start gap-3">
-                       <CheckCircle2 className="text-green-500 shrink-0 mt-0.5" size={16} />
-                       <div>
-                         <h4 className="text-xs font-black uppercase tracking-wider text-green-500">Request Dispatched To {creator.name}</h4>
-                         <p className="text-[10px] text-gray-400 leading-relaxed mt-1 uppercase">
-                           Structured briefing parameters have been saved under trust benchmarks. The digital curator will review the payload parameters and direct replies to provided contact points.
-                         </p>
-                       </div>
-                     </div>
+                  </form>
+                ) : (
+                  // Outcome view
+                  <div className="space-y-6">
+                    <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex items-start gap-3">
+                      <CheckCircle2 className="text-green-500 shrink-0 mt-0.5" size={16} />
+                      <div>
+                        <h4 className="text-xs font-black uppercase tracking-wider text-green-500">Request Dispatched To {creator.name}</h4>
+                        <p className="text-[10px] text-gray-400 leading-relaxed mt-1 uppercase">
+                          The request payload has been saved successfully under secure dispatch benchmarks. The creator will respond directly to the provided callback channels.
+                        </p>
+                      </div>
+                    </div>
 
-                     {/* Structured brief summaries */}
-                     <div className="bg-[#030310] border border-white/10 rounded-xl p-5 select-text relative">
-                       <div className="absolute top-3 right-3 px-2 py-0.5 bg-white/5 rounded text-[8px] font-bold text-gray-500 uppercase tracking-widest">
-                         DISPATCH BRIEFING payload
-                       </div>
-                       
-                       <h4 className="text-[10px] font-black uppercase tracking-widest text-orange-primary mb-4 pb-2 border-b border-white/5">
-                         Collab Proposal Summary
-                       </h4>
+                    <div className="bg-[#030310] border border-white/10 rounded-xl p-5 select-text relative">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-[#FF5B00] mb-4 pb-2 border-b border-white/5">
+                        Dispatch payload Summary
+                      </h4>
 
-                       <div className="space-y-3.5 text-xs">
-                         <div>
-                           <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Target Asset Name</span>
-                           <span className="font-semibold text-white">{productDetails}</span>
-                         </div>
+                      <div className="space-y-3.5 text-xs">
+                        <div>
+                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Product Name</span>
+                          <span className="font-semibold text-white">{productDetails}</span>
+                        </div>
 
-                         <div>
-                           <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Selected Campaign Format</span>
-                           <span className="font-semibold text-white">{collabType}</span>
-                         </div>
+                        <div>
+                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Campaign Format</span>
+                          <span className="font-semibold text-white">{collabType}</span>
+                        </div>
 
-                         <div>
-                           <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Requirements Scope</span>
-                           <p className="text-xs text-gray-300 leading-relaxed bg-[#09091E] p-3 rounded-lg border border-white/5 mt-1">
-                             {requirements}
-                           </p>
-                         </div>
+                        <div>
+                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Requirements Scope</span>
+                          <p className="text-xs text-gray-300 leading-relaxed bg-[#09091E] p-3 rounded-lg border border-white/5 mt-1">
+                            {requirements}
+                          </p>
+                        </div>
 
-                         {budgetRange && (
-                           <div>
-                             <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Estimations Budget limit</span>
-                             <span className="font-semibold text-white">{budgetRange}</span>
-                           </div>
-                         )}
+                        {budgetRange && (
+                          <div>
+                            <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Budget Limit</span>
+                            <span className="font-semibold text-white">{budgetRange}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
-                         {(contactEmail || contactPhone) && (
-                           <div className="border-t border-white/5 pt-3 mt-3">
-                             <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Return Channels</span>
-                             <div className="flex flex-wrap gap-2">
-                               {contactEmail && (
-                                 <span className="bg-white/5 text-[10px] font-mono px-2 py-0.5 rounded text-gray-300 border border-white/5">
-                                   Email: {contactEmail}
-                                 </span>
-                               )}
-                               {contactPhone && (
-                                 <span className="bg-white/5 text-[10px] font-mono px-2 py-0.5 rounded text-gray-300 border border-white/5">
-                                   Tel: {contactPhone}
-                                 </span>
-                               )}
-                             </div>
-                           </div>
-                         )}
-                       </div>
-                     </div>
+                    <div className="flex justify-end pt-2">
+                      <button
+                        onClick={resetFormAndModal}
+                        className="px-6 py-2.5 rounded-full bg-white text-navy focus:bg-gray-100 text-[10px] font-black uppercase tracking-widest italic cursor-pointer transition-all border-0"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                )}
 
-                     <div className="flex justify-end pt-2">
-                       <button
-                         onClick={resetFormAndModal}
-                         className="px-6 py-2.5 rounded-full bg-white text-navy focus:bg-gray-100 text-[10px] font-black uppercase tracking-widest italic cursor-pointer transition-all border-0"
-                       >
-                         [Dismiss Preview Screen]
-                       </button>
-                     </div>
-
-                   </div>
-                 )}
-
-               </div>
-             </motion.div>
-           </div>
-         )}
+              </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
 
     </div>
+  );
+}
+
+// Custom Folder Icon
+function FolderIcon({ size = 16, className = "" }: { size?: number, className?: string }) {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      className={className}
+    >
+      <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
+    </svg>
   );
 }

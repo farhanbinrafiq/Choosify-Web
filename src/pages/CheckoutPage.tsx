@@ -491,7 +491,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                   <button
                     type="button"
                     onClick={handleApplyPromo}
-                    className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
+                    className="px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
                   >
                     Apply
                   </button>
@@ -522,7 +522,7 @@ ORDER STATUS: PENDING_CONFIRMATION
             {/* Action check button */}
             <button
               onClick={handlePlaceOrder}
-              className="w-full px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-between gap-2 italic"
+              className="w-full px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-between gap-2 italic"
             >
               <span>{sourceMode === 'wholesale' ? 'Authorize Wholesale Lot' : 'Confirm & Place Retail Order'}</span>
               <ArrowRight size={16} />

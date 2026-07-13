@@ -1,0 +1,12 @@
+--- src/components/FilterEngine.tsx
++++ src/components/FilterEngine.tsx
+@@ -1477,6 +1477,6 @@
+         const isSame = 
+           prev.pageName === config.pageName &&
+           prev.activeFilterCount === config.activeFilterCount &&
+-          prev?.quickFilters || [].length === config?.quickFilters || [].length &&
+-          prev?.quickFilters || [].every((q, i) => {
+-            const target = config?.quickFilters || [][i];
++          (prev.quickFilters?.length || 0) === (config.quickFilters?.length || 0) &&
++          (prev.quickFilters || []).every((q, i) => {
++            const target = (config.quickFilters || [])[i];

@@ -1,260 +1,668 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useDashboard, ThreadMessage, MessageThread } from '../context/DashboardContext';
+import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { 
-  Search, ArrowLeft, Send, Bell, MoreVertical, ShieldAlert, CheckCircle, 
-  Package, Truck, Clock, MessageSquare, ExternalLink, Settings, LayoutDashboard, Heart, CheckSquare,
-  X, MessageCircle, CheckCircle2, Info, Sparkles, Plus
+  Search, ArrowLeft, Send, Bell, MoreVertical, 
+  Package, Truck, Clock, MessageSquare, ExternalLink,
+  X, Check, Sparkles, Plus, Copy, Lock, Download, Play, Smile, Paperclip, ChevronRight, CheckCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+interface Thread {
+  id: string;
+  title: string;
+  avatar: string;
+  lastMessage: string;
+  time: string;
+  unread: boolean;
+  unreadCount?: number;
+  tagType: 'order' | 'announcement' | 'general' | 'admin' | 'support' | 'collaboration';
+  tagText: string;
+  online: boolean;
+  orderId?: string;
+  txnId?: string;
+  orderDate?: string;
+  paymentMethod?: string;
+  orderStatus?: string;
+  totalAmount?: string;
+  memberSince?: string;
+  totalOrders?: number;
+  responseTime?: string;
+  rating?: string;
+  ratingCount?: string;
+  verified?: boolean;
+}
+
+interface Message {
+  id: number;
+  sender: 'other' | 'support' | 'user' | 'seller';
+  senderName: string;
+  time: string;
+  text: string;
+  avatar?: string;
+  attachment?: {
+    name: string;
+    size: string;
+  };
+  productCard?: {
+    name: string;
+    variant: string;
+    color: string;
+    quantity: number;
+    price: number;
+    notes: string;
+    image: string;
+    status: 'pending' | 'approved' | 'countered' | 'canceled';
+    link: string;
+    counterPrice?: number;
+  };
+}
 
 export function MessagesPage() {
   const { threadId } = useParams<{ threadId?: string }>();
   const navigate = useNavigate();
-  const { threads, threadMessages, addThreadMessage, createNewThread, markAllAsRead, setThreads, setThreadMessages } = useDashboard();
-  const { orders } = useGlobalState();
-  const [inputText, setInputText] = useState('');
+  const { markAllAsRead } = useDashboard();
+  
+  // 1. Thread Seed Data Matching the Screenshot Visuals exactly
+  const defaultThreads: Thread[] = [
+    {
+      id: 'thread-apple-outlet',
+      title: 'APPLE FACTORY OUTLET',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80',
+      lastMessage: 'Hi, I have an issue with my MacBook Air M2. The screen flickers randomly when I\'m using external display.',
+      time: '11:24 PM',
+      unread: true,
+      unreadCount: 2,
+      tagType: 'order',
+      tagText: 'ORDER: ORD-12121',
+      online: true,
+      orderId: 'ORD-12121',
+      txnId: 'TXN-98764',
+      orderDate: 'May 12, 2025 • 10:18 AM',
+      paymentMethod: 'Cash on Delivery (COD)',
+      orderStatus: 'PENDING CONFIRMATION',
+      totalAmount: '৳128,120',
+      memberSince: 'Jan 15, 2023',
+      totalOrders: 24,
+      responseTime: 'Within 1 hour',
+      rating: '4.8',
+      ratingCount: '1.2K',
+      verified: true
+    },
+    {
+      id: 'thread-choosify-announcements',
+      title: 'CHOOSIFY ANNOUNCEMENTS',
+      avatar: 'announcement-avatar', // Special rendering
+      lastMessage: 'New Year Sale Live!',
+      time: '11:18 PM',
+      unread: true,
+      unreadCount: 1,
+      tagType: 'announcement',
+      tagText: 'ANNOUNCEMENT',
+      online: false,
+      orderId: 'N/A',
+      txnId: 'N/A',
+      orderDate: 'Jan 01, 2026',
+      paymentMethod: 'N/A',
+      orderStatus: 'ACTIVE',
+      totalAmount: 'N/A',
+      memberSince: 'Platform Channel',
+      totalOrders: 0,
+      responseTime: 'Instant',
+      rating: '5.0',
+      ratingCount: '10K',
+      verified: true
+    },
+    {
+      id: 'thread-apex-outlet',
+      title: 'APEX FACTORY OUTLET',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80',
+      lastMessage: 'When will my order be delivered?',
+      time: '10:45 PM',
+      unread: false,
+      tagType: 'order',
+      tagText: 'ORDER: ORD-12060',
+      online: true,
+      orderId: 'ORD-12060',
+      txnId: 'TXN-48592',
+      orderDate: 'May 10, 2025 • 04:30 PM',
+      paymentMethod: 'bKash Wallet',
+      orderStatus: 'DISPATCHED',
+      totalAmount: '৳4,500',
+      memberSince: 'Feb 20, 2022',
+      totalOrders: 18,
+      responseTime: 'Within 2 hours',
+      rating: '4.6',
+      ratingCount: '850',
+      verified: true
+    },
+    {
+      id: 'thread-samsung-outlet',
+      title: 'SAMSUNG FACTORY OUTLET',
+      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&h=150&q=80',
+      lastMessage: 'Do you have any ongoing offers?',
+      time: '09:30 PM',
+      unread: false,
+      tagType: 'general',
+      tagText: 'GENERAL QUERY',
+      online: true,
+      orderId: 'ORD-11590',
+      txnId: 'TXN-38591',
+      orderDate: 'Apr 18, 2025 • 11:15 AM',
+      paymentMethod: 'Credit Card',
+      orderStatus: 'COMPLETED',
+      totalAmount: '৳89,900',
+      memberSince: 'Mar 05, 2024',
+      totalOrders: 54,
+      responseTime: 'Within 15 mins',
+      rating: '4.9',
+      ratingCount: '2.4K',
+      verified: true
+    },
+    {
+      id: 'thread-farhan-rafiq',
+      title: 'FARHAN RAFIQ (ADMIN)',
+      avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png',
+      lastMessage: 'Approved my return request',
+      time: '08:20 PM',
+      unread: false,
+      tagType: 'admin',
+      tagText: 'ADMIN',
+      online: true,
+      orderId: 'RET-5592',
+      txnId: 'TXN-39581',
+      orderDate: 'May 08, 2025 • 11:20 AM',
+      paymentMethod: 'Refund to Wallet',
+      orderStatus: 'APPROVED',
+      totalAmount: '৳12,000',
+      memberSince: 'Jan 01, 2021',
+      totalOrders: 120,
+      responseTime: 'Instant',
+      rating: '5.0',
+      ratingCount: '5.0K',
+      verified: true
+    },
+    {
+      id: 'thread-samsung-bd',
+      title: 'SAMSUNG BANGLADESH LTD.',
+      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80',
+      lastMessage: 'Need technical support for my TV',
+      time: 'Yesterday',
+      unread: false,
+      tagType: 'support',
+      tagText: 'SUPPORT',
+      online: false,
+      orderId: 'ORD-11440',
+      txnId: 'TXN-90215',
+      orderDate: 'Apr 02, 2025 • 03:45 PM',
+      paymentMethod: 'Cash on Delivery (COD)',
+      orderStatus: 'SERVICED',
+      totalAmount: '৳52,000',
+      memberSince: 'Jul 18, 2023',
+      totalOrders: 82,
+      responseTime: 'Within 1 hour',
+      rating: '4.7',
+      ratingCount: '1.9K',
+      verified: true
+    },
+    {
+      id: 'thread-apple-retail',
+      title: 'APPLE RETAIL BD',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80',
+      lastMessage: 'Warranty claim for iPhone 15 Pro',
+      time: '2 Days ago',
+      unread: false,
+      tagType: 'order',
+      tagText: 'ORDER: ORD-11911',
+      online: false,
+      orderId: 'ORD-11911',
+      txnId: 'TXN-11048',
+      orderDate: 'Apr 25, 2025 • 02:15 PM',
+      paymentMethod: 'Credit Card',
+      orderStatus: 'CLAIM UNDER REVIEW',
+      totalAmount: '৳145,000',
+      memberSince: 'Sep 14, 2022',
+      totalOrders: 41,
+      responseTime: 'Within 2 hours',
+      rating: '4.8',
+      ratingCount: '920',
+      verified: true
+    },
+    {
+      id: 'thread-creator-collab',
+      title: 'CREATOR COLLAB',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
+      lastMessage: 'Interested in collaboration opportunity',
+      time: '3 Days ago',
+      unread: false,
+      tagType: 'collaboration',
+      tagText: 'COLLABORATION',
+      online: true,
+      orderId: 'COL-8821',
+      txnId: 'TXN-00983',
+      orderDate: 'Mar 15, 2025 • 10:00 AM',
+      paymentMethod: 'Sponsorship Grant',
+      orderStatus: 'PROPOSAL PHASE',
+      totalAmount: '৳25,000',
+      memberSince: 'Oct 01, 2024',
+      totalOrders: 5,
+      responseTime: 'Within 12 hours',
+      rating: '4.5',
+      ratingCount: '42',
+      verified: false
+    }
+  ];
+
+  // 2. Default messages mapped by thread ID
+  const defaultMessagesByThread: Record<string, Message[]> = {
+    'thread-apple-outlet': [
+      {
+        id: 1,
+        sender: 'seller',
+        senderName: 'APPLE FACTORY OUTLET',
+        time: '11:20 PM',
+        text: "Hi, I have an issue with my MacBook Air M2. The screen flickers randomly when I'm using external display.",
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80'
+      },
+      {
+        id: 2,
+        sender: 'support',
+        senderName: 'CHOOSIFY SUPPORT',
+        time: '11:21 PM',
+        text: "Hello! I'm sorry to hear that. Don't worry, I'll help you with this issue. Can you please share a short video of the problem?"
+      },
+      {
+        id: 3,
+        sender: 'seller',
+        senderName: 'APPLE FACTORY OUTLET',
+        time: '11:23 PM',
+        text: "Sure, here is the video.",
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80',
+        attachment: {
+          name: 'macbook-issue.mp4',
+          size: '18.4 MB'
+        }
+      },
+      {
+        id: 4,
+        sender: 'support',
+        senderName: 'CHOOSIFY SUPPORT',
+        time: '11:24 PM',
+        text: "Thanks for sharing. I've forwarded this to our technical team. They will get back to you within 2 hours."
+      },
+      {
+        id: 5,
+        sender: 'seller',
+        senderName: 'APPLE FACTORY OUTLET',
+        time: '11:24 PM',
+        text: "Thank you so much!",
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80'
+      }
+    ],
+    'thread-choosify-announcements': [
+      {
+        id: 1,
+        sender: 'support',
+        senderName: 'CHOOSIFY ANNOUNCEMENTS',
+        time: '11:18 PM',
+        text: "🔔 New Year Sale Live! Celebrate 2026 with verified premium factory offers. Massive deals and global logistics integrations are live today."
+      }
+    ],
+    'thread-apex-outlet': [
+      {
+        id: 1,
+        sender: 'seller',
+        senderName: 'APEX FACTORY OUTLET',
+        time: '10:45 PM',
+        text: "When will my order be delivered?",
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80'
+      },
+      {
+        id: 2,
+        sender: 'support',
+        senderName: 'CHOOSIFY SUPPORT',
+        time: '10:50 PM',
+        text: "Hello! We have dispatched your lot to the central hub. Let me update your tracker details right now."
+      }
+    ],
+    'thread-samsung-outlet': [
+      {
+        id: 1,
+        sender: 'seller',
+        senderName: 'SAMSUNG FACTORY OUTLET',
+        time: '09:30 PM',
+        text: "Do you have any ongoing offers for corporate bulk buyers of the Galaxy S24 Series?",
+        avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&h=150&q=80'
+      }
+    ],
+    'thread-farhan-rafiq': [
+      {
+        id: 1,
+        sender: 'seller',
+        senderName: 'FARHAN RAFIQ (ADMIN)',
+        time: '08:20 PM',
+        text: "Approved my return request. Please verify details for the reverse logistics pickup.",
+        avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png'
+      }
+    ],
+    'thread-samsung-bd': [
+      {
+        id: 1,
+        sender: 'seller',
+        senderName: 'SAMSUNG BANGLADESH LTD.',
+        time: 'Yesterday',
+        text: "Need technical support for my TV. There are vertical lines appearing after the recent power surge.",
+        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80'
+      }
+    ],
+    'thread-apple-retail': [
+      {
+        id: 1,
+        sender: 'seller',
+        senderName: 'APPLE RETAIL BD',
+        time: '2 Days ago',
+        text: "Warranty claim for iPhone 15 Pro submitted. Here are the diagnostics report logs.",
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80'
+      }
+    ],
+    'thread-creator-collab': [
+      {
+        id: 1,
+        sender: 'seller',
+        senderName: 'CREATOR COLLAB',
+        time: '3 Days ago',
+        text: "Interested in collaboration opportunity. Can we establish a campaign timeline for August 2026?",
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'
+      }
+    ]
+  };
+
+  // State initialization with localStorage fallback
+  const [threads, setThreadsState] = useState<Thread[]>(() => {
+    const saved = localStorage.getItem('choosify_mirror_threads');
+    return saved ? JSON.parse(saved) : defaultThreads;
+  });
+
+  const [messagesMap, setMessagesMap] = useState<Record<string, Message[]>>(() => {
+    const saved = localStorage.getItem('choosify_mirror_messages');
+    return saved ? JSON.parse(saved) : defaultMessagesByThread;
+  });
+
+  const [activeThreadId, setActiveThreadId] = useState<string>(() => {
+    return threadId || 'thread-apple-outlet';
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Interactive Perspective and Modal states
-  const [perspective, setPerspective] = useState<'buyer' | 'seller'>('buyer');
+  const [activeTab, setActiveTab] = useState<'All' | 'Orders' | 'Support' | 'Unread'>('All');
+  const [inputText, setInputText] = useState('');
   const [showSourcingModal, setShowSourcingModal] = useState(false);
-  
-  // Sourcing Modal field states
+
+  // Sourcing modal configuration state
   const [modalProdIdx, setModalProdIdx] = useState(0);
-  const [modalColor, setModalColor] = useState('Sunset Orange');
   const [modalVariant, setModalVariant] = useState('Standard Retail Unit');
+  const [modalColor, setModalColor] = useState('Sunset Orange');
   const [modalQuantity, setModalQuantity] = useState(5);
   const [modalNotes, setModalNotes] = useState('');
 
-  // Active thread selection
-  const activeThreadId = threadId || (threads.length > 0 ? threads[0].id : null);
-  const activeThread = threads.find(t => t.id === activeThreadId);
-
-  // Auto-mark active thread as read
-  useEffect(() => {
-    if (activeThreadId) {
-      const active = threads.find(t => t.id === activeThreadId);
-      if (active && active.unread) {
-        setThreads(prev => prev.map(t => t.id === activeThreadId ? { ...t, unread: false } : t));
-      }
-    }
-  }, [activeThreadId, threads, setThreads]);
-
-  // Filter threads by search query
-  const filteredThreads = threads.filter(t => 
-    t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    t.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.orderRef?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Filter messages for active thread
-  const activeMessages = threadMessages.filter(m => m.threadId === activeThreadId);
-
-  // Ref to automatically scroll chat to bottom
+  // Auto-scroll reference
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (chatBottomRef.current) {
       chatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [activeMessages]);
+  }, [messagesMap, activeThreadId]);
 
-  // Find linked order for active thread
-  const linkedOrder = orders.find(o => o.orderId === activeThread?.orderRef);
-  
-  // Find specific sub-order for active thread seller
-  const linkedSubOrder = linkedOrder?.subOrders.find(sub => {
-    // Check if thread ID contains seller ID
-    const sellerId = activeThreadId?.replace('thread-', '');
-    return sub.sellerId === sellerId;
-  }) || linkedOrder?.subOrders[0];
+  // Persist state to localstorage
+  useEffect(() => {
+    localStorage.setItem('choosify_mirror_threads', JSON.stringify(threads));
+  }, [threads]);
 
-  // Helper function to find a product image or fallback
-  const getProductImageByTitle = (title: string) => {
-    const p = PRODUCTS.find(prod => prod.title === title);
-    return p?.image || PLACEHOLDER_IMAGE;
-  };
+  useEffect(() => {
+    localStorage.setItem('choosify_mirror_messages', JSON.stringify(messagesMap));
+  }, [messagesMap]);
 
-  // Helper function to update dynamic product card state inside message history
-  const updateProductCard = (messageId: number, updates: Partial<any>) => {
-    setThreadMessages(prev => {
-      const updated = prev.map(msg => {
-        if (msg.id === messageId && msg.productCard) {
-          return {
-            ...msg,
-            productCard: {
-              ...msg.productCard,
-              ...updates
-            }
-          };
-        }
-        return msg;
-      });
-      localStorage.setItem('choosify_thread_messages', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const handleSendMessage = () => {
-    if (!inputText.trim() || !activeThreadId) return;
-
-    if (perspective === 'buyer') {
-      // Send customer message
-      addThreadMessage(activeThreadId, inputText.trim(), 'user', 'Me');
-      const userMsg = inputText.trim();
-      setInputText('');
-
-      // Simulated merchant response delay to show active engagement
-      setTimeout(() => {
-        let responseText = `Thank you for your message. Our sales representative has received your ping about order reference ${activeThread?.orderRef || 'general inquiry'}. We will review this and respond shortly!`;
-        
-        const lower = userMsg.toLowerCase();
-        if (lower.includes('deliver') || lower.includes('shipping') || lower.includes('when')) {
-          responseText = `Regarding dispatch, order ${activeThread?.orderRef || ''} current logistics status is [${(linkedSubOrder?.trackingStatus || 'Pending confirmation').toUpperCase()}]. We pack all items under safe cargo metrics immediately after confirmation!`;
-        } else if (lower.includes('discount') || lower.includes('price') || lower.includes('cost')) {
-          responseText = `Our listed wholesale rates are strictly computed with slabs. We guarantee the absolute best deals in Bangladesh!`;
-        } else if (lower.includes('size') || lower.includes('color') || lower.includes('variant')) {
-          responseText = `Yes, your preferred parameters have been logged against Invoice [${linkedSubOrder?.invoiceId || 'N/A'}]. We will package exactly as staged!`;
-        } else if (lower.includes('confirm') || lower.includes('approved')) {
-          responseText = `Perfect! Your order logs have been successfully synced inside our supply terminal. Thank you for placing your secure trust in Choosify.bd!`;
-        }
-
-        addThreadMessage(activeThreadId, responseText, 'seller', activeThread?.title || 'Merchant Partner');
-        toast.success('New reply received from factory representative!');
-      }, 1500);
-    } else {
-      // Seller sends message
-      addThreadMessage(activeThreadId, inputText.trim(), 'seller', activeThread?.title || 'Merchant Representative');
-      const sellerMsg = inputText.trim();
-      setInputText('');
-
-      // Simulated customer reply
-      setTimeout(() => {
-        const responseText = `Received! Thank you for the update on our order request. Let's make sure the packaging is robust.`;
-        addThreadMessage(activeThreadId, responseText, 'user', 'Me');
-        toast.success('New reply received from the buyer!');
-      }, 1500);
+  // Handle URL change
+  useEffect(() => {
+    if (threadId) {
+      setActiveThreadId(threadId);
     }
+  }, [threadId]);
+
+  // Active thread object lookup
+  const activeThread = threads.find(t => t.id === activeThreadId) || threads[0];
+
+  // Mark selected thread as read automatically
+  useEffect(() => {
+    if (activeThread && activeThread.unread) {
+      setThreadsState(prev => prev.map(t => t.id === activeThread.id ? { ...t, unread: false, unreadCount: 0 } : t));
+    }
+  }, [activeThreadId]);
+
+  // Copying helper function
+  const handleCopyText = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied to clipboard!`);
   };
 
-  const handleCreateSourcingRequest = () => {
-    const selectedProd = PRODUCTS[modalProdIdx];
-    const unitPriceNum = parseFloat(String(selectedProd.price).replace(/,/g, ''));
+  // Switch thread
+  const handleSelectThread = (id: string) => {
+    setActiveThreadId(id);
+    navigate(`/messages/${id}`);
+  };
+
+  // Filter conversations
+  const filteredThreads = threads.filter(t => {
+    const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          t.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (t.orderId && t.orderId.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                          (t.txnId && t.txnId.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    const pCard = {
-      image: selectedProd.image || PLACEHOLDER_IMAGE,
-      name: selectedProd.title,
-      variant: modalVariant || "Standard Sourcing Config",
-      color: modalColor || "Midnight Slate",
-      quantity: modalQuantity,
-      notes: modalNotes || "Special protective transport carton requested.",
-      price: unitPriceNum,
-      link: `/products/${selectedProd.id}`,
-      status: "pending"
+    if (!matchesSearch) return false;
+
+    if (activeTab === 'Orders') {
+      return t.tagType === 'order';
+    }
+    if (activeTab === 'Support') {
+      return t.tagType === 'support' || t.tagType === 'announcement';
+    }
+    if (activeTab === 'Unread') {
+      return t.unread;
+    }
+    return true; // 'All'
+  });
+
+  // Send message implementation with simulated factory/customer response
+  const handleSendMessage = () => {
+    if (!inputText.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now(),
+      sender: 'support',
+      senderName: 'CHOOSIFY SUPPORT',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      text: inputText.trim()
     };
 
-    const threadId = activeThreadId || 'thread-general';
-    const orderRef = `CHOOSIFY-${Math.floor(1000000 + Math.random() * 9000000)}`;
+    const updatedMsgs = [...(messagesMap[activeThreadId] || []), userMessage];
+    
+    setMessagesMap(prev => ({
+      ...prev,
+      [activeThreadId]: updatedMsgs
+    }));
 
-    const structuredMsg = `🛒 SPECIAL IN-CHAT SOURCING ORDER DISPATCH:
-📦 Item: ${selectedProd.title}
-🎨 Color: ${modalColor}
-⚙️ Variant: ${modalVariant}
-🔢 Quantity: ${modalQuantity}
-💵 Unit Price: BDT ${unitPriceNum.toLocaleString()}
-📝 Sourcing Memo: ${modalNotes || "No notes."}`;
-
-    // 1. Post shared card message
-    addThreadMessage(threadId, structuredMsg, 'user', 'Me', pCard);
-
-    // 2. Set thread meta order reference if missing
-    setThreads(prev => prev.map(t => {
-      if (t.id === threadId) {
+    // Update last message in thread list
+    setThreadsState(prev => prev.map(t => {
+      if (t.id === activeThreadId) {
         return {
           ...t,
-          orderRef: t.orderRef || orderRef
+          lastMessage: inputText.trim(),
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
       }
       return t;
     }));
 
+    setInputText('');
+
+    // Simulated Auto response
+    setTimeout(() => {
+      const autoResponses: Record<string, string[]> = {
+        'thread-apple-outlet': [
+          "Perfect! I will test this and let you know if the flickering persists.",
+          "Awesome, thanks for forwarding. Looking forward to the technician's update.",
+          "Received! Thank you so much for the quick response."
+        ],
+        'thread-apex-outlet': [
+          "Perfect, I'll keep an eye out for the Gazipur delivery vehicle. Thank you!",
+          "Great service! Let me know if you need any additional documents."
+        ],
+        'thread-samsung-outlet': [
+          "Got it. Please share the pricing table as soon as you have it.",
+          "Thank you for the quick support! We are setting up our purchase order."
+        ]
+      };
+
+      const replies = autoResponses[activeThreadId] || [
+        "Thanks for the support! Our team has logged this internally.",
+        "Understood. We appreciate your immediate assistance.",
+        "Will do. Thanks!"
+      ];
+
+      const randomReply = replies[Math.floor(Math.random() * replies.length)];
+
+      const sellerMessage: Message = {
+        id: Date.now() + 1,
+        sender: 'seller',
+        senderName: activeThread.title,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        text: randomReply,
+        avatar: activeThread.avatar
+      };
+
+      setMessagesMap(prev => ({
+        ...prev,
+        [activeThreadId]: [...(prev[activeThreadId] || []), sellerMessage]
+      }));
+
+      setThreadsState(prev => prev.map(t => {
+        if (t.id === activeThreadId) {
+          return {
+            ...t,
+            lastMessage: randomReply,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+        }
+        return t;
+      }));
+
+      toast.success(`Reply from ${activeThread.title}`);
+    }, 1500);
+  };
+
+  // Submit sourcing product card modal
+  const handleCreateSourcingRequest = () => {
+    const selectedProd = PRODUCTS[modalProdIdx];
+    const unitPriceNum = parseFloat(String(selectedProd.price).replace(/,/g, ''));
+
+    const pCard = {
+      image: selectedProd.image || PLACEHOLDER_IMAGE,
+      name: selectedProd.title,
+      variant: modalVariant || "Standard Retail Unit",
+      color: modalColor || "Midnight Gray",
+      quantity: modalQuantity,
+      notes: modalNotes || "Requested with premium wooden secure packaging.",
+      price: unitPriceNum,
+      link: `/products/${selectedProd.id}`,
+      status: "pending" as const
+    };
+
+    const cardMessage: Message = {
+      id: Date.now(),
+      sender: 'support',
+      senderName: 'CHOOSIFY SUPPORT',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      text: `🛒 Shared parameter card for ${selectedProd.title}`,
+      productCard: pCard
+    };
+
+    setMessagesMap(prev => ({
+      ...prev,
+      [activeThreadId]: [...(prev[activeThreadId] || []), cardMessage]
+    }));
+
     setShowSourcingModal(false);
     setModalNotes('');
-    toast.success('Custom product card shared inside current thread!');
+    toast.success('Custom product sourcing card shared inside chat!');
 
-    // 3. Automated seller reply
+    // Seller response
     setTimeout(() => {
-      const sellerResponse = `💬 SELLER SOURCING NOTIFICATION:
-Thank you for sending this custom parameter card! We have logged BDT ${(unitPriceNum * modalQuantity).toLocaleString()} in draft format. Let me review and approve it.`;
-      addThreadMessage(threadId, sellerResponse, 'seller', activeThread?.title || 'Merchant Partner');
+      const responseText = `💬 Custom parameters received for ${selectedProd.title}! We have calculated BDT ${(unitPriceNum * modalQuantity).toLocaleString()} in draft status. Our logistics team will review and approve within 1 hour.`;
+      const replyMsg: Message = {
+        id: Date.now() + 1,
+        sender: 'seller',
+        senderName: activeThread.title,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        text: responseText,
+        avatar: activeThread.avatar
+      };
+
+      setMessagesMap(prev => ({
+        ...prev,
+        [activeThreadId]: [...(prev[activeThreadId] || []), replyMsg]
+      }));
+
       toast.success('Reply received from supplier representative!');
-    }, 1200);
+    }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-choosify-feed text-gray-900 flex flex-col">
-      {/* Messages Header bar */}
-      <div className="w-full border-b border-[#D6E1EC] bg-[#000435] text-white sticky top-0 z-40 backdrop-blur px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button 
-            type="button" 
-            onClick={() => {
-              if (threadId && window.innerWidth < 768) {
-                navigate('/messages');
-              } else {
-                navigate('/dashboard');
-              }
-            }} 
-            className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/70 hover:text-white transition-colors"
-          >
-            <ArrowLeft size={16} />
-          </button>
-          <div>
-            <span className="text-[9px] font-black text-[#F96500] uppercase tracking-[0.25em] block leading-none mb-1">Customer Support Center</span>
-            <h1 className="text-xl font-black uppercase italic tracking-tighter leading-none flex items-center gap-2">
-              <MessageSquare size={16} className="text-[#F96500]" /> Real-time Support <span className="text-gray-500 font-serif lowercase font-normal">Inbox</span>
-            </h1>
-          </div>
+    <div className="min-h-screen bg-[#F5F8FD] text-gray-900 flex flex-col font-sans">
+      
+      {/* ========================================================= */}
+      {/* 🌟 CUSTOMER SUPPORT HERO                                  */}
+      {/* ========================================================= */}
+      <div className="w-full bg-gradient-to-r from-[#050B2C] to-[#1F0B3C] text-white px-8 py-7 flex flex-col md:flex-row items-start md:items-center justify-between border-b border-[#EEF2F7]/10 shrink-0">
+        <div className="space-y-1">
+          <span className="text-[#FF5B00] text-[10px] font-extrabold uppercase tracking-[0.25em] block leading-none">
+            CUSTOMER SUPPORT CENTER
+          </span>
+          <h1 className="text-2xl font-black uppercase italic tracking-tighter leading-none flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-[#FF5B00]/20 flex items-center justify-center text-[#FF5B00]">
+              💬
+            </span>
+            REAL-TIME SUPPORT
+          </h1>
+          <p className="text-xs text-gray-400 font-medium italic">
+            We're here to help, 24/7
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {(() => {
-            const hasUnread = threads.some(t => t.unread);
-            return (
-              <button
-                type="button"
-                onClick={() => {
-                  if (hasUnread) {
-                    markAllAsRead();
-                    toast.success('All Support Chats marked as read!');
-                  }
-                }}
-                disabled={!hasUnread}
-                className={`px-4 py-2 border rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all italic flex items-center gap-1.5
-                  ${hasUnread 
-                    ? 'bg-white/5 hover:bg-white/10 border-white/10 text-white cursor-pointer' 
-                    : 'bg-white/[0.02] border-white/5 text-gray-500 cursor-not-allowed'}`}
-                title={hasUnread ? "Mark All as Read" : "All messages are already read"}
-              >
-                <CheckSquare size={12} className={hasUnread ? 'text-[#F96550]' : 'text-gray-600'} />
-                Mark All as Read
-              </button>
-            );
-          })()}
+        <div className="flex flex-wrap items-center gap-3 mt-4 md:mt-0">
+          <button
+            type="button"
+            onClick={() => {
+              markAllAsRead();
+              setThreadsState(prev => prev.map(t => ({ ...t, unread: false, unreadCount: 0 })));
+              toast.success('All Support Chats marked as read!');
+            }}
+            className="px-4 py-2 bg-transparent hover:bg-white/5 border border-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <Check size={12} className="text-[#FF5B00]" />
+            Mark All As Read
+          </button>
           <Link 
             to="/dashboard"
-            state={{ activeTab: 'overview' }}
-            className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold text-white uppercase tracking-widest transition-all italic flex items-center gap-1"
+            className="px-4 py-2 bg-transparent hover:bg-white/5 border border-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all flex items-center gap-2"
           >
-            <LayoutDashboard size={12} className="text-orange-primary" />
+            <span className="text-orange-500">❖</span>
             My Dashboard
           </Link>
           <Link 
             to="/profile/orders"
-            className="px-4 py-2 bg-orange-primary hover:bg-[#FF5B00] rounded-xl text-[10px] font-bold text-white uppercase tracking-widest transition-all italic flex items-center gap-1"
+            className="px-4 py-2 bg-[#FF5B00] hover:bg-[#FF5B00] text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-[#FF5B00]/10"
           >
             <Package size={12} />
             My Orders
@@ -262,532 +670,732 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
         </div>
       </div>
 
-      {/* Main container */}
-      <div className="flex flex-1 overflow-hidden h-[calc(100vh-130px)]">
-        {/* Sidebar: list of chat threads */}
-        <aside className={`w-full md:w-[320px] lg:w-[380px] bg-white border-r border-[#D6E1EC] flex flex-col shrink-0 ${threadId ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-6 border-b border-gray-100 space-y-4 bg-white">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block italic">ACTIVE TRANSMISSION CHANNELS</span>
+      {/* ========================================================= */}
+      {/* 🚀 THREE-COLUMN MESSAGING LAYOUT                         */}
+      {/* ========================================================= */}
+      <div className="flex-1 max-w-[1600px] w-full mx-auto px-6 py-6 flex flex-col lg:flex-row gap-6 overflow-hidden">
+        
+        {/* --------------------------------------------------------- */}
+        {/* 1. LEFT CONVERSATION SIDEBAR (≈26% Width)                 */}
+        {/* --------------------------------------------------------- */}
+        <aside className="w-full lg:w-[26%] bg-white rounded-[24px] border border-[#EEF2F7] shadow-xs flex flex-col shrink-0 overflow-hidden">
+          
+          {/* Header Title & Plus */}
+          <div className="p-5 border-b border-[#EEF2F7] flex items-center justify-between">
+            <h2 className="text-xs font-black uppercase text-gray-900 tracking-wider">
+              Your Conversations
+            </h2>
+            <button
+              onClick={() => {
+                toast.success("Initializing a new transaction dialogue pipeline...");
+              }}
+              className="w-8 h-8 rounded-full bg-[#F5F8FD] hover:bg-[#EEF2F7] flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors border-none cursor-pointer"
+              title="Create Conversation"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
+
+          {/* Search Box */}
+          <div className="px-5 pt-4">
             <div className="relative">
               <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input 
                 onChange={(e) => setSearchQuery(e.target.value)}
                 value={searchQuery}
-                className="w-full h-11 pl-11 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-orange-primary focus:bg-white transition-all" 
+                className="w-full h-11 pl-11 pr-4 bg-[#F5F8FD] border border-[#EEF2F7] rounded-xl text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#FF5B00] transition-all" 
                 placeholder="Search transactions / order references..." 
               />
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-gray-100 bg-white no-scrollbar">
+          {/* Tabs row with Badges */}
+          <div className="px-5 py-3 border-b border-[#EEF2F7] flex items-center justify-between text-xs font-bold text-gray-500 mt-2">
+            {[
+              { id: 'All', count: 8 },
+              { id: 'Orders', count: 5 },
+              { id: 'Support', count: 3 },
+              { id: 'Unread', count: 3 }
+            ].map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-1 pb-1 transition-all relative border-none bg-transparent cursor-pointer
+                    ${isActive ? 'text-[#FF5B00] font-black' : 'hover:text-gray-900'}`}
+                >
+                  <span>{tab.id}</span>
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-black text-white
+                    ${isActive ? 'bg-[#FF5B00]' : 'bg-[#6B7280]'}`}>
+                    {tab.count}
+                  </span>
+                  {isActive && (
+                    <span className="absolute bottom-[-13px] left-0 right-0 h-[3px] bg-[#FF5B00] rounded-full" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Scrollable conversation list */}
+          <div className="flex-1 overflow-y-auto divide-y divide-[#EEF2F7] no-scrollbar">
             {filteredThreads.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 text-[11px] font-bold uppercase tracking-wider">
-                No messaging threads resolved
+              <div className="p-8 text-center text-gray-400 text-xs font-semibold uppercase tracking-wider">
+                No matching dialogues
               </div>
             ) : (
-              filteredThreads.map(t => {
+              filteredThreads.map((t) => {
                 const isActive = t.id === activeThreadId;
+                
+                // Get custom color styles for tags to match high-fidelity visuals
+                let tagStyles = 'bg-gray-150 border-gray-200 text-gray-600';
+                if (t.tagType === 'order') tagStyles = 'border-red-200 text-red-500 bg-red-50/50';
+                if (t.tagType === 'announcement') tagStyles = 'border-indigo-200 text-indigo-500 bg-indigo-50/50';
+                if (t.tagType === 'admin') tagStyles = 'border-emerald-200 text-emerald-600 bg-emerald-50/50';
+                if (t.tagType === 'support') tagStyles = 'border-blue-200 text-blue-500 bg-blue-50/50';
+                if (t.tagType === 'collaboration') tagStyles = 'border-purple-200 text-purple-600 bg-purple-50/50';
+                if (t.tagType === 'general') tagStyles = 'border-amber-200 text-amber-600 bg-amber-50/50';
+
                 return (
                   <button
                     key={t.id}
-                    onClick={() => navigate(`/messages/${t.id}`)}
-                    className={`w-full p-6 flex gap-4 text-left transition-all hover:bg-gray-50 relative ${isActive ? 'bg-[#F0F8FF]/80' : ''}`}
+                    onClick={() => handleSelectThread(t.id)}
+                    className={`w-full p-4 flex gap-3 text-left transition-all hover:bg-[#F5F8FD] relative border-none bg-transparent cursor-pointer
+                      ${isActive ? 'bg-[#F5F8FD]/80 font-medium' : ''}`}
                   >
-                    {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#F96500]" />}
+                    {isActive && (
+                      <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#FF5B00]" />
+                    )}
+                    
+                    {/* Avatar structure */}
                     <div className="relative shrink-0">
-                      <img src={t.avatar} className="w-12 h-12 rounded-full object-cover border border-gray-200" alt="" />
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+                      {t.avatar === 'announcement-avatar' ? (
+                        <div className="w-11 h-11 rounded-full bg-[#FF5B00] flex items-center justify-center text-white font-black text-sm border border-orange-200 shadow-sm">
+                          CH
+                        </div>
+                      ) : (
+                        <img 
+                          src={t.avatar} 
+                          className="w-11 h-11 rounded-full object-cover border border-[#EEF2F7]" 
+                          alt="" 
+                          referrerPolicy="no-referrer"
+                        />
+                      )}
+                      {t.online && (
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+                      )}
                     </div>
+
+                    {/* Metadata */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-black text-gray-900 uppercase italic truncate pr-2">{t.title}</span>
-                        <span className="text-[8px] font-bold text-gray-500 tracking-wider shrink-0">{t.time}</span>
-                      </div>
-                      <p className="text-[10px] text-gray-500 line-clamp-1 italic mb-1">{t.lastMessage}</p>
-                      {t.orderRef && (
-                        <span className="inline-flex text-[8px] font-black bg-[#F0F8FF] border border-[#D6E1EC] text-orange-primary px-1.5 py-0.5 rounded uppercase tracking-wider">
-                          ORDER: {t.orderRef}
+                        <span className="text-xs font-black text-gray-900 uppercase truncate pr-1">
+                          {t.title}
                         </span>
-                      )}
+                        <span className="text-[9px] font-semibold text-gray-400 shrink-0">
+                          {t.time}
+                        </span>
+                      </div>
+                      
+                      <p className="text-[11px] text-gray-500 line-clamp-1 italic mb-1.5 font-medium">
+                        {t.lastMessage}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <span className={`inline-flex text-[8px] font-black border px-1.5 py-0.5 rounded uppercase tracking-wider ${tagStyles}`}>
+                          {t.tagText}
+                        </span>
+                        
+                        {t.unreadCount && t.unreadCount > 0 ? (
+                          <span className="w-5 h-5 rounded-full bg-[#FF5B00] text-white text-[10px] font-bold flex items-center justify-center shrink-0 shadow-xs animate-pulse">
+                            {t.unreadCount}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   </button>
                 );
               })
             )}
           </div>
+
+          {/* Bottom center links */}
+          <div className="py-4 text-center border-t border-[#EEF2F7] bg-white rounded-b-[24px]">
+            <button
+              onClick={() => toast.success('Workspace history synced fully')}
+              className="text-xs font-black text-[#FF5B00] hover:underline uppercase tracking-wider bg-transparent border-none cursor-pointer"
+            >
+              View all conversations →
+            </button>
+          </div>
         </aside>
 
-        {/* Messaging / Conversation content viewport */}
-        <main className={`flex-1 flex flex-col bg-choosify-feed ${threadId ? 'flex' : 'hidden md:flex'}`}>
-          {threadId && (
-            <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-[#D6E1EC] flex-shrink-0">
-              <Link
-                to="/messages"
-                className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-gray-600 hover:text-navy transition-colors"
-              >
-                <ArrowLeft size={14} />
-                Back to Messages
-              </Link>
-            </div>
-          )}
-          {activeThread ? (
-            <>
-              {/* Header inside open thread Chat */}
-              <div className="p-6 border-b border-[#D6E1EC] bg-white flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <img src={activeThread.avatar} className="w-11 h-11 rounded-full object-cover border border-gray-200" alt="" />
-                  <div>
-                    <h2 className="text-sm font-black text-gray-900 italic uppercase tracking-wider leading-none mb-1">{activeThread.title}</h2>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-bold text-green-600 uppercase italic font-black flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                        Active Stream
-                      </span>
-                      {activeThread.orderRef && (
-                        <span className="text-[8px] font-black bg-orange-50 border border-orange-200 text-orange-primary px-2 py-0.5 rounded-md uppercase tracking-wider">
-                          {activeThread.orderRef}
-                        </span>
-                      )}
-                    </div>
+        {/* --------------------------------------------------------- */}
+        {/* 2. CENTER CHAT AREA (≈49% Width)                          */}
+        {/* --------------------------------------------------------- */}
+        <main className="w-full lg:w-[49%] bg-white rounded-[24px] border border-[#EEF2F7] shadow-xs flex flex-col overflow-hidden">
+          
+          {/* Conversation Header */}
+          <div className="p-4 border-b border-[#EEF2F7] flex items-center justify-between bg-white shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                {activeThread.avatar === 'announcement-avatar' ? (
+                  <div className="w-10 h-10 rounded-full bg-[#FF5B00] flex items-center justify-center text-white font-black text-xs border border-orange-200">
+                    CH
                   </div>
-                </div>
-
+                ) : (
+                  <img 
+                    src={activeThread.avatar} 
+                    className="w-10 h-10 rounded-full object-cover border border-[#EEF2F7]" 
+                    alt="" 
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+                {activeThread.online && (
+                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full" />
+                )}
+              </div>
+              
+              <div>
+                <h2 className="text-xs font-black text-gray-900 uppercase tracking-wider leading-none mb-1">
+                  {activeThread.title}
+                </h2>
                 <div className="flex items-center gap-2">
-                  <button className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors border-none cursor-pointer" title="Notifications">
-                    <Bell size={14} />
-                  </button>
-                  <button className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors border-none cursor-pointer" title="Thread Options">
-                    <MoreVertical size={14} />
-                  </button>
+                  <span className="text-[10px] font-semibold text-gray-400 flex items-center gap-1">
+                    <span className={`w-1.5 h-1.5 rounded-full ${activeThread.online ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                    {activeThread.online ? 'Online' : 'Offline'}
+                  </span>
+                  {activeThread.orderId && activeThread.orderId !== 'N/A' && (
+                    <span className="text-[8px] font-black bg-orange-50 border border-orange-200 text-[#FF5B00] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      ORDER: {activeThread.orderId}
+                    </span>
+                  )}
                 </div>
               </div>
+            </div>
 
-              {/* 🎭 INTERACTIVE ROLE PERSPECTIVE TOGGLER */}
-              <div className="bg-gradient-to-r from-gray-50 to-slate-100 border-b border-[#D6E1EC] px-6 py-3 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block italic">Chat Perspective:</span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider italic border shadow-xs flex items-center gap-1
-                    ${perspective === 'buyer' 
-                      ? 'bg-orange-500/10 border-orange-500/30 text-orange-600' 
-                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600'}`}>
-                    <Sparkles size={10} className="animate-spin" />
-                    {perspective === 'buyer' ? 'Viewing as Buyer (Me)' : 'Viewing as Seller (Merchant)'}
+            <div className="flex items-center gap-1">
+              <button 
+                onClick={() => toast.success('Live audit tracking activated')}
+                className="w-8 h-8 rounded-full hover:bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 border-none bg-transparent cursor-pointer"
+                title="Audit Track"
+              >
+                <Bell size={15} />
+              </button>
+              <button 
+                onClick={() => toast.success('Support ticket parameters generated')}
+                className="w-8 h-8 rounded-full hover:bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 border-none bg-transparent cursor-pointer"
+                title="Options"
+              >
+                <MoreVertical size={15} />
+              </button>
+            </div>
+          </div>
+
+          {/* Live Chat Viewport / Stream */}
+          <div className="flex-1 p-5 overflow-y-auto space-y-4 no-scrollbar bg-white">
+            
+            {/* LINKED LOT TRANSACTION CARD (Conditionally show for Apple Outlet or based on order ID) */}
+            {activeThread.id === 'thread-apple-outlet' && (
+              <div className="p-4 bg-white border border-[#EEF2F7] rounded-2xl shadow-xs relative">
+                
+                {/* Header line */}
+                <div className="flex items-center justify-between border-b border-[#EEF2F7] pb-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#FF5B00] text-white text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-sm">
+                      LINKED LOT TRANSACTION
+                    </span>
+                    <span className="text-[9px] font-black text-gray-400 tracking-wider">
+                      TXN ID: {activeThread.txnId}
+                    </span>
+                  </div>
+                  <span className="border border-[#FF9F00] text-[#FF9F00] bg-[#FF9F00]/5 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">
+                    🟠 PENDING
                   </span>
                 </div>
-                <div className="flex items-center gap-1 bg-white border border-gray-200 p-0.5 rounded-xl shadow-xs">
-                  <button
-                    onClick={() => {
-                      setPerspective('buyer');
-                      toast.success("Switched view to Buyer perspective");
-                    }}
-                    className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer border-none
-                      ${perspective === 'buyer'
-                        ? 'bg-orange-primary text-white shadow-xs'
-                        : 'text-gray-500 hover:text-gray-900 bg-transparent hover:bg-gray-50'}`}
+
+                {/* Content details */}
+                <div className="flex items-start gap-4">
+                  <img 
+                    src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=150&h=150&q=80" 
+                    className="w-14 h-14 object-cover rounded-xl border border-[#EEF2F7] bg-white shrink-0" 
+                    alt="MacBook"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-xs font-bold text-gray-900 uppercase tracking-tight mb-1">
+                      APPLE MACBOOK AIR M2
+                    </h4>
+                    <p className="text-[10px] text-[#6B7280] font-semibold mb-0.5">
+                      Space Gray • 512GB SSD • 8GB RAM
+                    </p>
+                    <p className="text-[10px] text-gray-400 font-medium">
+                      Order placed on <span className="font-bold text-gray-500">May 12, 2025</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bottom details */}
+                <div className="mt-4 pt-3 border-t border-[#EEF2F7] flex items-center justify-between">
+                  <div>
+                    <span className="text-[9px] text-[#6B7280] font-bold block leading-none mb-1">TOTAL AMOUNT</span>
+                    <span className="text-base font-black text-[#FF5B00] font-mono leading-none">
+                      {activeThread.totalAmount}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => toast.success('Opening detailed transaction pipeline...')}
+                    className="px-4 py-2 bg-[#F5F8FD] hover:bg-[#EEF2F7] text-xs font-black text-gray-700 rounded-xl transition-all flex items-center gap-1.5 border border-[#EEF2F7] cursor-pointer"
                   >
-                    Buyer View
-                  </button>
-                  <button
-                    onClick={() => {
-                      setPerspective('seller');
-                      toast.success("Switched view to Seller (Merchant) perspective");
-                    }}
-                    className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer border-none
-                      ${perspective === 'seller'
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'text-gray-500 hover:text-gray-900 bg-transparent hover:bg-gray-50'}`}
-                  >
-                    Seller View
+                    View Transaction Details →
                   </button>
                 </div>
               </div>
+            )}
 
-              {/* Chat Viewport Area with support for linked order cards inside the stream */}
-              <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6 no-scrollbar relative">
-                {/* 🚨 ORDER OVERVIEW CARD INSIDE CHAT (CRITICAL REQUIREMENT) */}
-                {linkedSubOrder && (
-                  <div className="max-w-2xl mx-auto bg-white border border-[#D6E1EC] rounded-3xl p-6 shadow-sm relative overflow-hidden transition-all duration-300">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#F96500]/5 rounded-full blur-2xl" />
-                    
-                    {/* Upper layout: badge indicators */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-4 mb-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[8.5px] font-black bg-orange-primary text-white px-2 py-0.5 rounded-md italic tracking-wider">
-                          LINKED LOT TRANSACTION
-                        </span>
-                        <span className="text-[8.5px] font-mono text-gray-500">
-                          {linkedSubOrder.invoiceId}
-                        </span>
-                      </div>
-                      
-                      {/* Tracking state badges matching original design colors */}
-                      <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded italic border flex items-center gap-1.5
-                        ${linkedSubOrder.trackingStatus === 'pending' ? 'bg-[#FF9F00]/10 border-[#FF9F00]/30 text-[#FF9F00]' : ''}
-                        ${linkedSubOrder.trackingStatus === 'dispatched' ? 'bg-[#3867ff]/10 border-[#3867ff]/30 text-[#3867ff]' : ''}
-                        ${linkedSubOrder.trackingStatus === 'transit' ? 'bg-purple-100 border-purple-300 text-purple-600' : ''}
-                        ${linkedSubOrder.trackingStatus === 'delivered' ? 'bg-[#07DD05]/10 border-[#07DD05]/30 text-[#07DD05]' : ''}
-                      `}>
-                        {linkedSubOrder.trackingStatus === 'pending' && <Clock size={11} />}
-                        {linkedSubOrder.trackingStatus === 'dispatched' && <Package size={11} />}
-                        {linkedSubOrder.trackingStatus === 'transit' && <Truck size={11} />}
-                        {linkedSubOrder.trackingStatus === 'delivered' && <CheckCircle size={11} />}
-                        {linkedSubOrder.trackingStatus.toUpperCase()}
-                      </span>
-                    </div>
+            {/* Chat Messages Timeline */}
+            <div className="space-y-4">
+              <div className="text-center py-2">
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">
+                  Today, May 12
+                </span>
+              </div>
 
-                    {/* Middle layer: Product details */}
-                    <div className="space-y-4">
-                      {linkedSubOrder.items.map((item: any, iIdx: number) => (
-                        <div key={iIdx} className="flex gap-4 items-start">
+              {(messagesMap[activeThreadId] || []).map((m) => {
+                const isSupport = m.sender === 'support';
+                
+                return (
+                  <div 
+                    key={m.id} 
+                    className={`flex gap-3 max-w-[85%] ${isSupport ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
+                  >
+                    {/* Avatar */}
+                    {!isSupport && (
+                      <div className="relative shrink-0">
+                        {m.avatar ? (
                           <img 
-                            src={getProductImageByTitle(item.productTitle)}
-                            className="w-16 h-16 rounded-2xl object-cover shrink-0 border border-gray-200 bg-white"
-                            alt=""
+                            src={m.avatar} 
+                            className="w-8 h-8 rounded-full object-cover border border-[#EEF2F7]" 
+                            alt="" 
+                            referrerPolicy="no-referrer"
                           />
-                          <div className="flex-1 min-w-0">
-                            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-1">
-                              {activeThread.title}
-                            </span>
-                            <h4 className="text-xs font-black text-gray-900 uppercase italic leading-tight mb-1 line-clamp-1">
-                              {item.productTitle}
-                            </h4>
-                            <div className="flex items-center gap-3 text-[10px] text-gray-500 font-bold">
-                              <span>Quantity: <b className="text-gray-900">{(item.quantity ?? 1)} units</b></span>
-                              <span>•</span>
-                              <span>Unit Net: <b className="text-orange-primary">৳{(item.price ?? 0).toLocaleString()}</b></span>
-                            </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-xs uppercase">
+                            {m.senderName.charAt(0)}
                           </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Bottom layer: tracking status bar indicators */}
-                    <div className="mt-6 pt-4 border-t border-gray-100 grid grid-cols-4 gap-2 text-center text-gray-500">
-                      {['pending', 'dispatched', 'transit', 'delivered'].map((step, sIdx, arr) => {
-                        const statusWeights: Record<string, number> = { pending: 1, dispatched: 2, transit: 3, delivered: 4 };
-                        const isActive = statusWeights[linkedSubOrder.trackingStatus] >= statusWeights[step];
-                        return (
-                          <div key={step} className="space-y-2">
-                            <div className={`h-1 rounded-full transition-all duration-500 ${isActive ? 'bg-[#F96500]' : 'bg-gray-150'}`} />
-                            <span className={`text-[8px] font-black uppercase tracking-wider block ${isActive ? 'text-gray-950 font-black' : 'text-gray-400'}`}>
-                              {step}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Order action parameters */}
-                    <div className="mt-6 flex flex-wrap gap-4 items-center justify-between">
-                      <div className="text-[10px]">
-                        <span className="text-gray-500 block">Lot Total (With Freight):</span>
-                        <span className="font-black text-gray-950 text-sm">
-                          ৳{(linkedSubOrder.items.reduce((acc: number, x: any) => acc + ((x.price ?? 0) * (x.quantity ?? 0)), 0) + (linkedSubOrder.deliveryFee ?? 0)).toLocaleString()}
-                        </span>
+                        )}
                       </div>
-                      <button
-                        onClick={() => navigate('/order-tracking', { state: { order: linkedOrder } })}
-                        className="px-5 py-2.5 bg-gray-50 hover:bg-orange-primary hover:text-white border border-gray-200 hover:border-orange-primary rounded-xl text-[9px] font-black text-gray-700 transition-all italic flex items-center gap-2 cursor-pointer"
-                      >
-                        <Truck size={12} />
-                        View Live Tracking Timeline
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Messages Listing thread */}
-                <div className="space-y-6">
-                  {activeMessages.map((m) => {
-                    // Determine alignment based on perspective role
-                    const isOutgoing = (perspective === 'buyer' && m.sender === 'user') || 
-                                       (perspective === 'seller' && m.sender === 'seller');
+                    )}
                     
-                    const senderLabel = m.sender === 'user' ? 'Buyer (You)' : (activeThread?.title || 'Merchant Representative');
+                    {isSupport && (
+                      <div className="w-8 h-8 rounded-full bg-[#FF5B00] border border-orange-200 text-white font-black text-[10px] flex items-center justify-center shrink-0">
+                        C
+                      </div>
+                    )}
 
-                    return (
-                      <div 
-                        key={m.id} 
-                        className={`flex flex-col max-w-[85%] sm:max-w-[75%] ${isOutgoing ? 'ml-auto items-end animate-in slide-in-from-right-4 duration-300' : 'mr-auto items-start animate-in slide-in-from-left-4 duration-300'}`}
-                      >
-                        {m.productCard && (
-                          <div className={`w-full max-w-sm rounded-3xl overflow-hidden border mb-3 text-left transition-all hover:shadow-lg bg-white text-gray-900 border-gray-200 shadow-md relative group`}>
-                            {/* Card Status Indicator overlay */}
-                            <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-                              <span className="text-[8px] font-black uppercase text-gray-400 tracking-wider flex items-center gap-1.5 leading-none">
-                                <Package size={11} className="text-[#E8500A]" />
-                                Sourcing Request Card
-                              </span>
-                              {(() => {
-                                const status = m.productCard.status || 'pending';
-                                if (status === 'pending') {
-                                  return (
-                                    <span className="px-2 py-0.5 text-[8px] font-black uppercase bg-amber-500/10 text-amber-600 rounded-md border border-amber-500/20 italic animate-pulse">
-                                      🟡 Sourcing Draft
-                                    </span>
-                                  );
-                                } else if (status === 'approved') {
-                                  return (
-                                    <span className="px-2 py-0.5 text-[8px] font-black uppercase bg-green-500/10 text-green-600 rounded-md border border-green-500/20 italic">
-                                      🟢 APPROVED BY SELLER
-                                    </span>
-                                  );
-                                } else if (status === 'countered') {
-                                  return (
-                                    <span className="px-2 py-0.5 text-[8px] font-black uppercase bg-blue-500/10 text-blue-600 rounded-md border border-blue-500/20 italic">
-                                      🔵 COUNTER OFFER PROPOSED
-                                    </span>
-                                  );
-                                } else {
-                                  return (
-                                    <span className="px-2 py-0.5 text-[8px] font-black uppercase bg-gray-400/10 text-gray-500 rounded-md border border-gray-400/20 italic">
-                                      ⚪ REJECTED / WITHDRAWN
-                                    </span>
-                                  );
-                                }
-                              })()}
+                    <div className="space-y-1">
+                      {/* Name + Time info */}
+                      <div className={`flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-gray-400
+                        ${isSupport ? 'justify-end' : ''}`}>
+                        <span className="text-gray-700 font-extrabold">{m.senderName}</span>
+                        <span>•</span>
+                        <span>{m.time}</span>
+                      </div>
+
+                      {/* Message Bubble */}
+                      <div className={`rounded-2xl p-3.5 text-xs font-bold leading-relaxed shadow-xs border
+                        ${isSupport 
+                          ? 'bg-[#EEF6FF] text-gray-800 border-[#D6E1EC]/20 rounded-tr-none' 
+                          : 'bg-white text-gray-800 border-[#EEF2F7] rounded-tl-none'}`}>
+                        <p>{m.text}</p>
+
+                        {/* File Attachment Card */}
+                        {m.attachment && (
+                          <div className="bg-white border border-[#EEF2F7] rounded-xl p-3 flex items-center justify-between gap-4 mt-2.5 max-w-sm shadow-xs">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white shrink-0">
+                                <Play size={16} fill="currentColor" className="ml-0.5 text-white" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-gray-900">{m.attachment.name}</p>
+                                <p className="text-[10px] text-gray-400 font-semibold">{m.attachment.size}</p>
+                              </div>
                             </div>
+                            <button
+                              onClick={() => toast.success(`Downloading ${m.attachment?.name}...`)}
+                              className="w-8 h-8 rounded-full hover:bg-[#F5F8FD] flex items-center justify-center text-gray-400 hover:text-gray-800 border-none bg-transparent cursor-pointer"
+                            >
+                              <Download size={15} />
+                            </button>
+                          </div>
+                        )}
 
-                            {/* Product Header */}
-                            <div className="p-4 flex gap-4 items-start">
+                        {/* Custom Shared Product Card */}
+                        {m.productCard && (
+                          <div className="bg-white border border-[#EEF2F7] rounded-xl p-3.5 mt-3 shadow-xs max-w-sm text-left text-gray-900">
+                            <div className="flex items-center justify-between border-b border-[#EEF2F7] pb-2 mb-2">
+                              <span className="text-[8px] font-black uppercase text-[#FF5B00] tracking-wider">
+                                SOURCING DEMO CARD
+                              </span>
+                              <span className="text-[8px] font-bold bg-[#FF5B00]/10 text-[#FF5B00] px-1.5 py-0.5 rounded uppercase">
+                                {m.productCard.status}
+                              </span>
+                            </div>
+                            <div className="flex gap-3">
                               <img 
-                                src={m.productCard.image || PLACEHOLDER_IMAGE} 
-                                className="w-20 h-20 rounded-2xl object-cover shrink-0 border border-gray-200 bg-white" 
+                                src={m.productCard.image} 
+                                className="w-12 h-12 rounded-lg object-cover shrink-0 border border-[#EEF2F7]" 
                                 alt="" 
                                 referrerPolicy="no-referrer"
                               />
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-xs font-black text-gray-900 uppercase italic leading-tight mb-1 line-clamp-2">
+                              <div>
+                                <h5 className="text-[11px] font-black uppercase text-gray-900 leading-tight">
                                   {m.productCard.name}
-                                </h4>
-                                <div className="text-[10px] text-gray-500 font-bold space-y-0.5 mt-2">
-                                  <p>Variant: <span className="text-gray-900 font-extrabold">{m.productCard.variant}</span></p>
-                                  <p>Color: <span className="text-gray-900 font-extrabold">{m.productCard.color}</span></p>
-                                  <p>Quantity: <span className="text-[#E8500A] font-extrabold">{m.productCard.quantity} units</span></p>
-                                </div>
+                                </h5>
+                                <p className="text-[9px] text-[#6B7280] mt-0.5">
+                                  Color: <span className="font-bold text-gray-900">{m.productCard.color}</span> • Qty: <span className="font-bold text-[#FF5B00]">{m.productCard.quantity}</span>
+                                </p>
                               </div>
                             </div>
-                            
-                            {/* Notes & Pricing */}
-                            <div className="px-4 py-3.5 bg-gray-50/50 border-t border-gray-100 text-[10px]">
-                              {m.productCard.notes && (
-                                <div className="mb-3 bg-white border border-gray-100 rounded-xl p-2.5">
-                                  <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Sourcing Parameter Memo</span>
-                                  <p className="text-gray-600 font-medium italic">"{m.productCard.notes}"</p>
-                                </div>
-                              )}
-                              
-                              <div className="flex items-center justify-between pt-1 border-t border-dashed border-gray-200">
-                                <span className="text-gray-500 font-bold uppercase text-[9px] tracking-wider">Estimated Total Sourcing Net:</span>
-                                <div className="text-right">
-                                  {m.productCard.status === 'countered' && (
-                                    <span className="text-[9px] font-bold line-through text-gray-400 mr-2 block">
-                                      ৳{(m.productCard.price * m.productCard.quantity).toLocaleString()}
-                                    </span>
-                                  )}
-                                  <span className="text-xs font-black text-[#E8500A] font-mono block">
-                                    ৳{((m.productCard.counterPrice || m.productCard.price) * m.productCard.quantity).toLocaleString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* 🛠️ SHARED INTERACTIVE CONTROLS (BUYER & SELLER AGENT PERSPECTIVE) */}
-                            <div className="p-3 bg-gray-50 border-t border-gray-100 flex flex-col gap-2">
-                              {/* 1. Buyer interactive perspective buttons */}
-                              {perspective === 'buyer' && (
-                                <div className="w-full flex flex-wrap gap-1.5 justify-end">
-                                  {(m.productCard.status || 'pending') === 'pending' && (
-                                    <button
-                                      onClick={() => {
-                                        updateProductCard(m.id, { status: 'canceled' });
-                                        addThreadMessage(activeThreadId, `🚫 Buyer has withdrawn the sourcing request for ${m.productCard.name}.`, 'user', 'Me');
-                                        toast.success('Sourcing request withdrawn!');
-                                      }}
-                                      className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
-                                    >
-                                      Withdraw Card
-                                    </button>
-                                  )}
-                                  {m.productCard.status === 'countered' && (
-                                    <>
-                                      <button
-                                        onClick={() => {
-                                          updateProductCard(m.id, { status: 'approved', price: m.productCard.counterPrice });
-                                          addThreadMessage(activeThreadId, `✅ Buyer accepted the supplier counter offer of BDT ${m.productCard.counterPrice?.toLocaleString()} per unit! Sourcing transaction locked.`, 'user', 'Me');
-                                          toast.success('Supplier counter offer accepted! Sourcing order verified.');
-                                        }}
-                                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
-                                      >
-                                        Accept Counter Deal
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          updateProductCard(m.id, { status: 'canceled' });
-                                          addThreadMessage(activeThreadId, `❌ Buyer declined the counter offer. Sourcing request cancelled.`, 'user', 'Me');
-                                          toast.error('Deal declined.');
-                                        }}
-                                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
-                                      >
-                                        Decline Deal
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* 2. Seller interactive perspective buttons */}
-                              {perspective === 'seller' && (
-                                <div className="w-full flex flex-wrap gap-1.5 justify-end">
-                                  {(m.productCard.status || 'pending') === 'pending' && (
-                                    <>
-                                      <button
-                                        onClick={() => {
-                                          updateProductCard(m.id, { status: 'approved' });
-                                          addThreadMessage(activeThreadId, `🟢 Factory approved custom parameters for ${m.productCard.name}! Generating proforma invoice.`, 'seller', activeThread.title);
-                                          toast.success('Custom sourcing parameters approved!');
-                                        }}
-                                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
-                                      >
-                                        Approve Custom parameters
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          const discountPrice = Math.round(m.productCard.price * 0.90);
-                                          updateProductCard(m.id, { status: 'countered', counterPrice: discountPrice });
-                                          addThreadMessage(activeThreadId, `🔵 Supplier counter proposal active! We offer 10% volumetric discount. Unit rate BDT ${discountPrice.toLocaleString()}`, 'seller', activeThread.title);
-                                          toast.success('10% volumetric discount counter proposed!');
-                                        }}
-                                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border-none"
-                                      >
-                                        Propose 10% discount
-                                      </button>
-                                    </>
-                                  )}
-                                  {m.productCard.status === 'countered' && (
-                                    <span className="text-[8px] font-bold text-gray-500 italic block py-1">
-                                      Waiting for buyer response on counter proposal...
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-
-                              <div className="flex justify-end pt-1.5 border-t border-gray-100">
-                                <Link 
-                                  to={m.productCard.link}
-                                  className="px-3.5 py-1.5 bg-gray-50 hover:bg-[#F96500]/10 text-gray-700 hover:text-[#F96500] border border-gray-200 hover:border-[#F96500]/25 text-[8.5px] font-black uppercase tracking-wider rounded-xl transition-all italic flex items-center gap-1.5 leading-none"
-                                >
-                                  View Sourcing Product Details <ExternalLink size={10} />
-                                </Link>
-                              </div>
+                            <div className="mt-3 pt-2 border-t border-[#EEF2F7] flex items-center justify-between text-[10px]">
+                              <span className="text-gray-400 font-bold uppercase">Estimated total:</span>
+                              <span className="font-mono font-black text-[#FF5B00]">
+                                ৳{(m.productCard.price * m.productCard.quantity).toLocaleString()}
+                              </span>
                             </div>
                           </div>
                         )}
 
-                        <div className={`px-5 py-3 md:px-6 md:py-4 rounded-[20px] mb-2 text-[11px] md:text-sm font-bold leading-relaxed shadow-sm
-                          ${isOutgoing 
-                            ? (perspective === 'buyer' ? 'bg-[#F96500] text-white rounded-tr-none italic' : 'bg-emerald-600 text-white rounded-tr-none italic') 
-                            : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
-                          }
-                        `}>
-                          {m.text}
-                        </div>
-                        <span className="text-[8.5px] font-black text-gray-400 uppercase tracking-widest px-2 italic">
-                          {senderLabel} • {m.time}
-                        </span>
+                        {/* Read status checkmarks */}
+                        {isSupport && (
+                          <div className="flex justify-end mt-1 text-[#FF5B00]">
+                            <CheckCheck size={14} className="text-blue-500" />
+                          </div>
+                        )}
                       </div>
-                    );
-                  })}
-                  <div ref={chatBottomRef} />
-                </div>
-              </div>
-
-              {/* Chat Send Input Box footer */}
-              <div className="p-6 md:p-8 bg-white border-t border-gray-200 flex flex-col gap-3">
-                
-                {/* 🛒 QUICK SOURCING DEMO ACTION PILLS */}
-                <div className="flex flex-wrap gap-2 justify-start max-w-4xl mx-auto w-full">
-                  <button
-                    onClick={() => {
-                      // Preload samsung or other popular product index
-                      setModalProdIdx(0);
-                      setModalColor("Premium Titanium Silver");
-                      setModalVariant("Volumetric Bulk Cargo Container");
-                      setModalQuantity(25);
-                      setShowSourcingModal(true);
-                    }}
-                    className="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 rounded-xl text-[10px] font-black text-blue-700 transition-all italic flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Plus size={12} className="text-blue-600 animate-pulse" />
-                    Share New Sourcing Product Card
-                  </button>
-                  <button
-                    onClick={() => {
-                      setInputText(perspective === 'buyer' 
-                        ? "Hi! Do you have this specific product variant fully prepared for bulk dispatch?" 
-                        : "Yes! Our factory line has prepared this specific configuration. Ready to ship.");
-                    }}
-                    className="px-3.5 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[10px] font-bold text-gray-600 transition-all cursor-pointer"
-                  >
-                    Check Stock Slabs 📦
-                  </button>
-                  <button
-                    onClick={() => {
-                      setInputText(perspective === 'buyer'
-                        ? "Could we request premium safe wooden-box packaging for the entire lot?"
-                        : "Absolutely, we pack in custom padded export crates for complete safe metrics.");
-                    }}
-                    className="px-3.5 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[10px] font-bold text-gray-600 transition-all cursor-pointer"
-                  >
-                    Logistics Packaging Memo 🏷️
-                  </button>
-                </div>
-
-                <div className="relative max-w-4xl mx-auto w-full">
-                  <input 
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    className="w-full h-14 bg-gray-50 border border-gray-200 rounded-2xl pl-6 pr-16 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-orange-primary focus:bg-white transition-all" 
-                    placeholder={perspective === 'buyer' ? "Type message to seller/factory logistics coordinator..." : "Type merchant reply to customer..."}
-                  />
-                  <button 
-                    onClick={handleSendMessage}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-orange-primary text-white flex items-center justify-center hover:bg-[#FF5B00] transition-colors shadow-lg active:scale-95 cursor-pointer border-none"
-                    title="Send Ticket Message"
-                  >
-                    <Send size={14} />
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-12 text-center max-w-lg mx-auto space-y-4">
-              <div className="w-20 h-20 bg-white rounded-full border border-gray-200 flex items-center justify-center text-gray-300 mb-4 scale-110 shadow-sm">
-                <MessageSquare size={32} />
-              </div>
-              <h3 className="text-lg font-black uppercase text-gray-950 italic tracking-tight">No dialogue stream active</h3>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest leading-relaxed font-bold">
-                Select a supplier transaction node from the workspace pipeline lists to monitor communication, discuss parameters, or track logistics.
-              </p>
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={chatBottomRef} />
             </div>
-          )}
+          </div>
+
+          {/* Message Composer & Chips */}
+          <div className="p-4 border-t border-[#EEF2F7] bg-white shrink-0">
+            
+            {/* Quick action chips */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-3 no-scrollbar shrink-0">
+              <button
+                onClick={() => {
+                  setModalProdIdx(0);
+                  setModalVariant("Standard Retail Unit");
+                  setModalColor("Space Gray");
+                  setModalQuantity(10);
+                  setShowSourcingModal(true);
+                }}
+                className="bg-[#F5F8FD] hover:bg-gray-100 border border-[#EEF2F7] rounded-full px-3 py-1.5 text-[10px] font-black text-gray-700 flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+              >
+                <Plus size={10} className="text-[#FF5B00]" />
+                Share Product Card
+              </button>
+              <button
+                onClick={() => setInputText(`Hello! Can you please verify dispatch status for ${activeThread.orderId || 'general order'}?`)}
+                className="bg-[#F5F8FD] hover:bg-gray-100 border border-[#EEF2F7] rounded-full px-3 py-1.5 text-[10px] font-black text-gray-700 flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+              >
+                Check Order Status
+              </button>
+              <button
+                onClick={() => setInputText("What is the return/refund procedure for bulk logistics lots?")}
+                className="bg-[#F5F8FD] hover:bg-gray-100 border border-[#EEF2F7] rounded-full px-3 py-1.5 text-[10px] font-black text-gray-700 flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+              >
+                Returns & Refunds
+              </button>
+              <button
+                onClick={() => setInputText("Do you support immediate warranty exchanges inside Dhaka?")}
+                className="bg-[#F5F8FD] hover:bg-gray-100 border border-[#EEF2F7] rounded-full px-3 py-1.5 text-[10px] font-black text-gray-700 flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+              >
+                FAQ
+              </button>
+            </div>
+
+            {/* Input Composer Box */}
+            <div className="flex items-center gap-3 bg-[#F5F8FD] border border-[#EEF2F7] rounded-2xl p-2 pl-4">
+              <input 
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                className="flex-1 bg-transparent border-none text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none py-2" 
+                placeholder="Type your message..." 
+              />
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => toast.success('Emoji tray activated')}
+                  className="w-8 h-8 rounded-lg hover:bg-gray-150 flex items-center justify-center text-gray-400 hover:text-gray-800 border-none bg-transparent cursor-pointer"
+                  title="Emoji"
+                >
+                  <Smile size={16} />
+                </button>
+                <button 
+                  onClick={() => toast.success('Logistics document dispatch active')}
+                  className="w-8 h-8 rounded-lg hover:bg-gray-150 flex items-center justify-center text-gray-400 hover:text-gray-800 border-none bg-transparent cursor-pointer"
+                  title="Attachment"
+                >
+                  <Paperclip size={16} />
+                </button>
+                <button 
+                  onClick={handleSendMessage}
+                  className="w-10 h-10 rounded-xl bg-[#FF5B00] hover:bg-[#FF5B00] text-white flex items-center justify-center shadow-md active:scale-95 transition-all border-none cursor-pointer"
+                  title="Send Message"
+                >
+                  <Send size={14} className="text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Security Notice beneath Composer */}
+            <div className="pt-3 flex items-center justify-center gap-1 text-[10px] text-[#6B7280] font-bold leading-none shrink-0">
+              <Lock size={11} className="text-gray-400" />
+              <span>All conversations are encrypted and secure.</span>
+            </div>
+          </div>
         </main>
+
+        {/* --------------------------------------------------------- */}
+        {/* 3. RIGHT SIDEBAR (≈25% Width)                            */}
+        {/* --------------------------------------------------------- */}
+        <aside className="w-full lg:w-[25%] flex flex-col gap-6 shrink-0 overflow-y-auto no-scrollbar">
+          
+          {/* CARD 1: TRANSACTION DETAILS */}
+          <div className="bg-white rounded-[24px] border border-[#EEF2F7] shadow-xs p-5">
+            <div className="flex items-center gap-2 border-b border-[#EEF2F7] pb-3 mb-4">
+              <span className="text-[#FF5B00] text-xs">💳</span>
+              <h3 className="text-xs font-black uppercase text-gray-900 tracking-wider">
+                Transaction Details
+              </h3>
+            </div>
+
+            <div className="space-y-3.5">
+              <div>
+                <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block mb-1">
+                  Order ID
+                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-900 font-mono">
+                    {activeThread.orderId || 'N/A'}
+                  </span>
+                  {activeThread.orderId && activeThread.orderId !== 'N/A' && (
+                    <button
+                      onClick={() => handleCopyText(activeThread.orderId!, 'Order ID')}
+                      className="px-2 py-0.5 bg-[#F5F8FD] hover:bg-[#EEF2F7] border border-[#EEF2F7] rounded text-[9px] font-black text-[#FF5B00] flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <Copy size={9} />
+                      Copy
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block mb-1">
+                  Transaction ID
+                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-900 font-mono">
+                    {activeThread.txnId || 'N/A'}
+                  </span>
+                  {activeThread.txnId && activeThread.txnId !== 'N/A' && (
+                    <button
+                      onClick={() => handleCopyText(activeThread.txnId!, 'Transaction ID')}
+                      className="px-2 py-0.5 bg-[#F5F8FD] hover:bg-[#EEF2F7] border border-[#EEF2F7] rounded text-[9px] font-black text-[#FF5B00] flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <Copy size={9} />
+                      Copy
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block mb-1">
+                  Order Date
+                </span>
+                <p className="text-xs font-bold text-gray-900">
+                  {activeThread.orderDate || 'N/A'}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block mb-1">
+                  Payment Method
+                </span>
+                <p className="text-xs font-bold text-gray-900">
+                  {activeThread.paymentMethod || 'N/A'}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block mb-1">
+                  Order Status
+                </span>
+                <p className="text-xs font-bold text-gray-900 flex items-center gap-1.5 uppercase">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#FF5B00] inline-block"></span>
+                  {activeThread.orderStatus || 'N/A'}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block mb-1">
+                  Total Amount
+                </span>
+                <p className="text-lg font-black text-[#FF5B00] font-mono">
+                  {activeThread.totalAmount || 'N/A'}
+                </p>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => toast.success('Routing to detailed transaction audit report...')}
+              className="mt-5 w-full py-3 bg-white hover:bg-[#F5F8FD] border border-[#EEF2F7] rounded-xl text-xs font-black text-gray-700 transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
+            >
+              View Full Order Details →
+            </button>
+          </div>
+
+          {/* CARD 2: CUSTOMER PROFILE */}
+          <div className="bg-white rounded-[24px] border border-[#EEF2F7] shadow-xs p-5">
+            <div className="flex items-center gap-2 border-b border-[#EEF2F7] pb-3 mb-4">
+              <span className="text-[#FF5B00] text-xs">👤</span>
+              <h3 className="text-xs font-black uppercase text-gray-900 tracking-wider">
+                Customer Profile
+              </h3>
+            </div>
+
+            <div className="flex items-start gap-3.5 mb-4">
+              {activeThread.avatar === 'announcement-avatar' ? (
+                <div className="w-12 h-12 rounded-full bg-[#FF5B00] flex items-center justify-center text-white font-black text-sm border border-orange-200 shrink-0">
+                  CH
+                </div>
+              ) : (
+                <img 
+                  src={activeThread.avatar} 
+                  className="w-12 h-12 rounded-full object-cover border border-[#EEF2F7] shrink-0" 
+                  alt="" 
+                  referrerPolicy="no-referrer"
+                />
+              )}
+              
+              <div>
+                <h4 className="text-xs font-black text-gray-900 uppercase">
+                  {activeThread.title}
+                </h4>
+                {activeThread.verified ? (
+                  <span className="inline-flex bg-green-50 text-green-600 border border-green-200 rounded px-1.5 py-0.5 text-[8.5px] font-bold items-center gap-1 mt-1 leading-none">
+                    ✓ Verified Seller
+                  </span>
+                ) : (
+                  <span className="inline-flex bg-gray-50 text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 text-[8.5px] font-bold items-center gap-1 mt-1 leading-none">
+                    Standard Account
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-y-3.5 gap-x-2 text-xs border-t border-b border-[#EEF2F7] py-4 my-4">
+              <div>
+                <span className="text-[10px] text-gray-400 font-bold block uppercase leading-none mb-1">
+                  Member since
+                </span>
+                <span className="font-bold text-gray-900 truncate block">
+                  {activeThread.memberSince || 'N/A'}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] text-gray-400 font-bold block uppercase leading-none mb-1">
+                  Total Orders
+                </span>
+                <span className="font-bold text-gray-900 block">
+                  {activeThread.totalOrders ?? 'N/A'}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] text-gray-400 font-bold block uppercase leading-none mb-1">
+                  Response Time
+                </span>
+                <span className="font-bold text-gray-900 block">
+                  {activeThread.responseTime || 'N/A'}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] text-gray-400 font-bold block uppercase leading-none mb-1">
+                  Rating
+                </span>
+                <span className="font-bold text-gray-900 block">
+                  ★ {activeThread.rating || 'N/A'} ({activeThread.ratingCount || '0'})
+                </span>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => toast.success('Opening catalog profile page...')}
+              className="w-full py-3 bg-white hover:bg-[#F5F8FD] border border-[#EEF2F7] rounded-xl text-xs font-black text-gray-700 transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
+            >
+              View Store Profile →
+            </button>
+          </div>
+
+          {/* CARD 3: SUPPORT SHORTCUTS */}
+          <div className="bg-white rounded-[24px] border border-[#EEF2F7] shadow-xs p-5">
+            <div className="flex items-center gap-2 border-b border-[#EEF2F7] pb-3 mb-4">
+              <span className="text-[#FF5B00] text-xs">⚙️</span>
+              <h3 className="text-xs font-black uppercase text-gray-900 tracking-wider">
+                Support Shortcuts
+              </h3>
+            </div>
+
+            <div className="divide-y divide-[#EEF2F7]">
+              {[
+                "Return & Refund Policy",
+                "Warranty Information",
+                "Shipping & Delivery",
+                "Product Support"
+              ].map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => toast.success(`Opening shortcut: ${item}`)}
+                  className="w-full py-3 text-left text-xs font-bold text-gray-700 hover:text-[#FF5B00] flex items-center justify-between transition-colors bg-transparent border-none cursor-pointer"
+                >
+                  <span>{item}</span>
+                  <ChevronRight size={14} className="text-gray-400" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+        </aside>
+
       </div>
 
-      {/* 🚨 CUSTOM IN-CHAT SOURCING ORDER CARD GENERATION MODAL */}
+      {/* ========================================================= */}
+      {/* 🚨 CUSTOM IN-CHAT SOURCING CONFIGURATION MODAL            */}
+      {/* ========================================================= */}
       {showSourcingModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-gray-950/65 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-xs">
           <div className="relative bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-gray-100 p-6 md:p-8 animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-[#FF5B00]">
                   <Sparkles size={16} />
                 </div>
                 <div>
-                  <h3 className="text-xs font-black uppercase text-gray-950 italic tracking-wide leading-none">Share Custom Sourcing Config</h3>
-                  <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest block mt-0.5">Simulate Buyer Order Request Card</span>
+                  <h3 className="text-xs font-black uppercase text-gray-900 tracking-wider leading-none">
+                    Share Custom Sourcing Config
+                  </h3>
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block mt-0.5">
+                    Generate Buyer Order Request Card
+                  </span>
                 </div>
               </div>
               <button
@@ -802,11 +1410,13 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
             <div className="space-y-4">
               {/* Product Selection */}
               <div>
-                <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider block mb-1.5">Select Sourcing Product Catalog:</label>
+                <label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider block mb-1.5">
+                  Select Sourcing Catalog Product:
+                </label>
                 <select
                   value={modalProdIdx}
                   onChange={(e) => setModalProdIdx(Number(e.target.value))}
-                  className="w-full h-11 px-4 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:outline-none focus:border-blue-500"
+                  className="w-full h-11 px-4 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:outline-none focus:border-[#FF5B00]"
                 >
                   {PRODUCTS.map((prod, pIdx) => (
                     <option key={prod.id} value={pIdx}>
@@ -819,24 +1429,28 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
               <div className="grid grid-cols-2 gap-4">
                 {/* Variant */}
                 <div>
-                  <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider block mb-1.5">Selected Variant:</label>
+                  <label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider block mb-1.5">
+                    Selected Variant:
+                  </label>
                   <input
                     type="text"
                     value={modalVariant}
                     onChange={(e) => setModalVariant(e.target.value)}
-                    className="w-full h-11 px-4 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:outline-none focus:border-blue-500"
+                    className="w-full h-11 px-4 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:outline-none focus:border-[#FF5B00]"
                     placeholder="e.g. 256GB / 12GB RAM"
                   />
                 </div>
 
                 {/* Color */}
                 <div>
-                  <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider block mb-1.5">Selected Color:</label>
+                  <label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider block mb-1.5">
+                    Selected Color:
+                  </label>
                   <input
                     type="text"
                     value={modalColor}
                     onChange={(e) => setModalColor(e.target.value)}
-                    className="w-full h-11 px-4 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:outline-none focus:border-blue-500"
+                    className="w-full h-11 px-4 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:outline-none focus:border-[#FF5B00]"
                     placeholder="e.g. Space Gray"
                   />
                 </div>
@@ -844,20 +1458,24 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
 
               {/* Quantity */}
               <div>
-                <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider block mb-1.5">Wholesale Quantity (Units):</label>
+                <label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider block mb-1.5">
+                  Wholesale Quantity (Units):
+                </label>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setModalQuantity(q => Math.max(1, q - 1))}
-                    className="w-10 h-10 rounded-xl bg-gray-150 hover:bg-gray-200 text-gray-800 font-bold flex items-center justify-center border-none cursor-pointer"
+                    className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold flex items-center justify-center border-none cursor-pointer"
                   >
                     -
                   </button>
-                  <span className="text-sm font-black text-gray-900 w-12 text-center">{modalQuantity}</span>
+                  <span className="text-sm font-black text-gray-900 w-12 text-center">
+                    {modalQuantity}
+                  </span>
                   <button
                     type="button"
                     onClick={() => setModalQuantity(q => q + 1)}
-                    className="w-10 h-10 rounded-xl bg-gray-150 hover:bg-gray-200 text-gray-800 font-bold flex items-center justify-center border-none cursor-pointer"
+                    className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold flex items-center justify-center border-none cursor-pointer"
                   >
                     +
                   </button>
@@ -866,19 +1484,21 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
 
               {/* Custom Notes */}
               <div>
-                <label className="text-[9px] font-black uppercase text-gray-400 tracking-wider block mb-1.5">Special Sourcing Parameter Memo:</label>
+                <label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider block mb-1.5">
+                  Special Logistics Notes Memo:
+                </label>
                 <textarea
                   value={modalNotes}
                   onChange={(e) => setModalNotes(e.target.value)}
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 h-20 resize-none"
-                  placeholder="e.g. Request fast sea-cargo dispatch with heavy bubble wrap and individual manufacturer tags..."
+                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#FF5B00] h-20 resize-none"
+                  placeholder="e.g. Request fast sea-cargo delivery with complete bubble wrap protection layers..."
                 />
               </div>
 
               {/* Total Summary */}
-              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex justify-between items-center text-[11px] font-bold">
-                <span className="text-blue-800">Sourcing Total Estimate:</span>
-                <span className="text-sm font-black text-[#E8500A] font-mono">
+              <div className="bg-[#EEF6FF] border border-[#EEF2F7] rounded-2xl p-4 flex justify-between items-center text-xs font-bold text-gray-700">
+                <span>Estimated Total Volume Sourcing BDT:</span>
+                <span className="text-sm font-black text-[#FF5B00] font-mono">
                   ৳{(parseFloat(String(PRODUCTS[modalProdIdx].price).replace(/,/g, '')) * modalQuantity).toLocaleString()}
                 </span>
               </div>
@@ -889,14 +1509,14 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
               <button
                 type="button"
                 onClick={() => setShowSourcingModal(false)}
-                className="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl text-[10px] font-black uppercase tracking-wider text-gray-600 transition-all cursor-pointer border-none"
+                className="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl text-[10px] font-black uppercase tracking-wider text-gray-500 transition-all cursor-pointer border-none"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleCreateSourcingRequest}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all italic shadow-md cursor-pointer border-none flex items-center gap-1"
+                className="px-5 py-2.5 bg-[#FF5B00] hover:bg-[#FF5B00] text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all italic shadow-md cursor-pointer border-none flex items-center gap-1"
               >
                 <Sparkles size={12} />
                 Confirm & Dispatch Card
@@ -905,6 +1525,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
           </div>
         </div>
       )}
+
     </div>
   );
 }

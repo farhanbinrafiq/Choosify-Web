@@ -88,7 +88,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
     <Link
       to={`/brands/${brand.id}`}
       onClick={onClick}
-      className="block w-[335px] max-w-[335px] min-w-[335px] bg-white rounded-[12px] border border-[#e8edf2] hover:shadow-lg hover:border-[#E8500A]/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative shrink-0"
+      className="block w-[335px] max-w-[335px] min-w-[335px] bg-white rounded-[12px] border border-[#e8edf2] hover:shadow-lg hover:border-[#FF5B00]/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative shrink-0"
     >
       {/* FEATURED BADGE */}
       {brand.isFeatured && (
@@ -107,7 +107,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
       )}
 
       {/* COVER PHOTO SECTION */}
-      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#1A1D4E]/10 to-[#E8500A]/10 overflow-hidden shrink-0">
+      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#1A1D4E]/10 to-[#FF5B00]/10 overflow-hidden shrink-0">
         <img 
           src={coverUrl}
           alt={`${brand.name} cover`}
@@ -183,7 +183,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
             <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
               Price Range
             </div>
-            <div className="text-xs font-black text-[#E8500A] truncate leading-tight">
+            <div className="text-xs font-black text-[#FF5B00] truncate leading-tight">
               {priceText}
             </div>
           </div>

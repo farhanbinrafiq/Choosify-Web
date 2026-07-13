@@ -40,7 +40,7 @@ export function RecommendationCard(props: any) {
     return (
       <Link 
         to={`/guides/${guide.id}`} 
-        className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] hover:border-orange-primary/30 transition-all duration-300 w-full relative p-3"
+        className="group cursor-pointer block bg-white rounded-[20px] shadow-soft hover:shadow-high-density hover:border-orange-primary/30 transition-all duration-300 w-full relative p-3 border-none"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -115,7 +115,7 @@ export function RecommendationCard(props: any) {
     return (
       <Link 
         to={`/guides/${guide.id}`} 
-        className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 h-full relative p-3 max-w-[285px] sm:max-w-[320px] md:max-w-none mx-auto w-full"
+        className="group cursor-pointer block bg-white rounded-[20px] shadow-soft hover:shadow-high-density transition-all duration-300 h-full relative p-3 max-w-[285px] sm:max-w-[320px] md:max-w-none mx-auto w-full border-none"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -181,7 +181,7 @@ export function RecommendationCard(props: any) {
   return (
     <Link 
       to={`/guides/${guide.id}`} 
-      className="group cursor-pointer block bg-white rounded-[5px] overflow-hidden border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 flex flex-col shrink-0"
+      className="group cursor-pointer block bg-white rounded-[20px] overflow-hidden shadow-soft hover:-translate-y-1 hover:shadow-high-density transition-all duration-300 flex flex-col shrink-0 border-none"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={isDashboard ? {

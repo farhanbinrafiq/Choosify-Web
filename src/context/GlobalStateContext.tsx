@@ -705,6 +705,197 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     });
   });
 
+  // Push Mock Reference Products with offset IDs to prevent duplicate keys and support full detail page navigation
+  const REFERENCE_PRODUCTS = [
+    {
+      id: 5001,
+      title: "Samsung Galaxy S24 Ultra",
+      category: "Mobile & Phones",
+      brand: "Samsung",
+      rating: 4.8,
+      reviews: 1200,
+      price: 124800,
+      originalPrice: 139900,
+      image: "https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=500&q=80",
+      stock: 58,
+      fastDelivery: true,
+      codSupport: true
+    },
+    {
+      id: 5002,
+      title: "Sony WH-1000XM5",
+      category: "Tech & Electronics",
+      brand: "Sony",
+      rating: 4.7,
+      reviews: 890,
+      price: 32999,
+      originalPrice: 38999,
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
+      stock: 42,
+      fastDelivery: true,
+      codSupport: true
+    },
+    {
+      id: 5003,
+      title: "Amazfit GTR 4",
+      category: "Tech & Electronics",
+      brand: "Amazfit",
+      rating: 4.6,
+      reviews: 532,
+      price: 18490,
+      originalPrice: 22999,
+      image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500&q=80",
+      stock: 15,
+      fastDelivery: false,
+      codSupport: true
+    },
+    {
+      id: 5004,
+      title: "Apple AirPods Pro 2",
+      category: "Tech & Electronics",
+      brand: "Apple",
+      rating: 4.9,
+      reviews: 1500,
+      price: 25999,
+      originalPrice: 29499,
+      image: "https://images.unsplash.com/photo-1588449668338-d13417f16fd0?w=500&q=80",
+      stock: 67,
+      fastDelivery: true,
+      codSupport: true
+    },
+    {
+      id: 5005,
+      title: "Nike Air Max Excee",
+      category: "Fashion & Lifestyle",
+      brand: "Nike",
+      rating: 4.6,
+      reviews: 420,
+      price: 7499,
+      originalPrice: 9999,
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80",
+      stock: 8,
+      fastDelivery: false,
+      codSupport: true
+    },
+    {
+      id: 5006,
+      title: "Xiaomi 14T Pro",
+      category: "Mobile & Phones",
+      brand: "Xiaomi",
+      rating: 4.7,
+      reviews: 210,
+      price: 54999,
+      originalPrice: null,
+      image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500&q=80",
+      stock: 25,
+      fastDelivery: true,
+      codSupport: true
+    },
+    {
+      id: 5007,
+      title: "Dell XPS 13 Plus",
+      category: "Tech & Electronics",
+      brand: "Dell",
+      rating: 4.6,
+      reviews: 612,
+      price: 178500,
+      originalPrice: 188900,
+      image: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=500&q=80",
+      stock: 12,
+      fastDelivery: true,
+      codSupport: true
+    },
+    {
+      id: 5008,
+      title: "Walton Refrigerator WNV-3A5",
+      category: "TV & Appliances",
+      brand: "Walton",
+      rating: 4.5,
+      reviews: 478,
+      price: 34990,
+      originalPrice: 38500,
+      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&q=80",
+      stock: 18,
+      fastDelivery: false,
+      codSupport: true
+    },
+    {
+      id: 5009,
+      title: "Canon EOS R50",
+      category: "Tech & Electronics",
+      brand: "Canon",
+      rating: 4.7,
+      reviews: 156,
+      price: 89999,
+      originalPrice: 109999,
+      image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80",
+      stock: 14,
+      fastDelivery: true,
+      codSupport: true
+    },
+    {
+      id: 5010,
+      title: "Samsung 55\" QLED 4K",
+      category: "TV & Appliances",
+      brand: "Samsung",
+      rating: 4.8,
+      reviews: 322,
+      price: 74900,
+      originalPrice: 106900,
+      image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=500&q=80",
+      stock: 22,
+      fastDelivery: true,
+      codSupport: true
+    },
+    {
+      id: 5011,
+      title: "Apple Watch Series 9",
+      category: "Tech & Electronics",
+      brand: "Apple",
+      rating: 4.7,
+      reviews: 892,
+      price: 54900,
+      originalPrice: null,
+      image: "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=500&q=80",
+      stock: 35,
+      fastDelivery: true,
+      codSupport: true
+    },
+    {
+      id: 5012,
+      title: "Dior Sauvage EDP",
+      category: "Fashion & Lifestyle",
+      brand: "Dior",
+      rating: 4.6,
+      reviews: 320,
+      price: 8490,
+      originalPrice: 10900,
+      image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80",
+      stock: 19,
+      fastDelivery: false,
+      codSupport: true
+    }
+  ];
+
+  REFERENCE_PRODUCTS.forEach(p => {
+    mappedProducts.push({
+      id: p.id,
+      title: p.title,
+      image: p.image,
+      brand: p.brand,
+      mode_type: 'retail',
+      codSupport: p.codSupport,
+      quotationSupport: false,
+      stock: p.stock,
+      sellerId: p.brand === 'Samsung' ? 'seller-samsung' : p.brand === 'Apple' ? 'seller-apple' : p.brand === 'Apex' ? 'seller-apex' : 'seller-general',
+      brandId: p.brand === 'Samsung' ? 1 : p.brand === 'Apple' ? 2 : p.brand === 'Apex' ? 3 : 4,
+      price: p.price,
+      description: `Full verified ${p.title} with complete manufacturer accessory bundle and native local warranty coverage.`,
+      category: p.category,
+      variants: getVariantsForProduct(p.id, p.price, p.image)
+    });
+  });
+
   // Create Wholesale Products (ID mapping shifted upwards by 1000 to keep unique)
   PRODUCTS.forEach(p => {
     const cleanPrice = parseFloat(p.price.replace(/,/g, '')) || 5000;

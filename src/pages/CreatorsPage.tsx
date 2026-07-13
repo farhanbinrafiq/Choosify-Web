@@ -9,6 +9,7 @@ import {
 import { CREATORS, Creator } from '../data/creators';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import { toast } from 'react-hot-toast';
+import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
 
 export function CreatorsPage() {
   // State for active filters
@@ -31,6 +32,78 @@ export function CreatorsPage() {
   const [isPlatformOpen, setIsPlatformOpen] = useState(false);
   const [isCountryOpen, setIsCountryOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
+
+  useRegisterPageFilters({
+    pageName: 'Creators',
+    renderSearch: () => (
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={13} className="text-[#FF5B00]" />
+        </div>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search creators..."
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
+        />
+      </div>
+    ),
+    renderFilters: () => (
+      <div className="flex flex-col gap-4 mt-4">
+        <UniversalFilterRenderer
+          profile={{
+            entity: 'creators',
+            filters: [
+              {
+                id: 'expertise',
+                name: 'Expertise',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'All Expertise' },
+                  { value: 'tech', label: 'Tech & Gadgets' },
+                  { value: 'fashion', label: 'Fashion & Beauty' },
+                  { value: 'lifestyle', label: 'Lifestyle' }
+                ]
+              },
+              {
+                id: 'platforms',
+                name: 'Platforms',
+                type: 'multi_select',
+                options: [
+                  { value: 'youtube', label: 'YouTube' },
+                  { value: 'instagram', label: 'Instagram' },
+                  { value: 'tiktok', label: 'TikTok' }
+                ]
+              },
+              {
+                id: 'followers',
+                name: 'Followers',
+                type: 'single_select',
+                options: [
+                  { value: '1M+', label: '1M+ Followers' },
+                  { value: '500k+', label: '500k+ Followers' },
+                  { value: '100k+', label: '100k+ Followers' }
+                ]
+              },
+              {
+                id: 'verified',
+                name: 'Verified Status',
+                type: 'single_select',
+                options: [
+                  { value: 'verified', label: 'Verified Only' },
+                  { value: 'all', label: 'All Creators' }
+                ]
+              }
+            ]
+          }}
+          activeFilters={{}}
+          onFilterChange={() => {}}
+        />
+      </div>
+    ),
+    onClearAll: () => setSearchQuery('')
+  }, [searchQuery]);
 
   // Categories with counts matching reference image perfectly
   const categories = [
@@ -495,7 +568,7 @@ export function CreatorsPage() {
             {(activeTab !== 'All Creators' || searchQuery !== '' || nicheDropdown !== 'All Niches' || platformDropdown !== 'Platform' || countryDropdown !== 'Country' || verifiedOnly || hasReviews) && (
               <button
                 onClick={handleClearAll}
-                className="text-xs font-bold text-[#FF5B00] hover:text-[#CF4400] transition-colors ml-1 cursor-pointer"
+                className="text-xs font-bold text-[#FF5B00] hover:text-[#EB4501] transition-colors ml-1 cursor-pointer"
               >
                 Clear all
               </button>
@@ -520,7 +593,7 @@ export function CreatorsPage() {
                 <p className="text-xs text-gray-400 mt-2 max-w-sm mx-auto">Try refining your search queries or clearing active filters to see other results.</p>
                 <button
                   onClick={handleClearAll}
-                  className="mt-5 px-6 py-2.5 bg-[#FF5B00] text-white text-xs font-bold uppercase tracking-wider rounded-xl border-0 shadow-md hover:bg-[#E8500A] transition-colors cursor-pointer"
+                  className="mt-5 px-6 py-2.5 bg-[#FF5B00] text-white text-xs font-bold uppercase tracking-wider rounded-xl border-0 shadow-md hover:bg-[#FF5B00] transition-colors cursor-pointer"
                 >
                   Clear All Filters
                 </button>
@@ -678,7 +751,7 @@ export function CreatorsPage() {
           <div className="shrink-0 relative z-10 flex flex-col items-start md:items-end gap-2.5 w-full md:w-auto">
             <button 
               onClick={handleJoinAsCreator}
-              className="px-8 py-3.5 bg-[#FF5B00] hover:bg-[#E8500A] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-200 shadow-lg hover:shadow-[#FF5B00]/25 hover:scale-[1.02] active:scale-[0.98] w-full md:w-auto text-center border-0 cursor-pointer"
+              className="px-8 py-3.5 bg-[#FF5B00] hover:bg-[#FF5B00] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-200 shadow-lg hover:shadow-[#FF5B00]/25 hover:scale-[1.02] active:scale-[0.98] w-full md:w-auto text-center border-0 cursor-pointer"
             >
               Join as Creator
             </button>

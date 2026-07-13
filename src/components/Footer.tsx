@@ -51,13 +51,13 @@ export function Footer() {
                   href="https://www.facebook.com/choosify.bd" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#FF5B00] hover:text-[#FF5B00] hover:bg-[#FF5B00]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B00] transition-all duration-300 active:scale-95"
                   aria-label="Visit Choosify on Facebook"
                   title="Visit Choosify on Facebook"
                 >
                   <Facebook size={20} />
                 </a>
-                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                <span className="text-[14px] text-white/50 group-hover:text-[#FF5B00] font-normal transition-colors">
                   Facebook
                 </span>
               </div>
@@ -68,13 +68,13 @@ export function Footer() {
                   href="https://www.instagram.com/choosify.bd/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#FF5B00] hover:text-[#FF5B00] hover:bg-[#FF5B00]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B00] transition-all duration-300 active:scale-95"
                   aria-label="Visit Choosify on Instagram"
                   title="Visit Choosify on Instagram"
                 >
                   <Instagram size={20} />
                 </a>
-                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                <span className="text-[14px] text-white/50 group-hover:text-[#FF5B00] font-normal transition-colors">
                   Instagram
                 </span>
               </div>
@@ -85,13 +85,13 @@ export function Footer() {
                   href="https://www.tiktok.com/@choosify5" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#FF5B00] hover:text-[#FF5B00] hover:bg-[#FF5B00]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B00] transition-all duration-300 active:scale-95"
                   aria-label="Visit Choosify on TikTok"
                   title="Visit Choosify on TikTok"
                 >
                   <TikTokIcon size={20} />
                 </a>
-                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                <span className="text-[14px] text-white/50 group-hover:text-[#FF5B00] font-normal transition-colors">
                   TikTok
                 </span>
               </div>
@@ -102,13 +102,13 @@ export function Footer() {
                   href="https://www.youtube.com/@choosifybd" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#FF5B00] hover:text-[#FF5B00] hover:bg-[#FF5B00]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B00] transition-all duration-300 active:scale-95"
                   aria-label="Visit Choosify on YouTube"
                   title="Visit Choosify on YouTube"
                 >
                   <Youtube size={20} />
                 </a>
-                <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
+                <span className="text-[14px] text-white/50 group-hover:text-[#FF5B00] font-normal transition-colors">
                   YouTube
                 </span>
               </div>
@@ -203,10 +203,10 @@ export function Footer() {
         >
           <g>
             <g>
-              <path fill="#ef3c23" d="M921.65,303.09c0-47.35-38.42-85.71-85.76-85.71s-85.76,38.36-85.76,85.71,38.42,85.76,85.76,85.76c8.22,0,16.14-1.17,23.65-3.3-3.3-5.38-5.23-11.77-5.23-18.57,0-19.74,15.99-35.73,35.68-35.73,8.93,0,17.1,3.3,23.34,8.68,5.33-11.16,8.32-23.65,8.32-36.84Z"/>
-              <path fill="#ef3c23" d="M356.15,303.09c0-47.35-38.42-85.71-85.76-85.71s-85.76,38.36-85.76,85.71c0,47.35,38.42,85.76,85.76,85.76,8.22,0,16.14-1.17,23.65-3.3-3.3-5.38-5.23-11.77-5.23-18.57,0-19.74,15.99-35.73,35.68-35.73,8.93,0,17.1,3.3,23.34,8.68,5.33-11.16,8.32-23.65,8.32-36.84Z"/>
-              <path fill="#ef3c23" d="M252.7,505.4C113.36,505.4,0,392.04,0,252.7S113.36,0,252.7,0s252.7,113.36,252.7,252.7-113.36,252.7-252.7,252.7ZM252.7,57.74c-107.5,0-194.96,87.46-194.96,194.96s87.46,194.96,194.96,194.96,194.96-87.46,194.96-194.96S360.2,57.74,252.7,57.74Z"/>
-              <path fill="#ef3c23" d="M779.18,505.4c-139.34,0-252.7-113.36-252.7-252.7S639.84,0,779.18,0s252.7,113.36,252.7,252.7-113.36,252.7-252.7,252.7ZM779.18,57.74c-107.5,0-194.96,87.46-194.96,194.96s87.46,194.96,194.96,194.96,194.96-87.46,194.96-194.96-87.46-194.96-194.96-194.96Z"/>
+              <path fill="#FF5B00" d="M921.65,303.09c0-47.35-38.42-85.71-85.76-85.71s-85.76,38.36-85.76,85.71,38.42,85.76,85.76,85.76c8.22,0,16.14-1.17,23.65-3.3-3.3-5.38-5.23-11.77-5.23-18.57,0-19.74,15.99-35.73,35.68-35.73,8.93,0,17.1,3.3,23.34,8.68,5.33-11.16,8.32-23.65,8.32-36.84Z"/>
+              <path fill="#FF5B00" d="M356.15,303.09c0-47.35-38.42-85.71-85.76-85.71s-85.76,38.36-85.76,85.71c0,47.35,38.42,85.76,85.76,85.76,8.22,0,16.14-1.17,23.65-3.3-3.3-5.38-5.23-11.77-5.23-18.57,0-19.74,15.99-35.73,35.68-35.73,8.93,0,17.1,3.3,23.34,8.68,5.33-11.16,8.32-23.65,8.32-36.84Z"/>
+              <path fill="#FF5B00" d="M252.7,505.4C113.36,505.4,0,392.04,0,252.7S113.36,0,252.7,0s252.7,113.36,252.7,252.7-113.36,252.7-252.7,252.7ZM252.7,57.74c-107.5,0-194.96,87.46-194.96,194.96s87.46,194.96,194.96,194.96,194.96-87.46,194.96-194.96S360.2,57.74,252.7,57.74Z"/>
+              <path fill="#FF5B00" d="M779.18,505.4c-139.34,0-252.7-113.36-252.7-252.7S639.84,0,779.18,0s252.7,113.36,252.7,252.7-113.36,252.7-252.7,252.7ZM779.18,57.74c-107.5,0-194.96,87.46-194.96,194.96s87.46,194.96,194.96,194.96,194.96-87.46,194.96-194.96-87.46-194.96-194.96-194.96Z"/>
             </g>
             <g>
               <path fill="#fff" d="M1094.27,260.83c0-54.18,36.9-95.48,93.45-95.48,48.09,0,77.9,27.43,84.31,66.7h-51.45c-3.72-16.59-14.55-27.09-32.15-27.09-26.77,0-40.3,22.01-40.3,55.88s13.53,55.19,40.3,55.19c19.62,0,31.48-11.85,33.85-32.51h51.13c-1.7,40.97-34.21,72.8-84.31,72.8-57.58,0-94.83-41.64-94.83-95.48Z"/>
@@ -217,7 +217,7 @@ export function Footer() {
               <rect fill="#fff" x="2102.94" y="170.41" width="53.18" height="180.15"/>
               <path fill="#fff" d="M2260.83,204.96v145.61h-53.18v-145.61h-27.09v-34.54h27.09v-15.23c0-19.3,4.74-32.84,15.26-42.33,11.83-10.5,30.46-14.55,53.47-14.22,7.12,0,14.59.34,22.02,1.35v37.92c-26.74-1.01-37.57.69-37.57,21v11.51h37.57v34.54h-37.57Z"/>
               <path fill="#fff" d="M2335.71,410.16v-41.64h2.72c.67.34,15.9.34,17.28.34,16.57,0,24.72-6.09,25.71-18.29,0-6.09-3.05-19.97-9.46-36.23l-55.88-143.92h55.88l23.02,69.09c8.11,24.38,14.91,62.64,14.91,62.64h.67s8.11-38.6,15.9-62.64l22.02-69.09h52.83l-64.34,184.56c-14.59,41.64-31.16,55.86-65.69,55.86-1.7,0-34.56-.34-35.58-.67Z"/>
-              <path fill="#ef3c23" d="M2129.7,152.15c15.9,0,28.78-12.9,28.78-28.8,0-15.9-12.88-28.8-28.78-28.8-15.9,0-28.8,12.9-28.8,28.8,0,2.76.39,5.42,1.11,7.94,1.81-1.11,3.95-1.76,6.24-1.76,6.63,0,12,5.37,12,11.98,0,3-1.11,5.74-2.91,7.84,3.75,1.79,7.94,2.79,12.37,2.79Z"/>
+              <path fill="#FF5B00" d="M2129.7,152.15c15.9,0,28.78-12.9,28.78-28.8,0-15.9-12.88-28.8-28.78-28.8-15.9,0-28.8,12.9-28.8,28.8,0,2.76.39,5.42,1.11,7.94,1.81-1.11,3.95-1.76,6.24-1.76,6.63,0,12,5.37,12,11.98,0,3-1.11,5.74-2.91,7.84,3.75,1.79,7.94,2.79,12.37,2.79Z"/>
             </g>
           </g>
           <g>
@@ -235,12 +235,12 @@ export function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[14px] text-white/70 font-normal">
           {/* Left Copyright Text */}
           <div className="text-center md:text-left">
-            © 2026 <span className="text-[#ef3c23] font-semibold">Choosify</span>. Made In Bangladesh
+            © 2026 <span className="text-[#FF5B00] font-semibold">Choosify</span>. Made In Bangladesh
           </div>
 
           {/* Right Slogan Text */}
           <div className="text-center md:text-right">
-            Choose <span className="text-[#ef3c23] font-semibold">Easy</span>, Compare & Decide <span className="text-[#ef3c23] font-semibold">Wisely</span>.
+            Choose <span className="text-[#FF5B00] font-semibold">Easy</span>, Compare & Decide <span className="text-[#FF5B00] font-semibold">Wisely</span>.
           </div>
         </div>
       </div>

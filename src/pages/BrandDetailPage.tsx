@@ -1,1389 +1,1017 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, Link, useParams } from "react-router-dom";
-import { toast } from "react-hot-toast";
-import { motion, AnimatePresence } from "motion/react";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { 
-  Home, ChevronRight, Star, Heart, Share2, Calendar, MapPin, 
-  Globe, Package, ShieldCheck, Award, RotateCcw, Lock, Clock,
-  Search, ChevronLeft, Check, ThumbsUp, ExternalLink, ArrowUpRight,
-  Bookmark, Mail, Info, HelpCircle, BadgePercent, Sparkles
-} from "lucide-react";
+  MapPin, Calendar, Globe, Heart, Share2, Check, Star, ShieldCheck, 
+  Award, Lock, Headset, ChevronRight, ChevronLeft, HelpCircle, 
+  ThumbsUp, Flag, Eye, ShoppingCart, ArrowRight
+} from 'lucide-react';
+import { useGlobalState } from '../context/GlobalStateContext';
+import { cn } from '../lib/utils';
 
-// Import our custom-generated premium Samsung products illustration collage
-// @ts-expect-error raw image asset import
-import samsungHeroImg from "../assets/images/samsung_hero_products_1783877011850.jpg";
-
-// TikTok Icon Custom SVG
-function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
-    </svg>
-  );
-}
-
-// Brand Detail Interfaces
-interface ProductCardData {
-  id: string;
-  title: string;
-  price: number;
-  originalPrice?: number;
-  discountBadge?: string;
-  customBadge?: { text: string; type: "seller" | "new" };
-  rating: number;
-  reviewCount: number;
-  image: string;
-}
-
-interface CreatorReview {
-  author: string;
-  role: string;
-  avatar: string;
-  rating: number;
-  timeAgo: string;
-  comment: string;
-}
+import { ProductCard } from '../components/ProductCard';
+import { CreatorReviewCard, CreatorReview } from '../components/CreatorReviewCard';
+import { VideoModal } from '../components/VideoModal';
 
 export function BrandDetailPage() {
   const navigate = useNavigate();
-  const { id } = useParams();
-  
-  // States
-  const [activeTab, setActiveTab] = useState("OVERVIEW");
+  const { addToCart } = useGlobalState();
+  const [activeTab, setActiveTab] = useState('Overview');
+  const [selectedReview, setSelectedReview] = useState<CreatorReview | null>(null);
   const [isFollowed, setIsFollowed] = useState(false);
-  const [likedProducts, setLikedProducts] = useState<string[]>([]);
-  const [currentCreatorReviewIdx, setCurrentCreatorReviewIdx] = useState(0);
-  const [creatorReviewLikes, setCreatorReviewLikes] = useState<Record<number, number>>({});
-  const [publicReviewLikes, setPublicReviewLikes] = useState<Record<string, number>>({});
-  const [votedPublicReviews, setVotedPublicReviews] = useState<string[]>([]);
-  
-  // Auto-slide Creator Reviews
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentCreatorReviewIdx((prev) => (prev + 1) % CREATOR_REVIEWS.length);
-    }, 8000);
-    return () => clearInterval(timer);
-  }, []);
+  const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
+  const [helpfulCount, setHelpfulCount] = useState<Record<string, number>>({ 'tahsin': 128, 'nusrat': 96 });
+  const [votedHelpful, setVotedHelpful] = useState<Record<string, boolean>>({});
 
-  // Handle Liking a Product
-  const toggleLikeProduct = (productId: string, productTitle: string) => {
-    if (likedProducts.includes(productId)) {
-      setLikedProducts(prev => prev.filter(x => x !== productId));
-      toast.success(`Removed ${productTitle} from wishlist`);
-    } else {
-      setLikedProducts(prev => [...prev, productId]);
-      toast.success(`Added ${productTitle} to wishlist!`, { icon: "❤️" });
-    }
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Brand comparison link copied to clipboard!');
   };
 
-  // Follow Brand trigger
-  const handleFollowBrand = () => {
+  const toggleFollow = () => {
     setIsFollowed(!isFollowed);
     if (!isFollowed) {
-      toast.success("You are now following Samsung! Get instant notifications on new deals.", { icon: "🔔" });
+      toast.success('Following Apple for exclusive drops!');
     } else {
-      toast.success("Unfollowed Samsung");
+      toast.success('Unfollowed Apple');
     }
   };
 
-  // Explore Products action
-  const handleExploreProducts = () => {
-    toast.success("Scrolling to Top Products...");
-    const element = document.getElementById("top-products-section");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  // Share brand trigger
-  const handleShareBrand = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success("Samsung Brand Page Link copied to clipboard!", { icon: "🔗" });
-  };
-
-  // DATASETS (Reflecting Samsung exactly as shown in the reference image)
-  
-  const STATS_ITEMS = [
-    { label: "Founded", value: "1937", icon: Calendar, color: "text-blue-500 bg-blue-50" },
-    { label: "Headquarters", value: "South Korea", icon: MapPin, color: "text-indigo-500 bg-indigo-50" },
-    { label: "Countries", value: "200+", icon: Globe, color: "text-teal-500 bg-teal-50" },
-    { label: "Products Sold", value: "1,000,000+", icon: Package, color: "text-purple-500 bg-purple-50" },
-    { label: "Verified Reviews", value: "12.4K", icon: Star, color: "text-amber-500 bg-amber-50 animate-pulse" },
-    { label: "Buyer Protection", value: "98%", icon: ShieldCheck, color: "text-emerald-500 bg-emerald-50" }
-  ];
-
-  const FEATURED_COLLECTIONS = [
-    {
-      title: "Galaxy S Series",
-      subtitle: "Smartphones",
-      count: "24 Products",
-      image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80"
-    },
-    {
-      title: "QLED 8K Series",
-      subtitle: "Televisions",
-      count: "18 Products",
-      image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&q=80"
-    },
-    {
-      title: "Bespoke Collection",
-      subtitle: "Home Appliances",
-      count: "32 Products",
-      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&q=80"
-    },
-    {
-      title: "Galaxy Watch Series",
-      subtitle: "Wearables",
-      count: "12 Products",
-      image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&q=80"
-    },
-    {
-      title: "Galaxy Buds Series",
-      subtitle: "Audio",
-      count: "16 Products",
-      image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&q=80"
-    }
-  ];
-
-  const TOP_PRODUCTS: ProductCardData[] = [
-    {
-      id: "samsung-s24",
-      title: "Samsung Galaxy S24 Ultra",
-      price: 124900,
-      originalPrice: 146900,
-      discountBadge: "-15%",
-      rating: 4.8,
-      reviewCount: 1200,
-      image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80"
-    },
-    {
-      id: "samsung-qled-55",
-      title: 'Samsung 55" QLED 4K TV',
-      price: 89900,
-      originalPrice: 104000,
-      customBadge: { text: "BEST SELLER", type: "seller" },
-      rating: 4.7,
-      reviewCount: 980,
-      image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&q=80"
-    },
-    {
-      id: "samsung-refrig",
-      title: "Samsung Bespoke 4-Door Refrigerator",
-      price: 152900,
-      originalPrice: 189900,
-      discountBadge: "-20%",
-      rating: 4.8,
-      reviewCount: 532,
-      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&q=80"
-    },
-    {
-      id: "samsung-watch-6",
-      title: "Samsung Galaxy Watch6 Classic 47mm",
-      price: 32900,
-      originalPrice: 37400,
-      discountBadge: "-12%",
-      rating: 4.7,
-      reviewCount: 713,
-      image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&q=80"
-    },
-    {
-      id: "samsung-buds-2",
-      title: "Samsung Galaxy Buds2 Pro",
-      price: 15900,
-      originalPrice: 19400,
-      discountBadge: "-18%",
-      rating: 4.6,
-      reviewCount: 421,
-      image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&q=80"
-    },
-    {
-      id: "samsung-frame-65",
-      title: 'Samsung The Frame 65" QLED TV',
-      price: 159900,
-      customBadge: { text: "NEW", type: "new" },
-      rating: 4.8,
-      reviewCount: 215,
-      image: "https://images.unsplash.com/photo-1461151304267-38535e780c79?w=400&q=80"
-    }
-  ];
-
-  const TRUST_ITEMS = [
-    {
-      title: "Official Warranty",
-      desc: "100% authentic products with official warranty",
-      linkText: "LEARN MORE",
-      icon: Award,
-      color: "text-blue-600 bg-blue-50 border border-blue-100"
-    },
-    {
-      title: "Exclusive Offers",
-      desc: "Special discounts and bank offers",
-      linkText: "EXPLORE DEALS",
-      icon: BadgePercent,
-      color: "text-orange-600 bg-orange-50 border border-orange-100"
-    },
-    {
-      title: "Easy Returns",
-      desc: "7-day easy returns on eligible products",
-      linkText: "RETURN POLICY",
-      icon: RotateCcw,
-      color: "text-teal-600 bg-teal-50 border border-teal-100"
-    },
-    {
-      title: "Secure Payments",
-      desc: "100% secure payments protected by SSL",
-      linkText: "PAYMENT INFO",
-      icon: Lock,
-      color: "text-indigo-600 bg-indigo-50 border border-indigo-100"
-    }
-  ];
-
-  const CREATOR_REVIEWS: CreatorReview[] = [
-    {
-      author: "Ashraful Islam",
-      role: "Verified Buyer",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80",
-      rating: 5,
-      timeAgo: "2 days ago",
-      comment: "Best smartphone experience ever! The camera, performance and design are just outstanding. The integration with One UI is super smooth and battery lasts easily over a day."
-    },
-    {
-      author: "Samia Rahman",
-      role: "Tech Influencer",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
-      rating: 5,
-      timeAgo: "1 week ago",
-      comment: "The Bespoke TV collection and The Frame is an absolute masterpiece. It blends into my living room like real art. Picture quality of QLED is unmatched in this price range."
-    },
-    {
-      author: "Zeeshan Khan",
-      role: "Verified Professional",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
-      rating: 4,
-      timeAgo: "3 days ago",
-      comment: "Highly recommend Galaxy Buds2 Pro for audiophiles. Active Noise Canceling is amazing, blocks Dhaka's traffic sounds completely during my daily commute."
-    }
-  ];
-
-  const NEWS_STORIES = [
-    {
-      title: "Samsung Unveils Next Generation AI-Powered TV Lineup",
-      date: "May 10, 2025",
-      category: "News",
-      image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=200&q=80"
-    },
-    {
-      title: "Galaxy S24 Series One UI 7 Update Rollout Begins",
-      date: "May 08, 2025",
-      category: "Updates",
-      image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=200&q=80"
-    },
-    {
-      title: "Samsung Expands Bespoke Home Solutions in Bangladesh",
-      date: "May 05, 2025",
-      category: "Stories",
-      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80"
-    }
-  ];
-
-  const PUBLIC_REVIEWS = [
-    {
-      id: "pub-1",
-      author: "Tanvir Hasan",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80",
-      product: "Samsung Galaxy S24 Ultra",
-      timeAgo: "2 days ago",
-      helpfulCount: 124,
-      rating: 5,
-      comment: "I have been using Samsung products for years and they never disappoint. Excellent build quality, stellar display, and amazing camera performance."
-    },
-    {
-      id: "pub-2",
-      author: "Nusrat Jahan",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80",
-      product: "Samsung Bespoke 4-Door Refrigerator",
-      timeAgo: "5 days ago",
-      helpfulCount: 80,
-      rating: 5,
-      comment: "The Bespoke refrigerator is perfect for our home. Stylish modern design, super efficient cooling, and customizable door panels are awesome!"
-    }
-  ];
-
-  const SIMILAR_BRANDS = [
-    { name: "Apple", identity: "Premium", quality: "PREMIUM", price: "High (৳৳৳৳)", rating: 4.6 },
-    { name: "Xiaomi", identity: "High", quality: "HIGH", price: "Mid (৳৳)", rating: 4.5 },
-    { name: "OnePlus", identity: "High", quality: "HIGH", price: "Mid-High (৳৳৳)", rating: 4.4 },
-    { name: "Google", identity: "Premium", quality: "PREMIUM", price: "High (৳৳৳৳)", rating: 4.3 }
-  ];
-
-  // Rating details distribution values
-  const ratingDistribution = [
-    { stars: 5, count: "9.6K", percent: 77 },
-    { stars: 4, count: "2.1K", percent: 17 },
-    { stars: 3, count: "524", percent: 4 },
-    { stars: 2, count: "123", percent: 1 },
-    { stars: 1, count: "58", percent: 1 }
-  ];
-
-  // Helpful clicks handler
-  const handleReviewHelpful = (id: string, isCreator = false) => {
-    if (isCreator) {
-      setCreatorReviewLikes(prev => ({
-        ...prev,
-        [currentCreatorReviewIdx]: (prev[currentCreatorReviewIdx] || 0) + 1
-      }));
-      toast.success("Marked creator review as helpful!");
-    } else {
-      if (votedPublicReviews.includes(id)) {
-        toast.error("You have already voted this review as helpful.");
-        return;
+  const toggleWishlist = (id: string, name: string) => {
+    setWishlist(prev => {
+      const updated = { ...prev, [id]: !prev[id] };
+      if (updated[id]) {
+        toast.success('Saved to vault');
+      } else {
+        toast.success('Removed from vault');
       }
-      setVotedPublicReviews(prev => [...prev, id]);
-      setPublicReviewLikes(prev => ({
-        ...prev,
-        [id]: (prev[id] || 0) + 1
-      }));
-      toast.success("Marked review as helpful!");
+      return updated;
+    });
+  };
+
+  const handleHelpful = (reviewId: string) => {
+    if (votedHelpful[reviewId]) {
+      toast('Already voted as helpful!');
+      return;
     }
+    setHelpfulCount(prev => ({
+      ...prev,
+      [reviewId]: prev[reviewId] + 1
+    }));
+    setVotedHelpful(prev => ({
+      ...prev,
+      [reviewId]: true
+    }));
+    toast.success('Marked as helpful!');
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-gray-800 pb-20 select-none font-sans">
+    <>
+      <VideoModal review={selectedReview} onClose={() => setSelectedReview(null)} />
+      <div className="bg-[#F5F8FD] min-h-screen text-[#050B2C] pb-20 font-sans antialiased">
       
-      {/* 1. BREADCRUMB */}
-      <div className="w-full max-w-[1440px] mx-auto px-6 md:px-10 py-4 text-left select-none shrink-0">
-        <nav className="text-xs font-semibold text-gray-400 flex items-center gap-1.5 uppercase tracking-wider">
-          <Link to="/" className="hover:text-[#FF5B00] transition-colors">Home</Link>
-          <span className="text-gray-300 font-bold">&gt;</span>
-          <Link to="/brands" className="hover:text-[#FF5B00] transition-colors">Brands</Link>
-          <span className="text-gray-300 font-bold">&gt;</span>
-          <span className="text-gray-800 font-bold">Samsung</span>
-        </nav>
-      </div>
+      {/* 1 & 2. EDGE-TO-EDGE EDITORIAL BRAND HERO WITH INTEGRATED BREADCRUMBS */}
+      <section className="w-full bg-gradient-to-br from-[#050B2C] via-[#09103C] to-[#120935] py-12 md:py-16 relative overflow-hidden text-white shrink-0">
+        {/* Ambient light glow */}
+        <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-[#FF5B00]/10 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* 2. Brand Hero Section */}
-      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-6 shrink-0">
-        <div className="bg-gradient-to-r from-[#030312] via-[#090A22] to-[#121338] rounded-3xl relative overflow-hidden flex flex-col md:flex-row items-stretch border border-white/5 shadow-2xl min-h-[460px]">
+        {/* Constrained Content Container */}
+        <div className="max-w-[1440px] mx-auto w-full px-6 md:px-12 relative z-10">
           
-          {/* Glowing Ambient Light Spots */}
-          <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-[#FF5B00]/10 rounded-full blur-[100px] pointer-events-none" />
+          {/* Breadcrumbs inside the hero section */}
+          <nav className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold mb-8 select-none">
+            <Link to="/" className="hover:text-[#FF5B00] transition-colors">Home</Link>
+            <ChevronRight size={12} className="text-gray-500" />
+            <Link to="/brands" className="hover:text-[#FF5B00] transition-colors">Brands</Link>
+            <ChevronRight size={12} className="text-gray-500" />
+            <span className="text-white font-bold">Apple</span>
+          </nav>
 
-          {/* Left Block (Text and Logo) */}
-          <div className="flex-1 p-8 md:p-12 text-left relative z-10 flex flex-col justify-between">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* Solder / Logo and Slogan Header Row */}
-            <div className="flex flex-col sm:flex-row items-start gap-6 mb-6">
-              {/* Samsung Authentic White Logo Container */}
-              <div className="w-24 h-24 sm:w-28 sm:h-28 bg-white rounded-2xl flex items-center justify-center shadow-lg shrink-0 border border-gray-150 p-3">
+            {/* LEFT HERO: Brand Logo Card */}
+            <div className="lg:col-span-3 flex flex-col items-center lg:items-start text-center lg:text-left">
+              <div className="w-32 h-32 bg-white rounded-2xl flex items-center justify-center p-6 shadow-2xl mb-6 border border-[#EEF2F7]">
                 <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg" 
-                  alt="Samsung Logo" 
-                  className="w-full object-contain"
+                  src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" 
+                  alt="Apple Logo" 
+                  className="w-16 h-16 object-contain"
                 />
               </div>
+              
+              {/* Metadata strip below logo */}
+              <div className="space-y-3 text-xs font-semibold text-gray-300 w-full">
+                <div className="flex items-center gap-2 justify-center lg:justify-start">
+                  <MapPin size={14} className="text-[#FF5B00]" />
+                  <span>California, USA</span>
+                </div>
+                <div className="flex items-center gap-2 justify-center lg:justify-start">
+                  <Calendar size={14} className="text-[#FF5B00]" />
+                  <span>1976</span>
+                </div>
+                <div className="flex items-center gap-2 justify-center lg:justify-start">
+                  <Globe size={14} className="text-[#FF5B00]" />
+                  <a href="https://apple.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#FF5B00] transition-colors">apple.com</a>
+                </div>
+                
+                {/* Social icons */}
+                <div className="flex items-center gap-3 pt-2 justify-center lg:justify-start">
+                  <a href="#" className="w-7 h-7 rounded-full bg-white/10 hover:bg-[#FF5B00] transition-all flex items-center justify-center text-white" aria-label="Facebook">
+                    <span className="text-[10px] font-black uppercase tracking-tight">FB</span>
+                  </a>
+                  <a href="#" className="w-7 h-7 rounded-full bg-white/10 hover:bg-[#FF5B00] transition-all flex items-center justify-center text-white" aria-label="Instagram">
+                    <span className="text-[10px] font-black uppercase tracking-tight">IG</span>
+                  </a>
+                  <a href="#" className="w-7 h-7 rounded-full bg-white/10 hover:bg-[#FF5B00] transition-all flex items-center justify-center text-white" aria-label="TikTok">
+                    <span className="text-[10px] font-black uppercase tracking-tight">TK</span>
+                  </a>
+                  <a href="#" className="w-7 h-7 rounded-full bg-white/10 hover:bg-[#FF5B00] transition-all flex items-center justify-center text-white" aria-label="X">
+                    <span className="text-[10px] font-black uppercase tracking-tight">X</span>
+                  </a>
+                </div>
+              </div>
+            </div>
 
-              <div className="flex-1">
-                {/* Brand status badge */}
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-400/20 rounded-full text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2.5">
-                  <Check className="w-3 h-3 text-blue-400 stroke-[3px]" />
+            {/* CENTER HERO: Brand Name & Slogan */}
+            <div className="lg:col-span-5 text-center lg:text-left space-y-6">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#10B981]/15 border border-[#10B981]/30 rounded-full text-[10px] font-black text-[#10B981] uppercase tracking-wider">
+                  <Check size={12} className="stroke-[3px]" />
                   <span>Verified Brand</span>
                 </div>
-
-                <h1 className="text-4xl md:text-[52px] font-black tracking-tight text-white leading-none">
-                  Samsung
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-none">
+                  Apple
                 </h1>
-                <p className="text-lg md:text-xl font-bold text-gray-300 mt-2 tracking-tight">
-                  Innovation that inspires the world
+                <p className="text-sm md:text-base text-gray-300 leading-relaxed max-w-md font-medium">
+                  Apple Inc. designs and manufactures innovative products that empower people around the world. Built on privacy, security, and seamless experience.
                 </p>
               </div>
-            </div>
 
-            {/* Ratings & Slogan block */}
-            <div className="mb-6">
-              {/* Stars and metrics row */}
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold text-gray-300 tracking-wide uppercase mb-4 border-b border-white/5 pb-4">
-                <div className="flex items-center gap-1 text-amber-400">
-                  <Star className="w-4 h-4 fill-current text-amber-400" />
-                  <span className="text-white">4.8/5</span>
-                  <span className="text-gray-400 font-medium lowercase">(12.4K reviews)</span>
-                </div>
-                <div className="h-4 w-px bg-white/10 hidden sm:block"></div>
-                <div>
-                  <span className="text-emerald-400">98%</span> Positive Feedback
-                </div>
-                <div className="h-4 w-px bg-white/10 hidden sm:block"></div>
-                <div className="text-purple-400 font-extrabold">
-                  #1 Most Trusted Brand
-                </div>
-              </div>
-
-              <p className="text-sm text-gray-400 leading-relaxed max-w-xl">
-                Discover the latest smartphones, TVs, home appliances and more from Samsung – a global leader in technology and innovation.
-              </p>
-            </div>
-
-            {/* Actions Row */}
-            <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-white/5">
-              <button 
-                onClick={handleExploreProducts}
-                className="px-6 py-3.5 bg-[#FF5B00] hover:bg-[#E8500A] text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-lg hover:shadow-[#FF5B00]/20 flex items-center gap-2 cursor-pointer border-0 active:scale-95"
-              >
-                <span>Explore Products</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </button>
-
-              <button 
-                onClick={handleFollowBrand}
-                className={`px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer border flex items-center gap-2 ${
-                  isFollowed 
-                    ? "bg-white text-gray-900 border-white" 
-                    : "bg-transparent text-white border-white/20 hover:border-white hover:bg-white/5"
-                }`}
-              >
-                <Heart className={`w-4 h-4 ${isFollowed ? "fill-red-500 text-red-500" : ""}`} />
-                <span>{isFollowed ? "Following Brand" : "Follow Brand"}</span>
-              </button>
-
-              {/* Share Circular Button */}
-              <button 
-                onClick={handleShareBrand}
-                className="w-11 h-11 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all cursor-pointer"
-                title="Share Brand"
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Social Media List Row */}
-            <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-3 pt-4 border-t border-white/5">
-              <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Find Us On</span>
-              <div className="flex flex-wrap items-center gap-3">
-                {[
-                  { label: "Facebook", link: "https://facebook.com/samsung", icon: FacebookIcon },
-                  { label: "Instagram", link: "https://instagram.com/samsung", icon: InstagramIcon },
-                  { label: "TikTok", link: "https://tiktok.com/@samsung", icon: TikTokIcon },
-                  { label: "YouTube", link: "https://youtube.com/samsung", icon: YoutubeIcon },
-                  { label: "Website", link: "https://samsung.com", icon: Globe }
-                ].map((social, idx) => {
-                  const IconComp = social.icon;
-                  return (
-                    <a 
-                      key={idx}
-                      href={social.link} 
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 hover:text-white transition-all text-[11px] font-bold"
-                    >
-                      <IconComp className="w-3.5 h-3.5" />
-                      <span>{social.label}</span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Product Image Collage (Visualizing beautiful modern Samsung collage) */}
-          <div className="w-full md:w-[45%] lg:w-[50%] min-h-[300px] md:min-h-full relative overflow-hidden shrink-0">
-            {/* Absolute gradients blending edge to dark */}
-            <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#030312] via-transparent to-transparent z-10 pointer-events-none" />
-            <img 
-              src={samsungHeroImg} 
-              alt="Samsung Tech Collage Banner" 
-              className="w-full h-full object-cover object-center scale-100 md:scale-105 transition-transform duration-1000"
-              referrerPolicy="no-referrer"
-            />
-          </div>
-
-        </div>
-      </section>
-
-      {/* 3. Stats Summary Row Grid Bar (Clean White Box below the hero) */}
-      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-8 shrink-0">
-        <div className="bg-white border border-gray-150 rounded-2xl py-6 px-4 md:px-8 shadow-sm">
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-6 items-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
-            {STATS_ITEMS.map((stat, idx) => {
-              const StatIcon = stat.icon;
-              return (
-                <div key={idx} className="flex items-center gap-4 px-4 first:pl-0 last:pr-0 pt-4 md:pt-0">
-                  <div className={`w-11 h-11 rounded-full ${stat.color} flex items-center justify-center shrink-0 shadow-xs`}>
-                    <StatIcon className="w-5 h-5" />
-                  </div>
-                  <div className="text-left min-w-0">
-                    <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider leading-none">
-                      {stat.label}
-                    </p>
-                    <h4 className="text-base font-black text-gray-900 mt-1.5 leading-none truncate">
-                      {stat.value}
-                    </h4>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Horizontal Navigation Tab Strip */}
-      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-8 shrink-0">
-        <div className="border-b border-gray-200">
-          <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
-            {[
-              "OVERVIEW",
-              "PRODUCTS",
-              "COLLECTIONS",
-              "DEALS",
-              "REVIEWS",
-              "GUIDES",
-              "NEWS & STORIES"
-            ].map((tab) => {
-              const isActive = activeTab === tab;
-              return (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    setActiveTab(tab);
-                    toast.success(`Navigating to ${tab}`);
-                    const targetEl = document.getElementById(`${tab.toLowerCase().replace(" & ", "-")}-section`);
-                    if (targetEl) {
-                      targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }
-                  }}
-                  className={`py-4 px-1 text-xs font-black tracking-widest border-b-[3px] transition-all cursor-pointer relative uppercase whitespace-nowrap outline-none ${
-                    isActive 
-                      ? "border-[#FF5B00] text-[#FF5B00]" 
-                      : "border-transparent text-gray-500 hover:text-gray-900"
-                  }`}
+              {/* Actions Row */}
+              <div className="flex flex-wrap items-center gap-3 justify-center lg:justify-start pt-2">
+                <button 
+                  onClick={toggleFollow}
+                  className={cn(
+                    "px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border-0 cursor-pointer shadow-lg",
+                    isFollowed 
+                      ? "bg-white text-gray-900" 
+                      : "bg-[#FF5B00] text-white hover:bg-[#E04F00] hover:shadow-[#FF5B00]/25"
+                  )}
                 >
-                  {tab}
+                  <Heart size={14} className={isFollowed ? "fill-red-500 text-red-500" : ""} />
+                  <span>{isFollowed ? "Following" : "Follow Brand"}</span>
                 </button>
-              );
-            })}
+
+                <a 
+                  href="https://apple.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest bg-white text-[#050B2C] hover:bg-gray-100 transition-all flex items-center gap-2 cursor-pointer shadow-lg border border-gray-100 decoration-0"
+                >
+                  <Globe size={14} />
+                  <span>Visit Website</span>
+                </a>
+
+                <button 
+                  onClick={handleShare}
+                  className="px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest bg-transparent text-white hover:bg-white/5 transition-all flex items-center gap-2 cursor-pointer border border-white/20 shadow-lg"
+                >
+                  <Share2 size={14} />
+                  <span>Share</span>
+                </button>
+              </div>
+            </div>
+
+            {/* RIGHT HERO: Brand Score Card */}
+            <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-[24px] p-6 text-left backdrop-blur-md shadow-2xl">
+              <div className="flex items-center justify-between">
+                <div className="text-[11px] font-black uppercase tracking-widest text-gray-400">Brand Score</div>
+                <button className="text-gray-400 hover:text-white transition-colors border-0 bg-transparent cursor-pointer" title="Score explanations">
+                  <HelpCircle size={14} />
+                </button>
+              </div>
+
+              <div className="flex items-baseline gap-2 mt-4">
+                <div className="text-4xl md:text-5xl font-black text-white tracking-tight leading-none">4.3</div>
+                <div className="text-lg text-gray-400 font-bold">/5</div>
+                <div className="ml-2">
+                  <div className="flex items-center gap-0.5 text-[#FF9F00]">
+                    <Star size={13} className="fill-current" />
+                    <Star size={13} className="fill-current" />
+                    <Star size={13} className="fill-current" />
+                    <Star size={13} className="fill-current" />
+                    <Star size={13} className="fill-current opacity-40" />
+                  </div>
+                  <div className="text-[10px] text-gray-400 font-bold mt-1">(2,486 reviews)</div>
+                </div>
+              </div>
+
+              {/* Progress attributes list */}
+              <div className="space-y-2 mt-5 border-t border-white/5 pt-4">
+                {[
+                  { label: "Quality", val: "4.5", pct: "90%" },
+                  { label: "Value", val: "4.1", pct: "82%" },
+                  { label: "Durability", val: "4.2", pct: "84%" },
+                  { label: "Design", val: "4.6", pct: "92%" },
+                  { label: "Support", val: "4.0", pct: "80%" }
+                ].map((bar, i) => (
+                  <div key={i} className="flex items-center justify-between text-[11px] font-semibold text-gray-300">
+                    <span className="w-16">{bar.label}</span>
+                    <div className="flex-1 mx-3 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-[#FF5B00] to-[#FF9F00] rounded-full" style={{ width: bar.pct }} />
+                    </div>
+                    <span className="w-6 text-right font-black text-white">{bar.val}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Recommendation percent box */}
+              <div className="text-center mt-5 pt-4 border-t border-white/5 space-y-1">
+                <div className="text-3xl font-black text-emerald-400 leading-none">85%</div>
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">of customers recommend Apple</div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* 5. OVERVIEW / FEATURED COLLECTIONS SECTION */}
-      <section id="overview-section" className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left">
-        <div className="flex items-center justify-between mb-6 border-b border-gray-150 pb-3.5">
-          <div>
-            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
-              Featured Collections
-            </h3>
-            <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">
-              Curated product series &bull; Designed for brilliance
+      {/* 3. TRUST BENEFITS STRIP */}
+      <section className="max-w-[1440px] mx-auto px-6 md:px-12 mb-8">
+        <div className="bg-[#050B2C] border border-white/10 rounded-2xl p-5 md:py-6 md:px-8 text-white shadow-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          {[
+            { title: "100% Original Products", sub: "Official & authentic products", icon: ShieldCheck },
+            { title: "1 Year Warranty", sub: "Standard brand warranty", icon: Award },
+            { title: "Secure Purchase", sub: "Safe & secure shopping", icon: Lock },
+            { title: "Global Brand", sub: "Trusted worldwide", icon: Globe },
+            { title: "Premium Support", sub: "Dedicated customer care", icon: Headset }
+          ].map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <div key={i} className="flex items-center gap-3.5 text-left">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0">
+                  <Icon size={18} className="text-white" />
+                </div>
+                <div>
+                  <h4 className="text-[12.5px] font-black text-white leading-tight uppercase tracking-wider">{item.title}</h4>
+                  <p className="text-[10px] text-gray-400 font-semibold mt-1 leading-none">{item.sub}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 4. STICKY BRAND NAVIGATION TABS */}
+      <section className="max-w-[1440px] mx-auto px-6 md:px-12 mb-8 sticky top-0 z-40 bg-[#F5F8FD]/95 backdrop-blur-md py-3">
+        <div className="bg-white border border-[#EEF2F7] rounded-2xl p-1.5 shadow-sm flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
+          {[
+            { name: "Overview", count: null, badge: null },
+            { name: "Products", count: null, badge: null },
+            { name: "Deals", count: null, badge: "HOT" },
+            { name: "Reviews", count: "2.4K", badge: null },
+            { name: "Brand Info", count: null, badge: null },
+            { name: "Compare", count: null, badge: null }
+          ].map((tab) => {
+            const isActive = activeTab === tab.name;
+            return (
+              <button
+                key={tab.name}
+                onClick={() => {
+                  setActiveTab(tab.name);
+                  toast.success(`Switched tab to ${tab.name}`);
+                  const targetId = tab.name.toLowerCase().replace(" ", "-");
+                  const element = document.getElementById(targetId);
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }}
+                className={cn(
+                  "flex-1 py-3 px-4 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 rounded-xl transition-all cursor-pointer whitespace-nowrap border-0 relative outline-none",
+                  isActive 
+                    ? "bg-[#FF5B00]/10 text-[#FF5B00]" 
+                    : "text-[#6B7280] hover:text-[#050B2C] hover:bg-gray-50"
+                )}
+              >
+                <span>{tab.name}</span>
+                
+                {tab.badge && (
+                  <span className="bg-[#FF5B00] text-white text-[8px] font-black px-1.5 py-0.5 rounded leading-none">
+                    {tab.badge}
+                  </span>
+                )}
+                
+                {tab.count && (
+                  <span className={cn(
+                    "text-[9px] font-black px-1.5 py-0.5 rounded-full leading-none",
+                    isActive ? "bg-[#FF5B00] text-white" : "bg-gray-100 text-[#6B7280]"
+                  )}>
+                    {tab.count}
+                  </span>
+                )}
+
+                {isActive && (
+                  <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-[#FF5B00] rounded-full" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 5. TOP DEALS ON BRAND */}
+      <section id="deals" className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12 scroll-mt-24">
+        <div className="flex items-end justify-between mb-6 border-b border-[#EEF2F7] pb-4">
+          <div className="text-left">
+            <h2 className="text-2xl font-black text-[#050B2C] uppercase tracking-tight">
+              Top Deals on Apple
+            </h2>
+            <p className="text-xs font-bold text-[#6B7280] mt-1.5">
+              Limited-time offers on Apple products
             </p>
           </div>
           <button 
-            onClick={() => toast.success("Redirecting to all collections...")}
-            className="text-xs font-black text-[#FF5B00] hover:text-[#E8500A] transition-colors uppercase tracking-widest flex items-center gap-1 group"
+            onClick={() => {
+              setActiveTab("Deals");
+              toast.success("Opening premium Apple Deals stream...");
+            }}
+            className="px-4 py-2 bg-white border border-[#EEF2F7] hover:border-[#FF5B00] hover:text-[#FF5B00] transition-all text-xs font-bold text-[#050B2C] rounded-xl shadow-sm cursor-pointer"
           >
-            <span>View all collections</span>
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            VIEW ALL DEALS
           </button>
         </div>
 
-        {/* Collections Horizontal List Layout */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
-          {FEATURED_COLLECTIONS.map((col, idx) => (
+        {/* 4 Premium Product Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              id: "apple-iphone-15",
+              title: "Apple iPhone 15 (128GB)",
+              price: 114999,
+              oldPrice: 134999,
+              saving: "15% OFF",
+              hot: true,
+              badge: "15% OFF",
+              likes: "1.2K",
+              views: "856",
+              image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&q=80"
+            },
+            {
+              id: "apple-macbook-air",
+              title: "Apple MacBook Air M2 (2024)",
+              price: 128000,
+              oldPrice: 142000,
+              saving: "10% OFF",
+              sale: true,
+              badge: "10% OFF",
+              likes: "932",
+              views: "614",
+              image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80"
+            },
+            {
+              id: "apple-airpods-pro",
+              title: "Apple AirPods Pro (2nd Gen)",
+              price: 25999,
+              oldPrice: 29999,
+              saving: "13% OFF",
+              new: true,
+              badge: "13% OFF",
+              likes: "1.1K",
+              views: "723",
+              image: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=400&q=80"
+            },
+            {
+              id: "apple-watch-9",
+              title: "Apple Watch Series 9",
+              price: 45999,
+              oldPrice: 57999,
+              saving: "20% OFF",
+              sale: true,
+              badge: "20% OFF",
+              likes: "789",
+              views: "488",
+              image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&q=80"
+            }
+          ].map((prod) => {
+            const formattedProd = {
+              id: prod.id,
+              title: prod.title,
+              price: prod.price,
+              originalPrice: prod.oldPrice,
+              image: prod.image,
+              brand: 'Apple',
+              discount: prod.saving,
+              badge: prod.hot ? 'HOT' : (prod.new ? 'NEW' : (prod.sale ? 'SALE' : null)),
+              rating: '4.9',
+              reviews: prod.likes,
+            };
+            return (
+              <ProductCard key={prod.id} product={formattedProd} />
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 6. BRAND PRODUCT CATEGORIES */}
+      <section id="products" className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12 scroll-mt-24">
+        <div className="flex items-end justify-between mb-6 border-b border-[#EEF2F7] pb-4">
+          <div className="text-left">
+            <h2 className="text-2xl font-black text-[#050B2C] uppercase tracking-tight">
+              Apple Products
+            </h2>
+            <p className="text-xs font-bold text-[#6B7280] mt-1.5">
+              Explore all products from Apple
+            </p>
+          </div>
+          <button 
+            onClick={() => {
+              setActiveTab("Products");
+              toast.success("Loading all Apple catalog filters...");
+            }}
+            className="px-4 py-2 bg-white border border-[#EEF2F7] hover:border-[#FF5B00] hover:text-[#FF5B00] transition-all text-xs font-bold text-[#050B2C] rounded-xl shadow-sm cursor-pointer"
+          >
+            VIEW ALL PRODUCTS
+          </button>
+        </div>
+
+        {/* 6 Grid items of Apple Product Category Collections */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {[
+            { name: "iPhone", count: "24 Products", img: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=200&q=80" },
+            { name: "Mac", count: "15 Products", img: "https://images.unsplash.com/photo-1496181130204-7552cc1524e2?w=200&q=80" },
+            { name: "iPad", count: "18 Products", img: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=200&q=80" },
+            { name: "Watch", count: "12 Products", img: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=200&q=80" },
+            { name: "AirPods", count: "8 Products", img: "https://images.unsplash.com/photo-1588449668365-d15e397f6787?w=200&q=80" },
+            { name: "Accessories", count: "32 Products", img: "https://images.unsplash.com/photo-1608156639585-b3a032ef9689?w=200&q=80" }
+          ].map((cat, i) => (
             <div 
-              key={idx}
-              onClick={() => toast.success(`Viewing ${col.title} collection!`)}
-              className="bg-white rounded-2xl border border-gray-200/80 p-4 hover:shadow-lg hover:border-blue-500/20 transition-all duration-300 cursor-pointer group"
+              key={i}
+              onClick={() => {
+                toast.success(`Loading ${cat.name} Collection from Apple`);
+                navigate(`/products?brand=Apple&category=${cat.name}`);
+              }}
+              className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-lg hover:border-[#FF5B00]/20 border border-transparent transition-all duration-300 cursor-pointer text-center flex flex-col justify-between"
             >
-              {/* Product illustration image with wrapper border */}
-              <div className="aspect-square bg-gray-50 rounded-xl overflow-hidden mb-4 border border-gray-100 flex items-center justify-center">
+              <div className="h-24 flex items-center justify-center mb-4">
                 <img 
-                  src={col.image} 
-                  alt={col.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  referrerPolicy="no-referrer"
+                  src={cat.img} 
+                  alt={cat.name} 
+                  className="max-h-full max-w-[85%] object-contain"
                 />
               </div>
-
-              <div>
-                <h4 className="text-sm font-black text-gray-900 group-hover:text-[#FF5B00] transition-colors leading-tight">
-                  {col.title}
-                </h4>
-                <p className="text-[11px] text-gray-400 font-bold mt-1 uppercase tracking-wider leading-none">
-                  {col.subtitle}
-                </p>
-                <div className="mt-3.5 pt-2.5 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-gray-500">
-                    {col.count}
-                  </span>
-                  <div className="w-5 h-5 rounded-full bg-gray-50 group-hover:bg-[#FF5B00] group-hover:text-white flex items-center justify-center text-gray-400 transition-colors">
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </div>
-                </div>
+              <div className="text-center">
+                <h4 className="text-sm font-black text-[#050B2C]">{cat.name}</h4>
+                <p className="text-[11px] text-gray-400 font-bold mt-1">{cat.count}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 6. TOP PRODUCTS GRID SECTION */}
-      <section id="products-section" className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left scroll-mt-24">
-        <div id="top-products-section" className="flex items-center justify-between mb-6 border-b border-gray-150 pb-3.5">
+      {/* CREATOR REVIEWS */}
+      <section className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12">
+        <div className="flex items-center justify-between mb-8 border-b border-[#EEF2F7] pb-4">
           <div>
-            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
-              Top Products
-            </h3>
-            <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">
-              Top-selling Samsung devices in Bangladesh
+            <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-2">CREATOR REVIEWS</h2>
+            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">WATCH TRUSTED CREATOR REVIEWS BEFORE MAKING YOUR BUYING DECISION</p>
+          </div>
+          <button className="text-xs font-bold text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 hover:text-[#EB4501] group">
+            VIEW ALL REVIEWS <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+        
+        <div className="flex gap-6 overflow-x-auto pb-6 snap-x scrollbar-hide">
+          {[
+            {
+              id: "1",
+              cover: "https://images.unsplash.com/photo-1616348436168-de43ad0db179?q=80&w=600&auto=format&fit=crop",
+              title: "iPhone 15 Pro Max 30 Days Later - The Truth!",
+              creator: { name: "Marques Brownlee", avatar: "https://i.pravatar.cc/150?u=mb", verified: true },
+              duration: "14:20",
+              views: "1.2M",
+              date: "2 weeks ago",
+              category: "Long Term Review",
+              categoryColor: "bg-blue-600",
+              platform: "youtube" as const
+            },
+            {
+              id: "2",
+              cover: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=600&auto=format&fit=crop",
+              title: "iPhone 15 Pro Camera Test vs S24 Ultra",
+              creator: { name: "Mrwhosetheboss", avatar: "https://i.pravatar.cc/150?u=mr", verified: true },
+              duration: "18:45",
+              views: "850K",
+              date: "1 month ago",
+              category: "Camera Test",
+              categoryColor: "bg-purple-600",
+              platform: "youtube" as const
+            },
+            {
+              id: "3",
+              cover: "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?q=80&w=600&auto=format&fit=crop",
+              title: "Is the Titanium actually better? Drop Test!",
+              creator: { name: "JerryRigEverything", avatar: "https://i.pravatar.cc/150?u=jr", verified: true },
+              duration: "08:12",
+              views: "2.1M",
+              date: "3 weeks ago",
+              category: "Durability Test",
+              categoryColor: "bg-red-600",
+              platform: "youtube" as const
+            },
+            {
+              id: "4",
+              cover: "https://images.unsplash.com/photo-1605236453806-6ff368536b8e?q=80&w=600&auto=format&fit=crop",
+              title: "Top 10 Hidden Features in iOS 17 & iPhone 15 Pro",
+              creator: { name: "iJustine", avatar: "https://i.pravatar.cc/150?u=ij", verified: true },
+              duration: "12:05",
+              views: "450K",
+              date: "5 days ago",
+              category: "Tips & Tricks",
+              categoryColor: "bg-emerald-600",
+              platform: "instagram" as const
+            },
+            {
+              id: "5",
+              cover: "https://images.unsplash.com/photo-1556656793-08538906a9f8?q=80&w=600&auto=format&fit=crop",
+              title: "Gaming on A17 Pro - Console Level Quality?",
+              creator: { name: "Dave2D", avatar: "https://i.pravatar.cc/150?u=d2d", verified: true },
+              duration: "10:30",
+              views: "320K",
+              date: "1 week ago",
+              category: "Gaming Test",
+              categoryColor: "bg-amber-600",
+              platform: "youtube" as const,
+              sponsor: "Sponsored"
+            }
+          ].map((review) => (
+            <CreatorReviewCard key={review.id} review={review} onClick={() => setSelectedReview(review)} />
+          ))}
+        </div>
+      </section>
+
+      {/* 7. CUSTOMER REVIEWS */}
+      <section id="reviews" className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12 scroll-mt-24">
+        <div className="flex items-end justify-between mb-6 border-b border-[#EEF2F7] pb-4">
+          <div className="text-left">
+            <h2 className="text-2xl font-black text-[#050B2C] uppercase tracking-tight">
+              What Customers Say
+            </h2>
+            <p className="text-xs font-bold text-[#6B7280] mt-1.5">
+              Real reviews from verified buyers
             </p>
           </div>
           <button 
-            onClick={() => toast.success("Redirecting to all products...")}
-            className="text-xs font-black text-[#FF5B00] hover:text-[#E8500A] transition-colors uppercase tracking-widest flex items-center gap-1 group"
+            onClick={() => toast.success("Showing custom reviews dynamic streams!")}
+            className="px-4 py-2 bg-white border border-[#EEF2F7] hover:border-[#FF5B00] hover:text-[#FF5B00] transition-all text-xs font-bold text-[#050B2C] rounded-xl shadow-sm cursor-pointer"
           >
-            <span>View all products</span>
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            VIEW ALL REVIEWS
           </button>
         </div>
 
-        {/* Six Column Products Responsive Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-5">
-          {TOP_PRODUCTS.map((prod) => {
-            const isLiked = likedProducts.includes(prod.id);
-            return (
-              <div 
-                key={prod.id}
-                className="bg-white rounded-2xl border border-gray-200/80 hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden group h-[340px]"
-              >
-                {/* Thumb Box */}
-                <div className="relative aspect-square bg-gray-50 overflow-hidden shrink-0 p-3 flex items-center justify-center border-b border-gray-100">
-                  <img 
-                    src={prod.image} 
-                    alt={prod.title} 
-                    className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                    referrerPolicy="no-referrer"
-                  />
+        {/* Reviews Horizontal Container with Navigation Arrows outside */}
+        <div className="relative px-2">
+          {/* Slider Arrow Left */}
+          <button 
+            onClick={() => toast.success("Previous reviews")}
+            className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-gray-150 shadow-md flex items-center justify-center text-[#050B2C] hover:text-[#FF5B00] transition-all cursor-pointer z-10"
+            aria-label="Previous Review"
+          >
+            <ChevronLeft size={18} />
+          </button>
 
-                  {/* Ribbon badges floating */}
-                  {prod.discountBadge && (
-                    <span className="absolute top-2.5 left-2.5 bg-red-500 text-white text-[9px] font-black tracking-widest px-2 py-0.5 rounded shadow-xs uppercase">
-                      {prod.discountBadge}
-                    </span>
-                  )}
-                  {prod.customBadge && (
-                    <span className={`absolute top-2.5 left-2.5 text-white text-[8px] font-extrabold tracking-widest px-2 py-0.5 rounded shadow-xs uppercase ${
-                      prod.customBadge.type === "seller" ? "bg-amber-500" : "bg-teal-500"
-                    }`}>
-                      {prod.customBadge.text}
-                    </span>
-                  )}
-                </div>
-
-                {/* Content Box */}
-                <div className="p-3 flex-1 flex flex-col justify-between text-left">
-                  
-                  {/* Title and stats */}
-                  <div>
-                    <h4 className="text-[12px] font-black text-gray-900 tracking-tight leading-snug line-clamp-2 group-hover:text-[#FF5B00] transition-colors">
-                      {prod.title}
-                    </h4>
-                    
-                    {/* Stars ratings */}
-                    <div className="flex items-center gap-1 text-[10px] text-amber-500 font-extrabold mt-1.5">
-                      <Star className="w-3 h-3 fill-current" />
-                      <span>{prod.rating}</span>
-                      <span className="text-gray-400 font-bold">({prod.reviewCount})</span>
-                    </div>
-                  </div>
-
-                  {/* Prices & Actions Footer Row */}
-                  <div className="mt-3.5 pt-3.5 border-t border-gray-100 flex items-center justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Review 1: Tahsin Ahmed */}
+            <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 md:p-8 shadow-sm text-left flex flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3.5">
+                    <img 
+                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80" 
+                      alt="Tahsin Ahmed" 
+                      className="w-12 h-12 rounded-full object-cover border border-gray-100"
+                    />
                     <div>
-                      <div className="text-[13px] font-black text-orange-600 leading-none">
-                        ৳{prod.price.toLocaleString()}
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-black text-[#050B2C]">Tahsin Ahmed</h4>
+                        <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded text-[9px] font-extrabold uppercase tracking-wide">
+                          Verified Buyer
+                        </span>
                       </div>
-                      {prod.originalPrice && (
-                        <div className="text-[10px] text-gray-400 line-through font-semibold mt-1">
-                          ৳{prod.originalPrice.toLocaleString()}
+                      
+                      {/* Rating details */}
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="flex text-[#FF9F00]">
+                          {[...Array(5)].map((_, i) => <Star key={i} size={11} className="fill-current" />)}
                         </div>
-                      )}
-                    </div>
-
-                    {/* Wishlist Heart Toggle button */}
-                    <button
-                      onClick={() => toggleLikeProduct(prod.id, prod.title)}
-                      className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
-                        isLiked 
-                          ? "bg-red-50 border-red-200 text-red-500" 
-                          : "bg-gray-50 border-gray-100 text-gray-400 hover:text-red-500 hover:bg-red-50"
-                      }`}
-                    >
-                      <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-current" : ""}`} />
-                    </button>
-                  </div>
-
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 7. TRUST BADGES / GUARANTEE ROW */}
-      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 shrink-0">
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
-          {TRUST_ITEMS.map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <div 
-                key={idx}
-                className="bg-white border border-gray-150 rounded-2xl p-5 flex items-start gap-4 hover:shadow-md transition-all duration-300 text-left cursor-pointer"
-                onClick={() => toast.success(`Viewing policy details of: ${item.title}`)}
-              >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${item.color}`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-sm font-black text-gray-900 leading-tight">
-                    {item.title}
-                  </h4>
-                  <p className="text-[11px] text-gray-400 font-bold leading-normal mt-1">
-                    {item.desc}
-                  </p>
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-extrabold text-[#FF5B00] hover:text-[#E8500A] uppercase tracking-wider mt-2.5">
-                    <span>{item.linkText}</span>
-                    <ChevronRight className="w-3 h-3" />
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 8. GRID OF THREE PANELS (Why Samsung? / Creator reviews / News & Stories) */}
-      <section id="reviews-section" className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          
-          {/* Panel 1: Why Choose Samsung */}
-          <div className="lg:col-span-3 bg-white border border-gray-150 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
-            <div>
-              <h3 className="text-base font-black text-gray-900 uppercase tracking-tight pb-3 border-b border-gray-150">
-                Why Choose Samsung?
-              </h3>
-
-              <div className="flex flex-col gap-5 mt-5">
-                {[
-                  { title: "Global Technology Leader", desc: "Pioneering innovation across mobile, TV, home appliances and more.", icon: Sparkles, iconCol: "text-blue-500 bg-blue-50" },
-                  { title: "Trusted by Millions", desc: "#1 most trusted brand in Bangladesh and worldwide.", icon: Award, iconCol: "text-[#FF5B00] bg-orange-50" },
-                  { title: "Built for the Future", desc: "Sustainable innovation for a better tomorrow.", icon: ShieldCheck, iconCol: "text-emerald-500 bg-emerald-50" }
-                ].map((item, idx) => {
-                  const ItemIcon = item.icon;
-                  return (
-                    <div key={idx} className="flex gap-3.5">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${item.iconCol}`}>
-                        <ItemIcon className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-black text-gray-900 leading-tight">
-                          {item.title}
-                        </h4>
-                        <p className="text-[10px] text-gray-400 font-bold mt-1 leading-normal">
-                          {item.desc}
-                        </p>
+                        <span className="text-xs text-[#050B2C] font-black">5.0</span>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <button 
-              onClick={() => toast.success("Opening Samsung Global Info...")}
-              className="w-full py-3.5 bg-gray-50 border border-gray-100 hover:bg-gray-100 hover:border-gray-200 text-[#FF5B00] font-black rounded-xl text-[10px] uppercase tracking-widest transition-all duration-200 cursor-pointer text-center"
-            >
-              Discover Samsung
-            </button>
-          </div>
-
-          {/* Panel 2: Creator Reviews (Interactive sliding panel) */}
-          <div className="lg:col-span-5 bg-white border border-gray-150 rounded-3xl p-6 flex flex-col justify-between shadow-sm relative overflow-hidden">
-            <div>
-              <div className="flex items-center justify-between pb-3 border-b border-gray-150">
-                <h3 className="text-base font-black text-gray-900 uppercase tracking-tight">
-                  Creator Reviews
-                </h3>
-                <button 
-                  onClick={() => toast.success("Opening reviews analytics panel...")}
-                  className="text-[10px] font-black text-[#FF5B00] hover:text-[#E8500A] uppercase tracking-wider"
-                >
-                  View All Reviews &gt;
-                </button>
-              </div>
-
-              {/* Big Score Header */}
-              <div className="flex gap-6 items-start mt-4 mb-5 pb-5 border-b border-gray-100">
-                <div className="text-left">
-                  <div className="text-4xl font-black text-gray-900 tracking-tight leading-none">4.8</div>
-                  <div className="flex items-center gap-0.5 text-amber-400 mt-2">
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                    <Star className="w-3.5 h-3.5 fill-current" />
                   </div>
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-2">
-                    12.4K Reviews
-                  </div>
+                  <span className="text-[11px] text-gray-400 font-semibold">18 Apr 2025</span>
                 </div>
 
-                {/* Vertical Divider */}
-                <div className="w-px h-16 bg-gray-150"></div>
+                <p className="text-sm text-[#6B7280] font-medium leading-relaxed mt-5">
+                  The build quality is fantastic. iPhone 15 Pro exceeds my expectations. Battery life is excellent and the camera is simply amazing!
+                </p>
 
-                {/* Small Rating Bars */}
-                <div className="flex-1 flex flex-col gap-1.5">
-                  {ratingDistribution.map((r, index) => (
-                    <div key={index} className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
-                      <span className="w-2 text-right">{r.stars}</span>
-                      <Star className="w-2.5 h-2.5 fill-current text-amber-400" />
-                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-amber-400" style={{ width: `${r.percent}%` }}></div>
-                      </div>
-                      <span className="w-7 text-right">{r.count}</span>
-                    </div>
+                {/* Tags row */}
+                <div className="flex flex-wrap gap-1.5 mt-5">
+                  {["Quality", "Value", "Performance", "Design"].map((tag, idx) => (
+                    <span key={idx} className="bg-[#F5F8FD] text-[#050B2C] text-[10px] font-bold px-3 py-1 rounded-full">
+                      {tag}
+                    </span>
                   ))}
                 </div>
               </div>
 
-              {/* active Creator review box */}
-              <div className="min-h-[140px]">
-                <AnimatePresence mode="wait">
-                  <motion.div 
-                    key={currentCreatorReviewIdx}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="text-left"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100 bg-gray-50">
-                        <img 
-                          src={CREATOR_REVIEWS[currentCreatorReviewIdx].avatar} 
-                          alt={CREATOR_REVIEWS[currentCreatorReviewIdx].author} 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-xs font-black text-gray-900">
-                            {CREATOR_REVIEWS[currentCreatorReviewIdx].author}
-                          </h4>
-                          <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 rounded text-[8px] font-extrabold uppercase tracking-wide">
-                            {CREATOR_REVIEWS[currentCreatorReviewIdx].role}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex text-amber-400">
-                            {Array.from({ length: CREATOR_REVIEWS[currentCreatorReviewIdx].rating }).map((_, i) => (
-                              <Star key={i} className="w-2.5 h-2.5 fill-current" />
-                            ))}
-                          </div>
-                          <span className="text-[10px] text-gray-400 font-bold">{CREATOR_REVIEWS[currentCreatorReviewIdx].timeAgo}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-[11.5px] text-gray-500 font-medium leading-relaxed italic mt-3">
-                      "{CREATOR_REVIEWS[currentCreatorReviewIdx].comment}"
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Slider navigation controls */}
-            <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-4">
-              <div className="flex gap-1.5">
-                {CREATOR_REVIEWS.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentCreatorReviewIdx(i)}
-                    className={`h-2 rounded-full transition-all cursor-pointer ${
-                      i === currentCreatorReviewIdx ? "w-5 bg-[#FF5B00]" : "w-2 bg-gray-200"
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <div className="flex items-center gap-1.5">
+              {/* Action helpful buttons */}
+              <div className="flex items-center gap-4 border-t border-gray-50 pt-4 mt-6">
                 <button 
-                  onClick={() => handleReviewHelpful(String(currentCreatorReviewIdx), true)}
-                  className="px-3 py-1.5 rounded-lg border border-gray-150 bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-gray-800 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                  onClick={() => handleHelpful('tahsin')}
+                  className="flex items-center gap-1.5 text-xs font-bold text-[#6B7280] hover:text-[#FF5B00] transition-colors border-0 bg-transparent cursor-pointer"
                 >
-                  <ThumbsUp className="w-3 h-3" />
-                  <span>Helpful ({creatorReviewLikes[currentCreatorReviewIdx] || 0})</span>
+                  <ThumbsUp size={13} />
+                  <span>Helpful ({helpfulCount['tahsin']})</span>
                 </button>
-
-                <div className="flex gap-1">
-                  <button 
-                    onClick={() => setCurrentCreatorReviewIdx(prev => (prev - 1 + CREATOR_REVIEWS.length) % CREATOR_REVIEWS.length)}
-                    className="w-7 h-7 rounded-lg border border-gray-150 bg-white hover:bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-800 cursor-pointer"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={() => setCurrentCreatorReviewIdx(prev => (prev + 1) % CREATOR_REVIEWS.length)}
-                    className="w-7 h-7 rounded-lg border border-gray-150 bg-white hover:bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-800 cursor-pointer"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Panel 3: News & Stories */}
-          <div id="news-stories-section" className="lg:col-span-4 bg-white border border-gray-150 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
-            <div>
-              <div className="flex items-center justify-between pb-3 border-b border-gray-150">
-                <h3 className="text-base font-black text-gray-900 uppercase tracking-tight">
-                  Latest News & Stories
-                </h3>
                 <button 
-                  onClick={() => toast.success("Redirecting to blog/stories section...")}
-                  className="text-[10px] font-black text-[#FF5B00] hover:text-[#E8500A] uppercase tracking-wider"
+                  onClick={() => toast.success("Report registered successfully.")}
+                  className="flex items-center gap-1.5 text-xs font-bold text-[#6B7280] hover:text-red-500 transition-colors border-0 bg-transparent cursor-pointer ml-auto"
                 >
-                  View All &gt;
+                  <Flag size={13} />
+                  <span>Report</span>
                 </button>
               </div>
-
-              {/* News Rows list */}
-              <div className="flex flex-col gap-4 mt-4">
-                {NEWS_STORIES.map((news, idx) => (
-                  <div 
-                    key={idx}
-                    onClick={() => toast.success(`Opening news article: ${news.title}`)}
-                    className="flex gap-3.5 items-center group cursor-pointer border-b border-gray-100 last:border-b-0 pb-4 last:pb-0"
-                  >
-                    {/* Left side preview */}
-                    <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative">
-                      <img 
-                        src={news.image} 
-                        alt="News thumb" 
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-                    
-                    {/* Right side content */}
-                    <div className="min-w-0 flex-1 text-left">
-                      <span className="text-[8px] font-extrabold text-[#FF5B00] bg-orange-50 border border-orange-100 px-2 py-0.5 rounded uppercase tracking-wider">
-                        {news.category}
-                      </span>
-                      <h4 className="text-xs font-black text-gray-900 tracking-tight leading-snug line-clamp-2 mt-1.5 group-hover:text-[#FF5B00] transition-colors">
-                        {news.title}
-                      </h4>
-                      <p className="text-[10px] text-gray-400 font-semibold mt-1">
-                        {news.date}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
 
-            <button 
-              onClick={() => toast.success("Subscribing to newsletter feeds...")}
-              className="w-full py-3.5 bg-[#0B0C23] hover:bg-[#FF5B00] text-white font-black rounded-xl text-[10px] uppercase tracking-widest transition-all duration-300 shadow-sm cursor-pointer border-0 mt-5"
-            >
-              Subscribe To News Updates
-            </button>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 9. BRAND OVERVIEW DETAILS GRID PANEL */}
-      <section id="guides-section" className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left">
-        <div className="bg-white border border-gray-150 rounded-3xl p-6 md:p-8 shadow-sm">
-          <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight pb-3.5 border-b border-gray-150 mb-6">
-            Brand Overview
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
-            
-            {/* Box A: About Samsung */}
-            <div className="flex flex-col justify-between">
+            {/* Review 2: Nusrat Jahan */}
+            <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 md:p-8 shadow-sm text-left flex flex-col justify-between">
               <div>
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-3">
-                  About Samsung
-                </h4>
-                <p className="text-[13px] text-gray-500 font-bold leading-relaxed mb-4">
-                  Samsung inspires the world and shapes the future with transformative ideas and technologies. From smartphones and TVs to home appliances and semiconductors, Samsung is committed to creating a better world through innovation and sustainability.
-                </p>
-              </div>
-              <button 
-                onClick={() => toast.success("Loading full Samsung brand history...")}
-                className="inline-flex items-center gap-1.5 text-xs font-black text-[#FF5B00] hover:text-[#E8500A] uppercase tracking-wider mt-2 cursor-pointer self-start"
-              >
-                <span>Learn More About Samsung</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Box B: Contact information */}
-            <div className="flex flex-col gap-4 bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
-              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none border-b border-gray-200/60 pb-2.5 flex items-center gap-2">
-                <Globe className="w-3.5 h-3.5" />
-                <span>Contact Information</span>
-              </h4>
-
-              <div className="flex flex-col gap-3.5 text-xs font-bold text-gray-600 mt-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Email</span>
-                  <a href="mailto:support@samsung.com" className="text-gray-900 hover:text-[#FF5B00] transition-colors font-extrabold">
-                    support@samsung.com
-                  </a>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Website</span>
-                  <a href="https://www.samsung.com" target="_blank" rel="noreferrer" className="text-gray-900 hover:text-[#FF5B00] transition-colors font-extrabold flex items-center gap-1">
-                    <span>www.samsung.com</span>
-                    <ExternalLink className="w-3 h-3 text-gray-400" />
-                  </a>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Phone</span>
-                  <span className="text-gray-900 font-extrabold">09613-726726</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Box C: Price & Audience Info */}
-            <div className="flex flex-col gap-4 bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
-              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none border-b border-gray-200/60 pb-2.5 flex items-center gap-2">
-                <Award className="w-3.5 h-3.5" />
-                <span>Price & Audience</span>
-              </h4>
-
-              <div className="flex flex-col gap-3 text-xs font-bold text-gray-600 mt-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Brand Level</span>
-                  <div className="flex text-amber-500 gap-0.5">
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Price Range</span>
-                  <span className="text-gray-900 font-extrabold">BDT 5,000 - 199,000</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Audience Focus</span>
-                  <span className="text-gray-900 font-extrabold">All Demographics</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Focus Segments</span>
-                  <span className="text-gray-900 font-extrabold uppercase text-[10px]">Tech Enthusiasts, Professionals</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-gray-150">
-            
-            {/* Box D: Shop Address & Links */}
-            <div className="flex flex-col gap-3">
-              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-[#FF5B00]" />
-                <span>Shop Address & Links</span>
-              </h4>
-              <p className="text-[12px] text-gray-600 font-bold leading-relaxed mt-1">
-                Samsung Electronics Bangladesh, Level 12, Bashundhara R/A, Dhaka 1229 Bangladesh.
-              </p>
-              <button 
-                onClick={() => toast.success("Opening shop address map guide...")}
-                className="inline-flex items-center gap-1.5 text-xs font-black text-[#FF5B00] hover:text-[#E8500A] uppercase tracking-wider mt-2 cursor-pointer self-start"
-              >
-                <span>View On Map</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Box E: Services & Specialties */}
-            <div className="flex flex-col gap-3">
-              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Services & Specialties</span>
-              </h4>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] font-extrabold text-gray-600 mt-2">
-                {[
-                  "1 Year Brand Warranty",
-                  "Official Product Warranty",
-                  "Genuine Product Guarantee",
-                  "After Sales Support",
-                  "Doorstep Service",
-                  "Easy EMI & Bank Installments"
-                ].map((serv, i) => (
-                  <div key={i} className="flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3px] shrink-0" />
-                    <span>{serv}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Box F: Best For category pills */}
-            <div className="flex flex-col gap-3">
-              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none flex items-center gap-2">
-                <Star className="w-3.5 h-3.5 text-amber-500" />
-                <span>Best For</span>
-              </h4>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {[
-                  "Smartphones",
-                  "Televisions",
-                  "Home Appliances",
-                  "Wearables",
-                  "Audio",
-                  "Accessories",
-                  "Gaming",
-                  "Home Entertainment"
-                ].map((tag, idx) => (
-                  <span 
-                    key={idx}
-                    className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-150 rounded-lg text-[9px] font-black text-gray-500 hover:text-[#FF5B00] transition-colors uppercase tracking-wider cursor-pointer"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Bottom verified sourcing row */}
-          <div className="mt-8 pt-5 border-t border-gray-100 flex items-center gap-3 bg-emerald-500/5 rounded-2xl p-4 border border-emerald-500/10 text-left">
-            <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <Check className="w-4 h-4 stroke-[3px]" />
-            </div>
-            <div>
-              <h4 className="text-xs font-black text-emerald-800 uppercase tracking-tight">Verified Sourcing</h4>
-              <p className="text-[11px] text-emerald-600 font-bold mt-1">
-                Each Samsung product is verified against official brand catalogs. Real assurance, checked & re-verified for authenticity, safety, and quality.
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 10. PUBLIC REVIEWS ROW (Tanvir Hasan & Nusrat Jahan) */}
-      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left">
-        <div className="flex items-center justify-between mb-6 border-b border-gray-150 pb-3.5">
-          <div>
-            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
-              Public Reviews
-            </h3>
-            <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest mt-1">
-              Feedback from certified Samsung device owners
-            </p>
-          </div>
-          <button 
-            onClick={() => toast.success("Opening public reviews catalog...")}
-            className="text-xs font-black text-[#FF5B00] hover:text-[#E8500A] transition-colors uppercase tracking-widest flex items-center gap-1 group"
-          >
-            <span>View all reviews</span>
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-          </button>
-        </div>
-
-        {/* Double Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {PUBLIC_REVIEWS.map((review) => (
-            <div 
-              key={review.id}
-              className="bg-white border border-gray-150 rounded-3xl p-6 hover:shadow-md transition-all duration-300 text-left flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-full overflow-hidden border border-gray-150 bg-gray-50">
-                      <img 
-                        src={review.avatar} 
-                        alt={review.author} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3.5">
+                    <img 
+                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80" 
+                      alt="Nusrat Jahan" 
+                      className="w-12 h-12 rounded-full object-cover border border-gray-100"
+                    />
                     <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="text-xs font-black text-gray-900 leading-none">
-                          {review.author}
-                        </h4>
-                        <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-600 rounded text-[8px] font-extrabold uppercase tracking-wide">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-black text-[#050B2C]">Nusrat Jahan</h4>
+                        <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded text-[9px] font-extrabold uppercase tracking-wide">
                           Verified Buyer
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span className="text-[10px] font-bold text-[#FF5B00] uppercase tracking-wide">Reviewing:</span>
-                        <span className="text-[10px] text-gray-500 font-extrabold truncate max-w-[150px]">{review.product}</span>
+                      
+                      {/* Rating details */}
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="flex text-[#FF9F00]">
+                          {[...Array(4)].map((_, i) => <Star key={i} size={11} className="fill-current" />)}
+                          <Star size={11} className="text-gray-200" />
+                        </div>
+                        <span className="text-xs text-[#050B2C] font-black">4.0</span>
                       </div>
                     </div>
                   </div>
-
-                  <div className="text-right">
-                    <div className="flex text-amber-400 gap-0.5">
-                      {Array.from({ length: review.rating }).map((_, i) => (
-                        <Star key={i} className="w-3 h-3 fill-current" />
-                      ))}
-                    </div>
-                    <span className="text-[10px] text-gray-400 font-bold mt-1.5 block">
-                      {review.timeAgo}
-                    </span>
-                  </div>
+                  <span className="text-[11px] text-gray-400 font-semibold">12 Apr 2025</span>
                 </div>
 
-                <p className="text-[12px] text-gray-500 font-bold leading-relaxed italic">
-                  "{review.comment}"
+                <p className="text-sm text-[#6B7280] font-medium leading-relaxed mt-5">
+                  MacBook Air M2 is super fast and lightweight. Perfect for productivity on the go. Totally worth it!
                 </p>
+
+                {/* Tags row */}
+                <div className="flex flex-wrap gap-1.5 mt-5">
+                  {["Quality", "Performance", "Portability", "Battery"].map((tag, idx) => (
+                    <span key={idx} className="bg-[#F5F8FD] text-[#050B2C] text-[10px] font-bold px-3 py-1 rounded-full">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              {/* Helpful footer */}
-              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+              {/* Action helpful buttons */}
+              <div className="flex items-center gap-4 border-t border-gray-50 pt-4 mt-6">
                 <button 
-                  onClick={() => handleReviewHelpful(review.id)}
-                  className={`px-4 py-1.5 rounded-lg border text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
-                    votedPublicReviews.includes(review.id)
-                      ? "bg-[#FF5B00]/5 border-[#FF5B00]/20 text-[#FF5B00]"
-                      : "bg-gray-50 border-gray-200 text-gray-400 hover:text-gray-800"
-                  }`}
+                  onClick={() => handleHelpful('nusrat')}
+                  className="flex items-center gap-1.5 text-xs font-bold text-[#6B7280] hover:text-[#FF5B00] transition-colors border-0 bg-transparent cursor-pointer"
                 >
-                  <ThumbsUp className="w-3.5 h-3.5" />
-                  <span>Helpful ({review.helpfulCount + (publicReviewLikes[review.id] || 0)})</span>
+                  <ThumbsUp size={13} />
+                  <span>Helpful ({helpfulCount['nusrat']})</span>
                 </button>
-
-                <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>Purchase Verified</span>
-                </span>
+                <button 
+                  onClick={() => toast.success("Report registered successfully.")}
+                  className="flex items-center gap-1.5 text-xs font-bold text-[#6B7280] hover:text-red-500 transition-colors border-0 bg-transparent cursor-pointer ml-auto"
+                >
+                  <Flag size={13} />
+                  <span>Report</span>
+                </button>
               </div>
-
             </div>
-          ))}
+
+          </div>
+
+          {/* Slider Arrow Right */}
+          <button 
+            onClick={() => toast.success("Next reviews")}
+            className="absolute right-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-gray-150 shadow-md flex items-center justify-center text-[#050B2C] hover:text-[#FF5B00] transition-all cursor-pointer z-10"
+            aria-label="Next Review"
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
       </section>
 
-      {/* 11. TRUST STATEMENT STATEMENT BANNER */}
-      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 shrink-0">
-        <div className="bg-[#0D0B26] border border-white/5 rounded-2xl py-6 px-8 flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left shadow-lg">
-          <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
-            <ShieldCheck className="w-5 h-5 stroke-[2.5px]" />
+      {/* 8. BRAND OVERVIEW */}
+      <section id="brand-info" className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12 scroll-mt-24">
+        <h2 className="text-xl font-black text-[#050B2C] uppercase tracking-tight mb-6 text-left">
+          Brand Overview
+        </h2>
+
+        {/* 4 Equal Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          {/* Card 1: About Apple */}
+          <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm text-left flex flex-col justify-between">
+            <div className="space-y-4">
+              <h3 className="text-sm font-black text-[#050B2C] uppercase tracking-wider pb-3 border-b border-gray-100">
+                About Apple
+              </h3>
+              <p className="text-xs text-[#6B7280] leading-relaxed font-medium">
+                Apple Inc. is an American multinational technology company that specializes in consumer electronics, software, and online services.
+              </p>
+              <p className="text-xs text-[#6B7280] leading-relaxed font-medium">
+                Founded in 1976 by Steve Jobs, Steve Wozniak, and Ronald Wayne.
+              </p>
+            </div>
+            <button 
+              onClick={() => toast.success("Loading the complete Apple Wiki...")}
+              className="mt-6 flex items-center gap-1.5 text-xs font-black text-[#FF5B00] hover:text-[#E04F00] uppercase tracking-wider border-0 bg-transparent cursor-pointer text-left self-start"
+            >
+              <span>Read More</span>
+              <ChevronRight size={13} />
+            </button>
           </div>
-          <div>
-            <h4 className="text-sm font-black text-white uppercase tracking-wider">
-              Choosify.bd Trust Statement
-            </h4>
-            <p className="text-xs text-gray-400 italic mt-1 font-semibold">
-              "Only verified sellers and completely unbiased, authentic brand experiences are list on Choosify."
+
+          {/* Card 2: Key Highlights */}
+          <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm text-left">
+            <h3 className="text-sm font-black text-[#050B2C] uppercase tracking-wider pb-3 border-b border-gray-100 mb-4">
+              Key Highlights
+            </h3>
+            <ul className="space-y-3.5">
+              {[
+                "Innovation leader in technology",
+                "Premium quality products",
+                "Focus on privacy & security",
+                "Seamless ecosystem"
+              ].map((highlight, idx) => (
+                <li key={idx} className="flex items-start gap-2.5 text-xs text-[#6B7280] font-medium leading-tight">
+                  <Check size={14} className="text-[#10B981] stroke-[3.5px] mt-0.5 shrink-0" />
+                  <span>{highlight}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Card 3: Popular Categories */}
+          <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm text-left">
+            <h3 className="text-sm font-black text-[#050B2C] uppercase tracking-wider pb-3 border-b border-gray-100 mb-4">
+              Popular Categories
+            </h3>
+            <div className="flex flex-wrap gap-2.5">
+              {["iPhone", "Mac", "iPad", "Watch", "AirPods"].map((cat, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    toast.success(`Loading ${cat} Collection`);
+                    navigate(`/products?brand=Apple&category=${cat}`);
+                  }}
+                  className="bg-[#F5F8FD] hover:bg-[#FF5B00]/10 hover:text-[#FF5B00] text-[#050B2C] text-xs font-bold px-4 py-2 rounded-full border-0 transition-colors cursor-pointer"
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Card 4: Support */}
+          <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm text-left">
+            <h3 className="text-sm font-black text-[#050B2C] uppercase tracking-wider pb-3 border-b border-gray-100 mb-4">
+              Support
+            </h3>
+            <ul className="space-y-3.5">
+              {[
+                { title: "Official Apple Support", icon: Headset },
+                { title: "1 Year Standard Warranty", icon: Award },
+                { title: "Apple Care+ Available", icon: ShieldCheck },
+                { title: "Global Service Centers", icon: Globe }
+              ].map((item, idx) => {
+                const SupportIcon = item.icon;
+                return (
+                  <li key={idx} className="flex items-center gap-2.5 text-xs text-[#6B7280] font-medium">
+                    <SupportIcon size={14} className="text-[#FF5B00]" />
+                    <span>{item.title}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 9. BRAND TRUST STATEMENT BANNER */}
+      <section className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12">
+        <div className="bg-gradient-to-r from-[#050B2C] to-[#0A1961] border border-white/5 rounded-3xl py-10 px-8 text-white text-center shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/10 via-transparent to-transparent pointer-events-none" />
+          
+          <div className="relative z-10 max-w-2xl mx-auto space-y-3 mb-8">
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0">
+                <ShieldCheck size={16} className="text-white" />
+              </div>
+              <h3 className="text-lg md:text-xl font-black uppercase tracking-widest text-white leading-none">
+                CHOSEN BY MILLIONS. TRUSTED WORLDWIDE.
+              </h3>
+            </div>
+            <p className="text-xs md:text-sm text-gray-300 font-medium leading-relaxed">
+              100% authentic products, official warranty & dedicated support from Apple.
             </p>
           </div>
+
+          {/* Stats matrix */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 relative z-10 max-w-4xl mx-auto border-t border-white/10 pt-8">
+            {[
+              { val: "1M+", lbl: "Happy Customers" },
+              { val: "50+", lbl: "Countries" },
+              { val: "2.4K+", lbl: "Reviews" },
+              { val: "4.3/5", lbl: "Brand Score" }
+            ].map((stat, idx) => (
+              <div key={idx} className="space-y-1">
+                <div className="text-3xl md:text-4xl font-black text-white leading-none tracking-tight">
+                  {stat.val}
+                </div>
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                  {stat.lbl}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* 12. SIMILAR BRANDS COMPARISON TABLE */}
-      <section className="max-w-[1440px] mx-auto w-full px-4 md:px-10 mb-10 text-left">
-        <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight pb-3.5 border-b border-gray-150 mb-6">
-          Similar Brands Comparison
-        </h3>
+      {/* 10. BRAND COMPARISON TABLE */}
+      <section id="compare" className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12 scroll-mt-24">
+        <h2 className="text-xl font-black text-[#050B2C] uppercase tracking-tight mb-6 text-left">
+          Compare Apple With Other Brands
+        </h2>
 
-        <div className="bg-white border border-gray-150 rounded-3xl overflow-hidden shadow-sm">
+        {/* Clean responsive table */}
+        <div className="bg-white border border-[#EEF2F7] rounded-3xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-150 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                  <th className="py-4 px-6">Brand Identity</th>
-                  <th className="py-4 px-6">Quality</th>
-                  <th className="py-4 px-6">Price Range</th>
-                  <th className="py-4 px-6">Rating</th>
-                  <th className="py-4 px-6 text-right">Compare</th>
+                <tr className="bg-[#FAFBFD] border-b border-[#EEF2F7]">
+                  <th className="py-4.5 px-6 text-xs font-black text-[#050B2C] uppercase tracking-wider">Brand</th>
+                  <th className="py-4.5 px-6 text-xs font-black text-[#050B2C] uppercase tracking-wider">Overall Score</th>
+                  <th className="py-4.5 px-6 text-xs font-black text-[#050B2C] uppercase tracking-wider">Quality</th>
+                  <th className="py-4.5 px-6 text-xs font-black text-[#050B2C] uppercase tracking-wider">Value</th>
+                  <th className="py-4.5 px-6 text-xs font-black text-[#050B2C] uppercase tracking-wider">Support</th>
+                  <th className="py-4.5 px-6 text-xs font-black text-[#050B2C] uppercase tracking-wider">Popular Products</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 text-xs font-bold text-gray-600">
-                {SIMILAR_BRANDS.map((brand, idx) => (
+              <tbody className="divide-y divide-[#EEF2F7]">
+                {[
+                  {
+                    name: "Apple",
+                    logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg",
+                    score: "4.3/5",
+                    stars: 4.3,
+                    quality: "4.5/5",
+                    value: "4.1/5",
+                    support: "4.0/5",
+                    extras: "+12",
+                    thumbs: [
+                      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=100&q=80",
+                      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100&q=80",
+                      "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=100&q=80"
+                    ]
+                  },
+                  {
+                    name: "Samsung",
+                    logo: "https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg",
+                    score: "4.1/5",
+                    stars: 4.1,
+                    quality: "4.2/5",
+                    value: "4.0/5",
+                    support: "3.9/5",
+                    extras: "+18",
+                    thumbs: [
+                      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=100&q=80",
+                      "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=100&q=80",
+                      "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=100&q=80"
+                    ]
+                  },
+                  {
+                    name: "Sony",
+                    logo: "https://upload.wikimedia.org/wikipedia/commons/c/ca/Sony_logo.svg",
+                    score: "4.0/5",
+                    stars: 4.0,
+                    quality: "4.1/5",
+                    value: "3.8/5",
+                    support: "4.2/5",
+                    extras: "+15",
+                    thumbs: [
+                      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=100&q=80",
+                      "https://images.unsplash.com/photo-1588449668365-d15e397f6787?w=100&q=80",
+                      "https://images.unsplash.com/photo-1608156639585-b3a032ef9689?w=100&q=80"
+                    ]
+                  },
+                  {
+                    name: "Xiaomi",
+                    logo: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Xiaomi_logo_%282021-%29.svg",
+                    score: "3.9/5",
+                    stars: 3.9,
+                    quality: "3.9/5",
+                    value: "4.2/5",
+                    support: "3.6/5",
+                    extras: "+20",
+                    thumbs: [
+                      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=100&q=80",
+                      "https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?w=100&q=80",
+                      "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=100&q=80"
+                    ]
+                  }
+                ].map((row, idx) => (
                   <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="py-4 px-6 flex items-center gap-3">
-                      {/* Circle letter icon */}
-                      <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-150 flex items-center justify-center text-gray-900 font-black">
-                        {brand.name.substring(0, 1)}
-                      </div>
-                      <span className="text-sm font-black text-gray-900">{brand.name}</span>
-                    </td>
                     <td className="py-4 px-6">
-                      <span className={`px-2 py-1.5 text-[9px] font-black rounded-lg uppercase tracking-wider ${
-                        brand.quality === "PREMIUM" 
-                          ? "bg-purple-50 text-purple-600 border border-purple-100" 
-                          : "bg-blue-50 text-blue-600 border border-blue-100"
-                      }`}>
-                        {brand.quality}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="text-gray-900 font-extrabold">{brand.price}</span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-1 font-extrabold text-amber-500">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        <span>{brand.rating}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#F5F8FD] p-2 flex items-center justify-center border border-[#EEF2F7]">
+                          <img src={row.logo} alt={row.name} className="max-h-full max-w-full object-contain" />
+                        </div>
+                        <span className="font-black text-[#050B2C] text-sm">{row.name}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-6 text-right">
-                      <button 
-                        onClick={() => toast.success(`Comparing Samsung with ${brand.name}...`)}
-                        className="px-4.5 py-2 bg-gray-50 hover:bg-[#FF5B00] hover:text-white border border-gray-150 hover:border-[#FF5B00] text-gray-500 font-black rounded-lg text-[10px] uppercase tracking-wider transition-all cursor-pointer"
-                      >
-                        Compare
-                      </button>
+                    <td className="py-4 px-6">
+                      <div className="space-y-1">
+                        <span className="text-sm font-black text-[#050B2C]">{row.score}</span>
+                        <div className="flex items-center gap-0.5 text-[#FF9F00]">
+                          {[...Array(5)].map((_, i) => {
+                            const diff = row.stars - i;
+                            if (diff >= 1) {
+                              return <Star key={i} size={11} className="fill-current" />;
+                            } else if (diff > 0) {
+                              return <Star key={i} size={11} className="fill-current opacity-70" />;
+                            } else {
+                              return <Star key={i} size={11} className="text-gray-200" />;
+                            }
+                          })}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-xs font-bold text-gray-500">{row.quality}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-xs font-bold text-gray-500">{row.value}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-xs font-bold text-gray-500">{row.support}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-1.5">
+                        {row.thumbs.map((thumb, thumbIdx) => (
+                          <div key={thumbIdx} className="w-8 h-8 rounded-full overflow-hidden border-2 border-white bg-gray-50 shadow-sm shrink-0">
+                            <img src={thumb} alt="Product thumb" className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                        <span className="text-[10px] font-black text-[#6B7280] bg-gray-100 px-1.5 py-0.5 rounded-full">
+                          {row.extras}
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          {/* Table Centered CTA */}
+          <div className="py-6 bg-[#FAFBFD] border-t border-[#EEF2F7] flex items-center justify-center">
+            <button 
+              onClick={() => {
+                navigate("/compare");
+                toast.success("Opening comparison matrix platform...");
+              }}
+              className="px-6 py-3 bg-[#050B2C] hover:bg-[#FF5B00] text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md cursor-pointer border-0"
+            >
+              COMPARE MORE BRANDS
+            </button>
+          </div>
         </div>
       </section>
 
     </div>
-  );
-}
-
-// Simple Icon Fallbacks for Facebook/Instagram/Youtube
-function FacebookIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-    </svg>
-  );
-}
-
-function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-    </svg>
-  );
-}
-
-function YoutubeIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
-      <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor" />
-    </svg>
+    </>
   );
 }

@@ -2,12 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, Star, Filter, ArrowRight, ChevronDown, Check, X,
   LayoutGrid, List, ShieldCheck, Tag, Layers, Award,
-  HelpCircle, CreditCard, RotateCcw, Headphones, ArrowLeftRight, CheckSquare
+  HelpCircle, CreditCard, RotateCcw, Headphones, ArrowLeftRight, CheckSquare, SlidersHorizontal
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
+import { useRegisterPageFilters, useFloatingFilter, ActiveFilterChips } from '../components/FilterEngine';
 
 interface Brand {
   id: string;
@@ -288,6 +289,7 @@ const ALL_BRANDS_DATA: Brand[] = [
 export function BrandsPage() {
   const navigate = useNavigate();
   const { mode } = useGlobalState();
+  const { setIsOpen: setGlobalFilterOpen } = useFloatingFilter();
 
   // Search input state
   const [searchQuery, setSearchQuery] = useState('');
@@ -502,6 +504,143 @@ export function BrandsPage() {
     searchQuery
   ]);
 
+  // Register page specific filters
+  useRegisterPageFilters({
+    pageName: "Brands",
+    activeFilterCount: activeChipsList.length,
+    onClearAll: handleResetFilters,
+    quickFilters: [
+      { id: 'verified', label: 'Verified Only', active: verifiedChecked, onClick: () => setVerifiedChecked(!verifiedChecked) },
+      { id: 'global', label: 'Global Brands', active: brandTypeGlobal, onClick: () => setBrandTypeGlobal(!brandTypeGlobal) },
+      { id: 'local', label: 'Local Brands', active: brandTypeLocal, onClick: () => setBrandTypeLocal(!brandTypeLocal) },
+    ],
+    renderSearch: () => (
+      <div className="relative w-full">
+        <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={14} className="text-slate-400" />
+        </span>
+        <input
+          type="text"
+          placeholder="Search brands..."
+          value={searchQuery}
+          onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+          className="w-full h-10 pl-9 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-850 placeholder-slate-400 focus:outline-none focus:border-[#FF5B00]/40 transition-all font-sans"
+        />
+      </div>
+    ),
+    renderFilters: () => (
+      <div className="space-y-6 select-none font-sans">
+        {/* Category Selector */}
+        <div className="space-y-3">
+          <h4 className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Category</h4>
+          <div className="relative">
+            <select
+              value={selectedCategory}
+              onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
+              className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-[#FF5B00]/40 font-sans pr-8 cursor-pointer"
+            >
+              <option value="All Categories">All Categories</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Tech">Tech</option>
+              <option value="Fashion">Fashion</option>
+              <option value="Home Appliances">Home Appliances</option>
+              <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+              <option value="Sports & Outdoors">Sports & Outdoors</option>
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Brand Type */}
+        <div className="space-y-3">
+          <h4 className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Brand Type</h4>
+          <div className="space-y-2">
+            {[
+              { label: 'Global Brands', checked: brandTypeGlobal, setter: setBrandTypeGlobal },
+              { label: 'Local Brands', checked: brandTypeLocal, setter: setBrandTypeLocal },
+              { label: 'Official Stores', checked: brandTypeOfficial, setter: setBrandTypeOfficial },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                onClick={() => { item.setter(!item.checked); setCurrentPage(1); }}
+                className="flex items-center gap-2.5 py-1 cursor-pointer"
+              >
+                <div className={cn(
+                  "w-4.5 h-4.5 rounded-md border flex items-center justify-center transition-all bg-white",
+                  item.checked ? "border-[#FF5B00] bg-[#FF5B00] text-white" : "border-slate-200"
+                )}>
+                  {item.checked && <Check size={11} strokeWidth={3} className="text-white" />}
+                </div>
+                <span className={cn("text-xs font-bold uppercase tracking-wider", item.checked ? "text-[#FF5B00]" : "text-slate-600")}>
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Verification */}
+        <div className="space-y-3">
+          <h4 className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Verification</h4>
+          <div className="space-y-2">
+            {[
+              { label: 'Verified Only', checked: verifiedChecked, setter: setVerifiedChecked },
+              { label: 'Unverified', checked: unverifiedChecked, setter: setUnverifiedChecked },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                onClick={() => { item.setter(!item.checked); setCurrentPage(1); }}
+                className="flex items-center gap-2.5 py-1 cursor-pointer"
+              >
+                <div className={cn(
+                  "w-4.5 h-4.5 rounded-md border flex items-center justify-center transition-all bg-white",
+                  item.checked ? "border-[#FF5B00] bg-[#FF5B00] text-white" : "border-slate-200"
+                )}>
+                  {item.checked && <Check size={11} strokeWidth={3} className="text-white" />}
+                </div>
+                <span className={cn("text-xs font-bold uppercase tracking-wider", item.checked ? "text-[#FF5B00]" : "text-slate-600")}>
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Shop Type */}
+        <div className="space-y-3">
+          <h4 className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Shop Type</h4>
+          <div className="space-y-2">
+            {[
+              { label: 'Official Store', checked: shopTypeOfficial, setter: setShopTypeOfficial },
+              { label: 'Authorized Dealer', checked: shopTypeDealer, setter: setShopTypeDealer },
+              { label: 'Marketplace Seller', checked: shopTypeMarketplace, setter: setShopTypeMarketplace },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                onClick={() => { item.setter(!item.checked); setCurrentPage(1); }}
+                className="flex items-center gap-2.5 py-1 cursor-pointer"
+              >
+                <div className={cn(
+                  "w-4.5 h-4.5 rounded-md border flex items-center justify-center transition-all bg-white",
+                  item.checked ? "border-[#FF5B00] bg-[#FF5B00] text-white" : "border-slate-200"
+                )}>
+                  {item.checked && <Check size={11} strokeWidth={3} className="text-white" />}
+                </div>
+                <span className={cn("text-xs font-bold uppercase tracking-wider", item.checked ? "text-[#FF5B00]" : "text-slate-600")}>
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }, [
+    verifiedChecked, brandTypeGlobal, brandTypeLocal, brandTypeOfficial,
+    searchQuery, selectedCategory, unverifiedChecked, shopTypeOfficial,
+    shopTypeDealer, shopTypeMarketplace, activeChipsList
+  ]);
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7FA] text-left">
       {/* Breadcrumbs Sub-Header */}
@@ -538,7 +677,7 @@ export function BrandsPage() {
             <p className="text-gray-300 font-sans text-sm md:text-base leading-relaxed mb-4">
               Discover, compare and shop from authentic Bangladeshi and global brands.
             </p>
-            <div className="flex items-center gap-2 text-xs font-bold text-orange-primary tracking-wide bg-[#E8500A]/10 border border-[#E8500A]/20 px-3.5 py-2 rounded-full w-fit">
+            <div className="flex items-center gap-2 text-xs font-bold text-orange-primary tracking-wide bg-[#FF5B00]/10 border border-[#FF5B00]/20 px-3.5 py-2 rounded-full w-fit">
               <span>🚀</span> 1,248 brands available on Choosify
             </div>
           </div>
@@ -717,292 +856,10 @@ export function BrandsPage() {
         </div>
       </div>
 
-      {/* Main Two-Column Directory Workspace */}
-      <div className="max-w-[1400px] mx-auto px-6 py-6 w-full grid grid-cols-1 lg:grid-cols-[290px_1fr] gap-8 items-start">
+      {/* Centered Single-Feed Directory Workspace */}
+      <div className="max-w-[1400px] mx-auto px-6 py-6 w-full">
         
-        {/* Left Column: Filter Panel (Prisinte White Styling) */}
-        <aside className="bg-white rounded-xl border border-[#E3E8EE] p-5 shadow-sm space-y-6 flex-shrink-0">
-          
-          {/* Header & Clear all */}
-          <div className="flex items-center justify-between pb-3.5 border-b border-gray-100">
-            <h3 className="text-[13px] font-black text-navy uppercase tracking-wider flex items-center gap-2">
-              <Filter size={15} className="text-orange-primary" /> Filters
-            </h3>
-            <button
-              onClick={handleResetFilters}
-              className="text-xs font-black text-orange-primary hover:text-orange-dark transition-colors cursor-pointer"
-            >
-              Clear all
-            </button>
-          </div>
-
-          {/* Section 1: Search Brands */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-black text-navy uppercase tracking-wider block">
-              Search brands
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={sidebarSearch}
-                onChange={(e) => { setSidebarSearch(e.target.value); setCurrentPage(1); }}
-                placeholder="Search brand name..."
-                className="w-full h-10 pl-9 pr-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-medium text-navy placeholder-gray-400 focus:outline-none focus:border-orange-primary/50 focus:bg-white transition-all"
-              />
-              <Search size={14} className="absolute left-3.5 top-3.5 text-gray-400" />
-            </div>
-          </div>
-
-          {/* Section 2: Category Dropdown */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-black text-navy uppercase tracking-wider block">
-              Category
-            </label>
-            <div className="relative">
-              <select
-                value={selectedCategory}
-                onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
-                className="w-full h-10 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-bold text-navy appearance-none focus:outline-none focus:border-orange-primary/50 focus:bg-white cursor-pointer transition-all pr-8"
-              >
-                <option value="All Categories">All Categories</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Tech">Tech</option>
-                <option value="Fashion">Fashion</option>
-                <option value="Home Appliances">Home Appliances</option>
-                <option value="Beauty & Personal Care">Beauty & Personal Care</option>
-                <option value="Sports & Outdoors">Sports & Outdoors</option>
-              </select>
-              <ChevronDown size={14} className="absolute right-3.5 top-3.5 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Section 3: Brand Type Checkboxes */}
-          <div className="space-y-3">
-            <h4 className="text-[11px] font-black text-navy uppercase tracking-wider">Brand Type</h4>
-            <div className="space-y-2.5">
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={brandTypeGlobal}
-                    onChange={() => { setBrandTypeGlobal(!brandTypeGlobal); setCurrentPage(1); }}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span>Global Brands</span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">562</span>
-              </label>
-
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={brandTypeLocal}
-                    onChange={() => { setBrandTypeLocal(!brandTypeLocal); setCurrentPage(1); }}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span>Local Brands</span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">458</span>
-              </label>
-
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={brandTypeOfficial}
-                    onChange={() => { setBrandTypeOfficial(!brandTypeOfficial); setCurrentPage(1); }}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span>Official Stores</span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">228</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Section 4: Verification Checkboxes */}
-          <div className="space-y-3">
-            <h4 className="text-[11px] font-black text-navy uppercase tracking-wider">Verification</h4>
-            <div className="space-y-2.5">
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={verifiedChecked}
-                    onChange={() => { setVerifiedChecked(!verifiedChecked); setCurrentPage(1); }}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span className="flex items-center gap-1">Verified <ShieldCheck size={12} className="text-green-500 shrink-0" /></span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">623</span>
-              </label>
-
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={unverifiedChecked}
-                    onChange={() => { setUnverifiedChecked(!unverifiedChecked); setCurrentPage(1); }}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span>Unverified</span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">625</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Section 5: Shop Type Checkboxes */}
-          <div className="space-y-3">
-            <h4 className="text-[11px] font-black text-navy uppercase tracking-wider">Shop Type</h4>
-            <div className="space-y-2.5">
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={shopTypeOfficial}
-                    onChange={() => { setShopTypeOfficial(!shopTypeOfficial); setCurrentPage(1); }}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span>Official Store</span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">312</span>
-              </label>
-
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={shopTypeDealer}
-                    onChange={() => { setShopTypeDealer(!shopTypeDealer); setCurrentPage(1); }}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span>Authorized Dealer</span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">189</span>
-              </label>
-
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={shopTypeMarketplace}
-                    onChange={() => { setShopTypeMarketplace(!shopTypeMarketplace); setCurrentPage(1); }}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span>Marketplace Seller</span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">747</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Section 6: Popular Categories Checkboxes */}
-          <div className="space-y-3">
-            <h4 className="text-[11px] font-black text-navy uppercase tracking-wider">Popular Categories</h4>
-            <div className="space-y-2.5">
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={catElectronics}
-                    onChange={() => togglePopularCategoryCheckbox('Electronics', catElectronics, setCatElectronics)}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span>Electronics</span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">412</span>
-              </label>
-
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={catFashion}
-                    onChange={() => togglePopularCategoryCheckbox('Fashion', catFashion, setCatFashion)}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span>Fashion</span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">298</span>
-              </label>
-
-              <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={catHome}
-                    onChange={() => togglePopularCategoryCheckbox('Home Appliances', catHome, setCatHome)}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                  />
-                  <span>Home Appliances</span>
-                </div>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">186</span>
-              </label>
-
-              {/* Show more collapsible block */}
-              {(showMoreCategories || catBeauty || catSports) && (
-                <div className="space-y-2.5 pt-2.5 border-t border-gray-50 animate-fade-in">
-                  <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                    <div className="flex items-center gap-2.5">
-                      <input
-                        type="checkbox"
-                        checked={catBeauty}
-                        onChange={() => togglePopularCategoryCheckbox('Beauty & Personal Care', catBeauty, setCatBeauty)}
-                        className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                      />
-                      <span>Beauty & Personal Care</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">142</span>
-                  </label>
-
-                  <label className="flex items-center justify-between group cursor-pointer text-xs font-semibold text-gray-600 hover:text-navy transition-colors">
-                    <div className="flex items-center gap-2.5">
-                      <input
-                        type="checkbox"
-                        checked={catSports}
-                        onChange={() => togglePopularCategoryCheckbox('Sports & Outdoors', catSports, setCatSports)}
-                        className="w-4 h-4 rounded border-gray-300 text-orange-primary focus:ring-orange-primary/30 cursor-pointer accent-orange-primary"
-                      />
-                      <span>Sports & Outdoors</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">98</span>
-                  </label>
-                </div>
-              )}
-
-              <button
-                onClick={() => setShowMoreCategories(!showMoreCategories)}
-                className="text-[11px] font-black text-orange-primary flex items-center gap-1 pt-1 tracking-wider uppercase cursor-pointer"
-              >
-                {showMoreCategories ? 'Show less' : 'Show more'} <ChevronDown size={12} className={cn("transition-transform", showMoreCategories && "rotate-180")} />
-              </button>
-            </div>
-          </div>
-
-          {/* Submit Action Buttons */}
-          <div className="pt-4 border-t border-gray-100 flex flex-col gap-2.5">
-            <button
-              onClick={() => {
-                setSearchQuery(sidebarSearch);
-                setCurrentPage(1);
-                toast.success('Filters applied successfully.');
-              }}
-              className="w-full py-3 bg-[#050C24] hover:bg-[#0c1533] text-white rounded-lg text-xs font-black uppercase tracking-wider shadow-sm transition-colors cursor-pointer"
-            >
-              Apply Filters
-            </button>
-            <button
-              onClick={handleResetFilters}
-              className="w-full py-3 bg-white border border-[#CBD5E1] text-gray-600 hover:bg-gray-50 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
-            >
-              Reset Filters
-            </button>
-          </div>
-        </aside>
-
-        {/* Right Column: Main Brand Listings Workspace */}
+        {/* Main Brand Listings Workspace */}
         <main className="space-y-6">
           
           {/* Controls Bar */}
@@ -1045,6 +902,16 @@ export function BrandsPage() {
                 </div>
               </div>
 
+              {/* Filter Drawer Toggle Trigger */}
+              <button
+                type="button"
+                onClick={() => setGlobalFilterOpen(true)}
+                className="flex items-center gap-2 h-9 px-4 bg-[#FFF0E8] hover:bg-[#FFE5D6] border border-[#FF5B00]/30 text-[#FF5B00] rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer font-sans shrink-0"
+              >
+                <SlidersHorizontal size={14} />
+                <span>Filters</span>
+              </button>
+ 
               {/* Layout Toggles */}
               <div className="flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
                 <button
@@ -1073,28 +940,11 @@ export function BrandsPage() {
 
           {/* Active Chips Row */}
           {activeChipsList.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 p-2 bg-orange-primary/5 rounded-xl border border-[#FDE1D3] animate-fade-in">
-              <span className="text-[10px] font-black text-orange-primary uppercase tracking-wider pl-2 mr-2">Active filters:</span>
-              {activeChipsList.map((chip, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#FDE1D3] rounded-full text-xs font-bold text-navy shadow-xs animate-in zoom-in-95 duration-150"
-                >
-                  <span>{chip.label}</span>
-                  <button
-                    onClick={chip.onClear}
-                    className="p-0.5 rounded-full hover:bg-gray-100 transition-all cursor-pointer"
-                  >
-                    <X size={11} className="text-orange-primary" />
-                  </button>
-                </div>
-              ))}
-              <button
-                onClick={handleResetFilters}
-                className="text-[10px] font-black text-orange-primary uppercase tracking-widest hover:underline ml-auto pr-2"
-              >
-                Clear all
-              </button>
+            <div className="mb-4">
+              <ActiveFilterChips 
+                chips={activeChipsList.map((c, i) => ({ id: `brand-${i}`, label: c.label, onRemove: c.onClear }))}
+                onClearAll={handleResetFilters}
+              />
             </div>
           )}
 
@@ -1395,7 +1245,7 @@ export function BrandsPage() {
               <div className="flex flex-wrap justify-center items-center gap-3.5">
                 {['', '✔️', 'S', 'mi', 'Ap', 'W'].map((logo, idx) => (
                   <div
-                    key={idx}
+                    key={`floating-logo-${logo}-${idx}`}
                     className="w-11 h-11 bg-white border border-gray-100 rounded-xl shadow-sm flex items-center justify-center font-sans font-black text-navy text-xs"
                   >
                     {logo}

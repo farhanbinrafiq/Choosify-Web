@@ -89,7 +89,7 @@ export function B2BSolutionsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column */}
             <div className="lg:col-span-7 space-y-4 text-left">
-              <span className="inline-block bg-[#E8500A]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
+              <span className="inline-block bg-[#FF5B00]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
                 Enterprise Commerce Hub
               </span>
               <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
@@ -176,7 +176,7 @@ export function B2BSolutionsPage() {
           {/* Book Consultation Form (Right) */}
           <div className="lg:col-span-5">
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 md:p-8 shadow-xs text-left relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF5B00] to-[#E8500A]" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF5B00] to-[#FF5B00]" />
               
               <AnimatePresence mode="wait">
                 {!submitted ? (

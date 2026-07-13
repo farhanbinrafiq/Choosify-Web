@@ -70,7 +70,7 @@ export function PrivacyPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column */}
             <div className="lg:col-span-8 space-y-4 text-left">
-              <span className="inline-block bg-[#E8500A]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
+              <span className="inline-block bg-[#FF5B00]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
                 User Protection
               </span>
               <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">

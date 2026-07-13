@@ -619,7 +619,7 @@ export function CompareEngine() {
                 {/* Color swatches */}
                 {item.colors && item.colors.length > 0 && (
                   <div className="flex items-center gap-1.5 mb-2">
-                    {item.colors.map((color, cidx) => (
+                    {item.colors.map((color: string, cidx: number) => (
                       <span 
                         key={cidx} 
                         className="w-3.5 h-3.5 rounded-full border border-slate-200 shadow-xs cursor-pointer hover:scale-110 transition-transform" 
@@ -831,7 +831,7 @@ export function CompareEngine() {
                         {/* Parameter value columns aligned side-by-side (Right) */}
                         <div className={cn("grid divide-x divide-slate-100", gridColumnsCountClass)}>
                           {displayItems.map((item) => {
-                            const val = item.specs[row.key] || 'N/A';
+                            const val = (item.specs as any)[row.key] || 'N/A';
                             const badgeHighlight = cellHighlights[item.id]?.[row.key];
 
                             return (
@@ -840,7 +840,7 @@ export function CompareEngine() {
                                 className="p-4 flex flex-col items-center justify-center text-center text-xs font-medium text-slate-700 relative"
                               >
                                 {/* Display rating as golden stars */}
-                                {row.isRating ? (
+                                {(row as any).isRating ? (
                                   <div className="flex flex-col items-center gap-1">
                                     <span className="text-xs font-extrabold text-slate-900">{val} / 5.0</span>
                                     <div className="flex items-center gap-0.5">
@@ -855,13 +855,13 @@ export function CompareEngine() {
                                     <span className="text-xs font-semibold text-slate-800">{val}</span>
                                     
                                     {/* Small custom design icons for brands */}
-                                    {row.hasIcon && val.includes('A17 Pro') && (
+                                    {(row as any).hasIcon && val.includes('A17 Pro') && (
                                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest"> Apple Silicon</span>
                                     )}
-                                    {row.hasIcon && val.includes('Snapdragon') && (
+                                    {(row as any).hasIcon && val.includes('Snapdragon') && (
                                       <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">⚡ Qualcomm</span>
                                     )}
-                                    {row.hasIcon && val.includes('Tensor') && (
+                                    {(row as any).hasIcon && val.includes('Tensor') && (
                                       <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">G Google Core</span>
                                     )}
 
@@ -878,7 +878,7 @@ export function CompareEngine() {
                                     )}
 
                                     {/* Price offers link */}
-                                    {row.hasOffers && (
+                                    {(row as any).hasOffers && (
                                       <span className="text-[10px] text-blue-500 hover:underline cursor-pointer font-semibold mt-0.5 block">
                                         View Offers ({val.includes('167') ? '12' : val.includes('145') ? '18' : '9'})
                                       </span>
