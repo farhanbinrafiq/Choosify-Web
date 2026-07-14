@@ -238,7 +238,7 @@ export function BrandDetailPage() {
       </section>
 
       {/* 3. TRUST BENEFITS STRIP */}
-      <section className="max-w-[1440px] mx-auto px-6 md:px-12 mb-8">
+      <section className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-8">
         <div className="bg-[#050B2C] border border-white/10 rounded-2xl p-5 md:py-6 md:px-8 text-white shadow-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {[
             { title: "100% Original Products", sub: "Official & authentic products", icon: ShieldCheck },
@@ -264,7 +264,7 @@ export function BrandDetailPage() {
       </section>
 
       {/* 4. STICKY BRAND NAVIGATION TABS */}
-      <section className="max-w-[1440px] mx-auto px-6 md:px-12 mb-8 sticky top-0 z-40 bg-[#F5F8FD]/95 backdrop-blur-md py-3">
+      <section className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-8 sticky top-0 z-40 bg-[#F5F8FD]/95 backdrop-blur-md py-3">
         <div className="bg-white border border-[#EEF2F7] rounded-2xl p-1.5 shadow-sm flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
           {[
             { name: "Overview", count: null, badge: null },
@@ -321,7 +321,7 @@ export function BrandDetailPage() {
       </section>
 
       {/* 5. TOP DEALS ON BRAND */}
-      <section id="deals" className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12 scroll-mt-24">
+      <section id="deals" className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-12 scroll-mt-24">
         <div className="flex items-end justify-between mb-6 border-b border-[#EEF2F7] pb-4">
           <div className="text-left">
             <h2 className="text-2xl font-black text-[#050B2C] uppercase tracking-tight">
@@ -343,7 +343,7 @@ export function BrandDetailPage() {
         </div>
 
         {/* 4 Premium Product Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 min-[992px]:grid-cols-3 min-[1200px]:grid-cols-4 gap-x-6 gap-y-8">
           {[
             {
               id: "apple-iphone-15",
@@ -414,7 +414,7 @@ export function BrandDetailPage() {
       </section>
 
       {/* 6. BRAND PRODUCT CATEGORIES */}
-      <section id="products" className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12 scroll-mt-24">
+      <section id="products" className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-12 scroll-mt-24">
         <div className="flex items-end justify-between mb-6 border-b border-[#EEF2F7] pb-4">
           <div className="text-left">
             <h2 className="text-2xl font-black text-[#050B2C] uppercase tracking-tight">
@@ -470,7 +470,7 @@ export function BrandDetailPage() {
       </section>
 
       {/* CREATOR REVIEWS */}
-      <section className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12">
+      <section className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-12">
         <div className="flex items-center justify-between mb-8 border-b border-[#EEF2F7] pb-4">
           <div>
             <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-2">CREATOR REVIEWS</h2>
@@ -551,7 +551,7 @@ export function BrandDetailPage() {
       </section>
 
       {/* 7. CUSTOMER REVIEWS */}
-      <section id="reviews" className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12 scroll-mt-24">
+      <section id="reviews" className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-12 scroll-mt-24">
         <div className="flex items-end justify-between mb-6 border-b border-[#EEF2F7] pb-4">
           <div className="text-left">
             <h2 className="text-2xl font-black text-[#050B2C] uppercase tracking-tight">
@@ -723,7 +723,7 @@ export function BrandDetailPage() {
       </section>
 
       {/* 8. BRAND OVERVIEW */}
-      <section id="brand-info" className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12 scroll-mt-24">
+      <section id="brand-info" className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-12 scroll-mt-24">
         <h2 className="text-xl font-black text-[#050B2C] uppercase tracking-tight mb-6 text-left">
           Brand Overview
         </h2>
@@ -821,7 +821,7 @@ export function BrandDetailPage() {
       </section>
 
       {/* 9. BRAND TRUST STATEMENT BANNER */}
-      <section className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12">
+      <section className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-12">
         <div className="bg-gradient-to-r from-[#050B2C] to-[#0A1961] border border-white/5 rounded-3xl py-10 px-8 text-white text-center shadow-xl relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/10 via-transparent to-transparent pointer-events-none" />
           
@@ -861,7 +861,7 @@ export function BrandDetailPage() {
       </section>
 
       {/* 10. BRAND COMPARISON TABLE */}
-      <section id="compare" className="max-w-[1440px] mx-auto px-6 md:px-12 mb-12 scroll-mt-24">
+      <section id="compare" className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-12 scroll-mt-24">
         <h2 className="text-xl font-black text-[#050B2C] uppercase tracking-tight mb-6 text-left">
           Compare Apple With Other Brands
         </h2>

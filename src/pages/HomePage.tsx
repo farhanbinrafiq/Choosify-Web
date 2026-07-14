@@ -223,6 +223,7 @@ export function HomePage() {
             {SPOTLIGHT_CARDS.map((card) => (
               <div 
                 key={card.id}
+                onClick={() => navigate(`/discover/${card.id}`)}
                 className="relative min-w-[280px] lg:min-w-[320px] h-[400px] rounded-3xl overflow-hidden cursor-pointer group shadow-[0_4px_20px_rgb(0,0,0,0.04)] snap-start shrink-0 border border-transparent"
               >
                 <img src={card.cover} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
@@ -387,7 +388,7 @@ export function HomePage() {
             {BUYING_GUIDES.map((guide) => (
               <div 
                 key={guide.id}
-                onClick={() => navigate('/guides')}
+                onClick={() => navigate(`/discover/${guide.id}`)}
                 className="bg-white rounded-2xl overflow-hidden cursor-pointer group hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] shadow-[0_4px_20px_rgb(0,0,0,0.02)] transition-all duration-300 border border-transparent"
               >
                 <div className="w-full aspect-[16/10] overflow-hidden">

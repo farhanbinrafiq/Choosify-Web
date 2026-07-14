@@ -114,12 +114,29 @@ export function CategoriesPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [expandedCategoryIds, setExpandedCategoryIds] = useState<Record<string, boolean>>({});
+  const [showAllSubcategories, setShowAllSubcategories] = useState<Record<string, boolean>>({});
 
   // Filter categories based on search
   const filteredCategories = CATEGORIES.filter(cat => 
     cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     cat.subcategories.some(sub => sub.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const toggleCategoryExpand = (catId: string) => {
+    setExpandedCategoryIds(prev => ({
+      ...prev,
+      [catId]: !prev[catId]
+    }));
+  };
+
+  const toggleShowAll = (catId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAllSubcategories(prev => ({
+      ...prev,
+      [catId]: !prev[catId]
+    }));
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9] text-slate-800 font-sans pb-24">
@@ -187,78 +204,117 @@ export function CategoriesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence>
-              {filteredCategories.map((category, idx) => (
-                <motion.div
-                  key={category.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  onMouseEnter={() => setHoveredCategory(category.id)}
-                  onMouseLeave={() => setHoveredCategory(null)}
-                  onClick={() => navigate(`/products?category=${category.id}`)}
-                  className="group bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden cursor-pointer flex flex-col h-full"
-                >
-                  {/* CARD HEADER & IMAGE */}
-                  <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                    <img 
-                      src={category.image} 
-                      alt={category.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                    
-                    {/* ICON BADGE */}
-                    <div className="absolute top-4 left-4 w-12 h-12 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg">
-                      <category.icon className="w-6 h-6 text-[#000435]" />
-                    </div>
+              {filteredCategories.map((category, idx) => {
+                const isExpanded = !!expandedCategoryIds[category.id];
+                const showAll = !!showAllSubcategories[category.id];
+                const displayedSubs = showAll ? category.subcategories : category.subcategories.slice(0, 4);
 
-                    {/* ITEM COUNT */}
-                    <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                      <span className="text-xs font-bold text-white tracking-wide">
-                        {category.itemCount.toLocaleString()} items
-                      </span>
-                    </div>
+                return (
+                  <motion.div
+                    key={category.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    onMouseEnter={() => setHoveredCategory(category.id)}
+                    onMouseLeave={() => setHoveredCategory(null)}
+                    onClick={() => toggleCategoryExpand(category.id)}
+                    className="group bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden cursor-pointer flex flex-col h-full"
+                  >
+                    {/* CARD HEADER & IMAGE */}
+                    <div className="relative h-48 w-full overflow-hidden bg-slate-100 shrink-0">
+                      <img 
+                        src={category.image} 
+                        alt={category.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                      
+                      {/* ICON BADGE */}
+                      <div className="absolute top-4 left-4 w-12 h-12 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg">
+                        <category.icon className="w-6 h-6 text-[#000435]" />
+                      </div>
 
-                    {/* TITLE */}
-                    <div className="absolute bottom-4 left-5 right-5 flex justify-between items-end">
-                      <h3 className="text-2xl font-extrabold text-white tracking-tight leading-tight">
-                        {category.name}
-                      </h3>
-                      <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transform translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                        <ArrowRight className="w-4 h-4 text-white" />
+                      {/* ITEM COUNT */}
+                      <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                        <span className="text-xs font-bold text-white tracking-wide">
+                          {category.itemCount.toLocaleString()} items
+                        </span>
+                      </div>
+
+                      {/* TITLE */}
+                      <div className="absolute bottom-4 left-5 right-5 flex justify-between items-end">
+                        <h3 className="text-2xl font-extrabold text-white tracking-tight leading-tight">
+                          {category.name}
+                        </h3>
+                        <div className={cn("w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transform transition-all duration-300", isExpanded ? "rotate-90 text-[#FF5B00] bg-white" : "group-hover:translate-x-0")}>
+                          <ArrowRight className="w-4 h-4 text-white group-hover:text-[#FF5B00]" />
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* CARD BODY (SUBCATEGORIES) */}
-                  <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex-1">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Popular in {category.name}</h4>
-                      <ul className="space-y-3">
-                        {category.subcategories.slice(0, 4).map((sub, i) => (
-                          <li key={i} className="flex items-center text-sm font-semibold text-slate-600 hover:text-[#FF5B00] transition-colors">
-                            <ChevronRight className="w-4 h-4 mr-2 text-slate-300" />
-                            {sub}
-                          </li>
-                        ))}
-                        {category.subcategories.length > 4 && (
-                          <li className="text-sm font-bold text-slate-400 pl-6 pt-2">
-                            + {category.subcategories.length - 4} more
-                          </li>
+                    {/* CARD BODY (SUBCATEGORIES) */}
+                    <div className="p-6 flex-1 flex flex-col justify-between">
+                      <div className="flex-1">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
+                          {isExpanded ? `All Subcategories (${category.subcategories.length})` : `Popular in ${category.name}`}
+                        </h4>
+                        
+                        <motion.div 
+                          layout
+                          className="overflow-hidden"
+                        >
+                          <ul className="space-y-3">
+                            {(isExpanded ? category.subcategories : displayedSubs).map((sub, i) => (
+                              <li 
+                                key={i} 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/products?category=${category.id}&sub=${encodeURIComponent(sub)}`);
+                                }}
+                                className="flex items-center text-sm font-semibold text-slate-600 hover:text-[#FF5B00] transition-colors py-1 cursor-pointer"
+                              >
+                                <ChevronRight className="w-4 h-4 mr-2 text-slate-300" />
+                                {sub}
+                              </li>
+                            ))}
+                          </ul>
+                        </motion.div>
+
+                        {/* Expand remaining subcategories within card if NOT expanded card but has more */}
+                        {!isExpanded && category.subcategories.length > 4 && (
+                          <button
+                            onClick={(e) => toggleShowAll(category.id, e)}
+                            className="text-xs font-bold text-[#FF5B00] hover:underline mt-4 focus:outline-none block pl-6"
+                          >
+                            {showAll ? "Show Less" : `+ ${category.subcategories.length - 4} Show All`}
+                          </button>
                         )}
-                      </ul>
-                    </div>
+                      </div>
 
-                    {/* FEATURED BRAND TAG */}
-                    <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-400">Featured Brand</span>
-                      <span className="text-xs font-black text-[#000435] bg-slate-50 px-3 py-1 rounded-full border border-slate-200">
-                        {category.featuredBrand}
-                      </span>
+                      <div className="mt-6 pt-4 border-t border-slate-100 space-y-4">
+                        {/* FEATURED BRAND TAG */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-400">Featured Brand</span>
+                          <span className="text-xs font-black text-[#000435] bg-slate-50 px-3 py-1 rounded-full border border-slate-200">
+                            {category.featuredBrand}
+                          </span>
+                        </div>
+
+                        {/* Explore Products Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/products?category=${category.id}`);
+                          }}
+                          className="w-full py-2.5 bg-[#000435] hover:bg-[#FF5B00] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm"
+                        >
+                          Explore Products <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         )}
