@@ -2,246 +2,34 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Search, Bookmark, Eye, Play, ArrowRight, Star, CheckCircle2, ChevronRight, ChevronLeft, 
-  Smartphone, Laptop, Headphones, Camera, Gamepad, Tv, Shirt, MoreHorizontal,
-  PlaySquare, BookOpen, Scale, ListOrdered, Lightbulb, Bot, Check, Sparkles, Users,
-  Heart, Calendar, Flame, ShieldCheck, Zap, LayoutGrid, MessageSquare
+  Search, Bookmark, Eye, Play, ArrowRight, Star, Check, Sparkles, Users, 
+  HelpCircle, ChevronDown, ChevronRight, X, Send, Mail, CheckCircle2, 
+  ShieldCheck, Calendar, Bot, Share2, PlaySquare, BookOpen, Scale, 
+  ListOrdered, Lightbulb, Heart, Flame, LayoutGrid, MessageSquare
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
+import { useRegisterPageFilters } from '../components/FilterEngine';
 
-// ==========================================
-// DATA STRUCTURES
-// ==========================================
-
-interface Story {
-  id: string;
-  type: 'BUYING GUIDE' | 'CREATOR REVIEW' | 'COLLECTION' | 'BRAND STORY';
-  title: string;
-  image: string;
-  readTime: string;
-  category: string;
-  subCategory: string;
-  isVideo?: boolean;
-  author: {
-    name: string;
-    avatar: string;
-    badge: string;
-  };
+// Inline TikTok icon component for footer
+function TikTokIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
+    </svg>
+  );
 }
-
-interface TrendingItem {
-  id: string;
-  title: string;
-  image: string;
-  badge: 'TRENDING' | 'NEW LAUNCH' | 'DEAL ALERT';
-  readTime: string;
-  views: string;
-  category: string;
-  isVideo?: boolean;
-}
-
-interface EditorsPickItem {
-  id: string;
-  index: number;
-  title: string;
-  readTime: string;
-  views: string;
-  image: string;
-}
-
-interface Creator {
-  id: string;
-  name: string;
-  avatar: string;
-  badge: string;
-  guidesCount: number;
-  followersCount: string;
-}
-
-// ==========================================
-// STATIC REALISTIC DATASETS
-// ==========================================
-
-const STORIES_DATA: Story[] = [
-  {
-    id: 'story-1',
-    type: 'BUYING GUIDE',
-    title: 'Best Running Shoes for 2026',
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
-    readTime: '12 min read',
-    category: 'Buying Guides',
-    subCategory: 'Expert Guide',
-    author: {
-      name: 'Tanvir Hossain',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
-      badge: 'Verified Expert'
-    }
-  },
-  {
-    id: 'story-2',
-    type: 'CREATOR REVIEW',
-    title: '30 Day Review: Samsung S24 Ultra',
-    image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=600&q=80',
-    readTime: '18 min video',
-    category: 'Videos',
-    subCategory: '2 days ago',
-    isVideo: true,
-    author: {
-      name: 'Nusrat Jahan',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80',
-      badge: 'Tech Creator'
-    }
-  },
-  {
-    id: 'story-3',
-    type: 'COLLECTION',
-    title: 'Minimal Desk Setup Ideas for 2025',
-    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80',
-    readTime: '8 items',
-    category: 'Collections',
-    subCategory: 'Home & Office',
-    author: {
-      name: 'Productivity Lab',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80',
-      badge: 'Official Creator'
-    }
-  },
-  {
-    id: 'story-4',
-    type: 'BRAND STORY',
-    title: "Behind Aarong's Summer Collection",
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80',
-    readTime: '10 min read',
-    category: 'Brand Stories',
-    subCategory: 'Brand Story',
-    author: {
-      name: 'Aarong Official',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&q=80',
-      badge: 'Verified Brand'
-    }
-  }
-];
-
-const TRENDING_DATA: TrendingItem[] = [
-  {
-    id: 'trend-1',
-    title: 'Best Laptop for Students in 2025',
-    image: 'https://images.unsplash.com/photo-1496181130204-755241544e35?w=600&q=80',
-    badge: 'TRENDING',
-    readTime: '10 min read',
-    views: '15.2K',
-    category: 'Buying Guides'
-  },
-  {
-    id: 'trend-2',
-    title: 'Best Smartwatches Under BDT 10,000',
-    image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&q=80',
-    badge: 'TRENDING',
-    readTime: '8 min read',
-    views: '12.8K',
-    category: 'Buying Guides'
-  },
-  {
-    id: 'trend-3',
-    title: 'Top 5 ANC Earbuds Compared',
-    image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&q=80',
-    badge: 'TRENDING',
-    readTime: '7 min read',
-    views: '9.6K',
-    category: 'Deals'
-  },
-  {
-    id: 'trend-4',
-    title: 'iPhone 15 vs Samsung S24: Which is Better?',
-    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&q=80',
-    badge: 'TRENDING',
-    readTime: '12 min read',
-    views: '18.4K',
-    category: 'Blogs'
-  },
-  {
-    id: 'trend-5',
-    title: 'DJI Mini 4 Pro - Full Review',
-    image: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=600&q=80',
-    badge: 'NEW LAUNCH',
-    readTime: '15 min video',
-    views: '8.1K',
-    category: 'Videos',
-    isVideo: true
-  }
-];
-
-const EDITORS_LIST_DATA: EditorsPickItem[] = [
-  {
-    id: 'ed-1',
-    index: 1,
-    title: 'Best 4K TVs for Home Theater in 2025',
-    readTime: '9 min read',
-    views: '12.6K',
-    image: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=200&q=80'
-  },
-  {
-    id: 'ed-2',
-    index: 2,
-    title: 'Camera Settings Every Beginner Should Know',
-    readTime: '7 min read',
-    views: '8.9K',
-    image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=200&q=80'
-  },
-  {
-    id: 'ed-3',
-    index: 3,
-    title: 'How to Choose the Right Gaming Monitor',
-    readTime: '6 min read',
-    views: '7.4K',
-    image: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=200&q=80'
-  }
-];
-
-const CREATORS_DATA: Creator[] = [
-  {
-    id: 'creator-1',
-    name: 'Tech World BD',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
-    badge: 'Verified Expert',
-    guidesCount: 128,
-    followersCount: '452K'
-  },
-  {
-    id: 'creator-2',
-    name: 'Gadget & Gear',
-    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&q=80',
-    badge: 'Tech Creator',
-    guidesCount: 98,
-    followersCount: '312K'
-  },
-  {
-    id: 'creator-3',
-    name: 'Style With Me',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&q=80',
-    badge: 'Fashion Creator',
-    guidesCount: 76,
-    followersCount: '245K'
-  },
-  {
-    id: 'creator-4',
-    name: 'Productivity Lab',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&q=80',
-    badge: 'Lifestyle Creator',
-    guidesCount: 64,
-    followersCount: '198K'
-  }
-];
 
 export function GuidesPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('All');
-  const [selectedSort, setSelectedSort] = useState('Newest');
-  const [savedStories, setSavedStories] = useState<string[]>([]);
-  const [followedCreators, setFollowedCreators] = useState<string[]>([]);
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeFilter, setActiveFilter] = useState('Trending');
+  const [savedArticles, setSavedArticles] = useState<string[]>([]);
+  const [followedCreators, setFollowedCreators] = useState<string[]>(['Tech World BD']);
 
+  // Support responsive pagination/scroll on featured grid
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+
+  // Register with FilterEngine so floating bar works if triggered
   useRegisterPageFilters({
     pageName: 'Discover & Guides',
     renderSearch: () => (
@@ -253,284 +41,222 @@ export function GuidesPage() {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search guides, reviews, collections..."
+          placeholder="Search guides, reviews, articles..."
           className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
         />
       </div>
     ),
     renderFilters: () => (
-      <div className="flex flex-col gap-4 mt-4">
-        <UniversalFilterRenderer
-          profile={{
-            entity: 'guides',
-            filters: [
-              {
-                id: 'content-type',
-                name: 'Content Type',
-                type: 'multi_select',
-                options: [
-                  { value: 'buying-guide', label: 'Buying Guide' },
-                  { value: 'review', label: 'Review' },
-                  { value: 'comparison', label: 'Comparison' },
-                  { value: 'tutorial', label: 'Tutorial' }
-                ]
-              },
-              {
-                id: 'media',
-                name: 'Media Type',
-                type: 'single_select',
-                options: [
-                  { value: 'all', label: 'All Media' },
-                  { value: 'video', label: 'Video Only' },
-                  { value: 'article', label: 'Articles Only' }
-                ]
-              }
-            ]
-          }}
-          activeFilters={{}}
-          onFilterChange={() => {}}
-        />
+      <div className="flex gap-2">
+        {['All', 'Buying Guides', 'Videos', 'Creator Reviews', 'Collections'].map((f) => (
+          <button
+            key={f}
+            onClick={() => setActiveCategory(f)}
+            className={`px-3 py-1.5 rounded text-[10px] font-bold ${activeCategory === f ? 'bg-[#FF5B00] text-white' : 'bg-slate-100 text-slate-600'}`}
+          >
+            {f}
+          </button>
+        ))}
       </div>
     ),
-    onClearAll: () => setSearchQuery('')
-  }, [searchQuery]);
-
-  const navigationTabs = [
-    { name: 'All', icon: LayoutGrid },
-    { name: 'Buying Guides', icon: BookOpen },
-    { name: 'Videos', icon: PlaySquare },
-    { name: 'Creator Reviews', icon: Star },
-    { name: 'Collections', icon: Flame },
-    { name: 'Brand Stories', icon: ShieldCheck },
-    { name: 'Campaigns', icon: Zap },
-    { name: 'Blogs', icon: Sparkles },
-    { name: 'Deals', icon: Heart },
-    { name: 'Reels', icon: Smartphone },
-    { name: 'Live', icon: Users },
-  ];
-
-  const quickFilters = ['Trending', 'Most Viewed', 'Most Helpful', 'Expert Picks', 'Official', 'Verified'];
-
-  const handleTrendingSearchClick = (term: string) => {
-    setSearchQuery(term);
-    toast.success(`Searching for "${term}"`, { icon: '🔍' });
-  };
-
-  const toggleSaveStory = (storyId: string) => {
-    setSavedStories(prev => {
-      const isSaved = prev.includes(storyId);
-      if (isSaved) {
-        toast.success('Removed from saved stories');
-        return prev.filter(id => id !== storyId);
-      } else {
-        toast.success('Saved to your dashboard!');
-        return [...prev, storyId];
-      }
-    });
-  };
-
-  const toggleFollowCreator = (creatorId: string, name: string) => {
-    setFollowedCreators(prev => {
-      const isFollowing = prev.includes(creatorId);
-      if (isFollowing) {
-        toast.success(`Unfollowed ${name}`);
-        return prev.filter(id => id !== creatorId);
-      } else {
-        toast.success(`Now following ${name}!`, { icon: '🙌' });
-        return [...prev, creatorId];
-      }
-    });
-  };
-
-  const handleToggleFilter = (filter: string) => {
-    setActiveFilters(prev => {
-      const exists = prev.includes(filter);
-      if (exists) {
-        return prev.filter(f => f !== filter);
-      } else {
-        return [...prev, filter];
-      }
-    });
-  };
-
-  // Filtered Featured stories
-  const filteredStories = useMemo(() => {
-    let result = [...STORIES_DATA];
-    if (activeTab !== 'All') {
-      result = result.filter(story => story.category === activeTab);
+    onClearAll: () => {
+      setSearchQuery('');
+      setActiveCategory('All');
+      setActiveFilter('Trending');
     }
-    if (searchQuery.trim() !== '') {
-      const query = searchQuery.toLowerCase().trim();
-      result = result.filter(story => 
-        story.title.toLowerCase().includes(query) ||
-        story.type.toLowerCase().includes(query) ||
-        story.author.name.toLowerCase().includes(query)
-      );
+  }, [searchQuery, activeCategory, activeFilter]);
+
+  // Handle saving items
+  const toggleSaveArticle = (title: string) => {
+    if (savedArticles.includes(title)) {
+      setSavedArticles(prev => prev.filter(t => t !== title));
+      toast.success('Removed from saved collection');
+    } else {
+      setSavedArticles(prev => [...prev, title]);
+      toast.success('Saved to your collection!');
     }
-    return result;
-  }, [activeTab, searchQuery]);
+  };
+
+  const toggleFollowCreator = (creatorName: string) => {
+    if (followedCreators.includes(creatorName)) {
+      setFollowedCreators(prev => prev.filter(n => n !== creatorName));
+      toast.success(`Unfollowed ${creatorName}`);
+    } else {
+      setFollowedCreators(prev => [...prev, creatorName]);
+      toast.success(`Following ${creatorName}`);
+    }
+  };
+
+  const handleShare = (title: string) => {
+    if (navigator.share) {
+      navigator.share({
+        title,
+        text: `Check out this amazing article on Choosify: ${title}`,
+        url: window.location.href,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(`${window.location.origin}/discover?share=${encodeURIComponent(title)}`);
+      toast.success('Link copied to clipboard!');
+    }
+  };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8F9FC] text-gray-800 pb-16 font-sans">
+    <div className="min-h-screen w-full flex flex-col bg-[#F4F7F9] text-[#1A1A2E]" id="discover-root">
       
-      {/* 1. EDGE-TO-EDGE HERO SECTION WITH INTEGRATED BREADCRUMBS */}
-      <section className="w-full bg-gradient-to-br from-[#050616] via-[#0A0C24] to-[#121538] py-12 md:py-16 relative overflow-hidden shrink-0">
+      {/* 1. HERO SECTION (Dark Navy Theme #000435) */}
+      <section className="bg-[#000435] text-white relative pt-8 pb-14 px-6 md:px-10 lg:px-12 overflow-hidden" id="discover-hero">
+        {/* Soft grid lines or glow circles */}
+        <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-[#FF5B00]/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
         
-        {/* Glowing Ambient Light Effects */}
-        <div className="absolute top-0 left-1/4 w-[450px] h-[450px] bg-[#FF5B00]/8 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="max-w-7xl mx-auto w-full relative z-10 flex flex-col">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-1.5 text-[10px] font-black text-white/50 uppercase tracking-widest mb-6">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight size={10} />
+            <span className="text-white/80">Discover</span>
+          </div>
 
-        {/* Constrained Content Container */}
-        <div className="max-w-7xl mx-auto w-full px-6 md:px-10 relative z-10">
-          
-          {/* Breadcrumb row inside the hero */}
-          <nav className="text-xs font-semibold text-gray-400 flex items-center gap-1.5 uppercase tracking-wider mb-8 select-none">
-            <Link to="/" className="hover:text-[#FF5B00] transition-colors">Home</Link>
-            <span className="text-gray-500 font-bold">&gt;</span>
-            <span className="text-white font-bold">Discover</span>
-          </nav>
-
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             
-            {/* Left Text Block */}
-            <div className="max-w-xl text-left relative z-10 flex-1">
-              <span className="text-xs font-black tracking-widest text-[#FF5B00] uppercase block mb-3">
-                DISCOVER.
-              </span>
-              <h1 className="text-4xl md:text-5xl lg:text-[54px] font-black tracking-tight text-white leading-tight uppercase font-sans">
+            {/* Left Column: Headline and Input */}
+            <div className="lg:col-span-7 flex flex-col text-left space-y-5">
+              <span className="text-xs font-black text-[#FF5B00] uppercase tracking-[0.2em]">DISCOVER.</span>
+              <h2 className="text-3xl sm:text-[46px] lg:text-[52px] font-black tracking-tight leading-none text-white uppercase font-sans">
                 Smarter Choices,<br />
                 Better <span className="text-[#FF5B00]">Decisions.</span>
-              </h1>
-              <p className="text-sm text-slate-300 font-medium mt-4 leading-relaxed max-w-lg">
+              </h2>
+              <p className="text-xs sm:text-sm text-white/70 max-w-lg font-bold leading-relaxed">
                 Explore expert guides, creator reviews, videos, collections, brand stories and real experiences.
               </p>
 
-              {/* INTEGRATED SEARCH BAR */}
-              <div className="relative w-full max-w-lg mt-8">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-20">
-                  <Search className="w-4 h-4 text-slate-400" />
+              {/* Input container matches reference search layout */}
+              <div className="relative max-w-xl w-full pt-2">
+                <div className="absolute left-4.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-white/50">
+                  <Search size={18} />
                 </div>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search Discover..." 
-                  className="w-full h-13 pl-11 pr-28 bg-white/10 backdrop-blur-md border border-white/15 focus:border-[#FF5B00]/50 rounded-2xl text-xs font-bold text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#FF5B00]/40 transition-all shadow-lg"
+                  placeholder="Search Discover..."
+                  className="w-full bg-white/10 backdrop-blur-md h-13 pl-12 pr-28 rounded-2xl text-white placeholder-white/50 font-bold text-xs outline-none focus:ring-2 focus:ring-[#FF5B00]/30 transition-all border border-white/10 focus:bg-white/15"
                 />
                 <button 
-                  onClick={() => toast.success(`Searching for "${searchQuery}"`)}
-                  className="absolute right-1.5 top-1.5 bottom-1.5 px-6 bg-[#FF5B00] hover:bg-orange-600 active:scale-95 text-white text-[11px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center transition-all shadow-md cursor-pointer border-none"
+                  onClick={() => toast.success(`Searching for "${searchQuery || 'everything'}"...`)}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black tracking-wider uppercase px-5 py-2.5 rounded-xl transition-all cursor-pointer"
                 >
                   Search
                 </button>
               </div>
 
-              {/* Trending Searches Row */}
-              <div className="flex flex-wrap items-center gap-2 mt-5 text-[11px] font-bold text-slate-400">
-                <span className="font-semibold uppercase tracking-wider text-slate-500">Trending searches:</span>
-                {['iPhone 15 Pro Max', 'Best Laptops 2025', 'Running Shoes', 'Smartwatches', 'Air Fryer'].map((term) => (
+              {/* Trending searches */}
+              <div className="flex flex-wrap items-center gap-2.5 text-[10.5px] font-black pt-2">
+                <span className="text-white/40">Trending searches:</span>
+                {[
+                  'iPhone 15 Pro Max',
+                  'Best Laptops 2025',
+                  'Running Shoes',
+                  'Smartwatches',
+                  'Air Fryer'
+                ].map((item, idx) => (
                   <button
-                    key={term}
-                    onClick={() => handleTrendingSearchClick(term)}
-                    className="hover:text-white transition-colors cursor-pointer text-slate-400 font-bold border-none bg-transparent p-0"
+                    key={idx}
+                    onClick={() => {
+                      setSearchQuery(item);
+                      toast.success(`Filtering by: ${item}`);
+                    }}
+                    className="bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg text-white/85 hover:text-white transition-all cursor-pointer"
                   >
-                    {term},
+                    {item}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Right Product Image Collage */}
-            <div className="relative w-full max-w-[500px] h-[320px] hidden lg:block shrink-0">
-              {/* Background Laptop screen */}
-              <div className="absolute top-4 right-10 w-[360px] h-[240px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+            {/* Right Column: Hero Collage & Editor's Pick Box */}
+            <div className="lg:col-span-5 relative flex justify-center items-center">
+              <div className="relative w-full max-w-[440px] aspect-[4/3] rounded-3xl overflow-hidden bg-slate-900/50 border border-white/10 shadow-2xl flex items-center justify-center">
+                
+                {/* Simulated Collage containing Shoe, Laptop, Headphones, Camera */}
                 <img 
-                  src="https://images.unsplash.com/photo-1496181130204-755241544e35?w=500&q=80" 
-                  className="w-full h-full object-cover grayscale opacity-30"
-                  alt="Laptop Backdrop"
+                  src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80" 
+                  alt="Tech & Lifestyle Collage" 
+                  className="w-full h-full object-cover opacity-75"
+                  referrerPolicy="no-referrer"
                 />
-              </div>
 
-              {/* Canon Camera overlay */}
-              <div className="absolute top-2 right-0 w-[170px] h-[130px] rounded-xl overflow-hidden border border-white/15 shadow-xl transform rotate-3 bg-[#0A0B22]">
-                <img 
-                  src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300&q=80" 
-                  className="w-full h-full object-cover"
-                  alt="Canon Camera"
-                />
-              </div>
+                {/* Collage Overlays */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#000435]/90 via-transparent to-transparent" />
+                
+                {/* Share Button on top-right */}
+                <button 
+                  onClick={() => handleShare("Choosify Discover Platform")}
+                  className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition-all active:scale-95"
+                >
+                  <Share2 size={15} />
+                </button>
 
-              {/* Headphones overlay */}
-              <div className="absolute -bottom-2 right-[180px] w-[170px] h-[140px] rounded-xl overflow-hidden border border-white/15 shadow-2xl transform -rotate-6 bg-[#0A0B22]">
-                <img 
-                  src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80" 
-                  className="w-full h-full object-cover"
-                  alt="Headphones"
-                />
-              </div>
-
-              {/* Red running shoe overlay */}
-              <div className="absolute bottom-6 left-2 w-[150px] h-[110px] rounded-xl overflow-hidden border border-white/15 shadow-xl transform rotate-12 bg-[#0A0B22]">
-                <img 
-                  src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80" 
-                  className="w-full h-full object-cover"
-                  alt="Red shoe"
-                />
-              </div>
-
-              {/* EDITOR'S PICK INTERACTIVE BANNER */}
-              <div className="absolute bottom-4 right-2 bg-[#08081A]/95 border border-white/15 rounded-2xl p-4 shadow-2xl text-left w-[240px] backdrop-blur-md">
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-black tracking-widest text-[#FF5B00] uppercase bg-[#FF5B00]/10 px-2 py-0.5 rounded">
-                    Editor's Pick
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00] animate-pulse" />
-                </div>
-                <h4 className="text-xs font-black text-white mt-2 leading-snug">
-                  Best Tech of Summer 2025
-                </h4>
-                <p className="text-[10px] text-slate-400 mt-1">
-                  12 min read
-                </p>
-                <div className="flex items-center justify-end mt-2">
-                  <div 
-                    onClick={() => handleTrendingSearchClick('Best Tech of Summer 2025')}
-                    className="w-7 h-7 rounded-full bg-[#FF5B00]/10 text-[#FF5B00] hover:bg-[#FF5B00] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-                  >
-                    <ArrowRight className="w-3.5 h-3.5" />
+                {/* Editor's Pick Floating Widget */}
+                <div className="absolute bottom-4 left-4 right-4 bg-slate-950/80 backdrop-blur-md border border-white/10 p-3.5 rounded-2xl text-left flex items-center gap-3 shadow-xl hover:scale-[1.01] transition-transform">
+                  <div className="w-10 h-10 rounded-xl bg-[#FF5B00]/15 flex items-center justify-center text-[#FF5B00] shrink-0 border border-[#FF5B00]/25">
+                    <Sparkles size={18} />
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[8px] font-black text-[#FF5B00] tracking-widest uppercase block leading-none mb-1">EDITOR'S PICK</span>
+                    <h4 className="text-xs font-black text-white leading-tight truncate">
+                      Best Tech of Summer 2025
+                    </h4>
+                    <span className="text-[9px] text-white/50 font-bold block mt-0.5">12 min read</span>
+                  </div>
+                  <button 
+                    onClick={() => toast.success('Opening Editor\'s Pick!')}
+                    className="w-7 h-7 rounded-lg bg-[#FF5B00] hover:bg-[#EB4501] text-white flex items-center justify-center shrink-0 transition-colors"
+                  >
+                    <ArrowRight size={13} />
+                  </button>
                 </div>
               </div>
-
             </div>
 
           </div>
-
         </div>
       </section>
 
-      {/* 2. PRIMARY HORIZONTAL NAVIGATION BAR */}
-      <section className="max-w-7xl mx-auto w-full px-6 md:px-10 mb-6">
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-2 shadow-sm overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1 min-w-max">
-            {navigationTabs.map((tab) => {
-              const TabIcon = tab.icon;
-              const isActive = activeTab === tab.name;
+      {/* 2. CATEGORY NAVIGATION (Full viewport wide horizontal scroll) */}
+      <section className="bg-white border-b border-slate-200/60 sticky top-0 z-30 shadow-sm" id="category-nav-bar">
+        <div className="max-w-7xl mx-auto w-full px-6 md:px-10 flex items-center justify-between overflow-x-auto no-scrollbar">
+          <div className="flex items-center space-x-1 sm:space-x-2 py-3.5 shrink-0">
+            {[
+              { label: 'All', icon: Sparkles },
+              { label: 'Buying Guides', icon: BookOpen },
+              { label: 'Videos', icon: PlaySquare },
+              { label: 'Creator Reviews', icon: Users },
+              { label: 'Collections', icon: LayoutGrid },
+              { label: 'Brand Stories', icon: Lightbulb },
+              { label: 'Campaigns', icon: Flame },
+              { label: 'Blogs', icon: MessageSquare },
+              { label: 'Deals', icon: Scale },
+              { label: 'Reels', icon: PlaySquare },
+              { label: 'Live', icon: Bot }
+            ].map((cat) => {
+              const Icon = cat.icon;
+              const isSelected = activeCategory === cat.label;
               return (
                 <button
-                  key={tab.name}
+                  key={cat.label}
                   onClick={() => {
-                    setActiveTab(tab.name);
-                    toast.success(`Category set to: ${tab.name}`);
+                    setActiveCategory(cat.label);
+                    toast.success(`Viewing format: ${cat.label}`);
                   }}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-sans text-xs font-bold uppercase tracking-wide cursor-pointer border-none outline-none select-none shrink-0 ${
-                    isActive 
-                      ? 'bg-[#FF5B00]/10 text-[#FF5B00] border-b-2 border-[#FF5B00] rounded-b-none' 
-                      : 'text-slate-500 hover:text-[#FF5B00] hover:bg-slate-50'
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-extrabold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                    isSelected 
+                      ? 'bg-[#FF5B00]/10 text-[#FF5B00] border border-[#FF5B00]/25' 
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
                   }`}
                 >
-                  <TabIcon className="w-3.5 h-3.5" />
-                  <span>{tab.name}</span>
+                  <Icon size={12} className={isSelected ? 'text-[#FF5B00]' : 'text-slate-400'} />
+                  <span>{cat.label}</span>
                 </button>
               );
             })}
@@ -538,231 +264,385 @@ export function GuidesPage() {
         </div>
       </section>
 
-      {/* 3. SUB-FILTERS ROW */}
-      <section className="max-w-7xl mx-auto w-full px-6 md:px-10 mb-8">
-        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between w-full">
+      {/* 3. FILTER BAR ROW */}
+      <section className="bg-slate-50 border-b border-slate-200/50 py-3 px-6 md:px-10" id="filter-bar">
+        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
           
-          <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+          {/* Filter pills group */}
+          <div className="flex flex-wrap items-center gap-1.5">
             <button 
-              onClick={() => toast.success('Filters drawers settings triggered')}
-              className="h-10 px-5 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-2 shadow-sm cursor-pointer border-none outline-none"
+              onClick={() => toast.success('Opening extended filter sheet...')}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 text-[11px] font-black uppercase tracking-wider hover:bg-slate-50 transition-colors"
             >
-              <MoreHorizontal className="w-4 h-4 text-slate-400" />
-              <span>FILTERS</span>
+              <LayoutGrid size={11} className="text-slate-400" />
+              <span>Filters</span>
             </button>
+            
+            <div className="w-px bg-slate-200 h-5 mx-1.5 hidden sm:block" />
 
-            <select 
-              value={selectedSort}
-              onChange={(e) => {
-                setSelectedSort(e.target.value);
-                toast.success(`Sorting by: ${e.target.value}`);
-              }}
-              className="h-10 px-4 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 shadow-sm outline-none focus:border-[#FF5B00]/40"
-            >
-              <option value="Newest">Newest</option>
-              <option value="Most Viewed">Most Viewed</option>
-              <option value="Highest Rating">Highest Rating</option>
-            </select>
-
-            {quickFilters.map((filterName) => {
-              const isSelected = activeFilters.includes(filterName);
+            {[
+              { id: 'Newest', label: 'Newest' },
+              { id: 'Trending', label: 'Trending' },
+              { id: 'Most Viewed', label: 'Most Viewed' },
+              { id: 'Most Helpful', label: 'Most Helpful' },
+              { id: 'Expert Picks', label: 'Expert Picks' },
+              { id: 'Official', label: 'Official' },
+              { id: 'Verified', label: 'Verified' }
+            ].map((f) => {
+              const isSelected = activeFilter === f.id;
               return (
                 <button
-                  key={filterName}
-                  onClick={() => handleToggleFilter(filterName)}
-                  className={`h-10 px-4 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border shadow-sm cursor-pointer ${
+                  key={f.id}
+                  onClick={() => {
+                    setActiveFilter(f.id);
+                    toast.success(`Sorting by: ${f.label}`);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-[10.5px] font-extrabold transition-all cursor-pointer whitespace-nowrap border ${
                     isSelected 
-                      ? 'bg-[#FF5B00]/10 border-[#FF5B00]/30 text-[#FF5B00]' 
-                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      ? 'bg-white border-[#FF5B00]/30 text-[#FF5B00] shadow-sm font-black' 
+                      : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
                   }`}
                 >
-                  {isSelected && <Check className="w-3 h-3 text-[#FF5B00]" />}
-                  {filterName}
+                  {f.label}
                 </button>
               );
             })}
           </div>
 
-          <button 
-            onClick={() => {
-              setSearchQuery('Smartphones under 30k with best battery');
-              toast.success('AI Engine scanning best matching products for you!', { icon: '🔮' });
-            }}
-            className="h-10 px-5 bg-white border border-pink-200 hover:border-pink-300 rounded-xl text-xs font-bold text-pink-600 flex items-center gap-2 shadow-sm cursor-pointer transition-all hover:bg-pink-50/50 outline-none w-full lg:w-auto justify-center"
+          {/* AI Discover Button on the right */}
+          <button
+            onClick={() => toast.success('Initializing intelligent AI discovery recommendations...')}
+            className="bg-white hover:bg-indigo-50/50 border border-indigo-200 px-4 py-1.5 rounded-full text-indigo-700 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-sm shrink-0"
           >
-            <Bot className="w-4 h-4 text-pink-500" />
-            <span>AI DISCOVER</span>
-            <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
+            <Bot size={13} className="text-indigo-500 animate-bounce" />
+            <span>AI Discover</span>
+            <Sparkles size={11} className="text-pink-500" />
           </button>
 
         </div>
       </section>
 
-      {/* 4. FEATURED DISCOVER STORIES */}
-      <section className="max-w-7xl mx-auto w-full px-6 md:px-10 mb-12 text-left">
-        <div className="flex items-center justify-between mb-6 border-b border-slate-200/60 pb-3">
-          <div>
-            <span className="text-[10px] font-bold text-[#FF5B00] uppercase tracking-widest leading-none">FEATURED</span>
-            <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 mt-1 uppercase tracking-tight">
-              Featured Discover Stories
-            </h3>
+      {/* 4. MAIN CONTENT AREA */}
+      <main className="max-w-7xl mx-auto w-full px-6 md:px-10 py-8 flex-1 flex flex-col space-y-12 text-left" id="discover-main-content">
+        
+        {/* SECTION 4.1: FEATURED DISCOVER STORIES (As shown in screenshot) */}
+        <section id="featured-discover-stories">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-base font-black text-[#000435] uppercase tracking-tight">FEATURED DISCOVER STORIES</h3>
+              <p className="text-[10px] text-slate-400 font-bold">Top curated content from our editorial expert team</p>
+            </div>
+            <button 
+              onClick={() => toast.success('Loading all featured content...')}
+              className="text-[11px] font-black text-[#FF5B00] hover:text-[#EB4501] uppercase tracking-wider flex items-center gap-1"
+            >
+              <span>View all featured</span>
+              <ArrowRight size={12} />
+            </button>
           </div>
-          <Link 
-            to="/guides" 
-            className="text-xs font-bold text-[#FF5B00] hover:text-orange-600 transition-colors uppercase tracking-wider flex items-center gap-1 group"
-          >
-            View all featured 
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-          <AnimatePresence mode="popLayout">
-            {filteredStories.map((story) => {
-              const isSaved = savedStories.includes(story.id);
-              const badgeColors: Record<string, string> = {
-                'BUYING GUIDE': 'bg-[#FF5B00] text-white',
-                'CREATOR REVIEW': 'bg-purple-600 text-white',
-                'COLLECTION': 'bg-blue-600 text-white',
-                'BRAND STORY': 'bg-amber-700 text-white'
-              };
-
-              return (
-                <motion.div
-                  key={story.id}
-                  layout
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 15 }}
-                  className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden group h-[380px]"
-                >
-                  {/* Card Image Area with overlays */}
-                  <div className="relative flex-1 overflow-hidden shrink-0 bg-slate-900">
-                    <img 
-                      src={story.image} 
-                      alt={story.title} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-85"
-                      referrerPolicy="no-referrer"
-                    />
-                    
-                    {/* Dark gradient overlay at bottom of image for readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-
-                    {/* Category Label badge at top left */}
-                    <div className="absolute top-4 left-4 z-10">
-                      <span className={`${badgeColors[story.type] || 'bg-black text-white'} text-[9px] font-black tracking-widest px-3 py-1 rounded uppercase`}>
-                        {story.type}
-                      </span>
-                    </div>
-
-                    {/* Video play icon overlay */}
-                    {story.isVideo && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                        <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center border border-white/20 shadow-md">
-                          <Play className="text-white fill-white ml-0.5 w-5 h-5" />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Title and readtime overlaid at bottom of image */}
-                    <div className="absolute bottom-4 left-4 right-4 text-left z-10">
-                      <h4 className="font-sans text-[16px] font-black text-white tracking-tight leading-snug group-hover:text-[#FF5B00] transition-colors line-clamp-2">
-                        {story.title}
-                      </h4>
-                      <p className="text-[10px] text-slate-300 font-bold uppercase tracking-wider mt-1.5">
-                        {story.readTime} &bull; {story.subCategory}
-                      </p>
-                    </div>
+          {/* Grid Layout containing 4 large high-contrast visual cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {/* CARD 1: BUYING GUIDE */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col h-full justify-between">
+              <div className="relative">
+                {/* Aspect ratio layout image */}
+                <div className="aspect-[4/3] w-full bg-slate-100 overflow-hidden relative">
+                  <img 
+                    src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" 
+                    alt="Best Running Shoes" 
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-3 left-3 bg-blue-500 text-white px-2.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">
+                    BUYING GUIDE
                   </div>
+                  <button 
+                    onClick={() => toggleSaveArticle("Best Running Shoes for 2026")}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm text-slate-600 hover:text-[#FF5B00] flex items-center justify-center transition-all shadow"
+                  >
+                    <Bookmark size={13} fill={savedArticles.includes("Best Running Shoes for 2026") ? "#FF5B00" : "none"} />
+                  </button>
+                </div>
 
-                  {/* Card Footer with Author info */}
-                  <div className="p-4 bg-white flex items-center justify-between border-t border-slate-100 shrink-0">
-                    <div className="flex items-center gap-2.5 text-left">
-                      <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 shrink-0">
-                        <img src={story.author.avatar} alt={story.author.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1 leading-none">
-                          {story.author.name}
-                          <CheckCircle2 className="w-3 h-3 text-[#FF5B00] fill-current" />
-                        </div>
-                        <div className="text-[9px] font-semibold text-slate-400 mt-0.5 uppercase tracking-wide leading-none">
-                          {story.author.badge}
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => toggleSaveStory(story.id)}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${
-                        isSaved 
-                          ? 'border-[#FF5B00]/40 text-[#FF5B00] bg-[#FF5B00]/5' 
-                          : 'border-slate-200 text-slate-400 hover:text-[#FF5B00] hover:border-[#FF5B00]/20'
-                      } cursor-pointer`}
-                    >
-                      <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
-                    </button>
+                <div className="p-5">
+                  <h4 className="text-sm font-black text-[#000435] leading-snug group-hover:text-[#FF5B00] transition-colors uppercase tracking-tight">
+                    Best Running Shoes for 2026
+                  </h4>
+                  <div className="flex items-center gap-2 mt-2 text-[10px] text-slate-400 font-bold font-mono">
+                    <span>12 min read</span>
+                    <span>•</span>
+                    <span className="text-[#FF5B00]">Expert Guide</span>
                   </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </div>
-      </section>
-
-      {/* 5. TRENDING NOW & BROWSE BY FORMAT SECTION (TWO-COLUMN SPLIT) */}
-      <section className="max-w-7xl mx-auto w-full px-6 md:px-10 mb-12 text-left">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Column A (Col Span 9): TRENDING NOW */}
-          <div className="lg:col-span-9">
-            <div className="flex items-center justify-between mb-6 border-b border-slate-200/60 pb-3">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">TRENDING NOW</span>
-                <h3 className="text-xl font-extrabold text-slate-900 mt-1 uppercase tracking-tight">
-                  What's hot on Choosify right now
-                </h3>
+                </div>
               </div>
-              <Link 
-                to="/guides" 
-                className="text-xs font-bold text-[#FF5B00] hover:text-orange-600 transition-colors uppercase tracking-wider flex items-center gap-1 group"
-              >
-                View all 
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
+
+              {/* Bottom author info matches reference screenshot */}
+              <div className="p-4 border-t border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <img 
+                    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80" 
+                    alt="Tanvir Hossain" 
+                    className="w-7.5 h-7.5 rounded-full border border-slate-200"
+                  />
+                  <div className="text-left">
+                    <p className="text-[10px] font-black text-slate-800 leading-tight">Tanvir Hossain</p>
+                    <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest block">Verified Expert</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* 5 columns grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-              {TRENDING_DATA.map((item) => (
+            {/* CARD 2: CREATOR REVIEW */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col h-full justify-between">
+              <div className="relative">
+                <div className="aspect-[4/3] w-full bg-slate-100 overflow-hidden relative">
+                  <img 
+                    src="https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80" 
+                    alt="Samsung S24 Ultra" 
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-3 left-3 bg-indigo-600 text-white px-2.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">
+                    CREATOR REVIEW
+                  </div>
+                  {/* Play circle icon overlay */}
+                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
+                    <div className="w-10 h-10 rounded-full bg-[#FF5B00] text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <Play size={16} fill="currentColor" className="ml-0.5" />
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => toggleSaveArticle("30 Day Review: Samsung S24 Ultra")}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm text-slate-600 hover:text-[#FF5B00] flex items-center justify-center transition-all shadow"
+                  >
+                    <Bookmark size={13} fill={savedArticles.includes("30 Day Review: Samsung S24 Ultra") ? "#FF5B00" : "none"} />
+                  </button>
+                </div>
+
+                <div className="p-5">
+                  <h4 className="text-sm font-black text-[#000435] leading-snug group-hover:text-[#FF5B00] transition-colors uppercase tracking-tight">
+                    30 Day Review: Samsung S24 Ultra
+                  </h4>
+                  <div className="flex items-center gap-2 mt-2 text-[10px] text-slate-400 font-bold font-mono">
+                    <span>18 min video</span>
+                    <span>•</span>
+                    <span>2 days ago</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border-t border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <img 
+                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&q=80" 
+                    alt="Nusrat Jahan" 
+                    className="w-7.5 h-7.5 rounded-full border border-slate-200"
+                  />
+                  <div className="text-left">
+                    <p className="text-[10px] font-black text-slate-800 leading-tight">Nusrat Jahan</p>
+                    <span className="text-[8px] font-bold text-indigo-600 uppercase tracking-widest block">Tech Creator</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 3: COLLECTION */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col h-full justify-between">
+              <div className="relative">
+                <div className="aspect-[4/3] w-full bg-slate-100 overflow-hidden relative">
+                  <img 
+                    src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80" 
+                    alt="Minimal Desk Setup" 
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-3 left-3 bg-purple-600 text-white px-2.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">
+                    COLLECTION
+                  </div>
+                  <button 
+                    onClick={() => toggleSaveArticle("Minimal Desk Setup Ideas for 2025")}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm text-slate-600 hover:text-[#FF5B00] flex items-center justify-center transition-all shadow"
+                  >
+                    <Bookmark size={13} fill={savedArticles.includes("Minimal Desk Setup Ideas for 2025") ? "#FF5B00" : "none"} />
+                  </button>
+                </div>
+
+                <div className="p-5">
+                  <h4 className="text-sm font-black text-[#000435] leading-snug group-hover:text-[#FF5B00] transition-colors uppercase tracking-tight">
+                    Minimal Desk Setup Ideas for 2025
+                  </h4>
+                  <div className="flex items-center gap-2 mt-2 text-[10px] text-slate-400 font-bold font-mono">
+                    <span>8 Items</span>
+                    <span>•</span>
+                    <span>Home & Office</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border-t border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <img 
+                    src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80" 
+                    alt="Productivity Lab" 
+                    className="w-7.5 h-7.5 rounded-full border border-slate-200"
+                  />
+                  <div className="text-left">
+                    <p className="text-[10px] font-black text-slate-800 leading-tight">Productivity Lab</p>
+                    <span className="text-[8px] font-bold text-purple-600 uppercase tracking-widest block">Official Creator</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 4: BRAND STORY */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col h-full justify-between">
+              <div className="relative">
+                <div className="aspect-[4/3] w-full bg-slate-100 overflow-hidden relative">
+                  <img 
+                    src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&q=80" 
+                    alt="Behind Aarong's" 
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-3 left-3 bg-[#FF5B00] text-white px-2.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">
+                    BRAND STORY
+                  </div>
+                  <button 
+                    onClick={() => toggleSaveArticle("Behind Aarong's Summer Collection")}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm text-slate-600 hover:text-[#FF5B00] flex items-center justify-center transition-all shadow"
+                  >
+                    <Bookmark size={13} fill={savedArticles.includes("Behind Aarong's Summer Collection") ? "#FF5B00" : "none"} />
+                  </button>
+                </div>
+
+                <div className="p-5">
+                  <h4 className="text-sm font-black text-[#000435] leading-snug group-hover:text-[#FF5B00] transition-colors uppercase tracking-tight">
+                    Behind Aarong's Summer Collection
+                  </h4>
+                  <div className="flex items-center gap-2 mt-2 text-[10px] text-slate-400 font-bold font-mono">
+                    <span>10 min read</span>
+                    <span>•</span>
+                    <span>Brand Story</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border-t border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <img 
+                    src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&q=80" 
+                    alt="Aarong Official" 
+                    className="w-7.5 h-7.5 rounded-full border border-slate-200"
+                  />
+                  <div className="text-left">
+                    <p className="text-[10px] font-black text-slate-800 leading-tight">Aarong Official</p>
+                    <span className="text-[8px] font-bold text-[#FF5B00] uppercase tracking-widest block">Verified Brand</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* SECTION 4.2: TRENDING NOW + BROWSE BY FORMAT */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start" id="trending-and-formats">
+          
+          {/* Left Block: Trending Now List */}
+          <div className="lg:col-span-8 flex flex-col space-y-4">
+            <div className="flex flex-col text-left">
+              <h3 className="text-sm font-black text-[#000435] uppercase tracking-tight">TRENDING NOW</h3>
+              <p className="text-[10px] text-slate-400 font-bold">What's hot on Choosify right now</p>
+            </div>
+
+            {/* Horizontal scrolling or grid of trending items */}
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+              {[
+                { 
+                  title: 'Best Laptop for Students in 2025', 
+                  image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=150&q=80',
+                  badge: 'TRENDING',
+                  badgeColor: 'bg-[#FF5B00]/15 text-[#FF5B00]',
+                  readTime: '10 min read', 
+                  views: '15.2K',
+                  type: 'read'
+                },
+                { 
+                  title: 'Best Smartwatches Under BDT 10,000', 
+                  image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=150&q=80',
+                  badge: 'TRENDING',
+                  badgeColor: 'bg-[#FF5B00]/15 text-[#FF5B00]',
+                  readTime: '8 min read', 
+                  views: '12.8K',
+                  type: 'read'
+                },
+                { 
+                  title: 'Top 5 ANC Earbuds Compared', 
+                  image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=150&q=80',
+                  badge: 'TRENDING',
+                  badgeColor: 'bg-[#FF5B00]/15 text-[#FF5B00]',
+                  readTime: '7 min read', 
+                  views: '9.6K',
+                  type: 'read'
+                },
+                { 
+                  title: 'iPhone 15 vs Samsung S24: Which is Better?', 
+                  image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=150&q=80',
+                  badge: 'TRENDING',
+                  badgeColor: 'bg-[#FF5B00]/15 text-[#FF5B00]',
+                  readTime: '12 min read', 
+                  views: '18.4K',
+                  type: 'read'
+                },
+                { 
+                  title: 'DJI Mini 4 Pro - Full Review', 
+                  image: 'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?w=150&q=80',
+                  badge: 'NEW LAUNCH',
+                  badgeColor: 'bg-emerald-500/15 text-emerald-600',
+                  readTime: '15 min video', 
+                  views: '18.1K',
+                  type: 'video'
+                }
+              ].map((item, idx) => (
                 <div 
-                  key={item.id}
-                  onClick={() => handleTrendingSearchClick(item.title)}
-                  className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between h-[270px] group cursor-pointer"
+                  key={idx} 
+                  onClick={() => toast.success(`Opening: ${item.title}`)}
+                  className="bg-white border border-slate-200/60 rounded-2xl p-3 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between h-[210px] text-left group"
                 >
-                  <div className="relative h-[110px] bg-slate-100 overflow-hidden shrink-0">
+                  <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-50 mb-2">
                     <img 
                       src={item.image} 
                       alt={item.title} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute top-2 left-2 z-10">
-                      <span className={`bg-[#FF5B00] text-white text-[8px] font-black tracking-wider px-2 py-0.5 rounded uppercase`}>
-                        {item.badge}
-                      </span>
-                    </div>
+                    
+                    {/* Badge */}
+                    <span className={`absolute top-1.5 left-1.5 text-[7px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded ${item.badgeColor}`}>
+                      {item.badge}
+                    </span>
+
+                    {/* Video play icon indicator overlay if video */}
+                    {item.type === 'video' && (
+                      <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-white text-[#FF5B00] flex items-center justify-center shadow">
+                          <Play size={10} fill="currentColor" className="ml-0.5" />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="p-3 flex-1 flex flex-col justify-between">
-                    <h4 className="text-[12px] font-bold text-slate-800 leading-snug group-hover:text-[#FF5B00] transition-colors line-clamp-3">
+                  <div className="flex flex-col justify-between flex-1">
+                    <h5 className="text-[10.5px] font-black text-[#000435] leading-snug line-clamp-3 group-hover:text-[#FF5B00] transition-colors uppercase tracking-tight">
                       {item.title}
-                    </h4>
+                    </h5>
                     
-                    <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase border-t border-slate-100 pt-2.5 mt-2">
+                    <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-slate-100 text-[8.5px] text-slate-400 font-bold font-mono">
                       <span>{item.readTime}</span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="flex items-center gap-0.5 text-slate-500 font-extrabold shrink-0">
+                        <Flame size={9} className="text-[#FF5B00]" />
                         {item.views}
                       </span>
                     </div>
@@ -772,342 +652,543 @@ export function GuidesPage() {
             </div>
           </div>
 
-          {/* Column B (Col Span 3): BROWSE BY FORMAT */}
-          <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-6 border-b border-slate-200/60 pb-3">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">FORMATS</span>
-                <h3 className="text-xl font-extrabold text-slate-900 mt-1 uppercase tracking-tight">
-                  Browse by Format
-                </h3>
+          {/* Right Block: Browse by Format List */}
+          <div className="lg:col-span-4 flex flex-col space-y-4">
+            <div className="flex justify-between items-end">
+              <div className="text-left">
+                <h3 className="text-sm font-black text-[#000435] uppercase tracking-tight">BROWSE BY FORMAT</h3>
+                <p className="text-[10px] text-slate-400 font-bold">Choose how you want to discover</p>
               </div>
+              <button 
+                onClick={() => toast.success('Loading format overview...')}
+                className="text-[10px] font-black text-[#FF5B00] hover:text-[#EB4501] uppercase tracking-widest block shrink-0"
+              >
+                View all formats &rarr;
+              </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-5.5 space-y-3.5 shadow-sm">
               {[
-                { name: 'Videos', desc: 'Watch expert videos', color: 'bg-rose-50 text-rose-500 border-rose-100', icon: PlaySquare },
-                { name: 'Buying Guides', desc: 'In-depth buying help', color: 'bg-blue-50 text-blue-500 border-blue-100', icon: BookOpen },
-                { name: 'Reviews', desc: 'Honest product reviews', color: 'bg-amber-50 text-amber-500 border-amber-100', icon: Star },
-                { name: 'Comparisons', desc: 'Compare products', color: 'bg-purple-50 text-purple-500 border-purple-100', icon: Scale },
-                { name: 'Lists & Rankings', desc: 'Top picks & rankings', color: 'bg-indigo-50 text-indigo-500 border-indigo-100', icon: ListOrdered },
-                { name: 'How-To & Tips', desc: 'Learn & improve', color: 'bg-teal-50 text-teal-500 border-teal-100', icon: Lightbulb }
+                { label: 'Videos', desc: 'Watch expert videos', color: 'bg-red-50 text-red-500 border-red-100', icon: PlaySquare },
+                { label: 'Buying Guides', desc: 'In-depth buying help', color: 'bg-blue-50 text-blue-600 border-blue-100', icon: BookOpen },
+                { label: 'Reviews', desc: 'Honest product reviews', color: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: CheckCircle2 },
+                { label: 'Comparisons', desc: 'Compare products side-by-side', color: 'bg-indigo-50 text-indigo-600 border-indigo-100', icon: Scale },
+                { label: 'Lists & Rankings', desc: 'Top picks & rankings', color: 'bg-purple-50 text-purple-600 border-purple-100', icon: ListOrdered },
+                { label: 'How-To & Tips', desc: 'Learn & improve your device usage', color: 'bg-orange-50 text-[#FF5B00] border-orange-100', icon: Lightbulb }
               ].map((format, idx) => {
-                const FormatIcon = format.icon;
+                const IconComponent = format.icon;
                 return (
-                  <div
+                  <button
                     key={idx}
                     onClick={() => {
-                      setSearchQuery(format.name === 'Reviews' ? 'Review' : format.name);
-                      toast.success(`Format selected: ${format.name}`);
+                      setActiveCategory(format.label);
+                      toast.success(`Active Format: ${format.label}`);
                     }}
-                    className="flex items-center gap-3 p-3 bg-white border border-slate-200/85 hover:border-[#FF5B00]/30 hover:bg-[#FF5B00]/2 rounded-xl shadow-xs transition-all duration-200 cursor-pointer group text-left"
+                    className="w-full flex items-center justify-between p-2.5 rounded-2xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 text-left cursor-pointer group"
                   >
-                    <div className={`w-9 h-9 rounded-full ${format.color} flex items-center justify-center border shrink-0`}>
-                      <FormatIcon className="w-4 h-4" />
+                    <div className="flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${format.color}`}>
+                        <IconComponent size={16} />
+                      </div>
+                      <div>
+                        <p className="text-[11.5px] font-extrabold text-[#000435] leading-none mb-1 group-hover:text-[#FF5B00] transition-colors">{format.label}</p>
+                        <p className="text-[9.5px] text-slate-400 font-semibold leading-none">{format.desc}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800 tracking-tight group-hover:text-[#FF5B00] transition-colors leading-none">
-                        {format.name}
-                      </h4>
-                      <p className="text-[10px] text-slate-400 font-semibold mt-1">
-                        {format.desc}
-                      </p>
-                    </div>
-                  </div>
+                    <ChevronRight size={13} className="text-slate-300 group-hover:text-[#FF5B00] transition-colors" />
+                  </button>
                 );
               })}
             </div>
           </div>
 
-        </div>
-      </section>
+        </section>
 
-      {/* 6. GUIDES BY PRODUCT TYPE */}
-      <section className="max-w-7xl mx-auto w-full px-6 md:px-10 mb-12 text-left">
-        <div className="flex items-center justify-between mb-6 border-b border-slate-200/60 pb-3">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">PRODUCT TYPE</span>
-            <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 mt-1 uppercase tracking-tight">
-              Guides by Product Type
-            </h3>
-            <p className="text-xs text-slate-400 mt-1">Explore our comprehensive buying guides</p>
-          </div>
-          <Link 
-            to="/categories" 
-            className="text-xs font-bold text-[#FF5B00] hover:text-orange-600 transition-colors uppercase tracking-wider flex items-center gap-1 group"
-          >
-            View all categories 
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-          {[
-            {
-              title: 'Smartphones',
-              bullets: [
-                'Best Phones Under 20,000',
-                'Flagship Phones Comparison',
-                'Camera Phones Guide',
-                'Battery Life Comparison'
-              ],
-              count: 128,
-              image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&q=80'
-            },
-            {
-              title: 'Laptops',
-              bullets: [
-                'Best Laptops for Students',
-                'Gaming Laptops Guide',
-                'MacBooks vs Windows',
-                'Budget Laptops'
-              ],
-              count: 96,
-              image: 'https://images.unsplash.com/photo-1496181130204-755241544e35?w=300&q=80'
-            },
-            {
-              title: 'Audio',
-              bullets: [
-                'Headphones Buying Guide',
-                'Wireless Earbuds Guide',
-                'Speakers Comparison',
-                'Soundbars Guide'
-              ],
-              count: 76,
-              image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80'
-            },
-            {
-              title: 'Cameras',
-              bullets: [
-                'DSLR vs Mirrorless',
-                'Best Cameras for Beginners',
-                'Videography Cameras',
-                'Lens Buying Guide'
-              ],
-              count: 55,
-              image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300&q=80'
-            },
-            {
-              title: 'Gaming',
-              bullets: [
-                'Gaming PC Build Guide',
-                'Gaming Accessories',
-                'Monitor Buying Guide',
-                'Console Comparison'
-              ],
-              count: 32,
-              image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=300&q=80'
-            },
-            {
-              title: 'Home Appliances',
-              bullets: [
-                'Refrigerator Guide',
-                'Washing Machine Guide',
-                'Air Conditioner Guide',
-                'Kitchen Appliances'
-              ],
-              count: 60,
-              image: 'https://images.unsplash.com/photo-1571175432247-52382a4ac931?w=300&q=80'
-            }
-          ].map((cat, idx) => (
-            <div 
-              key={idx}
-              className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-300 flex justify-between gap-4 h-[200px]"
+        {/* SECTION 4.3: GUIDES BY PRODUCT TYPE */}
+        <section id="guides-by-product-type">
+          <div className="flex justify-between items-end mb-5">
+            <div className="text-left">
+              <h3 className="text-sm font-black text-[#000435] uppercase tracking-tight">GUIDES BY PRODUCT TYPE</h3>
+              <p className="text-[10px] text-slate-400 font-bold">Explore our comprehensive buying guides</p>
+            </div>
+            <button 
+              onClick={() => toast.success('Loading all categories...')}
+              className="text-[11px] font-black text-[#FF5B00] hover:text-[#EB4501] uppercase tracking-wider block shrink-0"
             >
-              <div className="flex-1 flex flex-col justify-between text-left">
-                <div>
-                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest leading-none mb-3">
-                    {cat.title}
-                  </h4>
-                  <ul className="space-y-1 text-[11px] font-semibold text-slate-600 list-disc list-inside">
-                    {cat.bullets.map((b, bidx) => (
-                      <li key={bidx} className="line-clamp-1 hover:text-[#FF5B00] cursor-pointer" onClick={() => handleTrendingSearchClick(b)}>
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              View all categories &rarr;
+            </button>
+          </div>
 
-                <div 
-                  onClick={() => handleTrendingSearchClick(cat.title)}
-                  className="text-[10px] font-extrabold text-[#FF5B00] hover:underline uppercase tracking-wider cursor-pointer flex items-center gap-1 shrink-0 mt-3"
-                >
-                  <span>VIEW ALL ({cat.count})</span>
-                  <ArrowRight size={10} />
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* CATEGORY 1: SMARTPHONES */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+              <div>
+                <h4 className="text-xs font-black text-[#000435] uppercase tracking-wider mb-4 pb-1.5 border-b border-slate-100 flex justify-between items-center">
+                  <span>Smartphones</span>
+                  <span className="text-[9px] text-[#FF5B00] bg-[#FF5B00]/5 px-2 py-0.5 rounded-full font-bold">Category</span>
+                </h4>
+                
+                <ul className="space-y-3">
+                  {[
+                    'Best Phones Under 20,000',
+                    'Flagship Phones Comparison',
+                    'Camera Phones Guide',
+                    'Battery Life Comparison'
+                  ].map((guide, idx) => (
+                    <li key={idx}>
+                      <button 
+                        onClick={() => toast.success(`Opening: ${guide}`)}
+                        className="text-slate-600 hover:text-[#FF5B00] text-xs font-bold leading-tight flex items-center gap-1.5 text-left"
+                      >
+                        <span className="text-[#FF5B00]">•</span>
+                        <span>{guide}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              <div className="w-24 h-full bg-slate-50 rounded-xl overflow-hidden flex items-center justify-center p-1.5 shrink-0">
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                <button 
+                  onClick={() => toast.success('Viewing 128 smartphone guides...')}
+                  className="text-[9.5px] font-black text-slate-400 hover:text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 transition-colors"
+                >
+                  <span>View All (128)</span>
+                  <ArrowRight size={10} />
+                </button>
                 <img 
-                  src={cat.image} 
-                  alt={cat.title} 
-                  className="max-h-full max-w-full object-contain rounded-lg shadow-sm"
+                  src="https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=100&q=80" 
+                  alt="Phone" 
+                  className="w-10 h-10 object-contain rounded-lg bg-slate-50 p-1 shrink-0"
                   referrerPolicy="no-referrer"
                 />
               </div>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* 7. EXPERT'S PICKS & TOP CREATORS (SPLIT COLUMNS) */}
-      <section className="max-w-7xl mx-auto w-full px-6 md:px-10 mb-12 text-left">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          
-          {/* Column A: Expert's Picks */}
-          <div>
-            <div className="flex items-center justify-between mb-6 border-b border-slate-200/60 pb-3">
+            {/* CATEGORY 2: LAPTOPS */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">EXPERT HANDPICKED</span>
-                <h3 className="text-xl font-extrabold text-slate-900 mt-1 uppercase tracking-tight">
-                  Expert's Picks
-                </h3>
+                <h4 className="text-xs font-black text-[#000435] uppercase tracking-wider mb-4 pb-1.5 border-b border-slate-100 flex justify-between items-center">
+                  <span>Laptops</span>
+                  <span className="text-[9px] text-[#FF5B00] bg-[#FF5B00]/5 px-2 py-0.5 rounded-full font-bold">Category</span>
+                </h4>
+                
+                <ul className="space-y-3">
+                  {[
+                    'Best Laptops for Students',
+                    'Gaming Laptops Guide',
+                    'MacBooks vs Windows',
+                    'Budget Laptops'
+                  ].map((guide, idx) => (
+                    <li key={idx}>
+                      <button 
+                        onClick={() => toast.success(`Opening: ${guide}`)}
+                        className="text-slate-600 hover:text-[#FF5B00] text-xs font-bold leading-tight flex items-center gap-1.5 text-left"
+                      >
+                        <span className="text-[#FF5B00]">•</span>
+                        <span>{guide}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <Link 
-                to="/guides" 
-                className="text-xs font-bold text-[#FF5B00] hover:text-orange-600 transition-colors uppercase tracking-wider flex items-center gap-1 group"
-              >
-                View all 
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                <button 
+                  onClick={() => toast.success('Viewing 98 laptop guides...')}
+                  className="text-[9.5px] font-black text-slate-400 hover:text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 transition-colors"
+                >
+                  <span>View All (98)</span>
+                  <ArrowRight size={10} />
+                </button>
+                <img 
+                  src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=100&q=80" 
+                  alt="Laptop" 
+                  className="w-10 h-10 object-contain rounded-lg bg-slate-50 p-1 shrink-0"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch h-auto md:h-[290px]">
-              
-              {/* Left Side: Vertical list of 3 items */}
-              <div className="md:col-span-7 flex flex-col justify-between gap-3 h-full">
-                {EDITORS_LIST_DATA.map((item) => (
-                  <div 
-                    key={item.id}
-                    onClick={() => handleTrendingSearchClick(item.title)}
-                    className="flex items-center gap-3 p-3 bg-white border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors cursor-pointer"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-[#FF5B00]/10 text-[#FF5B00] text-xs font-black flex items-center justify-center shrink-0">
-                      {item.index}
-                    </div>
-                    
-                    <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden shrink-0">
-                      <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                    </div>
+            {/* CATEGORY 3: AUDIO */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+              <div>
+                <h4 className="text-xs font-black text-[#000435] uppercase tracking-wider mb-4 pb-1.5 border-b border-slate-100 flex justify-between items-center">
+                  <span>Audio</span>
+                  <span className="text-[9px] text-[#FF5B00] bg-[#FF5B00]/5 px-2 py-0.5 rounded-full font-bold">Category</span>
+                </h4>
+                
+                <ul className="space-y-3">
+                  {[
+                    'Headphones Buying Guide',
+                    'Wireless Earbuds Guide',
+                    'Speakers Comparison',
+                    'Soundbars Guide'
+                  ].map((guide, idx) => (
+                    <li key={idx}>
+                      <button 
+                        onClick={() => toast.success(`Opening: ${guide}`)}
+                        className="text-slate-600 hover:text-[#FF5B00] text-xs font-bold leading-tight flex items-center gap-1.5 text-left"
+                      >
+                        <span className="text-[#FF5B00]">•</span>
+                        <span>{guide}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-                    <div className="min-w-0">
-                      <h4 className="text-[11.5px] font-bold text-slate-800 line-clamp-2 leading-tight">
-                        {item.title}
-                      </h4>
-                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1.5 flex items-center gap-2">
-                        <span>{item.readTime}</span>
-                        <span>&bull;</span>
-                        <span className="flex items-center gap-0.5">
-                          <Eye size={10} />
-                          {item.views}
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                <button 
+                  onClick={() => toast.success('Viewing 76 audio guides...')}
+                  className="text-[9.5px] font-black text-slate-400 hover:text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 transition-colors"
+                >
+                  <span>View All (76)</span>
+                  <ArrowRight size={10} />
+                </button>
+                <img 
+                  src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=100&q=80" 
+                  alt="Headphones" 
+                  className="w-10 h-10 object-contain rounded-lg bg-slate-50 p-1 shrink-0"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
+
+            {/* CATEGORY 4: CAMERAS */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+              <div>
+                <h4 className="text-xs font-black text-[#000435] uppercase tracking-wider mb-4 pb-1.5 border-b border-slate-100 flex justify-between items-center">
+                  <span>Cameras</span>
+                  <span className="text-[9px] text-[#FF5B00] bg-[#FF5B00]/5 px-2 py-0.5 rounded-full font-bold">Category</span>
+                </h4>
+                
+                <ul className="space-y-3">
+                  {[
+                    'DSLR vs Mirrorless',
+                    'Best Cameras for Beginners',
+                    'Videography Cameras',
+                    'Lens Buying Guide'
+                  ].map((guide, idx) => (
+                    <li key={idx}>
+                      <button 
+                        onClick={() => toast.success(`Opening: ${guide}`)}
+                        className="text-slate-600 hover:text-[#FF5B00] text-xs font-bold leading-tight flex items-center gap-1.5 text-left"
+                      >
+                        <span className="text-[#FF5B00]">•</span>
+                        <span>{guide}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                <button 
+                  onClick={() => toast.success('Viewing 55 camera guides...')}
+                  className="text-[9.5px] font-black text-slate-400 hover:text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 transition-colors"
+                >
+                  <span>View All (55)</span>
+                  <ArrowRight size={10} />
+                </button>
+                <img 
+                  src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=100&q=80" 
+                  alt="Camera" 
+                  className="w-10 h-10 object-contain rounded-lg bg-slate-50 p-1 shrink-0"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
+
+            {/* CATEGORY 5: GAMING */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+              <div>
+                <h4 className="text-xs font-black text-[#000435] uppercase tracking-wider mb-4 pb-1.5 border-b border-slate-100 flex justify-between items-center">
+                  <span>Gaming</span>
+                  <span className="text-[9px] text-[#FF5B00] bg-[#FF5B00]/5 px-2 py-0.5 rounded-full font-bold">Category</span>
+                </h4>
+                
+                <ul className="space-y-3">
+                  {[
+                    'Gaming PC Build Guide',
+                    'Gaming Accessories',
+                    'Monitor Buying Guide',
+                    'Console Comparison'
+                  ].map((guide, idx) => (
+                    <li key={idx}>
+                      <button 
+                        onClick={() => toast.success(`Opening: ${guide}`)}
+                        className="text-slate-600 hover:text-[#FF5B00] text-xs font-bold leading-tight flex items-center gap-1.5 text-left"
+                      >
+                        <span className="text-[#FF5B00]">•</span>
+                        <span>{guide}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                <button 
+                  onClick={() => toast.success('Viewing 32 gaming guides...')}
+                  className="text-[9.5px] font-black text-slate-400 hover:text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 transition-colors"
+                >
+                  <span>View All (32)</span>
+                  <ArrowRight size={10} />
+                </button>
+                <img 
+                  src="https://images.unsplash.com/photo-1527977966376-1c8408f9f108?w=100&q=80" 
+                  alt="Gaming" 
+                  className="w-10 h-10 object-contain rounded-lg bg-slate-50 p-1 shrink-0"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
+
+            {/* CATEGORY 6: HOME APPLIANCES */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+              <div>
+                <h4 className="text-xs font-black text-[#000435] uppercase tracking-wider mb-4 pb-1.5 border-b border-slate-100 flex justify-between items-center">
+                  <span>Home Appliances</span>
+                  <span className="text-[9px] text-[#FF5B00] bg-[#FF5B00]/5 px-2 py-0.5 rounded-full font-bold">Category</span>
+                </h4>
+                
+                <ul className="space-y-3">
+                  {[
+                    'Refrigerator Guide',
+                    'Washing Machine Guide',
+                    'Air Conditioner Guide',
+                    'Kitchen Appliances'
+                  ].map((guide, idx) => (
+                    <li key={idx}>
+                      <button 
+                        onClick={() => toast.success(`Opening: ${guide}`)}
+                        className="text-slate-600 hover:text-[#FF5B00] text-xs font-bold leading-tight flex items-center gap-1.5 text-left"
+                      >
+                        <span className="text-[#FF5B00]">•</span>
+                        <span>{guide}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                <button 
+                  onClick={() => toast.success('Viewing 60 home appliances guides...')}
+                  className="text-[9.5px] font-black text-slate-400 hover:text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 transition-colors"
+                >
+                  <span>View All (60)</span>
+                  <ArrowRight size={10} />
+                </button>
+                <img 
+                  src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=100&q=80" 
+                  alt="Home Appliances" 
+                  className="w-10 h-10 object-contain rounded-lg bg-slate-50 p-1 shrink-0"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* SECTION 4.4: EXPERT'S PICKS & TOP CREATORS */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start" id="experts-and-creators">
+          
+          {/* Left Block: Expert's Picks */}
+          <div className="lg:col-span-7 flex flex-col space-y-4">
+            <div className="flex justify-between items-end">
+              <div className="text-left">
+                <h3 className="text-sm font-black text-[#000435] uppercase tracking-tight">EXPERT'S PICKS</h3>
+                <p className="text-[10px] text-slate-400 font-bold">Handpicked by our expert team</p>
+              </div>
+              <button 
+                onClick={() => toast.success('Loading all expert picks...')}
+                className="text-[10px] font-black text-[#FF5B00] hover:text-[#EB4501] uppercase tracking-widest block shrink-0"
+              >
+                View all picks &rarr;
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-stretch">
+              {/* 3 list items on the left */}
+              <div className="sm:col-span-5 space-y-3.5 flex flex-col justify-between">
+                {[
+                  {
+                    num: '1',
+                    title: 'Best 4K TVs for Home Theater in 2025',
+                    image: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=80&q=80',
+                    readTime: '9 min read',
+                    views: '12.6K'
+                  },
+                  {
+                    num: '2',
+                    title: 'Camera Settings Every Beginner Should Know',
+                    image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=80&q=80',
+                    readTime: '7 min read',
+                    views: '8.9K'
+                  },
+                  {
+                    num: '3',
+                    title: 'How to Choose the Right Gaming Monitor',
+                    image: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=80&q=80',
+                    readTime: '6 min read',
+                    views: '7.4K'
+                  }
+                ].map((pick) => (
+                  <div 
+                    key={pick.num}
+                    onClick={() => toast.success(`Opening: ${pick.title}`)}
+                    className="bg-white border border-slate-200/60 p-3.5 rounded-2xl flex items-start gap-3 hover:shadow-sm transition-all cursor-pointer group text-left flex-1"
+                  >
+                    <span className="text-sm font-black text-indigo-600 shrink-0 mt-0.5">{pick.num}</span>
+                    <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
+                      <img src={pick.image} alt={pick.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="min-w-0 flex-1 flex flex-col justify-between">
+                      <h5 className="text-[10.5px] font-extrabold text-[#000435] leading-snug line-clamp-2 uppercase tracking-tight group-hover:text-[#FF5B00] transition-colors">{pick.title}</h5>
+                      <div className="flex items-center justify-between text-[8px] text-slate-400 font-bold font-mono mt-1">
+                        <span>{pick.readTime}</span>
+                        <span className="flex items-center gap-0.5 text-slate-500">
+                          <Flame size={8} className="text-[#FF5B00]" />
+                          {pick.views}
                         </span>
-                      </p>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Right Side: Big Highlight Card */}
-              <div className="md:col-span-5 h-full">
-                <div 
-                  onClick={() => handleTrendingSearchClick('Best Noise Cancelling Headphones in 2025')}
-                  className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between h-full group relative cursor-pointer"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent z-10" />
+              {/* Huge editor's pick on the right */}
+              <div 
+                onClick={() => toast.success('Opening: Best Noise Cancelling Headphones in 2025')}
+                className="sm:col-span-7 bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group cursor-pointer text-left"
+              >
+                <div className="relative aspect-[16/10] bg-slate-100 w-full overflow-hidden">
                   <img 
-                    src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80" 
-                    alt="Noise Cancelling Headphones"
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60"
+                    src="https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&q=80" 
+                    alt="Best Noise Cancelling Headphones" 
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                    referrerPolicy="no-referrer"
                   />
-
-                  {/* Top tag */}
-                  <div className="p-4 relative z-20 text-left">
-                    <span className="bg-[#FF5B00] text-white text-[8px] font-black tracking-widest px-2.5 py-0.5 rounded uppercase">
-                      EDITOR'S PICK
-                    </span>
+                  <div className="absolute top-3 left-3 bg-[#FF5B00] text-white px-2.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">
+                    EDITOR'S PICK
                   </div>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleSaveArticle("Best Noise Cancelling Headphones in 2025");
+                    }}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm text-slate-600 hover:text-[#FF5B00] flex items-center justify-center transition-all shadow"
+                  >
+                    <Bookmark size={13} fill={savedArticles.includes("Best Noise Cancelling Headphones in 2025") ? "#FF5B00" : "none"} />
+                  </button>
+                </div>
 
-                  {/* Bottom title & author */}
-                  <div className="p-4 relative z-20 text-left">
-                    <h4 className="text-xs font-black text-white leading-snug group-hover:text-[#FF5B00] transition-colors">
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 className="text-sm font-black text-[#000435] leading-snug group-hover:text-[#FF5B00] transition-colors uppercase tracking-tight">
                       Best Noise Cancelling Headphones in 2025
                     </h4>
-                    <p className="text-[9px] text-slate-300 font-bold uppercase tracking-wider mt-1">
-                      10 min read
-                    </p>
+                    <span className="text-[10px] text-slate-400 font-bold font-mono mt-1.5 block">10 min read</span>
+                  </div>
 
-                    <div className="flex items-center gap-2 pt-2.5 border-t border-white/10 mt-2.5">
-                      <div className="w-6 h-6 rounded-full overflow-hidden bg-white/20 shrink-0">
-                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&q=80" alt="Headphone Zone" className="w-full h-full object-cover" />
-                      </div>
-                      <div>
-                        <div className="text-[10px] font-bold text-white leading-none">
-                          Headphone Zone
-                        </div>
-                        <div className="text-[8px] font-semibold text-slate-400 mt-0.5 uppercase tracking-wider leading-none">
-                          Official Review
-                        </div>
-                      </div>
+                  <div className="flex items-center gap-2.5 pt-4 border-t border-slate-100 mt-5">
+                    <img 
+                      src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&q=80" 
+                      alt="Headphone Zone" 
+                      className="w-7 h-7 rounded-full border border-slate-200"
+                    />
+                    <div className="text-left">
+                      <p className="text-[9.5px] font-black text-slate-800 leading-none mb-0.5">Headphone Zone</p>
+                      <span className="text-[7.5px] font-bold text-[#FF5B00] uppercase tracking-wider block">Official Review</span>
                     </div>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
 
-          {/* Column B: Top Creators */}
-          <div>
-            <div className="flex items-center justify-between mb-6 border-b border-slate-200/60 pb-3">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">DISCOVER VOICES</span>
-                <h3 className="text-xl font-extrabold text-slate-900 mt-1 uppercase tracking-tight">
-                  Top Creators
-                </h3>
+          {/* Right Block: Top Creators */}
+          <div className="lg:col-span-5 flex flex-col space-y-4">
+            <div className="flex justify-between items-end">
+              <div className="text-left">
+                <h3 className="text-sm font-black text-[#000435] uppercase tracking-tight">TOP CREATORS</h3>
+                <p className="text-[10px] text-slate-400 font-bold">Discover trusted voices</p>
               </div>
-              <Link 
-                to="/creators" 
-                className="text-xs font-bold text-[#FF5B00] hover:text-orange-600 transition-colors uppercase tracking-wider flex items-center gap-1 group"
+              <button 
+                onClick={() => toast.success('Loading creators directory...')}
+                className="text-[10px] font-black text-[#FF5B00] hover:text-[#EB4501] uppercase tracking-widest block shrink-0"
               >
-                View all creators 
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
+                View all creators &rarr;
+              </button>
             </div>
 
-            <div className="flex flex-col gap-3 h-auto md:h-[290px] justify-between">
-              {CREATORS_DATA.map((creator) => {
-                const isFollowing = followedCreators.includes(creator.id);
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-5.5 space-y-4 shadow-sm">
+              {[
+                {
+                  name: 'Tech World BD',
+                  badge: 'Verified Expert',
+                  badgeColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+                  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&q=80',
+                  guides: '128 Guides',
+                  followers: '452K Followers'
+                },
+                {
+                  name: 'Gadget & Gear',
+                  badge: 'Tech Creator',
+                  badgeColor: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+                  avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&q=80',
+                  guides: '98 Guides',
+                  followers: '312K Followers'
+                },
+                {
+                  name: 'Style With Me',
+                  badge: 'Fashion Creator',
+                  badgeColor: 'text-pink-600 bg-pink-50 border-pink-100',
+                  avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&q=80',
+                  guides: '76 Guides',
+                  followers: '245K Followers'
+                },
+                {
+                  name: 'Productivity Lab',
+                  badge: 'Lifestyle Creator',
+                  badgeColor: 'text-purple-600 bg-purple-50 border-purple-100',
+                  avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&q=80',
+                  guides: '64 Guides',
+                  followers: '198K Followers'
+                }
+              ].map((creator) => {
+                const isFollowing = followedCreators.includes(creator.name);
                 return (
                   <div 
-                    key={creator.id}
-                    className="flex items-center justify-between bg-white p-3 border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors"
+                    key={creator.name}
+                    className="flex items-center justify-between p-1 text-left"
                   >
-                    <div className="flex items-center gap-3 text-left">
-                      <div className="w-10 h-10 rounded-full overflow-hidden border border-[#FF5B00]/10 shrink-0 bg-slate-50">
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-10 h-10 rounded-full border border-slate-200/80 overflow-hidden bg-slate-50 shrink-0">
                         <img src={creator.avatar} alt={creator.name} className="w-full h-full object-cover" />
+                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-white" />
                       </div>
                       <div>
-                        <div className="flex items-center gap-1">
-                          <h4 className="text-xs font-extrabold text-slate-900 tracking-tight leading-none">
-                            {creator.name}
-                          </h4>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#FF5B00] fill-current" />
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-[11px] font-black text-[#000435] leading-none">{creator.name}</h4>
+                          <span className={`text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border shrink-0 ${creator.badgeColor}`}>
+                            {creator.badge}
+                          </span>
                         </div>
-                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
-                          {creator.badge}
-                        </p>
-                        <p className="text-[9px] font-semibold text-slate-500 mt-1 leading-none">
-                          {creator.guidesCount} Guides &bull; {creator.followersCount} Followers
-                        </p>
+                        <p className="text-[9px] text-slate-400 font-bold font-mono mt-1 leading-none">{creator.guides} • {creator.followers}</p>
                       </div>
                     </div>
 
                     <button
-                      onClick={() => toggleFollowCreator(creator.id, creator.name)}
-                      className={`h-8 px-4 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border-none ${
+                      onClick={() => toggleFollowCreator(creator.name)}
+                      className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider border cursor-pointer transition-all ${
                         isFollowing 
-                          ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' 
-                          : 'bg-white text-slate-800 border border-slate-300 hover:border-[#FF5B00] hover:text-[#FF5B00]'
+                          ? 'bg-slate-50 border-slate-200 text-slate-400 hover:text-red-500 hover:bg-red-50/50 hover:border-red-100' 
+                          : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
                       }`}
                     >
                       {isFollowing ? 'Following' : 'Follow'}
@@ -1118,143 +1199,172 @@ export function GuidesPage() {
             </div>
           </div>
 
-        </div>
-      </section>
+        </section>
 
-      {/* 8. FROM OUR COMMUNITY (SPLIT RATING SYSTEM BLOCK) */}
-      <section className="max-w-7xl mx-auto w-full px-6 md:px-10 mb-12 text-left">
-        <div className="flex flex-col items-start mb-6 border-b border-slate-200/60 pb-3">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">USER REVIEWS</span>
-          <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 mt-1 uppercase tracking-tight">
-            From Our Community
-          </h3>
-          <p className="text-xs text-slate-400 mt-1">Real experiences from verified users</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          
-          {/* Left Blockquote Column: Tanvir's feedback */}
-          <div className="lg:col-span-4 bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-50 shrink-0">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80" alt="Tanvir" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-black text-slate-900 leading-none">Tanvir Hossain</p>
-                    <p className="text-[9px] text-[#FF5B00] font-bold uppercase tracking-wider mt-0.5">Verified Expert</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} size={11} className="text-amber-400 fill-current" />
-                  ))}
-                </div>
-              </div>
-              <p className="text-xs font-semibold text-slate-600 italic leading-relaxed">
-                "I have been using Samsung products for years and they never disappoint. Excellent build quality and amazing performance on the Samsung Galaxy S24 Ultra."
-              </p>
+        {/* SECTION 4.5: FROM OUR COMMUNITY */}
+        <section id="community-reviews">
+          <div className="flex justify-between items-end mb-6">
+            <div className="text-left">
+              <h3 className="text-sm font-black text-[#000435] uppercase tracking-tight">FROM OUR COMMUNITY</h3>
+              <p className="text-[10px] text-slate-400 font-bold">Real experiences from verified users</p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold">
-              <span className="text-[#FF5B00] uppercase tracking-wide">Samsung Galaxy S24 Ultra &bull; 2 days ago</span>
-              <button onClick={() => toast.success('Voted helpful!')} className="text-slate-400 hover:text-[#FF5B00] flex items-center gap-1 cursor-pointer bg-transparent border-none">
-                <MessageSquare size={11} />
-                <span>HELPFUL (124)</span>
-              </button>
-            </div>
+            <button 
+              onClick={() => toast.success('Loading all community reviews...')}
+              className="text-[11px] font-black text-[#FF5B00] hover:text-[#EB4501] uppercase tracking-wider block shrink-0"
+            >
+              View all reviews &rarr;
+            </button>
           </div>
 
-          {/* Center Rating Summary Breakdown column */}
-          <div className="lg:col-span-4 bg-white border border-slate-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-            <span className="text-4xl md:text-5xl font-black text-slate-900 leading-none">4.8</span>
-            <div className="flex items-center gap-1 mt-2 mb-1">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Star key={s} size={16} className="text-amber-400 fill-current" />
-              ))}
-            </div>
-            <span className="text-[11px] text-slate-400 font-extrabold uppercase tracking-wider">(12.4K Reviews)</span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             
-            <div className="w-full space-y-2 mt-6">
-              {[
-                { star: 5, pct: 75, val: '9.6K' },
-                { star: 4, pct: 16, val: '2.1K' },
-                { star: 3, pct: 4, val: '524' },
-                { star: 2, pct: 1, val: '123' },
-                { star: 1, pct: 1, val: '58' }
-              ].map((row) => (
-                <div key={row.star} className="flex items-center gap-2 w-full text-[10px] font-bold text-slate-600">
-                  <span className="w-3 text-right">{row.star}★</span>
-                  <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-[#FF5B00] rounded-full" 
-                      style={{ width: `${row.pct}%` }}
-                    />
+            {/* Left Community Review */}
+            <div className="lg:col-span-4 bg-white border border-slate-200/80 rounded-3xl p-6.5 flex flex-col justify-between text-left shadow-sm">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <img 
+                    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80" 
+                    alt="Tanvir Hossain" 
+                    className="w-10 h-10 rounded-full border border-slate-200 shrink-0"
+                  />
+                  <div>
+                    <h5 className="text-[11px] font-black text-slate-800 leading-none mb-1">Tanvir Hossain</h5>
+                    <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest block leading-none">Verified Expert</span>
                   </div>
-                  <span className="w-10 text-right text-slate-400">{row.val}</span>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Right Blockquote Column: Nusrat's feedback */}
-          <div className="lg:col-span-4 bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-50 shrink-0">
-                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80" alt="Nusrat" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-black text-slate-900 leading-none">Nusrat Jahan</p>
-                    <p className="text-[9px] text-[#FF5B00] font-bold uppercase tracking-wider mt-0.5">Verified Buyer</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} size={11} className="text-amber-400 fill-current" />
+                {/* Rating Stars */}
+                <div className="flex gap-1 text-amber-400 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={11} fill="currentColor" />
                   ))}
+                  <span className="text-slate-800 text-[10px] font-black ml-1.5 font-mono">5/5</span>
                 </div>
+
+                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  "I have been using Samsung products for years and they never disappoint. Excellent build quality and amazing performance."
+                </p>
               </div>
-              <p className="text-xs font-semibold text-slate-600 italic leading-relaxed">
-                "The Bespoke refrigerator is perfect for our home. Stylish design and super efficient cooling. I highly recommend it."
-              </p>
+
+              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[9.5px]">
+                <div className="text-left leading-tight">
+                  <p className="text-[8px] text-slate-400 font-bold uppercase">Target Product</p>
+                  <p className="font-extrabold text-[#000435] mt-0.5">Samsung Galaxy S24 Ultra</p>
+                  <span className="text-[8.5px] text-slate-400 font-bold font-mono">2 days ago</span>
+                </div>
+                <button 
+                  onClick={() => toast.success('You found this review helpful!')}
+                  className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg font-black uppercase tracking-wider text-[8px] cursor-pointer"
+                >
+                  Helpful (124)
+                </button>
+              </div>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold">
-              <span className="text-[#FF5B00] uppercase tracking-wide">Samsung Bespoke 4-Door &bull; 6 days ago</span>
-              <button onClick={() => toast.success('Voted helpful!')} className="text-slate-400 hover:text-[#FF5B00] flex items-center gap-1 cursor-pointer bg-transparent border-none">
-                <MessageSquare size={11} />
-                <span>HELPFUL (60)</span>
-              </button>
+
+            {/* Center average score breakdown */}
+            <div className="lg:col-span-4 bg-white border border-slate-200/80 rounded-3xl p-6.5 flex flex-col justify-center items-center text-center shadow-sm">
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">AVERAGE RATING</span>
+              <h2 className="text-5xl font-black text-[#000435] leading-none tracking-tight">4.8</h2>
+              
+              <div className="flex gap-1 text-amber-400 mt-2.5 mb-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={13} fill="currentColor" />
+                ))}
+              </div>
+              <span className="text-[10px] text-slate-400 font-bold font-mono mb-6">(12.4K Reviews)</span>
+
+              {/* Progress bars */}
+              <div className="w-full space-y-1.5 text-[10px] font-bold text-slate-500">
+                {[
+                  { stars: '5', count: '9.6K', percentage: '80%' },
+                  { stars: '4', count: '2.1K', percentage: '15%' },
+                  { stars: '3', count: '524', percentage: '4%' },
+                  { stars: '2', count: '123', percentage: '1%' },
+                  { stars: '1', count: '58', percentage: '0%' }
+                ].map((stat) => (
+                  <div key={stat.stars} className="flex items-center gap-3">
+                    <span className="w-3 text-right shrink-0">{stat.stars}</span>
+                    <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-amber-400 rounded-full" style={{ width: stat.percentage }} />
+                    </div>
+                    <span className="w-8 text-right font-mono text-slate-400 shrink-0">{stat.count}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {/* Right Community Review */}
+            <div className="lg:col-span-4 bg-white border border-slate-200/80 rounded-3xl p-6.5 flex flex-col justify-between text-left shadow-sm">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <img 
+                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&q=80" 
+                    alt="Nusrat Jahan" 
+                    className="w-10 h-10 rounded-full border border-slate-200 shrink-0"
+                  />
+                  <div>
+                    <h5 className="text-[11px] font-black text-slate-800 leading-none mb-1">Nusrat Jahan</h5>
+                    <span className="text-[8px] font-bold text-indigo-600 uppercase tracking-widest block leading-none">Verified Buyer</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-1 text-amber-400 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={11} fill={i < 4 ? "currentColor" : "none"} className={i >= 4 ? "text-slate-200" : ""} />
+                  ))}
+                  <span className="text-slate-800 text-[10px] font-black ml-1.5 font-mono">4.8/5</span>
+                </div>
+
+                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  "The Bespoke refrigerator is perfect for our home. Stylish design and super efficient cooling."
+                </p>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[9.5px]">
+                <div className="text-left leading-tight">
+                  <p className="text-[8px] text-slate-400 font-bold uppercase">Target Product</p>
+                  <p className="font-extrabold text-[#000435] mt-0.5">Samsung Bespoke 4-Door Refrigerator</p>
+                  <span className="text-[8.5px] text-slate-400 font-bold font-mono">6 days ago</span>
+                </div>
+                <button 
+                  onClick={() => toast.success('You found this review helpful!')}
+                  className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg font-black uppercase tracking-wider text-[8px] cursor-pointer"
+                >
+                  Helpful (60)
+                </button>
+              </div>
+            </div>
+
           </div>
+        </section>
 
-        </div>
-      </section>
+      </main>
 
-      {/* 9. TRUST BADGES ROW */}
-      <section className="max-w-7xl mx-auto w-full px-6 md:px-10 mb-10 select-none">
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 w-full">
+      {/* 5. Bottom Trust Badges Section */}
+      <section className="bg-white border-t border-slate-200/50 py-10 px-6 md:px-10" id="trust-strip">
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-2 md:grid-cols-5 gap-6 select-none text-left">
           {[
             { title: 'Expert & Verified', desc: 'Content by experts and verified creators.', icon: CheckCircle2 },
-            { title: '100% Independent', desc: 'Unbiased guides you can trust.', icon: ShieldCheck },
-            { title: 'Regularly Updated', desc: 'Latest trends and recommendations.', icon: Calendar },
-            { title: 'Real Experiences', desc: 'From real users and customers.', icon: Sparkles },
-            { title: 'Smart & Helpful', desc: 'AI powered discovery just for you.', icon: Bot }
+            { title: '100% Independent', desc: 'Unbiased guides you can trust completely.', icon: ShieldCheck },
+            { title: 'Regularly Updated', desc: 'Latest shopping trends and pricing guides.', icon: Calendar },
+            { title: 'Real Experiences', desc: 'From real customers and verified buyers.', icon: Sparkles },
+            { title: 'Smart & Helpful', desc: 'AI assisted discovery just for you.', icon: Bot }
           ].map((item, idx) => {
-            const IconComponent = item.icon;
+            const Icon = item.icon;
             return (
               <div 
-                key={idx}
-                className="bg-white border border-slate-200/70 rounded-2xl p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow duration-200"
+                key={idx} 
+                className={`flex flex-col items-start space-y-2.5 p-4 bg-[#F4F7F9]/50 rounded-2xl border border-slate-200/40 hover:bg-[#F4F7F9] transition-all ${
+                  idx === 4 ? 'col-span-2 md:col-span-1' : ''
+                }`}
               >
                 <div className="w-9 h-9 rounded-full bg-[#FF5B00]/10 text-[#FF5B00] flex items-center justify-center shrink-0">
-                  <IconComponent size={18} />
+                  <Icon size={18} />
                 </div>
-                <h4 className="text-[11.5px] font-black text-slate-800 mt-3 tracking-tight leading-none uppercase">
+                <h4 className="text-[11.5px] font-black text-[#000435] uppercase tracking-tight leading-none">
                   {item.title}
                 </h4>
-                <p className="text-[10px] text-slate-400 font-semibold mt-1.5 leading-snug">
+                <p className="text-[10px] text-slate-400 font-semibold leading-normal">
                   {item.desc}
                 </p>
               </div>
@@ -1263,21 +1373,146 @@ export function GuidesPage() {
         </div>
       </section>
 
-      {/* 10. CHOOSIFY.BD TRUST STATEMENT FOOTER CALLOUT */}
-      <section className="max-w-7xl mx-auto w-full px-6 md:px-10">
-        <div className="bg-[#050616] border border-slate-800 rounded-3xl p-8 text-center relative overflow-hidden shadow-lg flex flex-col items-center justify-center min-h-[160px]">
-          <div className="absolute top-0 right-0 w-[150px] h-[150px] bg-[#FF5B00]/5 rounded-full blur-[50px] pointer-events-none" />
-          
-          <span className="text-[10px] font-black tracking-[0.25em] text-[#FF5B00] uppercase mb-2 block">
-            CHOOSIFY.BD TRUST STATEMENT
-          </span>
-          <p className="text-xs md:text-sm text-slate-300 font-semibold max-w-2xl leading-relaxed italic">
-            "Only verified sellers and completely unbiased, authentic brand experiences are list on Choosify."
+      {/* 6. CHOOSIFY.BD TRUST STATEMENT STATEMENT CALLOUT */}
+      <section className="bg-[#000435] border-t border-white/5 text-white py-12 px-6 md:px-10" id="discover-trust-statement">
+        <div className="max-w-4xl mx-auto text-center flex flex-col items-center justify-center">
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-[9.5px] font-black tracking-[0.25em] text-[#FF5B00] uppercase mb-3">
+            <ShieldCheck size={13} className="text-[#FF5B00]" />
+            <span>CHOOSIFY.BD TRUST STATEMENT</span>
+          </div>
+          <p className="text-xs md:text-sm text-slate-300 font-bold leading-relaxed max-w-2xl italic">
+            "Only verified sellers and completely unbiased, authentic brand experiences are listed on Choosify."
           </p>
-          
-          <div className="w-12 h-1 bg-[#FF5B00]/40 rounded-full mt-4" />
+          <div className="w-12 h-[3px] bg-[#FF5B00] rounded-full mt-4" />
         </div>
       </section>
+
+      {/* 7. FOOTER SECTION */}
+      <footer className="bg-[#050616] text-white/50 border-t border-white/5 py-12 px-6 md:px-10 text-left" id="discover-footer">
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+          
+          {/* Logo & Description */}
+          <div className="md:col-span-4 space-y-4">
+            <svg viewBox="0 0 2585.84 505.4" className="h-6.5 w-auto text-white" xmlns="http://www.w3.org/2000/svg">
+              <g>
+                <g>
+                  <path fill="#FF5B00" d="M921.65,303.09c0-47.35-38.42-85.71-85.76-85.71s-85.76,38.36-85.76,85.71,38.42,85.76,85.76,85.76c8.22,0,16.14-1.17,23.65-3.3-3.3-5.38-5.23-11.77-5.23-18.57,0-19.74,15.99-35.73,35.68-35.73,8.93,0,17.1,3.3,23.34,8.68,5.33-11.16,8.32-23.65,8.32-36.84Z"/>
+                  <path fill="#FF5B00" d="M356.15,303.09c0-47.35-38.42-85.71-85.76-85.71s-85.76,38.36-85.76,85.71c0,47.35,38.42,85.76,85.76,85.76,8.22,0,16.14-1.17,23.65-3.3-3.3-5.38-5.23-11.77-5.23-18.57,0-19.74,15.99-35.73,35.68-35.73,8.93,0,17.1,3.3,23.34,8.68,5.33-11.16,8.32-23.65,8.32-36.84Z"/>
+                  <path fill="#FF5B00" d="M252.7,505.4C113.36,505.4,0,392.04,0,252.7S113.36,0,252.7,0s252.7,113.36,252.7,252.7-113.36,252.7-252.7,252.7ZM252.7,57.74c-107.5,0-194.96,87.46-194.96,194.96s87.46,194.96,194.96,194.96,194.96-87.46,194.96-194.96S360.2,57.74,252.7,57.74Z"/>
+                  <path fill="#FF5B00" d="M779.18,505.4c-139.34,0-252.7-113.36-252.7-252.7S639.84,0,779.18,0s252.7,113.36,252.7,252.7-113.36,252.7-252.7,252.7ZM779.18,57.74c-107.5,0-194.96,87.46-194.96,194.96s87.46,194.96,194.96,194.96,194.96-87.46,194.96-194.96-87.46-194.96-194.96-194.96Z"/>
+                </g>
+                <g>
+                  <path fill="#fff" d="M1094.27,260.83c0-54.18,36.9-95.48,93.45-95.48,48.09,0,77.9,27.43,84.31,66.7h-51.45c-3.72-16.59-14.55-27.09-32.15-27.09-26.77,0-40.3,22.01-40.3,55.88s13.53,55.19,40.3,55.19c19.62,0,31.48-11.85,33.85-32.51h51.13c-1.7,40.97-34.21,72.8-84.31,72.8-57.58,0-94.83-41.64-94.83-95.48Z"/>
+                  <path fill="#fff" d="M1351.4,350.56h-53.18V98.64h53.18v69.42c0,1.68,0,16.25-.35,28.1h1.03c10.84-19.3,29.11-30.81,54.18-30.81,39.59,0,62.64,26.4,62.64,66.7v118.52h-52.83v-108.36c0-19.64-10.48-32.84-30.13-32.84-20.65,0-34.53,16.59-34.53,39.62v101.58Z"/>
+                  <path fill="#fff" d="M1494.41,260.83c0-54.18,37.92-95.48,95.5-95.48s94.8,41.31,94.8,95.48-37.57,95.48-94.8,95.48-95.5-41.64-95.5-95.48ZM1630.88,260.83c0-34.21-14.91-57.56-41.32-57.56s-41.29,23.35-41.29,57.56,14.2,56.89,41.29,56.89,41.32-23.03,41.32-56.89Z"/>
+                  <path fill="#fff" d="M1703.14,260.83c0-54.18,37.92-95.48,95.5-95.48s94.8,41.31,94.8,95.48-37.57,95.48-94.8,95.48-95.5-41.64-95.5-95.48ZM1839.61,260.83c0-34.21-14.91-57.56-41.32-57.56s-41.29,23.35-41.29,57.56,14.2,56.89,41.29,56.89,41.32-23.03,41.32-56.89Z"/>
+                  <path fill="#fff" d="M1908.8,295.02h50.11c3.05,16.94,15.93,26.42,36.58,26.42,18.98,0,29.81-7.79,29.81-20.65,0-16.25-21.35-18.29-46.39-23.03-32.19-6.09-64.69-14.22-64.69-56.21,0-36.9,33.53-56.2,75.85-56.2,50.11,0,75.18,21.67,79.92,53.15h-49.43c-3.4-12.86-13.56-19.3-30.49-19.3s-26.74,6.78-26.74,18.29c0,13.54,19.62,15.58,44.34,19.97,32.19,5.75,68.76,14.22,68.76,59.6,0,38.95-34.56,59.26-81.27,59.26-52.16,0-83.64-25.05-86.36-61.29Z"/>
+                  <rect fill="#fff" x="2102.94" y="170.41" width="53.18" height="180.15"/>
+                  <path fill="#fff" d="M2260.83,204.96v145.61h-53.18v-145.61h-27.09v-34.54h27.09v-15.23c0-19.3,4.74-32.84,15.26-42.33,11.83-10.5,30.46-14.55,53.47-14.22,7.12,0,14.59.34,22.02,1.35v37.92c-26.74-1.01-37.57.69-37.57,21v11.51h37.57v34.54h-37.57Z"/>
+                  <path fill="#fff" d="M2335.71,410.16v-41.64h2.72c.67.34,15.9.34,17.28.34,16.57,0,24.72-6.09,25.71-18.29,0-6.09-3.05-19.97-9.46-36.23l-55.88-143.92h55.88l23.02,69.09c8.11,24.38,14.91,62.64,14.91,62.64h.67s8.11-38.6,15.9-62.64l22.02-69.09h52.83l-64.34,184.56c-14.59,41.64-31.16,55.86-65.69,55.86-1.7,0-34.56-.34-35.58-.67Z"/>
+                  <path fill="#FF5B00" d="M2129.7,152.15c15.9,0,28.78-12.9,28.78-28.8,0-15.9-12.88-28.8-28.78-28.8-15.9,0-28.8,12.9-28.8,28.8,0,2.76.39,5.42,1.11,7.94,1.81-1.11,3.95-1.76,6.24-1.76,6.63,0,12,5.37,12,11.98,0,3-1.11,5.74-2.91,7.84,3.75,1.79,7.94,2.79,12.37,2.79Z"/>
+                </g>
+              </g>
+            </svg>
+            <p className="text-xs leading-relaxed max-w-sm text-slate-400 font-bold">
+              Bangladesh's smartest product discovery platform. Find the best brands, compare prices and shop with confidence.
+            </p>
+            
+            {/* Social media links */}
+            <div className="flex gap-4.5 pt-2">
+              {[
+                { icon: 'https://cdn-icons-png.flaticon.com/512/124/124010.png', label: 'Facebook', url: 'https://facebook.com' },
+                { icon: 'https://cdn-icons-png.flaticon.com/512/174/174855.png', label: 'Instagram', url: 'https://instagram.com' },
+                { icon: 'tiktok', label: 'TikTok', url: 'https://tiktok.com' },
+                { icon: 'https://cdn-icons-png.flaticon.com/512/174/174883.png', label: 'YouTube', url: 'https://youtube.com' }
+              ].map((social, idx) => (
+                <a 
+                  key={idx}
+                  href={social.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:text-[#FF5B00] text-white/75 transition-all shadow"
+                >
+                  {social.icon === 'tiktok' ? (
+                    <TikTokIcon size={14} />
+                  ) : (
+                    <img src={social.icon} alt={social.label} className="w-3.5 h-3.5 object-contain opacity-75 group-hover:opacity-100" />
+                  )}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer menu columns */}
+          <div className="md:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-6 text-xs font-bold uppercase tracking-wider text-slate-300">
+            <div>
+              <h5 className="text-[10px] font-black text-white uppercase tracking-widest mb-3.5">DISCOVER</h5>
+              <ul className="space-y-2 text-[11px] font-bold text-slate-400">
+                <li><button onClick={() => { setActiveCategory('Buying Guides'); toast.success('Guides Loaded'); }} className="hover:text-white transition-colors">Top Guides</button></li>
+                <li><button onClick={() => { setActiveCategory('Videos'); toast.success('Videos Loaded'); }} className="hover:text-white transition-colors">Videos</button></li>
+                <li><button onClick={() => { setActiveCategory('Creator Reviews'); toast.success('Reviews Loaded'); }} className="hover:text-white transition-colors">Reviews</button></li>
+                <li><button onClick={() => { setActiveCategory('Comparisons'); toast.success('Comparisons Loaded'); }} className="hover:text-white transition-colors">Comparisons</button></li>
+                <li><button onClick={() => { setActiveCategory('Brand Stories'); toast.success('Brand Stories Loaded'); }} className="hover:text-white transition-colors">Brand Stories</button></li>
+                <li><button onClick={() => { setActiveCategory('Deals'); toast.success('Deals Loaded'); }} className="hover:text-white transition-colors">Deals</button></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h5 className="text-[10px] font-black text-white uppercase tracking-widest mb-3.5">COMPANY</h5>
+              <ul className="space-y-2 text-[11px] font-bold text-slate-400">
+                <li><button onClick={() => toast.success('About page coming soon!')} className="hover:text-white transition-colors">About Us</button></li>
+                <li><button onClick={() => toast.success('Careers list coming soon!')} className="hover:text-white transition-colors">Careers</button></li>
+                <li><button onClick={() => toast.success('Partnerships details coming soon!')} className="hover:text-white transition-colors">Partnership</button></li>
+                <li><button onClick={() => toast.success('Advertise guidelines coming soon!')} className="hover:text-white transition-colors">Advertise</button></li>
+                <li><button onClick={() => toast.success('Press releases coming soon!')} className="hover:text-white transition-colors">Press</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h5 className="text-[10px] font-black text-white uppercase tracking-widest mb-3.5">SUPPORT</h5>
+              <ul className="space-y-2 text-[11px] font-bold text-slate-400">
+                <li><button onClick={() => toast.success('Opening Help Center...')} className="hover:text-white transition-colors">Help Center</button></li>
+                <li><button onClick={() => toast.success('Returning guidelines...')} className="hover:text-white transition-colors">Returns</button></li>
+                <li><button onClick={() => toast.success('Shipping tracker...')} className="hover:text-white transition-colors">Shipping</button></li>
+                <li><button onClick={() => toast.success('Contact support...')} className="hover:text-white transition-colors">Contact Us</button></li>
+                <li><button onClick={() => toast.success('Tracking order...')} className="hover:text-white transition-colors">Track Order</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h5 className="text-[10px] font-black text-white uppercase tracking-widest mb-3.5">LEGAL</h5>
+              <ul className="space-y-2 text-[11px] font-bold text-slate-400">
+                <li><button onClick={() => toast.success('Terms of service...')} className="hover:text-white transition-colors">Terms & Conditions</button></li>
+                <li><button onClick={() => toast.success('Privacy policy...')} className="hover:text-white transition-colors">Privacy Policy</button></li>
+                <li><button onClick={() => toast.success('Cookie settings...')} className="hover:text-white transition-colors">Cookie Policy</button></li>
+                <li><button onClick={() => toast.success('Disclaimers...')} className="hover:text-white transition-colors">Disclaimer</button></li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom copyright & region selector bar */}
+        <div className="max-w-7xl mx-auto w-full border-t border-white/5 mt-10 pt-6.5 flex flex-col sm:flex-row gap-4 items-center justify-between text-[11px] text-slate-500 font-extrabold uppercase">
+          <p>&copy; 2025 Choosify. All rights reserved.</p>
+          
+          <div className="flex flex-wrap items-center gap-6">
+            <span className="text-slate-400">Choose Easy. Compare & Decide <span className="text-[#FF5B00]">Wisely.</span></span>
+            
+            <button 
+              onClick={() => toast.success('Opening regional selector...')}
+              className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            >
+              <span className="w-4 h-3 bg-red-600 rounded-sm relative overflow-hidden flex shrink-0">
+                <span className="absolute left-0 top-0 bottom-0 right-1/2 bg-green-700" />
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-red-600 rounded-full" />
+              </span>
+              <span>Bangladesh | BDT</span>
+              <ChevronDown size={11} className="text-slate-400" />
+            </button>
+          </div>
+        </div>
+      </footer>
 
     </div>
   );

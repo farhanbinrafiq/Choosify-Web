@@ -7,7 +7,7 @@ import {
   TrendingUp, CheckCircle2, XCircle, HelpCircle, Info, Copy, 
   ExternalLink, Eye, MessageSquare, Send, Award, Sparkles, 
   Clock, Flame, Zap, Shield, Heart, Share, Volume2, Maximize, 
-  Pause, RotateCcw, FlameKindling, Ticket, AlertTriangle
+  Pause, RotateCcw, FlameKindling, Ticket, AlertTriangle, Calendar, Bell
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { PRODUCTS } from '../constants';
@@ -476,6 +476,17 @@ export function ContentDetailsPage() {
   // Copy code trigger
   const [copiedCode, setCopiedCode] = useState(false);
 
+  // Live Shopping specialized interactive states
+  const [liveChatMessages, setLiveChatMessages] = useState<{ id: number; user: string; text: string; time: string }[]>([
+    { id: 1, user: 'Imran Khan', text: 'Does it have a global warranty?', time: '12:02' },
+    { id: 2, user: 'Farah S.', text: 'Voucher code is working guys! Just saved BDT 5,000!', time: '12:04' },
+    { id: 3, user: 'Asif Karim', text: 'How is the low-light zoom comparison?', time: '12:05' }
+  ]);
+  const [newLiveChatMessage, setNewLiveChatMessage] = useState('');
+  const [reminderSet, setReminderSet] = useState(false);
+  const [activeChapterIndex, setActiveChapterIndex] = useState(0);
+  const [featuredProductInChapter, setFeaturedProductInChapter] = useState<any>(null);
+
   useEffect(() => {
     // Scroll to top when loading new content
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -689,96 +700,372 @@ export function ContentDetailsPage() {
 
             {/* Right Column (40% equivalent) - Contextual Media Block */}
             <div className="w-full flex justify-center">
-              <div className="w-full max-w-[440px] aspect-[4/5] rounded-[28px] overflow-hidden shadow-2xl relative border-2 border-white/10 bg-black/40 group">
+              <div className="w-full max-w-[440px] rounded-[28px] overflow-hidden shadow-2xl border-2 border-white/10 bg-black/90 flex flex-col">
                 
-                {/* VIDEO REVIEW / REELS / SHORTS / VIDEO PLAYER MOCK */}
-                {(content.type === 'REELS' || content.type === 'SHORTS' || content.type === 'VIDEO REVIEW' || content.type === 'VIDEO') ? (
-                  <div className="w-full h-full relative flex flex-col justify-between p-4">
-                    {/* Background image under video cover */}
-                    <img 
-                      src={content.coverImage} 
-                      alt="" 
-                      className={cn(
-                        "absolute inset-0 w-full h-full object-cover transition-opacity duration-500 pointer-events-none",
-                        isVideoPlaying ? "opacity-20" : "opacity-100"
-                      )} 
-                    />
+                {content.isLiveShopping ? (
+                  // ==========================================
+                  // LIVE SHOPPING SPECIALIZED PORTLET CARD
+                  // ==========================================
+                  <div className="w-full flex flex-col h-[520px]">
                     
-                    {/* Floating Watermark logo */}
-                    <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-bold text-[#FF5B00]">
-                      <Youtube className="w-3.5 h-3.5 fill-current" /> CHOOSIFY OUTPLAY
-                    </div>
+                    {/* Live Stream Viewport */}
+                    {content.liveState === 'LIVE NOW' && (
+                      <div className="flex-1 flex flex-col bg-slate-900 relative overflow-hidden min-h-[220px]">
+                        {/* Stream cover image backdrop with subtle moving glow */}
+                        <img 
+                          src={content.coverImage} 
+                          alt="" 
+                          className="absolute inset-0 w-full h-full object-cover opacity-30 animate-pulse duration-[8000ms]" 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent" />
 
-                    {/* Dark gradient shadow */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent z-10 pointer-events-none" />
+                        {/* Stream Header Info */}
+                        <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
+                          <span className="bg-red-600 text-white font-black text-[9px] px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse shadow-md">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white block" /> LIVE NOW
+                          </span>
+                          <span className="bg-black/60 backdrop-blur-md text-white font-bold text-[10px] px-3 py-1 rounded-full flex items-center gap-1">
+                            <Eye className="w-3.5 h-3.5 text-[#FF5B00]" /> {content.viewerCount || '4,850'} WATCHING
+                          </span>
+                        </div>
 
-                    {/* Centered big play button overlay */}
-                    {!isVideoPlaying && (
-                      <button 
-                        onClick={() => {
-                          setIsVideoPlaying(true);
-                          toast.success('Live playback initialized!');
-                        }}
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white text-[#000435] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-transform z-20 group"
-                      >
-                        <Play className="w-8 h-8 fill-current ml-1 text-[#FF5B00] group-hover:text-[#EB4501] transition-colors" />
-                      </button>
+                        {/* Floating Platform Tag */}
+                        <div className="absolute top-14 left-4 z-20 bg-[#FF5B00]/90 backdrop-blur-md text-white font-extrabold text-[8px] tracking-widest px-2.5 py-1 rounded">
+                          {content.platform?.toUpperCase()} STREAM
+                        </div>
+
+                        {/* Animated Video Stream Mockup Overlay */}
+                        <div className="flex-1 flex flex-col items-center justify-center relative p-6">
+                          <div className="w-12 h-12 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center animate-bounce">
+                            <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                          </div>
+                          <span className="text-white/60 font-mono text-[9px] tracking-widest uppercase mt-3">Streaming Active Unboxing</span>
+                        </div>
+
+                        {/* Bottom Bar Info Overlay */}
+                        <div className="p-4 bg-slate-950/85 border-t border-white/5 z-10 flex items-center justify-between">
+                          <div className="text-left">
+                            <p className="text-[9px] font-black text-[#FF5B00] uppercase tracking-wider">Host & Anchor</p>
+                            <h4 className="text-xs font-extrabold text-white">{content.author.name}</h4>
+                          </div>
+                          <div className="bg-[#FF5B00] text-white text-[9px] font-black px-3 py-1.5 rounded-lg flex items-center gap-1">
+                            <Ticket className="w-3.5 h-3.5" /> CODE: S26LIVE
+                          </div>
+                        </div>
+                      </div>
                     )}
 
-                    {/* Interactive Animated Video Player controls inside overlay when playing */}
-                    {isVideoPlaying && (
-                      <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 text-white bg-black/25">
-                        <div className="flex items-center gap-3 mb-4">
-                          <button 
-                            onClick={() => setIsVideoPlaying(false)} 
-                            className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-                          >
-                            <Pause className="w-5 h-5 fill-current text-white" />
-                          </button>
-                          <div className="flex-1">
-                            <div className="text-xs font-bold text-emerald-400">PLAYING LIVE</div>
-                            <div className="text-[10px] text-slate-300 truncate font-semibold mt-0.5">{content.title}</div>
+                    {/* Upcoming Live Widget */}
+                    {content.liveState === 'UPCOMING' && (
+                      <div className="flex-1 flex flex-col bg-slate-950 relative overflow-hidden p-6 text-center justify-between">
+                        {/* Faded backdrop */}
+                        <img 
+                          src={content.coverImage} 
+                          alt="" 
+                          className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none" 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/60 to-slate-950" />
+
+                        <div className="relative z-10 flex flex-col items-center pt-4">
+                          <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-4 text-emerald-400 animate-pulse">
+                            <Bell className="w-6 h-6" />
                           </div>
-                          <span className="text-xs font-mono font-bold bg-black/30 px-2 py-1 rounded">{videoTime}</span>
+                          <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-black tracking-widest px-3 py-1 rounded-full uppercase mb-4">
+                            Scheduled Broadcast
+                          </span>
+                          <h3 className="text-white text-lg font-black tracking-tight leading-snug px-4">
+                            {content.title}
+                          </h3>
                         </div>
 
-                        {/* Interactive progress bar */}
-                        <div className="relative w-full h-1 bg-white/20 rounded-full mb-2 overflow-hidden cursor-pointer">
-                          <div className="absolute left-0 top-0 h-full bg-[#FF5B00] transition-all" style={{ width: `${videoProgress}%` }} />
+                        {/* Digital Ticker Block */}
+                        <div className="relative z-10 my-6 bg-white/5 border border-white/10 rounded-2xl p-4 mx-2">
+                          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Starts In</div>
+                          <div className="flex justify-center items-center gap-4 font-mono">
+                            <div>
+                              <span className="text-2xl font-black text-white">01</span>
+                              <p className="text-[8px] text-slate-500 uppercase font-semibold mt-0.5">Day</p>
+                            </div>
+                            <span className="text-xl font-black text-[#FF5B00] -mt-4">:</span>
+                            <div>
+                              <span className="text-2xl font-black text-white">18</span>
+                              <p className="text-[8px] text-slate-500 uppercase font-semibold mt-0.5">Hours</p>
+                            </div>
+                            <span className="text-xl font-black text-[#FF5B00] -mt-4">:</span>
+                            <div>
+                              <span className="text-2xl font-black text-white">42</span>
+                              <p className="text-[8px] text-slate-500 uppercase font-semibold mt-0.5">Mins</p>
+                            </div>
+                            <span className="text-xl font-black text-[#FF5B00] -mt-4">:</span>
+                            <div>
+                              <span className="text-2xl font-black text-white">15</span>
+                              <p className="text-[8px] text-slate-500 uppercase font-semibold mt-0.5">Secs</p>
+                            </div>
+                          </div>
                         </div>
 
-                        {/* Control buttons */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
-                            <Volume2 className="w-4 h-4 text-slate-300" />
-                            <span className="text-[10px] font-mono font-semibold text-slate-300">{volume}%</span>
-                          </div>
+                        {/* Booking CTAs */}
+                        <div className="relative z-10 flex flex-col gap-2.5 pb-2">
                           <button 
                             onClick={() => {
-                              setVideoProgress(15);
-                              setVideoTime('01:15');
-                              setIsVideoPlaying(false);
-                            }} 
-                            className="text-[9px] font-bold text-slate-400 uppercase hover:text-white transition-colors flex items-center gap-1"
+                              setReminderSet(true);
+                              toast.success("Reminder Active! We will alert you 10 mins before start 🔔");
+                            }}
+                            className={cn(
+                              "w-full py-3.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2",
+                              reminderSet 
+                                ? "bg-emerald-600 text-white shadow-lg" 
+                                : "bg-[#FF5B00] hover:bg-[#E05000] text-white shadow-lg shadow-[#FF5B00]/20"
+                            )}
                           >
-                            <RotateCcw className="w-3 h-3" /> Replay Chapter
+                            <Bell className="w-4 h-4 fill-current" />
+                            {reminderSet ? 'SMS & Email Reminder Set' : 'Set Stream Reminder'}
+                          </button>
+                          
+                          <button 
+                            onClick={() => toast.success("Event added to Google Calendar! 📅")}
+                            className="w-full py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-xs font-bold uppercase text-white transition-all flex items-center justify-center gap-2"
+                          >
+                            <Calendar className="w-4 h-4" /> Add to Google Calendar
                           </button>
                         </div>
                       </div>
                     )}
+
+                    {/* Replay Video chapters Widget */}
+                    {content.liveState === 'REPLAY' && (
+                      <div className="flex-1 flex flex-col bg-slate-900 relative overflow-hidden min-h-[220px]">
+                        <img 
+                          src={content.coverImage} 
+                          alt="" 
+                          className={cn(
+                            "absolute inset-0 w-full h-full object-cover transition-opacity duration-500 pointer-events-none",
+                            isVideoPlaying ? "opacity-20" : "opacity-100"
+                          )} 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent" />
+
+                        {/* Floating watermark */}
+                        <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-bold text-[#FF5B00]">
+                          <Youtube className="w-3.5 h-3.5 fill-current" /> RECORDED REPLAY
+                        </div>
+
+                        {/* Interactive Replay button */}
+                        {!isVideoPlaying && (
+                          <button 
+                            onClick={() => {
+                              setIsVideoPlaying(true);
+                              toast.success("Launching unboxing replay session...");
+                            }}
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white text-[#000435] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-transform z-20 group"
+                          >
+                            <Play className="w-6 h-6 fill-current ml-1 text-[#FF5B00]" />
+                          </button>
+                        )}
+
+                        {/* Replay stream player */}
+                        {isVideoPlaying && (
+                          <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 text-white bg-black/45">
+                            <div className="flex items-center gap-3 mb-4">
+                              <button 
+                                onClick={() => setIsVideoPlaying(false)} 
+                                className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                              >
+                                <Pause className="w-4 h-4 fill-current text-white" />
+                              </button>
+                              <div className="flex-1">
+                                <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Replaying Session</span>
+                                <div className="text-[10px] text-slate-200 truncate font-semibold">{content.title}</div>
+                              </div>
+                              <span className="text-[11px] font-mono font-bold bg-black/40 px-2 py-0.5 rounded">{videoTime}</span>
+                            </div>
+
+                            {/* Timeline with highlight dot */}
+                            <div className="relative w-full h-1 bg-white/20 rounded-full mb-3 overflow-hidden cursor-pointer">
+                              <div className="absolute left-0 top-0 h-full bg-[#FF5B00] transition-all" style={{ width: `${videoProgress}%` }} />
+                            </div>
+
+                            {/* Volume bar and speed selection */}
+                            <div className="flex items-center justify-between border-t border-white/5 pt-2">
+                              <span className="text-[9px] text-slate-400 font-mono">Speed: 1.0x (Normal)</span>
+                              <span className="text-[9px] text-[#FF5B00] font-black uppercase tracking-wider">Duration: {content.duration}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Bottom Dynamic Interactive Console */}
+                    {content.liveState === 'LIVE NOW' ? (
+                      // Live Chat scrolling log for Active Streams
+                      <div className="h-[260px] bg-slate-950 border-t border-white/10 flex flex-col justify-between p-4">
+                        <div className="text-left border-b border-white/5 pb-2 flex justify-between items-center shrink-0">
+                          <span className="text-[9px] font-black tracking-widest text-slate-400 uppercase">Live Chat Feed</span>
+                          <span className="text-[9px] font-semibold text-emerald-400 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block animate-pulse" /> Active Connecting
+                          </span>
+                        </div>
+
+                        {/* Scrolling list */}
+                        <div className="flex-1 overflow-y-auto py-2 flex flex-col gap-2 scrollbar-hide text-left">
+                          {liveChatMessages.map((msg) => (
+                            <div key={msg.id} className="text-xs">
+                              <span className="text-slate-400 font-black mr-1.5">{msg.user}</span>
+                              <span className="text-slate-200">{msg.text}</span>
+                              <span className="text-[8px] text-slate-600 float-right mt-1">{msg.time}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Input chat form */}
+                        <form 
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            if (!newLiveChatMessage.trim()) return;
+                            const newMsg = {
+                              id: liveChatMessages.length + 1,
+                              user: 'You (Shopper)',
+                              text: newLiveChatMessage.trim(),
+                              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            };
+                            setLiveChatMessages([...liveChatMessages, newMsg]);
+                            setNewLiveChatMessage('');
+                            toast.success("Comment sent live!");
+                          }}
+                          className="flex items-center gap-2 mt-2 pt-2 border-t border-white/5 shrink-0"
+                        >
+                          <input 
+                            type="text"
+                            placeholder="Ask the host anything..."
+                            value={newLiveChatMessage}
+                            onChange={(e) => setNewLiveChatMessage(e.target.value)}
+                            className="flex-1 bg-slate-900 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5B00] transition-colors"
+                          />
+                          <button 
+                            type="submit"
+                            className="w-8 h-8 rounded-lg bg-[#FF5B00] text-white flex items-center justify-center hover:bg-[#E05000] shrink-0"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                          </button>
+                        </form>
+                      </div>
+                    ) : content.liveState === 'REPLAY' ? (
+                      // Chapter Selector log for Replay Streams
+                      <div className="h-[260px] bg-slate-950 border-t border-white/10 flex flex-col p-4 text-left justify-between">
+                        <div className="border-b border-white/5 pb-2 shrink-0">
+                          <span className="text-[9px] font-black tracking-widest text-slate-400 uppercase">Interactive Video Chapters</span>
+                        </div>
+
+                        {/* Chapter timeline list */}
+                        <div className="flex-1 overflow-y-auto py-2 flex flex-col gap-1.5 scrollbar-hide">
+                          {content.videoChapters?.map((chap: any, idx: number) => {
+                            const isActive = activeChapterIndex === idx;
+                            return (
+                              <button
+                                key={idx}
+                                onClick={() => {
+                                  setActiveChapterIndex(idx);
+                                  setIsVideoPlaying(true);
+                                  // Update progress bar
+                                  const totalSeconds = 70 * 60; // 70 minutes mock
+                                  const timeParts = chap.time.split(':').map(Number);
+                                  const chapSeconds = timeParts.length === 3 
+                                    ? timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2]
+                                    : timeParts[0] * 60 + timeParts[1];
+                                  const percentage = (chapSeconds / totalSeconds) * 100;
+                                  setVideoProgress(percentage);
+                                  setVideoTime(chap.time);
+                                  
+                                  // Assign product alert depending on chapter index
+                                  const mentionedProduct = content.productsMentioned?.[idx % content.productsMentioned.length];
+                                  if (mentionedProduct) {
+                                    setFeaturedProductInChapter(mentionedProduct);
+                                    toast.success(`Seeking to ${chap.title}! Mentioned product loaded.`, { duration: 4000 });
+                                  } else {
+                                    setFeaturedProductInChapter(null);
+                                    toast.success(`Seeking to chapter: ${chap.title}`);
+                                  }
+                                }}
+                                className={cn(
+                                  "w-full p-2.5 rounded-xl text-xs text-left transition-all border flex items-start gap-2.5",
+                                  isActive 
+                                    ? "bg-[#FF5B00]/10 border-[#FF5B00]/30 text-white" 
+                                    : "bg-slate-900/50 border-white/5 text-slate-300 hover:bg-slate-900 hover:border-white/10"
+                                )}
+                              >
+                                <span className="bg-[#FF5B00] text-white font-mono font-black text-[9px] px-1.5 py-0.5 rounded shrink-0">
+                                  {chap.time}
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                  <h5 className="font-extrabold truncate">{chap.title}</h5>
+                                  <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">{chap.description}</p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Interactive Contextual chapter popup overlay */}
+                        {featuredProductInChapter && (
+                          <div className="bg-slate-900 border border-white/10 rounded-xl p-2 mt-2 flex items-center justify-between shrink-0">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <img 
+                                src={featuredProductInChapter.image} 
+                                alt="" 
+                                className="w-8 h-8 object-contain bg-white/5 rounded" 
+                              />
+                              <div className="min-w-0">
+                                <p className="text-[8px] text-slate-400 uppercase font-black tracking-wider leading-none">CHAPTER HIGHLIGHT</p>
+                                <p className="text-[10px] font-extrabold text-white truncate leading-snug">{featuredProductInChapter.name}</p>
+                              </div>
+                            </div>
+                            <Link 
+                              to={`/brands/${featuredProductInChapter.brandId || 'samsung'}`}
+                              className="text-[9px] font-black text-[#FF5B00] uppercase tracking-wider hover:underline shrink-0 pl-2"
+                            >
+                              Compare & Buy
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      // Upcoming session detail box
+                      <div className="h-[260px] bg-slate-950 border-t border-white/10 p-5 flex flex-col justify-between text-left shrink-0">
+                        <div>
+                          <p className="text-[9px] font-black tracking-widest text-slate-400 uppercase mb-2">Live Session Target Items</p>
+                          <div className="flex flex-col gap-2.5">
+                            {content.productsMentioned?.map((prod: any, idx: number) => (
+                              <div key={idx} className="flex items-center gap-3 bg-white/5 p-2 rounded-xl border border-white/5">
+                                <img src={prod.image} alt="" className="w-10 h-10 object-contain bg-white rounded-lg p-1 shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-xs font-black text-white truncate">{prod.name}</h4>
+                                  <p className="text-[10px] font-bold text-slate-400">{prod.price}</p>
+                                </div>
+                                <span className="bg-emerald-500/10 text-emerald-400 text-[8px] font-bold tracking-widest px-2 py-0.5 rounded border border-emerald-500/20 uppercase">
+                                  LIVE DISCOUNT
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-[9.5px] text-slate-400 italic">★ Exclusive live discounts and bundle vouchers will drop during flight demonstration.</p>
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  // GENERAL HIGH-RES POSTER GRID FOR EDITORIALS / STORIES / GUIDES
-                  <div className="w-full h-full relative group">
+                  // ==========================================
+                  // ORIGINAL GENERAL HIGH-RES POSTER GRID FOR EDITORIALS / STORIES / GUIDES
+                  // ==========================================
+                  <div className="w-full h-full relative group min-h-[400px]">
                     <img 
                       src={content.coverImage} 
                       alt={content.title} 
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
                     
                     {/* Floating Branding logo */}
-                    <div className="absolute bottom-6 left-6 right-6 z-10 text-white">
+                    <div className="absolute bottom-6 left-6 right-6 z-10 text-white text-left">
                       <div className="text-xs font-black text-[#FF5B00] uppercase tracking-wider mb-1">Choosify Verified Content</div>
                       <p className="text-sm font-medium text-slate-200/95 leading-snug">Every recommendation is backed by real rigorous comparison testing.</p>
                     </div>
@@ -1308,7 +1595,7 @@ export function ContentDetailsPage() {
             <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> OTHER PRODUCTS MENTIONED
           </h2>
           <div className="flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-hide relative group">
-            {content.relatedProducts.map((product: any) => (
+            {(content.relatedProducts || content.productsMentioned || []).map((product: any) => (
               <div key={product.id} className="min-w-[280px] lg:min-w-[300px] shrink-0 snap-start">
                 <ProductCard product={product} />
               </div>
@@ -1319,6 +1606,97 @@ export function ContentDetailsPage() {
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* ========================================================================================================= */}
+        {/* MODULE 8.5: LIVE SHOPPING INTEL & DYNAMIC BUYER JOURNEY MAP */}
+        {/* ========================================================================================================= */}
+        {content.isLiveShopping && (
+          <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-soft border border-slate-100 mb-12 text-left">
+            <h3 className="text-xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
+              <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> LIVE BROADCAST SUMMARY & METRICS
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-[#F8F9FC] rounded-2xl p-5 border border-slate-200/40">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Topics Explored</span>
+                <ul className="space-y-2 mt-3">
+                  {content.topicsCovered?.map((topic: string, i: number) => (
+                    <li key={i} className="text-xs font-bold text-slate-700 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> {topic}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-[#F8F9FC] rounded-2xl p-5 border border-slate-200/40">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Platform Details</span>
+                <div className="mt-4 space-y-2 text-xs font-bold text-slate-700">
+                  <p>Stream Platform: <span className="text-[#FF5B00]">{content.platform}</span></p>
+                  <p>Estimated Duration: <span className="text-indigo-600">{content.duration}</span></p>
+                  <p>Featured Brand: <span className="text-indigo-600">{content.brand}</span></p>
+                  <p>Consensus Rating: <span className="text-amber-500">★ {content.rating} / 5</span></p>
+                </div>
+              </div>
+              <div className="bg-[#F8F9FC] rounded-2xl p-5 border border-slate-200/40">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Services Mentioned</span>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black px-2.5 py-1 rounded">0% EMI INSTALLMENT</span>
+                  <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-black px-2.5 py-1 rounded">OFFICIAL BD WARRANTY</span>
+                  <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-black px-2.5 py-1 rounded">STORE PICKUP</span>
+                  <span className="bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-black px-2.5 py-1 rounded">EXCHANGE CASHBACK</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dynamic Buyer Journey Roadmap widget */}
+        <div className="bg-gradient-to-br from-[#000435] to-[#0A1054] text-white rounded-[32px] p-8 md:p-10 shadow-2xl mb-12 text-left relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/10 pb-6 mb-8">
+            <div>
+              <span className="text-xs font-black text-[#FF5B00] uppercase tracking-widest block mb-1">Choosify AI Assistant</span>
+              <h3 className="text-2xl font-black text-white leading-tight tracking-tight uppercase">YOUR ACTIVE BUYING JOURNEY</h3>
+            </div>
+            <div className="bg-white/10 px-4 py-2 rounded-xl border border-white/10 text-xs font-bold text-slate-300">
+              Journey Code: <span className="text-[#FF5B00] font-mono">BD-S26-44</span>
+            </div>
+          </div>
+
+          {/* Stepper Timeline UI */}
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 relative">
+            <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-white/10 -translate-y-1/2 hidden md:block z-0" />
+            
+            {[
+              { step: '1', title: 'Watch Review', desc: 'Livestream unboxing & test details', completed: true },
+              { step: '2', title: 'Check Verdict', desc: 'Expert ratings & low-light tests', completed: true },
+              { step: '3', title: 'Compare Specs', desc: 'Side-by-side comparison matrix', completed: false, link: `/brands/${content.brand?.toLowerCase() || 'samsung'}` },
+              { step: '4', title: 'Grab Vouchers', desc: 'Claim coupon S26LIVE for BDT 5,000 off', completed: false },
+              { step: '5', title: 'Compare Stores', desc: 'Find lowest authentic pricing BD', completed: false },
+              { step: '6', title: 'Buy Safely', desc: 'Checkout at official Samsung authorized store', completed: false }
+            ].map((stepObj, idx) => (
+              <div key={idx} className="flex flex-col items-center text-center relative z-10 group">
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center font-mono font-black text-sm border-2 transition-all shadow-md",
+                  stepObj.completed 
+                    ? "bg-[#FF5B00] border-[#FF5B00] text-white scale-110"
+                    : "bg-slate-900 border-white/20 text-slate-400 group-hover:border-[#FF5B00] group-hover:text-white"
+                )}>
+                  {stepObj.completed ? '✓' : stepObj.step}
+                </div>
+                <h4 className="text-xs font-extrabold text-white mt-3 mb-1 uppercase tracking-wider">{stepObj.title}</h4>
+                <p className="text-[10px] text-slate-400 font-semibold leading-relaxed px-2">{stepObj.desc}</p>
+                {stepObj.link && (
+                  <Link 
+                    to={stepObj.link}
+                    className="text-[10px] font-black text-[#FF5B00] uppercase tracking-wider mt-2 hover:underline"
+                  >
+                    Launch Page
+                  </Link>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 import { PRODUCTS } from '../constants';
 import { 
   Smartphone, Cpu, Camera, ShieldCheck, TrendingUp, 
-  Flame, Zap, Shield, Sparkles, Clock, Award
+  Flame, Zap, Shield, Sparkles, Clock, Award, Headphones
 } from 'lucide-react';
 
 export interface EditorialContent {
@@ -54,7 +54,7 @@ export interface EditorialContent {
     question: string;
     answer: string;
   }[];
-  relatedProducts: typeof PRODUCTS;
+  relatedProducts?: typeof PRODUCTS;
   relatedGuides: {
     id: string;
     cover: string;
@@ -111,6 +111,15 @@ export interface EditorialContent {
     rating: number;
     link: string;
   }>;
+  isLiveShopping?: boolean;
+  liveState?: 'LIVE NOW' | 'UPCOMING' | 'REPLAY';
+  platform?: string;
+  viewerCount?: number;
+  brand?: string;
+  scheduledDate?: string;
+  scheduledTime?: string;
+  topicsCovered?: string[];
+  productsMentioned?: typeof PRODUCTS;
 }
 
 export const DYNAMIC_CONTENT_DB: Record<string, EditorialContent> = {
@@ -678,6 +687,179 @@ export const DYNAMIC_CONTENT_DB: Record<string, EditorialContent> = {
     priceStores: [
       { name: 'Kitchen World BD', price: '৳88,000', delivery: 'Free · 1-2 Days', isBest: true, rating: 4.9, link: '#' },
       { name: 'Best Buy Appliances', price: '৳92,000', delivery: 'Free · 2-3 Days', rating: 4.8, link: '#' }
+    ]
+  },
+  'live-1': {
+    id: 'live-1',
+    type: 'LIVE SHOPPING',
+    badgeBg: 'bg-[#FF5B00]',
+    title: 'Samsung Galaxy S26 Ultra Launch: Exclusive Live Unboxing & Price Drops',
+    subtitle: 'We are live at the official Samsung Experience Store in Dhaka, unboxing the brand new Galaxy S26 Ultra. Join live to grab BDT 15,000 cash discount vouchers!',
+    coverImage: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=1200&q=80',
+    isLiveShopping: true,
+    liveState: 'LIVE NOW',
+    platform: 'YouTube Live',
+    viewerCount: 4850,
+    brand: 'Samsung',
+    scheduledDate: 'July 14, 2026',
+    scheduledTime: '01:00 AM (BST)',
+    duration: '1h 30m',
+    author: {
+      name: 'Nusrat Jahan',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80',
+      verified: true,
+      role: 'Tech Creator & Anchor',
+      bio: 'Leading female tech content creator in Bangladesh. Specialized in live shopping streams and interactive unboxings.'
+    },
+    date: 'July 14, 2026',
+    readTime: 'LIVE STREAM',
+    views: '4.8K Watching',
+    rating: 4.9,
+    reviews: '850',
+    topicsCovered: ['Bangladesh Retail Pricing', 'Pre-order Cash Discounts', 'Live Camera Test vs S24 Ultra', 'S-Pen AI capabilities demo'],
+    productsMentioned: PRODUCTS.slice(0, 3),
+    priceStores: [
+      { name: 'Samsung Bangladesh Store', price: '৳175,000', delivery: 'Free Instant Shipping', isBest: true, rating: 4.9, link: '#' },
+      { name: 'Daraz BD', price: '৳170,000', delivery: 'Free · 2-3 Days', rating: 4.8, link: '#' }
+    ],
+    takeaways: [
+      { icon: Smartphone, text: "LIVE OFFER: Use voucher code 'S26LIVE' during this live stream for an extra BDT 5,000 off!" },
+      { icon: Cpu, text: "Processor performance has been boosted by 25% with the new Snapdragon 8 Gen 4." },
+      { icon: Camera, text: "The new 200MP camera sensor captures significantly sharper details in low-light environments." }
+    ],
+    verdict: {
+      buyIf: 'You want the absolute pinnacle of smartphone technology, elite low-light photography, and want to leverage pre-order discounts.',
+      considerIf: 'You are looking to upgrade from a Galaxy S21 Ultra or older.',
+      notForYouIf: 'You are on a tight budget or prefer small, lightweight pocketable phones.',
+      overall: "Samsung's Galaxy S26 Ultra is the ultimate flagship of 2026.",
+      summary: 'We tested the S26 Ultra live, checking out its 200MP camera, Snapdragon 8 Gen 4 processor, and outstanding anti-reflective armor screen.',
+      chips: ['200MP Main', 'S26 Dhaka Launch', 'S-Pen AI', 'Snapdragon 8 Gen 4']
+    },
+    evaluations: [
+      { id: 'camera_lowlight', title: 'Low-light & Nightography Zoom', score: 9.9, content: 'Live zoom tests at 10x and 30x magnification showed remarkable noise control and stable optical image stabilization under dim Dhaka streets.' }
+    ],
+    faqs: [
+      { question: 'When does pre-order shipping start in Bangladesh?', answer: 'Pre-orders placed today will start shipping on July 20, 2026 with verified store pickup options.' }
+    ],
+    tags: ['Samsung S26 live stream', 'S26 Bangladesh price', 'Dhaka pre-order deals', 'Galaxy S26 camera test'],
+    relatedGuides: [
+      { id: '1', cover: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=600&h=800', title: 'Top 10 Smartphones to Buy in 2026', category: 'MOBILE', readTime: '15 MIN READ', views: '125K', badgeClass: 'bg-[#FF5B00]' }
+    ]
+  },
+  'live-2': {
+    id: 'live-2',
+    type: 'LIVE SHOPPING',
+    badgeBg: 'bg-[#10B981]',
+    title: 'DJI Mini 4 Pro Drone Outdoor Demonstration & Night-Flight Test',
+    subtitle: 'Join us upcoming as we take the DJI Mini 4 Pro on a live night flight demonstration over the scenic Hatirjheel in Dhaka. Live tips on flying regulations!',
+    coverImage: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=1200&q=80',
+    isLiveShopping: true,
+    liveState: 'UPCOMING',
+    platform: 'Facebook Live',
+    brand: 'DJI',
+    scheduledDate: 'July 16, 2026',
+    scheduledTime: '07:30 PM (BST)',
+    duration: '45 mins',
+    author: {
+      name: 'Tanvir Hossain',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
+      verified: true,
+      role: 'Creative Director & Pilot',
+      bio: 'Professional aerial cinematographer and CAA-licensed drone pilot. Over 5 years filming beautiful spots in Bangladesh.'
+    },
+    date: 'July 16, 2026',
+    readTime: 'UPCOMING LIVE',
+    views: 'Scheduled',
+    rating: 4.8,
+    reviews: '340',
+    topicsCovered: ['Hatirjheel Flight Permit Guidance', 'Low-light camera sensor test', 'ActiveTrack 360 obstacle avoidance', 'Dhaka local seller pricing'],
+    productsMentioned: [PRODUCTS[4] || PRODUCTS[0], PRODUCTS[5] || PRODUCTS[1]],
+    priceStores: [
+      { name: 'Gadget & Gear', price: '৳98,000', delivery: 'Free · Instant Store Pickup', isBest: true, rating: 5.0, link: '#' }
+    ],
+    takeaways: [
+      { icon: Camera, text: 'Under-249g weight means you can fly in many locations without needing commercial drone licensing.' },
+      { icon: Zap, text: 'True vertical shooting mode makes it perfect for social media creators on Reels & TikTok.' }
+    ],
+    verdict: {
+      buyIf: 'You are a content creator looking for stunning aerial photography without complex licensing overhead.',
+      considerIf: 'You want a highly portable drone that fits inside a jacket pocket.',
+      notForYouIf: 'You fly in extreme gale force winds regularly.',
+      overall: 'The ultimate compact travel drone of 2026.',
+      summary: "DJI's Mini 4 Pro represents a masterclass in portable drone photography.",
+      chips: ['True Vertical', 'ActiveTrack 360', 'Under 249g', 'Hatirjheel Night Flight']
+    },
+    evaluations: [
+      { id: 'sensor', title: '1/1.3-inch CMOS Sensor Performance', score: 9.3, content: 'Superb dynamic range with dual native ISO fusion ensures night landscapes look exceptionally clean.' }
+    ],
+    faqs: [
+      { question: 'Do I need CAAB registration in Bangladesh?', answer: 'For recreational drones under 250g flown at low altitudes, registration requirements are simplified, but caution must be taken near airports.' }
+    ],
+    tags: ['DJI Mini 4 pro drone test', 'Dhaka Hatirjheel flight', 'CAAB drone rules Bangladesh', 'Drone price in BD'],
+    relatedGuides: [
+      { id: '8', cover: 'https://images.unsplash.com/photo-1510972527921-ce03766a1cf1?w=800&h=1000', title: 'Best Tech for Outdoor Creators', category: 'TECH', readTime: '12 MIN READ', views: '15K', badgeClass: 'bg-[#FF5B00]' }
+    ]
+  },
+  'live-3': {
+    id: 'live-3',
+    type: 'LIVE SHOPPING',
+    badgeBg: 'bg-[#6366F1]',
+    title: 'Sony WH-1000XM5: Deep-Dive Noise Cancellation Test & Comparison',
+    subtitle: 'Did you miss the live audio showcase? Watch the full replay as we test the XM5 live inside a noisy coffee shop, comparing it side-by-side with XM4.',
+    coverImage: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200&q=80',
+    isLiveShopping: true,
+    liveState: 'REPLAY',
+    platform: 'YouTube Live',
+    brand: 'Sony',
+    scheduledDate: 'July 12, 2026',
+    scheduledTime: '04:00 PM (BST)',
+    duration: '1h 10m',
+    author: {
+      name: 'Tech World BD',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
+      verified: true,
+      role: 'Lead Sound Engineer',
+      bio: 'Expert audio reviewer and audiophile based in Dhaka. Focused on helping consumers find high-fidelity headphones and audio systems.'
+    },
+    date: 'July 12, 2026',
+    readTime: 'REPLAY VIDEO',
+    views: '12.5K Views',
+    rating: 4.8,
+    reviews: '1.2K',
+    topicsCovered: ['Active Noise Cancellation vs XM4', 'Dhaka Traffic isolation test', 'Microphone array quality for zoom calls', 'Bangladesh market discounts'],
+    productsMentioned: [PRODUCTS[2] || PRODUCTS[0], PRODUCTS[6] || PRODUCTS[1]],
+    priceStores: [
+      { name: 'Sony Rangs Bangladesh', price: '৳38,500', delivery: 'Free Shipping', isBest: true, rating: 4.9, link: '#' },
+      { name: 'Daraz BD', price: '৳36,500', delivery: 'Free Shipping', rating: 4.7, link: '#' }
+    ],
+    videoChapters: [
+      { time: '00:00', title: 'Introduction & Unboxing', description: 'First look at the XM5 case and lightweight carbon fiber materials.' },
+      { time: '12:15', title: 'ANC Dhaka Bus Noise Test', description: 'Real-world test showing how the XM5 cancels heavy diesel engine rumbling.' },
+      { time: '28:40', title: 'Microphone Call Quality Demo', description: 'Zoom call microphone quality under gusty fan conditions.' },
+      { time: '45:10', title: 'Sound Profile & App Equalizer', description: 'Adjusting clear bass for traditional Bangladeshi instruments.' },
+      { time: '1:02:05', title: 'Pricing & Dhaka Store Deals', description: 'Finding the best local warranties and lowest authentic pricing.' }
+    ],
+    takeaways: [
+      { icon: Headphones, text: 'Industry-leading ANC makes Dhaka traffic rumbling vanish completely.' },
+      { icon: Zap, text: '30-hour battery life with extremely fast charge (3 minutes yields 5 hours playback).' }
+    ],
+    verdict: {
+      buyIf: 'You commute in noisy environments, take frequent voice calls, and want the best noise-canceling headphones available.',
+      considerIf: 'You want a comfortable pair of over-ears for 8+ hours of continuous daily wearing.',
+      notForYouIf: 'You require folding earcups for ultra-compact storage (consider XM4 instead).',
+      overall: 'The absolute benchmark for premium ANC noise-canceling headphones.',
+      summary: 'In our live review replay, we compared the XM5 to its predecessor and found the ANC and mic quality upgrades to be incredibly compelling.',
+      chips: ['Sony XM5', 'ANC Benchmark', 'Dhaka Commuter', '30-Hr Battery']
+    },
+    evaluations: [
+      { id: 'anc', title: 'Active Noise Canceling Performance', score: 9.8, content: 'Dual-processor system and 8 microphones adapt dynamically to cancel high-frequency chatter and low bus hums with absolute ease.' }
+    ],
+    faqs: [
+      { question: 'Is the official international warranty covered in BD?', answer: 'Yes, verified Sony dealers in Dhaka like Sony Rangs cover official limited warranty terms.' }
+    ],
+    tags: ['Sony WH-1000XM5 Dhaka reviews', 'XM5 vs XM4 price BD', 'Best noise canceling headphones', 'Sony audio store Bangladesh'],
+    relatedGuides: [
+      { id: '1', cover: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=600&h=800', title: 'Best Headphones for Travel 2026', category: 'AUDIO', readTime: '8 MIN READ', views: '32K', badgeClass: 'bg-[#FF5B00]' }
     ]
   }
 };

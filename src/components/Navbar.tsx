@@ -5,7 +5,6 @@ import {
   Menu, X, Inbox, ShoppingCart
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { SignInModal } from './SignInModal';
 import { CartDrawer } from './CartDrawer';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -15,7 +14,6 @@ import toast from 'react-hot-toast';
 
 export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -267,7 +265,13 @@ export function Navbar() {
             ) : (
               <div className="flex items-center gap-2.5">
                 <button 
-                  onClick={() => setIsSignInOpen(true)}
+                  onClick={() => navigate('/login')}
+                  className="h-10 px-4 text-gray-300 hover:text-white text-[10px] uppercase font-black tracking-widest transition-all italic"
+                >
+                  SIGN IN
+                </button>
+                <button 
+                  onClick={() => navigate('/signup')}
                   className="h-10 px-5 text-white text-[10px] uppercase font-black rounded-full tracking-widest transition-all bg-[#FF5B00] hover:bg-orange-600 italic"
                 >
                   SIGN UP
@@ -302,7 +306,6 @@ export function Navbar() {
         </div>
       </header>
 
-      <SignInModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
       {/* MOBILE / TABLET SLIDE-OUT HAMBURGER MENU */}
@@ -417,16 +420,28 @@ export function Navbar() {
                     </button>
                   </>
                 ) : (
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setIsSignInOpen(true);
-                    }}
-                    className="w-full py-3.5 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors cursor-pointer border-0 flex items-center justify-center gap-2"
-                  >
-                    <LogIn size={14} />
-                    <span className="italic">Sign In / Register</span>
-                  </button>
+                  <div className="flex flex-col gap-2.5">
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        navigate('/login');
+                      }}
+                      className="w-full py-3 bg-transparent border border-white/20 hover:bg-white/5 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <LogIn size={14} />
+                      <span className="italic">Sign In</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        navigate('/signup');
+                      }}
+                      className="w-full py-3.5 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors cursor-pointer border-0 flex items-center justify-center gap-2"
+                    >
+                      <LogIn size={14} />
+                      <span className="italic">Register / Sign Up</span>
+                    </button>
+                  </div>
                 )}
                 <div className="text-center pt-2">
                   <span className="text-[8px] font-mono font-bold text-gray-600 uppercase tracking-widest">

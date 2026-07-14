@@ -1482,6 +1482,7 @@ export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[
       }
     }
 
+    let timeoutId: any;
     if (shouldUpdate) {
       const delegate: FloatingFilterConfig = {
         pageName: config.pageName,
@@ -1491,10 +1492,18 @@ export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[
         get renderFilters() { return latestConfigRef.current.renderFilters; },
         get renderSearch() { return latestConfigRef.current.renderSearch; }
       };
-      setConfig(delegate);
+      timeoutId = setTimeout(() => {
+        setConfig(delegate);
+      }, 0);
     }
     
     prevConfigRef.current = config;
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }); // Runs on every render to manually check dependency/config updates safely
 }
 

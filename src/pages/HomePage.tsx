@@ -419,21 +419,39 @@ export function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-            {BRAND_LOGOS.map((brand, idx) => (
-              <div 
-                key={idx}
-                onClick={() => navigate('/brands')}
-                className="h-20 bg-white rounded-2xl flex items-center justify-center p-4 cursor-pointer hover:-translate-y-1 hover:shadow-[0_8px_20px_rgb(0,0,0,0.04)] shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all duration-300 border border-transparent group"
-              >
-                {brand.image ? (
-                  <img src={brand.image} alt={brand.name} className="max-h-8 max-w-[80%] object-contain opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300" />
-                ) : (
-                  <span className={`text-sm font-black uppercase tracking-wider ${brand.color} opacity-60 group-hover:opacity-100 transition-all duration-300`}>
-                    {brand.text}
-                  </span>
-                )}
-              </div>
-            ))}
+            {BRAND_LOGOS.map((brand, idx) => {
+              const getBrandSlug = (brandId: string) => {
+                if (brandId === 'brand-logo-samsung') return 'samsung';
+                if (brandId === 'brand-logo-apple') return 'apple';
+                if (brandId === 'brand-logo-xiaomi') return 'xiaomi';
+                if (brandId === 'brand-logo-walton') return 'walton';
+                if (brandId === 'brand-logo-aarong') return 'aarong';
+                if (brandId === 'brand-logo-bata') return 'bata';
+                return '';
+              };
+              const slug = getBrandSlug(brand.id);
+              return (
+                <div 
+                  key={idx}
+                  onClick={() => {
+                    if (slug) {
+                      navigate(`/brands/${slug}`);
+                    } else {
+                      navigate('/brands');
+                    }
+                  }}
+                  className="h-20 bg-white rounded-2xl flex items-center justify-center p-4 cursor-pointer hover:-translate-y-1 hover:shadow-[0_8px_20px_rgb(0,0,0,0.04)] shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all duration-300 border border-transparent group"
+                >
+                  {brand.image ? (
+                    <img src={brand.image} alt={brand.name} className="max-h-8 max-w-[80%] object-contain opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300" />
+                  ) : (
+                    <span className={`text-sm font-black uppercase tracking-wider ${brand.color} opacity-60 group-hover:opacity-100 transition-all duration-300`}>
+                      {brand.text}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </section>
 

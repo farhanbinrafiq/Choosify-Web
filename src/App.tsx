@@ -201,6 +201,7 @@ function AppContent() {
             <Route path="/recommendations" element={<Navigate to="/discover" replace />} />
             <Route path="/recommendations/:id" element={<Navigate to="/discover/:id" replace />} />
             <Route path="/login" element={<PageWrapper><AuthPage /></PageWrapper>} />
+            <Route path="/signup" element={<PageWrapper><AuthPage /></PageWrapper>} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
             <Route path="/creators" element={<PageWrapper><CreatorsPage /></PageWrapper>} />

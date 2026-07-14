@@ -15,6 +15,7 @@ interface Brand {
   name: string;
   description: string;
   logo: string; // The monogram monogram, e.g. "S", "A", "Ap"
+  logoUrl?: string; // Optional logo URL
   rating: number;
   reviewsCount: string; // e.g., "12.4k reviews"
   productsCount: string; // e.g., "1,240"
@@ -34,6 +35,7 @@ const ALL_BRANDS_DATA: Brand[] = [
     name: 'Samsung',
     description: 'Global Electronics Brand',
     logo: 'S',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg',
     rating: 4.9,
     reviewsCount: '12.4k',
     productsCount: '1,240',
@@ -51,6 +53,7 @@ const ALL_BRANDS_DATA: Brand[] = [
     name: 'Apple',
     description: 'Global Technology Brand',
     logo: 'A',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/31/Apple_logo_white.svg',
     rating: 4.9,
     reviewsCount: '8.7k',
     productsCount: '856',
@@ -85,6 +88,7 @@ const ALL_BRANDS_DATA: Brand[] = [
     name: 'Nike',
     description: 'Global Sports Brand',
     logo: 'N',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg',
     rating: 4.7,
     reviewsCount: '9.1k',
     productsCount: '540',
@@ -119,6 +123,7 @@ const ALL_BRANDS_DATA: Brand[] = [
     name: 'Xiaomi',
     description: 'Innovative Technology Brand',
     logo: 'mi',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ae/Xiaomi_logo_%282021-%29.svg',
     rating: 4.6,
     reviewsCount: '3.8k',
     productsCount: '410',
@@ -136,6 +141,7 @@ const ALL_BRANDS_DATA: Brand[] = [
     name: 'Philips',
     description: 'Health & Lifestyle Brand',
     logo: 'P',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/df/Philips_logo_new.svg',
     rating: 4.6,
     reviewsCount: '2.9k',
     productsCount: '330',
@@ -153,6 +159,7 @@ const ALL_BRANDS_DATA: Brand[] = [
     name: 'Adidas',
     description: 'Global Sportswear Brand',
     logo: 'Ad',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg',
     rating: 4.6,
     reviewsCount: '3.2k',
     productsCount: '330',
@@ -238,6 +245,7 @@ const ALL_BRANDS_DATA: Brand[] = [
     name: 'Bata',
     description: 'Legacy Footwear Brand',
     logo: 'B',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e8/Bata_logo.svg',
     rating: 4.6,
     reviewsCount: '11.0k',
     productsCount: '950',
@@ -857,7 +865,7 @@ export function BrandsPage() {
       </div>
 
       {/* Centered Single-Feed Directory Workspace */}
-      <div className="max-w-[1400px] mx-auto px-6 py-6 w-full">
+      <div className="max-w-[1400px] min-[1600px]:max-w-[1600px] mx-auto px-6 py-6 w-full">
         
         {/* Main Brand Listings Workspace */}
         <main className="space-y-6">
@@ -967,19 +975,28 @@ export function BrandsPage() {
             </div>
           ) : viewMode === 'grid' ? (
             /* Grid View */
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 min-[1200px]:grid-cols-4 min-[1400px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
               {paginatedBrands.map((brand) => (
-                <div
+                <Link
                   key={brand.id}
-                  className="bg-white rounded-xl border border-[#E3E8EE] overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group"
+                  to={`/brands/${brand.id}`}
+                  className="bg-white rounded-xl border border-[#E3E8EE] overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group text-left cursor-pointer"
                 >
                   {/* Top Image Card Banner */}
                   <div className={cn("h-36 relative flex items-center justify-center p-4 transition-transform overflow-hidden", brand.bannerClass)}>
                     
-                    {/* Centered large brand logo name */}
-                    <span className="text-white text-3xl font-sans font-black uppercase tracking-widest opacity-80 group-hover:scale-105 transition-transform duration-500">
-                      {brand.brandText}
-                    </span>
+                    {/* Centered official brand logo or fallback */}
+                    {brand.logoUrl ? (
+                      <img 
+                        src={brand.logoUrl} 
+                        alt={`${brand.name} Logo`} 
+                        className="h-10 max-h-[50%] w-auto max-w-[80%] object-contain brightness-0 invert opacity-90 group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <span className="text-white text-2xl font-sans font-black uppercase tracking-widest opacity-80 group-hover:scale-105 transition-transform duration-500 text-center px-4">
+                        {brand.brandText}
+                      </span>
+                    )}
 
                     {/* Top right verified shield badge */}
                     {brand.isVerified && (
@@ -988,14 +1005,14 @@ export function BrandsPage() {
                       </div>
                     )}
 
-                    {/* Bottom left monogram circular monogram avatar badge */}
-                    <div className="absolute bottom-[-22px] left-5 w-11 h-11 bg-white rounded-xl shadow-md border border-[#E2E8F0] flex items-center justify-center text-center font-sans font-black text-navy text-base">
+                    {/* Bottom left monogram circular monogram avatar badge - increased by 27% and optimized transition */}
+                    <div className="absolute bottom-[-26px] left-5 w-14 h-14 bg-white rounded-full shadow-md border-2 border-white flex items-center justify-center text-center font-sans font-black text-navy text-lg z-10">
                       {brand.logo}
                     </div>
                   </div>
 
                   {/* Body Content */}
-                  <div className="p-5 pt-7 flex-1 flex flex-col text-left">
+                  <div className="p-5 pt-9 flex-1 flex flex-col text-left">
                     <h4 className="text-base font-black text-navy uppercase tracking-tight group-hover:text-orange-primary transition-colors">
                       {brand.name}
                     </h4>
@@ -1039,29 +1056,38 @@ export function BrandsPage() {
                     </div>
 
                     {/* View Button */}
-                    <Link
-                      to={`/brands/${brand.id}`}
-                      className="w-full mt-auto py-2.5 bg-[#050C24] hover:bg-orange-primary text-white text-xs font-black uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all duration-200"
+                    <div
+                      className="w-full mt-auto py-2.5 bg-[#050C24] group-hover:bg-[#FF5B00] text-white text-xs font-black uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all duration-200"
                     >
                       View Brand <ArrowRight size={13} />
-                    </Link>
+                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
             /* List View */
             <div className="space-y-4">
               {paginatedBrands.map((brand) => (
-                <div
+                <Link
                   key={brand.id}
-                  className="bg-white rounded-xl border border-[#E3E8EE] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col md:flex-row group text-left"
+                  to={`/brands/${brand.id}`}
+                  className="bg-white rounded-xl border border-[#E3E8EE] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col md:flex-row group text-left cursor-pointer"
                 >
                   {/* Left banner strip */}
                   <div className={cn("w-full md:w-48 h-32 md:h-auto relative flex items-center justify-center p-4 shrink-0 overflow-hidden", brand.bannerClass)}>
-                    <span className="text-white text-xl font-sans font-black uppercase tracking-wider opacity-85 group-hover:scale-105 transition-transform duration-500">
-                      {brand.brandText}
-                    </span>
+                    {/* Centered official brand logo or fallback */}
+                    {brand.logoUrl ? (
+                      <img 
+                        src={brand.logoUrl} 
+                        alt={`${brand.name} Logo`} 
+                        className="h-8 w-auto max-w-[85%] object-contain brightness-0 invert opacity-85 group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <span className="text-white text-xl font-sans font-black uppercase tracking-wider opacity-85 group-hover:scale-105 transition-transform duration-500 text-center px-4">
+                        {brand.brandText}
+                      </span>
+                    )}
                     {brand.isVerified && (
                       <div className="absolute top-3 right-3 bg-[#0DDE78] text-white font-sans text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Check size={8} strokeWidth={4} /> Verified
@@ -1074,7 +1100,7 @@ export function BrandsPage() {
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 bg-gray-50 border border-gray-100 rounded flex items-center justify-center font-sans font-black text-navy text-[10px]">
+                          <span className="w-8 h-8 bg-gray-50 border border-gray-100 rounded flex items-center justify-center font-sans font-black text-navy text-xs shrink-0">
                             {brand.logo}
                           </span>
                           <h4 className="text-base font-black text-navy uppercase tracking-tight group-hover:text-orange-primary transition-colors">
@@ -1113,15 +1139,14 @@ export function BrandsPage() {
                       </div>
 
                       {/* Button */}
-                      <Link
-                        to={`/brands/${brand.id}`}
-                        className="py-2 px-5 bg-[#050C24] hover:bg-orange-primary text-white text-xs font-black uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-colors self-start md:self-auto"
+                      <div
+                        className="py-2 px-5 bg-[#050C24] group-hover:bg-[#FF5B00] text-white text-xs font-black uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-colors self-start md:self-auto"
                       >
                         View Brand <ArrowRight size={13} />
-                      </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
