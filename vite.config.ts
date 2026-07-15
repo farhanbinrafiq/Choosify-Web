@@ -215,6 +215,8 @@ export default defineConfig(({ mode }) => {
     ],
 
 
+    build: {
+    },
     resolve: {
       alias: {
         '@': path.resolve("./src"),

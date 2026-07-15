@@ -7,7 +7,7 @@ import {
   X, Check, FileText, Sparkle, HelpCircle, ShieldCheck
 } from 'lucide-react';
 import { CREATORS, Creator } from '../data/creators';
-import { CreatorCardDesign } from '../components/CreatorCardDesign';
+import { CreatorCard } from '../components/CreatorCard';
 import { toast } from 'react-hot-toast';
 import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
 
@@ -611,7 +611,7 @@ export function CreatorsPage() {
               >
                 {filteredCreators.map((creator) => {
                   if (viewMode === 'grid') {
-                    return <CreatorCardDesign key={creator.id} creator={creator} />;
+                    return <CreatorCard key={creator.id} creator={creator} />;
                   } else {
                     // Custom list-view row for high-craftsmanship list mode
                     return (

@@ -408,7 +408,7 @@ export function AllProductsPage() {
           />
 
           {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1200px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
               {Array.from({ length: 10 }).map((_, idx) => (
                 <div key={idx} className="bg-white rounded-2xl p-5 h-[380px] animate-pulse border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                   <div className="w-full aspect-[4/3] bg-slate-100 rounded-xl mb-6" />
@@ -432,7 +432,7 @@ export function AllProductsPage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1200px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard 
                   key={product.id}

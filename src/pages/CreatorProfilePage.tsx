@@ -12,6 +12,7 @@ import {
 import { CREATORS } from '../data/creators';
 import { cn } from '../lib/utils';
 import { FollowButton } from '../components/FollowButton';
+import { UnifiedProfileHero } from '../components/ui/cards/UnifiedProfileHero';
 
 function TikTokIcon({ size = 20 }: { size?: number }) {
   return (
@@ -139,185 +140,72 @@ export function CreatorProfilePage() {
     setContactPhone('');
   };
 
+  const activeTabId = activeSection === 'overview' ? 'overview' :
+                      activeSection === 'guides' ? 'featured-content' :
+                      activeSection === 'videos' ? 'videos-section' :
+                      activeSection === 'reviews' ? 'brand-reviews-section' :
+                      activeSection === 'collections' ? 'collections-section' :
+                      activeSection === 'deals' ? 'deals-section' : 'about-section';
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F5F8FD]">
       
-      {/* 1. CREATOR HERO SECTION */}
-      <section className="bg-gradient-to-br from-[#020516] to-[#120F26] relative pt-8 pb-16 overflow-hidden border-b border-white/5 select-none text-left">
-        {/* Glow Effects */}
-        <div className="absolute top-1/4 -left-1/4 w-96 h-96 rounded-full bg-[#FF5B00]/15 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/4 -right-1/4 w-96 h-96 rounded-full bg-purple-600/10 blur-3xl pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full mb-6">
-          <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-semibold tracking-wider uppercase">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <Link to="/creators" className="hover:text-white transition-colors">Creators</Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">{creator.name}</span>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-8 xl:gap-12 lg:items-center">
-            
-            {/* Left Side: Profile Information */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 text-center md:text-left">
-              {/* Profile Squircle */}
-              <div className="relative shrink-0">
-                <div className="w-28 h-28 md:w-36 md:h-36 rounded-[32px] overflow-hidden border-4 border-white/10 shadow-2xl bg-[#09091E]">
-                  <img 
-                    src={creator.avatar} 
-                    className="w-full h-full object-cover" 
-                    alt={creator.name} 
-                    referrerPolicy="no-referrer" 
-                  />
-                </div>
-                {/* Verified Circle Badge */}
-                <div className="absolute -top-1 -right-1 w-7 h-7 bg-[#FF5B00] rounded-full flex items-center justify-center text-white border-2 border-[#020516] shadow-lg">
-                  <Check size={14} className="stroke-[3]" />
-                </div>
-              </div>
-
-              {/* Identity Metadata */}
-              <div className="flex-1 flex flex-col items-center md:items-start">
-                <div className="flex items-center gap-2 mb-1 bg-cyan-400/10 px-2.5 py-1 rounded-md border border-cyan-400/20">
-                  <CheckCircle2 size={12} className="text-cyan-400 fill-cyan-400/10" />
-                  <span className="text-[9px] font-black tracking-widest text-cyan-400 uppercase">VERIFIED CREATOR</span>
-                </div>
-
-                <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight mb-1">
-                  {creator.name}
-                </h1>
-
-                <p className="text-xs md:text-sm font-bold text-[#FF5B00] tracking-wide mb-3 uppercase">
-                  Sr. Tech Analyst & Digital Product Researcher
-                </p>
-
-                {/* Inline Badges list */}
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-white/60 text-xs font-semibold mb-4">
-                  <span className="flex items-center gap-1.5"><MapPin size={13} className="text-[#FF5B00]" /> Dhaka, Bangladesh</span>
-                  <span className="text-white/20">•</span>
-                  <span className="flex items-center gap-1.5"><Briefcase size={13} className="text-[#FF5B00]" /> 10+ Years Experience</span>
-                  <span className="text-white/20">•</span>
-                  <span className="flex items-center gap-1.5"><GraduationCap size={13} className="text-[#FF5B00]" /> Tech & Consumer Expert</span>
-                </div>
-
-                <p className="text-white/75 text-sm md:text-base leading-relaxed max-w-xl mb-6">
-                  {creator.bio}
-                </p>
-
-                {/* CTA Action Row */}
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 w-full">
-                  <FollowButton 
-                    id={creator.id}
-                    name={creator.name}
-                    type="creator"
-                    className="!px-6 !py-3 rounded-full !text-xs !font-bold !bg-[#FF5B00] hover:!bg-[#E05000] !text-white !border-none shadow-lg tracking-wider uppercase font-space transition-transform duration-200"
-                  />
-
-                  <button 
-                    onClick={() => setIsModalOpen(true)}
-                    className="px-6 py-3 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold tracking-wider uppercase text-xs flex items-center gap-2 transition-all cursor-pointer"
-                  >
-                    <MessageCircle size={14} />
-                    Ask For Recommendation
-                  </button>
-
-                  <button 
-                    onClick={() => {
-                      navigator.clipboard.writeText(window.location.href);
-                      toast.success("Profile link copied to clipboard!");
-                    }}
-                    className="w-11 h-11 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-white flex items-center justify-center transition-all cursor-pointer"
-                    title="Share Profile"
-                  >
-                    <Share2 size={15} />
-                  </button>
-                </div>
-
-                {/* Social media connections */}
-                <div className="mt-6 flex flex-col items-center md:items-start gap-2 w-full">
-                  <span className="text-white/40 text-[9px] font-bold uppercase tracking-[0.2em]">Follow Me On</span>
-                  <div className="flex items-center gap-2.5">
-                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all">
-                      <Youtube size={16} />
-                    </a>
-                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all">
-                      <Instagram size={16} />
-                    </a>
-                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all">
-                      <TikTokIcon size={16} />
-                    </a>
-                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all">
-                      <Facebook size={16} />
-                    </a>
-                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center transition-all">
-                      <Globe size={16} />
-                    </a>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Right Side: Trust scoring glass panel */}
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-[28px] p-6 text-white shadow-2xl relative overflow-hidden flex flex-col justify-between h-full max-w-sm lg:ml-auto w-full">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF5B00]/10 blur-2xl rounded-full translate-x-1/3 -translate-y-1/3" />
-              
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <div className="text-[10px] font-black uppercase text-emerald-400 tracking-widest mb-0.5">Trust Score</div>
-                  <div className="text-5xl font-black tracking-tight italic">
-                    4.9 <span className="text-xl text-white/55 font-normal">/5</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="flex gap-0.5 justify-end mb-1">
-                    {[1, 2, 3, 4, 5].map(i => (
-                      <Star key={i} size={13} className="fill-[#FF5B00] text-[#FF5B00]" />
-                    ))}
-                  </div>
-                  <div className="text-[8.5px] font-bold text-white/40 uppercase tracking-wider">Based on 12.4K Reviews</div>
-                </div>
-              </div>
-
-              {/* Progress Rating Bars */}
-              <div className="space-y-3 mb-6">
-                {[
-                  { label: "Research", value: 4.9 },
-                  { label: "Transparency", value: 4.9 },
-                  { label: "Quality", value: 4.8 },
-                  { label: "Helpfulness", value: 4.9 },
-                  { label: "Consistency", value: 4.8 }
-                ].map((m, i) => (
-                  <div key={i} className="space-y-1">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-white/70 tracking-wide uppercase">
-                      <span>{m.label}</span>
-                      <span>{m.value}/5</span>
-                    </div>
-                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-[#FF5B00] rounded-full transition-all duration-1000" 
-                        style={{ width: `${(m.value / 5) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Bottom recommendation block */}
-              <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                <div className="text-center w-full">
-                  <div className="text-4xl font-black text-emerald-400 leading-none mb-1">98%</div>
-                  <div className="text-[9px] font-black text-white/50 uppercase tracking-widest">Recommendation Rate</div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
+      {/* 1. UNIFIED CREATOR HERO */}
+      <div id="overview">
+        <UnifiedProfileHero 
+          type="creator"
+          id={creator.id}
+          name={creator.name}
+          verified={true}
+          handle={creator.handle}
+          title="Sr. Tech Analyst & Digital Product Researcher"
+          country="Dhaka, Bangladesh"
+          bio={creator.bio}
+          logoUrl={creator.avatar}
+          bannerClass="from-[#020516] to-[#120F26]"
+          socials={{
+            youtube: '#',
+            ig: '#',
+            tiktok: '#',
+            fb: '#',
+            website: '#',
+          }}
+          score={{
+            value: "4.9",
+            max: "5",
+            reviewsCountLabel: "Based on 12.4K+ reviews",
+            recommendPctLabel: "98% Recommendation Rate",
+            breakdown: [
+              { label: "Research", value: 4.9 },
+              { label: "Transparency", value: 4.9 },
+              { label: "Quality", value: 4.8 },
+              { label: "Helpfulness", value: 4.9 },
+              { label: "Consistency", value: 4.8 }
+            ]
+          }}
+          isFollowed={isLoved}
+          onToggleFollow={() => {
+            setIsLoved(!isLoved);
+            toast.success(!isLoved ? `Following ${creator.name}!` : `Unfollowed ${creator.name}.`);
+          }}
+          onShare={() => {
+            navigator.clipboard.writeText(window.location.href);
+            toast.success("Profile link copied to clipboard!");
+          }}
+          onMessage={() => setIsModalOpen(true)}
+          navigationItems={[
+            { id: 'overview', label: 'Overview' },
+            { id: 'featured-content', label: 'Guides', count: '254' },
+            { id: 'videos-section', label: 'Videos', count: '128' },
+            { id: 'brand-reviews-section', label: 'Reviews', count: '1.2K' },
+            { id: 'collections-section', label: 'Collections', count: '48' },
+            { id: 'deals-section', label: 'Deals', count: '56' },
+            { id: 'about-section', label: 'About' }
+          ]}
+          activeTabId={activeTabId}
+          onTabClick={(tabId) => scrollToSection(tabId)}
+        />
+      </div>
 
       {/* 2. FLOATING STATISTICS CARD */}
       <div className="relative z-20 -mt-10 max-w-7xl mx-auto w-full px-4 md:px-8 select-none">
@@ -348,60 +236,6 @@ export function CreatorProfilePage() {
         </div>
       </div>
 
-      {/* 3. STICKY NAVIGATION TABS */}
-      <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-b border-[#EEF2F7] shadow-sm py-3 mt-8 select-none">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-1">
-            {[
-              { id: 'overview', label: 'Overview', icon: ShieldCheck },
-              { id: 'featured-content', label: 'Guides', count: '254', icon: BookOpen },
-              { id: 'videos-section', label: 'Videos', count: '128', icon: Video },
-              { id: 'brand-reviews-section', label: 'Reviews', count: '1.2K', icon: Star },
-              { id: 'collections-section', label: 'Collections', count: '48', icon: FolderIcon },
-              { id: 'deals-section', label: 'Deals', count: '56', icon: Flame },
-              { id: 'about-section', label: 'About', icon: Info }
-            ].map((tab) => {
-              const TabIcon = tab.icon;
-              const normalizedName = tab.id === 'overview' ? 'overview' : 
-                                     tab.id === 'featured-content' ? 'guides' :
-                                     tab.id === 'videos-section' ? 'videos' :
-                                     tab.id === 'brand-reviews-section' ? 'reviews' :
-                                     tab.id === 'collections-section' ? 'collections' :
-                                     tab.id === 'deals-section' ? 'deals' : 'about';
-              
-              const isSectionActive = activeSection === normalizedName;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => scrollToSection(tab.id)}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all uppercase tracking-wide cursor-pointer",
-                    isSectionActive 
-                      ? "text-[#FF5B00] bg-[#FF5B00]/5" 
-                      : "text-gray-500 hover:text-[#050B2C] hover:bg-gray-50"
-                  )}
-                >
-                  <TabIcon size={14} />
-                  <span>{tab.label}</span>
-                  {tab.count && (
-                    <span className={cn(
-                      "text-[9px] px-1.5 py-0.5 rounded-md font-mono font-bold ml-0.5",
-                      isSectionActive ? "bg-[#FF5B00] text-white" : "bg-gray-100 text-gray-400"
-                    )}>
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="hidden lg:flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Active Collaboration Channel</span>
-          </div>
-        </div>
-      </div>
 
       {/* 4. MAIN CONTENT SECTION */}
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-10 w-full flex flex-col gap-12">

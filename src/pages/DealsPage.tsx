@@ -798,7 +798,7 @@ export function DealsPage() {
             </div>
 
             {/* Grid of standard reusable Product Cards with custom BDT currency */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1500px]:grid-cols-5 gap-4">
               {TOP_DEALS_DATA.map((product) => (
                 <ProductCard 
                   key={product.id} 

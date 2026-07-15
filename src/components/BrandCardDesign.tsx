@@ -1,29 +1,37 @@
 import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, ArrowRight } from 'lucide-react';
+import { Star, Check } from 'lucide-react';
+import { cn } from '../lib/utils';
+
+interface Brand {
+  id: string | number;
+  name: string;
+  logo: string;
+  description?: string;
+  tagline?: string;
+  rating: number;
+  reviews?: number | string;
+  reviewCount?: number | string;
+  category?: string;
+  bestFor?: string;
+  priceRange?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  successScore?: number;
+  recommended?: string;
+  isHot?: boolean;
+  isFeatured?: boolean;
+  isVerified?: boolean;
+  coverImage?: string;
+  productsCount?: number;
+  followersCount?: number;
+  verified?: boolean;
+}
 
 interface BrandCardDesignProps {
-  brand: {
-    id: string | number;
-    name: string;
-    logo: string;
-    description?: string;
-    tagline?: string;
-    rating: number;
-    reviews?: number;
-    reviewCount?: number;
-    category?: string;
-    bestFor?: string;
-    priceRange?: string;
-    minPrice?: number;
-    maxPrice?: number;
-    successScore?: number;
-    recommended?: string;
-    isHot?: boolean;
-    isFeatured?: boolean;
-    coverImage?: string;
-  };
+  brand: Brand;
   onClick?: () => void;
+  className?: string;
 }
 
 const BRAND_COVERS: Record<string, string> = {
@@ -61,24 +69,10 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
-export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }: BrandCardDesignProps) {
+export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick, className }: BrandCardDesignProps) {
   const reviewsCount = brand.reviews ?? brand.reviewCount ?? 840;
-  const bestForText = brand.bestFor ?? brand.category ?? 'Fashion';
   const taglineText = brand.tagline || brand.description || 'Traditional & contemporary clothing';
   
-  let priceText = '৳500-2000';
-  if (brand.priceRange) {
-    priceText = brand.priceRange;
-  } else if (brand.minPrice !== undefined && brand.maxPrice !== undefined) {
-    priceText = `৳${formatNumber(brand.minPrice)}-${formatNumber(brand.maxPrice)}`;
-  } else if (brand.minPrice !== undefined) {
-    priceText = `৳${formatNumber(brand.minPrice)}`;
-  }
-
-  const score = brand.successScore 
-    || (brand.recommended ? parseInt(brand.recommended) : null)
-    || Math.round((brand.rating || 4.5) * 20);
-
   const coverUrl = brand.coverImage 
     || BRAND_COVERS[brand.name] 
     || CATEGORY_COVERS[brand.category || ''] 
@@ -88,7 +82,10 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
     <Link
       to={`/brands/${brand.id}`}
       onClick={onClick}
-      className="block w-[335px] max-w-[335px] min-w-[335px] bg-white rounded-[12px] border border-[#e8edf2] hover:shadow-lg hover:border-[#FF5B00]/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative shrink-0"
+      className={cn(
+        "block w-[335px] max-w-[335px] min-w-[335px] bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative shrink-0 text-left",
+        className
+      )}
     >
       {/* FEATURED BADGE */}
       {brand.isFeatured && (
@@ -107,37 +104,47 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
       )}
 
       {/* COVER PHOTO SECTION */}
-      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#1A1D4E]/10 to-[#FF5B00]/10 overflow-hidden shrink-0">
+      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#000435]/10 to-[#FF5B00]/10 overflow-hidden shrink-0">
         <img 
           src={coverUrl}
           alt={`${brand.name} cover`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
           loading="lazy"
+          referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/5" />
       </div>
 
       {/* LOGO - overlapping cover at bottom-left */}
       <div className="absolute top-[96px] left-4 z-10">
-        <div className="w-[80px] h-[80px] rounded-[8px] border-4 border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
-          {brand.logo.startsWith('http') || brand.logo.startsWith('/') ? (
+        <div className="w-[80px] h-[80px] rounded-full border-4 border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
+          {brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/')) ? (
             <img 
               src={brand.logo} 
               className="w-full h-full object-cover" 
               alt={brand.name}
               loading="lazy"
+              referrerPolicy="no-referrer"
             />
           ) : (
-            <span className="text-2xl font-black text-[#1A1D4E] tracking-tight">{brand.logo}</span>
+            <span className="text-2xl font-black text-[#000435] tracking-tight">{brand.logo || 'B'}</span>
           )}
         </div>
       </div>
 
       {/* BRAND INFO SECTION */}
-      <div className="px-4 pt-14 pb-3 text-left flex-1 flex flex-col justify-center min-w-0">
-        <h3 className="text-base font-black text-[#1A1D4E] uppercase line-clamp-1 mb-1 leading-tight tracking-tight">
+      <div className="px-4 pt-14 pb-3 flex-1 flex flex-col justify-center min-w-0">
+        <h3 className="text-base font-black text-[#000435] uppercase line-clamp-1 mb-1 leading-tight tracking-tight flex items-center gap-1.5">
           {brand.name}
         </h3>
+        
+        {/* Verified Brand Checkmark Badge under the name */}
+        {brand.verified && (
+          <div className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100/55 px-2 py-0.5 rounded-full w-fit mb-1.5 flex items-center gap-1">
+            <Check size={10} strokeWidth={3.5} />
+            <span>Verified Brand</span>
+          </div>
+        )}
         
         <p className="text-xs text-gray-500 mb-2 line-clamp-1 leading-normal font-medium">
           {taglineText}
@@ -156,73 +163,46 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
               />
             ))}
           </div>
-          <span className="text-xs font-bold text-[#1A1D4E]">
+          <span className="text-xs font-bold text-[#000435]">
             {brand.rating.toFixed(1)}
           </span>
           <span className="text-[11px] text-gray-400">
-            ({formatNumber(reviewsCount)} reviews)
+            ({typeof reviewsCount === 'number' ? formatNumber(reviewsCount) : reviewsCount} reviews)
           </span>
         </div>
       </div>
 
       {/* STATS SECTION - 3 COLUMNS */}
-      <div className="border-t border-b border-[#e8edf2] px-4 py-3 bg-[#F8FBFD] shrink-0">
+      <div className="border-t border-b border-[#e8edf2] px-4 py-3 bg-[#F4F7F9] shrink-0">
         <div className="grid grid-cols-3 gap-1">
-          {/* Column 1: Best For */}
+          {/* Column 1: Products */}
           <div className="text-center min-w-0">
-            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
-              Best For
+            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 leading-none">
+              Products
             </div>
-            <div className="text-xs font-black text-[#1A1D4E] truncate leading-tight">
-              {bestForText}
+            <div className="text-xs font-black text-[#000435] truncate leading-tight">
+              {brand.productsCount !== undefined ? formatNumber(brand.productsCount) : "—"}
             </div>
           </div>
           
-          {/* Column 2: Price Range */}
+          {/* Column 2: Rating */}
           <div className="text-center border-l border-r border-[#e8edf2] min-w-0 px-1">
-            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
-              Price Range
+            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 leading-none">
+              Rating
             </div>
-            <div className="text-xs font-black text-[#FF5B00] truncate leading-tight">
-              {priceText}
+            <div className="text-xs font-black text-[#FF5B00] truncate leading-tight flex items-center justify-center gap-0.5">
+              <span>{brand.rating.toFixed(1)}</span>
+              <span className="text-[9px]">★</span>
             </div>
           </div>
           
-          {/* Column 3: Success Score — circular SVG meter */}
-          <div className="text-center min-w-0 flex flex-col items-center justify-center">
-            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1 leading-none">
-              Success
+          {/* Column 3: Followers */}
+          <div className="text-center min-w-0">
+            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 leading-none">
+              Followers
             </div>
-            <div className="relative w-11 h-11 shrink-0">
-              <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
-                {/* Background track */}
-                <circle
-                  cx="22"
-                  cy="22"
-                  r="18"
-                  fill="none"
-                  stroke="#E5E7EB"
-                  strokeWidth="4"
-                />
-                {/* Progress arc */}
-                <circle
-                  cx="22"
-                  cy="22"
-                  r="18"
-                  fill="none"
-                  stroke="#10B981"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 18}`}
-                  strokeDashoffset={`${2 * Math.PI * 18 * (1 - score / 100)}`}
-                  style={{ transition: 'stroke-dashoffset 0.8s ease-out' }}
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-black text-emerald-600 leading-none">
-                  {score}%
-                </span>
-              </div>
+            <div className="text-xs font-black text-[#000435] truncate leading-tight">
+              {brand.followersCount !== undefined ? formatNumber(brand.followersCount) : "—"}
             </div>
           </div>
         </div>
@@ -230,19 +210,13 @@ export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }:
 
       {/* CTA BUTTON */}
       <div className="px-4 py-3 shrink-0 bg-white">
-        <button 
-          type="button"
-          className="w-full py-2.5 bg-[#1A1D4E] hover:bg-[#0F0F2E] text-white text-[11px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group"
+        <div 
+          className="w-full py-2 bg-white border-2 border-[#000435] text-[#000435] hover:bg-[#000435] hover:text-white text-[11px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group cursor-pointer"
         >
           Visit Brand
           <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>
-        </button>
+        </div>
       </div>
     </Link>
   );
 });
-
-// Simple cn utility local helper in case not fully defined
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
-}

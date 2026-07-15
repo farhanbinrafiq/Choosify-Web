@@ -9,6 +9,7 @@ import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
 import { useRegisterPageFilters, useFloatingFilter, ActiveFilterChips } from '../components/FilterEngine';
+import { BrandCard } from '../components/BrandCard';
 
 interface Brand {
   id: string;
@@ -919,30 +920,6 @@ export function BrandsPage() {
                 <SlidersHorizontal size={14} />
                 <span>Filters</span>
               </button>
- 
-              {/* Layout Toggles */}
-              <div className="flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={cn(
-                    "p-1.5 rounded-md transition-all",
-                    viewMode === 'grid' ? "bg-white text-orange-primary shadow-xs" : "text-gray-500 hover:text-navy"
-                  )}
-                  title="Grid View"
-                >
-                  <LayoutGrid size={15} />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={cn(
-                    "p-1.5 rounded-md transition-all",
-                    viewMode === 'list' ? "bg-white text-orange-primary shadow-xs" : "text-gray-500 hover:text-navy"
-                  )}
-                  title="List View"
-                >
-                  <List size={15} />
-                </button>
-              </div>
             </div>
           </div>
 
@@ -973,180 +950,24 @@ export function BrandsPage() {
                 Reset All Filters
               </button>
             </div>
-          ) : viewMode === 'grid' ? (
-            /* Grid View */
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 min-[1200px]:grid-cols-4 min-[1400px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
-              {paginatedBrands.map((brand) => (
-                <Link
-                  key={brand.id}
-                  to={`/brands/${brand.id}`}
-                  className="bg-white rounded-xl border border-[#E3E8EE] overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group text-left cursor-pointer"
-                >
-                  {/* Top Image Card Banner */}
-                  <div className={cn("h-36 relative flex items-center justify-center p-4 transition-transform overflow-hidden", brand.bannerClass)}>
-                    
-                    {/* Centered official brand logo or fallback */}
-                    {brand.logoUrl ? (
-                      <img 
-                        src={brand.logoUrl} 
-                        alt={`${brand.name} Logo`} 
-                        className="h-10 max-h-[50%] w-auto max-w-[80%] object-contain brightness-0 invert opacity-90 group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <span className="text-white text-2xl font-sans font-black uppercase tracking-widest opacity-80 group-hover:scale-105 transition-transform duration-500 text-center px-4">
-                        {brand.brandText}
-                      </span>
-                    )}
-
-                    {/* Top right verified shield badge */}
-                    {brand.isVerified && (
-                      <div className="absolute top-3.5 right-3.5 bg-[#0DDE78] text-white font-sans text-[8px] font-black uppercase tracking-wider px-2 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                        <Check size={9} strokeWidth={4} /> Verified
-                      </div>
-                    )}
-
-                    {/* Bottom left monogram circular monogram avatar badge - increased by 27% and optimized transition */}
-                    <div className="absolute bottom-[-26px] left-5 w-14 h-14 bg-white rounded-full shadow-md border-2 border-white flex items-center justify-center text-center font-sans font-black text-navy text-lg z-10">
-                      {brand.logo}
-                    </div>
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="p-5 pt-9 flex-1 flex flex-col text-left">
-                    <h4 className="text-base font-black text-navy uppercase tracking-tight group-hover:text-orange-primary transition-colors">
-                      {brand.name}
-                    </h4>
-                    <p className="text-gray-500 text-xs mt-1.5 line-clamp-1">
-                      {brand.description}
-                    </p>
-
-                    {/* Ratings row */}
-                    <div className="flex items-center gap-1.5 mt-3 text-xs">
-                      <div className="flex items-center gap-0.5 text-orange-primary">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={12}
-                            fill={i < Math.floor(brand.rating) ? "currentColor" : "none"}
-                            className="shrink-0"
-                          />
-                        ))}
-                      </div>
-                      <span className="font-bold text-navy text-[11px]">{brand.rating}</span>
-                      <span className="text-gray-400 text-[10px]">({brand.reviewsCount} reviews)</span>
-                    </div>
-
-                    {/* Separator line */}
-                    <div className="w-full h-px bg-[#F1F5F9] my-4" />
-
-                    {/* Statistics Horizontal Row */}
-                    <div className="grid grid-cols-3 gap-1.5 text-center text-xs font-sans mb-5">
-                      <div>
-                        <span className="text-[10px] font-semibold text-gray-400 block uppercase mb-0.5">Products</span>
-                        <span className="font-black text-navy">{brand.productsCount}</span>
-                      </div>
-                      <div className="border-x border-gray-100">
-                        <span className="text-[10px] font-semibold text-gray-400 block uppercase mb-0.5">Categories</span>
-                        <span className="font-black text-navy">{brand.categoriesCount}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-semibold text-gray-400 block uppercase mb-0.5">Followers</span>
-                        <span className="font-black text-navy">{brand.followersCount}</span>
-                      </div>
-                    </div>
-
-                    {/* View Button */}
-                    <div
-                      className="w-full mt-auto py-2.5 bg-[#050C24] group-hover:bg-[#FF5B00] text-white text-xs font-black uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all duration-200"
-                    >
-                      View Brand <ArrowRight size={13} />
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
           ) : (
-            /* List View */
-            <div className="space-y-4">
+            <div className="grid gap-5 w-full justify-center max-w-[1400px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
               {paginatedBrands.map((brand) => (
-                <Link
+                <BrandCard
                   key={brand.id}
-                  to={`/brands/${brand.id}`}
-                  className="bg-white rounded-xl border border-[#E3E8EE] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col md:flex-row group text-left cursor-pointer"
-                >
-                  {/* Left banner strip */}
-                  <div className={cn("w-full md:w-48 h-32 md:h-auto relative flex items-center justify-center p-4 shrink-0 overflow-hidden", brand.bannerClass)}>
-                    {/* Centered official brand logo or fallback */}
-                    {brand.logoUrl ? (
-                      <img 
-                        src={brand.logoUrl} 
-                        alt={`${brand.name} Logo`} 
-                        className="h-8 w-auto max-w-[85%] object-contain brightness-0 invert opacity-85 group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <span className="text-white text-xl font-sans font-black uppercase tracking-wider opacity-85 group-hover:scale-105 transition-transform duration-500 text-center px-4">
-                        {brand.brandText}
-                      </span>
-                    )}
-                    {brand.isVerified && (
-                      <div className="absolute top-3 right-3 bg-[#0DDE78] text-white font-sans text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Check size={8} strokeWidth={4} /> Verified
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="p-5 flex-1 flex flex-col justify-between">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="w-8 h-8 bg-gray-50 border border-gray-100 rounded flex items-center justify-center font-sans font-black text-navy text-xs shrink-0">
-                            {brand.logo}
-                          </span>
-                          <h4 className="text-base font-black text-navy uppercase tracking-tight group-hover:text-orange-primary transition-colors">
-                            {brand.name}
-                          </h4>
-                        </div>
-                        <p className="text-gray-500 text-xs mt-1">
-                          {brand.description}
-                        </p>
-                      </div>
-
-                      {/* Ratings */}
-                      <div className="flex items-center gap-1 text-xs">
-                        <Star size={12} fill="currentColor" className="text-orange-primary" />
-                        <span className="font-bold text-navy">{brand.rating}</span>
-                        <span className="text-gray-400 text-[10px]">({brand.reviewsCount})</span>
-                      </div>
-                    </div>
-
-                    {/* Stats & button bottom section */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4 pt-4 border-t border-gray-100">
-                      {/* Stats */}
-                      <div className="flex items-center gap-6 text-xs text-left">
-                        <div>
-                          <span className="text-[9px] font-semibold text-gray-400 block uppercase">Products</span>
-                          <span className="font-black text-navy">{brand.productsCount}</span>
-                        </div>
-                        <div>
-                          <span className="text-[9px] font-semibold text-gray-400 block uppercase">Categories</span>
-                          <span className="font-black text-navy">{brand.categoriesCount}</span>
-                        </div>
-                        <div>
-                          <span className="text-[9px] font-semibold text-gray-400 block uppercase">Followers</span>
-                          <span className="font-black text-navy">{brand.followersCount}</span>
-                        </div>
-                      </div>
-
-                      {/* Button */}
-                      <div
-                        className="py-2 px-5 bg-[#050C24] group-hover:bg-[#FF5B00] text-white text-xs font-black uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-colors self-start md:self-auto"
-                      >
-                        View Brand <ArrowRight size={13} />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                  brand={{
+                    id: brand.id,
+                    name: brand.name,
+                    logo: brand.logoUrl || brand.brandText || brand.name.charAt(0),
+                    rating: brand.rating,
+                    reviewCount: brand.reviewsCount,
+                    isVerified: brand.isVerified,
+                    description: brand.description,
+                    category: 'Technology',
+                    isFeatured: brand.isVerified,
+                    coverImage: brand.bannerClass === 'bg-gradient-to-r from-blue-600 to-indigo-700' ? 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&q=80' : undefined
+                  }}
+                />
               ))}
             </div>
           )}

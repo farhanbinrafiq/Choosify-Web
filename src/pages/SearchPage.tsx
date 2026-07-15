@@ -9,8 +9,8 @@ import {
 import { PRODUCTS, BRANDS, BLOGS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { GlobalSearchBar } from '../components/GlobalSearchBar';
-import { BrandCardDesign } from '../components/BrandCardDesign';
-import { CreatorCardDesign } from '../components/CreatorCardDesign';
+import { BrandCard } from '../components/BrandCard';
+import { CreatorCard } from '../components/CreatorCard';
 import { toast } from 'react-hot-toast';
 import { mockGuides } from '../data/mockGuides';
 import { CREATORS } from '../data/creators';
@@ -623,7 +623,7 @@ export function SearchPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1200px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
                   {(activeTab === 'all' ? searchResults.products.slice(0, 6) : searchResults.products).map((product) => (
                     <div key={product.id} className="flex flex-col justify-between h-full group">
                       <ProductCard product={product} />
@@ -738,7 +738,7 @@ export function SearchPage() {
 
                 <div className="grid gap-5 w-full justify-center max-w-[1045px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
                   {(activeTab === 'all' ? searchResults.brands.slice(0, 3) : searchResults.brands).map((brand) => (
-                    <BrandCardDesign key={brand.id} brand={brand} />
+                    <BrandCard key={brand.id} brand={brand} />
                   ))}
                 </div>
               </div>
@@ -909,7 +909,7 @@ export function SearchPage() {
 
                   <div className="grid gap-5 w-full justify-center max-w-[1045px] mx-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, 335px)' }}>
                     {(activeTab === 'all' ? searchResults.influencers.slice(0, 2) : searchResults.influencers).map((inf) => (
-                      <CreatorCardDesign key={inf.id} creator={inf} />
+                      <CreatorCard key={inf.id} creator={inf} />
                     ))}
                   </div>
                 </div>
@@ -940,7 +940,7 @@ export function SearchPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1200px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
                   {(activeTab === 'all' ? searchResults.favorites.slice(0, 6) : searchResults.favorites).map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}

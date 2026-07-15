@@ -7,12 +7,16 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
+import { SpotlightCard } from '../components/SpotlightCard';
+import { DealCard } from '../components/DealCard';
+import { CategoryCard } from '../components/CategoryCard';
+import { BrandCard } from '../components/BrandCard';
+import { BRANDS } from '../constants';
 import {
   CATEGORY_ITEMS,
   SPOTLIGHT_CARDS,
   FEATURED_PRODUCTS_MOCK,
   BUYING_GUIDES,
-  BRAND_LOGOS,
   POPULAR_SERVICES,
   RECENTLY_VIEWED
 } from '../data/homeData';
@@ -191,19 +195,29 @@ export function HomePage() {
               VIEW ALL CATEGORIES <ChevronRight size={14} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {CATEGORY_ITEMS.map((cat) => (
-              <div 
-                key={cat.id} 
-                onClick={() => navigate('/categories')}
-                className="bg-white rounded-3xl p-6 flex flex-col items-center justify-center gap-4 cursor-pointer hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] shadow-[0_4px_20px_rgb(0,0,0,0.02)] transition-all duration-300 border border-transparent"
-              >
-                <div className="w-14 h-14 rounded-full bg-slate-50 flex items-center justify-center text-2xl">
-                  {cat.emoji}
-                </div>
-                <span className="text-sm font-bold text-slate-700 text-center">{cat.name}</span>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+            {CATEGORY_ITEMS.slice(0, 6).map((cat) => {
+              const categoryCovers: Record<string, string> = {
+                'cat-elect': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80',
+                'cat-fash': 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80',
+                'cat-mob': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&q=80',
+                'cat-home': 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600&q=80',
+                'cat-beau': 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&q=80',
+                'cat-sport': 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&q=80'
+              };
+              const img = categoryCovers[cat.id] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
+              return (
+                <CategoryCard
+                  key={cat.id}
+                  id={cat.id}
+                  title={cat.name}
+                  image={img}
+                  discount="Up to 40% Off"
+                  count={cat.name === 'Electronics' ? 120 : cat.name === 'Fashion' ? 450 : 180}
+                  items={cat.name === 'Electronics' ? ['Headphones', 'Laptops', 'Audio'] : ['Men\'s Apparel', 'Women\'s Apparel', 'Casual Shoes']}
+                />
+              );
+            })}
           </div>
         </section>
 
@@ -221,29 +235,7 @@ export function HomePage() {
           </div>
           <div className="flex gap-6 overflow-x-auto pb-6 snap-x scrollbar-hide">
             {SPOTLIGHT_CARDS.map((card) => (
-              <div 
-                key={card.id}
-                onClick={() => navigate(`/discover/${card.id}`)}
-                className="relative min-w-[280px] lg:min-w-[320px] h-[400px] rounded-3xl overflow-hidden cursor-pointer group shadow-[0_4px_20px_rgb(0,0,0,0.04)] snap-start shrink-0 border border-transparent"
-              >
-                <img src={card.cover} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                
-                <div className="absolute top-4 left-4">
-                  <span className={`text-[10px] font-bold text-white px-3 py-1 rounded-full tracking-wider shadow-md uppercase ${card.badgeBg}`}>
-                    {card.badge}
-                  </span>
-                </div>
-                
-                <div className="absolute bottom-6 left-6 right-6 text-white">
-                  <h3 className="text-xl font-bold leading-tight mb-4 drop-shadow-md">{card.title}</h3>
-                  <div className="flex items-center gap-3">
-                    <img src={card.avatar} className="w-6 h-6 rounded-full border border-white/20" alt="" />
-                    <span className="text-xs font-bold text-white/90">{card.publisher}</span>
-                    <VerifiedIcon size={14} className="text-blue-400 ml-auto" />
-                  </div>
-                </div>
-              </div>
+              <SpotlightCard key={card.id} card={card} />
             ))}
           </div>
         </section>
@@ -279,31 +271,7 @@ export function HomePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {DEALS_MOCK.map((deal, idx) => (
-              <div 
-                key={idx}
-                className={`${deal.bg} rounded-3xl p-8 text-white relative overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-transparent`}
-              >
-                <div className="relative z-10 flex flex-col h-full">
-                  <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 w-fit px-2 py-1 rounded mb-4">
-                    {deal.label}
-                  </span>
-                  <h3 className="text-2xl font-black leading-tight mb-2">{deal.title}</h3>
-                  <p className="text-sm font-medium text-white/80 mb-6">{deal.subtitle}</p>
-                  
-                  <div className="mt-auto">
-                    {deal.code ? (
-                      <div className="bg-white/20 rounded-xl px-4 py-3 flex items-center justify-center border border-white/20 border-dashed">
-                        <span className="font-mono font-bold tracking-wider">{deal.code}</span>
-                      </div>
-                    ) : (
-                      <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                        {deal.cta} <ChevronRight size={14} />
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <deal.icon className="absolute -right-4 -bottom-4 w-32 h-32 text-white/10" />
-              </div>
+              <DealCard key={idx} variant="promo" deal={deal} />
             ))}
           </div>
         </section>
@@ -386,23 +354,15 @@ export function HomePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
             {BUYING_GUIDES.map((guide) => (
-              <div 
-                key={guide.id}
-                onClick={() => navigate(`/discover/${guide.id}`)}
-                className="bg-white rounded-2xl overflow-hidden cursor-pointer group hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] shadow-[0_4px_20px_rgb(0,0,0,0.02)] transition-all duration-300 border border-transparent"
-              >
-                <div className="w-full aspect-[16/10] overflow-hidden">
-                  <img src={guide.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-sm font-bold text-slate-900 leading-snug tracking-tight mb-2 group-hover:text-[#FF5B00] transition-colors line-clamp-2">
-                    {guide.title}
-                  </h3>
-                  <span className="text-[11px] font-semibold text-slate-400">
-                    {guide.desc}
-                  </span>
-                </div>
-              </div>
+              <SpotlightCard 
+                key={guide.id} 
+                variant="standard" 
+                title={guide.title}
+                image={guide.image}
+                desc={guide.desc}
+                badge="BUYING GUIDE"
+                badgeBg="bg-blue-600"
+              />
             ))}
           </div>
         </section>
@@ -418,40 +378,10 @@ export function HomePage() {
               VIEW ALL BRANDS <ChevronRight size={14} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-            {BRAND_LOGOS.map((brand, idx) => {
-              const getBrandSlug = (brandId: string) => {
-                if (brandId === 'brand-logo-samsung') return 'samsung';
-                if (brandId === 'brand-logo-apple') return 'apple';
-                if (brandId === 'brand-logo-xiaomi') return 'xiaomi';
-                if (brandId === 'brand-logo-walton') return 'walton';
-                if (brandId === 'brand-logo-aarong') return 'aarong';
-                if (brandId === 'brand-logo-bata') return 'bata';
-                return '';
-              };
-              const slug = getBrandSlug(brand.id);
-              return (
-                <div 
-                  key={idx}
-                  onClick={() => {
-                    if (slug) {
-                      navigate(`/brands/${slug}`);
-                    } else {
-                      navigate('/brands');
-                    }
-                  }}
-                  className="h-20 bg-white rounded-2xl flex items-center justify-center p-4 cursor-pointer hover:-translate-y-1 hover:shadow-[0_8px_20px_rgb(0,0,0,0.04)] shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all duration-300 border border-transparent group"
-                >
-                  {brand.image ? (
-                    <img src={brand.image} alt={brand.name} className="max-h-8 max-w-[80%] object-contain opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300" />
-                  ) : (
-                    <span className={`text-sm font-black uppercase tracking-wider ${brand.color} opacity-60 group-hover:opacity-100 transition-all duration-300`}>
-                      {brand.text}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+          <div className="flex gap-6 overflow-x-auto pb-6 snap-x scrollbar-hide">
+            {BRANDS.slice(0, 8).map((brand) => (
+              <BrandCard key={brand.id} brand={brand} />
+            ))}
           </div>
         </section>
 

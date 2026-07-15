@@ -1,27 +1,31 @@
 import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, CheckCircle2, Youtube, Instagram, Facebook, ArrowRight } from 'lucide-react';
+import { cn } from '../lib/utils';
 
-interface CreatorCardDesignProps {
-  creator: {
-    id: string | number;
-    name: string;
-    handle: string;
-    avatar: string;
-    score: number;
-    bestFor: string;
-    platforms: string[];
-    rating: number;
-    reviews: number;
-    isHot?: boolean;
-    isFeatured?: boolean;
-    coverImage?: string;
-    bio?: string;
-    trustScore?: number;
-    followersCount?: string;
-    reviewsCount?: number;
-  };
+interface Creator {
+  id: string | number;
+  name: string;
+  handle: string;
+  avatar: string;
+  score: number;
+  bestFor: string;
+  platforms: string[];
+  rating: number;
+  reviews: number;
+  isHot?: boolean;
+  isFeatured?: boolean;
+  coverImage?: string;
+  bio?: string;
+  trustScore?: number;
+  followersCount?: string;
+  reviewsCount?: number;
+}
+
+interface CreatorCardProps {
+  creator: Creator;
   onClick?: () => void;
+  className?: string;
 }
 
 const CREATOR_COVERS: Record<string, string> = {
@@ -64,7 +68,7 @@ function PinterestIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
   );
 }
 
-export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onClick }: CreatorCardDesignProps) {
+export const CreatorCard = memo(function CreatorCard({ creator, onClick, className }: CreatorCardProps) {
   const rating = creator.rating || 4.8;
   const reviewsCountText = creator.reviews ? formatReviewsCount(creator.reviews) : '12.3K';
   const reviews = creator.reviewsCount || 256;
@@ -79,7 +83,10 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
   return (
     <div
       id={`creator-card-${creator.id}`}
-      className="bg-white rounded-2xl border border-gray-200/65 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden group select-none text-left w-full h-[470px]"
+      className={cn(
+        "bg-white rounded-2xl border border-gray-200/65 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden group select-none text-left w-full h-[470px]",
+        className
+      )}
     >
       {/* Cover Image and Featured Badge */}
       <div className="relative h-[150px] overflow-hidden shrink-0">
@@ -118,7 +125,7 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
         {/* Text Center Details */}
         <div className="text-center w-full mt-1.5 flex-1 flex flex-col justify-start">
           <div className="flex items-center justify-center gap-1.5 mb-1">
-            <h3 className="font-sans text-[15px] font-bold text-[#0E0F23] tracking-tight leading-none">
+            <h3 className="font-sans text-[15px] font-bold text-[#0E0F23] tracking-tight leading-none truncate">
               {creator.name}
             </h3>
             {/* Green tick Verified badge */}
@@ -140,8 +147,8 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
           </div>
 
           {/* Social Platform Badges */}
-          <div className="flex items-center justify-center gap-2 mt-4.5">
-            {creator.platforms.map((platform, idx) => {
+          <div className="flex items-center justify-center gap-2 mt-4">
+            {creator.platforms && creator.platforms.map((platform, idx) => {
               const pLower = platform.toLowerCase();
               if (pLower === 'youtube') {
                 return (
@@ -226,8 +233,3 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onCl
     </div>
   );
 });
-
-// Simple local cn helper if needed
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
-}

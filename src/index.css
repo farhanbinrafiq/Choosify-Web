@@ -260,3 +260,153 @@
   }
 }
 
+/* DESIGN SYSTEM PHASE 1 UTILITY CLASSES */
+.btn-primary {
+  background: linear-gradient(90deg, #FF5B00, #EB4501) !important;
+  color: #ffffff !important;
+  border-radius: 0.5rem !important; /* rounded-lg */
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.75rem 1.5rem !important;
+  transition: all 0.2s ease-in-out !important;
+  cursor: pointer !important;
+  border: none !important;
+}
+.btn-primary:hover {
+  filter: brightness(1.1) !important;
+}
+.btn-primary:active {
+  transform: scale(0.98) !important;
+}
+
+.btn-secondary {
+  background-color: #000435 !important;
+  color: #ffffff !important;
+  border-radius: 0.5rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.75rem 1.5rem !important;
+  transition: all 0.2s ease-in-out !important;
+  cursor: pointer !important;
+  border: none !important;
+}
+.btn-secondary:hover {
+  background-color: #0d1245 !important;
+}
+.btn-secondary:active {
+  transform: scale(0.98) !important;
+}
+
+.btn-outline {
+  background-color: #ffffff !important;
+  color: #000435 !important;
+  border: 1px solid #C2C6D4 !important; /* gray border */
+  border-radius: 0.5rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.75rem 1.5rem !important;
+  transition: all 0.2s ease-in-out !important;
+  cursor: pointer !important;
+}
+.btn-outline:hover {
+  background-color: #f8fafc !important;
+  border-color: #8D94A8 !important;
+}
+.btn-outline:active {
+  transform: scale(0.98) !important;
+}
+
+.badge-verified {
+  background-color: rgba(7, 221, 5, 0.1) !important;
+  color: #07DD05 !important;
+  border: 1px solid rgba(7, 221, 5, 0.2) !important;
+  border-radius: 9999px !important; /* rounded-full */
+  font-size: 0.75rem !important; /* small text */
+  font-weight: 700 !important;
+  padding: 0.25rem 0.75rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.badge-sponsored {
+  background-color: rgba(255, 91, 0, 0.1) !important;
+  color: #FF5B00 !important;
+  border: 1px solid rgba(255, 91, 0, 0.2) !important;
+  border-radius: 9999px !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  padding: 0.25rem 0.75rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.badge-deal {
+  background-color: rgba(255, 0, 13, 0.1) !important;
+  color: #FF000D !important;
+  border: 1px solid rgba(255, 0, 13, 0.2) !important;
+  border-radius: 9999px !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  padding: 0.25rem 0.75rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.badge-neutral {
+  background-color: rgba(97, 102, 124, 0.1) !important;
+  color: #61667C !important;
+  border: 1px solid rgba(97, 102, 124, 0.2) !important;
+  border-radius: 9999px !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  padding: 0.25rem 0.75rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.pill {
+  background-color: #F4F7F9 !important; /* light gray secondary surface */
+  color: #000435 !important;
+  border-radius: 9999px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  padding: 0.25rem 0.75rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #E2E8F0 !important;
+}
+
+.surface-elevated {
+  background-color: #ffffff !important;
+  border-radius: var(--radius-2xl, 20px) !important;
+  box-shadow: var(--shadow-light, 0 6px 20px rgba(0,4,53,.05)) !important;
+  border: 1px solid rgba(0, 4, 53, 0.03) !important;
+}
+
+.surface-flat {
+  background-color: #ffffff !important;
+  border-radius: var(--radius-2xl, 20px) !important;
+  border: 1px solid #C2C6D4 !important;
+}
+
+.surface-glass {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: var(--radius-2xl, 20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
+}
+
+

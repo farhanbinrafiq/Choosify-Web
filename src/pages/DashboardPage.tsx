@@ -41,7 +41,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
-import { RecommendationCard } from '../components/RecommendationCard';
+import { SpotlightCard } from '../components/SpotlightCard';
 import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -623,7 +623,7 @@ const SavedProductsSection = () => {
       </div>
 
       {savedProducts.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1200px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
           {savedProducts.map((p) => (
             <ProductCard key={p.id} product={p} isDashboard={true} />
           ))}
@@ -876,7 +876,7 @@ const RecentlyViewedSection = () => {
       </div>
 
       {recentlyViewed.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1200px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
           {recentlyViewed.map((p) => (
             <ProductCard key={p.id} product={p} isDashboard={true} />
           ))}
@@ -1952,8 +1952,17 @@ export function DashboardPage() {
               <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Knowledge bookmarks for your next big buy</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 justify-items-center gap-8">
-               {BLOGS.slice(0, 4).map((guide, i) => (
-                 <RecommendationCard key={guide.id} guide={guide} index={i} isDashboard={true} />
+               {BLOGS.slice(0, 4).map((guide: any, i) => (
+                 <SpotlightCard 
+                    key={guide.id} 
+                    variant="standard"
+                    title={guide.title}
+                    image={guide.image || guide.thumbnail}
+                    desc={guide.desc || guide.excerpt}
+                    readTime={guide.readTime}
+                    badge="RECOMMENDED"
+                    badgeBg="bg-[#FF5B00]"
+                 />
                ))}
             </div>
         </div>

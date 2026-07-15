@@ -1,22 +1,22 @@
 import React from 'react';
-import { Star, CheckCircle2, ThumbsUp } from 'lucide-react';
+import { Star, CheckCircle2, ThumbsUp, MoreHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { Badge } from './ui/badges/Badge';
 
 export interface ReviewData {
   name: string;
   avatar?: string;
-  dp?: string; // Support both naming variants from source files
+  dp?: string;
   time?: string;
-  date?: string; // Support both key mappings
+  date?: string;
   purchaseDate?: string;
   comment?: string;
-  content?: string; // Support both key mappings
+  content?: string;
   rating: number | string;
   verified?: boolean;
   productImages?: string[];
-  images?: string[]; // Support both key mappings
+  images?: string[];
   helpful?: number;
-  // Product details specifically for dashboard view
   productName?: string;
   productImage?: string;
 }
@@ -29,208 +29,116 @@ interface PublicReviewCardProps {
   onEditClick?: () => void;
   onDeleteClick?: () => void;
   showActions?: boolean;
+  onOptionsClick?: () => void;
+  className?: string;
 }
 
 export function PublicReviewCard({
   review,
   isDark = false,
+  showActions = false,
   onHelpfulClick,
   onEditClick,
   onDeleteClick,
-  showActions = false,
+  onOptionsClick,
+  className,
 }: PublicReviewCardProps) {
   const ratingNum = typeof review.rating === 'string' ? parseFloat(review.rating) : review.rating;
   const avatarUrl = review.dp || review.avatar || "https://i.pravatar.cc/150?u=anonymous";
   const displayComment = review.comment || review.content || "";
-  const displayDate = review.date || review.time || "Recently";
+  const displayDate = review.date || review.time || "2 days ago";
   const displayProductImages = review.productImages || review.images || [];
-  const isVerified = review.verified !== false; // Default to true unless explicitly false
+  const isVerified = review.verified !== false;
 
   return (
-    <div 
-      className={cn(
-        "border transition-all duration-300 flex flex-col group rounded-[5px]",
-        isDark 
-          ? "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:shadow-lg hover:shadow-[#059669]/5" 
-          : "bg-gray-50 border-gray-100/50 text-[#1A1D4E] hover:shadow-md"
-      )}
-      style={{ borderRadius: '5px' }}
-    >
-      {/* Product Header (custom layout for dashboard/user reviews if applicable) */}
-      {review.productName && (
-        <div className={cn(
-          "p-4 border-b flex items-center gap-4",
-          isDark ? "border-white/10" : "border-gray-100"
-        )}>
-          {review.productImage && (
-            <div className="w-12 h-12 rounded-[5px] bg-white p-1 shrink-0 flex items-center justify-center border border-gray-150">
-              <img src={review.productImage} className="w-full h-full object-contain rounded-[3px]" alt={review.productName} />
+    <div className={cn("bg-white rounded-2xl border border-slate-100 p-6 flex flex-col", className)}>
+      {/* Header Profile & Rating */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+            <img src={avatarUrl} alt={review.name} className="w-full h-full object-cover" />
+          </div>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-[#000435]">{review.name}</span>
+              {isVerified && (
+                <Badge variant="green" className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full">
+                  <CheckCircle2 className="w-3 h-3" />
+                  Verified Buyer
+                </Badge>
+              )}
             </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <span className={cn(
-              "text-[8px] font-black uppercase tracking-widest block mb-0.5",
-              isDark ? "text-gray-500" : "text-gray-400"
-            )}>
-              REVIEWED PRODUCT
-            </span>
-            <h4 className={cn(
-              "text-xs font-black uppercase italic truncate",
-              isDark ? "text-white" : "text-navy"
-            )}>
-              {review.productName}
-            </h4>
+            <span className="text-xs font-medium text-slate-400 mt-0.5">{displayDate}</span>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Main Review Body */}
-      <div className="p-6 flex flex-col flex-1 gap-4">
-        {/* Profile Area & Rating Row */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-12 h-12 rounded-[5px] overflow-hidden border-2 p-0.5 shrink-0 bg-white",
-              isDark ? "border-[#F96500]/45" : "border-[#FF5B00]"
-            )}>
-              <img src={avatarUrl} className="w-full h-full object-cover rounded-[3px]" alt={review.name} />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className={cn(
-                  "font-extrabold text-sm italic",
-                  isDark ? "text-white" : "text-[#1A1D4E]"
-                )}>
-                  {review.name}
-                </span>
-                {isVerified && (
-                  <span className="bg-[#4DBC15]/10 text-[#4DBC15] text-[7px] font-black uppercase px-1.5 py-0.5 rounded-[5px] flex items-center gap-0.5 whitespace-nowrap">
-                    <CheckCircle2 size={8} className="text-[#4DBC15]" /> Verified
-                  </span>
+      {/* Rating & Review Content */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-sm font-black text-[#000435]">{ratingNum.toFixed(1)}</span>
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                className={cn(
+                  "w-4 h-4",
+                  star <= ratingNum ? "fill-[#FF5B00] text-[#FF5B00]" : "fill-slate-100 text-slate-200"
                 )}
-              </div>
-              <span className={cn(
-                "text-[8px] font-bold uppercase tracking-wider block mt-0.5",
-                isDark ? "text-gray-500" : "text-gray-400"
-              )}>
-                {displayDate.startsWith("Posted") || displayDate.startsWith("POSTED") ? displayDate : `Posted ${displayDate}`}
-              </span>
-            </div>
-          </div>
-
-          <div className="text-right shrink-0">
-            <div className="flex gap-0.5 justify-end">
-              {[1, 2, 3, 4, 5].map(star => (
-                <Star 
-                  key={star} 
-                  size={10} 
-                  className={cn(
-                    "fill-current", 
-                    star <= ratingNum 
-                      ? (isDark ? "text-[#F96500]" : "text-[#FF5B00]") 
-                      : (isDark ? "text-white/10" : "text-gray-200")
-                  )} 
-                />
-              ))}
-            </div>
-            <div className={cn(
-              "text-sm font-black mt-0.5 italic",
-              isDark ? "text-white" : "text-[#1A1D4E]"
-            )}>
-              {ratingNum} <span className={cn("text-[8px] font-sans", isDark ? "text-white/30" : "text-gray-300")}>/ 5</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Thumbnail Attachments */}
-        {displayProductImages.length > 0 && (
-          <div className="flex gap-2 flex-wrap">
-            {displayProductImages.map((img, j) => (
-              <div key={j} className={cn(
-                "w-16 h-16 rounded-[5px] overflow-hidden border cursor-zoom-in shrink-0 bg-white p-0.5",
-                isDark ? "border-white/10" : "border-gray-200"
-              )}>
-                <img src={img} className="w-full h-full object-cover rounded-[3px] hover:scale-110 transition-transform duration-500" alt="review attachment" />
-              </div>
+              />
             ))}
           </div>
-        )}
-
-        {/* Review Comment Box */}
-        <div className={cn(
-          "p-4 border relative flex-1 min-h-[70px] flex items-center rounded-[5px]",
-          isDark 
-            ? "bg-white/5 border-white/10" 
-            : "bg-white border-gray-100"
-        )}>
-          <p className={cn(
-            "text-xs font-bold leading-relaxed italic border-0 p-0 m-0",
-            isDark ? "text-gray-300" : "text-navy/80"
-          )}>
-            "{displayComment}"
-          </p>
         </div>
+        <p className="text-sm font-medium text-slate-600 leading-relaxed">
+          {displayComment}
+        </p>
+      </div>
 
-        {/* Card Footer / Reaction Bar */}
-        <div className={cn(
-          "flex items-center justify-between mt-auto pt-3 border-t",
-          isDark ? "border-white/10" : "border-gray-100/50"
-        )}>
-          {review.purchaseDate ? (
-            <div className="flex flex-col">
-              <span className={cn(
-                "text-[7px] font-black uppercase tracking-widest italic mb-0.5",
-                isDark ? "text-gray-500" : "text-gray-400"
-              )}>
-                Purchase Date
-              </span>
-              <span className={cn(
-                "text-[9px] font-black uppercase tracking-wider italic",
-                isDark ? "text-white" : "text-[#1A1D4E]"
-              )}>
-                {review.purchaseDate}
-              </span>
+      {/* Attachments */}
+      {displayProductImages.length > 0 && (
+        <div className="flex gap-2 flex-wrap mb-4">
+          {displayProductImages.map((img, j) => (
+            <div key={j} className="w-16 h-16 rounded-lg overflow-hidden border border-slate-200 cursor-zoom-in shrink-0 bg-slate-50">
+              <img src={img} className="w-full h-full object-cover hover:scale-110 transition-transform duration-300" alt="review attachment" />
             </div>
-          ) : (
-            <div />
-          )}
+          ))}
+        </div>
+      )}
 
-          {/* Action buttons slot */}
-          {showActions ? (
-            <div className="flex items-center gap-4">
-              {onEditClick && (
-                <button 
-                  onClick={onEditClick}
-                  className="text-[9px] font-black text-[#F96500] uppercase tracking-[0.2em] italic hover:underline cursor-pointer border-0 bg-transparent active:scale-95 transition-transform"
-                >
-                  Edit Review
-                </button>
-              )}
-              {onDeleteClick && (
-                <button 
-                  onClick={onDeleteClick}
-                  className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] italic hover:text-white cursor-pointer border-0 bg-transparent active:scale-95 transition-transform"
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
+      {/* Footer Actions */}
+      <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
+        {showActions ? (
+          <div className="flex items-center gap-4">
+            {onEditClick && (
               <button 
-                onClick={onHelpfulClick}
-                className={cn(
-                  "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest italic transition-colors cursor-pointer",
-                  isDark
-                    ? "bg-white/5 border-white/10 hover:border-white hover:bg-white/10 text-white"
-                    : "bg-white border-gray-100 hover:border-navy text-[#1A1D4E]"
-                )}
+                onClick={onEditClick}
+                className="text-xs font-bold text-[#FF5B00] hover:underline"
               >
-                <ThumbsUp size={10} /> Helpful ({review.helpful || 0})
+                Edit Review
               </button>
-            </div>
-          )}
-        </div>
+            )}
+            {onDeleteClick && (
+              <button 
+                onClick={onDeleteClick}
+                className="text-xs font-bold text-slate-500 hover:text-slate-800 hover:underline"
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            <button 
+              onClick={onHelpfulClick}
+              className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-[#000435] transition-colors"
+            >
+              <ThumbsUp className="w-4 h-4" /> Helpful ({review.helpful || 0})
+            </button>
+            <button onClick={onOptionsClick} className="text-slate-400 hover:text-[#000435] transition-colors">
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
