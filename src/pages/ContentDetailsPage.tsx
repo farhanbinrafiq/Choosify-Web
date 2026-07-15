@@ -28,6 +28,7 @@ import { Button } from '../components/ui/buttons/Button';
 import { Badge } from '../components/ui/badges/Badge';
 import { FAQAccordionCard } from '../components/ui/faq/FAQAccordionCard';
 import { FAQPill } from '../components/ui/faq/FAQPill';
+import { FaqPill } from '../components/FaqPill';
 import { TrustStatementCard } from '../components/ui/trust/TrustStatementCard';
 import { StickyNavigation } from '../components/ui/navigation/StickyNavigation';
 
@@ -575,6 +576,31 @@ export function ContentDetailsPage() {
                     />
                   ))}
                 </div>
+
+                {/* Editorial context FaqPills */}
+                <div className="flex flex-wrap gap-2.5 mb-6 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+                  <FaqPill 
+                    label="Who wrote this guide?" 
+                    answer="This guide is curated by our certified category experts after rigorous hands-on product testing and retail verification."
+                  />
+                  <FaqPill 
+                    label="Is this review sponsored?" 
+                    answer="No, our reviews are 100% independent. We do not accept sponsorships to bias our product recommendations or comparisons."
+                  />
+                  <FaqPill 
+                    label="How often is this updated?" 
+                    answer="We re-verify prices, stocks, and consumer ratings every single week to ensure you get the absolute latest shopping intelligence."
+                  />
+                  <FaqPill 
+                    label="Where are stores sourced?" 
+                    answer="We pull pricing dynamically from verified physical and online retail partners across Bangladesh to offer live comparison data."
+                  />
+                  <FaqPill 
+                    label="How to ask custom queries?" 
+                    answer="Feel free to scroll down to the Community Discussion section below to ask any specific product question to our experts!"
+                  />
+                </div>
+
                 <div className="space-y-4">
                   {getFilteredFaqs().map((faq: any, idx: number) => (
                     <FAQAccordionCard key={idx} question={faq.question} answer={faq.answer} />

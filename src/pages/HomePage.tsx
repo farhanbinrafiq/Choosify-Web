@@ -11,6 +11,8 @@ import { SpotlightCard } from '../components/SpotlightCard';
 import { DealCard } from '../components/DealCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { BrandCard } from '../components/BrandCard';
+import { useDashboard } from '../context/DashboardContext';
+import { RecentlyViewedCard } from '../components/RecentlyViewedCard';
 import { BRANDS } from '../constants';
 import {
   CATEGORY_ITEMS,
@@ -83,6 +85,7 @@ const DEALS_MOCK = [
 
 export function HomePage() {
   const navigate = useNavigate();
+  const { recentlyViewed } = useDashboard();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [compareFirst, setCompareFirst] = useState('');
   const [compareSecond, setCompareSecond] = useState('');
@@ -415,24 +418,21 @@ export function HomePage() {
         </section>
 
         {/* 10. RECENTLY VIEWED */}
-        <section className="pt-12 border-t border-slate-200/60">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-black text-slate-900 tracking-tight">Recently Viewed</h2>
-              <p className="text-xs text-slate-400 font-medium mt-1">Continue where you left off</p>
-            </div>
-            <button className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:border-[#FF5B00] hover:text-[#FF5B00] transition-colors">
-              <ChevronRight size={16} />
-            </button>
-          </div>
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
-            {RECENTLY_VIEWED.map((item) => (
-              <div key={item.id} className="w-16 h-16 rounded-2xl overflow-hidden shrink-0 snap-start border border-transparent shadow-[0_2px_10px_rgb(0,0,0,0.03)] cursor-pointer hover:border-[#FF5B00] transition-colors bg-white">
-                <img src={item.image} className="w-full h-full object-cover" alt="" />
+        {recentlyViewed && recentlyViewed.length > 0 && (
+          <section className="pt-12 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">Recently Viewed</h2>
+                <p className="text-xs text-slate-400 font-medium mt-1">Continue where you left off</p>
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
+              {recentlyViewed.map((item: any) => (
+                <RecentlyViewedCard key={item.id} product={item} className="snap-start" />
+              ))}
+            </div>
+          </section>
+        )}
 
       </div>
     </div>

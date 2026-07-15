@@ -4,6 +4,8 @@ import { toast } from "react-hot-toast";
 import { ArrowRight, Package, Award, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useGlobalState } from "../context/GlobalStateContext";
+import { useDashboard } from "../context/DashboardContext";
+import { FaqPill } from "../components/FaqPill";
 import { CreatorReviewCard, CreatorReview } from "../components/CreatorReviewCard";
 import { VideoModal } from "../components/VideoModal";
 
@@ -287,6 +289,7 @@ export function ProductDetailPage() {
   const { id } = useParams();
 
   const { allProducts, addToCart: globalAddToCart } = useGlobalState();
+  const { addRecentlyViewed } = useDashboard();
   
   const [selectedReview, setSelectedReview] = useState<CreatorReview | null>(null);
 
@@ -304,6 +307,12 @@ export function ProductDetailPage() {
     };
     return found;
   }, [id, allProducts]);
+
+  useEffect(() => {
+    if (product) {
+      addRecentlyViewed(product);
+    }
+  }, [product, addRecentlyViewed]);
 
   const boxInfo = useMemo(() => getProductBoxContents(product), [product]);
 
@@ -335,7 +344,8 @@ export function ProductDetailPage() {
         { id: "public-reviews", el: document.getElementById("public-reviews") },
         { id: "box-contents", el: document.getElementById("box-contents") },
         { id: "product-overview", el: document.getElementById("product-overview") },
-        { id: "prices", el: document.getElementById("prices") }
+        { id: "prices", el: document.getElementById("prices") },
+        { id: "faq", el: document.getElementById("faq") }
       ];
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -432,6 +442,7 @@ export function ProductDetailPage() {
           { id: "box-contents", label: "Box Contents" },
           { id: "product-overview", label: "Product Overview" },
           { id: "prices", label: "Prices Across Stores" },
+          { id: "faq", label: "FAQs" },
         ]}
         activeId={activeSection}
         onItemClick={scrollToSection}
@@ -655,7 +666,35 @@ export function ProductDetailPage() {
         
         {/* SECTION 7: FAQ */}
         <section id="faq" className="scroll-mt-36">
-          <div className="flex flex-col gap-4">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-2">Frequently Asked Questions</h2>
+            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">QUICK QUESTIONS & COLLAPSIBLE DETAILED RESPONSES</p>
+          </div>
+
+          <div className="flex flex-wrap gap-2.5 justify-center mb-8 max-w-4xl mx-auto px-4">
+            <FaqPill 
+              label="Is the product original?" 
+              answer="Yes, all products on Choosify are 100% genuine, sourced from certified brand distributors, with intact factory serial numbers."
+            />
+            <FaqPill 
+              label="How can I track my order?" 
+              answer="You can monitor real-time shipment progress directly from your dashboard or via the carrier SMS updates sent upon dispatch."
+            />
+            <FaqPill 
+              label="What's your return policy?" 
+              answer="Enjoy 7-day hassle-free exchange or full refund on items verified to have manufacturing defects or sizing mismatch."
+            />
+            <FaqPill 
+              label="Warranty details?" 
+              answer="Most electronics carry a 1-Year Brand Warranty. Warranty claims are easily made at authorized local service centers."
+            />
+            <FaqPill 
+              label="Shipping times?" 
+              answer="Dhaka metropolitan delivery takes 24-48 hours. Nationwide deliveries to other regions take between 2 to 4 business days."
+            />
+          </div>
+
+          <div className="flex flex-col gap-4 max-w-4xl mx-auto">
             <FAQAccordionCard 
               question="Is the product original?"
               answer="Yes, all products on Choosify are 100% original and sourced from authorized sellers."
