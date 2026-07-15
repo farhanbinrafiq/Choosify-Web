@@ -309,10 +309,10 @@ export function ProductDetailPage() {
   }, [id, allProducts]);
 
   useEffect(() => {
-    if (product) {
+    if (product?.id) {
       addRecentlyViewed(product);
     }
-  }, [product, addRecentlyViewed]);
+  }, [product?.id, addRecentlyViewed]);
 
   const boxInfo = useMemo(() => getProductBoxContents(product), [product]);
 
@@ -392,7 +392,7 @@ export function ProductDetailPage() {
       
       
       {/* 1. PRODUCT HERO */}
-      <div className="max-w-[1600px] mx-auto px-6 md:px-10 pt-6 pb-12">
+      <div id="overview" className="max-w-[1600px] mx-auto px-6 md:px-10 pt-6 pb-12 scroll-mt-36">
         {/* Breadcrumbs */}
         <nav className="text-xs font-semibold text-slate-400 flex flex-wrap items-center gap-1.5 uppercase tracking-wider mb-8">
           <Link to="/" className="hover:text-slate-600 transition-colors">Home</Link>
