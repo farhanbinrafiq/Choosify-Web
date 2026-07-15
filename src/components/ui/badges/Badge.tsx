@@ -9,7 +9,15 @@ export type BadgeVariant =
   | 'orange'
   | 'red'
   | 'outline'
-  | 'gray';
+  | 'gray'
+  | 'verified'
+  | 'sponsored'
+  | 'deal'
+  | 'featured'
+  | 'trending'
+  | 'bestseller'
+  | 'campaign'
+  | 'live';
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
@@ -31,19 +39,30 @@ export const Badge: React.FC<BadgeProps> = ({
     blue: 'bg-blue-500 text-white',
     purple: 'bg-purple-600 text-white',
     orange: 'bg-[#FF5B00] text-white',
-    red: 'bg-[#EB4S01] text-white', // Based on color palette
+    red: 'bg-[#EB4501] text-white',
     outline: 'border border-slate-200 text-slate-600',
     gray: 'bg-slate-200 text-slate-700',
+    verified: 'bg-[#07D005] text-white',
+    sponsored: 'bg-[#FF5B00] text-white',
+    deal: 'bg-[#EB4501] text-white',
+    featured: 'bg-[#000435] text-white',
+    trending: 'bg-amber-500 text-white',
+    bestseller: 'bg-purple-600 text-white',
+    campaign: 'bg-[#FF5B00] text-white',
+    live: 'bg-[#EB4501] text-white',
   };
-
-  // Adjust red color from EB4S01 (from image palette #EB4S01 seems to have a typo, let's use standard red or #E84501 maybe, wait the palette says #EB4S01, it's likely #EB4501. Wait, color palette in image: #000435, #FF5B00, #EB4501, #07D005, #F4F7F9, #1A1A2E, #E8EDF2, #0A0A1F
-  // Let's use #EB4501 for red.
 
   return (
     <span
       className={cn(baseStyles, variants[variant], className)}
       {...props}
     >
+      {variant === 'live' && (
+        <span className="mr-1 flex h-1.5 w-1.5 relative">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+        </span>
+      )}
       {children}
     </span>
   );

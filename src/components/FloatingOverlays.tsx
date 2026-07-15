@@ -13,6 +13,7 @@ import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { cn } from '../lib/utils';
 import { toast } from 'react-hot-toast';
 import { useFloatingFilter } from './FilterEngine';
+import { Badge } from './ui/badges/Badge';
 
 export function FloatingOverlays() {
   const navigate = useNavigate();
@@ -656,7 +657,9 @@ export function FloatingOverlays() {
                   <span className="text-white font-black text-xs uppercase tracking-widest leading-none">EMI</span>
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-[#1E2035] leading-none">EMI AI Assistant</h3>
+                  <h3 className="text-sm font-black text-[#1E2035] leading-none flex items-center gap-1.5">
+                    EMI AI Assistant <Badge variant="live" className="text-[7.5px] px-1 py-0.5 shadow-xs scale-90 select-none">LIVE</Badge>
+                  </h3>
                   <p className="text-[10px] text-gray-400 font-semibold mt-1">Sourcing & discovery support</p>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Facebook, Instagram, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Badge } from './ui/badges/Badge';
 
 // Perfect inline SVG for TikTok
 function TikTokIcon({ size = 20 }: { size?: number }) {
@@ -132,8 +133,8 @@ export function Footer() {
                 <Link to="/products" className="text-white/65 text-[14px] hover:text-white transition-colors">
                   New Arrival
                 </Link>
-                <Link to="/compare" className="text-white/65 text-[14px] hover:text-white transition-colors">
-                  Compare Tool
+                <Link to="/compare" className="text-white/65 text-[14px] hover:text-white transition-colors inline-flex items-center gap-1.5">
+                  Compare Tool <Badge variant="trending" className="text-[8px] px-1 py-0.5 scale-90">NEW</Badge>
                 </Link>
                 <Link to="/deals" className="text-white/65 text-[14px] hover:text-white transition-colors">
                   Best Deals

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Bookmark, Play, Clock, Eye, LayoutGrid, Calendar, Share2, Star } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { toast } from 'react-hot-toast';
+import { Badge } from './ui/badges/Badge';
 
 // Unified Verified Icon to match what is used on the Home Page
 function VerifiedIcon({ size = 14, className = "text-blue-400" }: { size?: number; className?: string }) {
@@ -155,9 +156,9 @@ export const SpotlightCard = memo(function SpotlightCard({
         <div className="p-8 md:w-[55%] flex flex-col justify-between flex-1">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className={cn("text-[10px] font-black text-white px-3 py-1 rounded-full tracking-wider uppercase", finalBadgeBg)}>
+              <Badge variant="orange" className={cn("rounded-full px-3 py-1 text-[10px]", finalBadgeBg)}>
                 {finalBadge}
-              </span>
+              </Badge>
               <button
                 onClick={handleBookmark}
                 className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#FF5B00] hover:bg-slate-100 transition-all border border-transparent"
@@ -237,9 +238,9 @@ export const SpotlightCard = memo(function SpotlightCard({
             referrerPolicy="no-referrer"
           />
           <div className="absolute top-4 left-4 z-10">
-            <span className={cn("text-[9px] font-black text-white px-2.5 py-1 rounded-md tracking-wider uppercase shadow-sm", finalBadgeBg)}>
+            <Badge variant="orange" className={cn("px-2.5 py-1 text-[9px] shadow-sm", finalBadgeBg)}>
               {finalBadge}
-            </span>
+            </Badge>
           </div>
           <button
             onClick={handleBookmark}
@@ -307,9 +308,9 @@ export const SpotlightCard = memo(function SpotlightCard({
           </div>
           
           <div className="absolute top-4 left-4 z-10">
-            <span className="text-[8px] font-black text-white bg-blue-600 px-2 py-0.5 rounded tracking-widest uppercase">
+            <Badge variant="blue" className="px-2 py-0.5 text-[8px]">
               {finalBadge || 'CREATOR REVIEW'}
-            </span>
+            </Badge>
           </div>
           <div className="absolute bottom-3 right-3 z-10 bg-black/75 px-2 py-0.5 rounded text-[10px] font-mono font-black text-white tracking-wider">
             {finalDuration}
@@ -368,9 +369,9 @@ export const SpotlightCard = memo(function SpotlightCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
 
         <div className="absolute top-4 left-4 z-10 flex gap-2">
-          <span className="text-[8px] font-black text-white bg-[#EF4444] px-2.5 py-0.5 rounded-full tracking-wider uppercase">
+          <Badge variant="red" className="px-2.5 py-0.5 text-[8px] rounded-full">
             REEL
-          </span>
+          </Badge>
           {finalDuration && (
             <span className="text-[8px] font-black text-white bg-black/40 px-2 py-0.5 rounded-full tracking-wider">
               {finalDuration}
@@ -426,9 +427,9 @@ export const SpotlightCard = memo(function SpotlightCard({
 
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[8px] font-black tracking-widest bg-[#FF5B00] text-white px-2.5 py-0.5 rounded uppercase shadow-xs">
+            <Badge variant="campaign" className="px-2.5 py-0.5 text-[8px] shadow-xs">
               {sponsorBadge || 'CAMPAIGN'}
-            </span>
+            </Badge>
             <span className="text-[9px] font-bold text-orange-500 uppercase tracking-widest">
               SPONSORED
             </span>
@@ -490,8 +491,10 @@ export const SpotlightCard = memo(function SpotlightCard({
             className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute top-3 left-3 text-white text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-sm bg-blue-600">
-            {finalBadge || 'COLLECTION'}
+          <div className="absolute top-3 left-3 z-10">
+            <Badge variant="blue" className="px-2.5 py-1 text-[8px] rounded-full shadow-sm">
+              {finalBadge || 'COLLECTION'}
+            </Badge>
           </div>
           {isSaved !== undefined && (
             <button
