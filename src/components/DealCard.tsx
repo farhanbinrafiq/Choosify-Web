@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Star, Heart, ShoppingCart } from 'lucide-react';
+import { ChevronRight, Star, Heart, ShoppingCart, Truck, Shield } from 'lucide-react';
 
 interface DealPromo {
   type?: 'flash' | 'coupon' | 'promo' | string;
@@ -25,7 +25,30 @@ interface DealProduct {
   reviewsText: string;
   claimedPercent: number;
   likes: number;
+  cashback?: number;
+  freeDelivery?: boolean;
+  officialWarranty?: boolean;
+  dealEndsAt?: string | number;
 }
+
+const getCountdownText = (dealEndsAt: any) => {
+  if (!dealEndsAt) return '';
+  if (typeof dealEndsAt === 'string' && (dealEndsAt.includes(':') || dealEndsAt.includes('Ends in'))) {
+    return dealEndsAt.startsWith('Ends in') ? dealEndsAt : `Ends in ${dealEndsAt}`;
+  }
+  try {
+    const end = new Date(dealEndsAt).getTime();
+    const now = new Date().getTime();
+    const diff = end - now;
+    if (diff <= 0) return 'Ended';
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return `Ends in ${days.toString().padStart(2, '0')}d : ${hours.toString().padStart(2, '0')}h : ${mins.toString().padStart(2, '0')}m`;
+  } catch (e) {
+    return `Ends in 02d : 14h : 36m`;
+  }
+};
 
 interface DealCardProps {
   variant?: 'promo' | 'product';
@@ -61,7 +84,7 @@ export const DealCard = memo(function DealCard({
       <div 
         id={`deal-card-${product.id}`}
         onClick={handleCardClick}
-        className="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex group text-left cursor-pointer h-[190px] w-full"
+        className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex group text-left cursor-pointer h-[190px] w-full"
       >
         {/* Left image area */}
         <div className="relative w-28 sm:w-36 bg-gray-50 flex items-center justify-center shrink-0 overflow-hidden">
@@ -79,11 +102,18 @@ export const DealCard = memo(function DealCard({
               </span>
             </div>
           )}
+          {product.dealEndsAt && (
+            <div className="absolute top-2 right-2 z-10">
+              <span className="bg-black/75 text-white text-[8px] sm:text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm backdrop-blur-xs">
+                {getCountdownText(product.dealEndsAt)}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Info contents */}
-        <div className="p-4 flex-1 flex flex-col justify-between">
-          <div>
+        <div className="p-4 flex-1 flex flex-col justify-between min-w-0">
+          <div className="min-w-0">
             <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest block">
               {product.brand}
             </span>
@@ -93,8 +123,8 @@ export const DealCard = memo(function DealCard({
           </div>
 
           {/* Pricing, progress claimed */}
-          <div>
-            <div className="flex items-baseline gap-2">
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-2 flex-wrap">
               <span className="text-base font-black text-[#FF5B00]">
                 BDT {product.price.toLocaleString()}
               </span>
@@ -103,37 +133,49 @@ export const DealCard = memo(function DealCard({
               </span>
             </div>
 
-            <div className="flex items-center gap-1 mt-1.5 select-none">
+            {/* Badges for Free Delivery and Official Warranty */}
+            {(product.freeDelivery || product.officialWarranty) && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {product.freeDelivery && (
+                  <div className="inline-flex items-center gap-1 bg-slate-50 border border-slate-100 rounded-full px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold text-slate-500">
+                    <Truck size={10} className="text-slate-400" />
+                    <span>Free Delivery</span>
+                  </div>
+                )}
+                {product.officialWarranty && (
+                  <div className="inline-flex items-center gap-1 bg-slate-50 border border-slate-100 rounded-full px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold text-slate-500">
+                    <Shield size={10} className="text-slate-400" />
+                    <span>Warranty</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center gap-1 mt-1 select-none">
               <Star className="w-3.5 h-3.5 fill-[#FF5B00] text-[#FF5B00]" />
               <span className="text-xs font-bold text-gray-800">{product.rating}</span>
               <span className="text-xs font-medium text-gray-400">({product.reviewsText})</span>
             </div>
 
-            {/* Progress Claimed */}
-            <div className="mt-3.5">
-              <div className="flex justify-between items-center text-[10px] font-bold text-gray-500 mb-1">
-                <span className="text-[#FF5B00] font-black">{product.claimedPercent}% Claimed</span>
-              </div>
-              <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-[#FF5B00] rounded-full" 
-                  style={{ width: `${product.claimedPercent}%` }}
-                ></div>
-              </div>
-            </div>
+            {/* Cashback text row */}
+            {product.cashback && (
+              <p className="text-[11px] font-extrabold text-emerald-600 tracking-tight leading-none pt-1">
+                Get up to ৳{product.cashback.toLocaleString()} cashback
+              </p>
+            )}
           </div>
 
           {/* Footer interactions bar */}
-          <div className="flex items-center justify-between gap-2.5 pt-3 border-t border-gray-100 mt-2">
+          <div className="flex items-center justify-between gap-2.5 pt-2 border-t border-slate-50 mt-1">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 if (onLike) onLike(product.id, product.title, e);
               }}
-              className={`h-8 px-3 rounded-lg border flex items-center gap-1 text-[11px] font-bold transition-all cursor-pointer ${
+              className={`h-8 px-3 rounded-xl border flex items-center gap-1 text-[11px] font-bold transition-all cursor-pointer ${
                 isLiked 
-                  ? 'border-red-200 text-red-500 bg-red-50' 
-                  : 'border-gray-200 text-gray-400 hover:text-red-500 hover:bg-gray-50'
+                  ? 'border-red-200 text-red-500 bg-red-50/50' 
+                  : 'border-slate-150 text-gray-400 hover:text-red-500 hover:bg-slate-50'
               }`}
             >
               <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
@@ -145,7 +187,7 @@ export const DealCard = memo(function DealCard({
                 e.stopPropagation();
                 if (onAddToCart) onAddToCart(product.title, e);
               }}
-              className="w-8 h-8 rounded-full bg-[#FF5B00] hover:bg-[#E04F00] text-white flex items-center justify-center transition-all shadow-xs hover:scale-105 cursor-pointer border-0 p-0"
+              className="w-8 h-8 rounded-full bg-[#FF5B00] hover:bg-[#E04F00] text-white flex items-center justify-center transition-all shadow-sm shadow-[#FF5B00]/15 hover:scale-105 cursor-pointer border-0 p-0"
             >
               <ShoppingCart className="w-4 h-4 shrink-0" />
             </button>

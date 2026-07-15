@@ -84,7 +84,7 @@ export const CreatorCard = memo(function CreatorCard({ creator, onClick, classNa
     <div
       id={`creator-card-${creator.id}`}
       className={cn(
-        "bg-white rounded-2xl border border-gray-200/65 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden group select-none text-left w-full h-[470px]",
+        "bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden group select-none text-left w-full h-[470px]",
         className
       )}
     >
@@ -192,39 +192,46 @@ export const CreatorCard = memo(function CreatorCard({ creator, onClick, classNa
       </div>
 
       {/* 3 Column Statistics section */}
-      <div className="border-t border-gray-150 bg-[#FAFAFA] grid grid-cols-3 py-3 text-center shrink-0">
-        <div className="flex flex-col items-center justify-center">
-          <span className="text-[14px] font-bold text-[#0E0F23] leading-tight">
+      <div className="border-t border-b border-[#e8edf2] py-3 bg-[#F4F7F9] grid grid-cols-3 text-center shrink-0">
+        <div className="flex flex-col items-center justify-center min-w-0">
+          <span className="text-[14px] font-bold text-[#0E0F23] leading-tight truncate w-full px-1">
             {reviews}
           </span>
-          <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5 leading-none">
             Reviews
           </span>
         </div>
-        <div className="border-x border-gray-200/80 flex flex-col items-center justify-center">
-          <span className="text-[14px] font-bold text-[#0E0F23] leading-tight">
+        <div className="border-x border-[#e8edf2] flex flex-col items-center justify-center min-w-0 px-1">
+          <span className="text-[14px] font-bold text-[#0E0F23] leading-tight truncate w-full">
             {followers}
           </span>
-          <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5 leading-none">
             Followers
           </span>
         </div>
-        <div className="flex flex-col items-center justify-center">
-          <span className="text-[14px] font-bold text-[#0E0F23] leading-tight">
-            {trustScore}%
+        <div className="flex flex-col items-center justify-center min-w-0">
+          <span className="text-[14px] font-bold text-[#0E0F23] leading-tight flex items-center justify-center gap-0.5 w-full">
+            {creator.rating !== undefined ? (
+              <>
+                <span>{creator.rating.toFixed(1)}</span>
+                <span className="text-[9px] text-[#FF5B00]">★</span>
+              </>
+            ) : (
+              <span>{trustScore}%</span>
+            )}
           </span>
-          <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
-            Trust Score
+          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5 leading-none">
+            Rating
           </span>
         </div>
       </div>
 
-      {/* Solid Dark Blue/Indigo Button */}
+      {/* Solid Dark Blue/Indigo Button replaced with outline style */}
       <div className="px-4 pb-4 shrink-0 bg-white">
         <Link 
           to={`/creators/${creator.id}`}
           onClick={onClick}
-          className="w-full py-2.5 bg-[#0C0C1F] hover:bg-[#1A1A3B] text-white text-[11px] font-bold uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-colors duration-200 group"
+          className="w-full py-2 bg-white border-2 border-[#000435] text-[#000435] hover:bg-[#000435] hover:text-white text-[11px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group cursor-pointer"
         >
           View Profile
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

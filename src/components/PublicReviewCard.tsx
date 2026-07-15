@@ -51,11 +51,11 @@ export function PublicReviewCard({
   const isVerified = review.verified !== false;
 
   return (
-    <div className={cn("bg-white rounded-2xl border border-slate-100 p-6 flex flex-col", className)}>
+    <div className={cn("bg-white rounded-2xl border border-slate-100 p-6 flex flex-col shadow-sm hover:shadow-md transition-all duration-300", className)}>
       {/* Header Profile & Rating */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 shrink-0 border border-slate-150">
             <img src={avatarUrl} alt={review.name} className="w-full h-full object-cover" />
           </div>
           <div className="flex flex-col">
@@ -76,8 +76,8 @@ export function PublicReviewCard({
       {/* Rating & Review Content */}
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-sm font-black text-[#000435]">{ratingNum.toFixed(1)}</span>
-          <div className="flex gap-1">
+          <span className="text-xl font-extrabold text-[#000435] leading-none">{ratingNum.toFixed(1)}</span>
+          <div className="flex gap-0.5">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
@@ -96,10 +96,10 @@ export function PublicReviewCard({
 
       {/* Attachments */}
       {displayProductImages.length > 0 && (
-        <div className="flex gap-2 flex-wrap mb-4">
+        <div className="flex gap-2.5 flex-wrap mb-4">
           {displayProductImages.map((img, j) => (
-            <div key={j} className="w-16 h-16 rounded-lg overflow-hidden border border-slate-200 cursor-zoom-in shrink-0 bg-slate-50">
-              <img src={img} className="w-full h-full object-cover hover:scale-110 transition-transform duration-300" alt="review attachment" />
+            <div key={j} className="w-16 h-16 rounded-xl overflow-hidden border border-slate-150 cursor-zoom-in shrink-0 bg-slate-50 shadow-xs">
+              <img src={img} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" alt="review attachment" />
             </div>
           ))}
         </div>
