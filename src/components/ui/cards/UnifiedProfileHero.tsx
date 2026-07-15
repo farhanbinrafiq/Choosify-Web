@@ -150,11 +150,25 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
           </span>
         </div>
 
-        {/* Big Score and Stars Row */}
+        {/* Big Score Ring + Stars Row */}
         <div className="flex items-start justify-between mb-4">
-          <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-black text-white tracking-tight">{score.value}</span>
-            <span className="text-sm font-bold text-slate-400">/{score.max || "5"}</span>
+          <div className="relative w-[72px] h-[72px] shrink-0">
+            <svg viewBox="0 0 72 72" className="w-[72px] h-[72px] -rotate-90">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="6" />
+              <circle
+                cx="36" cy="36" r="30" fill="none"
+                stroke={isBrand ? accentColor : "#10B981"}
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 30}`}
+                strokeDashoffset={`${2 * Math.PI * 30 * (1 - Math.min(Number(score.value) / Number(score.max || 5), 1))}`}
+                style={{ transition: 'stroke-dashoffset 1s ease-out' }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-lg font-black text-white leading-none">{score.value}</span>
+              <span className="text-[8px] font-bold text-slate-400 leading-none mt-0.5">/{score.max || "5"}</span>
+            </div>
           </div>
           <div className="flex flex-col items-end">
             <div className="flex gap-0.5 mb-1">
@@ -216,32 +230,33 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
 
   return (
     <div className="w-full bg-[#F5F8FD] select-none">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6">
-        
-        {/* Campaign Banner Wrapper */}
-        <div className="relative w-full aspect-[4/1] min-h-[160px] sm:min-h-[220px] md:min-h-[260px] lg:min-h-[300px] rounded-3xl overflow-hidden shadow-md">
-          {bannerImage ? (
-            <img 
-              src={bannerImage} 
-              alt={`${name} Campaign`} 
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div className={cn("w-full h-full bg-gradient-to-br", bannerClass)}>
-              {/* Fallback organic abstract overlays */}
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute inset-0 opacity-15 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-indigo-500 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-6 left-8 text-white/10 font-black text-4xl sm:text-6xl tracking-widest uppercase pointer-events-none selection:bg-transparent">
-                CHOOSIFY CERTIFIED
-              </div>
-            </div>
-          )}
 
+      {/* EDGE-TO-EDGE CAMPAIGN BANNER — full viewport width, no side gutters, no rounded outer corners */}
+      <div className="relative w-full aspect-[21/9] sm:aspect-[3/1] min-h-[220px] sm:min-h-[280px] md:min-h-[340px] lg:min-h-[400px] overflow-hidden">
+        {bannerImage ? (
+          <img 
+            src={bannerImage} 
+            alt={`${name} Campaign`} 
+            className="absolute inset-0 w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className={cn("absolute inset-0 bg-gradient-to-br", bannerClass)}>
+            {/* Fallback organic abstract overlays */}
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 opacity-15 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-indigo-500 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute bottom-6 left-8 text-white/10 font-black text-4xl sm:text-6xl tracking-widest uppercase pointer-events-none selection:bg-transparent">
+              CHOOSIFY CERTIFIED
+            </div>
+          </div>
+        )}
+
+        {/* Constrained inner column — keeps score card & avatar aligned with the rest of the page content, while the banner background itself stays full-bleed */}
+        <div className="relative w-full h-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
           {/* Floating brand score card inside the banner on desktop */}
           {renderScoreCard(false)}
 
-          {/* Floating Logo/Avatar absolutely centered on bottom edge */}
+          {/* Floating Logo/Avatar absolutely centered on bottom edge of the constrained column */}
           <div 
             className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-white rounded-full flex items-center justify-center z-20 shadow-xl border-4 border-white overflow-hidden"
           >
@@ -261,9 +276,11 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Content area below Banner */}
-        <div className="bg-white border border-slate-100 rounded-b-3xl shadow-sm px-6 pb-6 pt-16 sm:pt-20 lg:pt-12 relative z-10 -mt-2">
+      {/* Content area below Banner — constrained to the readable column, banner above remains edge-to-edge */}
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8">
+        <div className="bg-white border border-slate-100 rounded-b-3xl shadow-sm px-6 pb-6 pt-16 sm:pt-20 lg:pt-12 relative z-10">
           
           {/* Main 3-Column Profile Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start lg:items-center">
