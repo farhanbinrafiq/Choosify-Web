@@ -217,3 +217,24 @@ export const RECENTLY_VIEWED = [
   { id: 'rv-7', image: 'https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=100&h=100&fit=crop' },
   { id: 'rv-8', image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=100&h=100&fit=crop' }
 ];
+
+export const HERO_SLIDES = [
+  {
+    title: "Choose, Compare &",
+    highlight: "Decide Wisely.",
+    subtitle: "Bangladesh's most trusted product discovery platform. Compare prices, read verified guides, and spot authentic deals.",
+    cta1: "EXPLORE NOW",
+    cta2: "HOW IT WORKS",
+    imageLeft: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500&q=80",
+    imageRight: "https://images.unsplash.com/photo-1695048133031-698f1f5068cf?w=500&q=80"
+  },
+  {
+    title: "Compare Smartly,",
+    highlight: "Save Instantly.",
+    subtitle: "Find the absolute best deals, certified guides, and store prices.",
+    cta1: "EXPLORE DEALS",
+    cta2: "POPULAR SEARCH",
+    imageLeft: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=500&q=80",
+    imageRight: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500&q=80"
+  }
+];

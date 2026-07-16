@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { PRODUCTS, BRANDS, BLOGS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
-import { GlobalSearchBar } from '../components/GlobalSearchBar';
 import { BrandCard } from '../components/BrandCard';
 import { CreatorCard } from '../components/CreatorCard';
 import { toast } from 'react-hot-toast';
@@ -17,104 +16,11 @@ import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
 import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '../utils/overviewRegistry';
 import { useRegisterPageFilters } from '../components/FilterEngine';
-
-// Promo Codes & Brand Deals data
-const BRAND_DEALS = [
-  { id: 'aarong', name: "Aarong", dealHighlight: "Flat 15% OFF on Handicrafts", logo: "Aa", bgClass: "bg-orange-primary" },
-  { id: 'apex', name: "Apex", dealHighlight: "Buy 1 Get 1 Free on Select Shoes", logo: "A", bgClass: "bg-navy" },
-  { id: 'sailor', name: "Sailor", dealHighlight: "Flat 20% OFF on Casual Wear", logo: "S", bgClass: "bg-teal-700" },
-  { id: 'adidas', name: "Adidas", dealHighlight: "Extra 10% OFF on Sportswear", logo: "Ad", bgClass: "bg-[#1A1D4E]" },
-  { id: 'bay', name: "Bay Emporium", dealHighlight: "Up to 30% OFF on Leather Boots", logo: "B", bgClass: "bg-red-700" }
-];
-
-const PROMO_CODES = [
-  { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
-  { brandId: 'apex', brandName: "Apex", code: "APEXFOOT26", discount: "BDT 500 FLAT" },
-  { brandId: 'sailor', brandName: "Sailor", code: "SAILOREID", discount: "Flat 20% OFF" },
-  { brandId: 'adidas', brandName: "Adidas", code: "ADIEXTRA10", discount: "10% FLAT OFF" }
-];
-
-// Predefined Advanced Matrix Comparison Databases
-const COMPARE_DATABASES = [
-  { id: 'product-compare', title: "Sailor vs Yellow Cotton Comparison", category: "Products", route: "/compare" },
-  { id: 'brand-compare', title: "Aarong vs Yellow Positioning Matrix", category: "Brands", route: "/compare" },
-  { id: 'creator-compare', title: "Nafis Anjum vs Tasnim Creator Comparison", category: "Creators", route: "/compare" },
-  { id: 'guide-compare', title: "Capsule vs Traditional Wardrobe Comparison", category: "Guides", route: "/compare" },
-  { id: 'ai-compare', title: "Value vs Longevity Premium Quality Cost Matrix", category: "AI Matrix", route: "/compare" }
-];
-
-// Influencers details
-interface Influencer {
-  id: string;
-  name: string;
-  handle: string;
-  avatar: string;
-  bio: string;
-  platform: 'YouTube' | 'Instagram' | 'TikTok' | 'Facebook';
-  verifiedStatus: string;
-  quickTip: string;
-  rating?: number;
-}
-
-const INFLUENCERS: Influencer[] = [
-  {
-    id: "inf-1",
-    name: "Farhan Bin Rafiq",
-    handle: "@farhan",
-    avatar: "https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png",
-    bio: "Senior Tech Analyst & Digital Product Researcher with 10+ years of experience in the Bangladesh market.",
-    platform: "YouTube",
-    verifiedStatus: "verified expert contributor",
-    quickTip: "Always check for official warranty stickers when buying premium electronics in Bangladesh.",
-    rating: 4.9
-  },
-  {
-    id: "inf-2",
-    name: "Sarah Jenkins",
-    handle: "@sarah",
-    avatar: "https://i.pravatar.cc/300?u=sarah",
-    bio: "Fashion Curator & Retail Analyst specializing in contemporary garments, material longevity, and Dhaka street style.",
-    platform: "Instagram",
-    verifiedStatus: "fashion & beauty lead reviewer",
-    quickTip: "Always wash delicate block prints in cold water to preserve dye vibrancy and prevent premature shrinkage.",
-    rating: 4.8
-  },
-  {
-    id: "inf-3",
-    name: "Imtiaz Ahmed",
-    handle: "@imtiaz",
-    avatar: "https://i.pravatar.cc/300?u=imtiaz",
-    bio: "Interior Designer and Home Solutions Specialist with a passion for energy-efficient appliances and cozy layouts.",
-    platform: "Facebook",
-    verifiedStatus: "home living chief editor",
-    quickTip: "Prioritize multi-functional modular pieces to maintain open spaces in compact urban apartments.",
-    rating: 4.7
-  },
-  {
-    id: "inf-4",
-    name: "Style Maven",
-    handle: "@stylemaven",
-    avatar: "https://i.pravatar.cc/300?u=stylemaven",
-    bio: "Dhaka-based streetwear curator and wardrobe styling consultant.",
-    platform: "Instagram",
-    verifiedStatus: "verified lifestyle creator",
-    quickTip: "Standard sneakers pair exceptionally well with semi-formal linen trousers.",
-    rating: 4.6
-  },
-  {
-    id: "inf-5",
-    name: "BB Tech Reviews",
-    handle: "@bbtech",
-    avatar: "https://i.pravatar.cc/300?u=bbtech",
-    bio: "Unbiased tech unboxings, deep specs breakdowns, and local product comparisons.",
-    platform: "YouTube",
-    verifiedStatus: "certified gadget reviewer",
-    quickTip: "For true premium audio quality, always enable high-definition codec streaming.",
-    rating: 4.9
-  }
-];
+import { BRAND_DEALS, PROMO_CODES, COMPARE_DATABASES, INFLUENCERS } from '../data/searchData';
+import { SearchHero, SearchTabs, SearchLayout } from '../components/ui/search';
 
 export function SearchPage() {
+
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const rawQuery = searchParams.get('q') || '';
@@ -510,69 +416,27 @@ export function SearchPage() {
   ];
 
   return (
-    <div className="bg-choosify-feed min-h-screen text-[#1A1A2E] pb-24 font-sans antialiased">
-      {/* Search Header Banner */}
-      <div className="w-full relative overflow-hidden flex flex-col items-center justify-center border-b border-white/5 h-[303px] px-6">
-        <div className="absolute inset-0 hero-gradient" />
-        
-        <div className="max-w-3xl mx-auto flex flex-col items-center text-center relative z-10 w-full">
-          <div className="bg-orange-primary/10 text-orange-primary text-[8px] font-black px-3 py-1 rounded-full mb-3 uppercase tracking-[0.2em] italic inline-block w-fit">
-            OMNI SEARCH ENGINE v1.1
-          </div>
-          <h1 className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-4">
-            Unified Global Search
-          </h1>
-          <p className="text-white/60 text-xs md:text-sm max-w-lg mb-8 leading-relaxed font-medium">
-            Search across authorized brands, verified products, active discount campaigns, professional recommendations, and influencer insights.
-          </p>
-
-          <div className="w-full max-w-xl relative">
-            <GlobalSearchBar 
-              initialValue={localInput}
-              placeholder="Search products, brands, promo codes, influencers..."
-              onSubmit={(val) => {
-                setLocalInput(val);
-                setSearchParams({ q: val.trim() });
-              }}
-            />
-          </div>
-
-          {rawQuery && (
-            <p className="text-white/40 text-[10px] font-mono mt-4">
-              Showing {searchResults.total} matches for "{rawQuery}"
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Tabs navigation row */}
-      {rawQuery && (
-        <div className="w-full border-b border-gray-200 bg-white sticky top-20 z-40 shadow-sm overflow-x-auto no-scrollbar scroll-smooth">
-          <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-start gap-1.5">
-            {tabConfig.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
-                className={`h-11 px-4 rounded-full text-[10px] font-black tracking-widest uppercase transition-all whitespace-nowrap inline-flex items-center gap-1.5 ${
-                  activeTab === tab.key 
-                    ? 'bg-[#0A0A1F] text-white' 
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-800'
-                }`}
-              >
-                {tab.label}
-                <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-full ${
-                  activeTab === tab.key ? 'bg-[#FF5B00] text-white' : 'bg-gray-250 text-gray-500'
-                }`}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Search results container */}
-      <div className="max-w-7xl mx-auto px-6 py-10">
+    <SearchLayout
+      hero={
+        <SearchHero 
+          rawQuery={rawQuery} 
+          total={searchResults.total} 
+          onSearch={(val) => {
+            setLocalInput(val);
+            setSearchParams(val ? { q: val.trim() } : {});
+          }} 
+        />
+      }
+      tabs={
+        rawQuery ? (
+          <SearchTabs 
+            tabs={tabConfig} 
+            activeTab={activeTab} 
+            onTabChange={(tab) => setActiveTab(tab as any)} 
+          />
+        ) : null
+      }
+    >
         {!rawQuery ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
@@ -991,7 +855,6 @@ export function SearchPage() {
 
           </div>
         )}
-      </div>
-    </div>
+    </SearchLayout>
   );
 }
