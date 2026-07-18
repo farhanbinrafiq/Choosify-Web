@@ -2,22 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, PenTool, Search, Sparkles, Users, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Link, useNavigate } from 'react-router-dom';
-import { 
-  ChevronRight, 
-  Search, 
-  Smartphone, 
-  Laptop, 
-  Headphones, 
-  Camera, 
-  Watch, 
-  Speaker, 
-  Gamepad, 
-  Tv,
-  ArrowRight,
-  TrendingUp,
-  Award
-} from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
@@ -34,97 +18,7 @@ import { PLACEMENT_KEYS } from '../lib/placements';
 import { SponsoredFeedInjector } from '../components/commerce/SponsoredFeedInjector';
 import { ChoosifySponsoredCard } from '../components/commerce/ChoosifySponsoredCard';
 
-// ==========================================
-// MOCK DATA
-// ==========================================
-
-const CATEGORIES = [
-  {
-    id: 'electronics',
-    name: 'Electronics',
-    icon: Smartphone,
-    color: 'bg-blue-500/10 text-blue-600',
-    itemCount: 12450,
-    subcategories: [
-      'Smartphones', 'Laptops', 'Tablets', 'Wearables', 'Audio', 'Cameras'
-    ],
-    featuredBrand: 'Apple',
-    image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=2000&auto=format&fit=crop'
-  },
-  {
-    id: 'fashion',
-    name: 'Fashion & Apparel',
-    icon: Watch,
-    color: 'bg-pink-500/10 text-pink-600',
-    itemCount: 45200,
-    subcategories: [
-      'Men\'s Clothing', 'Women\'s Clothing', 'Shoes', 'Accessories', 'Jewelry'
-    ],
-    featuredBrand: 'Nike',
-    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2000&auto=format&fit=crop'
-  },
-  {
-    id: 'home',
-    name: 'Home & Living',
-    icon: Tv,
-    color: 'bg-amber-500/10 text-amber-600',
-    itemCount: 32100,
-    subcategories: [
-      'Furniture', 'Decor', 'Kitchen', 'Bedding', 'Bath', 'Lighting'
-    ],
-    featuredBrand: 'IKEA',
-    image: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?q=80&w=2000&auto=format&fit=crop'
-  },
-  {
-    id: 'beauty',
-    name: 'Health & Beauty',
-    icon: Award,
-    color: 'bg-emerald-500/10 text-emerald-600',
-    itemCount: 18900,
-    subcategories: [
-      'Skincare', 'Makeup', 'Haircare', 'Fragrance', 'Personal Care'
-    ],
-    featuredBrand: 'Sephora',
-    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=2000&auto=format&fit=crop'
-  },
-  {
-    id: 'sports',
-    name: 'Sports & Outdoors',
-    icon: TrendingUp,
-    color: 'bg-orange-500/10 text-orange-600',
-    itemCount: 15400,
-    subcategories: [
-      'Exercise Equipment', 'Outdoor Gear', 'Athletic Clothing', 'Cycling'
-    ],
-    featuredBrand: 'Patagonia',
-    image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2000&auto=format&fit=crop'
-  },
-  {
-    id: 'gaming',
-    name: 'Gaming',
-    icon: Gamepad,
-    color: 'bg-purple-500/10 text-purple-600',
-    itemCount: 8700,
-    subcategories: [
-      'Consoles', 'Video Games', 'Accessories', 'PC Gaming', 'VR'
-    ],
-    featuredBrand: 'PlayStation',
-    image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2000&auto=format&fit=crop'
-  }
-];
-
-const TRENDING_SEARCHES = [
-  "iPhone 15 Pro Max",
-  "Nike Air Force 1",
-  "Sony WH-1000XM5",
-  "Dyson Airwrap",
-  "PlayStation 5",
-  "Herman Miller"
-];
-
-// ==========================================
-// MAIN COMPONENT
-// ==========================================
+type CategoryItem = CategoryDisplayItem;
 
 export function CategoriesPage() {
   const {
@@ -870,65 +764,43 @@ export function CategoriesPage() {
         </aside>
       </div>
 
-      {/* MAIN GRID */}
-      <div className="max-w-[1600px] mx-auto px-6 md:px-10 mt-12 w-full">
-        {filteredCategories.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-[32px] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Search className="w-8 h-8 text-slate-300" />
-            </div>
-            <h3 className="text-2xl font-bold text-[#000435] mb-2">No categories found</h3>
-            <p className="text-slate-500 font-medium">Try adjusting your search terms or browse all categories.</p>
-            <button 
-              onClick={() => setSearchQuery("")}
-              className="mt-8 px-8 py-3 bg-[#000435] text-white rounded-xl font-bold hover:bg-[#FF5B00] transition-colors"
+      {/* Mobile / Tablet Filter Drawer */}
+      <AnimatePresence>
+        {isMobileDrawerOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileDrawerOpen(false)}
+              className="fixed inset-0 bg-black/60 z-50 lg:hidden"
+            />
+            {/* Drawer Panel */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 bottom-0 w-4/5 max-w-xs bg-[#F0F4F9] z-50 p-5 overflow-y-auto lg:hidden shadow-2xl flex flex-col gap-4 text-left font-sans"
             >
-              Clear Search
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <AnimatePresence>
-              {filteredCategories.map((category, idx) => (
-                <CategoryCard
-                  key={category.id}
-                  id={category.id}
-                  title={category.name}
-                  image={category.image}
-                  count={category.itemCount}
-                  items={category.subcategories}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
+              <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                <span className="text-[11px] font-black uppercase tracking-wider text-navy">Discovery Filters</span>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className="w-8 h-8 rounded-full border border-gray-200 hover:border-orange-primary flex items-center justify-center text-gray-400 hover:text-orange-primary bg-white cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex-1 pb-10">
+                {renderFilterPanel()}
+              </div>
+            </motion.div>
+          </>
         )}
-      </div>
-
-      {/* BOTTOM CTA */}
-      <div className="max-w-[1600px] mx-auto px-6 md:px-10 mt-16">
-        <div className="bg-[#000435] rounded-[32px] p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF5B00]/20 rounded-full blur-[100px] transform translate-x-1/3 -translate-y-1/3" />
-          
-          <div className="relative z-10 max-w-2xl">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
-              Can't find what you're looking for?
-            </h2>
-            <p className="text-slate-300 font-medium text-lg">
-              Our complete catalog includes millions of items. Use our advanced search or browse all products.
-            </p>
-          </div>
-          
-          <div className="relative z-10 shrink-0">
-            <Link 
-              to="/products"
-              className="inline-flex items-center justify-center px-8 py-4 bg-[#FF5B00] text-white rounded-2xl font-bold text-lg hover:bg-[#EB4501] transition-colors shadow-lg hover:shadow-xl hover:-translate-y-1 transform duration-200"
-            >
-              Browse All Products
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Link>
-          </div>
-        </div>
-      </div>
+      </AnimatePresence>
     </div>
   );
 }

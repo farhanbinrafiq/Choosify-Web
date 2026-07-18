@@ -13,8 +13,9 @@ import {
   MessageSquare
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { operationsApi } from '../services/operationsApi';
 
-const KNOWN_PROMOS = [
+const KNOWN_PROMOS_FALLBACK = [
   { code: 'AARONG15', discount: 15, type: 'percentage' as const },
   { code: 'APEXFOOT26', discount: 500, type: 'flat' as const },
   { code: 'SAILOREID', discount: 20, type: 'percentage' as const },
@@ -22,18 +23,12 @@ const KNOWN_PROMOS = [
 ];
 
 export function CheckoutPage() {
-  const { mode, retailCart, wholesaleCart, createOrder, addOrder, clearCart, currentUser, buyerReputations } = useGlobalState();
+  const { retailCart, addOrder, currentUser, buyerReputations, isFeatureEnabled } = useGlobalState();
   const { createNewThread } = useDashboard();
   
   const navigate = useNavigate();
 
-  // Find out if checking out retail or wholesale
-  const sourceMode: 'retail' | 'wholesale' = (location.state as any)?.sourceMode || mode;
-  const isQuotationRequest = (location.state as any)?.isQuotationRequest || false;
-  const tradeLicense = (location.state as any)?.tradeLicense || localStorage.getItem('b2b_trade_license') || 'TR-2026/89412';
-  const companyName = (location.state as any)?.companyName || localStorage.getItem('b2b_company_name') || 'Apex Distributors Ltd';
-
-  const activeCart = sourceMode === 'wholesale' ? wholesaleCart : retailCart;
+  const activeCart = retailCart;
 
   // Contact States
   const [fullName, setFullName] = useState('Kamal Uddin');
@@ -46,18 +41,11 @@ export function CheckoutPage() {
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount: number; type: 'flat' | 'percentage' } | null>(null);
 
-  const handleApplyPromo = () => {
-    const found = KNOWN_PROMOS.find(p => p.code === promoCode.trim().toUpperCase());
-    if (!found) { toast.error('Invalid or expired promo code.'); return; }
-    if (appliedPromo) { toast.error('A promo code is already applied.'); return; }
-    setAppliedPromo(found);
-    toast.success(`Promo code applied! ${found.type === 'percentage' ? found.discount + '% OFF' : '৳' + found.discount + ' OFF'}`);
-  };
-
   const userRep = buyerReputations?.find(rep => rep.userId === currentUser?.id);
   const codTrustScore = userRep ? userRep.codTrustScore : 100;
   const cancellationRatio = userRep ? userRep.cancellationRatio : 0;
   const isCODRestricted = codTrustScore < 50 || cancellationRatio > 40;
+  const orderPlacedRef = useRef(false);
 
   React.useEffect(() => {
     if (isCODRestricted) {
@@ -65,8 +53,9 @@ export function CheckoutPage() {
     }
   }, [isCODRestricted]);
 
-  // If cart is empty, redirect
+  // If cart is empty, redirect — unless we just placed an order (cart clears before navigate)
   React.useEffect(() => {
+    if (orderPlacedRef.current) return;
     if (activeCart.length === 0) {
       toast.error('No items in checkout buffer!');
       navigate('/');
@@ -84,22 +73,7 @@ export function CheckoutPage() {
   const sellerIds = Object.keys(groupedCart);
 
   // Helper function to resolve dynamic unit price based on pricing tiers/slabs
-  const getSlabPrice = (product: any, qty: number) => {
-    if (sourceMode === 'retail') return product.price;
-    const tiers = product.pricingTiers || product.quantitySlabs || [];
-    if (!tiers || tiers.length === 0) return product.price;
-
-    let activeSlabPrice = product.price;
-    const sortedTiers = [...tiers].sort((a, b) => b.minQuantity - a.minQuantity);
-    
-    for (const tier of sortedTiers) {
-      if (qty >= tier.minQuantity) {
-        activeSlabPrice = tier.price;
-        break;
-      }
-    }
-    return activeSlabPrice;
-  };
+  const getSlabPrice = (product: any, _qty: number) => product.price;
 
   const calculateSellerSubtotal = (items: typeof activeCart) => {
     return items.reduce((sum, item) => {
@@ -108,7 +82,7 @@ export function CheckoutPage() {
     }, 0);
   };
 
-  const DELIVERY_FEE_PER_SELLER = sourceMode === 'wholesale' ? 500 : 120;
+  const DELIVERY_FEE_PER_SELLER = 120;
   const deliveryTotal = sellerIds.length * DELIVERY_FEE_PER_SELLER;
 
   const subtotal = activeCart.reduce((sum, item) => {
@@ -125,8 +99,51 @@ export function CheckoutPage() {
     : 0;
   const finalTotal = Math.max(0, aggregateTotal - promoDiscount);
 
-  // COD support limits (retail under 150k, B2B quote allowed)
-  const isCODEligible = (sourceMode === 'retail' ? (aggregateTotal < 150000) : !isQuotationRequest) && !isCODRestricted;
+  const handleApplyPromo = async () => {
+    if (appliedPromo) {
+      toast.error('A promo code is already applied.');
+      return;
+    }
+    const code = promoCode.trim().toUpperCase();
+    try {
+      const result = await operationsApi.validateCoupon({
+        code,
+        cartTotal: subtotal,
+        userId: currentUser?.id,
+        cartItems: activeCart.map((item) => ({
+          id: String(item.product.id),
+          price: Number(getSlabPrice(item.product, item.quantity) || 0),
+          category: item.product.category,
+          brand: item.product.brand,
+          quantity: item.quantity,
+        })),
+      });
+      if (!result.valid) {
+        toast.error(result.reason || 'Invalid or expired promo code.');
+        return;
+      }
+      const promoType =
+        result.type === 'fixed_amount' || result.type === 'free_shipping' ? 'flat' : 'percentage';
+      const discountValue =
+        promoType === 'percentage'
+          ? Math.round((result.discount / Math.max(subtotal, 1)) * 100)
+          : result.discount;
+      setAppliedPromo({ code, discount: discountValue, type: promoType });
+      toast.success(
+        `Promo code applied! ${promoType === 'percentage' ? `${discountValue}% OFF` : `৳${result.discount} OFF`}`,
+      );
+    } catch {
+      const found = KNOWN_PROMOS_FALLBACK.find((p) => p.code === code);
+      if (!found) {
+        toast.error('Invalid or expired promo code.');
+        return;
+      }
+      setAppliedPromo(found);
+      toast.success(`Promo code applied! ${found.type === 'percentage' ? found.discount + '% OFF' : '৳' + found.discount + ' OFF'}`);
+    }
+  };
+
+  const isCODEligible = aggregateTotal < 150000 && !isCODRestricted;
 
   const handlePlaceOrder = () => {
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
@@ -152,18 +169,17 @@ export function CheckoutPage() {
       // Construct Thread starter messages containing products list status details
       const startMsg = `ORDER REFERENCE: ${tempOrderId}
 INVOICE ID: ${invoiceIdStr}
-MODE: ${sourceMode.toUpperCase()}
+MODE: RETAIL
 DELIVERY RECIPIENT: ${fullName}
 CONTACT PHONE: ${phone}
 DELIVERY LOCATION: ${address}, ${region}
-DELIVERY METHOD: ${sourceMode === 'wholesale' ? 'B2B Cargo Freight' : 'Standard Express Parcel'}
+DELIVERY METHOD: Standard Express Parcel
 DELIVERY FEE: ৳${DELIVERY_FEE_PER_SELLER}
 
 STAGED PRODUCTS IN LOT:
 ${itemsListStr}
 
 LOT METRIC AMOUNT: ৳${calculateSellerSubtotal(items).toLocaleString()}
-TRADE LICENSE SECURE: ${sourceMode === 'wholesale' ? tradeLicense : 'NOT APPLICABLE'}
 ORDER STATUS: PENDING_CONFIRMATION
 
 "Hello Partner! Clicking above confirms receipt of this staged ticket. Our logistics representative has started routing this package. Please review the parcel invoice."`;
@@ -173,7 +189,7 @@ ORDER STATUS: PENDING_CONFIRMATION
         `thread-${sellerId}`,
         `${sellerName} Factory Outlet`,
         `https://i.pravatar.cc/150?u=${sellerId}`,
-        sourceMode === 'wholesale' ? 'wholesale' : 'retail',
+        'retail',
         `New lot transaction initialized (${tempOrderId})`,
         tempOrderId
       );
@@ -209,7 +225,16 @@ ORDER STATUS: PENDING_CONFIRMATION
           productId: it.product.id,
           productTitle: it.product.title,
           quantity: it.quantity,
-          price: getSlabPrice(it.product, it.quantity)
+          price: getSlabPrice(it.product, it.quantity),
+          image: it.selectedVariant?.image || it.product.image,
+          brand: it.product.brand,
+          variantLabel: it.selectedVariant?.attributes
+            ? Object.entries(it.selectedVariant.attributes)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(' · ')
+            : undefined,
+          variantSku: it.selectedVariant?.sku,
+          notes: deliveryNotes.trim() || undefined,
         })),
         deliveryFee: DELIVERY_FEE_PER_SELLER,
         invoiceId: invoiceIdStr,
@@ -223,26 +248,39 @@ ORDER STATUS: PENDING_CONFIRMATION
       isCOD: paymentMethod === 'cod',
       isSplit: splitCount > 1,
       overallTotal: finalTotal,
+      subtotal,
+      deliveryTotal,
       subOrders: generatedSubOrders,
       createdAt: new Date().toISOString(),
       promoCode: appliedPromo?.code,
-      promoDiscount: promoDiscount
+      promoDiscount: promoDiscount,
+      promoType: appliedPromo?.type,
+      paymentMethod,
+      shipping: {
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        region,
+        deliveryNotes: deliveryNotes.trim() || undefined,
+      },
     };
 
     if (appliedPromo) {
       window.dispatchEvent(new CustomEvent('choosify-promo-applied', { detail: appliedPromo }));
     }
 
+    sessionStorage.setItem('choosify_last_order_id', tempOrderId);
+    sessionStorage.setItem('choosify_last_order_snapshot', JSON.stringify(fullOrderObject));
+
     // Add to global state (which automatically updates localStorage and triggers reactivity)
     addOrder(fullOrderObject);
+    operationsApi.createOrder(fullOrderObject as Record<string, unknown>).catch(() => {});
 
-    // Clear active cart
-    clearCart();
-
+    orderPlacedRef.current = true;
     toast.success('Order placed successfully! Live support thread generated.');
     
-    // Auto-open newly spawned buyer-seller conversation thread or show success screen
-    navigate('/order-success', { state: { order: fullOrderObject } });
+    // Navigate before cart clears so the empty-cart guard does not bounce to home
+    navigate(`/order-success/${tempOrderId}`, { replace: true, state: { order: fullOrderObject } });
   };
 
   return (
@@ -547,6 +585,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                   </div>
                 )}
               </div>
+              )}
 
               <div className="pt-3 flex justify-between items-baseline border-t border-[#F1F1F3]">
                 <span className="text-xs font-bold text-[#1A1A2E]">Total ({activeCart.length} Item{activeCart.length === 1 ? '' : 's'})</span>

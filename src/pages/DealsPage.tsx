@@ -1,14 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Home, ChevronRight, BadgePercent, Clock, Percent, ShoppingBag, Star, 
-  Tags, Landmark, SlidersHorizontal, Heart, Bookmark, ShoppingCart, 
-  ShieldCheck, Award, RotateCcw, Lock, Search, Mail, ArrowUpRight, Check,
-  Sparkles, ChevronLeft, Ticket, Tag, Flame, Gift, ArrowRight, Laptop, Smartphone,
-  Headphones, Watch, Tv, Gamepad, Cable, Camera, HelpCircle
-} from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { FlashDealCard, DealOfTheDayCard } from '../components/deals/FlashDealCard';
 import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle, ShieldCheck, Flame } from 'lucide-react';
@@ -37,9 +27,12 @@ import {
   DealsVerticalSponsoredCard,
 } from '../components/deals/DealsLowerSections';
 
-// Import custom generated hero banner image
-// @ts-expect-error raw image asset import
-import heroBannerImg from '../assets/images/deals_hero_banner_1783876480998.jpg';
+const PROMO_CODES = [
+  { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
+  { brandId: 'apex', brandName: "Apex", code: "APEXFOOT26", discount: "BDT 500 FLAT" },
+  { brandId: 'sailor', brandName: "Sailor", code: "SAILOREID", discount: "Flat 20% OFF" },
+  { brandId: 'adidas', brandName: "Adidas", code: "ADIEXTRA10", discount: "10% FLAT OFF" }
+];
 
 function FlashDealCountdown({ validUntil }: { validUntil?: string }) {
   const [parts, setParts] = useState({ h: '12', m: '00', s: '00' });
@@ -101,56 +94,82 @@ export function DealsPage() {
     return 'Flash Deals'; // default
   };
 
-  // Active filters and interactions
-  const [activeTab, setActiveTab] = useState('All Deals');
-  const [selectedCategory, setSelectedCategory] = useState('All Deals');
-  const [sortOption, setSortOption] = useState('Most Popular');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [likedProducts, setLikedProducts] = useState<string[]>([]);
-  const [cartCount, setCartCount] = useState<number>(0);
-  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [activeTab, setActiveTab] = useState(getInitialTab);
+  const [minDiscount, setMinDiscount] = useState<number>(0);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const productSource: any[] = allProducts.length > 0 ? allProducts : PRODUCTS;
+  const brandSource: any[] =
+    allBrands.length > 0
+      ? allBrands.map((brand) => ({ ...brand, rating: brand.ratings, products: brand.followers || 0 }))
+      : BRANDS;
+  const promoCodes = React.useMemo(
+    () =>
+      allDeals.length > 0
+        ? allDeals
+            .filter((deal) => !!deal.promoCode)
+            .map((deal) => ({
+              brandId: deal.brandId || 'brand-generic',
+              brandName: deal.seller || 'Brand',
+              code: deal.promoCode || '',
+              discount: deal.discountType === 'flat' ? `Flat ৳${deal.discountValue} OFF` : `${deal.discountValue}% OFF`,
+            }))
+        : PROMO_CODES,
+    [allDeals]
+  );
 
-  // 12:45:32 Countdown Timer for Flash Deals
-  const [flashHours, setFlashHours] = useState(12);
-  const [flashMinutes, setFlashMinutes] = useState(45);
-  const [flashSeconds, setFlashSeconds] = useState(32);
+  const TAB_TO_URL: Record<string, string> = {
+    'Flash Deals': 'flash',
+    'Promo Codes': 'promo',
+    'Brand Deals': 'brand',
+    'Seasonal Campaigns': 'seasonal',
+    'Expired Deals': 'expired',
+    'All Deals': 'all',
+  };
 
-  // 08:12:45 Countdown Timer for Deal of the Day
-  const [dealHours, setDealHours] = useState(8);
-  const [dealMinutes, setDealMinutes] = useState(12);
-  const [dealSeconds, setDealSeconds] = useState(45);
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    const urlKey = TAB_TO_URL[tab] || tab.toLowerCase().replace(/\s+/g, '_');
+    setSearchParams({ tab: urlKey });
+  };
 
-  // Countdown clock effect
   useEffect(() => {
-    const timer = setInterval(() => {
-      // Flash Deals Countdown
-      setFlashSeconds(prev => {
-        if (prev > 0) return prev - 1;
-        setFlashMinutes(m => {
-          if (m > 0) return m - 1;
-          setFlashHours(h => (h > 0 ? h - 1 : 12));
-          return 59;
-        });
-        return 59;
-      });
+    const t = searchParams.get('tab');
+    if (t) {
+      if (t === 'flash') setActiveTab('Flash Deals');
+      else if (t === 'promo' || t === 'promo_codes') setActiveTab('Promo Codes');
+      else if (t === 'brand') setActiveTab('Brand Deals');
+      else if (t === 'seasonal') setActiveTab('Seasonal Campaigns');
+      else if (t === 'expired') setActiveTab('Expired Deals');
+      else if (t === 'all') setActiveTab('All Deals');
+    }
+  }, [searchParams]);
 
-      // Deal of the Day Countdown
-      setDealSeconds(prev => {
-        if (prev > 0) return prev - 1;
-        setDealMinutes(m => {
-          if (m > 0) return m - 1;
-          setDealHours(h => (h > 0 ? h - 1 : 8));
-          return 59;
-        });
-        return 59;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
+  // Restore state from sessionStorage on mount
+  React.useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('choosify_deals_filters');
+      if (saved) {
+        const filters = JSON.parse(saved);
+        if (filters.selectedCategory) setSelectedCategory(filters.selectedCategory);
+        if (filters.minDiscount !== undefined) setMinDiscount(filters.minDiscount);
+        if (filters.activeTab) setActiveTab(filters.activeTab);
+      }
+    } catch (e) {
+      console.error(e);
+    }
   }, []);
 
-  // Format double digit helper
-  const formatTimeNum = (num: number) => String(num).padStart(2, '0');
+  // Save state on updates
+  React.useEffect(() => {
+    const filters = {
+      selectedCategory,
+      minDiscount,
+      activeTab
+    };
+    sessionStorage.setItem('choosify_deals_filters', JSON.stringify(filters));
+  }, [selectedCategory, minDiscount, activeTab]);
 
   // Section navigation registered via useRegisterPageFilters / useSectionScrollSpy
 
@@ -173,13 +192,9 @@ export function DealsPage() {
       const expired = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'clearance');
       result = expired.length > 0 ? expired : result.filter(p => p.id % 4 === 1);
     }
-    const isLiked = likedProducts.includes(id);
-    if (isLiked) {
-      setLikedProducts(prev => prev.filter(item => item !== id));
-      toast.success(`Removed like from ${name}`);
-    } else {
-      setLikedProducts(prev => [...prev, id]);
-      toast.success(`Added ${name} to wishlist!`, { icon: '❤️' });
+
+    if (selectedCategory) {
+      result = result.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase());
     }
 
     if (minDiscount > 0) {
@@ -243,7 +258,7 @@ export function DealsPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#FF5B00]" />
+          <Search size={13} className="text-[#E8500A]" />
         </div>
         <input
           type="text"
@@ -260,224 +275,78 @@ export function DealsPage() {
       { id: 'discount-25', label: 'ðŸ”¥ 25% Off +', active: minDiscount === 25, onClick: () => setMinDiscount(minDiscount === 25 ? 0 : 25) }
     ],
     renderFilters: () => (
-      <div className="flex flex-col gap-4 mt-4">
+      <div className="flex flex-col gap-4">
         <UniversalFilterRenderer
           profile={{
             entity: 'deals',
             filters: [
               {
-                id: 'deal-type',
-                name: 'Deal Type',
-                type: 'multi_select',
-                options: [
-                  { value: 'flash-deals', label: 'Flash Deals' },
-                  { value: 'clearance', label: 'Clearance' },
-                  { value: 'year-end', label: 'Year-End Sale' },
-                  { value: 'coupons', label: 'Coupons' }
-                ]
-              },
-              {
-                id: 'discount',
-                name: 'Discount %',
+                id: 'category',
+                name: 'Product Categories',
                 type: 'single_select',
                 options: [
-                  { value: '10+', label: '10% Off or more' },
-                  { value: '25+', label: '25% Off or more' },
-                  { value: '50+', label: '50% Off or more' },
-                  { value: '70+', label: '70% Off or more' }
-                ]
-              },
-              {
-                id: 'bank-offers',
-                name: 'Bank Offers',
-                type: 'multi_select',
-                options: [
-                  { value: 'city-bank', label: 'City Bank Amex' },
-                  { value: 'brac-bank', label: 'BRAC Bank' },
-                  { value: 'ebl', label: 'EBL Cards' }
+                  { value: 'all', label: 'All Categories' },
+                  ...categoriesList.map(cat => ({ value: cat.name, label: cat.name, count: cat.count }))
                 ]
               }
             ]
           }}
-          activeFilters={{}}
-          onFilterChange={() => {}}
+          activeFilters={{
+            category: selectedCategory,
+          }}
+          onFilterChange={(filterId, value) => {
+            if (filterId === 'category') {
+              setSelectedCategory(value === 'all' || !value ? null : value);
+            }
+          }}
+        />
+
+        <UniversalFilterRenderer
+          profile={{
+            entity: 'deals',
+            filters: [
+              {
+                id: 'discount_range2',
+                name: 'Minimum Discount',
+                type: 'single_select',
+                options: [
+                  { value: 'all', label: 'Any Savings' },
+                  { value: '10', label: '10% Savings & Up' },
+                  { value: '25', label: '25% Savings & Up' },
+                  { value: '40', label: '40% Savings & Up' },
+                  { value: '60', label: '60% Savings & Up' }
+                ]
+              }
+            ]
+          }}
+          activeFilters={{
+            discount_range2: minDiscount === 0 ? 'all' : minDiscount.toString()
+          }}
+          onFilterChange={(filterId, value) => {
+            if (filterId === 'discount_range2') {
+              setMinDiscount(value === 'all' || !value ? 0 : Number(value));
+            }
+          }}
         />
       </div>
     ),
-    onClearAll: () => setSearchQuery('')
-  }, [searchQuery]);
-
-  const handleAddToCart = (name: string, e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    setCartCount(prev => prev + 1);
-    toast.success(`Added ${name} to your cart!`, {
-      icon: '🛒',
-      style: {
-        background: '#FF5B00',
-        color: '#fff',
-        fontWeight: 'bold',
-      }
-    });
-  };
-
-  const handleCopyCoupon = (code: string) => {
-    navigator.clipboard.writeText(code);
-    toast.success(`Coupon code "${code}" copied!`, {
-      icon: '✂️',
-      style: {
-        background: '#10B981',
-        color: '#fff'
-      }
-    });
-  };
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newsletterEmail.trim() || !newsletterEmail.includes('@')) {
-      toast.error('Please enter a valid email address.');
-      return;
-    }
-    toast.success(`Thank you for subscribing, ${newsletterEmail}!`, { icon: '🎉' });
-    setNewsletterEmail('');
-  };
-
-  // Dataset mapping 100% exactly to screenshot items
-  const FLASH_DEAL_CARDS: Product[] = [
-    {
-      id: 'fd-1',
-      title: 'Samsung Galaxy S24 Ultra',
-      brand: 'SAMSUNG',
-      price: 145000,
-      originalPrice: 165000,
-      discount: '-12% OFF',
-      tag: 'HOT',
-      likes: 239,
-      rating: 4.8,
-      reviewsText: '1.2K',
-      category: 'Smartphones',
-      claimedPercent: 82,
-      image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80'
+    activeFilterCount: (selectedCategory ? 1 : 0) +
+      (minDiscount > 0 ? 1 : 0) +
+      (searchQuery ? 1 : 0),
+    onClearAll: () => {
+      setSelectedCategory(null);
+      setMinDiscount(0);
+      setSearchQuery('');
+      setActiveTab('All Deals');
     },
-    {
-      id: 'fd-2',
-      title: 'AirPods Pro (2nd Gen)',
-      brand: 'APPLE',
-      price: 25900,
-      originalPrice: 30900,
-      discount: '-16% OFF',
-      tag: 'HOT',
-      likes: 157,
-      rating: 4.8,
-      reviewsText: '2.1K',
-      category: 'Audio',
-      claimedPercent: 65,
-      image: 'https://images.unsplash.com/photo-1588449668338-d15176090c44?w=400&q=80'
+    sectionNav: {
+      items: dealsSectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Deals',
+      profileLabel: 'Deal hub',
     },
-    {
-      id: 'fd-3',
-      title: 'MacBook Air M3',
-      brand: 'APPLE',
-      price: 128000,
-      originalPrice: 145000,
-      discount: '-20% OFF',
-      tag: 'HOT',
-      likes: 219,
-      rating: 4.7,
-      reviewsText: '860',
-      category: 'Laptops',
-      claimedPercent: 74,
-      image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80'
-    }
-  ];
-
-  const TOP_DEALS_DATA = [
-    {
-      id: 'top-1',
-      title: "Apex Men's Royal Loafer",
-      brand: 'APEX',
-      price: 3280,
-      originalPrice: 4200,
-      discount: '23% OFF',
-      tag: 'SALE',
-      likes: 188,
-      rating: 4.6,
-      reviewsText: '321',
-      category: 'Fashion',
-      image: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400&q=80'
-    },
-    {
-      id: 'top-2',
-      title: "Galaxy S24 Ultra",
-      brand: 'SAMSUNG',
-      price: 145000,
-      originalPrice: 165000,
-      discount: '12% OFF',
-      likes: 239,
-      rating: 4.8,
-      reviewsText: '1.2K',
-      category: 'Smartphones',
-      image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80'
-    },
-    {
-      id: 'top-3',
-      title: "MacBook Air M3",
-      brand: 'APPLE',
-      price: 128000,
-      originalPrice: 145000,
-      discount: '12% OFF',
-      likes: 219,
-      rating: 4.7,
-      reviewsText: '860',
-      category: 'Laptops',
-      image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80'
-    },
-    {
-      id: 'top-4',
-      title: "WH-1000XM5",
-      brand: 'SONY',
-      price: 32900,
-      originalPrice: 41900,
-      discount: '30% OFF',
-      likes: 198,
-      rating: 4.8,
-      reviewsText: '1.1K',
-      category: 'Audio',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80'
-    },
-    {
-      id: 'top-5',
-      title: "14T Pro",
-      brand: 'XIAOMI',
-      price: 54990,
-      originalPrice: 66900,
-      discount: '17% OFF',
-      likes: 278,
-      rating: 4.7,
-      reviewsText: '701',
-      category: 'Smartphones',
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80'
-    }
-  ];
-
-  const COUPONS_DATA = [
-    { code: 'CHOOSIFY10', discount: '10% OFF', minSpend: 'BDT 5,000' },
-    { code: 'SAVE15', discount: '15% OFF', minSpend: 'BDT 10,000' },
-    { code: 'EMIS', discount: '5% OFF', minSpend: 'BDT 3,000' }
-  ];
-
-  const NAV_ITEMS = [
-    { label: 'All Deals', sub: '12,468 Deals', icon: Percent },
-    { label: 'Coupons', sub: '2,345 Offers', icon: Ticket },
-    { label: 'Product Deals', sub: '8,942 Items', icon: Tag },
-    { label: 'Brand Deals', sub: '356 Brands', icon: ShoppingBag },
-    { label: 'Bank Offers', sub: '128 Offers', icon: Landmark },
-    { label: 'Sale', sub: 'Seasonal Sales', icon: Flame },
-    { label: 'Clearance Sale', sub: 'Big Savings', icon: Tags },
-    { label: 'Year End Sale', sub: 'Special Prices', icon: Gift }
-  ];
+  }, [searchQuery, activeTab, selectedCategory, minDiscount, activeSectionId, dealsSectionNavItems, scrollToSection]);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
@@ -956,59 +825,26 @@ export function DealsPage() {
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
              <DealsVerticalSponsoredCard />
 
-            {/* Coupons Card Container */}
-            <div className="bg-white rounded-2xl border border-[#EEF2F7] p-5 shadow-sm flex-1 flex flex-col justify-between">
-              <div className="flex flex-col gap-4">
-                {COUPONS_DATA.map((coupon, idx) => (
-                  <div 
-                    key={idx} 
-                    className="border border-[#EEF2F7] rounded-xl p-3 flex items-center justify-between bg-gray-50/50 hover:bg-gray-50 transition-all group/coupon"
-                  >
-                    {/* Left discount */}
-                    <div className="text-left shrink-0">
-                      <span className="text-lg font-black text-[#050B2C] block leading-none">
-                        {coupon.discount}
-                      </span>
-                      <span className="text-[9px] font-bold text-gray-400 uppercase mt-1 block">
-                        OFF
-                      </span>
-                    </div>
-
-                    {/* Middle specs */}
-                    <div className="text-left flex-1 px-4 min-w-0">
-                      <span className="text-xs font-bold text-gray-800 block truncate font-mono">
-                        Use Code: <span className="text-[#FF5B00] font-black">{coupon.code}</span>
-                      </span>
-                      <span className="text-[10px] text-gray-400 font-semibold block mt-1 leading-none">
-                        Min. Spend {coupon.minSpend}
-                      </span>
-                    </div>
-
-                    {/* Right action button */}
-                    <button
-                      onClick={() => handleCopyCoupon(coupon.code)}
-                      className="text-[10px] font-black text-gray-600 bg-white hover:bg-[#FF5B00] hover:text-white border border-[#EEF2F7] hover:border-[#FF5B00] px-2.5 py-1.5 rounded-lg transition-all duration-300 shadow-2xs"
-                    >
-                      COPY
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Bottom show more action */}
-              <button
-                onClick={() => toast.success('More coupons loaded')}
-                className="w-full mt-6 py-2.5 bg-gray-50 hover:bg-[#FF5B00]/5 border border-[#EEF2F7] hover:border-[#FF5B00]/20 rounded-xl text-xs font-black text-gray-700 hover:text-[#FF5B00] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1"
-              >
-                <span>MORE COUPONS</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+             <ListingAdRail
+               sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
+               sponsoredVariant="portrait"
+               showAdSense
+               adSenseFormat="sidebar"
+             />
+          </aside>
 
         </div>
       </main>
 
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
+        .animate-float {
+          animation: float 4s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }

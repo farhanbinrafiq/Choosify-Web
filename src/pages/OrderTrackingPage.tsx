@@ -80,14 +80,28 @@ export function OrderTrackingPage() {
   const [remoteShipment, setRemoteShipment] = useState<TrackedShipment | null>(null);
   const [searchId, setSearchId] = useState('');
 
-  const handleSearchOrder = () => {
+  useEffect(() => {
+    if (!selectedOrderId) {
+      setRemoteShipment(null);
+      return;
+    }
+    operationsApi.trackShipment(selectedOrderId).then(setRemoteShipment).catch(() => setRemoteShipment(null));
+  }, [selectedOrderId]);
+
+  const handleSearchOrder = async () => {
     if (!searchId.trim()) return;
     const found = orders.find((x: any) => x.orderId.toUpperCase() === searchId.trim().toUpperCase());
     if (found) {
       setSelectedOrderId(found.orderId);
       toast.success(`Lot Ticket "${searchId.toUpperCase()}" loaded!`);
-    } else {
-      toast.error(`Ticket "${searchId.toUpperCase()}" not found in current local session DB.`);
+      return;
+    }
+    try {
+      await operationsApi.trackShipment(searchId.trim());
+      setSelectedOrderId(searchId.trim().toUpperCase());
+      toast.success(`Tracking loaded for "${searchId.toUpperCase()}"`);
+    } catch {
+      toast.error(`Ticket "${searchId.toUpperCase()}" not found.`);
       setSelectedOrderId(null);
     }
   };

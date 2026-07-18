@@ -65,90 +65,79 @@ import { CreateSpotlightCampaignButton } from "../components/spotlight/cms/Creat
 import { EmiProductAssistant } from "../components/emi/EmiProductAssistant";
 import type { CatalogProductSizeGuide } from "../types/catalog";
 
+function hasActiveSizeGuide(sizeGuide?: CatalogProductSizeGuide | null): boolean {
+  if (!sizeGuide?.enabled) return false;
+  if (sizeGuide.imageUrl?.trim()) return true;
+  if (sizeGuide.description?.trim()) return true;
+  if (Array.isArray(sizeGuide.rows) && sizeGuide.rows.length > 0) return true;
+  return false;
+}
 
+// ── Optional Add-ons ────────────────────────────────────────────
+export interface ProductAddon {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image?: string;
+  badge?: 'Popular' | 'Recommended' | 'Best Value';
+  available: boolean;
+}
 
-
-
-
-const getProductBoxContents = (prod: any) => {
-  const brandLower = prod.brand?.toLowerCase() || '';
-  const titleLower = prod.title?.toLowerCase() || '';
-  const isApple = brandLower === 'apple' || titleLower.includes('apple') || titleLower.includes('iphone') || titleLower.includes('macbook');
-  const isSamsung = brandLower === 'samsung' || titleLower.includes('galaxy') || titleLower.includes('s24');
-  const isSony = brandLower === 'sony' || titleLower.includes('1000xm5');
-  const isApex = brandLower === 'apex';
-
-  if (isApple) {
-    return {
-      contents: [
-        { name: "iPhone 15 Pro Max", desc: "Featuring Grade 5 Titanium design and A17 Pro Chip" },
-        { name: "USB-C Charge Cable (1m)", desc: "Premium braided design, matching the titanium colorway" },
-        { name: "Official Documentation", desc: "Quick Start Guide & Apple Safety leaflet" },
-        { name: "SIM Ejector Tool", desc: "Standard stainless-steel SIM pin" }
-      ],
-      benefits: [
-        { title: "Complimentary 20W Fast Charger", desc: "Exclusive Choosify partner benefit (Since Apple doesn't package one in the retail box)", badge: "Exclusive Gift" },
-        { title: "Liquid Silicone Protective Case", desc: "Anti-drop protective case in matching dark colors", badge: "Gift" },
-        { title: "Official Apple Care+ Local Assist", desc: "Get prioritized local assistance across Dhaka authorized centers", badge: "Service Benefit" },
-        { title: "Free Express Shipping", desc: "Guaranteed same-day courier dispatch inside Dhaka", badge: "Delivery Benefit" }
-      ]
-    };
-  } else if (isSamsung) {
-    return {
-      contents: [
-        { name: "Samsung Galaxy S24 Ultra", desc: "With embedded S-Pen" },
-        { name: "USB-C to USB-C Cable", desc: "High-speed power and data sync cable" },
-        { name: "Ejection Pin", desc: "SIM tray ejection tool" },
-        { name: "Quick Start Guide", desc: "Official product manual and warranty booklet" }
-      ],
-      benefits: [
-        { title: "S-Pen Replacement Nibs", desc: "Extra tips for your S-Pen stylus", badge: "Accessory" },
-        { title: "Samsung SmartTag 2", desc: "Track your phone and keys effortlessly", badge: "Exclusive Gift" },
-        { title: "12-Month Screen Replacement", desc: "One-time free screen replacement warranty locally", badge: "Free Warranty" },
-        { title: "Free Official Installation Support", desc: "Full data migration via SmartSwitch from older phones", badge: "Free Support" }
-      ]
-    };
-  } else if (isSony) {
-    return {
-      contents: [
-        { name: "Sony WH-1000XM5 Headphones", desc: "State-of-the-art noise-cancelling headphones" },
-        { name: "Premium Carrying Case", desc: "Hard-shell fabric case with magnet closure" },
-        { name: "USB-C Charging Cable", desc: "Premium quality charging cord" },
-        { name: "3.5mm Headphone Jack Cable", desc: "Gold-plated auxiliary audio connector" },
-        { name: "Plug Adapter for In-flight Use", desc: "Dual prong airplane adapter" }
-      ],
-      benefits: [
-        { title: "Complimentary Headphone Stand", desc: "Premium aluminum desk stand accessory", badge: "Gift" },
-        { title: "Sony Music 3-Month Voucher", desc: "Hi-Res streaming platform membership coupon", badge: "Bonus Item" },
-        { title: "Extra 6-Month Local Warranty", desc: "Additional warranty covering driver malfunctions", badge: "Free Warranty" }
-      ]
-    };
-  } else if (isApex) {
-    return {
-      contents: [
-        { name: "Apex Men's Ultima Pro Shoes", desc: "Surgically engineered sport runner footwear" },
-        { name: "Ortholite Pro Insoles", desc: "Injected memory-foam arch support" },
-        { name: "Extra Premium Shoelaces", desc: "Reflective dark shoelaces for night running" }
-      ],
-      benefits: [
-        { title: "Apex Premium Shoe Care Kit", desc: "Sneaker cleaning gel and horsehair brush set", badge: "Exclusive Gift" },
-        { title: "30-Day Hassle-Free Exchange", desc: "Return or exchange size at any physical outlet", badge: "Service Benefit" }
-      ]
-    };
-  }
-
-  return {
-    contents: [
-      { name: prod.title || "Product Main Unit", desc: "Official retail edition" },
-      { name: "User Documentation & Manuals", desc: "Detailed setup instructions" },
-      { name: "Standard Connectivity Cable", desc: "Compatible interface cable" }
-    ],
-    benefits: [
-      { title: "Free Premium Accessories Package", desc: "Curated custom kit matching your purchase", badge: "Exclusive Gift" },
-      { title: "Free Express Tracked Delivery", desc: "Fully insured transit with live location updates", badge: "Delivery Benefit" },
-      { title: "Choosify Verified Authenticity Seal", desc: "100% money-back guarantee against counterfeits", badge: "Guarantee" }
-    ]
-  };
+// Seeded mock add-ons per industry — keyed by product category
+// In future backend integration, these will come from the product API response
+const ADDON_SEEDS: Record<string, ProductAddon[]> = {
+  'Mobile & Gadgets': [
+    { id: 'ag1', title: 'Extended Warranty', description: '12-month extended coverage beyond standard warranty', price: 890, badge: 'Popular', available: true },
+    { id: 'ag2', title: 'Screen Protector', description: 'Premium tempered glass, 9H hardness, anti-glare', price: 350, badge: 'Recommended', available: true },
+    { id: 'ag3', title: 'Installation Service', description: 'Professional setup and data transfer at home', price: 550, available: true },
+    { id: 'ag4', title: 'Premium Case', description: 'Genuine leather protective case', price: 690, available: true },
+  ],
+  'Fashion & Clothing': [
+    { id: 'fc1', title: 'Gift Wrap', description: 'Premium branded gift wrapping with ribbon', price: 100, badge: 'Popular', available: true },
+    { id: 'fc2', title: 'Greeting Card', description: 'Personalised printed message card', price: 60, available: true },
+    { id: 'fc3', title: 'Express Ironing', description: 'Garment pressed and ready to wear', price: 150, badge: 'Recommended', available: true },
+    { id: 'fc4', title: 'Monogramming', description: 'Initials embroidered on the item', price: 350, available: false },
+  ],
+  'Fashion & Footwear': [
+    { id: 'ff1', title: 'Cleaning Kit', description: 'Professional-grade shoe care kit', price: 290, badge: 'Best Value', available: true },
+    { id: 'ff2', title: 'Hard Carry Case', description: 'Rigid protective box for travel', price: 450, available: true },
+    { id: 'ff3', title: 'Gift Wrap', description: 'Luxury box and ribbon', price: 100, badge: 'Popular', available: true },
+  ],
+  'Home Appliances': [
+    { id: 'ha1', title: 'Professional Installation', description: 'Certified technician installs at your location', price: 1200, badge: 'Recommended', available: true },
+    { id: 'ha2', title: 'Old Appliance Removal', description: 'We collect and dispose your old unit', price: 600, available: true },
+    { id: 'ha3', title: 'Annual Maintenance Contract', description: '1 year AMC with 2 free service visits', price: 2500, badge: 'Best Value', available: true },
+    { id: 'ha4', title: 'Extended Warranty', description: '2-year extended coverage', price: 1800, available: true },
+  ],
+  'Eyewear': [
+    { id: 'ew1', title: 'Cleaning Kit', description: 'Microfiber cloth + cleaning spray', price: 180, badge: 'Popular', available: true },
+    { id: 'ew2', title: 'Hard Case', description: 'Rigid protective carry case', price: 350, available: true },
+    { id: 'ew3', title: 'Anti-Reflective Coating', description: 'AR coating upgrade for lenses', price: 890, badge: 'Recommended', available: true },
+    { id: 'ew4', title: 'Blue Light Filter', description: 'Digital screen protection upgrade', price: 750, available: true },
+  ],
+  'Furniture': [
+    { id: 'fur1', title: 'Assembly Service', description: 'Expert team assembles at your home', price: 800, badge: 'Popular', available: true },
+    { id: 'fur2', title: 'Premium Delivery', description: 'White-glove delivery + room placement', price: 1200, badge: 'Recommended', available: true },
+    { id: 'fur3', title: 'Floor Protection', description: 'Rubber pads and floor protectors included', price: 350, available: true },
+    { id: 'fur4', title: '5-Year Warranty Extension', description: 'Extended structural warranty', price: 2200, badge: 'Best Value', available: true },
+  ],
+  'Beauty & Grooming': [
+    { id: 'bg1', title: 'Gift Box', description: 'Premium branded gift packaging', price: 200, badge: 'Popular', available: true },
+    { id: 'bg2', title: 'Sample Kit', description: 'Complementary brand sample collection', price: 350, badge: 'Recommended', available: true },
+    { id: 'bg3', title: 'Premium Packaging', description: 'Luxury presentation box with bow', price: 290, available: true },
+  ],
+  'Hotels & Travel': [
+    { id: 'ht1', title: 'Airport Pickup', description: 'Private car from airport to hotel', price: 1800, badge: 'Popular', available: true },
+    { id: 'ht2', title: 'Daily Breakfast', description: 'Full breakfast buffet per person', price: 950, badge: 'Recommended', available: true },
+    { id: 'ht3', title: 'Late Check-out', description: 'Check-out extended to 4:00 PM', price: 1200, available: true },
+    { id: 'ht4', title: 'Spa Package', description: 'Full day spa access + 60 min massage', price: 4500, badge: 'Best Value', available: true },
+  ],
+  'Food & Grocery': [
+    { id: 'fg1', title: 'Gift Wrap', description: 'Hamper-style gift wrapping', price: 150, badge: 'Popular', available: true },
+    { id: 'fg2', title: 'Greeting Card', description: 'Personalised message card', price: 60, available: true },
+    { id: 'fg3', title: 'Cold Chain Delivery', description: 'Temperature-controlled express delivery', price: 250, badge: 'Recommended', available: true },
+  ],
 };
 
 // Resolve add-ons for a product — category seeds with platform fallback

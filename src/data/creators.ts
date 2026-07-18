@@ -9,7 +9,7 @@ export interface MediaItem {
   readTime?: string;
   date?: string;
   url: string;
-  associatedGuideId?: number;
+  associatedGuideId?: string | number;
 }
 
 export interface Creator {
@@ -18,7 +18,7 @@ export interface Creator {
   handle: string;
   avatar: string;
   score: number; // 0 - 100
-  bestFor: string; 
+  bestFor: string; // "Tech" | "Fashion" | "Lifestyle" | "Finance" | "Home Living"
   bestForTags: string[];
   platforms: ('YouTube' | 'Instagram' | 'Facebook' | 'TikTok')[];
   bio: string;
@@ -28,13 +28,6 @@ export interface Creator {
   videos: MediaItem[];
   reels: MediaItem[];
   blogs: MediaItem[];
-  // Extra fields matching the redesigned search metrics
-  rating: number;
-  reviews: number;
-  trustScore: number;
-  followersCount: string;
-  reviewsCount: number;
-  isFeatured?: boolean;
 }
 
 export const CREATORS: Creator[] = [
@@ -43,18 +36,12 @@ export const CREATORS: Creator[] = [
     name: "Farhan Bin Rafiq",
     handle: "@farhan_tech",
     avatar: "https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png",
-    score: 98,
-    bestFor: "Tech Reviewers",
+    score: 96,
+    bestFor: "Tech",
     bestForTags: ["Smartphones", "Laptops", "Gadget Guides", "Dhaka Tech Hubs"],
-    platforms: ["YouTube", "Instagram", "TikTok", "Facebook"],
+    platforms: ["YouTube", "Facebook"],
     bio: "Senior Tech Analyst & Digital Product Researcher with 10+ years of experience analyzing electronic imports, consumer durables, and PC components in the Bangladesh market.",
-    followers: { "YouTube": "125K Followers" },
-    followersCount: "125K",
-    reviewsCount: 256,
-    rating: 4.8,
-    reviews: 12300,
-    trustScore: 98,
-    isFeatured: true,
+    followers: { "YouTube": "450K Subscriber Base", "Facebook": "120K Followers" },
     email: "farhan.outreach@choosify.bd",
     phone: "+880 1712-345678",
     videos: [
@@ -64,7 +51,7 @@ export const CREATORS: Creator[] = [
         thumbnail: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=600&h=337&q=80",
         views: "124K views",
         duration: "15:42",
-        url: "#"
+        url: "https://www.youtube.com/watch?v=8jPQjjsBbIc",
       },
       {
         id: "v2",
@@ -73,8 +60,16 @@ export const CREATORS: Creator[] = [
         views: "98K views",
         duration: "12:18",
         url: "#",
-        associatedGuideId: 1
-      }
+        associatedGuideId: 1,
+      },
+      {
+        id: "v3",
+        title: "Testing Flagship Earbuds on Dhaka Bus Routes (ANC Validation Test)",
+        thumbnail: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=600&h=337&q=80",
+        views: "82K views",
+        duration: "18:05",
+        url: "https://www.youtube.com/shorts/aqz-KE-bpKQ",
+      },
     ],
     reels: [
       {
@@ -84,16 +79,41 @@ export const CREATORS: Creator[] = [
         views: "240K views",
         likes: "18K",
         url: "#"
+      },
+      {
+        id: "r2",
+        title: "Instant thermal paste check: Does it make a difference in Dhaka summer?",
+        thumbnail: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=300&h=533&q=80",
+        views: "185K views",
+        likes: "14K",
+        url: "#"
+      },
+      {
+        id: "r3",
+        title: "This tiny Type-C hub is a life-saver for University students!",
+        thumbnail: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?auto=format&fit=crop&w=300&h=533&q=80",
+        views: "310K views",
+        likes: "25K",
+        url: "#"
       }
     ],
     blogs: [
       {
         id: "b1",
-        title: "Navigating Grey Market Premium Electronics in Bangladesh",
-        excerpt: "An in-depth manual highlighting the trade-offs of purchasing imported hardware without domestic distributor warranty validation.",
+        title: "Navigating Grey Market Premium Electronics in Bangladesh: Warranty vs Cost",
+        excerpt: "An in-depth manual highlighting the trade-offs of purchasing imported hardware without domestic distributor warranty validation. Learn how to verify official customs documentation.",
         readTime: "8 min read",
         date: "June 12, 2026",
         thumbnail: "https://images.unsplash.com/photo-1601524909162-be87252be298?auto=format&fit=crop&w=400&h=250&q=80",
+        url: "#"
+      },
+      {
+        id: "b2",
+        title: "Local Retailer vs Import Sourced: The Cost of SSD Solid State Storage in Dhaka",
+        excerpt: "We analyze historical parts pricing trends across Multiplan Center and IDB Bhaban to provide a predictive cost model for high-density flash storage components.",
+        readTime: "5 min read",
+        date: "May 28, 2026",
+        thumbnail: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=400&h=250&q=80",
         url: "#"
       }
     ]
@@ -103,18 +123,12 @@ export const CREATORS: Creator[] = [
     name: "Sarah Jenkins",
     handle: "@sarah_styles",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&h=300&q=80",
-    score: 96,
-    bestFor: "Fashion Creators",
+    score: 93,
+    bestFor: "Fashion",
     bestForTags: ["Streetwear", "Minimalist Wardrobe", "Local Boutiques", "Sustainable Materials"],
-    platforms: ["YouTube", "Instagram", "TikTok", "Facebook"],
-    bio: "Fashion Curator, Designer, & Retail Analyst specializing in contemporary garments, material longevity metrics, and Dhaka street style aesthetics.",
-    followers: { "Instagram": "98K Followers" },
-    followersCount: "98K",
-    reviewsCount: 189,
-    rating: 4.8,
-    reviews: 8700,
-    trustScore: 96,
-    isFeatured: true,
+    platforms: ["Instagram", "TikTok"],
+    bio: "Fashion Curator, Designer, & Retail Analyst specializing in contemporary garments, material longevity metrics, and Dhaka street style aesthetics. Passionate about blending modern cuts with Bangladeshi heritage textiles.",
+    followers: { "Instagram": "310K Followers", "TikTok": "150K Base" },
     email: "sarah.collabs@choosify.bd",
     phone: "+880 1812-987654",
     videos: [
@@ -125,6 +139,14 @@ export const CREATORS: Creator[] = [
         views: "95K views",
         duration: "10:30",
         url: "#"
+      },
+      {
+        id: "v5",
+        title: "My 10-Item Capsule Wardrobe Checklist (Dhaka Monsoon Edition)",
+        thumbnail: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=600&h=337&q=80",
+        views: "81K views",
+        duration: "14:15",
+        url: "#"
       }
     ],
     reels: [
@@ -134,6 +156,23 @@ export const CREATORS: Creator[] = [
         thumbnail: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=300&h=533&q=80",
         views: "420K views",
         likes: "38K",
+        url: "#",
+        associatedGuideId: 4
+      },
+      {
+        id: "r5",
+        title: "Why linen is the only fabric you should wear this June.",
+        thumbnail: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=300&h=533&q=80",
+        views: "290K views",
+        likes: "22K",
+        url: "#"
+      },
+      {
+        id: "r6",
+        title: "Simple styling hack for oversized shirts.",
+        thumbnail: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=300&h=533&q=80",
+        views: "520K views",
+        likes: "49K",
         url: "#"
       }
     ],
@@ -150,213 +189,187 @@ export const CREATORS: Creator[] = [
     ]
   },
   {
-    id: "creator-rakib",
-    name: "Tech With Rakib",
-    handle: "@tech_rakib",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&h=300&q=80",
-    score: 98,
-    bestFor: "Tech Reviewers",
-    bestForTags: ["Smartphones", "Unboxing", "Gadgets", "Smart Home"],
-    platforms: ["YouTube", "TikTok", "Facebook", "Instagram"],
-    bio: "Unboxing pioneer and device review specialist showcasing structural details and software optimization performance on consumer gadgets in Bangladesh.",
-    followers: { "YouTube": "215K Subscribers" },
-    followersCount: "215K",
-    reviewsCount: 312,
-    rating: 4.9,
-    reviews: 15200,
-    trustScore: 98,
-    isFeatured: true,
-    email: "rakib.collabs@choosify.bd",
-    phone: "+880 1715-998877",
-    videos: [
-      {
-        id: "v12",
-        title: "Unboxing the Newest Flagship Killer: Pure Performance Under BDT 40K!",
-        thumbnail: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&h=337&q=80",
-        views: "150K views",
-        duration: "11:20",
-        url: "#"
-      }
-    ],
-    reels: [
-      {
-        id: "r15",
-        title: "Quick hands-on review: The ultimate budget wireless gaming mouse!",
-        thumbnail: "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=300&h=533&q=80",
-        views: "350K views",
-        likes: "40K",
-        url: "#"
-      }
-    ],
-    blogs: []
-  },
-  {
-    id: "creator-nusrat",
-    name: "Nusrat Jahan",
-    handle: "@nusrat_skincare",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80",
-    score: 95,
-    bestFor: "Fashion Creators",
-    bestForTags: ["Skincare", "Makeup Guides", "Beauty Sourcing", "Local Serums"],
-    platforms: ["YouTube", "Instagram", "TikTok"],
-    bio: "Certified Skincare Esthetician and makeup design artist reviewing chemical profiles, ingredient safety metrics, and local beauty wellness brands.",
-    followers: { "Instagram": "76K Followers" },
-    followersCount: "76K",
-    reviewsCount: 142,
-    rating: 4.7,
-    reviews: 7100,
-    trustScore: 95,
-    isFeatured: false,
-    email: "nusrat.beauty@choosify.bd",
-    phone: "+880 1823-112233",
-    videos: [
-      {
-        id: "v13",
-        title: "My 5-Step Hydration Routine for Hot Dhaka Summers (Oily Skin Safe)",
-        thumbnail: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&h=337&q=80",
-        views: "80K views",
-        duration: "13:10",
-        url: "#"
-      }
-    ],
-    reels: [
-      {
-        id: "r16",
-        title: "Stop using physical face scrubs! Try this instead.",
-        thumbnail: "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=300&h=533&q=80",
-        views: "180K views",
-        likes: "15K",
-        url: "#"
-      }
-    ],
-    blogs: []
-  },
-  {
-    id: "creator-gadget",
-    name: "Gadget Unboxing BD",
-    handle: "@gadget_unboxing_bd",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&h=300&q=80",
-    score: 94,
-    bestFor: "Unboxing Experts",
-    bestForTags: ["Audio Gears", "Smartwatches", "Unboxing Videos", "Tech Deals"],
-    platforms: ["YouTube", "Facebook", "TikTok"],
-    bio: "Actionable hands-on reviews and macro photography breakdowns of budget tech, smart accessories, and smart wearables imported directly to Bangladesh.",
-    followers: { "YouTube": "64K Base" },
-    followersCount: "64K",
-    reviewsCount: 178,
-    rating: 4.6,
-    reviews: 8300,
-    trustScore: 94,
-    isFeatured: false,
-    email: "gadget.unboxing.bd@choosify.bd",
-    phone: "+880 1745-667788",
-    videos: [
-      {
-        id: "v14",
-        title: "Unboxing the Most Hyped ANC Earbuds Under 3000 TK!",
-        thumbnail: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=600&h=337&q=80",
-        views: "45K views",
-        duration: "09:45",
-        url: "#"
-      }
-    ],
-    reels: [],
-    blogs: []
-  },
-  {
-    id: "creator-homefinds",
-    name: "Home Finds BD",
-    handle: "@home_finds_bd",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&h=300&q=80",
-    score: 94,
-    bestFor: "Lifestyle Creators",
-    bestForTags: ["Kitchen Tools", "Smart Organizers", "Home Aesthetics", "Room Tours"],
-    platforms: ["YouTube", "Instagram", "Facebook"],
-    bio: "Sourcing beautiful, functional, and budget-friendly household appliances, storage solutions, and decor elements to transform modern urban apartments.",
-    followers: { "Facebook": "58K Followers" },
-    followersCount: "58K",
-    reviewsCount: 126,
-    rating: 4.7,
-    reviews: 5900,
-    trustScore: 94,
-    isFeatured: false,
-    email: "homefinds@choosify.bd",
-    phone: "+880 1623-445566",
-    videos: [
-      {
-        id: "v15",
-        title: "Top 5 Space Saving Organizers I Found in New Market under 500 TK",
-        thumbnail: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=600&h=337&q=80",
-        views: "98K views",
-        duration: "14:50",
-        url: "#"
-      }
-    ],
-    reels: [],
-    blogs: []
-  },
-  {
-    id: "creator-sneaker",
-    name: "Sneaker Spotter",
-    handle: "@sneaker_spotter_bd",
+    id: "creator-imtiaz",
+    name: "Imtiaz Ahmed",
+    handle: "@imtiaz_living",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&h=300&q=80",
-    score: 93,
-    bestFor: "Budget Finds",
-    bestForTags: ["Sneakers", "Streetwear", "Thrift Finds", "Brand Checks"],
-    platforms: ["YouTube", "Instagram", "TikTok"],
-    bio: "Uncovering premium replica vs original sneakers in local markets. Your go-to guide for street fashion, comfortable kicks, and sneaker collection maintenance in Dhaka.",
-    followers: { "Instagram": "43K Followers" },
-    followersCount: "43K",
-    reviewsCount: 98,
-    rating: 4.8,
-    reviews: 4800,
-    trustScore: 93,
-    isFeatured: false,
-    email: "sneakerspotter@choosify.bd",
-    phone: "+880 1515-223344",
+    score: 89,
+    bestFor: "Lifestyle",
+    bestForTags: ["Home Decor", "Organized Living", "Smart Kitchen", "Decluttering"],
+    platforms: ["Facebook", "YouTube"],
+    bio: "Interior Systems Architect and Home Operations Specialist with an emphasis on local modular setups, energy-efficient appliance placement, and optimizing space density in compact urban flats.",
+    followers: { "Facebook": "180K Followers", "YouTube": "75K Subscribers" },
+    email: "imtiaz.living@choosify.bd",
+    phone: "+880 1681-223344",
     videos: [
       {
-        id: "v16",
-        title: "Real vs Fake Sneakers Spotting Guide: Buy Smarter in Bangladesh",
-        thumbnail: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=600&h=337&q=80",
-        views: "60K views",
-        duration: "12:40",
+        id: "v6",
+        title: "Touring a Modular 1200 Sq Ft Flat in Uttara (Zero-Waste Organization Tour)",
+        thumbnail: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&h=337&q=80",
+        views: "72K views",
+        duration: "21:03",
+        url: "#"
+      },
+      {
+        id: "v7",
+        title: "Testing Inverter Recess Refrigerators against Non-Inverters: Live Power Consumpion Metering",
+        thumbnail: "https://images.unsplash.com/photo-1571175452281-047b769225d7?auto=format&fit=crop&w=600&h=337&q=80",
+        views: "54K views",
+        duration: "13:50",
         url: "#"
       }
     ],
-    reels: [],
-    blogs: []
+    reels: [
+      {
+        id: "r7",
+        title: "3 kitchen layout errors to avoid in Gulshan rentals.",
+        thumbnail: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=300&h=533&q=80",
+        views: "120K views",
+        likes: "9.2K",
+        url: "#"
+      },
+      {
+        id: "r8",
+        title: "How to fit a study corner into an 8x10 bedroom.",
+        thumbnail: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=300&h=533&q=80",
+        views: "165K views",
+        likes: "11K",
+        url: "#"
+      }
+    ],
+    blogs: [
+      {
+        id: "b4",
+        title: "The Ultimate Bangladeshi Kitchen Ventilation Guide: Hoods vs Exhaust Fans",
+        excerpt: "An engineering appraisal comparing high-volume suction exhaust hoods against passive exhaust systems in apartment designs modeled for heavy spice environments.",
+        readTime: "9 min read",
+        date: "May 15, 2026",
+        thumbnail: "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=400&h=250&q=80",
+        url: "#"
+      }
+    ]
   },
   {
-    id: "creator-tania",
-    name: "Travel With Tania",
-    handle: "@travel_with_tania",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&h=300&q=80",
-    score: 92,
-    bestFor: "Lifestyle Creators",
-    bestForTags: ["Sajek Valley", "Sylhet Tea Gardens", "Resort Reviews", "Travel Gear"],
-    platforms: ["YouTube", "Instagram", "Facebook"],
-    bio: "Passionate storyteller exploring local resorts, budget-friendly hotels, hidden travel routes, and sustainable backpacking experiences across Bangladesh.",
-    followers: { "YouTube": "39K Base" },
-    followersCount: "39K",
-    reviewsCount: 84,
-    rating: 4.8,
-    reviews: 3900,
-    trustScore: 92,
-    isFeatured: false,
-    email: "traveltania@choosify.bd",
-    phone: "+880 1912-889900",
+    id: "creator-mily",
+    name: "Mily Rahman",
+    handle: "@mily_finance",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80",
+    score: 91,
+    bestFor: "Finance",
+    bestForTags: ["Personal Budgeting", "Sanchayapatra", "Tax Filing BD", "Credit Score Tips"],
+    platforms: ["YouTube", "Facebook"],
+    bio: "Chartered Financial Consultant and Consumer Advocate making retail finance simple, transparent, and actionable for professional youth and local households.",
+    followers: { "YouTube": "210K Subscribers", "Facebook": "140K Followers" },
+    email: "mily.media@choosify.bd",
+    phone: "+880 1511-556677",
     videos: [
       {
-        id: "v17",
-        title: "Solo Travel Sajek on BDT 4,000 Budget: Full Safety & Resort Guide",
-        thumbnail: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&h=337&q=80",
-        views: "110K views",
-        duration: "18:20",
+        id: "v8",
+        title: "How to File Income Tax Online in Bangladesh (Step-by-Step Guide for 2026)",
+        thumbnail: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&h=337&q=80",
+        views: "320K views",
+        duration: "25:10",
+        url: "#"
+      },
+      {
+        id: "v9",
+        title: "Sanchayapatra Investment Rules: Latest Interest Rates & Verification Procedures",
+        thumbnail: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&h=337&q=80",
+        views: "180K views",
+        duration: "17:45",
         url: "#"
       }
     ],
-    reels: [],
-    blogs: []
+    reels: [
+      {
+        id: "r9",
+        title: "Stop storing money in standard current accounts. Here's why.",
+        thumbnail: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=300&h=533&q=80",
+        views: "340K views",
+        likes: "28K",
+        url: "#"
+      },
+      {
+        id: "r10",
+        title: "How to check credit history with central bank portal.",
+        thumbnail: "https://images.unsplash.com/photo-1563013544-824ae1d704d3?auto=format&fit=crop&w=300&h=533&q=80",
+        views: "220K views",
+        likes: "19K",
+        url: "#"
+      }
+    ],
+    blogs: [
+      {
+        id: "b5",
+        title: "Youth Retail Banking in Bangladesh: Fee Structures & Savings Accounts Comparison",
+        excerpt: "An exhaustive comparison table analyzing student accounts, monthly maintenance thresholds, and atm charges across top 10 retail banks in Dhaka.",
+        readTime: "7 min read",
+        date: "April 29, 2026",
+        thumbnail: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=400&h=250&q=80",
+        url: "#"
+      }
+    ]
+  },
+  {
+    id: "creator-shakib",
+    name: "Shakib Al-Mridha",
+    handle: "@shakib_lifestyle",
+    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&h=300&q=80",
+    score: 87,
+    bestFor: "Lifestyle",
+    bestForTags: ["Travel Sourcing", "Café Reviews", "Local Craftsmanship", "Eco Tourism"],
+    platforms: ["Instagram", "TikTok", "YouTube"],
+    bio: "Professional Travel Vlogger, Culinary Reviewer, and Eco-Lodge Developer based in Sylhet and Dhaka. Highlighting Bangladesh's emerging hospitality sector, organic food sourcing, and local lifestyle innovations.",
+    followers: { "Instagram": "180K Followers", "TikTok": "230K Base", "YouTube": "100K Subscribers" },
+    email: "shakib.outreach@choosify.bd",
+    phone: "+880 1912-334455",
+    videos: [
+      {
+        id: "v10",
+        title: "Is Sylhet's New Eco-Resort Worth BDT 15K a Night? (Detailed Audit)",
+        thumbnail: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&h=337&q=80",
+        views: "115K views",
+        duration: "19:12",
+        url: "#"
+      },
+      {
+        id: "v11",
+        title: "Chasing the Best Organic Coffee Cooperatives in the Chittagong Hill Tracts",
+        thumbnail: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&h=337&q=80",
+        views: "89K views",
+        duration: "22:45",
+        url: "#",
+        associatedGuideId: 8
+      }
+    ],
+    reels: [
+      {
+        id: "r11",
+        title: "Top 3 hidden cafes in Banani for quiet reading.",
+        thumbnail: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=300&h=533&q=80",
+        views: "198K views",
+        likes: "15.4K",
+        url: "#"
+      },
+      {
+        id: "r12",
+        title: "This organic honey from Sunderbans is absolute gold!",
+        thumbnail: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=300&h=533&q=80",
+        views: "245K views",
+        likes: "21K",
+        url: "#"
+      }
+    ],
+    blogs: [
+      {
+        id: "b6",
+        title: "The Rise of Organic Agri-Boutiques in Dhaka: Quality Sourcing Reports",
+        excerpt: "An investigative overview of supply networks distributing chemical-free produce, fresh honey, and block-pressed mustard oil directly from farmers to city doorsteps.",
+        readTime: "6 min read",
+        date: "May 10, 2026",
+        thumbnail: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&h=250&q=80",
+        url: "#"
+      }
+    ]
   }
 ];

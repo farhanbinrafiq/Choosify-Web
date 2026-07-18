@@ -76,8 +76,9 @@ export function CreatorProfilePage() {
                          creator.id === 'creator-imtiaz' ? '180K Base' : '180K Base';
 
   // Interaction States
-  const [isLoved, setIsLoved] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isJoined, setIsJoined] = useState(false); // follow state
+  const [isLoved, setIsLoved] = useState(false); // love favorite state
+  const [isModalOpen, setIsModalOpen] = useState(false); // structured brief outreach modal state
   
   // Structured Brief Outreach Form States
   const [productDetails, setProductDetails] = useState('');
@@ -90,76 +91,8 @@ export function CreatorProfilePage() {
   // Submit Outcome Status
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // Active section for sticky navigation scrollspy
-  const [activeSection, setActiveSection] = useState('overview');
-
-  // Carousel slider index for community reviews
-  const [reviewIndex, setReviewIndex] = useState(0);
-
-  // Auto-scrollspy effect
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 250;
-
-      const sections = [
-        { id: 'featured-content', name: 'guides' },
-        { id: 'videos-section', name: 'videos' },
-        { id: 'brand-reviews-section', name: 'reviews' },
-        { id: 'collections-section', name: 'collections' },
-        { id: 'deals-section', name: 'deals' },
-        { id: 'about-section', name: 'about' }
-      ];
-
-      if (window.scrollY < 300) {
-        setActiveSection('overview');
-        return;
-      }
-
-      let currentSection = 'overview';
-      for (const section of sections) {
-        const el = document.getElementById(section.id);
-        if (el) {
-          const top = el.getBoundingClientRect().top + window.pageYOffset;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            currentSection = section.name;
-          }
-        }
-      }
-      setActiveSection(currentSection);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToSection = (idStr: string) => {
-    if (idStr === 'overview') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setActiveSection('overview');
-    } else {
-      const el = document.getElementById(idStr);
-      if (el) {
-        const offset = 120;
-        const elementPosition = el.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-        
-        const nameMap: { [key: string]: string } = {
-          'featured-content': 'guides',
-          'videos-section': 'videos',
-          'brand-reviews-section': 'reviews',
-          'collections-section': 'collections',
-          'deals-section': 'deals',
-          'about-section': 'about'
-        };
-        setActiveSection(nameMap[idStr] || 'overview');
-      }
-    }
-  };
+  const [searchFilter, setSearchFilter] = useState('');
+  const [currentSearchInput, setCurrentSearchInput] = useState('');
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,7 +101,7 @@ export function CreatorProfilePage() {
       return;
     }
     setSubmitSuccess(true);
-    toast.success('Recommendation request dispatched successfully!');
+    toast.success('Structured collaboration request finalized!');
   };
 
   const resetFormAndModal = () => {
@@ -331,7 +264,7 @@ export function CreatorProfilePage() {
                        Reset filters
                      </button>
                   </div>
-                </div>
+               )}
 
                {profileTab === 'Overview' && (
                  <CreatorOverviewFeed
@@ -382,150 +315,9 @@ export function CreatorProfilePage() {
             </main>
       </div>
 
-        {/* ==================== COMMUNITY TESTIMONIALS (What The Community Says) ==================== */}
-        <section className="scroll-mt-32 w-full text-left select-none">
-          <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
-            <h2 className="text-xl md:text-2xl font-black text-[#050B2C] tracking-tight uppercase italic flex items-center gap-2">
-              <Users className="text-[#FF5B00]" size={22} />
-              What The Community Says
-            </h2>
-            <button 
-              onClick={() => toast.success("Showing comprehensive community comments dashboard...")}
-              className="text-xs font-black text-[#FF5B00] hover:underline uppercase tracking-widest flex items-center gap-1 border-0 bg-transparent cursor-pointer"
-            >
-              View All Reviews <span>➔</span>
-            </button>
-          </div>
-
-          {/* Testimonial cards list (3-column layout) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-            
-            {/* Card 1 */}
-            <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm flex flex-col justify-between h-full hover:shadow-md transition-shadow relative">
-              <div>
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-                      <img src="https://i.pravatar.cc/150?u=tanvir" className="w-full h-full object-cover" alt="Tanvir" referrerPolicy="no-referrer" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-[#050B2C]">Tanvir Hossain</h4>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <CheckCircle2 size={10} className="text-green-500 fill-green-500/10" />
-                        <span className="text-[9px] text-green-500 font-extrabold tracking-wide uppercase">Verified Buyer</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-0.5 text-[#FF5B00]">
-                    {[1, 2, 3, 4, 5].map(i => <Star key={i} size={10} className="fill-current" />)}
-                  </div>
-                </div>
-
-                <p className="text-xs text-gray-600 font-medium leading-relaxed italic mb-4">
-                  "Farhan bhai's reviews are so detailed and honest. Always helps me make the right decision!"
-                </p>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                <span className="text-[9.5px] font-bold text-[#050B2C] bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-md flex items-center gap-1 cursor-pointer" onClick={() => toast.success("Opening referenced Samsung S24 Ultra review parameters...")}>
-                  📖 Samsung Galaxy S24 Ultra Review
-                </span>
-              </div>
-            </div>
-
-            {/* Card 2 */}
-            <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm flex flex-col justify-between h-full hover:shadow-md transition-shadow relative">
-              <div>
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-                      <img src="https://i.pravatar.cc/150?u=nusrat" className="w-full h-full object-cover" alt="Nusrat" referrerPolicy="no-referrer" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-[#050B2C]">Nusrat Jahan</h4>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <CheckCircle2 size={10} className="text-green-500 fill-green-500/10" />
-                        <span className="text-[9px] text-green-500 font-extrabold tracking-wide uppercase">Verified Buyer</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-0.5 text-[#FF5B00]">
-                    {[1, 2, 3, 4, 5].map(i => <Star key={i} size={10} className="fill-current" />)}
-                  </div>
-                </div>
-
-                <p className="text-xs text-gray-600 font-medium leading-relaxed italic mb-4">
-                  "The most reliable tech reviewer in Bangladesh. His buying guides are gold!"
-                </p>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                <span className="text-[9.5px] font-bold text-[#050B2C] bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-md flex items-center gap-1 cursor-pointer" onClick={() => toast.success("Opening referenced Laptop Guide...")}>
-                  📖 Best Laptop Guide 2025
-                </span>
-              </div>
-            </div>
-
-            {/* Card 3 */}
-            <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm flex flex-col justify-between h-full hover:shadow-md transition-shadow relative">
-              <div>
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-                      <img src="https://i.pravatar.cc/150?u=rashed" className="w-full h-full object-cover" alt="Rashed" referrerPolicy="no-referrer" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-[#050B2C]">Rashed Ahmed</h4>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <CheckCircle2 size={10} className="text-green-500 fill-green-500/10" />
-                        <span className="text-[9px] text-green-500 font-extrabold tracking-wide uppercase">Verified Buyer</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-0.5 text-[#FF5B00]">
-                    {[1, 2, 3, 4, 5].map(i => <Star key={i} size={10} className="fill-current" />)}
-                  </div>
-                </div>
-
-                <p className="text-xs text-gray-600 font-medium leading-relaxed italic mb-4">
-                  "Love how he explains everything in simple terms. Super helpful for beginners like me."
-                </p>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                <span className="text-[9.5px] font-bold text-[#050B2C] bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-md flex items-center gap-1 cursor-pointer" onClick={() => toast.success("Opening referenced PC Build Guide...")}>
-                  📖 PC Build Guide
-                </span>
-              </div>
-            </div>
-
-            {/* Carousel navigation controls on sides */}
-            <button 
-              onClick={() => toast.success("Switched to preceding testimonial reviews...")}
-              className="absolute left-[-14px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white border border-gray-150 shadow-lg hover:scale-110 active:scale-95 transition-all text-[#050B2C] flex items-center justify-center cursor-pointer"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button 
-              onClick={() => toast.success("Switched to succeeding testimonial reviews...")}
-              className="absolute right-[-14px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white border border-gray-150 shadow-lg hover:scale-110 active:scale-95 transition-all text-[#050B2C] flex items-center justify-center cursor-pointer"
-            >
-              <ChevronRight size={16} />
-            </button>
-
-          </div>
-
-          {/* Indicators dots */}
-          <div className="flex justify-center items-center gap-2 mt-6">
-            <span className="w-2 h-2 rounded-full bg-[#FF5B00]" />
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-          </div>
-        </section>
-
-      </main>
-
-      {/* ==================== OUTREACH COLLABORATION DIALOG SYSTEM ==================== */}
+      {/* =======================================================
+          OUTREACH STRUCTURAL BRIEF WINDOW DIALOG SYSTEM
+          ======================================================= */}
       <AnimatePresence>
          {isModalOpen && (
            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none">
@@ -624,36 +416,36 @@ export function CreatorProfilePage() {
                        />
                      </div>
 
-                    {/* Contact callback channel */}
-                    <div className="border-t border-white/5 pt-4 space-y-4">
-                      <span className="block text-[9px] font-black uppercase tracking-widest text-gray-400">
-                        5. Callback Channel (At least one)
-                      </span>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[8px] font-bold text-gray-400 uppercase mb-1">Email</label>
-                          <input
-                            type="email"
-                            value={contactEmail}
-                            onChange={(e) => setContactEmail(e.target.value)}
-                            placeholder="marketing@acme.com"
-                            className="w-full px-3 py-2 bg-[#030310] border border-white/10 rounded-lg text-xs text-white placeholder-gray-600 outline-none focus:border-[#FF5B00]"
-                          />
-                        </div>
+                     {/* Contact detail callbacks */}
+                     <div className="border-t border-white/5 pt-4 space-y-4">
+                       <span className="block text-[9px] font-black uppercase tracking-widest text-gray-400">
+                         5. Optional Callback Channels
+                       </span>
+                       
+                       <div className="grid grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-[8px] font-bold text-gray-450 uppercase mb-1">Email</label>
+                           <input
+                             type="email"
+                             value={contactEmail}
+                             onChange={(e) => setContactEmail(e.target.value)}
+                             placeholder="marketing@acme.com"
+                             className="w-full px-3 py-2 bg-[#030310] border border-white/10 rounded-lg text-xs text-white placeholder-gray-600 outline-none focus:border-orange-primary"
+                           />
+                         </div>
 
-                        <div>
-                          <label className="block text-[8px] font-bold text-gray-400 uppercase mb-1">Phone Number</label>
-                          <input
-                            type="tel"
-                            value={contactPhone}
-                            onChange={(e) => setContactPhone(e.target.value)}
-                            placeholder="+880 17..."
-                            className="w-full px-3 py-2 bg-[#030310] border border-white/10 rounded-lg text-xs text-white placeholder-gray-600 outline-none focus:border-[#FF5B00]"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                         <div>
+                           <label className="block text-[8px] font-bold text-gray-450 uppercase mb-1">Phone Number</label>
+                           <input
+                             type="tel"
+                             value={contactPhone}
+                             onChange={(e) => setContactPhone(e.target.value)}
+                             placeholder="+880 17..."
+                             className="w-full px-3 py-2 bg-[#030310] border border-white/10 rounded-lg text-xs text-white placeholder-gray-600 outline-none focus:border-orange-primary"
+                           />
+                         </div>
+                       </div>
+                     </div>
 
                      {/* CTA Actions */}
                      <div className="pt-3 flex justify-end gap-3">
@@ -672,62 +464,75 @@ export function CreatorProfilePage() {
                        </button>
                      </div>
 
-                  </form>
-                ) : (
-                  // Outcome view
-                  <div className="space-y-6">
-                    <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex items-start gap-3">
-                      <CheckCircle2 className="text-green-500 shrink-0 mt-0.5" size={16} />
-                      <div>
-                        <h4 className="text-xs font-black uppercase tracking-wider text-green-500">Request Dispatched To {creator.name}</h4>
-                        <p className="text-[10px] text-gray-400 leading-relaxed mt-1 uppercase">
-                          The request payload has been saved successfully under secure dispatch benchmarks. The creator will respond directly to the provided callback channels.
-                        </p>
-                      </div>
-                    </div>
+                   </form>
+                 ) : (
+                   // Campaign proposed successful outcome screen
+                   <div className="space-y-6">
+                     
+                     <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex items-start gap-3">
+                       <CheckCircle2 className="text-green-500 shrink-0 mt-0.5" size={16} />
+                       <div>
+                         <h4 className="text-xs font-black uppercase tracking-wider text-green-500">Request Dispatched To {creator.name}</h4>
+                         <p className="text-[10px] text-gray-400 leading-relaxed mt-1 uppercase">
+                           Structured briefing parameters have been saved under trust benchmarks. The digital curator will review the payload parameters and direct replies to provided contact points.
+                         </p>
+                       </div>
+                     </div>
 
-                    <div className="bg-[#030310] border border-white/10 rounded-xl p-5 select-text relative">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-[#FF5B00] mb-4 pb-2 border-b border-white/5">
-                        Dispatch payload Summary
-                      </h4>
+                     {/* Structured brief summaries */}
+                     <div className="bg-[#030310] border border-white/10 rounded-xl p-5 select-text relative">
+                       <div className="absolute top-3 right-3 px-2 py-0.5 bg-white/5 rounded text-[8px] font-bold text-gray-500 uppercase tracking-widest">
+                         DISPATCH BRIEFING payload
+                       </div>
+                       
+                       <h4 className="text-[10px] font-black uppercase tracking-widest text-orange-primary mb-4 pb-2 border-b border-white/5">
+                         Collab Proposal Summary
+                       </h4>
 
-                      <div className="space-y-3.5 text-xs">
-                        <div>
-                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Product Name</span>
-                          <span className="font-semibold text-white">{productDetails}</span>
-                        </div>
+                       <div className="space-y-3.5 text-xs">
+                         <div>
+                           <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Target Asset Name</span>
+                           <span className="font-semibold text-white">{productDetails}</span>
+                         </div>
 
-                        <div>
-                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Campaign Format</span>
-                          <span className="font-semibold text-white">{collabType}</span>
-                        </div>
+                         <div>
+                           <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Selected Campaign Format</span>
+                           <span className="font-semibold text-white">{collabType}</span>
+                         </div>
 
-                        <div>
-                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Requirements Scope</span>
-                          <p className="text-xs text-gray-300 leading-relaxed bg-[#09091E] p-3 rounded-lg border border-white/5 mt-1">
-                            {requirements}
-                          </p>
-                        </div>
+                         <div>
+                           <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Requirements Scope</span>
+                           <p className="text-xs text-gray-300 leading-relaxed bg-[#09091E] p-3 rounded-lg border border-white/5 mt-1">
+                             {requirements}
+                           </p>
+                         </div>
 
-                        {budgetRange && (
-                          <div>
-                            <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Budget Limit</span>
-                            <span className="font-semibold text-white">{budgetRange}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                         {budgetRange && (
+                           <div>
+                             <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">Estimations Budget limit</span>
+                             <span className="font-semibold text-white">{budgetRange}</span>
+                           </div>
+                         )}
 
-                    <div className="flex justify-end pt-2">
-                      <button
-                        onClick={resetFormAndModal}
-                        className="px-6 py-2.5 rounded-full bg-white text-navy focus:bg-gray-100 text-[10px] font-black uppercase tracking-widest italic cursor-pointer transition-all border-0"
-                      >
-                        Dismiss
-                      </button>
-                    </div>
-                  </div>
-                )}
+                         {(contactEmail || contactPhone) && (
+                           <div className="border-t border-white/5 pt-3 mt-3">
+                             <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Return Channels</span>
+                             <div className="flex flex-wrap gap-2">
+                               {contactEmail && (
+                                 <span className="bg-white/5 text-[10px] font-mono px-2 py-0.5 rounded text-gray-300 border border-white/5">
+                                   Email: {contactEmail}
+                                 </span>
+                               )}
+                               {contactPhone && (
+                                 <span className="bg-white/5 text-[10px] font-mono px-2 py-0.5 rounded text-gray-300 border border-white/5">
+                                   Tel: {contactPhone}
+                                 </span>
+                               )}
+                             </div>
+                           </div>
+                         )}
+                       </div>
+                     </div>
 
                      <div className="flex justify-end pt-2">
                        <button
@@ -748,25 +553,5 @@ export function CreatorProfilePage() {
       </AnimatePresence>
 
     </div>
-  );
-}
-
-// Custom Folder Icon
-function FolderIcon({ size = 16, className = "" }: { size?: number, className?: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
-    </svg>
   );
 }

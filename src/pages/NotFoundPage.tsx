@@ -4,6 +4,15 @@ import { ArrowLeft, Home, Search } from 'lucide-react';
 
 export default function NotFoundPage() {
   const navigate = useNavigate();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+  };
 
   return (
     <div

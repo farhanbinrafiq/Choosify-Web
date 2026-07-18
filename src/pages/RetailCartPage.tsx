@@ -92,7 +92,7 @@ export function RetailCartPage() {
       }
     }
 
-    navigate('/checkout', { state: { sourceMode: 'retail' } });
+    navigate('/checkout');
   };
 
   return (

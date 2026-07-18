@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -21,337 +21,9 @@ type ConversationTab = 'all' | 'orders' | 'support' | 'unread';
 export function MessagesPage() {
   const { threadId } = useParams<{ threadId?: string }>();
   const navigate = useNavigate();
-  const { markAllAsRead } = useDashboard();
-  
-  // 1. Thread Seed Data Matching the Screenshot Visuals exactly
-  const defaultThreads: Thread[] = [
-    {
-      id: 'thread-apple-outlet',
-      title: 'APPLE FACTORY OUTLET',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80',
-      lastMessage: 'Hi, I have an issue with my MacBook Air M2. The screen flickers randomly when I\'m using external display.',
-      time: '11:24 PM',
-      unread: true,
-      unreadCount: 2,
-      tagType: 'order',
-      tagText: 'ORDER: ORD-12121',
-      online: true,
-      orderId: 'ORD-12121',
-      txnId: 'TXN-98764',
-      orderDate: 'May 12, 2025 • 10:18 AM',
-      paymentMethod: 'Cash on Delivery (COD)',
-      orderStatus: 'PENDING CONFIRMATION',
-      totalAmount: '৳128,120',
-      memberSince: 'Jan 15, 2023',
-      totalOrders: 24,
-      responseTime: 'Within 1 hour',
-      rating: '4.8',
-      ratingCount: '1.2K',
-      verified: true
-    },
-    {
-      id: 'thread-choosify-announcements',
-      title: 'CHOOSIFY ANNOUNCEMENTS',
-      avatar: 'announcement-avatar', // Special rendering
-      lastMessage: 'New Year Sale Live!',
-      time: '11:18 PM',
-      unread: true,
-      unreadCount: 1,
-      tagType: 'announcement',
-      tagText: 'ANNOUNCEMENT',
-      online: false,
-      orderId: 'N/A',
-      txnId: 'N/A',
-      orderDate: 'Jan 01, 2026',
-      paymentMethod: 'N/A',
-      orderStatus: 'ACTIVE',
-      totalAmount: 'N/A',
-      memberSince: 'Platform Channel',
-      totalOrders: 0,
-      responseTime: 'Instant',
-      rating: '5.0',
-      ratingCount: '10K',
-      verified: true
-    },
-    {
-      id: 'thread-apex-outlet',
-      title: 'APEX FACTORY OUTLET',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80',
-      lastMessage: 'When will my order be delivered?',
-      time: '10:45 PM',
-      unread: false,
-      tagType: 'order',
-      tagText: 'ORDER: ORD-12060',
-      online: true,
-      orderId: 'ORD-12060',
-      txnId: 'TXN-48592',
-      orderDate: 'May 10, 2025 • 04:30 PM',
-      paymentMethod: 'bKash Wallet',
-      orderStatus: 'DISPATCHED',
-      totalAmount: '৳4,500',
-      memberSince: 'Feb 20, 2022',
-      totalOrders: 18,
-      responseTime: 'Within 2 hours',
-      rating: '4.6',
-      ratingCount: '850',
-      verified: true
-    },
-    {
-      id: 'thread-samsung-outlet',
-      title: 'SAMSUNG FACTORY OUTLET',
-      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&h=150&q=80',
-      lastMessage: 'Do you have any ongoing offers?',
-      time: '09:30 PM',
-      unread: false,
-      tagType: 'general',
-      tagText: 'GENERAL QUERY',
-      online: true,
-      orderId: 'ORD-11590',
-      txnId: 'TXN-38591',
-      orderDate: 'Apr 18, 2025 • 11:15 AM',
-      paymentMethod: 'Credit Card',
-      orderStatus: 'COMPLETED',
-      totalAmount: '৳89,900',
-      memberSince: 'Mar 05, 2024',
-      totalOrders: 54,
-      responseTime: 'Within 15 mins',
-      rating: '4.9',
-      ratingCount: '2.4K',
-      verified: true
-    },
-    {
-      id: 'thread-farhan-rafiq',
-      title: 'FARHAN RAFIQ (ADMIN)',
-      avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png',
-      lastMessage: 'Approved my return request',
-      time: '08:20 PM',
-      unread: false,
-      tagType: 'admin',
-      tagText: 'ADMIN',
-      online: true,
-      orderId: 'RET-5592',
-      txnId: 'TXN-39581',
-      orderDate: 'May 08, 2025 • 11:20 AM',
-      paymentMethod: 'Refund to Wallet',
-      orderStatus: 'APPROVED',
-      totalAmount: '৳12,000',
-      memberSince: 'Jan 01, 2021',
-      totalOrders: 120,
-      responseTime: 'Instant',
-      rating: '5.0',
-      ratingCount: '5.0K',
-      verified: true
-    },
-    {
-      id: 'thread-samsung-bd',
-      title: 'SAMSUNG BANGLADESH LTD.',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80',
-      lastMessage: 'Need technical support for my TV',
-      time: 'Yesterday',
-      unread: false,
-      tagType: 'support',
-      tagText: 'SUPPORT',
-      online: false,
-      orderId: 'ORD-11440',
-      txnId: 'TXN-90215',
-      orderDate: 'Apr 02, 2025 • 03:45 PM',
-      paymentMethod: 'Cash on Delivery (COD)',
-      orderStatus: 'SERVICED',
-      totalAmount: '৳52,000',
-      memberSince: 'Jul 18, 2023',
-      totalOrders: 82,
-      responseTime: 'Within 1 hour',
-      rating: '4.7',
-      ratingCount: '1.9K',
-      verified: true
-    },
-    {
-      id: 'thread-apple-retail',
-      title: 'APPLE RETAIL BD',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80',
-      lastMessage: 'Warranty claim for iPhone 15 Pro',
-      time: '2 Days ago',
-      unread: false,
-      tagType: 'order',
-      tagText: 'ORDER: ORD-11911',
-      online: false,
-      orderId: 'ORD-11911',
-      txnId: 'TXN-11048',
-      orderDate: 'Apr 25, 2025 • 02:15 PM',
-      paymentMethod: 'Credit Card',
-      orderStatus: 'CLAIM UNDER REVIEW',
-      totalAmount: '৳145,000',
-      memberSince: 'Sep 14, 2022',
-      totalOrders: 41,
-      responseTime: 'Within 2 hours',
-      rating: '4.8',
-      ratingCount: '920',
-      verified: true
-    },
-    {
-      id: 'thread-creator-collab',
-      title: 'CREATOR COLLAB',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
-      lastMessage: 'Interested in collaboration opportunity',
-      time: '3 Days ago',
-      unread: false,
-      tagType: 'collaboration',
-      tagText: 'COLLABORATION',
-      online: true,
-      orderId: 'COL-8821',
-      txnId: 'TXN-00983',
-      orderDate: 'Mar 15, 2025 • 10:00 AM',
-      paymentMethod: 'Sponsorship Grant',
-      orderStatus: 'PROPOSAL PHASE',
-      totalAmount: '৳25,000',
-      memberSince: 'Oct 01, 2024',
-      totalOrders: 5,
-      responseTime: 'Within 12 hours',
-      rating: '4.5',
-      ratingCount: '42',
-      verified: false
-    }
-  ];
-
-  // 2. Default messages mapped by thread ID
-  const defaultMessagesByThread: Record<string, Message[]> = {
-    'thread-apple-outlet': [
-      {
-        id: 1,
-        sender: 'seller',
-        senderName: 'APPLE FACTORY OUTLET',
-        time: '11:20 PM',
-        text: "Hi, I have an issue with my MacBook Air M2. The screen flickers randomly when I'm using external display.",
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80'
-      },
-      {
-        id: 2,
-        sender: 'support',
-        senderName: 'CHOOSIFY SUPPORT',
-        time: '11:21 PM',
-        text: "Hello! I'm sorry to hear that. Don't worry, I'll help you with this issue. Can you please share a short video of the problem?"
-      },
-      {
-        id: 3,
-        sender: 'seller',
-        senderName: 'APPLE FACTORY OUTLET',
-        time: '11:23 PM',
-        text: "Sure, here is the video.",
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80',
-        attachment: {
-          name: 'macbook-issue.mp4',
-          size: '18.4 MB'
-        }
-      },
-      {
-        id: 4,
-        sender: 'support',
-        senderName: 'CHOOSIFY SUPPORT',
-        time: '11:24 PM',
-        text: "Thanks for sharing. I've forwarded this to our technical team. They will get back to you within 2 hours."
-      },
-      {
-        id: 5,
-        sender: 'seller',
-        senderName: 'APPLE FACTORY OUTLET',
-        time: '11:24 PM',
-        text: "Thank you so much!",
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80'
-      }
-    ],
-    'thread-choosify-announcements': [
-      {
-        id: 1,
-        sender: 'support',
-        senderName: 'CHOOSIFY ANNOUNCEMENTS',
-        time: '11:18 PM',
-        text: "🔔 New Year Sale Live! Celebrate 2026 with verified premium factory offers. Massive deals and global logistics integrations are live today."
-      }
-    ],
-    'thread-apex-outlet': [
-      {
-        id: 1,
-        sender: 'seller',
-        senderName: 'APEX FACTORY OUTLET',
-        time: '10:45 PM',
-        text: "When will my order be delivered?",
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80'
-      },
-      {
-        id: 2,
-        sender: 'support',
-        senderName: 'CHOOSIFY SUPPORT',
-        time: '10:50 PM',
-        text: "Hello! We have dispatched your lot to the central hub. Let me update your tracker details right now."
-      }
-    ],
-    'thread-samsung-outlet': [
-      {
-        id: 1,
-        sender: 'seller',
-        senderName: 'SAMSUNG FACTORY OUTLET',
-        time: '09:30 PM',
-        text: "Do you have any ongoing offers for corporate bulk buyers of the Galaxy S24 Series?",
-        avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&h=150&q=80'
-      }
-    ],
-    'thread-farhan-rafiq': [
-      {
-        id: 1,
-        sender: 'seller',
-        senderName: 'FARHAN RAFIQ (ADMIN)',
-        time: '08:20 PM',
-        text: "Approved my return request. Please verify details for the reverse logistics pickup.",
-        avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png'
-      }
-    ],
-    'thread-samsung-bd': [
-      {
-        id: 1,
-        sender: 'seller',
-        senderName: 'SAMSUNG BANGLADESH LTD.',
-        time: 'Yesterday',
-        text: "Need technical support for my TV. There are vertical lines appearing after the recent power surge.",
-        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80'
-      }
-    ],
-    'thread-apple-retail': [
-      {
-        id: 1,
-        sender: 'seller',
-        senderName: 'APPLE RETAIL BD',
-        time: '2 Days ago',
-        text: "Warranty claim for iPhone 15 Pro submitted. Here are the diagnostics report logs.",
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80'
-      }
-    ],
-    'thread-creator-collab': [
-      {
-        id: 1,
-        sender: 'seller',
-        senderName: 'CREATOR COLLAB',
-        time: '3 Days ago',
-        text: "Interested in collaboration opportunity. Can we establish a campaign timeline for August 2026?",
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'
-      }
-    ]
-  };
-
-  // State initialization with localStorage fallback
-  const [threads, setThreadsState] = useState<Thread[]>(() => {
-    const saved = localStorage.getItem('choosify_mirror_threads');
-    return saved ? JSON.parse(saved) : defaultThreads;
-  });
-
-  const [messagesMap, setMessagesMap] = useState<Record<string, Message[]>>(() => {
-    const saved = localStorage.getItem('choosify_mirror_messages');
-    return saved ? JSON.parse(saved) : defaultMessagesByThread;
-  });
-
-  const [activeThreadId, setActiveThreadId] = useState<string>(() => {
-    return threadId || 'thread-apple-outlet';
-  });
-
+  const { threads, threadMessages, addThreadMessage, createNewThread, markAllAsRead, setThreads, setThreadMessages } = useDashboard();
+  const { orders } = useGlobalState();
+  const [inputText, setInputText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [conversationTab, setConversationTab] = useState<ConversationTab>('all');
 
@@ -360,33 +32,34 @@ export function MessagesPage() {
 
   // Sourcing Modal field states
   const [modalProdIdx, setModalProdIdx] = useState(0);
-  const [modalVariant, setModalVariant] = useState('Standard Retail Unit');
   const [modalColor, setModalColor] = useState('Sunset Orange');
+  const [modalVariant, setModalVariant] = useState('Standard Retail Unit');
   const [modalQuantity, setModalQuantity] = useState(5);
   const [modalNotes, setModalNotes] = useState('');
 
-  // Auto-scroll reference
-  const chatBottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (chatBottomRef.current) {
-      chatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messagesMap, activeThreadId]);
-
-  // Persist state to localstorage
-  useEffect(() => {
-    localStorage.setItem('choosify_mirror_threads', JSON.stringify(threads));
+  const sortedThreads = useMemo(() => {
+    return [...threads].sort((a, b) => {
+      if (a.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID) return -1;
+      if (b.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID) return 1;
+      return 0;
+    });
   }, [threads]);
 
-  useEffect(() => {
-    localStorage.setItem('choosify_mirror_messages', JSON.stringify(messagesMap));
-  }, [messagesMap]);
+  // Active thread selection — announcements thread is pinned first
+  const activeThreadId = threadId || (sortedThreads.length > 0 ? sortedThreads[0].id : null);
+  const activeThread = sortedThreads.find(t => t.id === activeThreadId);
+  const isAnnouncementsThread =
+    activeThread?.type === 'announcement' ||
+    activeThread?.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID ||
+    activeThread?.readOnly === true;
 
-  // Handle URL change
+  // Auto-mark active thread as read
   useEffect(() => {
-    if (threadId) {
-      setActiveThreadId(threadId);
+    if (activeThreadId) {
+      const active = threads.find(t => t.id === activeThreadId);
+      if (active && active.unread) {
+        setThreads(prev => prev.map(t => t.id === activeThreadId ? { ...t, unread: false } : t));
+      }
     }
   }, [activeThreadId, threads, setThreads]);
 
@@ -426,15 +99,11 @@ export function MessagesPage() {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [threadId]);
 
-  // Active thread object lookup
-  const activeThread = threads.find(t => t.id === activeThreadId) || threads[0];
-
-  // Mark selected thread as read automatically
   useEffect(() => {
-    if (activeThread && activeThread.unread) {
-      setThreadsState(prev => prev.map(t => t.id === activeThread.id ? { ...t, unread: false, unreadCount: 0 } : t));
-    }
-  }, [activeThreadId]);
+    const viewport = chatViewportRef.current;
+    if (!viewport) return;
+    viewport.scrollTop = viewport.scrollHeight;
+  }, [activeMessages, activeThreadId]);
 
   // Find linked order for active thread
   const linkedOrder = orders.find(o => o.orderId === activeThread?.orderRef);
@@ -452,10 +121,24 @@ export function MessagesPage() {
     return p?.image || PLACEHOLDER_IMAGE;
   };
 
-  // Switch thread
-  const handleSelectThread = (id: string) => {
-    setActiveThreadId(id);
-    navigate(`/messages/${id}`);
+  // Helper function to update dynamic product card state inside message history
+  const updateProductCard = (messageId: number, updates: Partial<any>) => {
+    setThreadMessages(prev => {
+      const updated = prev.map(msg => {
+        if (msg.id === messageId && msg.productCard) {
+          return {
+            ...msg,
+            productCard: {
+              ...msg.productCard,
+              ...updates
+            }
+          };
+        }
+        return msg;
+      });
+      localStorage.setItem('choosify_thread_messages', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const handleSendMessage = () => {
@@ -509,136 +192,42 @@ export function MessagesPage() {
       status: "pending"
     };
 
-    const updatedMsgs = [...(messagesMap[activeThreadId] || []), userMessage];
-    
-    setMessagesMap(prev => ({
-      ...prev,
-      [activeThreadId]: updatedMsgs
-    }));
+    const threadId = activeThreadId || 'thread-general';
+    const orderRef = `CHOOSIFY-${Math.floor(1000000 + Math.random() * 9000000)}`;
 
-    // Update last message in thread list
-    setThreadsState(prev => prev.map(t => {
-      if (t.id === activeThreadId) {
+    const structuredMsg = `🛒 SPECIAL IN-CHAT SOURCING ORDER DISPATCH:
+📦 Item: ${selectedProd.title}
+🎨 Color: ${modalColor}
+⚙️ Variant: ${modalVariant}
+🔢 Quantity: ${modalQuantity}
+💵 Unit Price: BDT ${unitPriceNum.toLocaleString()}
+📝 Sourcing Memo: ${modalNotes || "No notes."}`;
+
+    // 1. Post shared card message
+    addThreadMessage(threadId, structuredMsg, 'user', 'Me', pCard);
+
+    // 2. Set thread meta order reference if missing
+    setThreads(prev => prev.map(t => {
+      if (t.id === threadId) {
         return {
           ...t,
-          lastMessage: inputText.trim(),
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          orderRef: t.orderRef || orderRef
         };
       }
       return t;
     }));
 
-    setInputText('');
-
-    // Simulated Auto response
-    setTimeout(() => {
-      const autoResponses: Record<string, string[]> = {
-        'thread-apple-outlet': [
-          "Perfect! I will test this and let you know if the flickering persists.",
-          "Awesome, thanks for forwarding. Looking forward to the technician's update.",
-          "Received! Thank you so much for the quick response."
-        ],
-        'thread-apex-outlet': [
-          "Perfect, I'll keep an eye out for the Gazipur delivery vehicle. Thank you!",
-          "Great service! Let me know if you need any additional documents."
-        ],
-        'thread-samsung-outlet': [
-          "Got it. Please share the pricing table as soon as you have it.",
-          "Thank you for the quick support! We are setting up our purchase order."
-        ]
-      };
-
-      const replies = autoResponses[activeThreadId] || [
-        "Thanks for the support! Our team has logged this internally.",
-        "Understood. We appreciate your immediate assistance.",
-        "Will do. Thanks!"
-      ];
-
-      const randomReply = replies[Math.floor(Math.random() * replies.length)];
-
-      const sellerMessage: Message = {
-        id: Date.now() + 1,
-        sender: 'seller',
-        senderName: activeThread.title,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        text: randomReply,
-        avatar: activeThread.avatar
-      };
-
-      setMessagesMap(prev => ({
-        ...prev,
-        [activeThreadId]: [...(prev[activeThreadId] || []), sellerMessage]
-      }));
-
-      setThreadsState(prev => prev.map(t => {
-        if (t.id === activeThreadId) {
-          return {
-            ...t,
-            lastMessage: randomReply,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          };
-        }
-        return t;
-      }));
-
-      toast.success(`Reply from ${activeThread.title}`);
-    }, 1500);
-  };
-
-  // Submit sourcing product card modal
-  const handleCreateSourcingRequest = () => {
-    const selectedProd = PRODUCTS[modalProdIdx];
-    const unitPriceNum = parseFloat(String(selectedProd.price).replace(/,/g, ''));
-
-    const pCard = {
-      image: selectedProd.image || PLACEHOLDER_IMAGE,
-      name: selectedProd.title,
-      variant: modalVariant || "Standard Retail Unit",
-      color: modalColor || "Midnight Gray",
-      quantity: modalQuantity,
-      notes: modalNotes || "Requested with premium wooden secure packaging.",
-      price: unitPriceNum,
-      link: `/products/${selectedProd.id}`,
-      status: "pending" as const
-    };
-
-    const cardMessage: Message = {
-      id: Date.now(),
-      sender: 'support',
-      senderName: 'CHOOSIFY SUPPORT',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      text: `🛒 Shared parameter card for ${selectedProd.title}`,
-      productCard: pCard
-    };
-
-    setMessagesMap(prev => ({
-      ...prev,
-      [activeThreadId]: [...(prev[activeThreadId] || []), cardMessage]
-    }));
-
     setShowSourcingModal(false);
     setModalNotes('');
-    toast.success('Custom product sourcing card shared inside chat!');
+    toast.success('Custom product card shared inside current thread!');
 
-    // Seller response
+    // 3. Automated seller reply
     setTimeout(() => {
-      const responseText = `💬 Custom parameters received for ${selectedProd.title}! We have calculated BDT ${(unitPriceNum * modalQuantity).toLocaleString()} in draft status. Our logistics team will review and approve within 1 hour.`;
-      const replyMsg: Message = {
-        id: Date.now() + 1,
-        sender: 'seller',
-        senderName: activeThread.title,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        text: responseText,
-        avatar: activeThread.avatar
-      };
-
-      setMessagesMap(prev => ({
-        ...prev,
-        [activeThreadId]: [...(prev[activeThreadId] || []), replyMsg]
-      }));
-
+      const sellerResponse = `💬 SELLER SOURCING NOTIFICATION:
+Thank you for sending this custom parameter card! We have logged BDT ${(unitPriceNum * modalQuantity).toLocaleString()} in draft format. Let me review and approve it.`;
+      addThreadMessage(threadId, sellerResponse, 'seller', activeThread?.title || 'Merchant Partner');
       toast.success('Reply received from supplier representative!');
-    }, 1500);
+    }, 1200);
   };
 
   const handleNewConversation = () => {
@@ -801,16 +390,6 @@ export function MessagesPage() {
             ) : (
               filteredThreads.map((t) => {
                 const isActive = t.id === activeThreadId;
-                
-                // Get custom color styles for tags to match high-fidelity visuals
-                let tagStyles = 'bg-gray-150 border-gray-200 text-gray-600';
-                if (t.tagType === 'order') tagStyles = 'border-red-200 text-red-500 bg-red-50/50';
-                if (t.tagType === 'announcement') tagStyles = 'border-indigo-200 text-indigo-500 bg-indigo-50/50';
-                if (t.tagType === 'admin') tagStyles = 'border-emerald-200 text-emerald-600 bg-emerald-50/50';
-                if (t.tagType === 'support') tagStyles = 'border-blue-200 text-blue-500 bg-blue-50/50';
-                if (t.tagType === 'collaboration') tagStyles = 'border-purple-200 text-purple-600 bg-purple-50/50';
-                if (t.tagType === 'general') tagStyles = 'border-amber-200 text-amber-600 bg-amber-50/50';
-
                 return (
                   <button
                     key={t.id}
@@ -825,11 +404,6 @@ export function MessagesPage() {
                           : 'bg-transparent hover:bg-[#F4F7F9]'
                     }`}
                   >
-                    {isActive && (
-                      <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#FF5B00]" />
-                    )}
-                    
-                    {/* Avatar structure */}
                     <div className="relative shrink-0">
                       <img
                         src={t.avatar}
@@ -840,8 +414,6 @@ export function MessagesPage() {
                         <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#FF5B00] border-2 border-white rounded-full" />
                       )}
                     </div>
-
-                    {/* Metadata */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="text-xs font-bold text-[#1A1A2E] truncate">
@@ -953,7 +525,6 @@ export function MessagesPage() {
                   </button>
                 </div>
               </div>
-            )}
 
               {/* Chat viewport */}
               <div
@@ -1099,14 +670,6 @@ export function MessagesPage() {
                                 );
                               })()}
                             </div>
-                            <button
-                              onClick={() => toast.success(`Downloading ${m.attachment?.name}...`)}
-                              className="w-8 h-8 rounded-full hover:bg-[#F5F8FD] flex items-center justify-center text-gray-400 hover:text-gray-800 border-none bg-transparent cursor-pointer"
-                            >
-                              <Download size={15} />
-                            </button>
-                          </div>
-                        )}
 
                             <div className="p-4 flex gap-3 items-start">
                               <img
@@ -1302,86 +865,7 @@ export function MessagesPage() {
                 Choose a thread from the list to chat with a seller or support.
               </p>
             </div>
-          </div>
-
-          {/* Message Composer & Chips */}
-          <div className="p-4 border-t border-[#EEF2F7] bg-white shrink-0">
-            
-            {/* Quick action chips */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-3 no-scrollbar shrink-0">
-              <button
-                onClick={() => {
-                  setModalProdIdx(0);
-                  setModalVariant("Standard Retail Unit");
-                  setModalColor("Space Gray");
-                  setModalQuantity(10);
-                  setShowSourcingModal(true);
-                }}
-                className="bg-[#F5F8FD] hover:bg-gray-100 border border-[#EEF2F7] rounded-full px-3 py-1.5 text-[10px] font-black text-gray-700 flex items-center gap-1 cursor-pointer transition-colors shrink-0"
-              >
-                <Plus size={10} className="text-[#FF5B00]" />
-                Share Product Card
-              </button>
-              <button
-                onClick={() => setInputText(`Hello! Can you please verify dispatch status for ${activeThread.orderId || 'general order'}?`)}
-                className="bg-[#F5F8FD] hover:bg-gray-100 border border-[#EEF2F7] rounded-full px-3 py-1.5 text-[10px] font-black text-gray-700 flex items-center gap-1 cursor-pointer transition-colors shrink-0"
-              >
-                Check Order Status
-              </button>
-              <button
-                onClick={() => setInputText("What is the return/refund procedure for bulk logistics lots?")}
-                className="bg-[#F5F8FD] hover:bg-gray-100 border border-[#EEF2F7] rounded-full px-3 py-1.5 text-[10px] font-black text-gray-700 flex items-center gap-1 cursor-pointer transition-colors shrink-0"
-              >
-                Returns & Refunds
-              </button>
-              <button
-                onClick={() => setInputText("Do you support immediate warranty exchanges inside Dhaka?")}
-                className="bg-[#F5F8FD] hover:bg-gray-100 border border-[#EEF2F7] rounded-full px-3 py-1.5 text-[10px] font-black text-gray-700 flex items-center gap-1 cursor-pointer transition-colors shrink-0"
-              >
-                FAQ
-              </button>
-            </div>
-
-            {/* Input Composer Box */}
-            <div className="flex items-center gap-3 bg-[#F5F8FD] border border-[#EEF2F7] rounded-2xl p-2 pl-4">
-              <input 
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="flex-1 bg-transparent border-none text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none py-2" 
-                placeholder="Type your message..." 
-              />
-              <div className="flex items-center gap-1">
-                <button 
-                  onClick={() => toast.success('Emoji tray activated')}
-                  className="w-8 h-8 rounded-lg hover:bg-gray-150 flex items-center justify-center text-gray-400 hover:text-gray-800 border-none bg-transparent cursor-pointer"
-                  title="Emoji"
-                >
-                  <Smile size={16} />
-                </button>
-                <button 
-                  onClick={() => toast.success('Logistics document dispatch active')}
-                  className="w-8 h-8 rounded-lg hover:bg-gray-150 flex items-center justify-center text-gray-400 hover:text-gray-800 border-none bg-transparent cursor-pointer"
-                  title="Attachment"
-                >
-                  <Paperclip size={16} />
-                </button>
-                <button 
-                  onClick={handleSendMessage}
-                  className="w-10 h-10 rounded-xl bg-[#FF5B00] hover:bg-[#FF5B00] text-white flex items-center justify-center shadow-md active:scale-95 transition-all border-none cursor-pointer"
-                  title="Send Message"
-                >
-                  <Send size={14} className="text-white" />
-                </button>
-              </div>
-            </div>
-
-            {/* Security Notice beneath Composer */}
-            <div className="pt-3 flex items-center justify-center gap-1 text-[10px] text-[#6B7280] font-bold leading-none shrink-0">
-              <Lock size={11} className="text-gray-400" />
-              <span>All conversations are encrypted and secure.</span>
-            </div>
-          </div>
+          )}
         </main>
 
         {/* Right rail — xl+ */}
@@ -1519,7 +1003,6 @@ export function MessagesPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
