@@ -345,12 +345,12 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                'w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none p-1 overflow-hidden',
+                'w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none p-0 overflow-hidden',
                 activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
               )}
               title="Ask Emi — Choosify Assistant"
             >
-              <EmiAiLogo size={44} className="w-11 h-11" />
+              <EmiAiLogo variant="fab" size={52} className="w-full h-full" />
             </motion.button>
           )}
         </AnimatePresence>
@@ -648,14 +648,14 @@ export function FloatingOverlays() {
         onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[219] bottom-4 left-4 w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-1 overflow-hidden bg-white',
+          'fixed z-[219] bottom-4 left-4 w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-0 overflow-hidden bg-white',
           activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
         )}
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         aria-label="Ask Emi"
         title="Ask Emi"
       >
-        <EmiAiLogo size={48} className="w-12 h-12" />
+        <EmiAiLogo variant="fab" size={56} className="w-full h-full" />
       </motion.button>
     )}
 

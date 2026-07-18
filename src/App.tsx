@@ -6,7 +6,6 @@ import { PageSeo } from './components/PageSeo';
 import { GoogleAnalyticsRouteTracker } from './components/GoogleAnalyticsRouteTracker';
 import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingOverlays } from './components/FloatingOverlays';
-import { EmiSidecar } from './components/emi/EmiSidecar';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { PageBreadcrumbsBar } from './components/PageBreadcrumbs';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
@@ -279,7 +278,6 @@ function AppContent() {
       </AnimatePresence>
       </MaintenanceGate>
       {!isCompactShell && <FloatingOverlays />}
-      {!isCompactShell && <EmiSidecar />}
       {!isCompactShell && !isMessagesShell && <MobileBottomNav />}
       {!isCompactShell && !isMessagesShell && <Footer />}
     </div>
