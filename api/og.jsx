@@ -1,28 +1,42 @@
 import { ImageResponse } from '@vercel/og';
-import {
-  OG_IMAGE_HEIGHT,
-  OG_IMAGE_WIDTH,
-  SITE_BRAND_ORANGE,
-  SITE_NAME,
-  SITE_THEME_COLOR,
-  SITE_URL,
-} from '../lib/seoShared';
 
 export const config = {
   runtime: 'edge',
 };
 
-function truncate(value: string, max: number): string {
-  const trimmed = value.trim();
+const SITE_NAME = 'Choosify';
+const SITE_THEME_COLOR = '#000435';
+const SITE_BRAND_ORANGE = '#FF5B00';
+const SITE_URL = 'https://www.choosify.bd';
+const OG_IMAGE_WIDTH = 1200;
+const OG_IMAGE_HEIGHT = 630;
+
+function truncate(value, max) {
+  const trimmed = String(value || '').trim();
   if (trimmed.length <= max) return trimmed;
   return `${trimmed.slice(0, max - 1).trimEnd()}…`;
 }
 
-/**
- * Dynamic Open Graph image — Choosify brand system.
- * Query: title, description, type, image, brand, label
- */
-export default async function handler(request: Request): Promise<Response> {
+function typeLabel(type) {
+  switch (type) {
+    case 'product':
+      return 'Product';
+    case 'brand':
+      return 'Brand';
+    case 'category':
+      return 'Category';
+    case 'deal':
+      return 'Deal';
+    case 'article':
+      return 'Guide';
+    case 'creator':
+      return 'Creator';
+    default:
+      return 'Choosify';
+  }
+}
+
+export default async function handler(request) {
   try {
     const { searchParams } = new URL(request.url);
     const title = truncate(searchParams.get('title') || SITE_NAME, 90);
@@ -31,11 +45,10 @@ export default async function handler(request: Request): Promise<Response> {
         'Compare verified brands and discover trusted products across Bangladesh.',
       140,
     );
-    const type = (searchParams.get('type') || 'default').toLowerCase();
+    const type = String(searchParams.get('type') || 'default').toLowerCase();
     const brand = truncate(searchParams.get('brand') || '', 48);
     const label = truncate(searchParams.get('label') || typeLabel(type), 32);
     const image = searchParams.get('image') || '';
-
     const showMedia = Boolean(image) && (type === 'product' || type === 'brand' || type === 'creator');
 
     return new ImageResponse(
@@ -53,7 +66,6 @@ export default async function handler(request: Request): Promise<Response> {
             overflow: 'hidden',
           }}
         >
-          {/* Accent wash */}
           <div
             style={{
               position: 'absolute',
@@ -81,7 +93,6 @@ export default async function handler(request: Request): Promise<Response> {
             }}
           />
 
-          {/* Header */}
           <div
             style={{
               display: 'flex',
@@ -132,7 +143,6 @@ export default async function handler(request: Request): Promise<Response> {
             </div>
           </div>
 
-          {/* Body */}
           <div
             style={{
               display: 'flex',
@@ -143,7 +153,14 @@ export default async function handler(request: Request): Promise<Response> {
               gap: 40,
             }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, maxWidth: showMedia ? 680 : 1080 }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                flex: 1,
+                maxWidth: showMedia ? 680 : 1080,
+              }}
+            >
               {brand ? (
                 <div
                   style={{
@@ -198,7 +215,6 @@ export default async function handler(request: Request): Promise<Response> {
                   flexShrink: 0,
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={image}
                   alt=""
@@ -215,7 +231,6 @@ export default async function handler(request: Request): Promise<Response> {
             ) : null}
           </div>
 
-          {/* Footer */}
           <div
             style={{
               display: 'flex',
@@ -224,10 +239,24 @@ export default async function handler(request: Request): Promise<Response> {
               padding: '0 56px 40px',
             }}
           >
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'rgba(255,255,255,0.55)', display: 'flex' }}>
+            <div
+              style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: 'rgba(255,255,255,0.55)',
+                display: 'flex',
+              }}
+            >
               {SITE_URL.replace(/^https?:\/\//, '')}
             </div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: 'rgba(255,255,255,0.45)', display: 'flex' }}>
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 600,
+                color: 'rgba(255,255,255,0.45)',
+                display: 'flex',
+              }}
+            >
               Verified discovery for Bangladesh
             </div>
           </div>
@@ -244,24 +273,5 @@ export default async function handler(request: Request): Promise<Response> {
   } catch (error) {
     console.error('[api/og]', error);
     return new Response('Failed to generate OG image', { status: 500 });
-  }
-}
-
-function typeLabel(type: string): string {
-  switch (type) {
-    case 'product':
-      return 'Product';
-    case 'brand':
-      return 'Brand';
-    case 'category':
-      return 'Category';
-    case 'deal':
-      return 'Deal';
-    case 'article':
-      return 'Guide';
-    case 'creator':
-      return 'Creator';
-    default:
-      return 'Choosify';
   }
 }
