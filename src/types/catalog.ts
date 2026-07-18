@@ -114,6 +114,8 @@ export interface HomepageHeroBanner {
   ctaText: string;
   ctaUrl: string;
   backgroundImage: string;
+  /** Optional muted looping video for hybrid photo/video hero slides. */
+  backgroundVideo?: string;
   isActive: boolean;
   order: number;
 }

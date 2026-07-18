@@ -3,6 +3,25 @@ import { useDashboard, type Campaign } from '../../context/DashboardContext';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import type { HeroSlide } from './types';
 
+/**
+ * Review slide — Pexels: “Woman showcasing a dress” by MART PRODUCTION
+ * https://www.pexels.com/video/woman-showcasing-a-dress-7679832/
+ * Remove or demote once CMS banners include production video creatives.
+ */
+const REVIEW_VIDEO_SLIDE: HeroSlide = {
+  id: 'home-review-video-fashion',
+  title: 'Style that moves with you.',
+  subtitle: 'Hybrid hero preview — fashion video + still campaigns in one banner.',
+  primaryCtaText: 'EXPLORE NOW',
+  primaryCtaLink: '/products',
+  secondaryCtaText: 'HOW IT WORKS',
+  secondaryCtaLink: '/about',
+  videoUrl: '/hero/fashion-dress-showcase.mp4',
+  image:
+    'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&q=80',
+  gradient: 'linear-gradient(135deg, #1a0a2e 0%, #0f0c29 40%, #24243e 100%)',
+};
+
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
     id: 'home-editorial-1',
@@ -70,10 +89,12 @@ export function useHomepageHeroSlides(): HeroSlide[] {
         secondaryCtaText: 'HOW IT WORKS',
         secondaryCtaLink: '/about',
         image: b.backgroundImage,
+        videoUrl: b.backgroundVideo,
       }));
 
     const campaignSlides = getActiveCampaigns(campaigns).map(campaignToSlide);
     const merged = [...cmsSlides, ...campaignSlides];
-    return merged.length ? merged : DEFAULT_SLIDES;
+    const rest = merged.length ? merged : DEFAULT_SLIDES;
+    return [REVIEW_VIDEO_SLIDE, ...rest];
   }, [campaigns, homepageConfig]);
 }

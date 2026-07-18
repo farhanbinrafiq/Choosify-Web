@@ -228,7 +228,13 @@ export default defineConfig(({ mode }) => {
 
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
-      watch: process.env.DISABLE_HMR === 'true' ? undefined : {},
+      watch:
+        process.env.DISABLE_HMR === 'true'
+          ? undefined
+          : {
+              // Large hero videos can lock on Windows and crash Vite's FS watcher.
+              ignored: ['**/public/hero/**/*.mp4'],
+            },
     },
   };
 });

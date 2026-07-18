@@ -10,7 +10,10 @@ export type HeroSlide = {
   primaryCtaLink?: string;
   secondaryCtaText?: string;
   secondaryCtaLink?: string;
+  /** Still image / poster (used alone for photo slides, or as video poster). */
   image?: string;
+  /** Optional muted looping background video — hybrid banner support. */
+  videoUrl?: string;
   gradient?: string;
 };
 

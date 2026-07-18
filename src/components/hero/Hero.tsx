@@ -13,36 +13,61 @@ interface HeroProps {
   className?: string;
 }
 
+const PHOTO_AUTOPLAY_MS = 6000;
+const VIDEO_AUTOPLAY_MS = 10000;
+
 /**
- * Homepage hero — Choosify.dc.html:
- * full-bleed image carousel, 460px, diagonal clip-path, arrows + dots only.
+ * Homepage hero — hybrid sliding banner:
+ * full-bleed photo and/or muted looping video per slide,
+ * diagonal clip-path, arrows + dots.
  */
 export function Hero({ variant, className }: HeroProps) {
   const slides = useHomepageHeroSlides();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
   const autoplayTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
 
   useEffect(() => {
     setCurrentIndex(0);
   }, [slides.length]);
+
+  // Play active video slide; pause & reset the rest.
+  useEffect(() => {
+    slides.forEach((slide, i) => {
+      const el = videoRefs.current.get(slide.id);
+      if (!el) return;
+      if (i === currentIndex && slide.videoUrl) {
+        void el.play().catch(() => {
+          /* autoplay may be blocked until gesture — poster still shows */
+        });
+      } else {
+        el.pause();
+        try {
+          el.currentTime = 0;
+        } catch {
+          /* ignore seek errors on unloaded media */
+        }
+      }
+    });
+  }, [currentIndex, slides]);
 
   useEffect(() => {
     if (variant !== 'homepage' || slides.length <= 1 || !autoplay) {
       if (autoplayTimer.current) clearInterval(autoplayTimer.current);
       return;
     }
+    const current = slides[currentIndex];
+    const delay = current?.videoUrl ? VIDEO_AUTOPLAY_MS : PHOTO_AUTOPLAY_MS;
     autoplayTimer.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % slides.length);
-    }, 6000);
+    }, delay);
     return () => {
       if (autoplayTimer.current) clearInterval(autoplayTimer.current);
     };
-  }, [slides.length, autoplay, variant]);
+  }, [slides, slides.length, autoplay, variant, currentIndex]);
 
   if (variant !== 'homepage' || !slides.length) return null;
-
-  const current = slides[currentIndex]!;
 
   const goPrev = () => {
     setAutoplay(false);
@@ -66,43 +91,61 @@ export function Hero({ variant, className }: HeroProps) {
       onMouseEnter={() => setAutoplay(false)}
       onMouseLeave={() => setAutoplay(true)}
     >
-      {slides.map((slide, i) => (
-        <div
-          key={slide.id}
-          className={cn(
-            'absolute inset-0 transition-opacity duration-500',
-            i === currentIndex ? 'opacity-100 z-[1]' : 'opacity-0 z-0 pointer-events-none',
-          )}
-          aria-hidden={i !== currentIndex}
-        >
-          {slide.image ? (
-            <img
-              src={slide.image}
-              alt=""
-              className="w-full h-full object-cover"
-              loading={i === 0 ? 'eager' : 'lazy'}
-            />
-          ) : (
-            <div
-              className="w-full h-full"
-              style={{
-                background:
-                  slide.gradient ||
-                  'linear-gradient(135deg, #000435 0%, #1A1D4E 50%, #FF5B00 160%)',
-              }}
-            />
-          )}
-          {/* Soft readability gradient — still image-led like dc.html */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10 pointer-events-none" />
-          {slide.primaryCtaLink && i === currentIndex && (
-            <Link
-              to={slide.primaryCtaLink}
-              className="absolute inset-0 z-[1]"
-              aria-label={slide.primaryCtaText || slide.title || 'View campaign'}
-            />
-          )}
-        </div>
-      ))}
+      {slides.map((slide, i) => {
+        const isActive = i === currentIndex;
+        return (
+          <div
+            key={slide.id}
+            className={cn(
+              'absolute inset-0 transition-opacity duration-500',
+              isActive ? 'opacity-100 z-[1]' : 'opacity-0 z-0 pointer-events-none',
+            )}
+            aria-hidden={!isActive}
+          >
+            {slide.videoUrl ? (
+              <video
+                ref={(el) => {
+                  if (el) videoRefs.current.set(slide.id, el);
+                  else videoRefs.current.delete(slide.id);
+                }}
+                src={slide.videoUrl}
+                poster={slide.image}
+                muted
+                loop
+                playsInline
+                preload={i === 0 ? 'auto' : 'metadata'}
+                className="w-full h-full object-cover"
+                aria-label={slide.title || 'Hero video'}
+              />
+            ) : slide.image ? (
+              <img
+                src={slide.image}
+                alt=""
+                className="w-full h-full object-cover"
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
+            ) : (
+              <div
+                className="w-full h-full"
+                style={{
+                  background:
+                    slide.gradient ||
+                    'linear-gradient(135deg, #000435 0%, #1A1D4E 50%, #FF5B00 160%)',
+                }}
+              />
+            )}
+            {/* Soft readability gradient — still image/video-led */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10 pointer-events-none" />
+            {slide.primaryCtaLink && isActive && (
+              <Link
+                to={slide.primaryCtaLink}
+                className="absolute inset-0 z-[1]"
+                aria-label={slide.primaryCtaText || slide.title || 'View campaign'}
+              />
+            )}
+          </div>
+        );
+      })}
 
       {slides.length > 1 && (
         <>
