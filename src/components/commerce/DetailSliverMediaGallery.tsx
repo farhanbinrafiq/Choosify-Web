@@ -67,11 +67,9 @@ function SliverMedia({
 }
 
 /**
- * Choosify.dc.html detail hero — centered main frame with left peeks + right peek.
+ * Choosify.dc.html detail hero — full-bleed 6/14/46/32 sliver carousel.
+ * Edge-to-edge on both sides; equal 14px gaps only between frames.
  * Used on Product Detail and Guide Detail (and Spotlight content heroes).
- *
- * Layout: equal side rails keep the 46% hero exactly centered; the right frame
- * sits toward the right edge so it is fully visible (not clipped by % + gap overflow).
  */
 export function DetailSliverMediaGallery({
   items,
@@ -117,29 +115,36 @@ export function DetailSliverMediaGallery({
 
   return (
     <section className={cn('relative w-full overflow-x-clip', className)} aria-label={ariaLabel}>
-      {/* Desktop / tablet — true-centered hero with side peeks */}
-      <div className="hidden md:flex w-full items-center">
-        {/* Left rail — peeks hug the center from the left */}
-        <div className="flex flex-1 min-w-0 items-center justify-end gap-3.5 pr-3.5">
-          {prev && total > 1 && (
-            <div className="relative hidden lg:block w-[22%] max-w-[96px] shrink-0 h-[340px] lg:h-[460px] overflow-hidden opacity-45">
-              <SliverMedia item={prev} playSize={36} />
-            </div>
+      {/* Desktop / tablet — full-bleed edge-to-edge; 14px gaps only between frames */}
+      <div
+        className={cn(
+          'hidden md:grid w-full items-center gap-3.5',
+          total > 1
+            ? 'grid-cols-[minmax(0,6fr)_minmax(0,14fr)_minmax(0,46fr)_minmax(0,32fr)]'
+            : 'grid-cols-1',
+        )}
+      >
+        {total > 1 && (
+          <div className="relative h-[340px] lg:h-[460px] overflow-hidden opacity-45 min-w-0 rounded-none">
+            {prev ? <SliverMedia item={prev} playSize={36} /> : null}
+          </div>
+        )}
+        {total > 1 && (
+          <button
+            type="button"
+            onClick={goNext}
+            className="relative h-[320px] lg:h-[430px] overflow-hidden opacity-40 cursor-pointer border-0 p-0 bg-transparent min-w-0 rounded-none"
+            aria-label="Skip ahead"
+          >
+            {next2 ? <SliverMedia item={next2} playSize={40} /> : null}
+          </button>
+        )}
+        <div
+          className={cn(
+            'relative h-[420px] lg:h-[580px] overflow-hidden min-w-0',
+            total > 1 ? 'rounded-[14px]' : 'rounded-none w-full',
           )}
-          {next2 && total > 2 && (
-            <button
-              type="button"
-              onClick={goNext}
-              className="relative hidden lg:block w-[48%] max-w-[200px] shrink-0 h-[320px] lg:h-[430px] overflow-hidden opacity-40 cursor-pointer border-0 p-0 bg-transparent"
-              aria-label="Skip ahead"
-            >
-              <SliverMedia item={next2} playSize={40} />
-            </button>
-          )}
-        </div>
-
-        {/* Center — exact middle of the viewport band */}
-        <div className="relative w-[46%] max-w-[720px] shrink-0 h-[420px] lg:h-[580px] rounded-[14px] overflow-hidden z-[1]">
+        >
           <SliverMedia item={current} playSize={56} />
           <button
             type="button"
@@ -150,25 +155,26 @@ export function DetailSliverMediaGallery({
             🔍
           </button>
         </div>
-
-        {/* Right rail — frame pushed toward the right edge so it stays fully visible */}
-        <div className="flex flex-1 min-w-0 items-center justify-end pl-3.5 pr-3 lg:pr-5">
-          {next && total > 1 && (
-            <button
-              type="button"
-              onClick={goNext}
-              className="relative w-[92%] max-w-[420px] shrink-0 h-[380px] lg:h-[510px] rounded-[14px] overflow-hidden opacity-85 cursor-pointer border-0 p-0 bg-transparent"
-              aria-label="Next media"
-            >
-              <SliverMedia item={next} playSize={52} />
-            </button>
-          )}
-        </div>
+        {total > 1 && (
+          <button
+            type="button"
+            onClick={goNext}
+            className="relative h-[380px] lg:h-[510px] overflow-hidden opacity-85 cursor-pointer border-0 p-0 bg-transparent min-w-0 rounded-none"
+            aria-label="Next media"
+          >
+            {next ? <SliverMedia item={next} playSize={52} /> : null}
+          </button>
+        )}
       </div>
 
-      {/* Mobile: current + peek next */}
-      <div className="flex md:hidden gap-2.5 items-center px-3">
-        <div className="relative flex-[1_1_70%] h-[320px] rounded-[14px] overflow-hidden min-w-0">
+      {/* Mobile: edge-to-edge current + peek */}
+      <div className="flex md:hidden gap-2.5 items-center w-full">
+        <div
+          className={cn(
+            'relative h-[320px] overflow-hidden min-w-0',
+            total > 1 ? 'flex-[1_1_70%] rounded-r-[14px] rounded-l-none' : 'flex-1 rounded-none',
+          )}
+        >
           <SliverMedia item={current} playSize={48} />
           <button
             type="button"
@@ -183,7 +189,7 @@ export function DetailSliverMediaGallery({
           <button
             type="button"
             onClick={goNext}
-            className="relative flex-[0_0_28%] h-[280px] rounded-[14px] overflow-hidden opacity-85 cursor-pointer border-0 p-0 bg-transparent"
+            className="relative flex-[0_0_28%] h-[280px] overflow-hidden opacity-85 cursor-pointer border-0 p-0 bg-transparent rounded-l-[14px] rounded-r-none"
             aria-label="Next media"
           >
             <SliverMedia item={next} playSize={36} />
