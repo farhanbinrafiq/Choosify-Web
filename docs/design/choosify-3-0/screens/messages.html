@@ -1,0 +1,124 @@
+<div data-screen-label="Messages" style="background:#F4F7F9;min-height:calc(100vh - 140px)">
+    <div style="background:#000435;color:#fff;padding:20px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
+      <div>
+        <div style="font-size:10.5px;font-weight:700;color:#FF5B00;letter-spacing:0.4px;margin-bottom:4px">CUSTOMER SUPPORT CENTER</div>
+        <div style="font-size:19px;font-weight:800">💬 REAL-TIME SUPPORT</div>
+        <div style="font-size:11.5px;color:rgba(255,255,255,0.5)">We're here to help, 24/7</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button style="background:rgba(255,255,255,0.08);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">↻ MARK ALL AS READ</button>
+        <button style="background:rgba(255,255,255,0.08);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">📊 MY DASHBOARD</button>
+        <button style="background:#FF5B00;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">📦 MY ORDERS</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:300px 1fr 260px;max-width:1400px;margin:0 auto">
+      <div style="border-right:1px solid #E8EDF2;background:#fff;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-size:11px;font-weight:800;color:#9AA0AC;letter-spacing:0.4px">YOUR CONVERSATIONS</div><div style="width:22px;height:22px;border-radius:50%;background:#FF5B00;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer">+</div></div>
+        <input placeholder="Search transactions / order references..." style="width:100%;height:36px;border-radius:8px;border:1px solid #E5E7EB;padding:0 12px;font-size:11.5px;box-sizing:border-box;margin-bottom:12px"/>
+        <div style="display:flex;gap:14px;margin-bottom:12px;font-size:11px;font-weight:700;color:#9AA0AC">
+          <span style="color:#FF5B00;border-bottom:2px solid #FF5B00;padding-bottom:6px">All <span style="background:#FF5B00;color:#fff;border-radius:8px;padding:1px 6px;font-size:9.5px">8</span></span>
+          <span>Orders <span style="color:#1A1A2E">5</span></span><span>Support <span style="color:#1A1A2E">3</span></span><span>Unread <span style="color:#1A1A2E">3</span></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;max-height:520px;overflow-y:auto">
+          <sc-for list="{{ conversations }}" as="conv" hint-placeholder-count="8">
+            <div style="{{ conv.style }}">
+              <div style="width:38px;height:38px;border-radius:50%;background:{{ conv.avatarBg }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;position:relative">{{ conv.initial }}<sc-if value="{{ conv.online }}"><div style="position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:#07DD05;border:2px solid #fff"></div></sc-if></div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:12px;font-weight:700;color:#1A1A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ conv.name }}</div><div style="font-size:9.5px;color:#9AA0AC;flex-shrink:0">{{ conv.time }}</div></div>
+                <div style="font-size:11px;color:#4B5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">{{ conv.preview }}</div>
+                <div style="{{ conv.tagStyle }}">{{ conv.tag }}</div>
+              </div>
+              <sc-if value="{{ conv.unread }}"><div style="width:16px;height:16px;border-radius:50%;background:#FF5B00;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ conv.unread }}</div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <a href="#" style="display:block;text-align:center;font-size:11.5px;font-weight:700;color:#FF5B00;margin-top:10px">View all conversations →</a>
+      </div>
+      <div style="display:flex;flex-direction:column;background:#F4F7F9">
+        <div style="background:#fff;border-bottom:1px solid #E8EDF2;padding:14px 20px;display:flex;align-items:center;gap:12px">
+          <div style="width:38px;height:38px;border-radius:50%;background:#DB2777;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">AF</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:700;color:#1A1A2E">APPLE FACTORY OUTLET</div><div style="font-size:10.5px;color:#07DD05">● Online</div></div>
+          <div style="background:#FFF3EC;color:#EB4501;font-size:10px;font-weight:700;padding:4px 10px;border-radius:12px">ORDER: {{ orderSuccess.id }}</div>
+        </div>
+        <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;max-height:480px">
+          <div style="background:#fff;border:1px solid #E8EDF2;border-radius:10px;padding:14px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div style="background:#F1F1F3;color:#4B5563;font-size:9px;font-weight:800;padding:3px 8px;border-radius:4px">LINKED LOT TRANSACTION</div>
+              <div style="background:#FFF3EC;color:#EB4501;font-size:9.5px;font-weight:700;padding:3px 10px;border-radius:12px">PENDING</div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0"><image-slot id="msg-item" shape="rect" placeholder="MacBook Air M2" style="width:100%;height:100%"></image-slot></div>
+              <div style="flex:1"><div style="font-size:12.5px;font-weight:700;color:#1A1A2E">APPLE MACBOOK AIR M2</div><div style="font-size:10.5px;color:#9AA0AC">Space Gray · 512GB SSD · 8GB RAM</div></div>
+              <div style="text-align:right"><div style="font-size:13px;font-weight:800;color:#FF5B00">৳128,120</div><div style="font-size:9.5px;color:#9AA0AC">May 12, 2025</div></div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:10.5px;color:#9AA0AC">Today, May 12</div>
+          <sc-for list="{{ chatMessages }}" as="msg" hint-placeholder-count="5">
+            <div style="{{ msg.wrapStyle }}">
+              <div style="{{ msg.nameStyle }}">{{ msg.sender }} <span style="color:#9AA0AC;font-weight:400">{{ msg.time }}</span></div>
+              <div style="{{ msg.bubbleStyle }}">{{ msg.text }}</div>
+              <sc-if value="{{ msg.attachment }}">
+                <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E8EDF2;border-radius:8px;padding:8px 12px;margin-top:6px;max-width:240px">
+                  <div style="width:26px;height:26px;border-radius:50%;background:#2323FF;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px">▶</div>
+                  <div style="flex:1;font-size:11px;color:#1A1A2E">{{ msg.attachment }}<div style="font-size:9.5px;color:#9AA0AC">18.4 MB</div></div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border-top:1px solid #E8EDF2;padding:14px 20px">
+          <div style="display:flex;gap:10px;margin-bottom:10px">
+            <sc-for list="{{ chatQuickActions }}" as="qa" hint-placeholder-count="4">
+              <button style="background:#fff;border:1px solid #E5E7EB;padding:7px 14px;border-radius:16px;font-size:11px;font-weight:600;color:#4B5563;cursor:pointer">{{ qa }}</button>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input placeholder="Type your message..." style="flex:1;height:42px;border-radius:8px;border:1px solid #E5E7EB;padding:0 14px;font-size:12.5px;box-sizing:border-box"/>
+            <button style="width:42px;height:42px;border-radius:8px;background:#FF5B00;color:#fff;border:none;cursor:pointer;font-size:15px">➤</button>
+          </div>
+          <div style="text-align:center;font-size:10px;color:#9AA0AC;margin-top:8px">🔒 All conversations are encrypted and secure</div>
+        </div>
+      </div>
+      <div style="border-left:1px solid #E8EDF2;background:#fff;padding:18px;display:flex;flex-direction:column;gap:20px">
+        <div>
+          <div style="font-size:11px;font-weight:800;color:#1A1A2E;margin-bottom:12px">📄 TRANSACTION DETAILS</div>
+          <div style="display:flex;flex-direction:column;gap:12px;font-size:11px">
+            <div><div style="color:#9AA0AC;margin-bottom:3px">Order ID</div><div style="font-weight:700;color:#1A1A2E">{{ orderSuccess.id }} 📋</div></div>
+            <div><div style="color:#9AA0AC;margin-bottom:3px">Transaction ID</div><div style="font-weight:700;color:#1A1A2E">TXN-98764 📋</div></div>
+            <div><div style="color:#9AA0AC;margin-bottom:3px">Order Date</div><div style="font-weight:700;color:#1A1A2E">{{ orderSuccess.date }} · {{ orderSuccess.time }}</div></div>
+            <div><div style="color:#9AA0AC;margin-bottom:3px">Payment Method</div><div style="font-weight:700;color:#1A1A2E">Cash on Delivery (COD)</div></div>
+            <div><div style="color:#9AA0AC;margin-bottom:3px">Order Status</div><div style="font-weight:700;color:#EB4501">PENDING CONFIRMATION</div></div>
+            <div><div style="color:#9AA0AC;margin-bottom:3px">Total Amount</div><div style="font-weight:800;color:#1A1A2E">৳128,120</div></div>
+          </div>
+          <button style="width:100%;background:#1A1A2E;color:#fff;border:none;padding:10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-top:14px">View Full Order Details →</button>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;color:#1A1A2E;margin-bottom:12px">👤 CUSTOMER PROFILE</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:36px;height:36px;border-radius:50%;background:#DB2777;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">AF</div>
+            <div><div style="font-size:12px;font-weight:700;color:#1A1A2E">Apple Factory Outlet</div><div style="font-size:9.5px;color:#07DD05;font-weight:700">✓ VERIFIED SELLER</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:10.5px">
+            <div><div style="color:#9AA0AC">Member since</div><div style="font-weight:700;color:#1A1A2E">Jan 15, 2023</div></div>
+            <div><div style="color:#9AA0AC">Total Orders</div><div style="font-weight:700;color:#1A1A2E">24</div></div>
+            <div><div style="color:#9AA0AC">Response Time</div><div style="font-weight:700;color:#1A1A2E">Within 1 hour</div></div>
+            <div><div style="color:#9AA0AC">Rating</div><div style="font-weight:700;color:#1A1A2E">★ 4.8 (1.2K)</div></div>
+          </div>
+          <button style="width:100%;background:#fff;border:1px solid #E5E7EB;color:#1A1A2E;padding:9px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-top:12px">View Store Profile →</button>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;color:#1A1A2E;margin-bottom:12px">🔗 SUPPORT SHORTCUTS</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ supportShortcuts }}" as="ss" hint-placeholder-count="4">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:#4B5563;cursor:pointer">{{ ss }} <span style="color:#9AA0AC">›</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ SEARCH RESULTS ============ -->
+  <sc-if value="{{ isSearch }}">
+  

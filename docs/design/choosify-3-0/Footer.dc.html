@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="background:radial-gradient(1200px 500px at 15% 0%, hsla(22,100%,50%,0.18), transparent 65%),radial-gradient(900px 500px at 90% 20%, hsla(12,92%,45%,0.14), transparent 65%),rgba(10,10,31,0.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-family:'Inter',system-ui,sans-serif;padding:64px 40px 0;overflow:hidden">
+  <div style="max-width:1280px;margin:0 auto;display:flex;gap:60px;flex-wrap:wrap;justify-content:space-between;padding-bottom:44px;border-bottom:1px solid rgba(255,255,255,0.1)">
+    <div style="flex:1 1 320px;max-width:360px">
+      <img src="assets/choosify-logo.png" alt="Choosify" style="height:34px;width:auto;display:block;margin-bottom:16px"/>
+      <div style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.55);margin-bottom:28px">Bangladesh's Smartest Product Discovery Platform. Find The Best Brand, Compare Price, And Shop With Confidence</div>
+      <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;color:#fff;margin-bottom:14px">Connect With Us</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ socials }}" as="s" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <div style="width:32px;height:32px;border-radius:50%;background:{{ s.bg }};display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0">
+              <sc-for list="{{ s.layers }}" as="ly" hint-placeholder-count="1">
+                <span style="position:absolute;color:{{ ly.color }};font-size:14px;font-weight:800;transform:translate({{ ly.dx }}px,{{ ly.dy }}px)">{{ ly.glyph }}</span>
+              </sc-for>
+            </div>
+            <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.85)">{{ s.name }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:flex;gap:60px;flex-wrap:wrap">
+      <sc-for list="{{ columns }}" as="col" hint-placeholder-count="3">
+        <div style="min-width:150px">
+          <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;color:rgba(255,255,255,0.4);margin-bottom:18px">{{ col.title }}</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <sc-for list="{{ col.links }}" as="lk" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:rgba(255,255,255,0.85);cursor:pointer" onClick="{{ lk.onClick }}">
+                {{ lk.label }}
+                <sc-if value="{{ lk.badge }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:9px;font-weight:800;color:#fff;background:#2323FF;padding:2px 6px;border-radius:5px;letter-spacing:0.04em">{{ lk.badge }}</span>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="font-size:12px;color:rgba(255,255,255,0.4);text-align:center;padding:22px 0 12px">© 2026 Choosify. All rights reserved.</div>
+  <div style="width:100%;text-align:center;line-height:0.72;margin-top:4px">
+    <span style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:700;font-size:min(20vw,260px);color:#fff">Choosify</span>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const onNavigate = this.props.onNavigate || (() => {});
+    const goAbout = (anchor) => () => { onNavigate('about'); if (anchor) setTimeout(() => { const el = document.getElementById(anchor); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 50); };
+    return {
+      socials: [
+        { name: 'Facebook', bg: '#1877F2', layers: [{ color: '#fff', dx: 0, dy: 0, glyph: 'f' }] },
+        { name: 'TikTok', bg: '#000', layers: [
+          { color: '#25F4EE', dx: -1, dy: -1, glyph: '♪' },
+          { color: '#FE2C55', dx: 1, dy: 1, glyph: '♪' },
+          { color: '#fff', dx: 0, dy: 0, glyph: '♪' },
+        ]},
+        { name: 'YouTube', bg: '#FF0000', layers: [{ color: '#fff', dx: 0, dy: 0, glyph: '▶' }] },
+      ],
+      columns: [
+        { title: 'DISCOVER', links: [
+          { label: 'Top Brands' },
+          { label: 'New Arrival' },
+          { label: 'Compare Tool', badge: 'NEW' },
+          { label: 'Best Deals' },
+        ]},
+        { title: 'COMPANY', links: [
+          { label: 'Suggest a brand', onClick: goAbout('suggest-brand') },
+          { label: 'Partnership', onClick: goAbout('partnership') },
+          { label: 'Advertise', onClick: goAbout('advertise') },
+          { label: 'B2B', onClick: goAbout('b2b') },
+        ]},
+        { title: 'LEGAL', links: [
+          { label: 'Terms', onClick: goAbout('terms') },
+          { label: 'Policy', onClick: goAbout('privacy') },
+          { label: 'Contact us', onClick: goAbout('contact') },
+          { label: 'About', onClick: goAbout() },
+        ]},
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

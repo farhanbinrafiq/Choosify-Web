@@ -1,277 +1,223 @@
 import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { 
-  ChevronRight, Compass, ShieldCheck, HelpCircle, Award, 
-  Sparkles, Layers, Users, Zap, Calendar, Heart, ArrowRight
-} from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { cn } from '../lib/utils';
 
+const COMPANY_NAV = [
+  { href: '#about-top', icon: '🏠', label: 'About Us', id: 'about-top' },
+  { href: '#suggest-brand', icon: '🏷', label: 'Suggest a Brand', id: 'suggest-brand' },
+  { href: '#partnership', icon: '🤝', label: 'Partnership', id: 'partnership' },
+  { href: '#advertise', icon: '📢', label: 'Advertise', id: 'advertise' },
+  { href: '#b2b', icon: '🏢', label: 'B2B Solutions', id: 'b2b' },
+];
+
+const LEGAL_NAV = [
+  { href: '#terms', icon: '📄', label: 'Terms of Service', id: 'terms' },
+  { href: '#privacy', icon: '🔒', label: 'Privacy Policy', id: 'privacy' },
+  { href: '#contact', icon: '✉', label: 'Contact Us', id: 'contact' },
+];
+
+const STATS = [
+  { icon: '🏷', value: '2,400+', label: 'Brands', bg: '#FFF3EA' },
+  { icon: '📦', value: '48K+', label: 'Products', bg: '#EEF0FF' },
+  { icon: '⭐', value: '120K+', label: 'Reviews', bg: '#ECFDF3' },
+  { icon: '👥', value: '85K+', label: 'Users', bg: '#FFF7ED' },
+];
+
+const WHY = [
+  { icon: '🔍', title: 'Smart Discovery', desc: 'Find trusted products across categories with curated catalogs.', bg: '#FFF3EA' },
+  { icon: '⚖', title: 'Honest Compare', desc: 'Side-by-side specs, prices, and reviews before you buy.', bg: '#EEF0FF' },
+  { icon: '⭐', title: 'Real Reviews', desc: 'Community and creator insights you can actually use.', bg: '#ECFDF3' },
+  { icon: '🏷', title: 'Live Deals', desc: 'Track promos and savings from verified sellers.', bg: '#FFF7ED' },
+  { icon: '🛡', title: 'Shop Confident', desc: 'Verified brands, transparent info, safer decisions.', bg: '#F3E8FF' },
+];
+
+const COMPANY_ROWS = [
+  { anchor: 'suggest-brand', icon: '🏷', bg: '#FFF3EA', title: 'Suggest a Brand', desc: 'Know a great Bangladeshi brand we should list? Tell us.', cta: 'Submit suggestion' },
+  { anchor: 'partnership', icon: '🤝', bg: '#EEF0FF', title: 'Partnership', desc: 'Collaborate with Choosify on campaigns, content, and growth.', cta: 'Partner with us' },
+  { anchor: 'advertise', icon: '📢', bg: '#ECFDF3', title: 'Advertise', desc: 'Reach high-intent shoppers across discovery surfaces.', cta: 'Advertise here' },
+  { anchor: 'b2b', icon: '🏢', bg: '#FFF7ED', title: 'B2B Solutions', desc: 'Procurement tools and catalogs for teams and retailers.', cta: 'Explore B2B' },
+];
+
+const LEGAL_ROWS = [
+  { anchor: 'terms', icon: '📄', bg: '#F4F7F9', title: 'Terms of Service', desc: 'Rules for using Choosify products and community features.' },
+  { anchor: 'privacy', icon: '🔒', bg: '#F4F7F9', title: 'Privacy Policy', desc: 'How we collect, use, and protect your information.' },
+  { anchor: 'contact', icon: '✉', bg: '#F4F7F9', title: 'Contact Us', desc: 'Reach support, partnerships, or press — we respond fast.' },
+];
+
+/** Choosify.dc.html About — sticky left nav + light hero panel + company/legal rows */
 export function AboutPage() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      const el = document.getElementById(id);
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        return;
+      }
+    }
     window.scrollTo(0, 0);
-  }, []);
+  }, [location.hash]);
 
-  const featureCards = [
-    {
-      icon: <Compass className="w-6 h-6 text-orange-primary" />,
-      title: 'Brand Discovery',
-      desc: 'Discover vetted retail catalogs across Bangladesh. Sort alphabetically or filter down to certified outlets.'
-    },
-    {
-      icon: <Sparkles className="w-6 h-6 text-[#5C2AFE]" />,
-      title: 'Recommendations',
-      desc: 'Read highly-researched shopping guides, expert reviews, and editor-approved product lists.'
-    },
-    {
-      icon: <Layers className="w-6 h-6 text-emerald-500" />,
-      title: 'Product Comparison',
-      desc: 'Compare spec metrics side-by-side. Analyze pricing sheets across multiple sellers to secure the best rates.'
-    },
-    {
-      icon: <Zap className="w-6 h-6 text-amber-500" />,
-      title: 'Deals & Coupons',
-      desc: 'Unlock active seller promos, hot deals, and community-submitted voucher codes to save on every checkout.'
-    },
-    {
-      icon: <Users className="w-6 h-6 text-indigo-500" />,
-      title: 'Creator Marketplace',
-      desc: 'Follow trustworthy creators who share authentic video reviews, lookbooks, and hand-on tests.'
-    },
-    {
-      icon: <ShieldCheck className="w-6 h-6 text-rose-500" />,
-      title: 'Community Insights',
-      desc: 'Contribute rating reviews and verified purchase flags, helping other shoppers avoid online scams.'
-    }
-  ];
+  const activeHash = location.hash.replace('#', '') || 'about-top';
 
-  const timelineEvents = [
-    {
-      year: '2024',
-      title: 'Platform Foundation',
-      desc: 'Choosify.bd is launched as an independent price-comparison spreadsheet directory for tech gadgets.'
-    },
-    {
-      year: '2025',
-      title: 'Ecosystem Expansion',
-      desc: 'Integrated local fashion boutiques and beauty brands. Launched the verified claim badge system for sellers.'
-    },
-    {
-      year: '2026',
-      title: 'Creator Synergy',
-      desc: 'Deployed the native Influencer Directory and integrated retail checkout loops to automate Dhaka shipping.'
-    }
-  ];
+  const navLinkClass = (id: string) =>
+    cn(
+      'flex items-center gap-2 px-3 py-2 rounded-lg text-[12.5px] font-semibold transition-colors',
+      activeHash === id ? 'bg-[#FFF3EA] text-[#FF5B00]' : 'text-[#4B5563] hover:bg-[#F4F7F9]',
+    );
 
   return (
-    <div className="min-h-screen bg-[#F0F8FF] font-sans">
-      {/* 1. HERO SECTION */}
-      <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
-        <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full">
-          {/* Breadcrumbs */}
-          <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-black uppercase tracking-widest mb-6">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">About Us</span>
+    <div className="min-h-screen bg-white">
+      <div
+        id="about-top"
+        className="max-w-[1280px] mx-auto px-5 sm:px-10 py-6 pb-[60px] grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 lg:gap-8 items-start scroll-mt-[104px]"
+      >
+        <aside className="lg:sticky lg:top-[104px] flex flex-col gap-6 order-2 lg:order-1">
+          <div>
+            <div className="text-[10.5px] font-extrabold text-[#9AA0AC] tracking-wide mb-2.5">ABOUT CHOOSIFY</div>
+            <div className="flex flex-col gap-0.5">
+              {COMPANY_NAV.map((an) => (
+                <a key={an.id} href={an.href} className={navLinkClass(an.id)}>
+                  <span>{an.icon}</span>
+                  {an.label}
+                </a>
+              ))}
+            </div>
           </div>
+          <div>
+            <div className="text-[10.5px] font-extrabold text-[#9AA0AC] tracking-wide mb-2.5">LEGAL</div>
+            <div className="flex flex-col gap-0.5">
+              {LEGAL_NAV.map((an) => (
+                <a key={an.id} href={an.href} className={navLinkClass(an.id)}>
+                  <span>{an.icon}</span>
+                  {an.label}
+                </a>
+              ))}
+            </div>
+          </div>
+          <div className="bg-[#F4F7F9] rounded-xl p-4">
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <div className="w-[34px] h-[34px] rounded-lg bg-[#000435] flex items-center justify-center text-[15px] shrink-0">
+                🤖
+              </div>
+              <div>
+                <div className="text-xs font-extrabold text-[#1A1A2E]">Need Help?</div>
+                <div className="text-[10.5px] text-[#9AA0AC]">Our support team is here to assist you.</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/messages')}
+              className="w-full bg-white border border-[#E5E7EB] text-[#1A1A2E] py-2.5 rounded-lg text-[11.5px] font-bold cursor-pointer hover:bg-white/90"
+            >
+              Contact Support
+            </button>
+          </div>
+        </aside>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-            {/* Left Column */}
-            <div className="lg:col-span-7 space-y-4 text-left">
-              <span className="inline-block bg-[#FF5B00]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
-                Our Story & Vision
-              </span>
-              <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
-                About Choosify
+        <div className="order-1 lg:order-2 min-w-0">
+          <div className="bg-[#F4F7F9] rounded-[14px] p-6 md:p-8 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-6 items-center mb-8">
+            <div>
+              <div className="text-[11px] font-extrabold text-[#2323FF] tracking-wide mb-2.5">ABOUT CHOOSIFY</div>
+              <h1 className="text-[28px] md:text-[32px] font-extrabold leading-tight text-[#1A1A2E] mb-3.5">
+                Choose. Compare.
+                <br />
+                Decide <span className="text-[#2323FF]">Wisely.</span>
               </h1>
-              <p className="text-gray-300 text-sm md:text-base font-medium leading-relaxed max-w-xl">
-                Helping consumers discover trusted brands, products, creators, and deals. We are building Bangladesh's smartest product discovery platform.
+              <p className="text-[13px] text-[#4B5563] leading-relaxed m-0 mb-[22px]">
+                Choosify is Bangladesh&apos;s smart product discovery and decision-making platform. We help you explore
+                trusted products, compare prices, read real reviews, and make confident choices.
               </p>
-            </div>
-
-            {/* Right Column */}
-            <div className="lg:col-span-5 flex justify-center lg:justify-end">
-              <div className="bg-white/5 border border-white/10 rounded-[5px] p-6 max-w-sm w-full text-left backdrop-blur-xs relative overflow-hidden">
-                <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-orange-primary/10 rounded-full blur-2xl pointer-events-none" />
-                <h3 className="text-xs font-black uppercase tracking-wider text-white mb-2 flex items-center gap-2">
-                  <Heart size={16} className="text-orange-primary" />
-                  Ecosystem of Trust
-                </h3>
-                <p className="text-white/70 text-xs leading-relaxed font-semibold">
-                  We empower Bangladeshi buyers with crystal-clear comparison algorithms, preventing social commerce scams and celebrating authentic boutique shops.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. BODY CONTENT SECTION */}
-      <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] py-16 text-left">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-          
-          {/* Main Story & Core Sections (Left) */}
-          <div className="lg:col-span-8 space-y-16">
-            
-            {/* Section: Mission & Vision */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <h2 className="text-xl font-black text-navy uppercase tracking-tight italic">
-                  Our Mission
-                </h2>
-                <div className="h-0.5 w-16 bg-orange-primary mb-4" />
-                <p className="text-gray-600 text-xs md:text-sm leading-relaxed font-semibold">
-                  To establish absolute commercial transparency for consumers in Bangladesh by centralizing product data, tracking competitor pricing sheets, and vetting brand claims under a unified trust database.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <h2 className="text-xl font-black text-navy uppercase tracking-tight italic">
-                  Our Vision
-                </h2>
-                <div className="h-0.5 w-16 bg-orange-primary mb-4" />
-                <p className="text-gray-600 text-xs md:text-sm leading-relaxed font-semibold">
-                  To become the primary online starting point for any purchase decision in Bangladesh—helping millions of shoppers buy safely while supporting local artisans, verified creators, and authentic stores.
-                </p>
-              </div>
-            </div>
-
-            {/* Section: Why Choosify Exists */}
-            <div className="space-y-4">
-              <h2 className="text-xl md:text-2xl font-black text-navy uppercase tracking-tight italic">
-                Why Choosify Exists
-              </h2>
-              <div className="h-0.5 w-16 bg-orange-primary mb-4" />
-              <p className="text-gray-600 text-xs md:text-sm leading-relaxed font-semibold">
-                Online shopping in Bangladesh is highly vibrant but fragmented. Consumers face hundreds of Facebook pages, independent websites, and individual Instagram feeds daily. This leads to massive price discrepancies, listing errors, and unfortunately, widespread commercial scams.
-              </p>
-              <p className="text-gray-600 text-xs md:text-sm leading-relaxed font-semibold">
-                Choosify was created to organize this chaos. By matching specific items, indexing verified store outlets, compiling active deals, and embedding authentic influencer reviews, we empower buyers with the tools they need to compare parameters and decide confidently.
-              </p>
-            </div>
-
-            {/* Section: How Choosify Works */}
-            <div className="space-y-6">
-              <h2 className="text-xl md:text-2xl font-black text-navy uppercase tracking-tight italic">
-                How Choosify Works
-              </h2>
-              <div className="h-0.5 w-16 bg-[#5C2AFE] mb-6" />
-              
-              <div className="space-y-6 text-xs md:text-sm">
-                <div className="border-l-2 border-orange-primary pl-4 space-y-1.5">
-                  <h4 className="font-black text-navy uppercase tracking-wider">For Consumers</h4>
-                  <p className="text-gray-500 font-semibold leading-relaxed">
-                    Search catalogs effortlessly, compare specifications, utilize checkout routes, unlock promotional codes, and view authentic video reviews before spending a single Taka.
-                  </p>
-                </div>
-
-                <div className="border-l-2 border-[#5C2AFE] pl-4 space-y-1.5">
-                  <h4 className="font-black text-navy uppercase tracking-wider">For Brands</h4>
-                  <p className="text-gray-500 font-semibold leading-relaxed">
-                    Claim your official profile page, upload SKU details, showcase your outlet maps, verify your BSTI certifications, and deploy targeted campaigns to active buyers.
-                  </p>
-                </div>
-
-                <div className="border-l-2 border-emerald-500 pl-4 space-y-1.5">
-                  <h4 className="font-black text-navy uppercase tracking-wider">For Creators</h4>
-                  <p className="text-gray-500 font-semibold leading-relaxed">
-                    Host your video lookbooks and reviews in our central directory, build direct audience followings, and earn passive commissions via affiliate deals.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Section: Feature Cards Grid (6 cards) */}
-            <div className="space-y-6">
-              <h2 className="text-xl md:text-2xl font-black text-navy uppercase tracking-tight italic">
-                Our Core Features
-              </h2>
-              <div className="h-0.5 w-16 bg-orange-primary mb-6" />
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featureCards.map((feat, idx) => (
-                  <div key={idx} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 hover:border-orange-primary/20 transition-all shadow-xs flex flex-col justify-between">
-                    <div>
-                      <div className="mb-4">{feat.icon}</div>
-                      <h4 className="text-xs font-black text-navy uppercase tracking-wider mb-2">
-                        {feat.title}
-                      </h4>
-                      <p className="text-gray-500 text-[11px] leading-relaxed font-semibold">
-                        {feat.desc}
-                      </p>
+              <div className="flex gap-6 flex-wrap">
+                {STATS.map((st) => (
+                  <div key={st.label} className="text-center">
+                    <div
+                      className="w-11 h-11 rounded-full flex items-center justify-center text-lg mx-auto mb-2"
+                      style={{ background: st.bg }}
+                    >
+                      {st.icon}
                     </div>
+                    <div className="text-base font-extrabold text-[#1A1A2E]">{st.value}</div>
+                    <div className="text-[10.5px] text-[#9AA0AC]">{st.label}</div>
                   </div>
                 ))}
               </div>
             </div>
-
+            <div className="w-full h-[200px] md:h-[220px] rounded-xl overflow-hidden bg-[#000435]">
+              <img
+                src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80"
+                alt=""
+                className="w-full h-full object-cover opacity-90"
+              />
+            </div>
           </div>
 
-          {/* Sidebar Info, Timeline & Core Values (Right) */}
-          <div className="lg:col-span-4 space-y-12">
-            
-            {/* Core Values */}
-            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 shadow-xs space-y-4">
-              <h3 className="text-xs font-black text-navy uppercase tracking-widest italic pb-2 border-b border-[#e8edf2] flex items-center gap-2">
-                <Award size={14} className="text-orange-primary" />
-                Core Values
-              </h3>
-              
-              <div className="space-y-4 text-xs">
-                <div>
-                  <h4 className="font-black text-navy uppercase tracking-wider mb-1">Authenticity First</h4>
-                  <p className="text-gray-500 font-semibold leading-relaxed">We strictly prohibit counterfeit listings and enforce verified claim badges.</p>
+          <div className="text-[19px] font-extrabold text-[#1A1A2E] mb-4">Why Choosify?</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-9">
+            {WHY.map((wc) => (
+              <div key={wc.title} className="bg-white border border-[#E8EDF2] rounded-[10px] p-[18px]">
+                <div
+                  className="w-9 h-9 rounded-[9px] flex items-center justify-center text-base mb-3"
+                  style={{ background: wc.bg }}
+                >
+                  {wc.icon}
                 </div>
-                <div>
-                  <h4 className="font-black text-navy uppercase tracking-wider mb-1">Empower Buyers</h4>
-                  <p className="text-gray-500 font-semibold leading-relaxed">We design neutral, data-driven comparison layouts that do not prioritize sponsored bias.</p>
-                </div>
-                <div>
-                  <h4 className="font-black text-navy uppercase tracking-wider mb-1">Local Celebration</h4>
-                  <p className="text-gray-500 font-semibold leading-relaxed">We provide premium placements to home-grown boutiques, highlighting Bangladeshi weavers and creators.</p>
-                </div>
+                <div className="text-[12.5px] font-bold text-[#1A1A2E] mb-1.5">{wc.title}</div>
+                <div className="text-[11px] text-[#9AA0AC] leading-relaxed">{wc.desc}</div>
               </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Platform Timeline */}
-            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 shadow-xs space-y-6">
-              <h3 className="text-xs font-black text-navy uppercase tracking-widest italic pb-2 border-b border-[#e8edf2] flex items-center gap-2">
-                <Calendar size={14} className="text-[#5C2AFE]" />
-                Platform Timeline
-              </h3>
-              
-              <div className="space-y-6 relative border-l border-gray-100 pl-4 ml-2">
-                {timelineEvents.map((evt, idx) => (
-                  <div key={idx} className="relative space-y-1">
-                    <span className="absolute -left-[25px] top-1 w-3.5 h-3.5 rounded-full bg-white border-2 border-orange-primary flex items-center justify-center">
-                      <div className="w-1 h-1 bg-orange-primary rounded-full" />
-                    </span>
-                    <span className="block text-[10px] font-black text-orange-primary italic font-mono">{evt.year}</span>
-                    <h4 className="text-xs font-black text-navy uppercase tracking-wider">{evt.title}</h4>
-                    <p className="text-gray-500 text-[10px] leading-relaxed font-semibold">{evt.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Explore Call to Action */}
-            <div className="bg-gradient-to-br from-navy to-[#000435] border border-white/10 rounded-[5px] p-6 text-white text-center relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 rounded-full blur-xl pointer-events-none" />
-              <h3 className="text-xs font-black uppercase tracking-widest italic mb-2">Explore Choosify</h3>
-              <p className="text-white/60 text-[10px] leading-relaxed font-semibold mb-4">
-                Discover brands and verify options right now inside our standard categories.
-              </p>
-              <button 
-                onClick={() => navigate('/products')}
-                className="w-full py-2.5 bg-orange-primary hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer border-none shadow-md group"
+          <div className="flex flex-col gap-3.5 mb-7">
+            {COMPANY_ROWS.map((cr) => (
+              <div
+                key={cr.anchor}
+                id={cr.anchor}
+                className="bg-white border border-[#E8EDF2] rounded-xl px-[22px] py-5 grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-5 items-center scroll-mt-[104px]"
               >
-                Start Exploring
-                <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-              </button>
-            </div>
-
+                <div
+                  className="w-11 h-11 rounded-full flex items-center justify-center text-lg shrink-0"
+                  style={{ background: cr.bg }}
+                >
+                  {cr.icon}
+                </div>
+                <div>
+                  <div className="text-[14.5px] font-extrabold text-[#1A1A2E] mb-1">{cr.title}</div>
+                  <div className="text-xs text-[#9AA0AC] leading-relaxed mb-1.5">{cr.desc}</div>
+                  <Link to="/contact" className="text-[11.5px] font-bold text-[#2323FF]">
+                    {cr.cta} →
+                  </Link>
+                </div>
+                <span className="hidden sm:inline text-lg text-[#9AA0AC]">›</span>
+              </div>
+            ))}
           </div>
 
+          <div className="text-[10.5px] font-extrabold text-[#9AA0AC] tracking-wide mb-3.5">LEGAL</div>
+          <div className="flex flex-col gap-3.5">
+            {LEGAL_ROWS.map((cr) => (
+              <div
+                key={cr.anchor}
+                id={cr.anchor}
+                className="bg-white border border-[#E8EDF2] rounded-xl px-[22px] py-5 grid grid-cols-[auto_1fr_auto] gap-5 items-center scroll-mt-[104px]"
+              >
+                <div
+                  className="w-11 h-11 rounded-full flex items-center justify-center text-lg shrink-0"
+                  style={{ background: cr.bg }}
+                >
+                  {cr.icon}
+                </div>
+                <div>
+                  <div className="text-[14.5px] font-extrabold text-[#1A1A2E] mb-1">{cr.title}</div>
+                  <div className="text-xs text-[#9AA0AC] leading-relaxed">{cr.desc}</div>
+                </div>
+                <span className="text-lg text-[#9AA0AC]">›</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

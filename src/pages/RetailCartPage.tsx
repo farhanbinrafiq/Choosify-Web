@@ -2,14 +2,24 @@ import React from 'react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
-import { Plus, Minus, Trash2, ShoppingBag, ArrowRight, ShieldCheck, ChevronRight, Truck, Store, AlertCircle } from 'lucide-react';
+import {
+  Plus,
+  Minus,
+  Trash2,
+  ShoppingBag,
+  ArrowRight,
+  ShieldCheck,
+  Truck,
+  Store,
+  AlertCircle,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
+/** Choosify.dc.html-aligned cart — compact navy header + light #F4F7F9 body (matches Checkout) */
 export function RetailCartPage() {
   const { retailCart, updateCartQuantity, removeFromCart, clearCart } = useGlobalState();
   const navigate = useNavigate();
 
-  // Group items by seller
   const groupedCart = retailCart.reduce((acc: { [key: string]: typeof retailCart }, item) => {
     const sellerId = item.product.sellerId || 'seller-general';
     if (!acc[sellerId]) acc[sellerId] = [];
@@ -21,22 +31,25 @@ export function RetailCartPage() {
 
   const calculateSellerSubtotal = (items: typeof retailCart) => {
     return items.reduce((sum, item) => {
-      const price = item.selectedVariant && item.selectedVariant.price !== undefined ? item.selectedVariant.price : item.product.price;
-      return sum + (price * item.quantity);
+      const price =
+        item.selectedVariant && item.selectedVariant.price !== undefined
+          ? item.selectedVariant.price
+          : item.product.price;
+      return sum + price * item.quantity;
     }, 0);
   };
 
-  // Base Delivery fee: ৳120 per seller as they are separate deliveries and packages
   const DELIVERY_FEE_PER_SELLER = 120;
   const deliveryTotal = sellerIds.length * DELIVERY_FEE_PER_SELLER;
 
   const subtotal = retailCart.reduce((sum, item) => {
-    const price = item.selectedVariant && item.selectedVariant.price !== undefined ? item.selectedVariant.price : item.product.price;
-    return sum + (price * item.quantity);
+    const price =
+      item.selectedVariant && item.selectedVariant.price !== undefined
+        ? item.selectedVariant.price
+        : item.product.price;
+    return sum + price * item.quantity;
   }, 0);
   const aggregateTotal = subtotal + deliveryTotal;
-
-  // COD is eligible for retail orders under ৳150,000
   const isCODEligible = aggregateTotal < 150000;
 
   const handleQtyChange = (item: any, amount: number) => {
@@ -44,7 +57,12 @@ export function RetailCartPage() {
     if (newQty <= 0) {
       removeFromCart(item.id);
     } else {
-      const itemStock = item.selectedVariant && item.selectedVariant.stock !== undefined ? item.selectedVariant.stock : (item.product.stock !== undefined ? item.product.stock : 58);
+      const itemStock =
+        item.selectedVariant && item.selectedVariant.stock !== undefined
+          ? item.selectedVariant.stock
+          : item.product.stock !== undefined
+            ? item.product.stock
+            : 58;
       if (itemStock !== undefined && newQty > itemStock) {
         toast.error(`Only ${itemStock} units currently available for this selection.`);
         return;
@@ -59,11 +77,17 @@ export function RetailCartPage() {
       return;
     }
 
-    // Verify stock before checkout
     for (const item of retailCart) {
-      const itemStock = item.selectedVariant && item.selectedVariant.stock !== undefined ? item.selectedVariant.stock : (item.product.stock !== undefined ? item.product.stock : 58);
+      const itemStock =
+        item.selectedVariant && item.selectedVariant.stock !== undefined
+          ? item.selectedVariant.stock
+          : item.product.stock !== undefined
+            ? item.product.stock
+            : 58;
       if (itemStock === 0) {
-        toast.error(`"${item.product.title}" is out of stock in this combination! Please remove before checkout.`);
+        toast.error(
+          `"${item.product.title}" is out of stock in this combination! Please remove before checkout.`,
+        );
         return;
       }
     }
@@ -72,108 +96,141 @@ export function RetailCartPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed">
-      {/* Hero Header */}
-      <div className="w-full bg-[#0A0B1E] relative overflow-hidden shrink-0 border-b border-white/5">
-        <div className="absolute inset-0 hero-gradient opacity-95 pointer-events-none" />
-        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
-          <div className="flex flex-col justify-center">
-            <div className="flex items-center gap-2 text-gray-400 text-[9px] font-black uppercase tracking-widest mb-1 pointer-events-none">
-              <Link to="/" className="hover:text-white transition-all pointer-events-auto">Home</Link>
-              <ChevronRight size={10} />
-              <span className="text-orange-primary">Shopping Cart</span>
-            </div>
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white uppercase tracking-tighter italic mb-1 leading-none">
-              Retail Shopping <span className="text-orange-primary">Cart</span>
-            </h1>
-            <p className="text-gray-400 text-[10px] font-medium leading-none mt-1">
-              Manage your retail items, compute grouped seller-level delivery, and checkout securely.
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <header className="bg-[#000435] text-white px-5 sm:px-10 py-7">
+        <nav className="text-xs text-white/45 mb-3" aria-label="Breadcrumb">
+          <Link to="/" className="hover:text-white/80">
+            Home
+          </Link>
+          <span className="mx-1.5">›</span>
+          <span className="text-[#FF5B00]">Shopping Cart</span>
+        </nav>
+        <h1 className="text-[22px] sm:text-[26px] font-extrabold tracking-tight mb-1">
+          Shopping Cart
+        </h1>
+        <p className="text-[12.5px] text-white/55 m-0">
+          Review items by seller, then checkout securely.
+        </p>
+      </header>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-12 flex-1">
+      <div className="max-w-[1100px] mx-auto w-full px-5 sm:px-8 py-8 flex-1">
         {retailCart.length === 0 ? (
-          <div className="bg-white border border-gray-100 rounded-[5px] p-16 text-center shadow-sm max-w-2xl mx-auto flex flex-col items-center gap-6">
-            <div className="w-24 h-24 bg-orange-primary/5 rounded-full flex items-center justify-center text-orange-primary">
-              <ShoppingBag size={40} className="animate-bounce" />
+          <div className="bg-white border border-[#E8EDF2] rounded-xl p-12 sm:p-16 text-center shadow-sm max-w-xl mx-auto flex flex-col items-center gap-5">
+            <div className="w-20 h-20 bg-[#FFF3EA] rounded-full flex items-center justify-center text-[#FF5B00]">
+              <ShoppingBag size={36} />
             </div>
             <div>
-              <h3 className="text-2xl font-black text-navy uppercase italic tracking-tighter mb-2">Your Retail Cart Is Empty</h3>
-              <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Add personal items to start checking out</p>
+              <h3 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-1.5">
+                Your cart is empty
+              </h3>
+              <p className="text-[12.5px] text-[#9AA0AC] font-semibold">
+                Add products to start checking out
+              </p>
             </div>
-            <Link to="/products">
-              <button className="bg-navy hover:bg-orange-primary text-white text-[11px] font-black uppercase tracking-[0.2em] px-8 py-4 rounded-full transition-all italic">
-                Return To Catalog
-              </button>
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 bg-[#FF5B00] hover:bg-[#E8500A] text-white text-xs font-bold px-6 py-3 rounded-lg transition-colors"
+            >
+              Browse products <ArrowRight size={14} />
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items List */}
-            <div className="lg:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-5">
               {sellerIds.map((sellerId) => {
                 const items = groupedCart[sellerId];
                 const sellerName = items[0].product.brand || 'General Vendor';
                 const sellerSubtotal = calculateSellerSubtotal(items);
 
                 return (
-                  <div key={sellerId} className="bg-white border border-gray-100 rounded-[5px] overflow-hidden shadow-sm transition-all hover:shadow-md">
-                    {/* Seller Header Section */}
-                    <div className="bg-navy/5 border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-navy flex items-center justify-center text-white">
+                  <div
+                    key={sellerId}
+                    className="bg-white border border-[#E8EDF2] rounded-xl overflow-hidden shadow-sm"
+                  >
+                    <div className="bg-[#F4F7F9] border-b border-[#E8EDF2] px-5 py-3.5 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-[#000435] flex items-center justify-center text-white shrink-0">
                           <Store size={14} />
                         </div>
-                        <div>
-                          <h3 className="text-xs font-black text-navy uppercase tracking-widest italic">{sellerName} Outlet</h3>
-                          <span className="text-[9px] font-bold text-gray-400 uppercase">Fulfillment Stream • Dhaka Warehouse</span>
+                        <div className="min-w-0">
+                          <h3 className="text-[13px] font-extrabold text-[#1A1A2E] truncate">
+                            {sellerName}
+                          </h3>
+                          <span className="text-[10.5px] font-semibold text-[#9AA0AC]">
+                            Fulfillment · Dhaka warehouse
+                          </span>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block leading-none mb-1">Seller Subtotal</span>
-                        <span className="text-sm font-black text-navy italic">৳{sellerSubtotal.toLocaleString()}</span>
+                      <div className="text-right shrink-0">
+                        <span className="text-[10px] font-bold text-[#9AA0AC] block leading-none mb-1">
+                          Seller subtotal
+                        </span>
+                        <span className="text-sm font-extrabold text-[#1A1A2E]">
+                          ৳{sellerSubtotal.toLocaleString()}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Group Items */}
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-[#E8EDF2]">
                       {items.map((item) => {
                         const product = item.product;
-                        const itemPrice = item.selectedVariant && item.selectedVariant.price !== undefined ? item.selectedVariant.price : item.product.price;
-                        const itemStock = item.selectedVariant && item.selectedVariant.stock !== undefined ? item.selectedVariant.stock : (product.stock !== undefined ? product.stock : 58);
-                        const isStockAvailable = itemStock > 0;
+                        const itemPrice =
+                          item.selectedVariant && item.selectedVariant.price !== undefined
+                            ? item.selectedVariant.price
+                            : item.product.price;
+                        const itemStock =
+                          item.selectedVariant && item.selectedVariant.stock !== undefined
+                            ? item.selectedVariant.stock
+                            : product.stock !== undefined
+                              ? product.stock
+                              : 58;
 
                         return (
-                          <div key={item.id} className="p-6 flex flex-col sm:flex-row gap-6 hover:bg-gray-50/50 transition-all">
-                            {/* Product Image */}
-                            <div className="w-20 h-20 bg-white border border-gray-100 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
-                              <img src={item.selectedVariant?.image || product.image} className="w-full h-full object-contain" alt={product.title} />
+                          <div
+                            key={item.id}
+                            className="p-5 flex flex-col sm:flex-row gap-4 hover:bg-[#F4F7F9]/60 transition-colors"
+                          >
+                            <div className="w-20 h-20 bg-white border border-[#E8EDF2] rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
+                              <img
+                                src={item.selectedVariant?.image || product.image}
+                                className="w-full h-full object-contain"
+                                alt={product.title}
+                              />
                             </div>
 
-                            {/* Content info */}
-                            <div className="flex-1 flex flex-col justify-between">
+                            <div className="flex-1 flex flex-col justify-between min-w-0">
                               <div>
                                 <div className="flex justify-between items-start gap-2 mb-1">
-                                  <Link to={`/products/${product.id}`} className="text-[13px] font-black text-navy uppercase italic tracking-tight hover:text-orange-primary transition-colors line-clamp-1">
+                                  <Link
+                                    to={`/products/${product.id}`}
+                                    className="text-[13px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] transition-colors line-clamp-2"
+                                  >
                                     {product.title}
                                   </Link>
-                                  <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                                  <button
+                                    type="button"
+                                    onClick={() => removeFromCart(item.id)}
+                                    className="text-[#9AA0AC] hover:text-red-500 transition-colors bg-transparent border-0 cursor-pointer p-0"
+                                    aria-label="Remove item"
+                                  >
                                     <Trash2 size={16} />
                                   </button>
                                 </div>
-                                
+
                                 {item.selectedVariant && (
-                                  <div className="flex flex-wrap gap-1 mt-1 mb-1.5 align-middle">
-                                    {Object.entries(item.selectedVariant.attributes).map(([key, value]) => (
-                                      <span key={key} className="bg-orange-primary/10 text-orange-deep text-[8px] font-black uppercase px-2 py-0.5 rounded tracking-wide italic leading-none">
-                                        {key}: {value as string}
-                                      </span>
-                                    ))}
+                                  <div className="flex flex-wrap gap-1 mt-1 mb-1.5">
+                                    {Object.entries(item.selectedVariant.attributes).map(
+                                      ([key, value]) => (
+                                        <span
+                                          key={key}
+                                          className="bg-[#FFF3EA] text-[#EB4501] text-[10px] font-bold px-2 py-0.5 rounded"
+                                        >
+                                          {key}: {value as string}
+                                        </span>
+                                      ),
+                                    )}
                                     {item.selectedVariant.sku && (
-                                      <span className="bg-gray-100 text-gray-500 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase font-mono">
+                                      <span className="bg-[#F4F7F9] text-[#9AA0AC] text-[10px] font-semibold px-1.5 py-0.5 rounded font-mono">
                                         {item.selectedVariant.sku}
                                       </span>
                                     )}
@@ -181,40 +238,54 @@ export function RetailCartPage() {
                                 )}
 
                                 <div className="flex items-center gap-3 mb-2">
-                                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{product.category}</span>
-                                  <span className={cn(
-                                    "text-[8px] font-black px-2 py-0.5 rounded uppercase italic",
-                                    itemStock === 0 ? "bg-red-50 text-red-500" : "bg-green-50 text-green-600"
-                                  )}>
-                                    {itemStock === 0 ? 'Out of Stock' : `Only ${itemStock} Left`}
+                                  <span className="text-[11px] font-semibold text-[#9AA0AC]">
+                                    {product.category}
+                                  </span>
+                                  <span
+                                    className={cn(
+                                      'text-[10px] font-bold px-2 py-0.5 rounded',
+                                      itemStock === 0
+                                        ? 'bg-red-50 text-red-500'
+                                        : 'bg-green-50 text-green-700',
+                                    )}
+                                  >
+                                    {itemStock === 0 ? 'Out of stock' : `${itemStock} left`}
                                   </span>
                                 </div>
                               </div>
 
-                              <div className="flex items-center justify-between gap-4 pt-2">
-                                {/* Quantity Toggles */}
-                                <div className="flex items-center gap-1 border border-gray-100 rounded-full bg-white p-1">
-                                  <button 
+                              <div className="flex items-center justify-between gap-4 pt-1">
+                                <div className="flex items-center gap-1 border border-[#E8EDF2] rounded-lg bg-white p-1">
+                                  <button
+                                    type="button"
                                     onClick={() => handleQtyChange(item, -1)}
-                                    className="w-7 h-7 rounded-full hover:bg-gray-50 flex items-center justify-center text-gray-400 hover:text-navy transition-colors"
+                                    className="w-7 h-7 rounded-md hover:bg-[#F4F7F9] flex items-center justify-center text-[#9AA0AC] hover:text-[#1A1A2E] transition-colors border-0 bg-transparent cursor-pointer"
                                   >
                                     <Minus size={12} />
                                   </button>
-                                  <span className="text-xs font-black px-3 text-navy italic">{item.quantity}</span>
-                                  <button 
+                                  <span className="text-xs font-extrabold px-3 text-[#1A1A2E]">
+                                    {item.quantity}
+                                  </span>
+                                  <button
+                                    type="button"
                                     disabled={itemStock !== undefined && item.quantity >= itemStock}
                                     onClick={() => handleQtyChange(item, 1)}
-                                    className="w-7 h-7 rounded-full hover:bg-gray-50 flex items-center justify-center text-gray-400 hover:text-navy transition-colors disabled:opacity-30"
+                                    className="w-7 h-7 rounded-md hover:bg-[#F4F7F9] flex items-center justify-center text-[#9AA0AC] hover:text-[#1A1A2E] transition-colors disabled:opacity-30 border-0 bg-transparent cursor-pointer"
                                   >
                                     <Plus size={12} />
                                   </button>
                                 </div>
 
-                                {/* Extended Price */}
                                 <div className="text-right">
-                                  <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest block leading-none mb-1">EXT. TOTAL</span>
-                                  <span className="text-[14px] font-black text-orange-primary italic font-mono">৳{(itemPrice * item.quantity).toLocaleString()}</span>
-                                  <span className="text-[9px] text-gray-400 block font-mono mt-0.5">৳{itemPrice.toLocaleString()} / pc</span>
+                                  <span className="text-[10px] font-bold text-[#9AA0AC] block leading-none mb-1">
+                                    Line total
+                                  </span>
+                                  <span className="text-[14px] font-extrabold text-[#FF5B00]">
+                                    ৳{(itemPrice * item.quantity).toLocaleString()}
+                                  </span>
+                                  <span className="text-[10.5px] text-[#9AA0AC] block mt-0.5">
+                                    ৳{itemPrice.toLocaleString()} / pc
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -223,106 +294,123 @@ export function RetailCartPage() {
                       })}
                     </div>
 
-                    {/* Group Delivery Breakdown */}
-                    <div className="bg-[#F8FAFC]/55 border-t border-gray-100 px-6 py-4 flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
-                      <Truck size={14} className="text-navy" />
-                      <span>Delivery Option: Paperfly Dispatch (৳{DELIVERY_FEE_PER_SELLER})</span>
+                    <div className="bg-[#F4F7F9] border-t border-[#E8EDF2] px-5 py-3 flex items-center gap-2 text-[11.5px] font-semibold text-[#4B5563]">
+                      <Truck size={14} className="text-[#000435]" />
+                      <span>Delivery: Paperfly dispatch (৳{DELIVERY_FEE_PER_SELLER})</span>
                     </div>
                   </div>
                 );
               })}
 
-              {/* Action utilities */}
-              <div className="flex items-center justify-between pt-4">
-                <Link to="/products" className="text-xs font-black text-navy hover:text-orange-primary transition-colors uppercase tracking-widest italic flex items-center gap-1">
-                  ← Continue Shopping
+              <div className="flex items-center justify-between pt-1">
+                <Link
+                  to="/products"
+                  className="text-[12.5px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] transition-colors"
+                >
+                  ← Continue shopping
                 </Link>
-                <button 
+                <button
+                  type="button"
                   onClick={() => {
                     clearCart();
                     toast.success('Retail Cart Cleared successfully.');
                   }}
-                  className="text-xs font-black text-red-500 hover:text-red-600 transition-colors uppercase tracking-widest italic"
+                  className="text-[12.5px] font-bold text-red-500 hover:text-red-600 transition-colors bg-transparent border-0 cursor-pointer"
                 >
-                  Clear Entire Cart
+                  Clear cart
                 </button>
               </div>
             </div>
 
-            {/* Sidebar Summary Card */}
-            <div className="space-y-6">
-              <div className="bg-white border border-gray-100 rounded-[28px] p-8 shadow-sm space-y-6">
-                <h3 className="text-lg font-black text-navy uppercase italic tracking-tighter border-b pb-4">Order Summary</h3>
+            <div className="space-y-4">
+              <div className="bg-white border border-[#E8EDF2] rounded-xl p-6 shadow-sm space-y-5">
+                <h3 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight border-b border-[#E8EDF2] pb-3.5">
+                  Order summary
+                </h3>
 
-                {/* Subtotals & Fees */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
-                    <span>Retail Card Subtotal</span>
-                    <span className="text-navy">৳{subtotal.toLocaleString()}</span>
+                <div className="space-y-3.5">
+                  <div className="flex justify-between items-center text-[12.5px] font-semibold text-[#4B5563]">
+                    <span>Subtotal</span>
+                    <span className="font-extrabold text-[#1A1A2E]">৳{subtotal.toLocaleString()}</span>
                   </div>
 
-                  <div className="flex justify-between items-start text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
+                  <div className="flex justify-between items-start text-[12.5px] font-semibold text-[#4B5563]">
                     <div>
-                      <span>Parcel Freight Shipping</span>
-                      <p className="text-[8px] text-gray-300 font-bold lowercase italic tracking-normal">Grouped per seller ({sellerIds.length} Packages)</p>
+                      <span>Shipping</span>
+                      <p className="text-[10.5px] text-[#9AA0AC] font-medium mt-0.5">
+                        {sellerIds.length} package{sellerIds.length === 1 ? '' : 's'}
+                      </p>
                     </div>
-                    <span className="text-navy">৳{deliveryTotal.toLocaleString()}</span>
+                    <span className="font-extrabold text-[#1A1A2E]">
+                      ৳{deliveryTotal.toLocaleString()}
+                    </span>
                   </div>
 
-                  {/* Cash on Delivery Eligibility */}
-                  <div className={cn(
-                    "flex items-start gap-3 p-4 rounded-2xl border text-[9px] font-black uppercase tracking-wider italic",
-                    isCODEligible ? "bg-green-50/50 border-green-100 text-green-700" : "bg-red-50/50 border-red-100 text-red-600"
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-start gap-3 p-3.5 rounded-lg border text-[11.5px] font-semibold',
+                      isCODEligible
+                        ? 'bg-green-50/70 border-green-100 text-green-800'
+                        : 'bg-red-50/70 border-red-100 text-red-700',
+                    )}
+                  >
                     {isCODEligible ? (
                       <>
                         <ShieldCheck size={18} className="shrink-0 text-green-600" />
                         <div>
-                          <span>COD Eligible</span>
-                          <p className="text-[7.5px] font-bold text-green-500/80 tracking-normal lowercase italic">This checkout qualifies for Cash on Delivery support.</p>
+                          <span className="font-bold">COD eligible</span>
+                          <p className="text-[10.5px] font-medium text-green-700/80 mt-0.5">
+                            This checkout qualifies for Cash on Delivery.
+                          </p>
                         </div>
                       </>
                     ) : (
                       <>
                         <AlertCircle size={18} className="shrink-0 text-red-500" />
                         <div>
-                          <span>COD High Value Limit Exceeded</span>
-                          <p className="text-[7.5px] font-bold text-red-500/80 tracking-normal lowercase italic">Orders over ৳150,000 require business prepayment or manual confirmation.</p>
+                          <span className="font-bold">COD limit exceeded</span>
+                          <p className="text-[10.5px] font-medium text-red-600/80 mt-0.5">
+                            Orders over ৳150,000 require prepayment or confirmation.
+                          </p>
                         </div>
                       </>
                     )}
                   </div>
 
-                  <div className="border-t pt-4 flex justify-between items-center font-black italic">
-                    <span className="text-xs uppercase tracking-widest text-[#0A0A1F]">Grand Total</span>
-                    <span className="text-2xl text-orange-primary tracking-tight">৳{aggregateTotal.toLocaleString()}</span>
+                  <div className="border-t border-[#E8EDF2] pt-3.5 flex justify-between items-center">
+                    <span className="text-[12.5px] font-bold text-[#1A1A2E]">Grand total</span>
+                    <span className="text-2xl font-extrabold text-[#FF5B00] tracking-tight">
+                      ৳{aggregateTotal.toLocaleString()}
+                    </span>
                   </div>
                 </div>
 
-                {/* Proceed Checkout button */}
                 <button
+                  type="button"
                   onClick={handleProceedToCheckout}
-                  className="w-full h-14 bg-orange-primary hover:bg-navy text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-full flex items-center justify-between px-8 shadow-lg shadow-orange-primary/10 transition-all italic hover:scale-[1.01] active:scale-95"
+                  className="w-full h-12 bg-[#FF5B00] hover:bg-[#E8500A] text-white text-[13px] font-bold rounded-lg flex items-center justify-between px-5 transition-colors cursor-pointer border-0"
                 >
-                  <span>Checkout Retail Cart</span>
+                  <span>Proceed to checkout</span>
                   <ArrowRight size={16} />
                 </button>
 
-                <p className="text-[8.5px] font-bold text-gray-400 leading-relaxed text-center italic">
-                  Complete local fast parcel service. Standard NID-verification is pre-configured on checkouts for safety.
+                <p className="text-[10.5px] font-medium text-[#9AA0AC] leading-relaxed text-center m-0">
+                  Verified suppliers and secure Cash-on-Delivery logistics nationwide.
                 </p>
               </div>
 
-              {/* Secure Trust Badge */}
-              <div className="bg-navy p-6 rounded-[5px] text-white flex gap-4 items-center">
-                <ShieldCheck size={32} className="text-orange-primary shrink-0" />
+              <div className="bg-[#000435] p-5 rounded-xl text-white flex gap-3.5 items-center">
+                <ShieldCheck size={28} className="text-[#FF5B00] shrink-0" />
                 <div>
-                  <h4 className="text-[10px] font-black uppercase tracking-widest italic leading-none mb-1">Shoosify.bd Secure Guaranteed</h4>
-                  <p className="text-[8px] text-white/60 font-medium leading-relaxed">Verified suppliers, active disputes monitors, secure Cash-on-Delivery logistics protocols nationwide.</p>
+                  <h4 className="text-[12.5px] font-extrabold leading-none mb-1.5">
+                    Choosify secure guarantee
+                  </h4>
+                  <p className="text-[10.5px] text-white/60 font-medium leading-relaxed m-0">
+                    Verified suppliers, dispute monitoring, and COD protocols nationwide.
+                  </p>
                 </div>
               </div>
             </div>
-
           </div>
         )}
       </div>

@@ -56,13 +56,13 @@ export const ModernCarousel: React.FC = () => {
               </h2>
               <div className="flex items-center gap-2">
                  <div className="w-0.5 h-4 bg-[#E65100]" />
-                 <p className="text-[10px] font-black text-[#0A0A1F]/60 uppercase tracking-[0.3em] italic">
+                 <p className="text-[12px] font-semibold text-[#1A1A2E]/60 tracking-tight">
                     CURATED PREMIUM SELECTION 2024
                  </p>
               </div>
            </div>
            
-           <Link to="/brands" className="hidden md:flex items-center gap-2 px-8 py-3.5 bg-white border border-[#0A0A1F]/10 rounded-full text-[#0A0A1F] text-[10px] font-black uppercase tracking-widest italic hover:bg-[#0A0A1F] hover:text-white transition-all shadow-sm">
+           <Link to="/brands" className="hidden md:flex items-center gap-2 px-6 py-3 bg-white border border-[#E8EDF2] rounded-lg text-[#1A1A2E] text-[13px] font-bold tracking-tight hover:bg-[#000435] hover:text-white transition-all shadow-sm">
              VIEW ALL BRANDS
              <ArrowUpRight size={14} className="text-[#6B4BFF]" />
            </Link>
@@ -115,7 +115,7 @@ export const ModernCarousel: React.FC = () => {
                 {/* Content for Inactive (Vertical Text) */}
                 {!isActive && (
                    <div className="absolute inset-x-0 bottom-12 flex justify-center translate-y-10 group-hover:translate-y-0 transition-transform">
-                      <span className="text-white/80 text-[11px] font-black uppercase tracking-[0.5em] italic origin-center rotate-[-90deg] whitespace-nowrap">
+                      <span className="text-white/80 text-[12px] font-bold tracking-tight origin-center rotate-[-90deg] whitespace-nowrap">
                          {brand.name}
                       </span>
                    </div>
@@ -133,7 +133,7 @@ export const ModernCarousel: React.FC = () => {
                        <div className="w-8 h-8 rounded-full bg-[#E65100] flex items-center justify-center text-white shadow-xl">
                           <Zap size={18} className="fill-current" />
                        </div>
-                       <span className="text-[11px] font-black text-white uppercase tracking-[0.2em] italic">TOP VERIFIED</span>
+                       <span className="text-[12px] font-bold text-white tracking-tight">Top verified</span>
                     </div>
 
                     <h3 className="text-6xl md:text-[92px] font-black text-white italic tracking-tighter uppercase mb-6 leading-none">
@@ -152,7 +152,7 @@ export const ModernCarousel: React.FC = () => {
                          }}
                          className="flex items-center gap-4 px-10 py-4 bg-white/5 backdrop-blur-sm border-2 border-white/20 hover:border-white transition-all rounded-full group/btn"
                        >
-                          <span className="text-[12px] font-black text-white uppercase tracking-[0.3em] italic">EXPLORE BRAND</span>
+                          <span className="text-[13px] font-bold text-white tracking-tight">Explore brand</span>
                           <ArrowUpRight size={20} className="text-white group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
                        </button>
                     </div>

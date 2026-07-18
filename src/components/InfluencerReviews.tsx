@@ -494,8 +494,7 @@ export function InfluencerReviews({
           <span className="w-5 h-[0.5px] bg-[#21262D]" />
         </p>
 
-        {/* Dynamic H2 heading with italic logic */}
-        <h2 className="font-['DM_Serif_Display',_serif] text-xl sm:text-2xl md:text-3xl font-normal leading-[1.2] tracking-tight text-[#F0F6FC] mt-1 mb-4">
+        <h2 className="font-sans text-xl sm:text-2xl md:text-[1.75rem] font-extrabold leading-[1.15] tracking-tight text-[#1A1A2E] mt-1 mb-4">
           {renderSubtitleText()}
         </h2>
 

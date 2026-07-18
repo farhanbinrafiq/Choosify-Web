@@ -15,7 +15,7 @@ class ErrorBoundary extends React.Component<Props, State> {
     super(props);
     this.state = {
       hasError: false,
-      error: null
+      error: null,
     };
   }
 
@@ -24,7 +24,7 @@ class ErrorBoundary extends React.Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
+    console.error('Uncaught error:', error, errorInfo);
   }
 
   public render() {
@@ -33,28 +33,30 @@ class ErrorBoundary extends React.Component<Props, State> {
 
     if (hasError) {
       return (
-        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mb-8">
-            <AlertTriangle size={48} className="text-red-500" />
+        <div className="min-h-screen bg-[#000435] flex flex-col items-center justify-center p-6 text-center font-sans">
+          <div className="w-16 h-16 bg-[#FF5B00]/15 border border-[#FF5B00]/25 rounded-2xl flex items-center justify-center mb-6">
+            <AlertTriangle size={28} className="text-[#FF5B00]" />
           </div>
-          <h1 className="text-4xl font-black text-navy uppercase tracking-tighter italic mb-4">Something went wrong</h1>
-          <p className="text-gray-500 max-w-md mb-12 font-bold italic uppercase text-[11px] tracking-widest leading-relaxed">
-            The discovery matrix has encountered an anomaly. Our experts have been notified.
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-3">
+            Something went wrong
+          </h1>
+          <p className="text-white/55 max-w-md mb-8 text-[14px] font-medium leading-relaxed">
+            Please refresh the page or return home.
             <br />
-            <span className="text-red-400 mt-2 block">{error?.message}</span>
+            <span className="text-[#FF5B00]/90 mt-2 block text-[13px]">{error?.message}</span>
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button 
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
               onClick={() => window.location.reload()}
-              className="px-10 py-4 bg-navy text-white text-[11px] font-black uppercase tracking-widest rounded-full flex items-center gap-2 hover:bg-orange-primary hover:scale-105 transition-all italic shadow-xl"
+              className="px-6 py-3 bg-[#FF5B00] hover:brightness-110 text-white text-[14px] font-bold tracking-tight rounded-xl flex items-center justify-center gap-2 transition-all"
             >
-              <RefreshCcw size={16} /> Re-initialize
+              <RefreshCcw size={16} /> Refresh
             </button>
-            <a 
+            <a
               href="/"
-              className="px-10 py-4 bg-white border-2 border-navy text-navy text-[11px] font-black uppercase tracking-widest rounded-full flex items-center gap-2 hover:bg-navy hover:text-white hover:scale-105 transition-all italic shadow-xl"
+              className="px-6 py-3 bg-white/10 border border-white/15 text-white text-[14px] font-bold tracking-tight rounded-xl flex items-center justify-center gap-2 hover:bg-white/15 transition-all"
             >
-              <Home size={16} /> Return Base
+              <Home size={16} /> Home
             </a>
           </div>
         </div>

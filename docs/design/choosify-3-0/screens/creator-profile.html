@@ -1,0 +1,203 @@
+<div data-screen-label="Creator Profile">
+    <div style="position:relative">
+      <div style="height:320px;overflow:hidden">
+        <image-slot id="creator-hero" shape="rect" placeholder="Creator cover banner" style="width:100%;height:100%"></image-slot>
+      </div>
+      <div style="position:absolute;left:50%;top:320px;transform:translate(-50%,-60px);width:120px;height:120px;z-index:5;cursor:pointer">
+        <div style="width:100%;height:100%;border-radius:50%;background:#1A1A2E;border:5px solid #fff;box-shadow:0 16px 36px rgba(0,0,0,0.28),0 0 0 4px rgba(7,208,80,0.18);display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:800">FR</div>
+      </div>
+    </div>
+    <div style="max-width:1180px;margin:0 auto;padding:0 40px 60px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;margin-top:74px;gap:24px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:22px;font-weight:800;color:#1A1A2E">Farhan Bin Rafiq ✓</div>
+        <div style="font-size:13px;color:#07DD05;font-weight:600">Sr. Tech Analyst &amp; Digital Product Researcher</div>
+        <div style="font-size:12.5px;color:#9AA0AC;margin-bottom:10px">@farhanbinrafiq · Dhaka, Bangladesh</div>
+        <div style="display:flex;gap:8px">
+          <sc-for list="{{ creatorSocialLinks }}" as="sl" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:7px;background:#F4F7F9;border:1px solid #E8EDF2;border-radius:20px;padding:4px 12px 4px 4px;cursor:pointer">
+              <div style="width:26px;height:26px;border-radius:50%;background:{{ sl.bg }};display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0">
+                <sc-for list="{{ sl.layers }}" as="ly" hint-placeholder-count="1">
+                  <span style="position:absolute;color:{{ ly.color }};font-size:11px;font-weight:800;transform:translate({{ ly.dx }}px,{{ ly.dy }}px)">{{ ly.glyph }}</span>
+                </sc-for>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:#1A1A2E">{{ sl.name }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:52px;flex-shrink:0;flex-wrap:nowrap">
+        <button style="background:#07DD05;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">+ Follow</button>
+        <button style="background:#fff;color:#1A1A2E;border:1px solid #E5E7EB;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">💬 Message</button>
+        <button style="background:#fff;color:#1A1A2E;border:1px solid #E5E7EB;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">Share</button>
+        <sc-if value="{{ creatorIsUnclaimed }}">
+          <button style="background:#FFF3EA;color:#FF5B00;border:1px solid #FFD8B8;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">🏷 Claim This Profile</button>
+        </sc-if>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;margin-bottom:20px">
+      <div style="background:#fff;border:1px solid #E8EDF2;border-radius:14px;padding:20px 22px;width:300px;box-shadow:0 2px 10px rgba(0,0,0,0.03)">
+        <div style="font-size:11px;font-weight:800;color:#9AA0AC;letter-spacing:0.4px;margin-bottom:10px">TRUST SCORE</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:16px"><div style="font-size:30px;font-weight:800;color:#1A1A2E">4.9</div><div style="font-size:11.5px;color:#9AA0AC">/5 · 12.4K+ reviews</div></div>
+        <sc-for list="{{ creatorScoreRows }}" as="r" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+            <div style="font-size:11px;color:#4B5563;font-weight:600;width:74px">{{ r.label }}</div>
+            <div style="flex:1;height:6px;background:#F1F1F3;border-radius:3px;overflow:hidden"><div style="height:100%;width:{{ r.pct }};background:#07DD05;border-radius:3px"></div></div>
+            <div style="font-size:11px;font-weight:800;color:#1A1A2E;width:20px;text-align:right">{{ r.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:#fff;border:1px solid #E8EDF2;border-radius:14px;padding:20px 22px;flex:1;box-shadow:0 2px 10px rgba(0,0,0,0.03)">
+        <div style="font-size:11px;font-weight:800;color:#9AA0AC;letter-spacing:0.4px;margin-bottom:16px">CREATOR INFO</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px 16px">
+          <sc-for list="{{ creatorProfileStats }}" as="cps" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:34px;height:34px;border-radius:8px;background:#F4F7F9;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">{{ cps.icon }}</div>
+              <div><div style="font-size:15px;font-weight:800;color:#1A1A2E">{{ cps.value }}</div><div style="font-size:10.5px;color:#9AA0AC">{{ cps.label }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:28px;border-bottom:1px solid #E8EDF2;margin-bottom:24px;overflow-x:auto;position:sticky;top:104px;z-index:40;background:#F4F7F9">
+      <sc-for list="{{ creatorTabs }}" as="ct" hint-placeholder-count="6">
+        <div style="{{ ct.style }}" onClick="{{ ct.onClick }}">{{ ct.label }} <span style="color:#9AA0AC;font-weight:600">{{ ct.count }}</span></div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isCreatorOverviewTab }}">
+      <div style="display:flex;flex-direction:column;gap:32px">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+            <div style="font-size:14px;font-weight:800;color:#1A1A2E">Featured Content</div>
+            <a href="#" style="font-size:11.5px;font-weight:700">VIEW ALL CONTENT →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+            <sc-for list="{{ creatorFeatured }}" as="cf" hint-placeholder-count="4">
+              <div style="cursor:pointer" onClick="{{ goGuideDetail }}">
+                <div style="position:relative;height:150px;border-radius:10px;overflow:hidden;margin-bottom:8px">
+                  <image-slot id="{{ cf.slotId }}" shape="rect" placeholder="{{ cf.title }}" style="width:100%;height:100%"></image-slot>
+                  <div style="position:absolute;top:8px;left:8px;background:{{ cf.tagBg }};color:#fff;font-size:8px;font-weight:800;padding:2px 7px;border-radius:4px;pointer-events:none">{{ cf.tag }}</div>
+                  <sc-if value="{{ cf.showPlay }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none"><div style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.4);border:1.5px solid rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:5px 0 5px 8px;border-color:transparent transparent transparent #fff;margin-left:2px"></div></div></div></sc-if>
+                  <div style="position:absolute;bottom:0;left:0;right:0;padding:22px 10px 8px;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);pointer-events:none">
+                    <div style="font-size:12px;font-weight:700;color:#fff;line-height:1.3">{{ cf.title }}</div>
+                  </div>
+                </div>
+                <div style="font-size:10.5px;color:#9AA0AC">{{ cf.meta }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:16px">
+          <div style="background:#fff;border:1px solid #E8EDF2;border-radius:10px;padding:20px">
+            <div style="font-size:13px;font-weight:800;color:#1A1A2E;margin-bottom:14px">Expertise &amp; Topics</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+              <sc-for list="{{ creatorExpertise }}" as="ex" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="width:30px;height:30px;border-radius:8px;background:#F4F7F9;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">{{ ex.icon }}</div>
+                  <div><div style="font-size:11.5px;font-weight:700;color:#1A1A2E">{{ ex.name }}</div><div style="font-size:10px;color:#9AA0AC">{{ ex.count }} Guides</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E8EDF2;border-radius:10px;padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+              <div style="font-size:13px;font-weight:800;color:#1A1A2E">Latest Reviews</div>
+              <a href="#" style="font-size:11px;font-weight:700">VIEW ALL REVIEWS →</a>
+            </div>
+            <sc-for list="{{ creatorLatestReviews }}" as="lr" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F1F1F3">
+                <div style="font-size:11px;font-weight:700;color:#9AA0AC;width:14px">{{ lr.rank }}</div>
+                <div style="width:34px;height:34px;border-radius:6px;overflow:hidden;flex-shrink:0"><image-slot id="{{ lr.slotId }}" shape="rect" placeholder="{{ lr.name }}" style="width:100%;height:100%"></image-slot></div>
+                <div style="flex:1;min-width:0"><div style="font-size:11.5px;font-weight:700;color:#1A1A2E">{{ lr.name }}</div><div style="font-size:10px;color:#9AA0AC">{{ lr.date }}</div></div>
+                <div style="font-size:11px;font-weight:700;color:#1A1A2E">★ {{ lr.rating }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#14161f;border-radius:12px;padding:26px 30px;color:#fff">
+          <div style="font-size:14px;font-weight:800;margin-bottom:18px">Why Follow Farhan?</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+            <sc-for list="{{ creatorWhyFollow }}" as="wf" hint-placeholder-count="4">
+              <div style="display:flex;gap:10px">
+                <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">{{ wf.icon }}</div>
+                <div><div style="font-size:12px;font-weight:700;margin-bottom:3px">{{ wf.title }}</div><div style="font-size:10.5px;color:rgba(255,255,255,0.5);line-height:1.4">{{ wf.sub }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+          <div style="background:#fff;border:1px solid #E8EDF2;border-radius:10px;padding:20px">
+            <div style="font-size:13px;font-weight:800;color:#1A1A2E;margin-bottom:14px">Creator Overview</div>
+            <sc-for list="{{ creatorOverviewBlocks }}" as="ob" hint-placeholder-count="3">
+              <div style="margin-bottom:14px">
+                <div style="font-size:11.5px;font-weight:700;color:#1A1A2E;display:flex;align-items:center;gap:6px;margin-bottom:4px">{{ ob.icon }} {{ ob.title }}</div>
+                <div style="font-size:11px;color:#4B5563;line-height:1.5">{{ ob.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid #E8EDF2;border-radius:10px;padding:20px">
+            <div style="font-size:13px;font-weight:800;color:#1A1A2E;margin-bottom:14px">Partnerships &amp; Collaborations</div>
+            <div style="font-size:10px;font-weight:700;color:#9AA0AC;margin-bottom:8px">TOP BRAND PARTNERS</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+              <sc-for list="{{ creatorBrandPartners }}" as="bp" hint-placeholder-count="6">
+                <div style="border:1px solid #E5E7EB;border-radius:6px;padding:8px;text-align:center;font-size:10.5px;font-weight:800;color:{{ bp.color }}">{{ bp.name }}</div>
+              </sc-for>
+            </div>
+            <div style="font-size:10px;font-weight:700;color:#9AA0AC;margin-bottom:8px">COLLABORATION TYPES</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <sc-for list="{{ creatorCollabTypes }}" as="ct2" hint-placeholder-count="5">
+                <div style="background:#F4F7F9;font-size:10.5px;font-weight:600;color:#4B5563;padding:6px 12px;border-radius:14px">{{ ct2 }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E8EDF2;border-radius:10px;padding:20px">
+            <div style="font-size:13px;font-weight:800;color:#1A1A2E;margin-bottom:14px">Contact &amp; Reach</div>
+            <sc-for list="{{ creatorContactRows }}" as="cr" hint-placeholder-count="4">
+              <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:12px">
+                <div style="font-size:12px;flex-shrink:0">{{ cr.icon }}</div>
+                <div><div style="font-size:11px;font-weight:700;color:#1A1A2E">{{ cr.label }}</div><div style="font-size:11px;color:#4B5563">{{ cr.value }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+            <div style="font-size:14px;font-weight:800;color:#1A1A2E">What The Community Says</div>
+            <a href="#" style="font-size:11.5px;font-weight:700">VIEW ALL REVIEWS →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+            <sc-for list="{{ creatorCommunitySays }}" as="cs2" hint-placeholder-count="3">
+              <div style="background:#fff;border:1px solid #E8EDF2;border-radius:14px;padding:16px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="width:32px;height:32px;border-radius:50%;background:#FF5B00;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">{{ cs2.initial }}</div>
+                    <div>
+                      <div style="font-size:12px;font-weight:700;color:#1A1A2E;margin-bottom:1px">{{ cs2.name }}</div>
+                      <div style="display:flex;align-items:center;gap:3px;font-size:10px;color:#16A34A;font-weight:700"><svg width="10" height="10" viewBox="0 0 20 20" fill="#16A34A"><circle cx="10" cy="10" r="9"/><path d="M6 10l3 3 5-6" stroke="#fff" stroke-width="2" fill="none"/></svg>Verified Buyer</div>
+                    </div>
+                  </div>
+                  <div style="color:#FBBF24;font-size:11px;font-weight:700">{{ cs2.rating }}</div>
+                </div>
+                <p style="font-size:11.5px;color:#374151;line-height:1.55;margin:0 0 8px">{{ cs2.text }}</p>
+                <div style="font-size:10px;color:#9AA0AC;padding-top:8px;border-top:1px solid #F1F1F3">{{ cs2.ref }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ !isCreatorOverviewTab }}">
+      <div style="font-size:13px;color:#4B5563;line-height:1.8">{{ creatorTabContent }}</div>
+    </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ DEALS ============ -->
+  <sc-if value="{{ isDeals }}">
+  

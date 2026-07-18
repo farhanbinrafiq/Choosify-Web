@@ -74,7 +74,7 @@ export function ContactPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F0F8FF] font-sans">
+    <div className="min-h-screen bg-[#F4F7F9] font-sans">
       {/* 1. HERO SECTION */}
       <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
@@ -92,7 +92,7 @@ export function ContactPage() {
               <span className="inline-block bg-[#FF5B00]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
                 Get In Touch
               </span>
-              <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
+              <h1 className="text-2xl sm:text-3xl md:text-[2.5rem] font-extrabold text-white tracking-tight leading-tight">
                 Contact Choosify
               </h1>
               <p className="text-gray-300 text-sm md:text-base font-medium leading-relaxed max-w-xl">
@@ -131,7 +131,7 @@ export function ContactPage() {
             
             {/* Support Sectors */}
             <div className="space-y-4">
-              <h2 className="text-xl md:text-2xl font-black text-navy uppercase tracking-tight italic">
+              <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
                 Support Channels
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
@@ -155,7 +155,7 @@ export function ContactPage() {
 
             {/* Direct Contact Cards */}
             <div className="space-y-4">
-              <h2 className="text-xl md:text-2xl font-black text-navy uppercase tracking-tight italic">
+              <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
                 Contact Methods
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
@@ -207,7 +207,7 @@ export function ContactPage() {
                     className="space-y-6"
                   >
                     <div>
-                      <h3 className="text-sm font-black text-navy uppercase tracking-widest italic mb-1">Send A Message</h3>
+                      <h3 className="text-sm font-extrabold text-[#1A1A2E] tracking-tight mb-1">Send A Message</h3>
                       <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Fill in parameters below</p>
                     </div>
 
@@ -280,7 +280,7 @@ export function ContactPage() {
                       ✓
                     </div>
                     <div>
-                      <h3 className="text-base font-black text-navy uppercase tracking-widest italic mb-1">Message Logged</h3>
+                      <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">Message Logged</h3>
                       <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Support Desk Notified</p>
                     </div>
                     <p className="text-gray-500 text-xs leading-relaxed font-semibold max-w-sm">

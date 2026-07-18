@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  ShoppingCart, MessageSquare, X, Trash2, ArrowRight, Send, 
-  Clock, Heart, ShoppingBag, ExternalLink, ChevronRight, CheckCircle, 
-  Package, User, Shield, Bell, HelpCircle, LogOut, Settings, Radio, Bookmark,
-  SlidersHorizontal, Search, X as XIcon, RotateCcw, ChevronDown
+import {
+  ShoppingCart, MessageCircle, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp, ArrowRight
 } from 'lucide-react';
+import { EmiAiLogo } from './EmiAiLogo';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
@@ -212,97 +210,14 @@ export function FloatingOverlays() {
     }
   }, [totalCartItems, activePanel]);
 
-
-
-  const subtotal = activeCart.reduce((sum, item) => {
-    const price = item.selectedVariant?.price || item.product.price;
-    return sum + (price * item.quantity);
-  }, 0);
-
-  const formatPrice = (p: number) => p.toLocaleString('en-US');
-
-  const handleMiniSend = () => {
-    if (!chatInput.trim() || !activeThreadId) return;
-
-    addThreadMessage(activeThreadId, chatInput.trim(), 'user', 'Me');
-    const userMsg = chatInput.trim();
-    setChatInput('');
-
-    setTimeout(() => {
-      const activeThreadObj = threads.find(t => t.id === activeThreadId);
-      let responseText = `Thank you for your message! Our representative logged your query. We will update you shortly on this request.`;
-      
-      const lower = userMsg.toLowerCase();
-      if (lower.includes('deliver') || lower.includes('shipping') || lower.includes('when')) {
-        responseText = `Regarding dispatch, your order is packaging. We secure all catalog orders instantly after confirmation.`;
-      } else if (lower.includes('discount') || lower.includes('price') || lower.includes('cost')) {
-        responseText = `Our wholesale rates are highly competitive. Slabs are applied automatically in global checkouts!`;
-      } else if (lower.includes('size') || lower.includes('color') || lower.includes('variant')) {
-        responseText = `Logged and noted! We package order lots exactly as staged in the inventory parameters.`;
-      } else if (lower.includes('confirm') || lower.includes('approved')) {
-        responseText = `Perfect! Your confirmation log is resolved inside our supply ecosystem. Thank you for choosing Choosify!`;
-      }
-
-      addThreadMessage(activeThreadId, responseText, 'seller', activeThreadObj?.title || 'Partner Support');
-    }, 1500);
-  };
-
-  const activeMessages = threadMessages.filter(m => m.threadId === activeThreadId);
-  const activeThreadObj = threads.find(t => t.id === activeThreadId);
-
-  // Accordion lists mapping perfectly to instructed Groups
-  const accordionGroups = [
-    {
-      id: 'account',
-      title: 'ACCOUNT SECTION',
-      items: [
-        { to: '/dashboard', label: 'My Profile', icon: User, badge: 'FARHAN' },
-        { to: '/dashboard', label: 'Edit Profile', icon: Settings },
-        { to: '/dashboard', label: 'Account Settings', icon: Settings },
-        { to: '/dashboard', label: 'Security Settings', icon: Shield },
-      ]
-    },
-    {
-      id: 'activity',
-      title: 'ACTIVITY SECTION',
-      items: [
-        { to: '/dashboard', label: 'Orders / Activity', icon: ShoppingCart, badge: '35' },
-        { to: '/dashboard', label: 'Saved Items', icon: Bookmark, badge: '550' },
-        { to: '/dashboard', label: 'Recently Viewed', icon: Clock, badge: '15' },
-        { to: '/dashboard', label: 'Purchase History', icon: Package },
-      ]
-    },
-    {
-      id: 'social',
-      title: 'SOCIAL & CONNECTIONS',
-      items: [
-        { to: '/brands', label: 'Followed Brands', icon: Heart, badge: '8' },
-        { to: '/creators', label: 'Followed Creators', icon: Radio, badge: '12' },
-      ]
-    },
-    {
-      id: 'messagesGroup',
-      title: 'MESSAGES & ALERTS',
-      items: [
-        { to: '/messages', label: 'Messages', icon: MessageSquare, badge: '20' },
-        { to: '/messages', label: 'Notifications', icon: Bell, badge: 'New' },
-        { to: '/messages', label: 'Alerts', icon: Shield },
-      ]
-    },
-    {
-      id: 'supportGroup',
-      title: 'SUPPORT',
-      items: [
-        { to: '/messages', label: 'Help Center', icon: HelpCircle },
-        { to: '/messages', label: 'Contact Support', icon: MessageSquare },
-      ]
-    }
-  ];
-
-  // Stack calculation based on active item volumes
-  const visibleButtonsCount = 1 + (unreadCount > 0 ? 1 : 0) + (totalCartItems > 0 ? 1 : 0);
-  // Each trigger is h-12 (48px) and equal spacing is gap-3 (12px)
-  const triggerStackHeight = visibleButtonsCount * 48 + (visibleButtonsCount - 1) * 12;
+  // Stack calculation based on active FAB sizes (Emi 52px, cart/messages 48px)
+  const triggerHeights: number[] = [];
+  if (showEmiFab) triggerHeights.push(52);
+  if (totalCartItems > 0) triggerHeights.push(48);
+  if (showMessagesFab) triggerHeights.push(48);
+  const triggerStackHeight =
+    triggerHeights.reduce((sum, h) => sum + h, 0) +
+    (triggerHeights.length > 1 ? (triggerHeights.length - 1) * 12 : 0);
 
   // Custom motion transitions matching standard Choosify velocity
   const standardTransition = { type: "spring" as const, damping: 25, stiffness: 350 };
@@ -745,20 +660,29 @@ export function FloatingOverlays() {
       </AnimatePresence>
 
       
-      {/* COORDINTED FLOATING ACTION TRIGGER STACK (No overlapping, consistent width) */}
-      <div className="flex flex-col-reverse items-end gap-3 w-[185px]">
+      {/* Desktop / tablet circular FAB stack — Emi + cart + messages */}
+      <div className="hidden sm:flex flex-col-reverse items-end gap-3">
 
-        {/* BUTTON 1: THE EMI AI PILL (Always visible, always matching width & borders) */}
-        <motion.button
-          id="floating-emi-dock-pill"
-          onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className={cn(
-            "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(255,91,0,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
-            activePanel === 'emi'
-              ? "bg-[#FFF0E8] border-[#FF5B00] text-[#FF5B00]"
-              : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#FF5B00]/40"
+        {/* EMI ASSISTANT — always available when feature flag is on */}
+        <AnimatePresence>
+          {showEmiFab && (
+            <motion.button
+              key="dock-emi-trigger"
+              initial={{ scale: 0, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0, opacity: 0, y: 15 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={cn(
+                'w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none p-1 overflow-hidden',
+                activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
+              )}
+              title="Ask Emi — Choosify Assistant"
+            >
+              <EmiAiLogo size={44} className="w-11 h-11" />
+            </motion.button>
           )}
           title="EMI AI Assistant Quick Dock"
         >
@@ -779,8 +703,7 @@ export function FloatingOverlays() {
           />
         </motion.button>
 
-
-        {/* BUTTON 2: THE SHOPPING CART PILL (Visible only if cart contains items) */}
+        {/* CART FAB (visible when cart has items) */}
         <AnimatePresence>
           {totalCartItems > 0 && (
             <motion.button
@@ -793,35 +716,16 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
-                activePanel === 'cart'
-                  ? "bg-[#FFF0E8] border-[#FF5B00] text-[#FF5B00]"
-                  : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#FF5B00]/40"
+                "relative w-12 h-12 rounded-full bg-[#000435] text-white shadow-[0_8px_20px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none",
+                activePanel === 'cart' && "ring-2 ring-[#FF5B00]/50 brightness-110",
               )}
               title="Quick Cart Checklist"
             >
-              <div className="flex items-center gap-2">
-                <ShoppingCart 
-                  size={15} 
-                  className={cn(
-                    "transition-colors",
-                    activePanel === 'cart' ? "text-[#FF5B00]" : "text-[#8a9bb0] group-hover:text-[#FF5B00]"
-                  )} 
-                />
-                <span className="text-[10px] font-black uppercase tracking-wider">
-                  QUICK CART
-                </span>
-              </div>
-              
-              <motion.span 
+              <ShoppingCart size={20} strokeWidth={2} />
+              <motion.span
                 animate={cartBadgeBounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className={cn(
-                  "font-mono text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center leading-none",
-                  activePanel === 'cart' 
-                    ? "bg-[#FF5B00] text-white"
-                    : "bg-gradient-to-br from-[#FF6A00] to-[#FF9E2C] text-white"
-                )}
+                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center leading-none"
               >
                 {totalCartItems > 99 ? '99+' : totalCartItems}
               </motion.span>
@@ -829,8 +733,7 @@ export function FloatingOverlays() {
           )}
         </AnimatePresence>
 
-
-        {/* BUTTON 3: THE MESSAGES PILL (Visible only if unread messages exist > 0) */}
+        {/* MESSAGES FAB — only when unread conversations exist */}
         <AnimatePresence>
           {unreadCount > 0 && (
             <motion.button
@@ -843,35 +746,16 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
-                activePanel === 'inbox'
-                  ? "bg-[#FFF0E8] border-[#FF5B00] text-[#FF5B00]"
-                  : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#FF5B00]/40"
+                "relative w-12 h-12 rounded-full bg-[#000435] text-white shadow-[0_8px_20px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none",
+                activePanel === 'messages' && "ring-2 ring-[#FF5B00]/50 brightness-110",
               )}
               title="Merchant Conversations"
             >
-              <div className="flex items-center gap-2">
-                <MessageSquare 
-                  size={15} 
-                  className={cn(
-                    "transition-colors",
-                    activePanel === 'inbox' ? "text-[#FF5B00]" : "text-[#8a9bb0] group-hover:text-[#FF5B00]"
-                  )} 
-                />
-                <span className="text-[10px] font-black uppercase tracking-wider">
-                  MESSAGES
-                </span>
-              </div>
-              
-              <motion.span 
+              <MessageCircle size={20} strokeWidth={2} />
+              <motion.span
                 animate={inboxBadgeBounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className={cn(
-                  "font-mono text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center leading-none",
-                  activePanel === 'inbox' 
-                    ? "bg-[#FF5B00] text-white"
-                    : "bg-gradient-to-br from-[#FF6A00] to-[#FF9E2C] text-white animate-pulse"
-                )}
+                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center leading-none"
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </motion.span>
@@ -884,8 +768,34 @@ export function FloatingOverlays() {
 
       {/* CINEMATIC VIDEO PLAYER OVERLAY FOR EMBEDDED-ONLY CONTENT */}
       <AnimatePresence>
-        {activeVideo && (
-          <motion.div
+        {showScrollTop && !activeVideo && (
+          <motion.button
+            type="button"
+            initial={{ opacity: 0, scale: 0.85, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85, y: 12 }}
+            transition={{ duration: 0.2 }}
+            onClick={scrollToTop}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={cn(
+              'fixed z-[218] w-11 h-11 rounded-full border border-[#e8edf2] bg-white text-[#1A1D4E] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#FF5B00]/40 hover:text-[#FF5B00] flex items-center justify-center cursor-pointer pointer-events-auto transition-colors',
+              isMobile ? 'bottom-20 right-4' : 'bottom-6 right-20 lg:bottom-8 lg:right-24',
+            )}
+            aria-label="Scroll to top"
+            title="Back to top"
+          >
+            <ChevronUp size={20} strokeWidth={2.5} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+    {/* FILTER LAUNCHER — legacy useRegisterPageFilters pages; drawer stacked above pill */}
+    {hasFilters && (
+      <>
+        {!isMobile && filterOpen && (
+          <motion.button
+            type="button"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -980,8 +890,8 @@ export function FloatingOverlays() {
               {/* Header */}
               <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3 text-left">
-                  <div className="w-10 h-10 rounded-full bg-[#FF5B00]/10 flex items-center justify-center border border-[#FF5B00]/20 shrink-0">
-                    <SlidersHorizontal size={16} className="text-[#FF5B00]" />
+                  <div className="w-11 h-11 rounded-full bg-[#FF5B00]/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
+                    <SlidersHorizontal size={18} className="text-[#FF5B00]" />
                   </div>
                   <div>
                     <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#FF5B00]">
@@ -995,13 +905,8 @@ export function FloatingOverlays() {
                 <div className="flex items-center gap-2">
                   {filterConfig.onClearAll && (filterConfig?.activeFilterCount || 0) > 0 && (
                     <button
-                      onClick={() => {
-                        if (filterConfig.onClearAll) {
-                          filterConfig.onClearAll();
-                          toast.success('Filters cleared successfully');
-                        }
-                      }}
-                      className="text-[9px] font-black uppercase tracking-wider text-[#FF5B00] bg-[#FF5B00]/8 hover:bg-[#FF5B00]/15 px-3 py-1.5 rounded-full transition-colors border-0 cursor-pointer flex items-center gap-1 font-sans"
+                      onClick={filterConfig.onClearAll}
+                      className="text-[9px] font-black uppercase tracking-wider text-[#FF5B00] bg-[#FF5B00]/8 hover:bg-[#FF5B00]/15 px-3 py-1.5 rounded-full transition-colors border-0 cursor-pointer flex items-center gap-1"
                     >
                       <RotateCcw size={9} /> Clear All
                     </button>
@@ -1037,7 +942,7 @@ export function FloatingOverlays() {
                             "px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all cursor-pointer flex items-center gap-1.5 border font-sans",
                             qf.active
                               ? "bg-[#FF5B00] text-white border-transparent shadow-sm font-black italic"
-                              : "bg-white border-[#e8edf2] text-gray-500 hover:border-[#FF5B00]/40 hover:text-[#1A1A2E]"
+                              : "bg-white border-[#e8edf2] text-gray-500 hover:border-[#1A1D4E]/25 hover:text-[#1A1D4E]"
                           )}
                         >
                           {qf.icon}
@@ -1065,29 +970,17 @@ export function FloatingOverlays() {
 
               </div>
 
-              {/* Sticky Footer Actions */}
-              <div className="p-5 border-t border-[#e8edf2] bg-slate-50 flex gap-3 shrink-0">
-                <button
-                  onClick={() => {
-                    if (filterConfig.onClearAll) {
-                      filterConfig.onClearAll();
-                      toast.success('Filters cleared successfully');
-                    }
-                  }}
-                  className="flex-1 py-3 border border-slate-200 bg-white text-slate-700 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer font-sans"
-                >
-                  Reset Filters
-                </button>
-                <button
-                  onClick={() => {
-                    setFilterOpen(false);
-                    toast.success('Filters applied successfully');
-                  }}
-                  className="flex-1 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_14px_rgba(255,91,0,0.25)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer font-sans border-0"
-                >
-                  Apply Filters
-                </button>
-              </div>
+              {/* Mobile footer */}
+              {isMobile && (
+                <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
+                  <button
+                    onClick={closeFilterPanel}
+                    className="w-full py-3.5 bg-[#FF5B00] hover:bg-[#E04E00] text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-colors cursor-pointer border-0"
+                  >
+                    Show Results
+                  </button>
+                </div>
+              )}
 
             </motion.div>
           )}
@@ -1099,34 +992,74 @@ export function FloatingOverlays() {
           whileHover={{ x: filterOpen ? 0 : isMobile ? 0 : 5, scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className={cn(
-            "fixed z-[220] flex items-center transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
-            isMobile
-              ? "bottom-4 left-4 h-12 px-4 rounded-full bg-white border border-slate-200 text-[#1A1A2E] shadow-lg gap-2"
-              : cn(
-                  "left-0 top-1/2 -translate-y-1/2 bg-white border-y border-r border-[#e8edf2] text-[#1A1A2E] shadow-[4px_0_24px_rgba(15,23,42,0.06)] h-14 pl-4 pr-5 rounded-r-2xl gap-2.5",
-                  filterOpen ? "opacity-0 pointer-events-none" : "opacity-100"
-                )
+            "h-[52px] rounded-[26px] bg-white border border-[#e8edf2] flex items-center gap-2.5 px-5 shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto",
+            filterOpen && "ring-2 ring-[#FF5B00]/30",
           )}
         >
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal
-              size={15}
-              className={cn(
-                "transition-colors",
-                filterOpen ? "text-[#FF5B00]" : "text-[#8a9bb0] group-hover:text-[#FF5B00]"
-              )}
-            />
-            <span className="text-[10px] font-black uppercase tracking-[0.12em]">
-              Filters
-            </span>
-            {(filterConfig?.activeFilterCount || 0) > 0 && (
-              <span className="w-5 h-5 rounded-full bg-[#FF5B00] text-white text-[9px] font-black flex items-center justify-center leading-none shadow-sm shadow-[#FF5B00]/20 italic">
-                {(filterConfig?.activeFilterCount || 0) > 9 ? '9+' : (filterConfig?.activeFilterCount || 0)}
-              </span>
+          <SlidersHorizontal
+            size={18}
+            className={cn(
+              "transition-colors shrink-0",
+              filterOpen ? "text-[#FF5B00]" : "text-[#8a9bb0] group-hover:text-[#FF5B00]"
             )}
-          </div>
+          />
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#1A1A2E]">
+            FILTERS
+          </span>
+          {filterConfig.activeFilterCount > 0 && (
+            <span className="min-w-[18px] h-[18px] px-1 rounded-lg bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center leading-none">
+              {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
+            </span>
+          )}
+          <ArrowRight
+            size={14}
+            className={cn(
+              "transition-transform duration-300 shrink-0 ml-1",
+              filterOpen ? "text-[#FF5B00] rotate-90" : "text-[#8a9bb0] group-hover:text-[#FF5B00] group-hover:translate-x-0.5"
+            )}
+          />
         </motion.button>
       </>
+    )}
+
+    {isMobile && showEmiFab && (
+      <motion.button
+        type="button"
+        onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
+        whileTap={{ scale: 0.95 }}
+        className={cn(
+          'fixed z-[219] bottom-4 left-4 w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-1 overflow-hidden bg-white',
+          activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
+        )}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        aria-label="Ask Emi"
+        title="Ask Emi"
+      >
+        <EmiAiLogo size={48} className="w-12 h-12" />
+      </motion.button>
+    )}
+
+    {isMobile && showFiltersAction && (
+      <motion.button
+        type="button"
+        onClick={openMobileFilters}
+        whileTap={{ scale: 0.95 }}
+        className={cn(
+          'fixed z-[220] bottom-4 right-4 w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden relative',
+          filterOpen || drawerFilterOpen
+            ? 'bg-[#000435] text-white ring-2 ring-[#FF5B00]/40'
+            : 'bg-[#000435] text-white',
+        )}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        aria-label="Open filters"
+      >
+        <SlidersHorizontal size={22} />
+        {filterConfig.activeFilterCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center">
+            {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
+          </span>
+        )}
+      </motion.button>
     )}
   </>
 );

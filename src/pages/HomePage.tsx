@@ -1,89 +1,84 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDashboard } from '../context/DashboardContext';
-import { BRANDS } from '../constants';
-import {
-  CATEGORY_ITEMS,
-  SPOTLIGHT_CARDS,
-  FEATURED_PRODUCTS_MOCK,
-  BUYING_GUIDES
-} from '../data/homeData';
-import { 
-  MarketplaceHero, 
-  CompareSection, 
-  ServicesSection,
-  FeaturedProductsSection,
-  DealsSection,
-  FeaturedBrandsSection,
-  SpotlightSection,
-  BuyingGuidesSection,
-  RecentlyViewedSection,
-  CreatorHighlightsSection,
-  CommunityReviewsSection,
-  TrustSection,
-  CategoriesSection
-} from '../components/ui/home';
-import { CalloutCard } from '../components/ui/content/CalloutCard';
+import { useRegisterPageFilters } from '../components/FilterEngine';
+import { useHomePageData } from '../hooks/useHomePageData';
+import { Hero } from '../components/hero';
+import { HomepageLayout } from '../components/home/HomepageLayout';
+import { HomeTopCategoriesSection } from '../components/home/sections/HomeTopCategoriesSection';
+import { HomeSpotlightPreviewSection } from '../components/home/sections/HomeSpotlightPreviewSection';
+import { HomeFeaturedProductsSection } from '../components/home/sections/HomeFeaturedProductsSection';
+import { HomeTodaysDealsSection } from '../components/home/sections/HomeTodaysDealsSection';
+import { HomeCompareSection } from '../components/home/sections/HomeCompareSection';
+import { HomeBuyingGuidesSection } from '../components/home/sections/HomeBuyingGuidesSection';
+import { HomeSponsoredBannerSection } from '../components/home/sections/HomeSponsoredBannerSection';
+import { HomeFeaturedBrandsSection } from '../components/home/sections/HomeFeaturedBrandsSection';
+import { HomePopularServicesSection } from '../components/home/sections/HomePopularServicesSection';
+import { HomeRecentlyViewedSection } from '../components/home/sections/HomeRecentlyViewedSection';
 
+/**
+ * Homepage — layout sourced from Choosify.dc.html Home screen.
+ * Business data via useHomePageData; Footer from App shell.
+ */
 export function HomePage() {
-  const navigate = useNavigate();
-  const { recentlyViewed } = useDashboard();
+  const data = useHomePageData();
+
+  useRegisterPageFilters(
+    {
+      pageName: 'Home',
+      renderSearch: null,
+      renderFilters: () => null,
+      activeFilterCount: 0,
+      onClearAll: () => {},
+      quickFilters: [],
+    },
+    [],
+  );
 
   return (
-    <div className="min-h-screen bg-[#F4F7F9] font-sans pb-20">
-      {/* 1. HERO SECTION (Edge-to-edge) */}
-      <MarketplaceHero 
-        onCta1Click={(idx) => navigate(idx === 0 ? '/discover' : '/discover')}
-        onCta2Click={(idx) => navigate(idx === 0 ? '/about' : '/about')}
-      />
-
-      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 space-y-16 py-16">
-        
-        {/* 2. TOP CATEGORIES */}
-        <CategoriesSection categories={CATEGORY_ITEMS} />
-
-        {/* 3. TRENDING IN SPOTLIGHT */}
-        <SpotlightSection cards={SPOTLIGHT_CARDS} />
-
-        {/* 4. FEATURED PRODUCTS */}
-        <FeaturedProductsSection products={FEATURED_PRODUCTS_MOCK} />
-
-        {/* 5. TODAY'S DEALS */}
-        <DealsSection />
-
-        {/* 6. COMPARE ANYTHING */}
-        <CompareSection />
-
-        {/* 7. TOP BUYING GUIDES */}
-        <BuyingGuidesSection guides={BUYING_GUIDES} />
-
-        {/* 8. FEATURED BRANDS */}
-        <FeaturedBrandsSection brands={BRANDS} />
-
-        {/* 9. CREATOR HIGHLIGHTS */}
-        <CreatorHighlightsSection />
-
-        {/* 10. COMMUNITY REVIEWS */}
-        <CommunityReviewsSection />
-
-        {/* 11. TRUST LAYER */}
-        <TrustSection />
-        
-        {/* EDITORIAL CALLOUT */}
-        <div className="py-8">
-          <CalloutCard 
-            variant="expert" 
-            content="Every recommendation on Choosify combines verified product data, creator expertise, community reviews, and marketplace intelligence to help buyers make informed decisions." 
-          />
+    <HomepageLayout>
+      {data.sectionVisible('hero') && (
+        <div id="home-top">
+          <Hero variant="homepage" />
         </div>
+      )}
 
-        {/* 12. POPULAR SERVICES */}
-        <ServicesSection onServiceClick={(id) => navigate('/categories')} />
+      <main className="pb-8">
+        {data.sectionVisible('categories') && (
+          <HomeTopCategoriesSection categories={data.categories} />
+        )}
 
-        {/* 13. RECENTLY VIEWED */}
-        <RecentlyViewedSection recentlyViewed={recentlyViewed} />
+        {data.sectionVisible('spotlight') && data.hasViralToday && (
+          <HomeSpotlightPreviewSection items={data.viralTodayItems} />
+        )}
 
-      </div>
-    </div>
+        {data.sectionVisible('trending') && (
+          <HomeFeaturedProductsSection feed={data.featuredProductFeed} />
+        )}
+
+        {/* Choosify.dc.html — sponsored banner after featured products */}
+        <HomeSponsoredBannerSection />
+
+        {data.sectionVisible('deals') && (
+          <HomeTodaysDealsSection tiles={data.promoTiles} />
+        )}
+
+        {data.sectionVisible('compare') && <HomeCompareSection />}
+
+        {/* Top Buying Guides — Choosify.dc.html (demo fallback when catalog empty) */}
+        <HomeBuyingGuidesSection guideSlides={data.homeFeaturedGuideSlides} />
+
+        {data.sectionVisible('featured-brands') && (
+          <HomeFeaturedBrandsSection
+            featuredBrands={data.spotlightBrands}
+            brandFallback={data.brandFallback}
+          />
+        )}
+
+        {data.sectionVisible('services') && <HomePopularServicesSection />}
+
+        {data.recentlyViewed.length > 0 && data.sectionVisible('recently-viewed') && (
+          <HomeRecentlyViewedSection products={data.recentlyViewed} />
+        )}
+      </main>
+    </HomepageLayout>
   );
 }

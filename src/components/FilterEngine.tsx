@@ -695,7 +695,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
     return (
       <div className="flex flex-col gap-3 font-sans">
         <div className="py-2.5 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-          <span className="text-[10px] font-black uppercase tracking-wider text-orange-primary italic block">🔥 Smartphone Smart Specs</span>
+          <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">Smartphone specs</span>
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Custom filters synced with Smartphone directory</span>
         </div>
         {specs.map((spec) => (
@@ -777,7 +777,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
     return (
       <div className="flex flex-col gap-3 font-sans">
         <div className="py-2.5 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-          <span className="text-[10px] font-black uppercase tracking-wider text-orange-primary italic block">👔 Fashion Custom Specs</span>
+          <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">Fashion specs</span>
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Custom apparel scopes</span>
         </div>
         {specs.map((spec) => (
@@ -849,7 +849,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
     return (
       <div className="flex flex-col gap-3 font-sans">
         <div className="py-2.5 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-          <span className="text-[10px] font-black uppercase tracking-wider text-orange-primary italic block">🕶️ Eyewear Smart Specs</span>
+          <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">Eyewear specs</span>
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Optimized dimensions for eyeglasses</span>
         </div>
         {specs.map((spec) => (

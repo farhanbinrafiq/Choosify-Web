@@ -183,24 +183,35 @@ export function PostOfferPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen choosify-dark-gradient py-12 px-8">
-      <div className="max-w-4xl mx-auto w-full">
-         <div className="mb-12">
-            <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 italic">Post Your Offer</h1>
-            <div className="flex items-center gap-4">
-               <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full button-gradient transition-all duration-300" style={{ width: `${(step / 4) * 100}%` }} />
-               </div>
-               <span className="text-orange-primary font-black uppercase text-[10px] tracking-widest whitespace-nowrap">
-                 Step {step} of 4 — {['Basic Info', 'Media Upload', 'Pricing & Details', 'Seller Info'][step - 1]}
-               </span>
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <section
+        ref={heroRef}
+        className="relative bg-[#000435] px-5 sm:px-8 pt-8 pb-7 border-b border-white/5"
+      >
+        <div className="max-w-4xl mx-auto w-full">
+          <h1 className="text-2xl sm:text-[28px] font-extrabold text-white tracking-tight mb-4">
+            Post your offer
+          </h1>
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[#FF5B00] transition-all duration-300"
+                style={{ width: `${(step / 4) * 100}%` }}
+              />
             </div>
-         </div>
+            <span className="text-[#FF5B00] font-bold text-[11px] whitespace-nowrap">
+              Step {step} of 4 — {['Basic Info', 'Media Upload', 'Pricing & Details', 'Seller Info'][step - 1]}
+            </span>
+          </div>
+        </div>
+      </section>
 
-         <div className="bg-white rounded-[5px] p-12 shadow-2xl space-y-16">
+      <div id="post-offer-form" className="px-5 sm:px-8 py-10">
+        <div className="max-w-4xl mx-auto w-full">
+         <div className="bg-white rounded-xl border border-[#E8EDF2] p-6 sm:p-10 shadow-sm space-y-12">
             {draftRestored && (
-              <div className="flex items-center justify-between bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-wider px-4 py-3 rounded-xl mb-4">
-                <span>📝 Draft restored from your last session</span>
+              <div className="flex items-center justify-between bg-amber-50 border border-amber-200 text-amber-800 text-[12px] font-semibold px-4 py-3 rounded-lg mb-4">
+                <span>Draft restored from your last session</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -211,19 +222,21 @@ export function PostOfferPage() {
                     setSellerName(''); setSellerPhone(''); setSellerRegion('Dhaka');
                     setStep(1);
                   }}
-                  className="text-amber-700 hover:text-red-600 font-black underline ml-4 cursor-pointer"
+                  className="text-amber-800 hover:text-red-600 font-bold underline ml-4 cursor-pointer bg-transparent border-0"
                 >
-                  Clear Draft
+                  Clear draft
                 </button>
               </div>
             )}
             {/* Step 1: Basic Info */}
             {step === 1 && (
               <section className="space-y-8">
-                <h3 className="text-xl font-black text-navy uppercase tracking-tighter italic border-b-2 border-orange-primary/10 pb-4">Section 1 — Basic Information</h3>
+                <h3 className="text-lg font-extrabold text-[#1A1A2E] tracking-tight border-b border-[#E8EDF2] pb-3">
+                  Section 1 — Basic information
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                    <div className="space-y-2 md:col-span-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Product Name</label>
+                      <label className="text-[11px] font-bold text-[#9AA0AC]">Product Name</label>
                       <input 
                         type="text" 
                         value={productName}
@@ -233,7 +246,7 @@ export function PostOfferPage() {
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Category</label>
+                      <label className="text-[11px] font-bold text-[#9AA0AC]">Category</label>
                       <select 
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
@@ -245,7 +258,7 @@ export function PostOfferPage() {
                       </select>
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Brand</label>
+                      <label className="text-[11px] font-bold text-[#9AA0AC]">Brand</label>
                       <input 
                         type="text" 
                         value={brand}
@@ -261,7 +274,7 @@ export function PostOfferPage() {
             {/* Step 2: Media Upload */}
             {step === 2 && (
               <section className="space-y-8">
-                <h3 className="text-xl font-black text-navy uppercase tracking-tighter italic border-b-2 border-orange-primary/10 pb-4">Section 2 — Media Upload</h3>
+                <h3 className="text-lg font-extrabold text-[#1A1A2E] tracking-tight border-b border-[#E8EDF2] pb-3">Section 2 — Media upload</h3>
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -279,7 +292,7 @@ export function PostOfferPage() {
                    <div className="w-16 h-16 rounded-full bg-ice-blue flex items-center justify-center text-orange-primary mb-4 group-hover:scale-110 transition-all">
                       <Camera size={32} />
                    </div>
-                   <h4 className="text-lg font-black text-navy mb-2">Drag & Drop Photos</h4>
+                   <h4 className="text-lg font-bold text-[#1A1A2E] mb-2">Drag & drop photos</h4>
                    <p className="text-gray-400 text-sm max-w-[240px]">High resolution JPEG or PNG images only. Minimum 800x800px.</p>
                 </div>
                 <div className="flex gap-4 flex-wrap">
@@ -313,10 +326,10 @@ export function PostOfferPage() {
             {/* Step 3: Pricing & Details */}
             {step === 3 && (
               <section className="space-y-8">
-                <h3 className="text-xl font-black text-navy uppercase tracking-tighter italic border-b-2 border-orange-primary/10 pb-4">Section 3 — Pricing & Details</h3>
+                <h3 className="text-lg font-extrabold text-[#1A1A2E] tracking-tight border-b border-[#E8EDF2] pb-3">Section 3 — Pricing & details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Price (৳)</label>
+                      <label className="text-[11px] font-bold text-[#9AA0AC]">Price (৳)</label>
                       <input 
                         type="number" 
                         value={price}
@@ -326,7 +339,7 @@ export function PostOfferPage() {
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Original Price (৳) (Optional)</label>
+                      <label className="text-[11px] font-bold text-[#9AA0AC]">Original Price (৳) (Optional)</label>
                       <input 
                         type="number" 
                         value={originalPrice}
@@ -336,7 +349,7 @@ export function PostOfferPage() {
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Stock Quantity</label>
+                      <label className="text-[11px] font-bold text-[#9AA0AC]">Stock Quantity</label>
                       <input 
                         type="number" 
                         value={stock}
@@ -346,7 +359,7 @@ export function PostOfferPage() {
                       />
                    </div>
                    <div className="space-y-2 md:col-span-3">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Description</label>
+                      <label className="text-[11px] font-bold text-[#9AA0AC]">Description</label>
                       <textarea 
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -363,12 +376,12 @@ export function PostOfferPage() {
                            onChange={(e) => setIsDeal(e.target.checked)}
                            className="w-5 h-5 rounded accent-[#FF5B00]" 
                          />
-                         <span className="text-xs font-black uppercase text-navy tracking-wider">Is this a promotional deal?</span>
+                         <span className="text-xs font-bold text-[#1A1A2E]">Is this a promotional deal?</span>
                       </label>
                       
                       {isDeal && (
                         <div className="space-y-2 transition-all">
-                           <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Promo Code</label>
+                           <label className="text-[11px] font-bold text-[#9AA0AC]">Promo Code</label>
                            <input 
                              type="text" 
                              value={promoCode}
@@ -386,10 +399,10 @@ export function PostOfferPage() {
             {/* Step 4: Seller Info */}
             {step === 4 && (
               <section className="space-y-8">
-                <h3 className="text-xl font-black text-navy uppercase tracking-tighter italic border-b-2 border-orange-primary/10 pb-4">Section 4 — Seller Information</h3>
+                <h3 className="text-lg font-extrabold text-[#1A1A2E] tracking-tight border-b border-[#E8EDF2] pb-3">Section 4 — Seller information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Business / Seller Name</label>
+                      <label className="text-[11px] font-bold text-[#9AA0AC]">Business / Seller Name</label>
                       <input 
                         type="text" 
                         value={sellerName}
@@ -399,7 +412,7 @@ export function PostOfferPage() {
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Phone Number</label>
+                      <label className="text-[11px] font-bold text-[#9AA0AC]">Phone Number</label>
                       <input 
                         type="text" 
                         value={sellerPhone}
@@ -409,7 +422,7 @@ export function PostOfferPage() {
                       />
                    </div>
                    <div className="space-y-2 md:col-span-2">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Division / region</label>
+                      <label className="text-[11px] font-bold text-[#9AA0AC]">Division / region</label>
                       <select 
                         value={sellerRegion}
                         onChange={(e) => setSellerRegion(e.target.value)}
@@ -434,7 +447,7 @@ export function PostOfferPage() {
                            onChange={(e) => setAgreeToTerms(e.target.checked)}
                            className="w-5 h-5 rounded accent-[#FF5B00]" 
                          />
-                         <span className="text-xs font-black uppercase text-navy tracking-wider">I agree to the terms of service and guarantee product authenticity.</span>
+                         <span className="text-xs font-bold text-[#1A1A2E]">I agree to the terms of service and guarantee product authenticity.</span>
                       </label>
                    </div>
                 </div>
@@ -445,7 +458,7 @@ export function PostOfferPage() {
                <div className="bg-ice-blue rounded-[10px] p-6 flex gap-4 border border-blue-grey/30">
                   <Info className="text-orange-primary shrink-0" size={24} />
                   <div>
-                    <h5 className="font-black text-navy text-sm uppercase mb-1">First Time Seller?</h5>
+                    <h5 className="font-bold text-[#1A1A2E] text-sm mb-1">First time seller?</h5>
                     <p className="text-gray-500 text-xs leading-relaxed">Ensure your product details match the official specifications to get the "Verified Offer" badge which increases trust by 80%.</p>
                   </div>
                </div>
@@ -455,7 +468,7 @@ export function PostOfferPage() {
                      <button 
                        type="button"
                        onClick={() => setStep(prev => prev - 1)}
-                       className="flex-1 px-6 py-3 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-[#e8edf2] hover:border-[#1A1D4E]/20"
+                       className="flex-1 px-6 py-3 bg-white hover:bg-gray-50 text-[#1A1A2E] text-sm font-bold rounded-lg transition-all duration-200 cursor-pointer border border-[#e8edf2] hover:border-[#1A1D4E]/20"
                      >
                        Back
                      </button>
@@ -463,14 +476,14 @@ export function PostOfferPage() {
                   <button 
                      type="button"
                      onClick={saveDraft}
-                     className="flex-1 px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 italic"
+                     className="flex-1 px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-sm font-bold rounded-lg transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                      Save Draft
                   </button>
                   <button 
                      type="button"
                      onClick={handleContinue}
-                     className="flex-[2] px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 italic"
+                     className="flex-[2] px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-sm font-bold rounded-lg transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                     {step === 4 ? (
                       <>Submit Offer <CheckCircle2 size={18} /></>

@@ -1,26 +1,69 @@
-import { useState, useEffect, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
-import { toast } from "react-hot-toast";
-import { ArrowRight, Package, Award, ShieldCheck } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import React, { useState, useMemo, useRef } from "react";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  Star,
+  Zap,
+  ShoppingBag,
+  ArrowRight,
+  Bookmark,
+  Share2,
+  Heart,
+  CheckCircle2,
+  MessageSquare,
+  Info,
+  Facebook,
+  Instagram,
+  Youtube,
+  Smartphone,
+  Shirt,
+  Gift,
+  Users,
+  Play,
+  Search,
+  ShieldCheck,
+  ChevronDown,
+  Package,
+  TrendingUp,
+  Award,
+  Save,
+  ThumbsUp,
+  ThumbsDown,
+  ChevronLeft,
+  ChevronRight,
+  MessageCircle,
+  X,
+  Tag,
+  Check,
+} from "lucide-react";
+import { PRODUCTS, BRANDS, PLACEHOLDER_IMAGE } from "../constants";
 import { useGlobalState } from "../context/GlobalStateContext";
+import { operationsApi } from "../services/operationsApi";
 import { useDashboard } from "../context/DashboardContext";
-import { FaqPill } from "../components/FaqPill";
-import { CreatorReviewCard, CreatorReview } from "../components/CreatorReviewCard";
-import { VideoModal } from "../components/VideoModal";
-
-import { ProductHeroCTACard } from "../components/ui/cards/ProductHeroCTACard";
-import { StickyNavigation } from "../components/ui/navigation/StickyNavigation";
-import { SpecificationCard } from "../components/ui/cards/SpecificationCard";
+import { motion, AnimatePresence } from "motion/react";
+import { cn } from "../lib/utils";
+import { toast } from "react-hot-toast";
+import { ProductMediaGallery } from "../components/ProductMediaGallery";
+import { ProductDetailBuyBox } from "../components/product/ProductDetailBuyBox";
+import { OptionalAddonsModule } from '../components/product/OptionalAddonsModule';
+import { CreatorReviewsPreview } from "../components/creatorReviews/CreatorReviewsPreview";
 import { PublicReviewCard } from "../components/PublicReviewCard";
-import { WriteReviewCard } from "../components/ui/reviews/WriteReviewCard";
-import { BoxContentsCard } from "../components/ui/cards/BoxContentsCard";
-import { TrustScoreCard } from "../components/ui/trust/TrustScoreCard";
-import { TrustStatementCard } from "../components/ui/trust/TrustStatementCard";
-import { ProductOverviewCard } from "../components/ui/cards/ProductOverviewCard";
-import { PriceAcrossStoresCard } from "../components/ui/cards/PriceAcrossStoresCard";
-import { FAQAccordionCard } from "../components/ui/faq/FAQAccordionCard";
-import { Button } from "../components/ui/buttons/Button";
+import { FollowButton } from "../components/FollowButton";
+import { useRegisterPageFilters } from "../components/FilterEngine";
+import { getBrandOfficialWebsite, normalizeExternalUrl } from "../utils/overviewRegistry";
+import { SizeGuideModal } from "../components/SizeGuideModal";
+import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
+import { ProductSpecsOverview } from "../components/ProductSpecsOverview";
+import { DcUnderlineTabs } from "../components/design/DcUnderlineTabs";
+import { CardEngagementStrip } from "../components/CardEngagementStrip";
+import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
+import { usePageBreadcrumbs } from "../context/BreadcrumbContext";
+import { slugifyPathSegment } from "../lib/seoHelpers";
+import { StudioWrap } from "../components/studio/StudioWrap";
+import { useStudioEdit } from "../context/StudioEditContext";
+import { useHasRole } from "../components/auth/RequireRole";
+import { CreateSpotlightCampaignButton } from "../components/spotlight/cms/CreateSpotlightCampaignButton";
+import { EmiProductAssistant } from "../components/emi/EmiProductAssistant";
+import type { CatalogProductSizeGuide } from "../types/catalog";
 
 
 
@@ -108,687 +151,1500 @@ const getProductBoxContents = (prod: any) => {
   };
 };
 
-const getStorePrices = (prod: any) => {
-  const rawPrice = typeof prod.price === 'string' ? prod.price.replace(/,/g, '') : String(prod.price || '167500');
-  const basePrice = Number(rawPrice) || 167500;
-  return [
-    {
-      name: "Apple Bangladesh Flagship",
-      avatar: "https://i.pravatar.cc/100?u=applebd",
-      price: basePrice,
-      originalPrice: basePrice + 17500,
-      rating: 4.9,
-      deliveryTime: "Instant / Same-day",
-      deliveryCost: "Free Delivery",
-      isOfficial: true,
-      isVerified: true,
-      coupon: "APPLEOFFICIAL",
-      cashback: "10% Cashback with AMEX",
-      stock: "In Stock"
-    },
-    {
-      name: "Gadget & Gear (Partner)",
-      avatar: "https://i.pravatar.cc/100?u=gg",
-      price: basePrice + 1200,
-      originalPrice: basePrice + 10000,
-      rating: 4.8,
-      deliveryTime: "1 Day Delivery",
-      deliveryCost: "Free Delivery",
-      isOfficial: false,
-      isVerified: true,
-      coupon: "GGCHOOSE500",
-      cashback: "BDT 3,000 Flat on City Bank AMEX",
-      stock: "In Stock"
-    },
-    {
-      name: "Pickaboo Shop",
-      avatar: "https://i.pravatar.cc/100?u=pb",
-      price: basePrice - 1900,
-      originalPrice: basePrice + 8000,
-      rating: 4.7,
-      deliveryTime: "1-2 Days",
-      deliveryCost: "BDT 100 Delivery",
-      isOfficial: false,
-      isVerified: true,
-      coupon: "PICKAPRO1000",
-      cashback: "Up to BDT 5,000 on bKash",
-      stock: "Limited Stock"
-    },
-    {
-      name: "Daraz Express",
-      avatar: "https://i.pravatar.cc/100?u=daraz",
-      price: basePrice - 3500,
-      originalPrice: basePrice + 12000,
-      rating: 4.3,
-      deliveryTime: "3-5 Days",
-      deliveryCost: "BDT 150 Delivery",
-      isOfficial: false,
-      isVerified: false,
-      coupon: "DARAZBEST",
-      cashback: "5% cashback on credit cards",
-      stock: "In Stock"
-    },
-    {
-      name: "Ryans Computers",
-      avatar: "https://i.pravatar.cc/100?u=ryans",
-      price: basePrice + 2500,
-      originalPrice: basePrice + 15000,
-      rating: 4.6,
-      deliveryTime: "2 Days",
-      deliveryCost: "Free Delivery",
-      isOfficial: false,
-      isVerified: true,
-      coupon: "RYAN500",
-      cashback: "No cashback available",
-      stock: "In Stock"
-    }
-  ];
-};
-
-const CREATOR_REVIEWS_MOCK = [
-  {
-    id: "1",
-    cover: "https://images.unsplash.com/photo-1616348436168-de43ad0db179?q=80&w=600&auto=format&fit=crop",
-    title: "iPhone 15 Pro Max 30 Days Later - The Truth!",
-    creator: { name: "Marques Brownlee", avatar: "https://i.pravatar.cc/150?u=mb", verified: true },
-    duration: "14:20",
-    views: "1.2M",
-    date: "2 weeks ago",
-    category: "Long Term Review",
-    categoryColor: "bg-blue-600",
-    platform: "youtube" as const
-  },
-  {
-    id: "2",
-    cover: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=600&auto=format&fit=crop",
-    title: "iPhone 15 Pro Camera Test vs S24 Ultra",
-    creator: { name: "Mrwhosetheboss", avatar: "https://i.pravatar.cc/150?u=mr", verified: true },
-    duration: "18:45",
-    views: "850K",
-    date: "1 month ago",
-    category: "Camera Test",
-    categoryColor: "bg-purple-600",
-    platform: "youtube" as const
-  },
-  {
-    id: "3",
-    cover: "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?q=80&w=600&auto=format&fit=crop",
-    title: "Is the Titanium actually better? Drop Test!",
-    creator: { name: "JerryRigEverything", avatar: "https://i.pravatar.cc/150?u=jr", verified: true },
-    duration: "08:12",
-    views: "2.1M",
-    date: "3 weeks ago",
-    category: "Durability Test",
-    categoryColor: "bg-red-600",
-    platform: "youtube" as const
-  },
-  {
-    id: "4",
-    cover: "https://images.unsplash.com/photo-1605236453806-6ff368536b8e?q=80&w=600&auto=format&fit=crop",
-    title: "Top 10 Hidden Features in iOS 17 & iPhone 15 Pro",
-    creator: { name: "iJustine", avatar: "https://i.pravatar.cc/150?u=ij", verified: true },
-    duration: "12:05",
-    views: "450K",
-    date: "5 days ago",
-    category: "Tips & Tricks",
-    categoryColor: "bg-emerald-600",
-    platform: "instagram" as const
-  },
-  {
-    id: "5",
-    cover: "https://images.unsplash.com/photo-1556656793-08538906a9f8?q=80&w=600&auto=format&fit=crop",
-    title: "Gaming on A17 Pro - Console Level Quality?",
-    creator: { name: "Dave2D", avatar: "https://i.pravatar.cc/150?u=d2d", verified: true },
-    duration: "10:30",
-    views: "320K",
-    date: "1 week ago",
-    category: "Gaming Test",
-    categoryColor: "bg-amber-600",
-    platform: "youtube" as const,
-    sponsor: "Sponsored"
-  },
-  {
-    id: "6",
-    cover: "https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?q=80&w=600&auto=format&fit=crop",
-    title: "Is the iPhone 15 Pro Max Worth the Premium price?",
-    creator: { name: "Sam Sheffer", avatar: "https://i.pravatar.cc/150?u=sam", verified: true },
-    duration: "09:40",
-    views: "180K",
-    date: "3 days ago",
-    category: "Buyer Guide",
-    categoryColor: "bg-teal-600",
-    platform: "youtube" as const
-  },
-  {
-    id: "7",
-    cover: "https://images.unsplash.com/photo-1523206489230-c012c64b2b48?q=80&w=600&auto=format&fit=crop",
-    title: "Unboxing the natural titanium iPhone 15 Pro Max",
-    creator: { name: "UrAvgConsumer", avatar: "https://i.pravatar.cc/150?u=ur", verified: true },
-    duration: "06:15",
-    views: "410K",
-    date: "6 days ago",
-    category: "Unboxing",
-    categoryColor: "bg-indigo-600",
-    platform: "tiktok" as const
-  },
-  {
-    id: "8",
-    cover: "https://images.unsplash.com/photo-1593508512255-86ab42a8e620?q=80&w=600&auto=format&fit=crop",
-    title: "iPhone 15 Pro Max Cinematography Walkthrough",
-    creator: { name: "Peter McKinnon", avatar: "https://i.pravatar.cc/150?u=peter", verified: true },
-    duration: "15:10",
-    views: "620K",
-    date: "3 weeks ago",
-    category: "Cinematography",
-    categoryColor: "bg-pink-600",
-    platform: "youtube" as const
-  }
+// Resolve add-ons for a product — category seeds with platform fallback
+const FALLBACK_ADDONS: ProductAddon[] = [
+  { id: 'fb1', title: 'Extended Warranty', description: '12-month extended coverage', price: 890, badge: 'Popular', available: true, image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=80&h=80&fit=crop' },
+  { id: 'fb2', title: 'Premium Case', description: 'Protective branded case', price: 690, available: true, image: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=80&h=80&fit=crop' },
+  { id: 'fb3', title: 'Screen Protector', description: 'Tempered glass protection', price: 350, badge: 'Recommended', available: true, image: 'https://images.unsplash.com/photo-1592890288564-76628a30a657?w=80&h=80&fit=crop' },
+  { id: 'fb4', title: 'Gift Wrap', description: 'Premium gift packaging', price: 100, available: true, image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=80&h=80&fit=crop' },
 ];
 
+function resolveAddons(product: any): ProductAddon[] {
+  if (!product) return FALLBACK_ADDONS;
+  const category = product.category || product.type || '';
+  if (ADDON_SEEDS[category]) return ADDON_SEEDS[category];
+  const matchKey = Object.keys(ADDON_SEEDS).find(k =>
+    category.toLowerCase().includes(k.toLowerCase()) ||
+    k.toLowerCase().includes(category.toLowerCase())
+  );
+  return matchKey ? ADDON_SEEDS[matchKey] : FALLBACK_ADDONS;
+}
+
 export function ProductDetailPage() {
+  const productHeroRef = useRef<HTMLDivElement>(null);
   const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
 
-  const { allProducts, addToCart: globalAddToCart } = useGlobalState();
-  const { addRecentlyViewed } = useDashboard();
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, isLoggedIn, currentUser } = useGlobalState();
+  const { editMode: studioEditMode } = useStudioEdit();
+  const canUseProductStudio = useHasRole('brand', 'admin');
+
+  const productList = allProducts.length > 0 ? allProducts : PRODUCTS;
+  const brandList = allBrands.length > 0 ? allBrands : BRANDS;
   
-  const [selectedReview, setSelectedReview] = useState<CreatorReview | null>(null);
+  const baseProduct: any =
+    productList.find((p: any) => p.id === Number(id)) ||
+    productList.find((p: any) => String(p.catalogId) === String(id)) ||
+    productList.find((p: any) => p.id === Number(id) + 1000) ||
+    productList[0];
 
-  const [activeSection, setActiveSection] = useState("overview");
-  const [showAllCreators, setShowAllCreators] = useState(false);
-  const [redirectingStore, setRedirectingStore] = useState<string | null>(null);
-
-  const product = useMemo<any>(() => {
-    const found = allProducts.find((p: any) => p.id === Number(id)) || {
-      id: 1,
-      title: "Apple iPhone 15 Pro Max (256GB)",
-      price: "167,500",
-      reviews: "12.4K",
-      rating: 4.8
+  const product = React.useMemo(() => {
+    const catalogKey = String(baseProduct?.catalogId || '');
+    const detail = productDetailsById[catalogKey];
+    if (!detail) return baseProduct;
+    return {
+      ...baseProduct,
+      about: detail.about || baseProduct?.description,
+      specs: detail.specs?.length ? detail.specs : baseProduct?.specs,
+      pros: detail.pros,
+      cons: detail.cons,
+      bestForTags: detail.bestForTags,
+      storeComparisonList: detail.storeComparisonList,
+      physicalStores: detail.physicalStores,
+      overviewBlocks: detail.overviewBlocks,
+      creatorContent: detail.creatorContent,
+      seoTitle: detail.seoTitle,
+      seoDescription: detail.seoDescription,
+      seoKeywords: detail.seoKeywords,
+      sizeGuide: detail.sizeGuide ?? baseProduct?.sizeGuide,
     };
-    return found;
-  }, [id, allProducts]);
+  }, [baseProduct, productDetailsById]);
 
-  useEffect(() => {
-    if (product?.id) {
-      addRecentlyViewed(product);
-    }
-  }, [product?.id, addRecentlyViewed]);
+  usePageBreadcrumbs(
+    {
+      insertBeforeLast: product?.category
+        ? [
+            {
+              name: product.category,
+              path: `/categories?category=${encodeURIComponent(slugifyPathSegment(product.category))}`,
+            },
+          ]
+        : [],
+    },
+    [product?.category, product?.title, product?.id],
+  );
 
-  const boxInfo = useMemo(() => getProductBoxContents(product), [product]);
+  const showSizeGuideButton = hasActiveSizeGuide(product?.sizeGuide);
 
-  const sortedStores = useMemo(() => getStorePrices(product), [product]);
+  // ── Optional Add-ons State ───────────────────────────────────────
+  const [selectedAddonIds, setSelectedAddonIds] = useState<Set<string>>(new Set());
+  const resolvedAddons = useMemo(() => resolveAddons(product), [product?.id]);
+  const hasAddons = resolvedAddons.length > 0;
 
-  const scrollToSection = (id: string) => {
+  const jumpToProductSection = (id: string) => {
     const el = document.getElementById(id);
-    if (el) {
-      const offset = 140; // Navbar (80) + Sticky Page Nav (60)
-      const elementPosition = el.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
-      setActiveSection(id);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.pageYOffset - 200;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  };
+
+  const productSectionNavItems = [
+    { id: "product-specs-section", label: "Specs", icon: <Package size={13} /> },
+    { id: "influencer-reviews-section", label: "Creator Reviews", icon: <Users size={13} /> },
+    { id: "public-reviews-section", label: "Public Reviews", icon: <MessageSquare size={13} /> },
+    { id: "product-overview-section", label: "Product Overview", icon: <Info size={13} /> },
+    { id: "product-utility-section", label: "Buying Guide", icon: <ShoppingBag size={13} /> },
+  ];
+
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(
+    productSectionNavItems,
+    { scrollOffset: 168, allId: "all" },
+  );
+
+  useRegisterPageFilters({
+    pageName: 'Product',
+    renderSearch: null,
+    sectionNav: {
+      items: productSectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Product',
+      profileLabel: 'Product profile',
+    },
+    quickFilters: [
+      { id: 'pd-specs', label: '📊 Specs', active: false, onClick: () => jumpToProductSection('product-specs-section') },
+      { id: 'pd-creators', label: '🎥 Creator Reviews', active: false, onClick: () => jumpToProductSection('influencer-reviews-section') },
+      { id: 'pd-reviews', label: '⭐ Public Reviews', active: false, onClick: () => jumpToProductSection('public-reviews-section') },
+      { id: 'pd-overview', label: 'ℹ️ Product Overview', active: false, onClick: () => jumpToProductSection('product-overview-section') },
+      { id: 'pd-stores', label: '📖 Buying Guide', active: false, onClick: () => jumpToProductSection('product-utility-section') },
+    ],
+    renderFilters: null, // product detail has no sidebar filters
+    activeFilterCount: 0,
+    onClearAll: null,
+  });
+
+  // Computed add-on total
+  const addonTotal = useMemo(() => {
+    return resolvedAddons
+      .filter(a => selectedAddonIds.has(a.id) && a.available)
+      .reduce((sum, a) => sum + a.price, 0);
+  }, [selectedAddonIds, resolvedAddons]);
+
+  // Selected add-on objects (for cart and message builder)
+  const selectedAddons = useMemo(() =>
+    resolvedAddons.filter(a => selectedAddonIds.has(a.id)),
+    [selectedAddonIds, resolvedAddons]
+  );
+
+  const toggleAddon = (addonId: string) => {
+    setSelectedAddonIds(prev => {
+      const next = new Set(prev);
+      if (next.has(addonId)) next.delete(addonId);
+      else next.add(addonId);
+      return next;
+    });
+  };
+
+  React.useEffect(() => {
+    setSelectedAddonIds(new Set());
+  }, [product?.id]);
+
+  const addToCart = (prod: any, qty: number, variant?: any) => {
+    const addonsToApply = resolveAddons(prod);
+    const selected = addonsToApply.filter(addon => selectedAddonIds.has(addon.id) && addon.available);
+    if (selected.length > 0) {
+      const addOnPrice = selected.reduce((sum, item) => sum + item.price, 0);
+      const addOnNames = selected.map(item => item.title).join(", ");
+      const customizedProduct = {
+        ...prod,
+        price: prod.price + addOnPrice,
+        title: `${prod.title} (${addOnNames})`
+      };
+      globalAddToCart(customizedProduct, qty, variant);
+    } else {
+      globalAddToCart(prod, qty, variant);
+    }
+  };
+  const {
+    addRecentlyViewed,
+    createNewThread,
+    addThreadMessage,
+    addToRecentlyViewed,
+    reviews,
+    setReviews,
+    addNotification,
+    comparedProducts,
+    setComparedProducts,
+    customOverviews,
+  } = useDashboard();
+
+  React.useEffect(() => {
+    if (product) {
+      addToRecentlyViewed(product);
+    }
+  }, [product?.id]);
+
+  React.useEffect(() => {
+    if (!product?.id) return;
+    operationsApi
+      .listProductReviews(String(product.id))
+      .then((published) => {
+        if (!published.length) return;
+        setReviews((prev: any[]) => {
+          const pending = prev.filter((row) => !published.some((p) => p.id === row.id));
+          return [
+            ...published.map((row) => ({
+              id: row.id,
+              productId: product.id,
+              productTitle: product.title,
+              rating: row.rating,
+              text: row.comment,
+              authorName: row.userName,
+              createdAt: row.createdAt,
+              status: 'published',
+            })),
+            ...pending,
+          ];
+        });
+      })
+      .catch(() => {});
+  }, [product?.id, setReviews]);
+
+  const [selectedRating, setSelectedRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+
+  const handleReviewSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newReview = {
+      id: Date.now().toString(),
+      productId: product.id,
+      productTitle: product.title,
+      rating: selectedRating,
+      text: reviewText,
+      authorName: currentUser.name,
+      createdAt: new Date().toISOString()
+    };
+    setReviews((prev: any[]) => [newReview, ...prev]);
+    setSelectedRating(5);
+    setReviewText("");
+    toast.success('Review submitted! It will appear after approval.');
+    operationsApi
+      .submitReview({
+        userId: String(currentUser?.id || 'guest'),
+        userName: currentUser?.name || 'Guest',
+        productId: String(product.id),
+        productTitle: product.title,
+        brandName: brandName,
+        storeName: brandName,
+        rating: selectedRating,
+        comment: reviewText.trim(),
+      })
+      .catch(() => {});
+    if (typeof addNotification === 'function') {
+      addNotification('Your review was submitted successfully.', 'system');
     }
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 180;
-      
-      const sections = [
-        { id: "overview", el: document.getElementById("overview") },
-        { id: "specifications", el: document.getElementById("specifications") },
-        { id: "creator-reviews", el: document.getElementById("creator-reviews") },
-        { id: "public-reviews", el: document.getElementById("public-reviews") },
-        { id: "box-contents", el: document.getElementById("box-contents") },
-        { id: "product-overview", el: document.getElementById("product-overview") },
-        { id: "prices", el: document.getElementById("prices") },
-        { id: "faq", el: document.getElementById("faq") }
-      ];
+  const handleAddToCompare = () => {
+    if (comparedProducts.some((p: any) => p.id === product.id)) {
+      toast.error('This product is already in your comparison list.');
+      return;
+    }
+    if (comparedProducts.length >= 4) {
+      toast.error('Comparison limit reached (4 products)');
+      return;
+    }
+    setComparedProducts((prev: any[]) => [product, ...prev]);
+    toast.success('Added to comparison!');
+  };
+  const brandObj = brandList.find((b: any) => b.id === product.brandId) ||
+    brandList.find((b: any) => b.name?.toLowerCase() === product.brand?.toLowerCase());
+  const brandId = brandObj ? brandObj.id : 1;
+  const brandName = brandObj ? brandObj.name : "Apex";
+  const brandOfficialWebsite = useMemo(() => {
+    const fromProduct = (product as any)?.officialWebsite || (product as any)?.buyUrl || (product as any)?.storeUrl;
+    const fromBrand = (brandObj as any)?.website || (brandObj as any)?.officialWebsite;
+    if (fromProduct) return normalizeExternalUrl(String(fromProduct));
+    if (fromBrand) return normalizeExternalUrl(String(fromBrand));
+    return getBrandOfficialWebsite(brandName);
+  }, [product, brandObj, brandName]);
 
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const section = sections[i];
-        if (section.el) {
-          const top = section.el.offsetTop;
-          if (scrollPosition >= top) {
-            setActiveSection(section.id);
-            break;
-          }
-        }
+  const [activeTab, setActiveTab] = useState("Overview");
+  const [activeAccordionIndex, setActiveAccordionIndex] = useState(0);
+  const [carouselIndex, setCarouselIndex] = useState(1);
+
+  // States for Stats Bar and ScrollSpy
+  const [purchasedCount] = useState(854);
+  const [viewCount] = useState(() => 8420 + (product?.id ?? 0) * 37);
+
+  // Variant support state hooks
+  const [selectedColor, setSelectedColor] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedRam, setSelectedRam] = useState<string>("");
+  const [selectedStorage, setSelectedStorage] = useState<string>("");
+  const [isSizeChartOpen, setIsSizeChartOpen] = useState<boolean>(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [cartQty, setCartQty] = useState(1);
+
+  React.useEffect(() => {
+    setIsSizeChartOpen(false);
+    setIsWishlisted(false);
+    setCartQty(1);
+  }, [product?.id]);
+
+  // Message to Order Flow States
+  const [showOrderConfig, setShowOrderConfig] = useState(false);
+  const [orderQty, setOrderQty] = useState(1);
+  const [orderColor, setOrderColor] = useState("");
+  const [orderSize, setOrderSize] = useState("");
+  const [orderNotes, setOrderNotes] = useState("");
+  const [showOrderConfirm, setShowOrderConfirm] = useState(false);
+
+  // Sync state options when product changes
+  React.useEffect(() => {
+    if (product && product.variants && product.variants.length > 0) {
+      // Auto select first entry that is in stock, or just first entry
+      const firstAvailable =
+        product.variants.find((v: any) => v.stock > 0) || product.variants[0];
+      if (firstAvailable) {
+        if (firstAvailable.attributes.color !== undefined)
+          setSelectedColor(firstAvailable.attributes.color);
+        if (firstAvailable.attributes.size !== undefined)
+          setSelectedSize(firstAvailable.attributes.size);
+        if (firstAvailable.attributes.ram !== undefined)
+          setSelectedRam(firstAvailable.attributes.ram);
+        if (firstAvailable.attributes.storage !== undefined)
+          setSelectedStorage(firstAvailable.attributes.storage);
       }
-    };
+    } else {
+      setSelectedColor("");
+      setSelectedSize("");
+      setSelectedRam("");
+      setSelectedStorage("");
+    }
+  }, [product]);
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const getSelectedVariant = () => {
+    if (!product || !product.variants || product.variants.length === 0)
+      return null;
+    return product.variants.find((v: any) => {
+      const hasColor = v.attributes.color !== undefined;
+      const hasSize = v.attributes.size !== undefined;
+      const hasRam = v.attributes.ram !== undefined;
+      const hasStorage = v.attributes.storage !== undefined;
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [id]);
+      if (hasColor && v.attributes.color !== selectedColor) return false;
+      if (hasSize && v.attributes.size !== selectedSize) return false;
+      if (hasRam && v.attributes.ram !== selectedRam) return false;
+      if (hasStorage && v.attributes.storage !== selectedStorage) return false;
+      return true;
+    });
+  };
 
-  const images = [
-    "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=2000&auto=format&fit=crop",
+  const getBoxContents = () => {
+    if (!product) return [];
+    
+    const title = (product.title || "").toLowerCase();
+    const category = (product.category || "").toLowerCase();
+
+    // Smartphone matching
+    if (
+      category.includes("phone") || 
+      category.includes("mobile") || 
+      title.includes("galaxy") || 
+      title.includes("iphone") || 
+      title.includes("redmi") || 
+      title.includes("pixel") || 
+      title.includes("poco") || 
+      title.includes("realme") || 
+      title.includes("smartphone")
+    ) {
+      return ["Device", "Charger", "USB Cable", "SIM Ejector Tool", "User Guide"];
+    }
+
+    // Laptop matching
+    if (
+      category.includes("laptop") || 
+      category.includes("computer") || 
+      title.includes("macbook") || 
+      title.includes("zenbook") || 
+      title.includes("laptop")
+    ) {
+      return ["Laptop", "Power Adapter", "Charging Cable", "Documentation"];
+    }
+
+    // Eyewear matching
+    if (
+      category.includes("eyewear") || 
+      category.includes("glasses") || 
+      title.includes("sunglasses") || 
+      title.includes("eyewear")
+    ) {
+      return ["Eyewear", "Protective Case", "Cleaning Cloth", "Warranty Card"];
+    }
+
+    // Clothing / Apparel matching
+    if (
+      category.includes("fashion") || 
+      category.includes("lifestyle") || 
+      category.includes("clothing") || 
+      category.includes("apparel") || 
+      title.includes("saree") || 
+      title.includes("panjabi") || 
+      title.includes("polo") || 
+      title.includes("shirt") || 
+      title.includes("apparel") || 
+      title.includes("runner") || 
+      title.includes("shoe")
+    ) {
+      if (title.includes("saree")) {
+        return ["Saree", "Shopping Bag", "Care Instructions"];
+      }
+      return ["Product Unit", "Shopping Bag", "Care Instructions"];
+    }
+
+    // Beauty Products matching
+    if (
+      category.includes("beauty") || 
+      category.includes("skin") || 
+      category.includes("makeup") || 
+      category.includes("cosmetics") || 
+      title.includes("perfume") || 
+      title.includes("serum") || 
+      title.includes("fragrance")
+    ) {
+      return ["Product Unit", "Protective Packaging", "User Instructions"];
+    }
+
+    return [];
+  };
+
+  const boxContents = getBoxContents();
+
+  const selectedVariant = getSelectedVariant();
+
+  // Reset active image index to 0 when variant changes
+  React.useEffect(() => {
+    if (selectedVariant?.image) {
+      setCarouselIndex(0);
+    }
+  }, [selectedVariant?.image]);
+
+  // Unique attribute variants computation
+  const uniqueColors = product.variants
+    ? (Array.from(
+        new Set(
+          product.variants.map((v: any) => v.attributes.color).filter(Boolean),
+        ),
+      ) as string[])
+    : [];
+
+  const uniqueSizes = product.variants
+    ? (Array.from(
+        new Set(
+          product.variants.map((v: any) => v.attributes.size).filter(Boolean),
+        ),
+      ) as string[])
+    : [];
+
+  const uniqueRams = product.variants
+    ? (Array.from(
+        new Set(
+          product.variants.map((v: any) => v.attributes.ram).filter(Boolean),
+        ),
+      ) as string[])
+    : [];
+
+  const uniqueStorages = product.variants
+    ? (Array.from(
+        new Set(
+          product.variants
+            .map((v: any) => v.attributes.storage)
+            .filter(Boolean),
+        ),
+      ) as string[])
+    : [];
+
+  // Availability lookup helpers for disabled states
+  const isSizeOptionAvailable = (size: string) => {
+    if (!product.variants) return true;
+    return product.variants.some(
+      (v: any) =>
+        v.attributes.size === size &&
+        (!selectedColor || v.attributes.color === selectedColor) &&
+        v.stock > 0,
+    );
+  };
+
+  const isColorOptionAvailable = (color: string) => {
+    if (!product.variants) return true;
+    return product.variants.some(
+      (v: any) =>
+        v.attributes.color === color &&
+        (!selectedSize || v.attributes.size === selectedSize) &&
+        v.stock > 0,
+    );
+  };
+
+  const isRamOptionAvailable = (ram: string) => {
+    if (!product.variants) return true;
+    return product.variants.some(
+      (v: any) =>
+        v.attributes.ram === ram &&
+        (!selectedStorage || v.attributes.storage === selectedStorage) &&
+        v.stock > 0,
+    );
+  };
+
+  const isStorageOptionAvailable = (storage: string) => {
+    if (!product.variants) return true;
+    return product.variants.some(
+      (v: any) =>
+        v.attributes.storage === storage &&
+        (!selectedRam || v.attributes.ram === selectedRam) &&
+        v.stock > 0,
+    );
+  };
+
+  const getColorHexClass = (colorName: string) => {
+    const norm = colorName.toLowerCase();
+    if (norm.includes("gray") || norm.includes("grey")) return "bg-gray-400";
+    if (norm.includes("yellow") || norm.includes("gold"))
+      return "bg-yellow-400";
+    if (norm.includes("violet") || norm.includes("purple"))
+      return "bg-purple-500";
+    if (norm.includes("black")) return "bg-gray-900";
+    if (norm.includes("white")) return "bg-white border border-gray-300";
+    if (norm.includes("silver") || norm.includes("platinum"))
+      return "bg-slate-300";
+    if (norm.includes("blue")) return "bg-blue-600";
+    if (norm.includes("red") || norm.includes("crimson")) return "bg-red-500";
+    if (norm.includes("lime") || norm.includes("green")) return "bg-lime-400";
+    return "bg-amber-600";
+  };
+
+  const tabs = [
+    "Overview",
+    "Specifications",
+    "About Choosify.bd",
+    "Influencer Reviews",
+    "Comparison",
   ];
 
+  const productSpecs = [
+    { label: "Material", value: "Premium Linen Wear" },
+    { label: "Category", value: product.category || "Lifestyle" },
+    { label: "Fit", value: "Standard / Regular" },
+    { label: "Occasion", value: "Festive Exclusive" },
+    { label: "Warranty", value: "1 Year Brand Care" },
+    { label: "Gender", value: "Unisex / Mens" },
+  ];
 
-  const handleAddToCart = () => {
-    globalAddToCart({
-      id: product.id,
-      title: product.title,
+  // Stock calculations
+  const isOutOfStock =
+    product.variants && product.variants.length > 0
+      ? selectedVariant
+        ? selectedVariant.stock === 0
+        : true
+      : product.id === 3 ||
+        product.title.includes("MacBook") ||
+        product.stock === 0;
+
+  const stockQuantity =
+    product.variants && product.variants.length > 0
+      ? selectedVariant
+        ? selectedVariant.stock
+        : 0
+      : isOutOfStock
+        ? 0
+        : 58;
+
+  const handleLoveBrand = () => {
+    toast.success(`You added ${product.brand} to your Favorite Brands!`);
+  };
+
+  const handleMessageOrder = () => {
+    setOrderQty(1);
+    setOrderColor(selectedColor || (product?.colors && product.colors[0]) || "Sunset Orange");
+    setOrderSize(selectedSize || selectedRam || selectedStorage || (product?.sizes && product.sizes[0]) || "Standard");
+    setOrderNotes("");
+    setShowOrderConfig(true);
+  };
+
+  const handleConfirmAndSend = () => {
+    const threadId = `thread-brand-${brandId}`;
+    const orderRef = `CHOOSIFY-${Math.floor(1000000 + Math.random() * 9000000)}`;
+    const structuredMsg = `🛒 SPECIAL INBOUND ORDER:
+📦 Item: ${product.title}
+🏢 Brand: ${brandName} (ID: ${brandId})
+🎨 Options:
+  • Color: ${orderColor}
+  • Variant: ${orderSize}
+🔢 Quantity: ${orderQty}
+📝 Custom Memo: ${orderNotes || "No notes."}
+${selectedAddons.length > 0
+  ? `🛍️ Optional Add-ons Selected:\n${selectedAddons.map(a => `  • ${a.title} (+৳${a.price.toLocaleString()})`).join('\n')}\n💰 Add-ons Subtotal: BDT ${addonTotal.toLocaleString()}\n💵 Total Value (incl. add-ons): BDT ${(orderQty * product.price + addonTotal).toLocaleString()}`
+  : `💵 Total Value: BDT ${(orderQty * product.price).toLocaleString()}`
+}
+Ref Link: /products/${product.id}
+
+Hello, I'd like to purchase this product config! Please approve shipping.`;
+
+    const sellerResponse = `💬 SELLER ACCEPTANCE AUTO-CONFIRMATION:
+🟢 Your order request has been APPROVED by the automatic gateway!
+📋 Tracking reference: #${orderRef}
+🚚 Dispatch logistics team will contact you shortly to coordinate receipt.`;
+
+    const pCard = {
+      image: product.image || PLACEHOLDER_IMAGE,
+      name: product.title,
+      variant: orderSize,
+      color: orderColor,
+      quantity: orderQty,
+      notes: orderNotes || "No custom parameter notes.",
       price: product.price,
-      image: images[0],
-      store: "Apple Store"
-    }, 1);
-    toast.success("Added to Cart!");
+      link: `/products/${product.id}`
+    };
+
+    // 1. Create message thread
+    createNewThread(
+      threadId,
+      brandName,
+      brandObj?.logo || "https://i.pravatar.cc/150?u=brand",
+      'retail',
+      structuredMsg,
+      orderRef
+    );
+
+    // 2. Add structural msg
+    addThreadMessage(threadId, structuredMsg, "user", "Me", pCard);
+
+    // 3. Add Seller response message
+    setTimeout(() => {
+      addThreadMessage(threadId, sellerResponse, "seller", brandName);
+    }, 450);
+
+    // Show toast and close
+    toast.success("Order request dispatched! Syncing to messaging workspace.");
+    setShowOrderConfirm(false);
+    
+    // Redirect to Messages thread
+    navigate(`/messages/${threadId}`);
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9] text-slate-800 font-sans pb-24 selection:bg-[#FF5B00] selection:text-white">
-      
-      
-      {/* 1. PRODUCT HERO */}
-      <div id="overview" className="max-w-[1600px] mx-auto px-6 md:px-10 pt-6 pb-12 scroll-mt-36">
-        {/* Breadcrumbs */}
-        <nav className="text-xs font-semibold text-slate-400 flex flex-wrap items-center gap-1.5 uppercase tracking-wider mb-8">
-          <Link to="/" className="hover:text-slate-600 transition-colors">Home</Link>
-          <span className="text-slate-400 font-bold">&gt;</span>
-          <Link to="/products" className="hover:text-slate-600 transition-colors">Products</Link>
-          <span className="text-slate-400 font-bold">&gt;</span>
-          <span className="hover:text-slate-600 transition-colors cursor-pointer">Electronics</span>
-          <span className="text-slate-400 font-bold">&gt;</span>
-          <span className="hover:text-slate-600 transition-colors cursor-pointer">Smartphones</span>
-          <span className="text-slate-400 font-bold">&gt;</span>
-          <span className="text-slate-800 font-extrabold">{product.title}</span>
-        </nav>
-
-        <ProductHeroCTACard
-          image={images[0]}
-          title={product.title}
-          subtitle="Titanium Black"
-          rating={4.8}
-          reviewCount={product.reviews}
-          price="BDT 167,500"
-          originalPrice="BDT 185,000"
-          discountBadge="-9%"
-          cashbackText="Get up to ৳ 8,000 cashback"
-          colors={[
-            { label: "Titanium Black", value: "Titanium Black", colorHex: "#2d2d2d" },
-            { label: "Titanium Blue", value: "Titanium Blue", colorHex: "#2c3d4a" },
-            { label: "Titanium Natural", value: "Titanium Natural", colorHex: "#959187" },
-            { label: "Titanium White", value: "Titanium White", colorHex: "#e3e4e5" }
-          ]}
-          storages={[
-            { label: "256GB", value: "256GB" },
-            { label: "512GB", value: "512GB" },
-            { label: "1TB", value: "1TB" }
-          ]}
-          onBuyNow={handleAddToCart}
-          onWishlist={() => toast.success("Added to Wishlist")}
-          onCompare={() => toast.success("Added to Compare")}
-        />
-      </div>
-
-      {/* 2. STICKY NAVIGATION */}
-      <StickyNavigation
-        items={[
-          { id: "specifications", label: "Specifications" },
-          { id: "creator-reviews", label: "Creator Reviews" },
-          { id: "public-reviews", label: "Public Reviews" },
-          { id: "box-contents", label: "Box Contents" },
-          { id: "product-overview", label: "Product Overview" },
-          { id: "prices", label: "Prices Across Stores" },
-          { id: "faq", label: "FAQs" },
-        ]}
-        activeId={activeSection}
-        onItemClick={scrollToSection}
-        productInfo={{
-          image: images[0],
-          title: product.title,
-          price: "BDT 167,500"
-        }}
-        onCtaClick={handleAddToCart}
-      />
-
-{/* 4. CONTENT AREA */}
-      <div className="max-w-[1600px] mx-auto px-6 md:px-10 pt-12 flex flex-col gap-16">
-        
-        {/* SECTION 1: SPECIFICATIONS */}
-        <section id="specifications" className="scroll-mt-36">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-2">PRODUCT SPECIFICATIONS</h2>
-            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">TECHNICAL DETAILS & COMPREHENSIVE FEATURES</p>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            <div className="lg:col-span-12">
-              <SpecificationCard 
-                title="PRODUCT SPECIFICATIONS"
-                specs={[
-                  { label: "BRAND", value: "Apple" },
-                  { label: "CATEGORY", value: "Smartphones" },
-                  { label: "DISPLAY", value: "6.7\" Super Retina XDR" },
-                  { label: "STORAGE", value: "256GB" },
-                  { label: "CHIPSET", value: "A17 Pro Chip" },
-                  { label: "CAMERA", value: "48MP Main + 12MP Ultra Wide" },
-                  { label: "BATTERY", value: "Up to 29 Hours" },
-                  { label: "RATING", value: "4.8 / 5" },
-                  { label: "Dimensions", value: "159.9 x 76.7 x 8.25 mm" },
-                  { label: "Weight", value: "221 g" },
-                  { label: "Screen Finish", value: "Ceramic Shield Front" },
-                  { label: "Chassis Material", value: "Grade 5 Titanium design" },
-                  { label: "Water Resistance", value: "IP68 Rated (up to 6m for 30m)" },
-                  { label: "Connector Port", value: "USB-C with USB 3 speed" }
-                ]}
-                onViewAll={() => toast.success("Opening full specifications sheet")}
-              />
-            </div>
-          </div>
-        </section>
-
-{/* SECTION 2: CREATOR REVIEWS */}
-        <section id="creator-reviews" className="scroll-mt-36">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-            <div>
-              <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-2">CREATOR REVIEWS</h2>
-              <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">WATCH TRUSTED INFLUENCER INSIGHTS BEFORE BUYING</p>
-            </div>
-            <Button 
-              variant="ghost"
-              onClick={() => setShowAllCreators(!showAllCreators)}
-              className="text-xs font-bold text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 hover:text-[#EB4501] group cursor-pointer self-start md:self-auto"
-            >
-              {showAllCreators ? "SHOW FEWER REVIEWS" : "VIEW ALL REVIEWS"} 
-              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {CREATOR_REVIEWS_MOCK.slice(0, showAllCreators ? 8 : 4).map((review) => (
-              <CreatorReviewCard key={review.id} review={review} onClick={() => setSelectedReview(review)} />
-            ))}
-          </div>
-        </section>
-
-        {/* SECTION 3: PUBLIC REVIEWS */}
-        <section id="public-reviews" className="scroll-mt-36">
-          <div className="mb-8">
-            <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-2">PUBLIC REVIEWS</h2>
-            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">GENUINE CUSTOMER FEEDBACK & VERIFIED PURCHASE REVIEWS</p>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-            {/* Write Review Form */}
-            <div className="lg:col-span-4 lg:sticky lg:top-36">
-              <WriteReviewCard onSubmit={(data) => {
-                if (data.rating === 0) {
-                  toast.error("Please pick a star rating first!");
-                } else {
-                  toast.success("Thank you! Your review has been submitted for verification.");
-                }
-              }} />
-            </div>
-
-            {/* Review Cards List */}
-            <div className="lg:col-span-8 flex flex-col gap-6">
-              {[
-                {
-                  name: "Tawhid Hossain",
-                  days: "2 days ago",
-                  text: "Absolutely incredible device! The camera quality is mind-blowing and the performance is next level. Battery life is also exceptional, easily getting me through a full day of heavy shooting.",
-                  helpful: 123,
-                  images: [1,2,3]
-                },
-                {
-                  name: "Nusrat Jahan",
-                  days: "5 days ago",
-                  text: "Upgraded from iPhone 12 Pro Max and the difference is incredible. The dynamic island and premium titanium build feel so luxurious and feather-light. Worth every single penny.",
-                  helpful: 96,
-                  images: [1,2,3]
-                }
-              ].map((review, i) => (
-                <PublicReviewCard 
-                  key={i} 
-                  review={{
-                    name: review.name,
-                    rating: 5,
-                    time: review.days,
-                    comment: review.text,
-                    verified: true,
-                    helpful: review.helpful,
-                    images: review.images.map(() => "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=200&auto=format&fit=crop")
-                  }} 
-                  onHelpfulClick={() => toast.success("Marked review as helpful")}
-                />
-              ))}
-                
-              <Button 
-                variant="secondary" 
-                className="w-full mt-2" 
-                onClick={() => toast.success("Loading older reviews...")}
-              >
-                LOAD MORE REVIEWS
-              </Button>
-            </div>
-          </div>
-        </section>
-
-
-        {/* SECTION 4: BOX CONTENTS & COMPLIMENTARY FEATURES */}
-        <section id="box-contents" className="scroll-mt-36">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-            <div className="lg:col-span-1">
-              <BoxContentsCard
-                title="BOX CONTENTS"
-                items={[
-                  ...boxInfo.contents.map(c => ({ label: c.name + " - " + c.desc, icon: Package })),
-                  ...boxInfo.benefits.map(b => ({ label: b.title + " - " + b.desc, icon: Award }))
-                ]}
-              />
-            </div>
-            <div className="lg:col-span-1">
-              <TrustScoreCard
-                overallScore={9.2}
-                categories={[
-                  { label: "Product Authenticity", score: 9.5 },
-                  { label: "Seller Reliability", score: 9.1 },
-                  { label: "User Reviews", score: 9.0 },
-                  { label: "Safety & Policy", score: 9.3 }
-                ]}
-              />
-            </div>
-            <div className="lg:col-span-1">
-              <TrustStatementCard
-                statements={[
-                  { title: "100% Genuine Products", description: "Sourced from official & trusted sellers" },
-                  { title: "Safe & Secure Payments", description: "Your payments are fully protected" },
-                  { title: "Easy Returns & Refunds", description: "Hassle-free returns within 7 days" },
-                  { title: "Dedicated Customer Support", description: "We're here to help you anytime" }
-                ]}
-              />
-            </div>
-          </div>
-        </section>
-
-
-        {/* SECTION 5: PRODUCT OVERVIEW */}
-        <section id="product-overview" className="scroll-mt-36">
-          <ProductOverviewCard
-            summary={"The " + product.title + " provides outstanding values. It is a premier option for customers looking for advanced reliability, durable design elements, and high-performance capabilities in daily workflows. Highly recommended for demanding power users, active content creators, and corporate professionals who expect high-end displays, top-of-the-line internal chipsets, and long-term durability."}
-            sections={[
-              {
-                title: "Key Features",
-                features: [
-                  "Premium Space Grade Materials",
-                  "High Strength Outer Screen Panel",
-                  "Rigid Internal Framing Architecture",
-                  "IP68 Certified Ingress Rating",
-                  "Significant Processing Speed Increase",
-                  "Optimal Thermal Dissipation Core",
-                  "Low Latency Mobile Refresh Rate",
-                  "Intelligent Battery Management",
-                  "12-Month Official Local Warranty",
-                  "Rapid Service Centers Availability"
-                ]
-              }
-            ]}
-          />
-        </section>
-
-
-        {/* SECTION 6: PRICES ACROSS STORES */}
-        <section id="prices" className="scroll-mt-36">
-          <PriceAcrossStoresCard 
-            stores={sortedStores.map((store, i) => ({
-              id: i.toString(),
-              storeName: store.name,
-              logo: store.avatar,
-              price: "BDT " + store.price.toLocaleString(),
-              cashback: store.cashback,
-              onViewStore: () => {
-                setRedirectingStore(store.name);
-                setTimeout(() => {
-                  setRedirectingStore(null);
-                  toast.success(`Successfully connected to ${store.name}!`);
-                }, 2500);
-              }
-            }))}
-            onViewAllStores={() => toast.success("Loading all stores...")}
-          />
-        </section>
-
-        
-        {/* SECTION 7: FAQ */}
-        <section id="faq" className="scroll-mt-36">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-2">Frequently Asked Questions</h2>
-            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">QUICK QUESTIONS & COLLAPSIBLE DETAILED RESPONSES</p>
-          </div>
-
-          <div className="flex flex-wrap gap-2.5 justify-center mb-8 max-w-4xl mx-auto px-4">
-            <FaqPill 
-              label="Is the product original?" 
-              answer="Yes, all products on Choosify are 100% genuine, sourced from certified brand distributors, with intact factory serial numbers."
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      {studioEditMode && isLoggedIn && canUseProductStudio && (
+        <div className="sticky top-0 z-[110] bg-[#1A1D4E] border-b border-white/10 px-4 py-3">
+          <div className="max-w-[1080px] mx-auto flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[12px] font-bold tracking-tight text-white/70">
+              Product Studio
+            </p>
+            <CreateSpotlightCampaignButton
+              productId={String(product?.catalogId ?? product?.id ?? '')}
+              brandId={product?.brand ? String(product.brand) : undefined}
             />
-            <FaqPill 
-              label="How can I track my order?" 
-              answer="You can monitor real-time shipment progress directly from your dashboard or via the carrier SMS updates sent upon dispatch."
-            />
-            <FaqPill 
-              label="What's your return policy?" 
-              answer="Enjoy 7-day hassle-free exchange or full refund on items verified to have manufacturing defects or sizing mismatch."
-            />
-            <FaqPill 
-              label="Warranty details?" 
-              answer="Most electronics carry a 1-Year Brand Warranty. Warranty claims are easily made at authorized local service centers."
-            />
-            <FaqPill 
-              label="Shipping times?" 
-              answer="Dhaka metropolitan delivery takes 24-48 hours. Nationwide deliveries to other regions take between 2 to 4 business days."
-            />
-          </div>
-
-          <div className="flex flex-col gap-4 max-w-4xl mx-auto">
-            <FAQAccordionCard 
-              question="Is the product original?"
-              answer="Yes, all products on Choosify are 100% original and sourced from authorized sellers."
-            />
-            <FAQAccordionCard 
-              question="How can I track my order?"
-              answer="You can track your order status directly from your dashboard using your order ID."
-            />
-            <FAQAccordionCard 
-              question="What is your return policy?"
-              answer="We offer a 7-day hassle-free return policy for any defective items."
-            />
-          </div>
-        </section>
-
-        {/* TRUST STATEMENT AND FOOTER PROMO */}
-        <div className="mt-12 mb-4">
-          <div className="bg-white rounded-t-[32px] border-t border-x border-slate-100 p-8 flex flex-col md:flex-row items-center justify-center gap-6 shadow-[0_-10px_30px_rgb(0,0,0,0.02)] max-w-5xl mx-auto -mb-6 relative z-10">
-            <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-7 h-7 text-emerald-500" />
-            </div>
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-extrabold text-[#000435] uppercase tracking-wider mb-2">CHOOSIFY.BD TRUST STATEMENT</h3>
-              <p className="text-base text-slate-500 font-medium">We only partner with verified sellers to ensure genuine products and the best experience as in Choosify.</p>
-            </div>
-          </div>
-          
-          <div className="bg-[#0B0F19] rounded-[32px] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between text-white shadow-2xl relative z-0 border border-white/5 overflow-hidden">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-[#FF5B00]/10 rounded-full blur-[80px] pointer-events-none"></div>
-             
-             <div className="flex-1 relative z-10 text-center md:text-left mb-6 md:mb-0">
-               <h4 className="font-extrabold text-xl md:text-2xl uppercase tracking-wider mb-2">UPGRADE TO CHOOSIFY PRIME</h4>
-               <p className="text-sm md:text-base text-slate-400 font-medium">Get premium deals, exclusive offers & early access to top launches.</p>
-               <button 
-                 onClick={() => toast.success("Welcome to Choosify Prime!")}
-                 className="text-[#FF5B00] text-sm font-bold uppercase tracking-wider mt-4 hover:text-white transition-colors cursor-pointer"
-               >
-                 UPGRADE NOW
-               </button>
-             </div>
-             
-             <div className="shrink-0 relative z-10">
-                <Award className="w-20 h-20 text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.3)]" />
-             </div>
           </div>
         </div>
-
-      </div>
-
-      {/* Video Modal playback */}
-      {selectedReview && (
-        <VideoModal 
-          review={selectedReview} 
-          onClose={() => setSelectedReview(null)} 
-        />
       )}
 
-      {/* Dynamic Simulated Redirection Backdrop Overlay */}
-      <AnimatePresence>
-        {redirectingStore && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
-          >
-            <motion.div 
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              className="bg-white rounded-[32px] p-8 md:p-10 max-w-lg w-full shadow-2xl border border-slate-100 flex flex-col items-center text-center"
+      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 pt-7 pb-0 w-full">
+        <div className="text-xs text-[#9AA0AC] mb-3.5">
+          <Link to="/" className="hover:text-[#FF5B00]">Home</Link>
+          {' '}&nbsp;›&nbsp;{' '}
+          <Link to="/products" className="hover:text-[#FF5B00]">Products</Link>
+          {product.category && (
+            <>
+              {' '}&nbsp;›&nbsp;{' '}
+              <Link
+                to={`/products?category=${encodeURIComponent(product.category)}`}
+                className="hover:text-[#FF5B00]"
+              >
+                {product.category}
+              </Link>
+            </>
+          )}
+          {' '}&nbsp;›&nbsp;{' '}
+          <span className="text-[#1A1A2E]">{product.title}</span>
+        </div>
+      </div>
+
+      <div ref={productHeroRef} className="w-full relative bg-[#000435] py-7 mb-6">
+        <div className="w-full relative">
+          <ProductMediaGallery
+            product={product}
+            selectedVariantImage={selectedVariant?.image}
+          />
+        </div>
+      </div>
+
+      <ProductDetailBuyBox
+        product={product}
+        brandName={brandName}
+        isOutOfStock={!!isOutOfStock}
+        stockQuantity={stockQuantity}
+        purchasedCount={purchasedCount}
+        viewCount={viewCount}
+        uniqueColors={uniqueColors}
+        uniqueSizes={uniqueSizes}
+        uniqueRams={uniqueRams}
+        selectedColor={selectedColor}
+        selectedSize={selectedSize}
+        selectedRam={selectedRam}
+        selectedStorage={selectedStorage}
+        setSelectedColor={setSelectedColor}
+        setSelectedSize={setSelectedSize}
+        setSelectedRam={setSelectedRam}
+        getColorHexClass={getColorHexClass}
+        showSizeGuideButton={showSizeGuideButton}
+        onOpenSizeChart={() => setIsSizeChartOpen(true)}
+        qty={cartQty}
+        setQty={setCartQty}
+        isWishlisted={isWishlisted}
+        onToggleWishlist={() => {
+          setIsWishlisted((prev) => {
+            const next = !prev;
+            toast.success(next ? 'Added to wishlist!' : 'Removed from wishlist');
+            return next;
+          });
+        }}
+        onAddToCart={() => {
+          addToCart(product, cartQty);
+          if (selectedAddons.length > 0) {
+            sessionStorage.setItem(
+              `choosify_addons_${product.id}`,
+              JSON.stringify(selectedAddons),
+            );
+            toast.success(
+              `Added ${product.title} + ${selectedAddons.length} add-on${selectedAddons.length > 1 ? 's' : ''} to your cart!`,
+              { duration: 3500 },
+            );
+          } else {
+            toast.success(`Added ${product.title} to your cart!`);
+          }
+        }}
+        onCompare={handleAddToCompare}
+        onMessageSeller={handleMessageOrder}
+        onAskEmi={() => {
+          document.getElementById('all-section')?.scrollIntoView({ behavior: 'smooth' });
+        }}
+        addonsSlot={
+          hasAddons ? (
+            <OptionalAddonsModule
+              addons={resolvedAddons}
+              selectedIds={selectedAddonIds}
+              onToggle={toggleAddon}
+              basePrice={product.price}
+              addonTotal={addonTotal}
+            />
+          ) : undefined
+        }
+      />
+
+      <DcUnderlineTabs
+        tabs={[
+          { id: 'product-specs-section', label: 'Product Specifications', icon: '⚏' },
+          { id: 'influencer-reviews-section', label: 'Creator Reviews', icon: '📖' },
+          { id: 'public-reviews-section', label: 'Public Reviews', icon: '🛡' },
+          { id: 'product-overview-section', label: 'Product Overview', icon: '👁' },
+        ]}
+        activeId={activeSectionId === 'all' ? 'product-specs-section' : activeSectionId}
+        onNavigate={scrollToSection}
+      />
+
+      <main id="all-section" className="bg-[#F4F7F9] py-6 md:py-8">
+        <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 w-full">
+          <div className={`${DETAIL_SINGLE_FEED}`}>
+            <StudioWrap sectionId="product-specs">
+            <div className="mb-6">
+              <EmiProductAssistant product={product} inStock={!isOutOfStock} />
+            </div>
+            <ProductSpecsOverview
+              productTitle={product.title}
+              specs={[
+                { label: 'Brand', value: brandObj?.name || product.brand || 'Sailor' },
+                { label: 'Category', value: product.category || 'Lifestyle' },
+                { label: 'Material', value: 'Premium Grade Build' },
+                { label: 'Origin', value: 'Local Production / Auth' },
+                { label: 'Warranty', value: '1 Year Care Warranty' },
+                { label: 'Model', value: product.title?.substring(0, 16) || 'Classic' },
+                { label: 'Rating', value: `${product.rating || '4.8'} / 5` },
+                { label: 'Status', value: isOutOfStock ? 'Out of Stock' : 'In Stock' },
+              ]}
+            />
+            </StudioWrap>
+
+            <StudioWrap sectionId="product-creator-reviews" className="scroll-mt-36 w-full">
+              <CreatorReviewsPreview
+                context="product"
+                productId={String(product.id)}
+                brandName={brandName}
+                productTitle={product?.title}
+                legacyCreatorContent={product?.creatorContent}
+                eyebrow=""
+                title="CREATOR REVIEWS"
+                subtitle="Video reviews from YouTube, Instagram & Facebook creators"
+              />
+            </StudioWrap>
+
+            {/* PUBLIC REVIEWS (ID: 'public-reviews-section') */}
+            <StudioWrap
+              sectionId="product-public-reviews"
+              className="scroll-mt-36 bg-white rounded-xl p-6 border border-[#E8EDF2] space-y-5 font-sans text-left w-full"
             >
-              <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-6 animate-pulse border border-emerald-100 shadow-inner">
-                <ShieldCheck className="w-8 h-8 stroke-[2.5]" />
+              <div>
+                <h3 className="text-[14px] font-extrabold tracking-tight text-[#1A1A2E]">
+                  PUBLIC REVIEWS
+                </h3>
+                <p className="text-[11px] font-medium text-[#9AA0AC] mt-0.5">
+                  Sharing genuine experiences
+                </p>
               </div>
-              <h3 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-2">SECURE REDIRECT</h3>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed mb-6">
-                Redirecting securely to <span className="font-extrabold text-[#FF5B00]">{redirectingStore}</span>...
-                You are leaving Choosify to complete your purchase on their partner platform.
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  ...reviews
+                    .filter((r: any) => r.productId === product.id)
+                    .map((r: any) => ({
+                      name: r.authorName,
+                      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(r.authorName)}`,
+                      time: 'Just now',
+                      rating: String(r.rating),
+                      content: r.text,
+                      date: 'Just now',
+                      helpful: 0,
+                      images: [] as string[],
+                      verified: true,
+                    })),
+                  {
+                    name: 'Tanvir Hasan',
+                    avatar: 'https://i.pravatar.cc/150?u=tanvir',
+                    time: '2 weeks ago',
+                    rating: '5',
+                    content:
+                      'The material quality of the new Apex collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it\'s worth every taka. The fit is perfect for large build individuals as well.',
+                    date: '2 weeks ago',
+                    helpful: 124,
+                    verified: true,
+                    images: [
+                      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&h=150&fit=crop',
+                      'https://images.unsplash.com/photo-1541643600914-78b084683601?w=150&h=150&fit=crop',
+                    ],
+                  },
+                  {
+                    name: 'Nusrat Jahan',
+                    avatar: 'https://i.pravatar.cc/150?u=nusrat',
+                    time: '1 month ago',
+                    rating: '4.8',
+                    content:
+                      'Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the fusion wear collection.',
+                    date: '1 month ago',
+                    helpful: 89,
+                    verified: true,
+                    images: [
+                      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=150&h=150&fit=crop',
+                    ],
+                  },
+                ].map((review, i) => (
+                  <PublicReviewCard
+                    key={i}
+                    review={review}
+                    onHelpfulClick={() =>
+                      toast.success('Thanks for voting this review as helpful!')
+                    }
+                  />
+                ))}
+              </div>
+
+              <div className="flex justify-center pt-1">
+                <button
+                  type="button"
+                  onClick={() => toast.success('All customer reviews are fully loaded.')}
+                  className="text-[11.5px] font-extrabold text-[#FF5B00] bg-transparent border-0 cursor-pointer hover:underline"
+                >
+                  LOAD MORE REVIEWS
+                </button>
+              </div>
+
+              {/* Write a Customer Review — after list (Choosify.dc.html) */}
+              <div className="pt-5 border-t border-[#F1F1F3]">
+                <div className="text-[12px] font-extrabold text-[#1A1A2E] mb-2.5">
+                  Write a Customer Review
+                </div>
+                {!isLoggedIn ? (
+                  <div className="flex flex-col items-center justify-center py-6 text-center space-y-3 bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl p-6">
+                    <span className="text-sm font-bold text-[#1A1A2E]">
+                      Sign in to write a review
+                    </span>
+                    <p className="text-[13px] text-[#9AA0AC] max-w-xs leading-relaxed">
+                      Please log in to your Choosify account to provide feedback on this product.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/login', { state: { from: location.pathname } })}
+                      className="h-10 px-6 bg-[#FF5B00] text-white text-[13px] font-bold rounded-lg hover:brightness-110 cursor-pointer border-none"
+                    >
+                      Sign in
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleReviewSubmit} className="flex gap-3 items-start">
+                    <div className="w-[38px] h-[38px] rounded-full bg-[#F4F7F9] shrink-0 overflow-hidden" />
+                    <div className="flex-1 min-w-0">
+                      <div className="border border-[#E5E7EB] rounded-[14px] px-3.5 py-2.5">
+                        <textarea
+                          rows={1}
+                          required
+                          placeholder="Share your experience with this product..."
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          className="w-full border-0 outline-none resize-none text-[13px] text-[#1A1A2E] bg-transparent min-h-[20px] leading-relaxed p-0"
+                        />
+                      </div>
+                      <div className="flex justify-between items-center mt-2.5">
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setSelectedRating(star)}
+                              className="bg-transparent border-0 p-0 cursor-pointer text-[#FBBF24] text-base leading-none"
+                              aria-label={`Rate ${star}`}
+                            >
+                              {star <= selectedRating ? '★' : '☆'}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          type="submit"
+                          className="bg-[#FF5B00] text-white border-0 px-5 py-2 rounded-lg text-[11.5px] font-extrabold cursor-pointer"
+                        >
+                          SUBMIT REVIEW
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </StudioWrap>
+
+            {/* Choosify.dc.html — EXPLAIN THIS PRODUCT */}
+            <div className="bg-[#FFF3EC] border border-[#FFD9C2] rounded-xl px-[22px] py-[18px] text-left">
+              <div className="text-[12.5px] font-extrabold text-[#EB4501] flex items-center gap-1.5 mb-3.5">
+                🔦 EXPLAIN THIS PRODUCT
+              </div>
+              <div className="mb-3">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <span className="text-[12px] font-bold text-[#1A1A2E]">Product at a glance</span>
+                  <span className="bg-[#FEF3C7] text-[#92400E] text-[9px] font-extrabold px-2 py-0.5 rounded">
+                    VERIFIED CHOOSIFY EXPLAINER
+                  </span>
+                </div>
+                <p className="text-[12.5px] text-[#4B5563] leading-relaxed m-0">
+                  {product.title} is a {product.category || 'featured'} pick from {brandName}
+                  {product.rating ? ` with a ${product.rating}/5 shopper rating` : ''}. Compare specs,
+                  creator reviews, and store prices before you buy.
+                </p>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <span className="text-[12px] font-bold text-[#1A1A2E]">Buying tip</span>
+                  <span className="bg-[#DCFCE7] text-[#16A34A] text-[9px] font-extrabold px-2 py-0.5 rounded">
+                    WHAT CHOOSIFY RECOMMENDS
+                  </span>
+                </div>
+                <p className="text-[12.5px] text-[#4B5563] leading-relaxed m-0">
+                  Best for shoppers who want verified options, transparent pricing, and honest creator
+                  feedback before committing.
+                </p>
+              </div>
+            </div>
+
+            {/* PRODUCT OVERVIEW (ID: 'product-overview-section') */}
+            <StudioWrap
+              sectionId="product-overview"
+              className="scroll-mt-36 bg-white rounded-xl p-6 border border-[#E8EDF2] space-y-5 text-left font-sans w-full"
+            >
+              <div>
+                <h3 className="text-[14px] font-extrabold text-[#1A1A2E] tracking-tight">
+                  Product <span className="text-[#FF5B00]">Overview</span>
+                </h3>
+                <p className="text-[10px] font-bold text-[#9AA0AC] tracking-wide mt-1 uppercase">
+                  Benefits, quality structure & trust
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {[
+                  {
+                    title: 'Quality & Materials',
+                    icon: <Tag size={14} />,
+                    items: [
+                      'Authentic standard sewing with brand labels',
+                      'High dust & spill proof coated exterior',
+                      'Unbreakable grade finishing structure',
+                      'Breathable premium cloths ideal for long wear',
+                    ],
+                  },
+                  {
+                    title: 'Features & Benefits',
+                    icon: <Award size={14} />,
+                    items: [
+                      '7 days satisfaction refund/exchange guarantee',
+                      'Secure partner checkout integrations',
+                      'Official deck warranty with unique serial code',
+                      'Nationwide compliance delivery coverage',
+                    ],
+                  },
+                  {
+                    title: 'Audience & Use Cases',
+                    icon: <Users size={14} />,
+                    items: [
+                      'Value-oriented buyers appraising build integrity',
+                      'Lifestyle creators requiring reliable wears',
+                      'Everyday shoppers seeking reliable value',
+                      'Modern Bangladeshi lifestyle and active circles',
+                    ],
+                  },
+                  {
+                    title: 'Customer Support & Assurance',
+                    icon: <ShieldCheck size={14} />,
+                    items: [
+                      'Real-time messaging from high priority staff',
+                      'Complete verification certificates deposited',
+                      'Easy access transit system integrations',
+                      'Secured personalized inbound support log',
+                    ],
+                  },
+                ].map((col) => (
+                  <div key={col.title} className="bg-[#F4F7F9] rounded-[10px] px-5 py-[18px] flex flex-col gap-3">
+                    <div className="flex items-center gap-2 text-[12px] font-extrabold text-[#1A1A2E]">
+                      <span className="text-[#FF5B00]">{col.icon}</span>
+                      {col.title}
+                    </div>
+                    <div className="space-y-2 text-[11.5px] text-[#4B5563] leading-relaxed">
+                      {col.items.map((item) => (
+                        <div key={item}>• {item}</div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {customOverviews &&
+                  customOverviews
+                    .filter(
+                      (co) =>
+                        co.targetType === 'product' &&
+                        String(co.targetId) === String(product.id),
+                    )
+                    .map((co, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-[#F4F7F9] rounded-[10px] px-5 py-[18px] flex flex-col gap-3"
+                      >
+                        <div className="flex items-center gap-2 text-[12px] font-extrabold text-[#1A1A2E]">
+                          <span className="text-[#FF5B00]">
+                            <Award size={14} />
+                          </span>
+                          {co.sectionName}
+                        </div>
+                        <div className="space-y-2 text-[11.5px] text-[#4B5563] leading-relaxed">
+                          {co.content.map((bullet, bIdx) => (
+                            <div key={bIdx}>• {bullet}</div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+              </div>
+
+              <div className="pt-1 space-y-2.5">
+                <div className="text-[11px] font-extrabold text-[#FF5B00]"># BEST FOR TAGS</div>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    'premium lifestyle',
+                    'quality driven',
+                    'modern apparel',
+                    'exclusive designs',
+                    'sustainable wear',
+                    'best in segment',
+                    'elite deshi collect',
+                  ].map((tag) => (
+                    <span
+                      key={tag}
+                      className="bg-[#FFF3EA] text-[#FF5B00] text-[11px] font-bold px-3.5 py-1.5 rounded-[14px]"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </StudioWrap>
+
+            {/* Box Content + Physical Specs — Choosify.dc.html */}
+            <StudioWrap
+              sectionId="product-buying-guide"
+              className="scroll-mt-36 bg-white rounded-xl border border-[#E8EDF2] p-6 grid grid-cols-1 md:grid-cols-2 gap-3.5 w-full"
+            >
+              <div className="bg-[#F4F7F9] rounded-[10px] p-4 text-left">
+                <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-2.5">BOX CONTENT</div>
+                {(boxContents?.length
+                  ? boxContents
+                  : ['Device', 'Charging cable', 'Documentation', 'Warranty card']
+                ).map((item, i) => (
+                  <div key={i} className="text-[11.5px] text-[#4B5563] mb-1.5">
+                    ✓ {item}
+                  </div>
+                ))}
+              </div>
+              <div className="bg-[#F4F7F9] rounded-[10px] p-4 text-left">
+                <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-2.5">PHYSICAL SPECS</div>
+                {[
+                  `Category: ${product.category || 'General'}`,
+                  `Brand: ${brandName}`,
+                  `Rating: ${product.rating || '4.8'} / 5`,
+                ].map((item, i) => (
+                  <div key={i} className="text-[11.5px] text-[#4B5563] mb-1.5">
+                    ✓ {item}
+                  </div>
+                ))}
+              </div>
+            </StudioWrap>
+
+            {/* Brand mini + Price Across Stores — Choosify.dc.html 1fr / 1.8fr */}
+            <div className="bg-white rounded-xl border border-[#E8EDF2] p-6 grid grid-cols-1 lg:grid-cols-[1fr_1.8fr] gap-3.5 w-full">
+              <div className="rounded-[10px] overflow-hidden border border-[#E8EDF2]">
+                <div className="h-[90px] bg-[#14161f] flex items-center justify-center">
+                  <div className="text-lg font-extrabold text-white tracking-wide uppercase">
+                    {brandName}
+                  </div>
+                </div>
+                <div className="p-4 text-center">
+                  <div className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center justify-center gap-1 mb-0.5">
+                    {brandName} <span className="text-[#6C4CFF]">✓</span>
+                  </div>
+                  <div className="text-[11px] text-[#9AA0AC] mb-3.5 flex items-center justify-center gap-1">
+                    <span className="text-[#6C4CFF]">✓</span> Verified Brand
+                  </div>
+                  <div className="flex items-center justify-between px-1 py-3 mb-3.5">
+                    <div className="text-left">
+                      <div className="text-[12px] font-extrabold text-[#1A1A2E]">Best For</div>
+                      <div className="text-[11px] font-bold text-[#FF000D]">
+                        {product.category || 'Everyday'}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-[14px] font-extrabold text-[#2323FF]">
+                        ৳{Math.round((product.price || 25000) / 1000)}K
+                      </div>
+                      <div className="text-[9px] text-[#4B5563]">Price Range</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-[14px] font-extrabold text-[#1A1A2E]">98%</div>
+                      <div className="text-[8.5px] text-[#9AA0AC]">Success</div>
+                    </div>
+                  </div>
+                  <FollowButton
+                    id={String(brandId)}
+                    name={brandName}
+                    type="brand"
+                    className="w-full mb-2 h-9 rounded-lg text-[11.5px] font-bold"
+                  />
+                  <Link
+                    to={`/brands/${brandId}`}
+                    className="block w-full bg-[#000435] hover:bg-[#FF5B00] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors"
+                  >
+                    View Brand
+                  </Link>
+                </div>
+              </div>
+
+              <div className="bg-[#F4F7F9] rounded-[10px] p-4 text-left">
+                <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-3">PRICE ACROSS STORES</div>
+                {[
+                  { name: 'Daraz BD', delivery: '2–3 days', price: Math.round((product.price || 1500) * 0.96), color: '#EB4501' },
+                  { name: `${brandName} Store`, delivery: 'Official · 1–2 days', price: product.price || 1500, color: '#07A828' },
+                  { name: 'Pickaboo', delivery: 'Nationwide', price: Math.round((product.price || 1500) * 1.02), color: '#2323FF' },
+                  { name: 'Ryans', delivery: 'Express available', price: Math.round((product.price || 1500) * 0.99), color: '#1A1A2E' },
+                ].map((store) => (
+                  <div
+                    key={store.name}
+                    className="flex items-center gap-2.5 bg-white border border-[#E8EDF2] rounded-[10px] px-3 py-2.5 mb-2.5"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#000435] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
+                      {store.name.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[11.5px] font-bold text-[#1A1A2E]">{store.name}</div>
+                      <div className="text-[10px] text-[#9AA0AC]">🚚 {store.delivery}</div>
+                    </div>
+                    <div className="text-[12.5px] font-extrabold shrink-0" style={{ color: store.color }}>
+                      ৳{store.price.toLocaleString()}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toast.success(`Opening ${store.name}…`)}
+                      className="bg-[#FF5B00] text-white border-0 px-3.5 py-1.5 rounded-2xl text-[10.5px] font-bold cursor-pointer shrink-0 whitespace-nowrap"
+                    >
+                      Shop Now
+                    </button>
+                  </div>
+                ))}
+                <Link to="/deals" className="text-[11px] font-bold text-[#FF5B00] hover:underline">
+                  View more stores →
+                </Link>
+              </div>
+            </div>
+
+            {/* Sponsored Advertisement */}
+            <div className="bg-[#000435] text-white rounded-xl p-6 relative overflow-hidden text-left w-full">
+              <span className="text-[11px] font-bold text-[#FF5B00] tracking-tight block mb-1.5">
+                SPONSORED AD
+              </span>
+              <h4 className="text-sm font-extrabold tracking-tight mb-2 text-white">
+                Upgrade To Express Delivery
+              </h4>
+              <p className="text-[11px] text-white/55 leading-relaxed mb-4">
+                Get free 1-hour home deliveries inside Dhaka metro area under Choosify Premium Club.
               </p>
-              <div className="w-full bg-slate-50 border border-slate-200/60 p-4 rounded-2xl flex items-center justify-center gap-2 mb-6">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Choosify Authenticity Guarantee active</span>
+              <button
+                type="button"
+                onClick={() => toast.success('Choosify Premium Club VIP services requested!')}
+                className="bg-[#FF5B00] hover:brightness-110 text-white px-4 py-2.5 rounded-lg text-[12px] font-bold transition-all cursor-pointer border-none"
+              >
+                Learn More
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Trust Section */}
+      <section className="w-full bg-[#F4F9FF] border-t border-blue-50 py-12">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-10 text-center md:text-left">
+          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl">
+            <ShieldCheck size={40} className="text-blue-600" />
+          </div>
+          <div className="space-y-2">
+            <h4 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight leading-none">
+              Choosify.bd trust statement
+            </h4>
+            <p className="text-[14px] font-medium text-[#9AA0AC] tracking-tight">
+              “Only verified sellers and unbiased brands are listed on
+              Choosify.bd.”
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <AnimatePresence>
+        {/* STEP 1: Message to Order - Option Configuration Popup */}
+        {showOrderConfig && (
+          <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#0D0E25] border border-white/10 rounded-2xl p-6 max-w-md w-full relative text-left"
+            >
+              <button
+                onClick={() => setShowOrderConfig(false)}
+                className="absolute top-4 right-4 text-white/50 hover:text-white cursor-pointer bg-transparent border-none"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
+                  <MessageCircle size={16} />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-white tracking-tight">
+                    Message to Order
+                  </h3>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono">
+                    Step 1: Configure Sourcing Parameters
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 bg-[#FF5B00] rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                <div className="w-2.5 h-2.5 bg-[#FF5B00] rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="w-2.5 h-2.5 bg-[#FF5B00] rounded-full animate-bounce"></div>
+
+              <div className="space-y-4">
+                {/* Product Meta */}
+                <div className="flex items-center gap-3 bg-white/5 rounded-xl p-3 border border-white/5">
+                  <img
+                    src={product.image || product.thumbnail || PLACEHOLDER_IMAGE}
+                    alt={product.title}
+                    className="w-12 h-12 rounded-[5px] object-cover shrink-0"
+                  />
+                  <div>
+                    <h4 className="text-xs font-bold text-white leading-tight truncate max-w-[220px]">
+                      {product.title}
+                    </h4>
+                    <p className="text-[10px] text-[#E8500A] font-bold mt-0.5 font-mono">
+                      BDT {product.price.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Color Selection */}
+                {product.colors && product.colors.length > 0 && (
+                  <div>
+                    <label className="block text-[12px] font-semibold tracking-tight text-white/50 mb-1.5">
+                      Select Color
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {product.colors.map((color: string) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setOrderColor(color)}
+                          className={cn(
+                            "px-3.5 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all",
+                            orderColor === color
+                              ? "bg-[#E8500A] text-white italic shadow-md shadow-orange-500/10 border-none"
+                              : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 cursor-pointer"
+                          )}
+                        >
+                          {color}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sizes/Options Selection */}
+                {product.sizes && product.sizes.length > 0 && (
+                  <div>
+                    <label className="block text-[12px] font-semibold tracking-tight text-white/50 mb-1.5">
+                      Select Size/Option
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {product.sizes.map((size: string) => (
+                        <button
+                          key={size}
+                          type="button"
+                          onClick={() => setOrderSize(size)}
+                          className={cn(
+                            "px-3.5 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all",
+                            orderSize === size
+                              ? "bg-[#E8500A] text-white italic shadow-md shadow-orange-500/10 border-none"
+                              : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 cursor-pointer"
+                          )}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Quantity input */}
+                <div>
+                  <label className="block text-[12px] font-semibold tracking-tight text-white/50 mb-1.5">
+                    Order Quantity
+                  </label>
+                  <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-2 w-max">
+                    <button
+                      type="button"
+                      onClick={() => setOrderQty(Math.max(1, orderQty - 1))}
+                      className="text-white/60 hover:text-white font-black text-sm p-1 cursor-pointer bg-transparent border-none"
+                    >
+                      -
+                    </button>
+                    <span className="text-white font-mono font-bold text-xs w-10 text-center">
+                      {orderQty}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setOrderQty(orderQty + 1)}
+                      className="text-white/60 hover:text-white font-black text-sm p-1 cursor-pointer bg-transparent border-none"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Special Memo */}
+                <div>
+                  <label className="block text-[12px] font-semibold tracking-tight text-white/50 mb-1.5">
+                    Additional Notes / Custom Sourcing Memo
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="e.g. Please expedite custom retail tag attachment or ship with cardboard protection boxes..."
+                    value={orderNotes}
+                    onChange={(e) => setOrderNotes(e.target.value)}
+                    className="w-full bg-[#050514] border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-orange-primary transition-colors resize-none"
+                  />
+                </div>
+
+                {/* Action CTA row */}
+                <div className="flex gap-3 pt-3">
+                  <button
+                    onClick={() => setShowOrderConfig(false)}
+                    className="flex-1 py-3 text-center border border-white/15 rounded-lg hover:bg-white/10 transition-all text-[13px] font-bold tracking-tight text-white cursor-pointer bg-transparent"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowOrderConfig(false);
+                      setShowOrderConfirm(true);
+                    }}
+                    className="flex-1 py-3 bg-[#FF5B00] text-white rounded-lg hover:brightness-110 transition-all text-[13px] font-bold tracking-tight shadow-sm cursor-pointer border-none"
+                  >
+                    Confirm Params
+                  </button>
+                </div>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
+
+        {/* STEP 2: Pre-filled Confirmation Message and Chat Initiation */}
+        {showOrderConfirm && (
+          <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#0D0E25] border border-white/10 rounded-2xl p-6 max-w-md w-full relative text-left"
+            >
+              <button
+                onClick={() => setShowOrderConfirm(false)}
+                className="absolute top-4 right-4 text-white/50 hover:text-white cursor-pointer bg-transparent border-none"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                  <CheckCircle2 size={16} />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-white tracking-tight">
+                    Confirm Broadcast Order
+                  </h3>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono">
+                    Step 2: Auto-send Structured Brief
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {/* Structured Overview Block */}
+                <div className="bg-[#050514] border border-white/5 rounded-xl p-4 text-left">
+                  <span className="text-[11px] font-bold text-[#FF5B00] tracking-tight block mb-2">
+                    CONFIRM LIVE MESSAGE SUMMARY
+                  </span>
+                  
+                  <div className="space-y-1.5 text-xs text-white/80 font-mono">
+                    <p><span className="text-white/40 font-sans font-bold">Product:</span> {product.title}</p>
+                    <p><span className="text-white/40 font-sans font-bold">Brand Partner:</span> {brandName}</p>
+                    <p><span className="text-white/40 font-sans font-bold">Configuration:</span> {orderColor} / {orderSize}</p>
+                    <p><span className="text-white/40 font-sans font-bold">Quantity:</span> {orderQty} units</p>
+                    <p><span className="text-white/40 font-sans font-bold">Total Estimate:</span> BDT {(orderQty * product.price).toLocaleString()}</p>
+                    <p><span className="text-white/40 font-sans font-bold">Note Memo:</span> <span className="italic">"{orderNotes || 'None'}"</span></p>
+                  </div>
+                </div>
+
+                {/* Help tip */}
+                <div className="flex gap-2 items-start bg-blue-500/5 text-blue-400 p-3 rounded-xl border border-blue-500/10 text-[10px] leading-relaxed">
+                  <Info size={12} className="shrink-0 mt-0.5" />
+                  <p>
+                    Confirming this order request will create a new direct thread with the brand, send this order brief, and auto-confirm acceptance references from the merchant!
+                  </p>
+                </div>
+
+                {/* CTA actions */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => {
+                      setShowOrderConfirm(false);
+                      setShowOrderConfig(true);
+                    }}
+                    className="flex-1 py-3 text-center border border-white/15 rounded-lg hover:bg-white/10 transition-all text-[13px] font-bold tracking-tight text-white cursor-pointer bg-transparent"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={handleConfirmAndSend}
+                    className="flex-1 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all text-[13px] font-bold tracking-tight shadow-sm cursor-pointer border-none"
+                  >
+                    Send & Start Chat
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
       </AnimatePresence>
 
+      {product.sizeGuide && (
+        <SizeGuideModal
+          open={showSizeGuideButton && isSizeChartOpen}
+          onClose={() => setIsSizeChartOpen(false)}
+          sizeGuide={product.sizeGuide}
+        />
+      )}
     </div>
   );
 }

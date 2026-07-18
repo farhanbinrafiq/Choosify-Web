@@ -10,19 +10,53 @@ import { toast } from 'react-hot-toast';
 import { cn } from '../lib/utils';
 import { ProductCard } from '../components/ProductCard';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { FEATURED_PRODUCTS_MOCK } from '../data/homeData';
-import { GENERATED_PRODUCTS } from '../data/categoriesData';
-import { useRegisterPageFilters, useFloatingFilter, ActiveFilterChips } from '../components/FilterEngine';
+import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
+import { DcListingHero } from '../components/design/DcListingHero';
+import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { PaginationBar } from '../components/PaginationBar';
+import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
+import { ListingAdRail } from '../components/ListingAdRail';
+import { AdSenseSlot } from '../components/AdSenseSlot';
+import { ProductsSponsoredBanner } from '../components/commerce/AdvertiseHereCard';
+import { useSponsoredFeedEntries } from '../hooks/useSponsoredFeedEntries';
+import { PLACEMENT_KEYS } from '../lib/placements';
+
+const SPONSORED_RECOMMENDATIONS = [
+  {
+    id: 1,
+    title: 'Top 10 Smartphones to Buy in 2026',
+    author: 'Farhan Rafiq',
+    category: 'MOBILE',
+    readTime: '15 MIN READ',
+    image: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=400&h=300&fit=crop',
+    tagline: 'Titanium flagships to budget powerhouses'
+  },
+  {
+    id: 3,
+    title: 'Is S24 Ultra Still Worth It in Late 2026?',
+    author: 'Sarah Jenkins',
+    category: 'MOBILE',
+    readTime: '12 MIN VIDEO',
+    image: 'https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=400&h=300&fit=crop',
+    tagline: 'Revisiting the titanium giant after 6 months'
+  },
+  {
+    id: 5,
+    title: 'Morning Skincare Routine for Dry Skin',
+    author: 'Sarah Jenkins',
+    category: 'BEAUTY',
+    readTime: 'SHORTS',
+    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop',
+    tagline: 'Deep hydration & barrier repair routine'
+  }
+];
 
 export function AllProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { addToCart } = useGlobalState();
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const { setIsOpen: setGlobalFilterOpen } = useFloatingFilter();
-  const [sortOption, setSortOption] = useState<'popularity' | 'price-asc' | 'price-desc'>('popularity');
-  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const { allCatalogProducts, allBrands } = useGlobalState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('All Products');
 
   // Search filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -101,17 +135,44 @@ export function AllProductsPage() {
 
   // Register filters
   useRegisterPageFilters({
-    pageName: "All Products",
-    renderSearch: null,
-    onClearAll: null,
+    pageName: 'Products',
+    scrollTargetId: 'all-products-display',
+    sectionNav: {
+      items: sectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Products',
+      profileLabel: 'Product catalog',
+    },
+    renderSearch: () => (
+      <div className="relative">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search size={13} className="text-[#E8500A]" />
+        </div>
+        <input
+          type="text"
+          value={sidebarSearch}
+          onChange={(e) => setSidebarSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
+          placeholder="Search products, brands or details..."
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+        />
+      </div>
+    ),
+    quickFilters: [
+      { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
+      { id: 'trending', label: 'ðŸ”¥ Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
+      { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'COD Ready', onClick: () => setActiveTab(activeTab === 'COD Ready' ? 'All Products' : 'COD Ready') },
+      { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
+    ],
     renderFilters: () => (
-      <div className="space-y-8 pb-6">
-        {/* Reset Row */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Filter Controls</span>
-          <button 
-            onClick={handleResetFilters}
-            className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md text-[10px] font-black transition-colors uppercase tracking-wider"
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5 font-sans">
+          <label className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-wider">Sort Listings By</label>
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value as any)}
+            className="w-full h-10 px-3 bg-[#F4F8FA] border border-[#eef2f6] rounded-2xl text-xs font-semibold text-navy outline-none focus:border-orange-primary/30"
           >
             <RotateCcw size={10} strokeWidth={3} />
             Reset
@@ -155,10 +216,19 @@ export function AllProductsPage() {
            </div>
         </div>
 
-        {/* Price Range */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Price Range</h4>
+        <div className="bg-white rounded-2xl p-4.5 border border-[#eef2f6] shadow-sm space-y-4 text-left">
+          <div className="flex items-center justify-between pb-2 border-b border-[#eef2f6]">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">
+              Price Range
+            </h3>
+            {(priceMin > 0 || priceMax < 999999) && (
+              <button
+                onClick={() => { setPriceMin(0); setPriceMax(999999); }}
+                className="text-[9px] font-black text-app-text-secondary hover:text-orange-primary underline ml-auto"
+              >
+                Reset
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <div>
@@ -306,34 +376,117 @@ export function AllProductsPage() {
     }
 
     return result;
-  }, [allProductsCombined, searchQuery, selectedCategories, selectedBrands, discountOnly, priceMin, priceMax, sortOption]);
+  }, [allCatalogProducts, searchParams, selectedCategory, selectedBrand, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax, allBrands]);
+
+  function handleResetFilters() {
+    setSelectedCategory(null);
+    setSelectedBrand(null);
+    setRatingFilter(null);
+    setAvailabilityFilter('all');
+    setRetailPriceLimit(30000);
+    setMinPrice('');
+    setMaxPrice('');
+    setPriceError('');
+    setSidebarSearch('');
+    setActiveSpecs({});
+    setPriceMin(0);
+    setPriceMax(999999);
+    setSearchParams(new URLSearchParams());
+  }
+
+  const productFeed = useSponsoredFeedEntries(
+    'products',
+    filteredProducts,
+    (product) => `product-${product.id}`,
+    { enabled: viewMode === 'grid' },
+  );
+
+  const productsSponsoredBanner = useMemo(() => {
+    const entry = productFeed.find((e) => e.kind === 'sponsored');
+    if (!entry || entry.kind !== 'sponsored') return null;
+    return entry.sponsored;
+  }, [productFeed]);
 
   return (
-    <div className="bg-[#F4F7F9] min-h-screen text-slate-800 antialiased font-sans pb-24">
-      
-      {/* Edge-to-Edge Minimal Header */}
-      <section className="w-full bg-[#000435] py-16 text-white text-center relative overflow-hidden select-none mb-8">
-        <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8">
-          <motion.h1 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl md:text-5xl font-black tracking-tight"
-          >
-            All Products
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mt-4 text-sm md:text-base text-blue-200/60 max-w-2xl mx-auto font-medium"
-          >
-            Explore our entire catalog. Premium brands, certified quality, and the best prices across {uniqueCategories.length} categories.
-          </motion.p>
-        </div>
-      </section>
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <DcListingHero
+        titleBefore="Explore Every"
+        titleHighlight="Product"
+        searchPlaceholder="Search products..."
+        quickChips={['Smartphones', 'Laptops', 'AC', 'TV', 'Fashion', 'Beauty']}
+        onSearch={(q) => executeSearch(q)}
+        onChipClick={(q) => executeSearch(q)}
+      />
 
-      {/* Main Content Layout */}
-      <main className="max-w-[1600px] mx-auto w-full px-4 md:px-6 lg:px-8">
+      <DcListingStickyFilters
+        overlapHero
+        items={[
+          {
+            id: 'verified',
+            icon: '🛡',
+            name: 'Verified Products',
+            sub: 'Trusted only',
+            bg: '#FFF3EA',
+            active: availabilityFilter === 'in-stock',
+            onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock'),
+          },
+          {
+            id: 'reviews',
+            icon: '★',
+            name: 'Real Reviews',
+            sub: 'User verified',
+            bg: '#FFF3EA',
+            active: ratingFilter === 4.5,
+            onClick: () => setRatingFilter(ratingFilter === 4.5 ? null : 4.5),
+          },
+          {
+            id: 'deals',
+            icon: '🔥',
+            name: 'Top Deals & Offers',
+            sub: 'Save more',
+            bg: '#FDECEC',
+            active: activeTab === 'Flash Deals',
+            onClick: () => setActiveTab(activeTab === 'Flash Deals' ? 'All Products' : 'Flash Deals'),
+          },
+          {
+            id: 'new',
+            icon: '✨',
+            name: 'New Arrivals',
+            sub: 'Just launched',
+            bg: '#EFECFD',
+            active: activeTab === 'New Arrivals',
+            onClick: () => setActiveTab(activeTab === 'New Arrivals' ? 'All Products' : 'New Arrivals'),
+          },
+          {
+            id: 'popular',
+            icon: '⭐',
+            name: 'Popular Picks',
+            sub: 'Trending now',
+            bg: '#FEF3E2',
+            active: activeTab === 'Bestsellers',
+            onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers'),
+          },
+        ]}
+      />
+
+      {/* ACTIVE FILTER CHIPS ROW */}
+      <ActiveFilterChips
+        chips={[
+          selectedCategory ? { id: 'category', label: `Cat: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+          selectedBrand ? { id: 'brand', label: `Brand: ${selectedBrand}`, onRemove: () => setSelectedBrand(null) } : null,
+          ratingFilter ? { id: 'rating', label: `Rating: ${ratingFilter}★ +`, onRemove: () => setRatingFilter(null) } : null,
+          availabilityFilter !== 'all' ? { id: 'availability', label: `Status: ${availabilityFilter}`, onRemove: () => setAvailabilityFilter('all') } : null,
+          (minPrice || maxPrice) ? { id: 'price', label: `Price: ৳${minPrice || '0'} - ${maxPrice || 'Any'}`, onRemove: () => { setMinPrice(''); setMaxPrice(''); } } : null,
+          (priceMin > 0 || priceMax < 999999) ? { id: 'priceRange', label: `Range: ৳${priceMin.toLocaleString()} - ৳${priceMax.toLocaleString()}`, onRemove: () => { setPriceMin(0); setPriceMax(999999); } } : null,
+          ...Object.entries(activeSpecs).map(([key, value]) => {
+            if (!value) return null;
+            return { id: `spec-${key}`, label: `${key.toUpperCase()}: ${value}`, onRemove: () => setActiveSpecs(prev => ({ ...prev, [key]: '' })) };
+          })
+        ].filter(Boolean) as any[]}
+        onClearAll={handleResetFilters}
+      />
+
+      <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-6 md:py-10 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Controls Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
@@ -348,12 +501,175 @@ export function AllProductsPage() {
             <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
               {filteredProducts.length} Results
             </div>
+            <input
+              type="text"
+              value={sidebarSearch}
+              onChange={(e) => setSidebarSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
+              placeholder="Search products, brands or details..."
+              className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+            />
           </div>
           
-          <div className="w-full sm:w-auto relative">
-            <button 
-              onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-              className="w-full sm:w-64 flex items-center justify-between bg-white px-5 py-3 rounded-full text-xs font-black text-[#000435] shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all border-0 tracking-widest uppercase cursor-pointer"
+          {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
+          <div id="global-sidebar-filters" className="transition-all duration-300 rounded-2xl">
+            <FullSidebarFilterPanel
+              title="Filter Catalog"
+              onReset={handleResetFilters}
+              searchQuery={sidebarSearch}
+              setSearchQuery={setSidebarSearch}
+              onSearchSubmit={executeSearch}
+              searchPlaceholder="Search products, brands or details..."
+              quickFilters={
+                <QuickFilterBar
+                  title="Products Quick Specs"
+                  onOpenFullFilters={() => {}}
+                  filters={[
+                    { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
+                    { id: 'trending', label: 'ðŸ”¥ Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
+                    { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'COD Ready', onClick: () => setActiveTab(activeTab === 'COD Ready' ? 'All Products' : 'COD Ready') },
+                    { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
+                  ]}
+                />
+              }
+              activeChips={
+                <ActiveFilterChips
+                  chips={[
+                    selectedCategory ? { id: 'category', label: `Cat: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+                    selectedBrand ? { id: 'brand', label: `Brand: ${selectedBrand}`, onRemove: () => setSelectedBrand(null) } : null,
+                    ratingFilter ? { id: 'rating', label: `Rating: ${ratingFilter}★ +`, onRemove: () => setRatingFilter(null) } : null,
+                    availabilityFilter !== 'all' ? { id: 'availability', label: `Status: ${availabilityFilter}`, onRemove: () => setAvailabilityFilter('all') } : null,
+                    (minPrice || maxPrice) ? { id: 'price', label: `Price: ৳${minPrice || '0'} - ${maxPrice || 'Any'}`, onRemove: () => { setMinPrice(''); setMaxPrice(''); } } : null,
+                    (priceMin > 0 || priceMax < 999999) ? { id: 'priceRange', label: `Range: ৳${priceMin.toLocaleString()} - ৳${priceMax.toLocaleString()}`, onRemove: () => { setPriceMin(0); setPriceMax(999999); } } : null,
+                    ...Object.entries(activeSpecs).map(([key, value]) => {
+                      if (!value) return null;
+                      return { id: `spec-${key}`, label: `${key.toUpperCase()}: ${value}`, onRemove: () => setActiveSpecs(prev => ({ ...prev, [key]: '' })) };
+                    })
+                  ].filter(Boolean) as any[]}
+                  onClearAll={handleResetFilters}
+                />
+              }
+              sorting={
+                <div className="flex flex-col gap-1.5 font-sans">
+                  <label className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-wider">Sort Listings By</label>
+                  <select
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value as any)}
+                    className="w-full h-10 px-3 bg-[#F4F8FA] border border-[#eef2f6] rounded-2xl text-xs font-semibold text-navy outline-none focus:border-orange-primary/30"
+                  >
+                    <option value="featured">Featured / Recommended</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="rating-desc">Rating: High to Low</option>
+                  </select>
+                </div>
+              }
+              advancedSection={
+                <div className="flex flex-col gap-4">
+                  <UniversalFilterRenderer
+                    profile={{
+                      entity: 'products',
+                      filters: [
+                        {
+                          id: 'rating',
+                          name: 'Rating Score',
+                          type: 'single_select',
+                          options: [
+                            { value: 'all', label: 'All Ratings' },
+                            { value: '4.8', label: '4.8★ & Up' },
+                            { value: '4.5', label: '4.5★ & Up' },
+                            { value: '4.0', label: '4.0★ & Up' }
+                          ]
+                        },
+                        {
+                          id: 'availability',
+                          name: 'Availability',
+                          type: 'single_select',
+                          options: [
+                            { value: 'all', label: 'All Items' },
+                            { value: 'in-stock', label: 'In Stock Only' },
+                            { value: 'out-of-stock', label: 'Out of Stock' }
+                          ]
+                        }
+                      ]
+                    }}
+                    activeFilters={{
+                      rating: ratingFilter ? ratingFilter.toString() : 'all',
+                      availability: availabilityFilter
+                    }}
+                    onFilterChange={(filterId, value) => {
+                      if (filterId === 'rating') {
+                        setRatingFilter(value === 'all' || !value ? null : parseFloat(value));
+                      } else if (filterId === 'availability') {
+                        setAvailabilityFilter(value || 'all');
+                      }
+                    }}
+                  />
+
+                  {/* Price Range Section (Fix 2) */}
+                  <div className="bg-white rounded-2xl p-4.5 border border-[#eef2f6] shadow-sm space-y-4 text-left">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#eef2f6]">
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">
+                        Price Range
+                      </h3>
+                      {(priceMin > 0 || priceMax < 999999) && (
+                        <button
+                          onClick={() => { setPriceMin(0); setPriceMax(999999); }}
+                          className="text-[9px] font-black text-app-text-secondary hover:text-orange-primary underline ml-auto"
+                        >
+                          Reset
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <input
+                          type="number"
+                          placeholder="Min"
+                          value={priceMin === 0 ? '' : priceMin}
+                          onChange={e => {
+                            const val = Math.max(0, Number(e.target.value) || 0);
+                            setPriceMin(Math.min(val, priceMax - 1));
+                          }}
+                          className="h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-bold w-full focus:outline-none focus:border-orange-primary"
+                        />
+                      </div>
+                      <span className="text-gray-400 text-xs text-center font-bold px-1">to</span>
+                      <div className="flex-1">
+                        <input
+                          type="number"
+                          placeholder="Max"
+                          value={priceMax === 999999 ? '' : priceMax}
+                          onChange={e => {
+                            const val = Math.max(1, Number(e.target.value) || 999999);
+                            setPriceMax(Math.max(val, priceMin + 1));
+                          }}
+                          className="h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] font-bold w-full focus:outline-none focus:border-orange-primary"
+                        />
+                      </div>
+                    </div>
+
+                    {priceMin >= priceMax && (
+                      <p className="text-[9px] text-red-500 font-bold mt-1">
+                        Min price must be less than max price
+                      </p>
+                    )}
+
+                    <div className="text-[10.5px] font-bold text-navy uppercase tracking-wider">
+                      ৳{priceMin.toLocaleString()} — ৳{priceMax.toLocaleString()}
+                    </div>
+                  </div>
+
+                  <CategorySmartFilters
+                    category={selectedCategory}
+                    activeSpecs={activeSpecs}
+                    onSpecChange={(key, value) => {
+                      setActiveSpecs(prev => ({ ...prev, [key]: value || '' }));
+                    }}
+                  />
+                </div>
+              }
             >
               <span>
                 Sort: {sortOption === 'popularity' ? 'Popularity' : sortOption === 'price-asc' ? 'Lowest Price' : 'Highest Price'}
@@ -407,6 +723,22 @@ export function AllProductsPage() {
               ...(priceMax < 200000 ? [{ id: Math.random().toString(), label: `Max $${priceMax}`, onRemove: () => setPriceMax(200000) }] : [])]}
           />
 
+          {/* Choosify.dc.html — full-width sponsored banner above grid */}
+          {!isLoading && filteredProducts.length > 0 && (
+            <ProductsSponsoredBanner
+              title={productsSponsoredBanner?.title || undefined}
+              subtitle={
+                productsSponsoredBanner?.subtitle ||
+                productsSponsoredBanner?.sponsorName ||
+                undefined
+              }
+              href={productsSponsoredBanner?.href || '/advertise'}
+              imageUrl={productsSponsoredBanner?.image || undefined}
+              ctaLabel={productsSponsoredBanner?.ctaLabel || 'Shop Now →'}
+            />
+          )}
+
+          {/* Product Grid */}
           {isLoading ? (
             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1200px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
               {Array.from({ length: 10 }).map((_, idx) => (
@@ -418,58 +750,96 @@ export function AllProductsPage() {
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="py-24 text-center bg-white rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center justify-center gap-4">
-              <Search size={48} className="stroke-[1.5px] text-slate-200" />
-              <h3 className="text-sm font-black text-[#000435] uppercase tracking-widest">No match found</h3>
-              <p className="text-xs text-slate-400 max-w-sm leading-relaxed px-4">
-                We couldn't find any products matching your active search queries or filters.
-              </p>
-              <button 
-                onClick={handleResetFilters} 
-                className="mt-4 px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[11px] font-black uppercase tracking-widest rounded-full transition-all border-0 cursor-pointer shadow-md"
-              >
-                Clear all filters
-              </button>
+            <div className="py-24 text-center bg-white rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-4 text-gray-400">
+              <SlidersHorizontal size={40} className="stroke-1 text-gray-300" />
+              <div className="text-sm font-semibold tracking-tight text-[#1A1A2E]">No products matched active filters.</div>
+              <p className="text-[10px] max-w-sm leading-relaxed font-bold">Try lowering your minimum order quantity filter or clearing search queries to explore the full authorized selection.</p>
+              <button onClick={handleResetFilters} className="px-5 py-2.5 bg-[#FF5B00] text-white text-[13px] font-bold tracking-tight rounded-lg shadow-sm hover:brightness-110">Clear Filters</button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1200px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
-              {filteredProducts.map((product) => (
-                <ProductCard 
-                  key={product.id}
-                  product={product}
-                />
-              ))}
+            <div className={cn(
+              "mb-20 w-full",
+              viewMode === 'grid' 
+                ? PRODUCT_CARD_GRID
+                : "flex flex-col gap-6"
+            )}>
+              {productFeed.map((entry) =>
+                entry.kind === 'sponsored' ? null : viewMode === 'list' ? (
+                  <ProductCard
+                    key={entry.key}
+                    product={entry.item}
+                    variant="list"
+                  />
+                ) : (
+                  <ProductCard
+                    key={entry.key}
+                    product={entry.item}
+                    variant="grid"
+                  />
+                ),
+              )}
             </div>
           )}
         </div>
 
-        {/* Value Props Bottom Row */}
-        <section className="bg-white rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 md:p-10 mt-16 border-0">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-left">
-            {[
-              { title: "100% Authentic", desc: "Verified products", color: "bg-blue-50 text-blue-600", icon: ShieldCheck },
-              { title: "Best Price", desc: "Price match guarantee", color: "bg-orange-50 text-[#FF5B00]", icon: Tag },
-              { title: "Easy Returns", desc: "7-day return policy", color: "bg-green-50 text-green-600", icon: RefreshCw },
-              { title: "Secure Checkout", desc: "100% secure payments", color: "bg-purple-50 text-purple-600", icon: Lock },
-              { title: "24/7 Support", desc: "Always here to help", color: "bg-[#000435]/5 text-[#000435]", icon: PhoneCall }
-            ].map((item, idx) => {
-              const IconComp = item.icon;
-              return (
-                <div key={idx} className="flex flex-col gap-4">
-                  <div className={cn("w-12 h-12 rounded-full flex items-center justify-center shrink-0", item.color)}>
-                    <IconComp size={20} strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h4 className="text-[11px] font-black text-[#000435] leading-tight uppercase tracking-widest">
-                      {item.title}
-                    </h4>
-                    <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed font-semibold">
-                      {item.desc}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+          <PaginationBar
+            showingCount={filteredProducts.length}
+            totalCount={filteredProducts.length}
+          />
+
+          <AdSenseSlot format="infeed" className="mt-6" />
+        </main>
+
+        {/* RIGHT SIDEBAR WITH PREMIUM AARONG AD BANNER */}
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
+          {/* Sponsored Recommendations Card */}
+          <div className="bg-white rounded-2xl border border-[#eef2f6] p-4.5 shadow-sm text-left relative overflow-hidden w-full flex flex-col">
+             <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#eef2f6] px-1">
+                <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
+                   ðŸ‘‰ Sponsored Recommendations
+                </h3>
+                <Link 
+                   to="/recommendations" 
+                   className="text-[10px] font-bold text-orange-primary hover:underline flex items-center gap-1 shrink-0"
+                >
+                   See All →
+                </Link>
+             </div>
+
+             <div className="flex flex-col gap-3">
+                {SPONSORED_RECOMMENDATIONS.length === 0 ? (
+                   <div className="text-center py-6 border border-dashed border-gray-200 rounded-2xl">
+                      <p className="text-xs text-gray-400 font-medium px-2">Sponsored recommendations will appear here.</p>
+                   </div>
+                ) : (
+                   SPONSORED_RECOMMENDATIONS.map((item) => (
+                      <Link 
+                         to={`/recommendations/${item.id}`}
+                         key={item.id} 
+                         className="flex items-start gap-3 bg-white border border-[#eef2f6]/60 rounded-2xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                      >
+                         <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-gray-100 bg-gray-50 flex items-center justify-center relative">
+                            <img 
+                               src={item.image} 
+                               alt={item.title} 
+                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                               referrerPolicy="no-referrer"
+                            />
+                            <span className="absolute bottom-0 right-0 bg-[#E8500A]/90 text-white text-[6px] font-black px-1 py-0.5 rounded-tl-md tracking-wider">AD</span>
+                         </div>
+                         <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
+                            <span className="text-[7.5px] font-black text-[#E8500A] uppercase tracking-widest leading-none block mb-0.5">{item.category}</span>
+                            <h4 className="font-sans text-[11px] font-bold tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors line-clamp-2 leading-tight">
+                               {item.title}
+                            </h4>
+                            <p className="text-[8px] font-bold text-gray-450 truncate mt-0.5 uppercase tracking-wide">
+                               {item.readTime} Â· BY {item.author}
+                            </p>
+                          </div>
+                      </Link>
+                   ))
+                )}
+             </div>
           </div>
         </section>
 

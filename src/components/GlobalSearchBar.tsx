@@ -27,7 +27,7 @@ interface SuggestionItem {
 
 export function GlobalSearchBar({
   initialValue = '',
-  placeholder = "Discover products, brands, deals, creators, buying guides...",
+  placeholder = "Search Products, Brands, Reviews...",
   className = '',
   onSubmit,
   variant = 'standard'
@@ -328,6 +328,93 @@ export function GlobalSearchBar({
     }
   };
 
+  const openMobileSearch = () => {
+    setMobileExpandedState(true);
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      if (enableSuggestions) setIsOpen(true);
+    });
+  };
+
+  const closeMobileSearch = () => {
+    setMobileExpandedState(false);
+    setIsOpen(false);
+    inputRef.current?.blur();
+  };
+
+  const renderNavbarHeroForm = (mode: 'inline' | 'overlay') => (
+    <form
+      onSubmit={(e) => {
+        handleSearchSubmit(e);
+        if (mode === 'overlay') closeMobileSearch();
+      }}
+      className={cn(
+        'relative w-full bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300',
+        mode === 'overlay' && 'choosify-mobile-search-pill',
+      )}
+    >
+      <div className="flex items-center bg-white rounded-full relative min-w-0">
+        {mode === 'overlay' && (
+          <button
+            type="button"
+            aria-label="Close search"
+            onClick={closeMobileSearch}
+            className="shrink-0 pl-2.5 pr-1 text-gray-400 hover:text-[#E8500A] transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+        <div className="pl-2.5 sm:pl-4 text-[#E8500A] shrink-0">
+          <Search className="w-4 h-4" />
+        </div>
+        <input
+          ref={inputRef}
+          type="text"
+          value={queryValue}
+          onChange={(e) => {
+            setQueryValue(e.target.value);
+            if (enableSuggestions) {
+              setIsOpen(true);
+              setActiveIndex(-1);
+            }
+          }}
+          onFocus={() => {
+            if (!enableSuggestions) return;
+            setIsOpen(true);
+            setActiveIndex(-1);
+          }}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className={cn(
+            'w-full min-w-0 bg-transparent outline-none text-navy font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none',
+            mode === 'overlay'
+              ? 'h-10 pl-2 pr-24 text-xs'
+              : 'h-9 sm:h-9 md:h-10 pl-2 sm:pl-3 pr-11 sm:pr-14 md:pr-20 lg:pr-24 text-[11px] sm:text-xs',
+          )}
+        />
+        <button
+          type="submit"
+          aria-label={submitLabel}
+          className={cn(
+            'absolute right-1 sm:right-1.5 top-1 sm:top-1.5 bottom-1 sm:bottom-1.5 rounded-full bg-[#FF5B00] hover:bg-[#E8500A] text-white font-bold tracking-wide uppercase flex items-center justify-center gap-1 transition-all duration-200 cursor-pointer',
+            mode === 'overlay'
+              ? 'px-4 text-[9px]'
+              : 'px-2 sm:px-2.5 md:px-4 lg:px-5 text-[8px] sm:text-[8px] md:text-[9px] min-w-[2rem] sm:min-w-[2.25rem] md:min-w-0',
+          )}
+        >
+          {mode === 'overlay' ? (
+            submitLabel
+          ) : (
+            <>
+              <Search className="w-3.5 h-3.5 md:hidden shrink-0" />
+              <span className="hidden md:inline">{submitLabel}</span>
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  );
+
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Home Hero or Navbar style glassmorphic search input box */}
@@ -397,7 +484,7 @@ export function GlobalSearchBar({
             />
             <button 
               type="submit"
-              className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#FF5B00] hover:from-[#FF5B00] hover:to-[#EB4501] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-[#FF5B00] hover:bg-[#E8500A] text-white text-[11px] font-bold tracking-wide uppercase flex items-center gap-1.5 transition-all duration-200 cursor-pointer"
             >
               DISCOVER
             </button>
@@ -602,7 +689,7 @@ export function GlobalSearchBar({
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 text-left">
-                              <div className="w-8 h-8 rounded-full bg-[#120713] text-white flex items-center justify-center font-black text-xs shrink-0 shadow-sm uppercase italic">
+                              <div className="w-8 h-8 rounded-full bg-[#000435] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm tracking-tight">
                                 {item.title.substring(0, 2)}
                               </div>
                               <div className="min-w-0">

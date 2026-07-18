@@ -114,7 +114,27 @@
 }
 
 .footer-brand-gradient {
-  background: #000435 !important;
+  background:
+    radial-gradient(1200px 500px at 15% 0%, hsla(22, 100%, 50%, 0.18), transparent 65%),
+    radial-gradient(900px 500px at 90% 20%, hsla(12, 92%, 45%, 0.14), transparent 65%),
+    rgba(10, 10, 31, 0.96) !important;
+}
+
+.choosify-chrome-header {
+  background:
+    radial-gradient(900px 200px at 15% 0%, hsla(22, 100%, 50%, 0.16), transparent 70%),
+    radial-gradient(700px 200px at 90% 100%, hsla(12, 92%, 45%, 0.12), transparent 70%),
+    rgba(10, 10, 31, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.choosify-discover-pill {
+  background: linear-gradient(90deg, #6C4CFF, #FF5B00);
+  color: #fff !important;
+  font-weight: 800 !important;
+  padding: 5px 14px;
+  border-radius: 9999px;
 }
 
 .shadow-soft {
@@ -153,6 +173,52 @@
   background: #000435;
 }
 
+/* Navbar search — fills space between logo and actions */
+.choosify-navbar-hero-search {
+  width: 100%;
+  max-width: none;
+}
+
+.choosify-navbar-hero-search form {
+  padding: 2px;
+}
+
+.choosify-navbar-hero-search form .bg-white {
+  min-height: 2.25rem;
+}
+
+@media (min-width: 768px) {
+  .choosify-navbar-hero-search form .bg-white {
+    min-height: 2.5rem;
+  }
+}
+
+.choosify-navbar-hero-search form input {
+  height: 2.25rem !important;
+}
+
+@media (min-width: 768px) {
+  .choosify-navbar-hero-search form input {
+    height: 2.5rem !important;
+  }
+}
+
+/* Row 2 shares choosify-chrome-header (Header.dc.html) — no solid override */
+/* Categories row — same chrome gradient as header, slightly more translucent */
+.choosify-navbar-categories {
+  background:
+    radial-gradient(900px 200px at 15% 0%, hsla(22, 100%, 50%, 0.16), transparent 70%),
+    radial-gradient(700px 200px at 90% 100%, hsla(12, 92%, 45%, 0.12), transparent 70%),
+    rgba(10, 10, 31, 0.82) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Sticky page section nav sits flush below the two-row navbar */
+.choosify-sticky-section-nav {
+  top: var(--choosify-navbar-height, 6.5rem);
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -160,6 +226,540 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Omni search suggestions — reset inherited nav/hero text colors */
+.choosify-omni-search-dropdown {
+  color: #1a1a2e !important;
+  background: #ffffff !important;
+}
+
+.choosify-omni-search-dropdown h4,
+.choosify-omni-search-dropdown span,
+.choosify-omni-search-dropdown p {
+  color: inherit;
+}
+
+.choosify-omni-search-dropdown .text-gray-400,
+.choosify-omni-search-dropdown .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+/* Horizontal touch scroll rows — sticky nav, quick filters, carousels.
+   No scroll-behavior:smooth here: it animates the drag handler's scrollLeft
+   writes and makes swiping feel rubbery. Programmatic scrolls pass
+   behavior:'smooth' explicitly instead. */
+.choosify-touch-scroll-row,
+.choosify-sticky-nav-track {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+
+.choosify-touch-scroll-row::-webkit-scrollbar,
+.choosify-sticky-nav-track::-webkit-scrollbar {
+  display: none;
+}
+
+.choosify-sticky-nav-track {
+  width: 100%;
+  min-width: 0;
+  padding-bottom: 2px;
+}
+
+/* Prevent 3-column page grids from bleeding into adjacent columns */
+.choosify-page-shell {
+  align-items: start;
+}
+
+/* ── Progressive shell: stack (<1024) → browse (2-col) → full (3-col @ 2xl) ── */
+
+@media (min-width: 1024px) and (max-width: 1535.98px) {
+  .choosify-page-shell {
+    grid-template-columns: minmax(188px, 208px) minmax(0, 1fr);
+  }
+
+  .choosify-page-shell:not(.choosify-page-shell--detail-product)
+    > .choosify-sidebar-right,
+  .choosify-page-shell:not(.choosify-page-shell--detail-product)
+    > aside.choosify-sidebar-right,
+  .choosify-page-shell:not(.choosify-page-shell--no-right-rail):not(.choosify-page-shell--feed-only):not(.choosify-page-shell--detail-product)
+    > .choosify-sidebar-right,
+  .choosify-page-shell:not(.choosify-page-shell--no-right-rail):not(.choosify-page-shell--feed-only):not(.choosify-page-shell--detail-product)
+    > aside:last-of-type:not(:only-of-type):not(.choosify-sidebar-left) {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1535.98px) {
+  .choosify-page-shell {
+    grid-template-columns: minmax(204px, 224px) minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1536px) {
+  .choosify-page-shell:not(.choosify-page-shell--no-right-rail):not(.choosify-page-shell--feed-only) {
+    grid-template-columns: minmax(220px, 248px) minmax(0, 1fr) minmax(230px, 260px);
+  }
+
+  .choosify-page-shell.choosify-page-shell--no-right-rail,
+  .choosify-page-shell.choosify-page-shell--feed-only {
+    grid-template-columns: minmax(220px, 248px) minmax(0, 1fr);
+  }
+}
+
+/* Optional feed-only profile: hide both sidebars @ lg+, single full-width column */
+@media (min-width: 1024px) {
+  .choosify-page-shell--feed-only > .choosify-sidebar-left,
+  .choosify-page-shell--feed-only > .choosify-sidebar-right,
+  .choosify-page-shell--feed-only > aside {
+    display: none !important;
+  }
+
+  .choosify-page-shell--feed-only {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.choosify-page-shell > aside,
+.choosify-page-grid > aside,
+.choosify-page-shell > .choosify-sidebar-left,
+.choosify-page-shell > .choosify-sidebar-right,
+.choosify-page-grid > .choosify-sidebar-left,
+.choosify-page-grid > .choosify-sidebar-right,
+.choosify-page-shell > main,
+.choosify-page-grid > main,
+.choosify-page-shell > section,
+.choosify-page-grid > section,
+.choosify-page-shell > div,
+.choosify-page-grid > div,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] > aside,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] > main,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] > section {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.choosify-page-shell > main,
+.choosify-page-grid > main,
+.choosify-page-shell > section.choosify-middle-feed,
+.choosify-page-grid > section.choosify-middle-feed,
+.choosify-page-shell > div.choosify-middle-feed,
+.choosify-page-grid > div.choosify-middle-feed,
+.choosify-middle-feed {
+  width: 100%;
+  padding-inline: clamp(0.35rem, 1.1vw, 1rem);
+}
+
+/* Full-width sections below catalog shell on detail pages */
+.choosify-detail-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+
+.choosify-sidebar-left,
+.choosify-sidebar-right {
+  align-self: start;
+  overflow: hidden;
+}
+
+/* Product detail: specs | center feed | pricing — all three share one grid row so
+   no blank band appears next to the sidebars */
+@media (min-width: 1024px) {
+  .choosify-page-shell--detail-product {
+    grid-template-columns: minmax(188px, 218px) minmax(0, 1fr) minmax(220px, 260px);
+  }
+
+  .choosify-page-shell--detail-product > .choosify-sidebar-left {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .choosify-page-shell--detail-product > .choosify-middle-feed {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .choosify-page-shell--detail-product > .choosify-sidebar-right,
+  .choosify-page-shell--detail-product > .choosify-sidebar-right--product {
+    display: flex !important;
+    grid-column: 3;
+    grid-row: 1;
+  }
+}
+
+@media (min-width: 1280px) {
+  .choosify-page-shell--detail-product {
+    grid-template-columns: minmax(204px, 234px) minmax(0, 1fr) minmax(240px, 280px);
+  }
+}
+
+@media (min-width: 1536px) {
+  .choosify-page-shell--detail-product {
+    grid-template-columns: minmax(220px, 248px) minmax(0, 1fr) minmax(250px, 300px);
+  }
+}
+
+.choosify-sidebar-left > *,
+.choosify-sidebar-right > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ── Unified card grids ─────────────────────────────────────────────
+ * Product cards: up to 5 per row (column count scales with viewport).
+ * Brand & creator cards: up to 4 per row.
+ * Cards fill their grid track; layout adds/removes columns, not card scale.
+ */
+
+/* Product cards — Choosify.dc.html Products List: 2 → 3 → 4 → 5 cols, gap 16px */
+.choosify-product-grid,
+.choosify-detail-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .choosify-product-grid,
+  .choosify-detail-feed-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-product-grid,
+  .choosify-detail-feed-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .choosify-product-grid,
+  .choosify-detail-feed-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* Category browse cards — 4-col cap matching Choosify.dc.html; fixed card footprint */
+.choosify-category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.15vw, 1.25rem);
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .choosify-category-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-category-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .choosify-category-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Home popular categories — fixed 5 per row on tablet+; 2 cols on small phones */
+.choosify-home-category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.15vw, 1.25rem);
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .choosify-home-category-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.choosify-category-grid > *,
+.choosify-category-card {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+.choosify-category-card {
+  min-height: 7.375rem;
+  box-sizing: border-box;
+}
+
+/* Photo-first category tiles — image fills top, label below (Categories page) */
+.choosify-category-photo-card {
+  min-height: 0;
+  height: auto;
+}
+
+.choosify-category-photo-card .aspect-\[4\/3\] {
+  min-height: 7rem;
+}
+
+@media (min-width: 768px) {
+  .choosify-category-photo-card .aspect-\[4\/3\] {
+    min-height: 8.5rem;
+  }
+}
+
+/* Brand & creator directory — flat grid, 4–5 per row */
+.choosify-brand-grid,
+.choosify-creator-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+/* Guide media rows mix reels (9:16) and horizontal cards — keep natural heights */
+.choosify-guide-media-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+  justify-items: stretch;
+}
+
+@media (min-width: 520px) {
+  .choosify-brand-grid,
+  .choosify-creator-grid,
+  .choosify-guide-media-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .choosify-brand-grid,
+  .choosify-creator-grid,
+  .choosify-guide-media-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-brand-grid,
+  .choosify-creator-grid,
+  .choosify-guide-media-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .choosify-brand-grid,
+  .choosify-creator-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .choosify-guide-media-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.choosify-spotlight-related-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.15vw, 1.25rem);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .choosify-spotlight-related-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-spotlight-related-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.choosify-spotlight-related-grid > * {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* What's On feed — max 4 cards per row; columns scale down on smaller viewports */
+.choosify-whats-on-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: clamp(0.65rem, 1vw, 1rem);
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+@media (min-width: 520px) {
+  .choosify-whats-on-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .choosify-whats-on-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-whats-on-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Creator review grid — lead row (max 2), dense rows (responsive 4–5 cols) */
+.choosify-creator-hybrid-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.15vw, 1.25rem);
+  align-items: start;
+}
+
+/* Row 1: always at most 2 cards */
+.choosify-creator-hybrid-grid[data-row-tier="lead"] {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .choosify-creator-hybrid-grid[data-row-tier="lead"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Single card in lead row */
+.choosify-creator-hybrid-grid[data-row-tier="lead"][data-row-size="1"] {
+  justify-items: stretch;
+}
+
+.choosify-creator-hybrid-grid[data-row-tier="lead"][data-row-size="1"] > .choosify-creator-hybrid-card[data-format="landscape"] {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 640px) {
+  .choosify-creator-hybrid-grid[data-row-tier="lead"][data-row-size="1"] > .choosify-creator-hybrid-card[data-format="portrait"] {
+    grid-column: 1 / -1;
+    max-width: 22rem;
+    justify-self: center;
+  }
+}
+
+/* Row 2+: responsive density (reels + YouTube share the same grid) */
+.choosify-creator-hybrid-grid[data-row-tier="dense"] {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .choosify-creator-hybrid-grid[data-row-tier="dense"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.choosify-product-grid > *,
+.choosify-detail-feed-grid > *,
+.choosify-category-grid > *,
+.choosify-home-category-grid > *,
+.choosify-brand-grid > *,
+.choosify-creator-grid > *,
+.choosify-guide-media-grid > *,
+.choosify-whats-on-grid > *,
+.choosify-creator-hybrid-grid > * {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Wrapper divs and cards fill the stretched row height so same-type cards match */
+.choosify-product-grid > *,
+.choosify-detail-feed-grid > *,
+.choosify-category-grid > *,
+.choosify-home-category-grid > *,
+.choosify-brand-grid > *,
+.choosify-creator-grid > *,
+.choosify-whats-on-grid > * {
+  height: 100%;
+}
+
+.choosify-detail-single-feed > section,
+.choosify-detail-single-feed > div {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Listing pages — single full-width feed; side rails hidden (filters via floating UI) */
+.choosify-listing-feed-only {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+@media (min-width: 1024px) {
+  .choosify-listing-feed-only > .choosify-sidebar-left,
+  .choosify-listing-feed-only > aside.choosify-sidebar-left,
+  .choosify-listing-feed-only > aside:first-of-type:not(.choosify-middle-feed):not(.choosify-listing-single-feed),
+  .choosify-listing-feed-only > .choosify-sidebar-right,
+  .choosify-listing-feed-only > aside.choosify-sidebar-right,
+  .choosify-listing-feed-only > aside:last-of-type:not(.choosify-middle-feed):not(.choosify-listing-single-feed) {
+    display: none !important;
+  }
+
+  .choosify-listing-feed-only > main,
+  .choosify-listing-feed-only > .choosify-middle-feed,
+  .choosify-listing-feed-only > div.choosify-middle-feed,
+  .choosify-listing-feed-only > .choosify-listing-single-feed,
+  .choosify-listing-feed-only > section.choosify-middle-feed {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+.choosify-listing-single-feed > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+
+/* Keep product cards inside their grid tracks */
+.choosify-page-shell main [class*="grid-cols-"] > *,
+.choosify-page-grid main [class*="grid-cols-"] > *,
+.choosify-middle-feed [class*="grid-cols-"] > *,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] main [class*="grid-cols-"] > *,
+[class*="grid-cols-[240px_minmax(0,1fr)_260px]"] section [class*="grid-cols-"] > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* MOBILE RESPONSIVE FIXES — CHOOSIFY.BD HERO SECTION */
@@ -301,112 +901,17 @@
   transform: scale(0.98) !important;
 }
 
-.btn-outline {
-  background-color: #ffffff !important;
-  color: #000435 !important;
-  border: 1px solid #C2C6D4 !important; /* gray border */
-  border-radius: 0.5rem !important;
-  font-weight: 700 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0.75rem 1.5rem !important;
-  transition: all 0.2s ease-in-out !important;
-  cursor: pointer !important;
-}
-.btn-outline:hover {
-  background-color: #f8fafc !important;
-  border-color: #8D94A8 !important;
-}
-.btn-outline:active {
-  transform: scale(0.98) !important;
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.badge-verified {
-  background-color: rgba(7, 221, 5, 0.1) !important;
-  color: #07DD05 !important;
-  border: 1px solid rgba(7, 221, 5, 0.2) !important;
-  border-radius: 9999px !important; /* rounded-full */
-  font-size: 0.75rem !important; /* small text */
-  font-weight: 700 !important;
-  padding: 0.25rem 0.75rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
-.badge-sponsored {
-  background-color: rgba(255, 91, 0, 0.1) !important;
-  color: #FF5B00 !important;
-  border: 1px solid rgba(255, 91, 0, 0.2) !important;
-  border-radius: 9999px !important;
-  font-size: 0.75rem !important;
-  font-weight: 700 !important;
-  padding: 0.25rem 0.75rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+.mask-fade-x {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
 }
-
-.badge-deal {
-  background-color: rgba(255, 0, 13, 0.1) !important;
-  color: #FF000D !important;
-  border: 1px solid rgba(255, 0, 13, 0.2) !important;
-  border-radius: 9999px !important;
-  font-size: 0.75rem !important;
-  font-weight: 700 !important;
-  padding: 0.25rem 0.75rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.badge-neutral {
-  background-color: rgba(97, 102, 124, 0.1) !important;
-  color: #61667C !important;
-  border: 1px solid rgba(97, 102, 124, 0.2) !important;
-  border-radius: 9999px !important;
-  font-size: 0.75rem !important;
-  font-weight: 700 !important;
-  padding: 0.25rem 0.75rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.pill {
-  background-color: #F4F7F9 !important; /* light gray secondary surface */
-  color: #000435 !important;
-  border-radius: 9999px !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  padding: 0.25rem 0.75rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 1px solid #E2E8F0 !important;
-}
-
-.surface-elevated {
-  background-color: #ffffff !important;
-  border-radius: var(--radius-2xl, 20px) !important;
-  box-shadow: var(--shadow-light, 0 6px 20px rgba(0,4,53,.05)) !important;
-  border: 1px solid rgba(0, 4, 53, 0.03) !important;
-}
-
-.surface-flat {
-  background-color: #ffffff !important;
-  border-radius: var(--radius-2xl, 20px) !important;
-  border: 1px solid #C2C6D4 !important;
-}
-
-.surface-glass {
-  background: rgba(255, 255, 255, 0.7) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border-radius: var(--radius-2xl, 20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
-}
-
 

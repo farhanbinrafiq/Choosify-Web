@@ -37,7 +37,6 @@ import {
   Gamepad,
   Trophy
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
@@ -49,483 +48,170 @@ import { PLACEHOLDER_IMAGE } from '../constants';
 import { PublicReviewCard } from '../components/PublicReviewCard';
 import toast from 'react-hot-toast';
 
-// Hex Colors as per instruction
-const COLORS = {
-  navy: '#0A0A1F',
-  orange: '#FF5B00',
-  green: '#059669',
-};
+const COLLECTION_TAB_IDS = new Set([
+  'saved-products',
+  'saved-brands',
+  'loved-brands',
+  'followed-brands',
+]);
+const ACTIVITY_TAB_IDS = new Set([
+  'recently-viewed',
+  'saved-recommendations',
+  'orders',
+]);
+const COMMUNICATION_TAB_IDS = new Set(['messages', 'my-reviews', 'addresses']);
 
 // --- SUB-COMPONENTS ---
 
-const SidebarItem = ({ icon: Icon, label, active, badge, onClick }: any) => (
+const SidebarSectionLabel = ({ children }: { children: React.ReactNode }) => (
+  <div className="text-[10.5px] font-extrabold text-[#9AA0AC] tracking-[0.06em] mb-2.5 mt-5 first:mt-0">
+    {children}
+  </div>
+);
+
+const SidebarItem = ({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+  count,
+  badge,
+}: {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+  count?: number | string | null;
+  badge?: number | string | null;
+}) => (
   <button
+    type="button"
     onClick={onClick}
     className={cn(
-      "w-full flex items-center justify-between px-8 py-3 transition-all relative group border-none text-left bg-transparent cursor-pointer select-none",
-      active ? "text-white font-bold" : "text-gray-400 hover:text-white"
+      'w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-[12.5px] font-semibold transition-colors border-none text-left cursor-pointer',
+      active
+        ? 'bg-[#FFF3EA] text-[#FF5B00]'
+        : 'bg-transparent text-[#4B5563] hover:bg-[#F4F7F9]',
     )}
   >
-    {active && (
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-[#FF5B00] rounded-r-full" />
-    )}
-    <div className="flex items-center gap-3.5 relative z-10">
-      <Icon size={16} className={cn(active ? "text-[#FF5B00]" : "text-gray-450 group-hover:text-white transition-colors")} />
-      <span className="text-[10px] uppercase tracking-[0.15em] font-black italic">{label}</span>
-    </div>
-    {badge && badge > 0 && (
-      <span className="bg-[#FF5B00] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full relative z-10">
+    <span className="flex items-center gap-2.5 min-w-0">
+      <Icon size={15} className={cn('shrink-0', active ? 'text-[#FF5B00]' : 'text-[#9AA0AC]')} />
+      <span className="truncate">{label}</span>
+    </span>
+    {badge != null && badge !== '' ? (
+      <span className="shrink-0 bg-[#FF5B00] text-white text-[10px] font-extrabold rounded-lg px-1.5 py-0.5 leading-none">
         {badge}
       </span>
-    )}
+    ) : count != null && count !== '' ? (
+      <span className="shrink-0 text-[#9AA0AC] font-bold text-[12px]">{count}</span>
+    ) : null}
   </button>
-);
-
-const TabItem = ({ label, active, onClick }: any) => (
-  <button
-    onClick={onClick}
-    className={cn(
-      "flex-shrink-0 px-6 py-4 text-[10px] font-black uppercase tracking-widest italic transition-all border-b-2 bg-transparent cursor-pointer",
-      active ? "border-[#FF5B00] text-navy" : "border-transparent text-gray-400 hover:text-navy"
-    )}
-  >
-    {label}
-  </button>
-);
-
-// High-fidelity Stats metric card
-const MetricBox = ({ title, value, linkText, onClick, icon: Icon, iconColor, bgHover }: any) => (
-  <div 
-    onClick={onClick}
-    className={cn(
-      "bg-white border border-gray-100 rounded-2xl p-5 hover:border-[#FF5B00]/20 transition-all cursor-pointer shadow-sm flex flex-col justify-between h-[135px] text-left group select-none",
-      bgHover
-    )}
-  >
-    <div className="flex items-center justify-between">
-      <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center border", iconColor)}>
-        <Icon size={16} />
-      </div>
-      <span className="text-2xl font-black text-navy tracking-tight">{value}</span>
-    </div>
-    <div className="mt-4">
-      <h5 className="text-[10px] font-black text-gray-800 uppercase tracking-wider mb-1 line-clamp-1">{title}</h5>
-      <span className="text-[8px] font-black text-[#FF5B00] uppercase tracking-widest flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-        {linkText} <span>→</span>
-      </span>
-    </div>
-  </div>
-);
-
-// High-fidelity recently viewed card
-const RecentlyViewedCard = ({ item }: { item: any }) => (
-  <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-[280px] w-full text-left group">
-    <div className="h-32 w-full flex items-center justify-center p-2 bg-gray-50/50 rounded-xl relative overflow-hidden">
-      <img src={item.image} alt={item.title} className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" />
-    </div>
-    <div className="mt-4 flex-1 flex flex-col justify-between">
-      <div>
-        <h4 className="text-[11px] font-bold text-gray-800 tracking-tight leading-snug line-clamp-2 h-8">{item.title}</h4>
-        <div className="mt-2 flex items-baseline gap-1.5">
-          <span className="text-xs font-extrabold text-navy">BDT {item.price}</span>
-          {item.originalPrice && (
-            <span className="text-[10px] text-gray-400 line-through">BDT {item.originalPrice}</span>
-          )}
-        </div>
-      </div>
-      <div className="text-[10px] text-gray-400 font-medium mt-2 flex items-center gap-1 uppercase tracking-wide">
-        <Clock size={10} className="text-gray-300" />
-        {item.viewed}
-      </div>
-    </div>
-  </div>
-);
-
-// Today's Recommendation headphone promo card
-const RecommendationBox = () => (
-  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-[280px] flex group w-full">
-    <div className="w-[40%] bg-[#080713] flex items-center justify-center p-4 relative shrink-0">
-      <div className="absolute inset-0 bg-gradient-to-t from-red-900/20 via-transparent to-transparent" />
-      <img 
-        src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop" 
-        alt="Sony WH-1000XM5" 
-        className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500 z-10" 
-      />
-    </div>
-    <div className="flex-1 p-5 flex flex-col justify-between bg-gradient-to-br from-white to-gray-50/50">
-      <div className="space-y-2 text-left">
-        <span className="text-[9px] font-black text-[#FF5B00] uppercase tracking-[0.2em] block">Recommended For You</span>
-        <h4 className="text-xs font-black text-navy uppercase leading-tight tracking-tight line-clamp-3">Best Noise Cancelling Headphones in 2025</h4>
-        <p className="text-[10px] text-gray-500 font-medium leading-relaxed">Top picks based on your recent views and interests.</p>
-      </div>
-      <button className="text-[10px] font-black text-[#FF5B00] uppercase tracking-wider flex items-center gap-1.5 hover:translate-x-1 transition-transform border-none bg-transparent cursor-pointer text-left self-start p-0 font-sans">
-        Discover Now <span className="text-sm font-bold">→</span>
-      </button>
-    </div>
-  </div>
-);
-
-// Top categories section
-const TopCategoriesList = () => {
-  const categories = [
-    { name: 'Smartphones', count: '128 Guides', icon: Phone },
-    { name: 'Laptops', count: '96 Guides', icon: Laptop },
-    { name: 'Audio', count: '76 Guides', icon: Headphones },
-    { name: 'Cameras', count: '64 Guides', icon: Camera },
-    { name: 'Gaming', count: '52 Guides', icon: Gamepad },
-  ];
-
-  return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-[310px] flex flex-col justify-between">
-      <div className="space-y-4">
-        {categories.map((cat, i) => {
-          const Icon = cat.icon;
-          return (
-            <div key={i} className="flex items-center justify-between group cursor-pointer hover:bg-gray-50/50 p-1.5 rounded-lg transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-500 group-hover:text-[#FF5B00] group-hover:bg-[#FF5B00]/5 transition-colors">
-                  <Icon size={14} />
-                </div>
-                <div className="text-left">
-                  <h5 className="text-[11px] font-bold text-gray-800">{cat.name}</h5>
-                  <p className="text-[9px] text-gray-400 font-medium">{cat.count}</p>
-                </div>
-              </div>
-              <ChevronRight size={14} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
-            </div>
-          );
-        })}
-      </div>
-      <button className="text-[9px] font-black text-[#FF5B00] uppercase tracking-widest text-left hover:translate-x-1 transition-transform border-none bg-transparent cursor-pointer p-0 mt-2 self-start flex items-center gap-1 font-sans">
-        Explore All Categories <span className="text-xs font-bold">→</span>
-      </button>
-    </div>
-  );
-};
-
-// Recent orders visualizer
-const RecentOrdersList = () => {
-  const orders = [
-    {
-      id: '#O054321',
-      title: 'Samsung Galaxy S24 Ultra',
-      price: 'BDT 145,000',
-      status: 'Delivered',
-      date: 'May 12, 2025',
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=100&h=100&fit=crop'
-    },
-    {
-      id: '#O054320',
-      title: 'Sony WH-1000XM5',
-      price: 'BDT 28,900',
-      status: 'Shipped',
-      date: 'May 10, 2025',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop'
-    },
-    {
-      id: '#O054319',
-      title: 'AirPods Pro (2nd Gen)',
-      price: 'BDT 25,900',
-      status: 'Delivered',
-      date: 'May 08, 2025',
-      image: 'https://images.unsplash.com/photo-1588449668338-d15176090c44?w=100&h=100&fit=crop'
-    }
-  ];
-
-  return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-[320px] flex flex-col justify-between">
-      <div className="divide-y divide-gray-100 flex-1 flex flex-col justify-center">
-        {orders.map((order, i) => (
-          <div key={i} className="py-3 flex items-center justify-between first:pt-0 last:pb-0 group hover:bg-gray-50/30 px-2 -mx-2 rounded-xl transition-all">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 p-1 flex items-center justify-center shrink-0">
-                <img src={order.image} alt={order.title} className="max-h-full max-w-full object-contain" />
-              </div>
-              <div className="text-left min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-[9px] font-bold text-[#FF5B00]">{order.id}</span>
-                  <span className="text-[10px] font-bold text-gray-800 truncate max-w-[150px] sm:max-w-xs">{order.title}</span>
-                </div>
-                <span className="text-[10px] text-gray-500 font-medium">{order.price}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-6">
-              <span className={cn(
-                "px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider leading-none",
-                order.status === 'Delivered' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
-              )}>
-                {order.status}
-              </span>
-              <span className="text-[10px] text-gray-400 font-medium min-w-[70px] text-right">{order.date}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-      <button className="text-[9px] font-black text-[#FF5B00] uppercase tracking-widest text-left hover:translate-x-1 transition-transform border-none bg-transparent cursor-pointer p-0 mt-3 self-start flex items-center gap-1 font-sans">
-        View All Orders <span className="text-xs font-bold">→</span>
-      </button>
-    </div>
-  );
-};
-
-// Activity counter with golden trophy and dynamic stats
-const ActivitySummaryCard = () => {
-  const metrics = [
-    { title: '18', desc: 'Products Viewed', change: '↑ 12%', icon: Clock, circleColor: 'bg-blue-50 text-blue-500 border border-blue-100' },
-    { title: '7', desc: 'Guides Read', change: '↑ 8%', icon: BookOpen, circleColor: 'bg-orange-50 text-[#FF5B00] border border-orange-100' },
-    { title: '3', desc: 'Reviews Written', change: '↑ 50%', icon: Star, circleColor: 'bg-orange-50 text-[#FF5B00] border border-orange-100' },
-    { title: '2', desc: 'Orders Placed', change: '↑ 100%', icon: ShoppingBag, circleColor: 'bg-blue-50 text-blue-500 border border-blue-100' },
-  ];
-
-  return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-[320px] flex flex-col justify-between">
-      <div className="grid grid-cols-4 gap-4">
-        {metrics.map((metric, i) => {
-          const Icon = metric.icon;
-          return (
-            <div key={i} className="flex flex-col items-start text-left p-3 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors">
-              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center mb-3", metric.circleColor)}>
-                <Icon size={14} />
-              </div>
-              <span className="text-lg font-black text-navy leading-none mb-1">{metric.title}</span>
-              <span className="text-[9px] text-gray-500 font-bold tracking-tight uppercase leading-snug line-clamp-2 h-6">{metric.desc}</span>
-              <span className="text-[8px] font-black text-emerald-600 tracking-wider uppercase mt-1">{metric.change}</span>
-            </div>
-          );
-        })}
-      </div>
-      
-      <div className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100/50 p-3.5 rounded-xl border border-gray-100">
-        <div className="text-left">
-          <p className="text-[10px] text-gray-600 font-bold leading-tight">Keep exploring, Farhan!</p>
-          <p className="text-[9px] text-gray-400 font-medium mt-0.5 leading-snug">You're making smart choices.</p>
-        </div>
-        <div className="relative shrink-0 flex items-center justify-center">
-          <Trophy size={28} className="text-amber-400 animate-bounce" />
-          <div className="absolute -top-1 -right-1 bg-[#FF5B00] text-white text-[7px] font-black px-1.5 py-0.5 rounded-full">+24</div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Premium user badge and date info
-const PremiumBadgeCard = () => (
-  <div className="bg-gradient-to-r from-white to-gray-50/50 border border-gray-100 rounded-2xl p-4.5 shadow-sm flex items-center justify-between max-w-sm w-full gap-4 relative overflow-hidden group">
-    <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF5B00]/5 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 group-hover:scale-125 transition-transform duration-500" />
-    <div className="flex items-center gap-3.5 relative z-10">
-      <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 shrink-0">
-        <Trophy size={18} />
-      </div>
-      <div className="text-left">
-        <h4 className="text-[11px] font-black text-navy uppercase tracking-wider mb-0.5">Premium Member</h4>
-        <p className="text-[9px] text-gray-400 font-medium">Member since Dec 2024</p>
-        <div className="mt-2 inline-flex items-center gap-1 bg-[#0c0d21] text-white text-[8px] font-black tracking-widest px-2.5 py-1 rounded-full uppercase">
-          <Star size={8} className="fill-amber-400 text-amber-400" /> Premium Active
-        </div>
-      </div>
-    </div>
-    
-    <div className="relative z-10 w-12 h-12 flex items-center justify-center shrink-0">
-      <div className="w-10 h-10 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center">
-        <Star size={20} className="text-[#FF5B00] fill-[#FF5B00]" />
-      </div>
-    </div>
-  </div>
 );
 
 // --- SECTIONS ---
 
-const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void }) => {
-  const { savedProducts, savedBrands, lovedBrands, followedBrands, recentlyViewed } = useDashboard();
+const OverviewSection = ({
+  onTabChange,
+  userName,
+}: {
+  onTabChange?: (tab: string) => void;
+  userName?: string;
+}) => {
+  const { recentlyViewed } = useDashboard();
+  const displayName = userName?.trim() || 'there';
 
-  // Mock static values from the reference image representation
-  const recentlyViewedItems = [
-    {
-      id: 1,
-      title: 'Samsung Galaxy S24 Ultra',
-      price: '145,000',
-      viewed: 'Viewed 2h ago',
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop'
-    },
-    {
-      id: 2,
-      title: 'Apex Premium Runner Elite X',
-      price: '4,500',
-      viewed: 'Viewed 5h ago',
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop'
-    },
-    {
-      id: 3,
-      title: 'Sony WH-1000XM5',
-      price: '28,900',
-      viewed: 'Viewed 1d ago',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop'
-    },
-    {
-      id: 4,
-      title: 'MacBook Air M3',
-      price: '132,000',
-      originalPrice: '138,000',
-      viewed: 'Viewed 2d ago',
-      image: 'https://images.unsplash.com/photo-1496181133227-f83bb023945d?w=400&h=400&fit=crop'
-    },
-    {
-      id: 5,
-      title: 'iPhone 15 Pro Max',
-      price: '167,500',
-      originalPrice: '175,000',
-      viewed: 'Viewed 3d ago',
-      image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=400&h=400&fit=crop'
-    }
-  ];
-
-  const recommendedItems = [
-    {
-      id: 1,
-      title: 'OnePlus 12R 5G',
-      price: '52,900',
-      originalPrice: '145,000',
-      rating: '4.6',
-      reviews: '128',
-      image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&h=400&fit=crop'
-    },
-    {
-      id: 2,
-      title: 'Apple Watch Series 9',
-      price: '48,500',
-      rating: '4.7',
-      reviews: '90',
-      image: 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&h=400&fit=crop'
-    },
-    {
-      id: 3,
-      title: 'AirPods Pro (2nd Gen)',
-      price: '25,900',
-      rating: '4.8',
-      reviews: '210',
-      image: 'https://images.unsplash.com/photo-1588449668338-d15176090c44?w=400&h=400&fit=crop'
-    },
-    {
-      id: 4,
-      title: 'Dell XPS 13 Plus',
-      price: '145,000',
-      rating: '4.5',
-      reviews: '84',
-      image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&h=400&fit=crop'
-    },
-    {
-      id: 5,
-      title: 'Canon EOS R50',
-      price: '85,000',
-      rating: '4.6',
-      reviews: '67',
-      image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop'
-    }
-  ];
-  
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
-      
-      {/* Welcome & Premium Member header card */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 font-sans">
-        <div className="text-left">
-          <span className="text-[11px] font-black text-gray-400 uppercase tracking-[0.25em] block mb-2">Welcome back,</span>
-          <h2 className="text-4xl font-black text-navy uppercase italic tracking-tighter leading-none mb-3">
-            Hi, <span className="text-[#FF5B00]">Mr. Farhan!</span>
+    <div className="space-y-7 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div>
+          <div className="text-[13px] text-[#6B7280] mb-0.5">Welcome back,</div>
+          <h2 className="text-[26px] font-extrabold text-[#1A1A2E] leading-tight mb-1.5">
+            Hi, {displayName}!
           </h2>
-          <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em] italic">Bangladesh's Smartest Product Discovery Platform</p>
+          <p className="text-[12.5px] text-[#9AA0AC]">
+            Bangladesh&apos;s smartest product discovery platform.
+          </p>
+        </div>
+        <div className="bg-[#FFF3EA] rounded-xl px-5 py-4 min-w-[260px] relative overflow-hidden">
+          <div className="text-[12.5px] font-bold text-[#1A1A2E] mb-0.5">Premium Member</div>
+          <div className="text-[11px] text-[#9AA0AC] mb-3">Member since Dec 2024</div>
+          <span className="inline-block bg-[#1A1A2E] text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full">
+            ★ PREMIUM ACTIVE
+          </span>
+          <div className="absolute right-[-6px] bottom-[-10px] text-[52px] opacity-15 pointer-events-none" aria-hidden>
+            ♛
+          </div>
         </div>
         <PremiumBadgeCard />
       </div>
 
-      {/* Metric counters with 7 columns */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 font-sans">
-        <MetricBox 
-          title="Saved Products" 
-          value={savedProducts.length || 5} 
-          linkText="View all saved" 
-          onClick={() => onTabChange && onTabChange('saved-products')}
-          icon={Heart}
-          iconColor="bg-rose-50 text-rose-500 border-rose-100"
-        />
-        <MetricBox 
-          title="Saved Brands" 
-          value={savedBrands.length || 3} 
-          linkText="View all saved" 
-          onClick={() => onTabChange && onTabChange('saved-brands')}
-          icon={Store}
-          iconColor="bg-blue-50 text-blue-500 border-blue-100"
-        />
-        <MetricBox 
-          title="Loved Brands" 
-          value={lovedBrands.length || 3} 
-          linkText="View all loved" 
-          onClick={() => onTabChange && onTabChange('loved-brands')}
-          icon={Heart}
-          iconColor="bg-rose-50 text-rose-500 border-rose-100"
-        />
-        <MetricBox 
-          title="Following" 
-          value={followedBrands.length || 5} 
-          linkText="View all following" 
-          onClick={() => onTabChange && onTabChange('followed-brands')}
-          icon={CheckCircle2}
-          iconColor="bg-indigo-50 text-indigo-500 border-indigo-100"
-        />
-        <MetricBox 
-          title="Browsing History" 
-          value={recentlyViewed.length || 7} 
-          linkText="View all history" 
-          onClick={() => onTabChange && onTabChange('recently-viewed')}
-          icon={Clock}
-          iconColor="bg-sky-50 text-sky-500 border-sky-100"
-        />
-        <MetricBox 
-          title="Saved Spotlight" 
-          value={2} 
-          linkText="View all saved" 
-          onClick={() => onTabChange && onTabChange('saved-recommendations')}
-          icon={Bookmark}
-          iconColor="bg-indigo-50 text-indigo-500 border-indigo-100"
-        />
-        <MetricBox 
-          title="Orders" 
-          value={4} 
-          linkText="View all orders" 
-          onClick={() => onTabChange && onTabChange('overview')}
-          icon={ShoppingBag}
-          iconColor="bg-violet-50 text-violet-500 border-violet-100"
-        />
-      </div>
-
-      {/* Row 1: Recently viewed + Today's Recommendation split */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 font-sans">
-        <div className="lg:col-span-9 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-black text-navy uppercase italic tracking-wider flex items-center gap-2">
-              <span className="text-[#FF5B00]">●</span> Recently Viewed
+      <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.1fr] gap-5">
+        <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2">
+              <Clock className="text-[#FF5B00]" size={16} /> Recently Viewed
             </h3>
-            <button 
-              onClick={() => onTabChange && onTabChange('recently-viewed')}
-              className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#FF5B00] transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1 font-sans"
+            <button
+              type="button"
+              onClick={() => onTabChange?.('recently-viewed')}
+              className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer"
             >
-              View all history <span>→</span>
+              View all history →
             </button>
           </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {recentlyViewedItems.map((item) => (
-              <RecentlyViewedCard key={item.id} item={item} />
-            ))}
-          </div>
+
+          {recentlyViewed.length > 0 ? (
+            <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth pb-2">
+              {recentlyViewed.map((p, i) => (
+                <div key={i} className="min-w-[240px] sm:min-w-[280px] shrink-0">
+                  <ProductCard product={p} variant="grid" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-16 border border-dashed border-[#E8EDF2] rounded-xl flex flex-col items-center justify-center text-center bg-[#F4F7F9] w-full">
+              <p className="text-[12px] font-semibold text-[#9AA0AC]">No recently viewed history</p>
+              <button
+                type="button"
+                onClick={() => onTabChange?.('recently-viewed')}
+                className="mt-3 text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer"
+              >
+                Browse products →
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="lg:col-span-3 space-y-4">
-          <h3 className="text-sm font-black text-navy uppercase italic tracking-wider text-left">
-            Today's Recommendation For You
-          </h3>
-          <RecommendationBox />
+        <div className="bg-white border border-[#E8EDF2] rounded-[14px] overflow-hidden flex flex-col">
+          <div className="h-[130px] bg-[#F4F7F9] shrink-0">
+            <img
+              src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop"
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.src = PLACEHOLDER_IMAGE;
+              }}
+              className="w-full h-full object-cover"
+              alt=""
+            />
+          </div>
+          <div className="p-4 flex-1 flex flex-col">
+            <div className="text-[10.5px] font-extrabold text-[#9AA0AC] tracking-[0.04em] mb-1.5">
+              TODAY&apos;S RECOMMENDATION
+            </div>
+            <h4 className="text-[14px] font-extrabold text-[#1A1A2E] leading-snug mb-2">
+              Best Noise Cancelling Headphones in 2025
+            </h4>
+            <p className="text-[11.5px] text-[#9AA0AC] leading-relaxed mb-3 flex-1">
+              Top picks based on your recent views and interests.
+            </p>
+            <button
+              type="button"
+              onClick={() => onTabChange?.('saved-recommendations')}
+              className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer text-left"
+            >
+              Discover Now →
+            </button>
+          </div>
         </div>
       </div>
 
@@ -609,8 +295,10 @@ const SavedProductsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#FF5B00]">Vault</span> <span className="text-gray-400 text-2xl">({savedProducts.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your curated list of premium desires</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Saved Products <span className="text-[#9AA0AC] text-lg font-bold">({savedProducts.length})</span>
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">Your curated list of saved products</p>
         </div>
         <div className="flex items-center gap-4 bg-white border border-[#e8edf2] rounded-full px-6 py-2 shadow-sm">
            <Filter size={14} className="text-gray-400" />
@@ -633,9 +321,54 @@ const SavedProductsSection = () => {
           <div className="w-24 h-24 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center text-gray-300 mb-8 scale-110 shadow-sm col-span-full">
             <ShoppingBag size={40} />
           </div>
-          <h3 className="text-xl font-black text-[#1a1a2e] italic uppercase tracking-widest mb-4">Vault is empty</h3>
-          <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">Start exploring Choosify.bd and save products you love to your personal vault.</p>
-          <Link to="/products" className="px-12 py-4 bg-[#FF5B00] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-xl shadow-[#FF5B00]/10 hover:scale-105 transition-all animate-none">Start Browsing</Link>
+          <h3 className="text-lg font-extrabold text-[#1A1A2E] mb-2">No saved products yet</h3>
+          <p className="text-[#9AA0AC] text-[12.5px] mb-8 max-w-sm">Start exploring Choosify.bd and save products you love.</p>
+          <Link to="/products" className="px-8 py-3 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all">Start browsing</Link>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const SavedGuidesSection = () => {
+  const { savedGuides } = useDashboard();
+
+  return (
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="text-left">
+        <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+          Saved Guides <span className="text-[#9AA0AC] text-lg font-bold">({savedGuides.length})</span>
+        </h2>
+        <p className="text-[#9AA0AC] text-[12.5px]">
+          Knowledge bookmarks for your next big buy
+        </p>
+      </div>
+
+      {savedGuides.length > 0 ? (
+        <div className={GUIDE_MEDIA_GRID}>
+          {savedGuides.map((guide) => (
+            <div key={guide.id} className="relative group min-w-0 w-full">
+              {renderGuideMediaCard(guide)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="py-32 flex flex-col items-center text-center">
+          <div className="w-24 h-24 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center text-gray-300 mb-8 scale-110 shadow-sm">
+            <BookOpen size={40} />
+          </div>
+          <h3 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-4">
+            No saved guides yet
+          </h3>
+          <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">
+            Bookmark guides from the recommendations page to find them here later.
+          </p>
+          <Link
+            to="/guides"
+            className="px-8 py-3 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all"
+          >
+            Browse Guides
+          </Link>
         </div>
       )}
     </div>
@@ -650,8 +383,10 @@ const SavedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#FF5B00]">Brands</span> <span className="text-gray-450 text-2xl">({savedBrands.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">☆ Bookmarked partners for later reference</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Saved Brands <span className="text-[#9AA0AC] text-lg font-bold">({savedBrands.length})</span>
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">Bookmarked partners for later reference</p>
         </div>
       </div>
 
@@ -685,8 +420,8 @@ const SavedBrandsSection = () => {
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-sm font-black text-[#1a1a2e] uppercase italic mb-1.5 truncate group-hover:text-[#FF5B00] transition-colors">{brand.name}</h4>
-                <div className="flex items-center justify-center gap-1 mb-4">
+                <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#FF5B00] fill-current text-current" : "text-gray-150"} />
                   ))}
@@ -703,8 +438,8 @@ const SavedBrandsSection = () => {
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Store size={64} className="mb-8 text-gray-300" />
-          <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No Saved Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#FF5B00] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Browse All Brands</Link>
+          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No Saved Brands yet</p>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse all brands</Link>
         </div>
       )}
     </div>
@@ -719,8 +454,10 @@ const LovedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Loved <span className="text-[#FF5B00]">Brands</span> <span className="text-gray-400 text-2xl">({lovedBrands.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">♥ Brands you reacted to with love</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Loved Brands <span className="text-[#9AA0AC] text-lg font-bold">({lovedBrands.length})</span>
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">Brands you reacted to with love</p>
         </div>
       </div>
 
@@ -754,8 +491,8 @@ const LovedBrandsSection = () => {
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-sm font-black text-[#1a1a2e] uppercase italic mb-1.5 truncate group-hover:text-[#FF5B00] transition-colors">{brand.name}</h4>
-                <div className="flex items-center justify-center gap-1 mb-4">
+                <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#FF5B00] fill-current text-current" : "text-gray-150"} />
                   ))}
@@ -772,8 +509,8 @@ const LovedBrandsSection = () => {
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Heart size={64} className="mb-8 text-rose-500" />
-          <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No Loved Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#FF5B00] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore Brands</Link>
+          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No Loved Brands yet</p>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
         </div>
       )}
     </div>
@@ -788,8 +525,10 @@ const FollowedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Followed <span className="text-[#FF5B00]">Partners</span> <span className="text-gray-400 text-2xl">({followedBrands.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">⚡ Subscribed to receive updates and deals</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Following <span className="text-[#9AA0AC] text-lg font-bold">({followedBrands.length})</span>
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">Subscribed to receive updates and deals</p>
         </div>
       </div>
 
@@ -823,8 +562,8 @@ const FollowedBrandsSection = () => {
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-sm font-black text-[#1a1a2e] uppercase italic mb-1.5 truncate group-hover:text-[#FF5B00] transition-colors">{brand.name}</h4>
-                <div className="flex items-center justify-center gap-1 mb-4">
+                <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#FF5B00] fill-current text-current" : "text-gray-150"} />
                   ))}
@@ -842,8 +581,8 @@ const FollowedBrandsSection = () => {
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Store size={64} className="mb-8 text-gray-300" />
-          <p className="text-[11px] font-black text-[#1a1a2e ] uppercase tracking-widest italic leading-relaxed font-black mb-4">No Followed Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#FF5B00] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore and Follow Brands</Link>
+          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed mb-4">No Followed Brands yet</p>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore and follow brands</Link>
         </div>
       )}
     </div>
@@ -862,13 +601,15 @@ const RecentlyViewedSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Recently <span className="text-[#FF5B00]">Viewed</span> <span className="text-gray-400 text-2xl">({recentlyViewed.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">🕒 Products you recently browsed</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Browsing History <span className="text-[#9AA0AC] text-lg font-bold">({recentlyViewed.length})</span>
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">Products you recently browsed</p>
         </div>
         {recentlyViewed.length > 0 && (
           <button 
             onClick={handleClearHistory}
-            className="text-[10px] font-black text-red-500 uppercase tracking-widest italic hover:underline bg-transparent border-none cursor-pointer"
+            className="text-[12px] font-bold text-red-500 tracking-tight hover:underline bg-transparent border-none cursor-pointer"
           >
             Clear History
           </button>
@@ -883,10 +624,10 @@ const RecentlyViewedSection = () => {
         </div>
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
-          <Clock size={64} className="mb-8 text-[#FF5B00]" />
-          <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No recently viewed products</p>
+          <Clock size={64} className="mb-8 text-[#E8500A]" />
+          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No recently viewed products</p>
           <p className="text-[10px] font-bold text-gray-405 uppercase mt-2 italic">Product views will automatically populate this section.</p>
-          <Link to="/products" className="mt-8 px-10 py-3 bg-[#FF5B00] text-white font-black uppercase tracking-widest italic shadow-xl">Go To Directory</Link>
+          <Link to="/products" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Go to directory</Link>
         </div>
       )}
     </div>
@@ -989,7 +730,7 @@ const MessagesSection = () => {
         activeChat !== null && "hidden md:flex"
       )}>
          <div className="p-6 md:p-8 border-b border-white/5">
-            <h2 className="text-lg md:text-xl font-black text-navy italic uppercase tracking-tighter mb-4">Inbox</h2>
+            <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-4">Inbox</h2>
             <div className="relative">
                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#FF5B00]/30 transition-all" placeholder="Search chats..." />
@@ -1030,7 +771,7 @@ const MessagesSection = () => {
                </button>
                <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" alt="" />
                <div>
-                  <h4 className="text-xs md:text-sm font-black text-navy italic uppercase tracking-widest leading-none">Farhan Rafiq</h4>
+                  <h4 className="text-xs md:text-sm font-extrabold text-[#1A1A2E] tracking-tight leading-none">Farhan Rafiq</h4>
                   <span className="text-[8px] md:text-[9px] font-bold text-[#059669] uppercase italic font-black">Support Active</span>
                </div>
             </div>
@@ -1049,7 +790,7 @@ const MessagesSection = () => {
                  )}>
                     {m.text}
                  </div>
-                 <span className="text-[8px] font-black text-gray-400 uppercase italic px-2">{m.senderName || 'Farhan'} • {m.time}</span>
+                 <span className="text-[11px] font-medium text-[#9AA0AC] tracking-tight px-2">{m.senderName || 'Farhan'} â€¢ {m.time}</span>
               </div>
             ))}
          </div>
@@ -1087,12 +828,12 @@ const NotificationsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Notification <span className="text-[#FF5B00]">Center</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Updates on your curated world</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">Notifications</h2>
+          <p className="text-[#9AA0AC] text-[13px] font-medium">Updates on your curated world</p>
         </div>
         <button 
           onClick={markAllAsRead}
-          className="text-[10px] font-black text-[#FF5B00] uppercase tracking-widest italic hover:underline border-none bg-transparent cursor-pointer"
+            className="text-[12px] font-bold text-[#FF5B00] tracking-tight hover:underline border-none bg-transparent cursor-pointer"
         >
           Mark all as read
         </button>
@@ -1119,7 +860,7 @@ const NotificationsSection = () => {
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-lg font-black text-navy uppercase italic tracking-tighter">{n.title}</h4>
+                  <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight">{n.title}</h4>
                   <span className="text-[10px] font-black text-gray-500 uppercase">{n.time}</span>
                 </div>
                 <p className="text-gray-500 text-sm font-bold italic leading-relaxed">{n.message}</p>
@@ -1129,7 +870,7 @@ const NotificationsSection = () => {
         ) : (
           <div className="py-32 flex flex-col items-center text-center text-gray-400">
             <Bell size={64} className="mb-8" />
-            <p className="text-[11px] font-black uppercase tracking-widest italic">No new notifications</p>
+            <p className="text-[13px] font-medium text-[#9AA0AC]">No new notifications</p>
           </div>
         )}
       </div>
@@ -1160,15 +901,20 @@ const SettingsSection = () => {
   };
 
   return (
-    <div className="max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
-       <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Profile <span className="text-[#FF5B00]">Master</span></h2>
-            <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Configure your discovery experience</p>
-          </div>
-          <button 
+    <div className="max-w-6xl space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div className="text-left">
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Profile Settings
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">
+            Account center — personal info, addresses, security &amp; preferences
+          </p>
+        </div>
+        {settingsSubTab === 'personal' && (
+          <button
             onClick={handleSave}
-            className="px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
+            className="px-5 py-2.5 bg-[#FF5B00] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-lg transition-all cursor-pointer border-0 shadow-sm flex items-center gap-2"
           >
             Save Changes
           </button>
@@ -1187,73 +933,95 @@ const SettingsSection = () => {
                 <h4 className="text-xl font-black text-navy italic uppercase mb-1">{name}</h4>
                 <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator • ID: 89BD-001</p>
               </div>
+              <h4 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">{name}</h4>
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator</p>
+            </div>
 
-             <div className="space-y-6">
-                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Basic Intel</h3>
-                <div className="space-y-4">
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Full Display Name</label>
-                      <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/50 shadow-sm" 
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Your full name"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Email Address</label>
-                      <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/50 shadow-sm" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="your@email.com"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Phone Number</label>
-                      <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/50 shadow-sm" 
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+880 1XXX-XXXXXX"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">Delivery Address</label>
-                      <input 
-                        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/50 shadow-sm" 
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        placeholder="Your address, Dhaka, Bangladesh"
-                      />
-                   </div>
+            <div className="space-y-6">
+              <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">Profile</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-4">
+                    Full Display Name
+                  </label>
+                  <input
+                    className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your full name"
+                  />
                 </div>
-             </div>
+                <div className="space-y-2">
+                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-4">
+                    Email Address
+                  </label>
+                  <input
+                    className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-4">
+                    Phone Number
+                  </label>
+                  <input
+                    className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+880 1XXX-XXXXXX"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-8">
-             <div className="space-y-6">
-                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Notification Matrix</h3>
-                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-8 space-y-6 shadow-sm">
-                   {[
-                     { label: 'Sale Alerts', desc: 'When your saved product goes on flash sale', checked: true },
-                     { label: 'Expert Tips', desc: 'Weekly curated guides for your categories', checked: true },
-                     { label: 'Price Drops', desc: 'Whenever a brand lowers price beyond 20%', checked: false },
-                     { label: 'Inbox Direct', desc: 'Direct messages from verified sellers', checked: true }
-                   ].map((item, i) => (
-                     <div key={i} className="flex items-center justify-between gap-6 group">
-                        <div className="flex-1">
-                           <h5 className="text-[11px] font-black text-navy uppercase italic tracking-tighter mb-1">{item.label}</h5>
-                           <p className="text-[9px] font-bold text-gray-500 italic uppercase">{item.desc}</p>
-                        </div>
-                        <button className={cn(
-                          "w-12 h-6 rounded-full transition-all relative p-1",
-                          item.checked ? "bg-[#059669]" : "bg-gray-200"
-                        )}>
-                           <div className={cn("w-4 h-4 rounded-full bg-white transition-all shadow-md", item.checked ? "translate-x-6" : "translate-x-0")} />
-                        </button>
-                     </div>
-                   ))}
+            <div className="space-y-6">
+              <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">
+                Quick links
+              </h3>
+              <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 space-y-3 shadow-sm">
+                <p className="text-[13px] font-medium text-[#9AA0AC]">
+                  Manage delivery locations from the Addresses tab or sidebar menu.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {settingsSubTab === 'addresses' && <AddressBookManager embedded />}
+
+      {settingsSubTab === 'security' && (
+        <div className="space-y-6 max-w-xl">
+          <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">Security</h3>
+          <button className="w-full py-4 bg-white border border-gray-200 rounded-lg text-[10px] font-black text-navy uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-3 cursor-pointer shadow-sm min-h-[44px]">
+            <ShieldCheck size={16} className="text-[#E8500A]" /> Reset Multi-Factor Auth
+          </button>
+          <button className="w-full py-4 bg-red-50 border border-red-100 rounded-lg text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all cursor-pointer min-h-[44px]">
+            Deactivate Curator Account
+          </button>
+        </div>
+      )}
+
+      {settingsSubTab === 'notifications' && (
+        <div className="space-y-6 max-w-2xl">
+          <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">Notifications</h3>
+          <div className="bg-white border border-[#e8edf2] rounded-[5px] p-8 space-y-6 shadow-sm">
+            {[
+              { label: 'Sale Alerts', desc: 'When your saved product goes on flash sale', checked: true },
+              { label: 'Expert Tips', desc: 'Weekly curated guides for your categories', checked: true },
+              { label: 'Price Drops', desc: 'Whenever a brand lowers price beyond 20%', checked: false },
+              { label: 'Inbox Direct', desc: 'Direct messages from verified sellers', checked: true },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center justify-between gap-6 group">
+                <div className="flex-1 text-left">
+                  <h5 className="text-[13px] font-bold text-[#1A1A2E] tracking-tight mb-1">
+                    {item.label}
+                  </h5>
+                  <p className="text-[9px] font-bold text-gray-500 italic uppercase">{item.desc}</p>
                 </div>
              </div>
 
@@ -1507,365 +1275,13 @@ const AdminOverviewsSection = () => {
   );
 };
 
-const AdminCampaignsSection = () => {
-  const { campaigns, addCampaign, updateCampaign, deleteCampaign } = useDashboard();
-  const [formMode, setFormMode] = useState<'list' | 'create' | 'edit'>('list');
-  const [editingId, setEditingId] = useState<string | null>(null);
-
-  // Form states
-  const [title, setTitle] = useState('');
-  const [tagline, setTagline] = useState('');
-  const [ctaText, setCtaText] = useState('EXPLORE');
-  const [ctaLink, setCtaLink] = useState('/deals');
-  const [image, setImage] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [priority, setPriority] = useState(1);
-  const [active, setActive] = useState(true);
-  const [sponsorBadge, setSponsorBadge] = useState('');
-  const [countdownEnd, setCountdownEnd] = useState('');
-
-  const imagePresets = [
-    { name: 'Black Friday Gold', url: 'https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?w=1600&q=80' },
-    { name: 'Summer Sunset', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80' },
-    { name: 'Tech Neon', url: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1600&q=80' },
-    { name: 'Fashion Boutique', url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&q=80' },
-    { name: 'Stadium & Arena', url: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1600&q=80' }
-  ];
-
-  const handleEdit = (c: any) => {
-    setEditingId(c.id);
-    setTitle(c.title);
-    setTagline(c.tagline);
-    setCtaText(c.ctaText || 'EXPLORE');
-    setCtaLink(c.ctaLink || '/deals');
-    setImage(c.image);
-    setStartDate(c.startDate || '');
-    setEndDate(c.endDate || '');
-    setPriority(c.priority || 1);
-    setActive(c.active);
-    setSponsorBadge(c.sponsorBadge || '');
-    setCountdownEnd(c.countdownEnd || '');
-    setFormMode('edit');
-  };
-
-  const handleCreateNew = () => {
-    setEditingId(null);
-    setTitle('');
-    setTagline('');
-    setCtaText('EXPLORE');
-    setCtaLink('/deals');
-    setImage('');
-    setStartDate('');
-    setEndDate('');
-    setPriority(1);
-    setActive(true);
-    setSponsorBadge('');
-    setCountdownEnd('');
-    setFormMode('create');
-  };
-
-  const handleSave = () => {
-    if (!title.trim() || !tagline.trim() || !image.trim()) {
-      toast.error('Please fill in Title, Tagline and Banner Image URL');
-      return;
-    }
-
-    const campaignData: any = {
-      title,
-      tagline,
-      ctaText,
-      ctaLink,
-      image,
-      startDate,
-      endDate,
-      priority: Number(priority),
-      active,
-      sponsorBadge: sponsorBadge.trim() || undefined,
-      countdownEnd: countdownEnd.trim() || undefined
-    };
-
-    if (formMode === 'edit' && editingId) {
-      updateCampaign({ ...campaignData, id: editingId });
-    } else {
-      addCampaign(campaignData);
-    }
-    setFormMode('list');
-  };
-
-  const toggleCampaignActive = (c: any) => {
-    updateCampaign({ ...c, active: !c.active });
-  };
-
-  return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700 text-white">
-      {formMode === 'list' ? (
-        <>
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Campaigns <span className="text-[#F96500]">Manager</span></h2>
-              <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Curate and schedule edge-to-edge promotional banners</p>
-            </div>
-            
-            <button
-              onClick={handleCreateNew}
-              className="px-6 py-2.5 bg-gradient-to-r from-[#FF5B00] to-[#FF5B00] hover:from-[#FF5B00] hover:to-[#EB4501] text-white rounded-full text-[10px] font-black tracking-widest uppercase transition-all shadow-md italic cursor-pointer animate-pulse"
-            >
-              + Create Campaign
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {campaigns && campaigns.map((c) => {
-              const isPast = c.endDate && new Date(c.endDate) < new Date();
-              const isFuture = c.startDate && new Date(c.startDate) > new Date();
-              
-              return (
-                <div key={c.id} className="bg-white/5 border border-white/10 rounded-[5px] p-6 flex flex-col justify-between relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none" style={{ backgroundImage: `url(${c.image})` }} />
-                  
-                  <div className="relative z-10 flex flex-col gap-3">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider ${
-                        !c.active ? 'bg-red-950/80 border border-red-500/25 text-red-400' :
-                        isPast ? 'bg-amber-950/80 border border-amber-500/25 text-amber-400' :
-                        isFuture ? 'bg-blue-950/80 border border-blue-500/25 text-blue-400' :
-                        'bg-green-950/80 border border-green-500/25 text-green-400'
-                      }`}>
-                        {!c.active ? 'Inactive' : isPast ? 'Expired' : isFuture ? 'Upcoming' : 'Active'}
-                      </span>
-                      <span className="text-[10px] font-mono text-gray-400 font-extrabold">Priority: {c.priority}</span>
-                    </div>
-
-                    <div>
-                      <h4 className="text-lg font-black text-white italic uppercase tracking-tight">{c.title}</h4>
-                      <p className="text-xs text-gray-300 font-medium line-clamp-2 mt-1">{c.tagline}</p>
-                    </div>
-
-                    <div className="space-y-1 text-[10px] text-gray-400 font-semibold border-t border-white/5 pt-3">
-                      <div><span className="text-gray-500 uppercase">CTA:</span> <span className="text-[#FF5B00] font-mono">{c.ctaText}</span> → <span className="text-gray-300 font-mono italic">{c.ctaLink}</span></div>
-                      {c.startDate && <div><span className="text-gray-500 uppercase font-mono">Runs:</span> <span className="text-gray-300 font-mono">{c.startDate} to {c.endDate || 'Forever'}</span></div>}
-                      {c.sponsorBadge && <div><span className="text-gray-500 uppercase">Sponsor Badge:</span> <span className="text-emerald-400">{c.sponsorBadge}</span></div>}
-                      {c.countdownEnd && <div><span className="text-gray-500 uppercase">Countdown:</span> <span className="text-purple-400 font-mono">{c.countdownEnd}</span></div>}
-                    </div>
-                  </div>
-
-                  <div className="relative z-10 flex items-center justify-between gap-3 mt-6 border-t border-white/5 pt-4">
-                    <button
-                      onClick={() => toggleCampaignActive(c)}
-                      className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase cursor-pointer tracking-wider border transition-all ${
-                        c.active 
-                          ? 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white' 
-                          : 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-400 hover:text-black'
-                      }`}
-                    >
-                      {c.active ? 'Deactivate' : 'Activate'}
-                    </button>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(c)}
-                        className="px-4 py-1.5 rounded-full text-[9px] font-black uppercase cursor-pointer tracking-wider bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all text-white"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteCampaign(c.id)}
-                        className="p-1.5 rounded-full bg-red-950/40 text-red-400 hover:bg-red-600 hover:text-white border border-red-900 hover:border-red-500 transition-all cursor-pointer"
-                        title="Delete"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      ) : (
-        <div className="max-w-4xl space-y-10">
-          <div>
-            <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">
-              {formMode === 'edit' ? 'Edit' : 'Create New'} <span className="text-[#FF5B00]">Campaign</span>
-            </h2>
-            <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Configure promotional parameters for Choosify home delivery shield</p>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-[5px] p-8 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Campaign Title</label>
-                <input
-                  type="text"
-                  placeholder="e.g. BLACK FRIDAY"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Short Tagline (Curated & Premium)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. UP TO 70% OFF SELECT PRODUCTS"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={tagline}
-                  onChange={(e) => setTagline(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">CTA Button Text</label>
-                <input
-                  type="text"
-                  placeholder="e.g. EXPLORE DEALS"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={ctaText}
-                  onChange={(e) => setCtaText(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">CTA Destination Page</label>
-                <select
-                  className="w-full h-11 bg-[#0b0c1e] border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={ctaLink}
-                  onChange={(e) => setCtaLink(e.target.value)}
-                >
-                  <option value="/deals">Deals Hub Page (/deals)</option>
-                  <option value="/products">All Products Feed (/products)</option>
-                  <option value="/brands">Brands Page (/brands)</option>
-                  <option value="/categories?cat=fashion">Fashion Category (/categories?cat=fashion)</option>
-                  <option value="/categories?cat=tech">Tech Category (/categories?cat=tech)</option>
-                  <option value="/dashboard">User Personal Dashboard (/dashboard)</option>
-                </select>
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Campaign Banner Background Image URL</label>
-                  <span className="text-[9px] text-[#FF5B00] font-black uppercase tracking-wider">Fast Presets</span>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Paste direct photographic banner URL"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50 font-mono"
-                  value={image}
-                  onChange={(e) => setImage(e.target.value)}
-                />
-                
-                {/* Visual Presets list */}
-                <div className="flex flex-wrap gap-2 pt-1.5">
-                  {imagePresets.map((preset) => (
-                    <button
-                      key={preset.name}
-                      type="button"
-                      onClick={() => {
-                        setImage(preset.url);
-                        toast.success(`Banner presets chosen: ${preset.name}`);
-                      }}
-                      className="px-3 py-1 text-[9px] font-black uppercase rounded-lg border bg-white/5 hover:bg-[#FF5B00]/20 text-gray-300 border-white/5 hover:border-[#FF5B00]/40 transition-all cursor-pointer"
-                    >
-                      {preset.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Start Date</label>
-                <input
-                  type="date"
-                  className="w-full h-11 bg-[#0b0c1e] border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">End Date (Expiry)</label>
-                <input
-                  type="date"
-                  className="w-full h-11 bg-[#0b0c1e] border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Display Priority (larger numbers shown first, e.g. 10)</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={priority}
-                  onChange={(e) => setPriority(Number(e.target.value))}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Countdown End Date (optional e.g. 2026-11-28T12:00:00Z)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 2026-11-28T12:00:00Z"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50 font-mono"
-                  value={countdownEnd}
-                  onChange={(e) => setCountdownEnd(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">Sponsor Label / Badge text (optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Platform Special, Sponsored, Apex exclusive"
-                  className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF5B00]/50"
-                  value={sponsorBadge}
-                  onChange={(e) => setSponsorBadge(e.target.value)}
-                />
-              </div>
-
-              <div className="flex items-center gap-3 pt-6 pl-1 select-none">
-                <button
-                  type="button"
-                  onClick={() => setActive(!active)}
-                  className={cn(
-                    "w-12 h-6 rounded-full transition-all relative p-1",
-                    active ? "bg-[#07DD05]" : "bg-white/10"
-                  )}
-                >
-                  <div className={cn("w-4 h-4 rounded-full bg-white transition-all shadow-md", active ? "translate-x-6" : "translate-x-0")} />
-                </button>
-                <div>
-                  <h5 className="text-[11px] font-black uppercase italic tracking-tighter">Publish immediately</h5>
-                  <p className="text-[9px] font-bold text-gray-500 italic uppercase">Make campaign visible on platform immediately</p>
-                </div>
-              </div>
-
-            </div>
-
-            <div className="flex items-center justify-end gap-4 border-t border-white/5 pt-6 mt-4">
-              <button
-                type="button"
-                onClick={() => setFormMode('list')}
-                className="px-6 py-3 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-[#e8edf2] hover:border-[#1A1D4E]/20"
-              >
-                Cancel
-              </button>
-              
-              <button
-                type="button"
-                onClick={handleSave}
-                className="px-6 py-3 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
-              >
-                Save Campaign
-              </button>
-            </div>
-          </div>
+      {settingsSubTab === 'privacy' && (
+        <div className="max-w-2xl bg-white border border-[#e8edf2] rounded-[5px] p-8 shadow-sm text-left">
+          <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-2">Privacy</h3>
+          <p className="text-[11px] text-gray-500 leading-relaxed">
+            Control how your browsing activity and profile data are used across Choosify. Privacy controls
+            will expand in a future release.
+          </p>
         </div>
       )}
     </div>
@@ -1892,6 +1308,72 @@ export function DashboardPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const platformRole = toPlatformRole(currentUser.role);
+  const dashboardNav = getDashboardNavForRole(platformRole);
+
+  const DASHBOARD_ICONS: Record<string, any> = {
+    LayoutDashboard,
+    Heart,
+    Store,
+    CheckCircle2,
+    Clock,
+    Bookmark,
+    ShoppingBag,
+    Package,
+    Send,
+    TrendingUp,
+    Megaphone,
+    BarChart3,
+    Sparkles: Star,
+    Users: MessageSquare,
+    Flame,
+    ShieldCheck: CheckCircle2,
+    MessageSquare,
+    Star,
+    Settings,
+    MapPin,
+  };
+
+  const formatNavLabel = (item: { id: string; label: string }) => item.label;
+
+  const getNavCount = (id: string): number | string | null => {
+    if (id === 'saved-products') return savedProducts.length;
+    if (id === 'saved-brands') return savedBrands.length;
+    if (id === 'loved-brands') return lovedBrands.length;
+    if (id === 'followed-brands') return followedBrands.length;
+    if (id === 'recently-viewed') return recentlyViewed.length;
+    if (id === 'saved-recommendations') return savedGuides.length;
+    return null;
+  };
+
+  const getNavBadge = (id: string): number | string | null => {
+    if (id === 'messages') {
+      const unread = threads.filter((t) => t.unread).length;
+      return unread > 0 ? unread : null;
+    }
+    return null;
+  };
+
+  const mapNavItems = (items: typeof dashboardNav.platform) =>
+    items.map((item) => ({
+      id: item.id,
+      label: formatNavLabel(item),
+      icon: DASHBOARD_ICONS[item.icon] ?? LayoutDashboard,
+      href: item.href,
+      count: getNavCount(item.id),
+      badge: getNavBadge(item.id),
+    }));
+
+  const controlItems = mapNavItems(dashboardNav.platform);
+  const workspaceItems = mapNavItems(dashboardNav.workspace);
+  const accountItems = mapNavItems(dashboardNav.account);
+
+  const overviewItems = controlItems.filter((i) => i.id === 'overview');
+  const collectionItems = controlItems.filter((i) => COLLECTION_TAB_IDS.has(i.id));
+  const activityItems = controlItems.filter((i) => ACTIVITY_TAB_IDS.has(i.id));
+  const communicationItems = accountItems.filter((i) => COMMUNICATION_TAB_IDS.has(i.id));
+  const accountOnlyItems = accountItems.filter((i) => !COMMUNICATION_TAB_IDS.has(i.id));
+
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
@@ -1910,22 +1392,10 @@ export function DashboardPage() {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
   };
 
-  const menuItems: Array<{ id: string; label: string; icon: any; badge?: number; href?: string }> = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'saved-products', label: 'Saved Products', icon: Heart, badge: savedProducts.length || 5 },
-    { id: 'saved-brands', label: 'Saved Brands', icon: Store, badge: savedBrands.length || 3 },
-    { id: 'loved-brands', label: 'Loved Brands', icon: Heart, badge: lovedBrands.length || 3 },
-    { id: 'followed-brands', label: 'Following', icon: CheckCircle2, badge: followedBrands.length || 5 },
-    { id: 'recently-viewed', label: 'Browsing History', icon: Clock, badge: recentlyViewed.length || 7 },
-    { id: 'saved-recommendations', label: 'Saved Spotlight', icon: Bookmark, badge: 2 },
-    { id: 'my-comparisons', label: 'My Comparisons', icon: Layers, badge: comparedProducts.length || 0 },
-    { id: 'admin-campaigns', label: 'Campaigns (Admin)', icon: Sparkles, badge: campaigns?.length || 0 },
-    { id: 'admin-overviews', label: 'Overviews (Admin)', icon: Settings, badge: customOverviews?.length || 0 },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: messages.length || 3, href: '/messages' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, badge: notifications.filter(n => !n.read).length || 0 },
-    { id: 'my-reviews', label: 'My Reviews', icon: Star },
-    { id: 'settings', label: 'Profile Settings', icon: Settings },
-  ];
+  const renderContent = () => {
+    if (!isDashboardTabAllowed(activeTab, platformRole)) {
+      return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
+    }
 
   const controlItems = menuItems.filter(item => 
     ['overview', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations', 'my-comparisons', 'admin-campaigns', 'admin-overviews'].includes(item.id)
@@ -1937,7 +1407,8 @@ export function DashboardPage() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'overview': return <OverviewSection onTabChange={setActiveTab} />;
+      // Retail Tabs
+      case 'overview': return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
       case 'saved-products': return <SavedProductsSection />;
       case 'saved-brands': return <SavedBrandsSection />;
       case 'loved-brands': return <LovedBrandsSection />;
@@ -1973,13 +1444,13 @@ export function DashboardPage() {
           <div className="w-16 h-16 bg-[#F96500]/10 text-orange-primary rounded-full flex items-center justify-center mb-4">
             <MessageSquare size={28} className="animate-pulse" />
           </div>
-          <h3 className="text-md font-black uppercase text-gray-950 italic tracking-tight">Opening Workspace Chat</h3>
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest leading-relaxed font-bold mb-6">
-            Connecting you to your secure buyer/seller network in the unified messenger...
+          <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight">Opening workspace chat</h3>
+          <p className="text-[13px] text-[#9AA0AC] leading-relaxed font-medium mb-6">
+            Connecting you to your buyer/seller network in the messenger…
           </p>
           <Link 
             to="/messages" 
-            className="px-6 py-3 bg-[#F96500] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#FF5B00] transition-all italic leading-none"
+            className="px-6 py-3 bg-[#FF5B00] text-white text-[13px] font-bold tracking-tight rounded-lg hover:brightness-110 transition-all leading-none"
           >
             Go to Messenger
           </Link>
@@ -1989,8 +1460,8 @@ export function DashboardPage() {
       case 'my-reviews': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
             <div>
-               <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">My <span className="text-[#FF5B00]">Reviews</span></h2>
-               <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your community contributions and feedback</p>
+               <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">My Reviews</h2>
+               <p className="text-[#9AA0AC] text-[12.5px]">Your community contributions and feedback</p>
             </div>
             <div className="space-y-6">
                {reviews && reviews.length > 0 ? (
@@ -2003,7 +1474,7 @@ export function DashboardPage() {
                        </div>
                        <div className="flex-grow text-left">
                          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                           <h4 className="font-sans font-black text-navy text-sm uppercase italic tracking-tight">{r.product}</h4>
+                           <h4 className="font-sans font-bold text-[#1A1A2E] text-sm tracking-tight">{r.product}</h4>
                            <span className="text-[10px] font-mono text-gray-400 font-extrabold uppercase">{r.date || r.createdAt || 'Just now'}</span>
                          </div>
                          <div className="flex items-center gap-1.5 mb-3">
@@ -2019,7 +1490,7 @@ export function DashboardPage() {
                  })
                ) : (
                  <div className="py-20 border border-dashed border-gray-200 rounded-[5px] flex flex-col items-center justify-center text-center bg-white shadow-sm w-full">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider italic">No review records found</p>
+                    <p className="text-[13px] font-medium text-[#9AA0AC] tracking-tight">No review records found</p>
                  </div>
                )}
             </div>
@@ -2027,129 +1498,228 @@ export function DashboardPage() {
       );
       case 'settings': return <SettingsSection />;
 
-      default: return <OverviewSection onTabChange={setActiveTab} />;
+      default: return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
     }
   };
 
+  const allNavItems = [...controlItems, ...workspaceItems, ...accountItems];
+
+  const handleNavClick = (item: { id: string; href?: string }) => {
+    setMobileNavOpen(false);
+    if (item.href) {
+      navigate(item.href);
+    } else {
+      setActiveTab(item.id);
+    }
+  };
+
+  const renderSidebarNav = (compact = false) => (
+    <nav className={cn('flex-1 overflow-y-auto no-scrollbar', compact ? 'px-3 py-4' : 'px-1')}>
+      {overviewItems.length > 0 && (
+        <>
+          <SidebarSectionLabel>DASHBOARD</SidebarSectionLabel>
+          {overviewItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              count={item.count}
+              badge={item.badge}
+              onClick={() => handleNavClick(item)}
+            />
+          ))}
+        </>
+      )}
+
+      {collectionItems.length > 0 && (
+        <>
+          <SidebarSectionLabel>MY COLLECTION</SidebarSectionLabel>
+          {collectionItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              count={item.count}
+              badge={item.badge}
+              onClick={() => handleNavClick(item)}
+            />
+          ))}
+        </>
+      )}
+
+      {activityItems.length > 0 && (
+        <>
+          <SidebarSectionLabel>ACTIVITY</SidebarSectionLabel>
+          {activityItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              count={item.count}
+              badge={item.badge}
+              onClick={() => handleNavClick(item)}
+            />
+          ))}
+        </>
+      )}
+
+      {workspaceItems.length > 0 && (
+        <>
+          <SidebarSectionLabel>WORKSPACE</SidebarSectionLabel>
+          {workspaceItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              count={item.count}
+              badge={item.badge}
+              onClick={() => handleNavClick(item)}
+            />
+          ))}
+        </>
+      )}
+
+      {communicationItems.length > 0 && (
+        <>
+          <SidebarSectionLabel>COMMUNICATION</SidebarSectionLabel>
+          {communicationItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              count={item.count}
+              badge={item.badge}
+              onClick={() => handleNavClick(item)}
+            />
+          ))}
+        </>
+      )}
+
+      <SidebarSectionLabel>ACCOUNT</SidebarSectionLabel>
+      {accountOnlyItems.map((item) => (
+        <SidebarItem
+          key={item.id}
+          icon={item.icon}
+          label={item.label}
+          active={activeTab === item.id}
+          count={item.count}
+          badge={item.badge}
+          onClick={() => handleNavClick(item)}
+        />
+      ))}
+      <SidebarItem
+        icon={LogOut}
+        label="Log Out"
+        onClick={() => {
+          setMobileNavOpen(false);
+          setIsLoggedIn(false);
+          navigate('/');
+          toast.success('Successfully logged out.');
+        }}
+      />
+    </nav>
+  );
+
+  const premiumCard = (
+    <div className="bg-[#000435] rounded-[14px] p-5 text-white mb-3.5">
+      <div className="text-[13px] font-extrabold mb-1">Premium Member</div>
+      <div className="text-[11px] text-white/55 mb-3.5">Enjoy exclusive benefits</div>
+      {['Early access to deals', 'Premium support', 'Exclusive rewards'].map((perk) => (
+        <div key={perk} className="flex items-center gap-2 text-[11.5px] text-white/85 mb-2.5">
+          <span className="text-[#FF5B00]">●</span>
+          {perk}
+        </div>
+      ))}
+      <button
+        type="button"
+        className="w-full bg-[#FF5B00] text-white border-none py-2.5 rounded-lg text-[12px] font-extrabold cursor-pointer mt-1.5 hover:brightness-105"
+      >
+        View Benefits
+      </button>
+    </div>
+  );
+
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F6F9] text-[#1a1a2e]">
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9] text-[#1A1A2E]">
       {/* Mobile Top Header */}
-      <div className="lg:hidden p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-50">
-        <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border border-gray-200 cursor-pointer">
+      <div className="lg:hidden p-4 border-b border-[#E8EDF2] flex items-center justify-between sticky top-0 bg-white z-50">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="w-10 h-10 rounded-full bg-[#F4F7F9] flex items-center justify-center text-[#1A1A2E] border border-[#E8EDF2] cursor-pointer"
+        >
           <ArrowLeft size={20} />
+        </button>
+        <p className="text-[13px] font-bold text-[#1A1A2E] truncate px-2">
+          {allNavItems.find((item) => item.id === activeTab)?.label ?? 'Dashboard'}
+        </p>
+        <button
+          type="button"
+          onClick={() => setMobileNavOpen(true)}
+          className="w-10 h-10 rounded-full bg-[#F4F7F9] flex items-center justify-center text-[#1A1A2E] border border-[#E8EDF2] cursor-pointer"
+          aria-label="Open dashboard menu"
+        >
+          <Menu size={20} />
         </button>
       </div>
 
-      <div className="flex flex-1">
-        {/* Sidebar Desktop */}
-        <aside className="hidden lg:flex w-[290px] flex-col border-r border-white/5 bg-[#0C0B1B] text-white h-screen sticky top-0 overflow-y-auto no-scrollbar shrink-0">
-          <div className="p-8 border-b border-white/5">
-            <Link to="/" className="flex flex-col items-start group text-white select-none">
-              <div className="flex gap-1.5 mb-2.5">
-                <div className="w-4 h-4 rounded-full border-2 border-[#FF5B00] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-[#FF5B00] rounded-full animate-ping" />
-                </div>
-                <div className="w-4 h-4 rounded-full border-2 border-[#FF5B00] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-[#FF5B00] rounded-full" />
-                </div>
-              </div>
-              <span className="text-xl font-black tracking-tight text-white block">choosify.bd</span>
-              <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] block mt-1 italic">Dashboard v2.0</span>
-            </Link>
-          </div>
-
-          <nav className="flex-1 py-6 overflow-y-auto no-scrollbar space-y-6">
-            <div>
-              <div className="px-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em] mb-3 italic">Platform Control</div>
-              {controlItems.map((item) => (
-                <SidebarItem
-                  key={item.id}
-                  icon={item.icon}
-                  label={item.label}
-                  active={activeTab === item.id}
-                  badge={item.badge}
-                  onClick={() => {
-                    if (item.href) {
-                      navigate(item.href);
-                    } else {
-                      setActiveTab(item.id);
-                    }
-                  }}
-                />
-              ))}
-            </div>
-            
-            <div>
-              <div className="px-8 text-[9px] font-black text-white/30 uppercase tracking-[0.4em] mb-3 italic">Communication & Account</div>
-              {accountItems.map((item) => (
-                <SidebarItem
-                  key={item.id}
-                  icon={item.icon}
-                  label={item.label}
-                  active={activeTab === item.id}
-                  badge={item.badge}
-                  onClick={() => {
-                    if (item.href) {
-                      navigate(item.href);
-                    } else {
-                      setActiveTab(item.id);
-                    }
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Promo Member card in sidebar */}
-            <div className="mx-6 my-8 p-5 rounded-2xl bg-gradient-to-br from-[#12132D] to-[#0A0B1A] border border-white/5 text-left relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-[#FF5B00]/5 rounded-full blur-xl pointer-events-none" />
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-[#FF5B00] text-xs font-sans">🔥</span>
-                <span className="text-[10px] font-black text-white uppercase tracking-wider">Premium Member</span>
-              </div>
-              <p className="text-[9px] text-gray-400 font-medium leading-relaxed mb-4">
-                Enjoy early access to handpicked deals, priority premium support, and exclusive rewards.
-              </p>
-              <button onClick={() => toast.success('Premium benefits are active!')} className="w-full py-2 bg-white/5 hover:bg-[#FF5B00] border border-white/10 hover:border-transparent text-white rounded-xl text-[8.5px] font-black uppercase tracking-widest transition-colors cursor-pointer text-center font-sans">
-                View Benefits
+      {mobileNavOpen && (
+        <div className="lg:hidden fixed inset-0 z-[80]">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMobileNavOpen(false)}
+            aria-label="Close menu"
+          />
+          <div className="absolute inset-y-0 left-0 w-[min(100%,300px)] bg-white shadow-2xl overflow-y-auto flex flex-col border-r border-[#E8EDF2]">
+            <div className="p-4 border-b border-[#E8EDF2] flex items-center justify-between">
+              <span className="text-sm font-extrabold text-[#1A1A2E]">Dashboard</span>
+              <button
+                type="button"
+                onClick={() => setMobileNavOpen(false)}
+                className="text-[#9AA0AC] hover:text-[#1A1A2E] bg-transparent border-none cursor-pointer"
+              >
+                <X size={20} />
               </button>
             </div>
-          </nav>
+            {renderSidebarNav(true)}
+            <div className="p-4 mt-auto border-t border-[#E8EDF2]">
+              {premiumCard}
+              <Link
+                to="/"
+                onClick={() => setMobileNavOpen(false)}
+                className="flex items-center gap-2 border border-[#E8EDF2] rounded-[10px] px-3.5 py-2.5 text-[12px] font-semibold text-[#1A1A2E]"
+              >
+                Browse Choosify.bd
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
-          <div className="p-8 border-t border-white/5 space-y-3">
-            <Link to="/" className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white text-navy rounded-2xl text-[10px] font-black uppercase tracking-widest italic hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-black/20">
-               <ShoppingBag size={14} /> Browse Choosify.bd
-            </Link>
-            <button 
-              onClick={() => {
-                setIsLoggedIn(false);
-                navigate('/');
-                toast.success('Successfully logged out.');
-              }}
-              className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white/5 border border-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic hover:bg-white/10 transition-all cursor-pointer"
+      <div className="flex flex-1 w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-7 gap-7 items-start">
+        {/* Sidebar Desktop — light sticky */}
+        <aside className="hidden lg:flex w-[240px] shrink-0 flex-col sticky top-[88px] max-h-[calc(100vh-100px)] overflow-y-auto no-scrollbar">
+          {renderSidebarNav()}
+          <div className="mt-4 pt-2">
+            {premiumCard}
+            <Link
+              to="/"
+              className="flex items-center gap-2 border border-[#E8EDF2] rounded-[10px] px-3.5 py-2.5 text-[12px] font-semibold text-[#1A1A2E] hover:bg-white transition-colors bg-white"
             >
-               <LogOut size={14} className="text-[#FF5B00]" /> Curator Log Out
-            </button>
+              Browse Choosify.bd
+            </Link>
           </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 w-full relative overflow-x-hidden">
-           <div className="p-8 md:p-12 lg:p-16 max-w-[1400px] mx-auto min-h-screen">
-              <div className="animate-in fade-in transition-all duration-700">
-                {renderContent()}
-              </div>
-           </div>
-           
-           {/* Footer Accent */}
-           <div className="py-12 text-center opacity-25 hidden lg:block">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <div className="w-4 h-4 rounded-full border-2 border-navy flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-navy rounded-full" />
-                </div>
-                <span className="text-xl font-bold tracking-tight lowercase">choosify.bd</span>
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em]">SECURE CURATOR TERMINAL • v2.6.0</p>
-           </div>
+        <main className="flex-1 w-full min-w-0 relative">
+          <div className="animate-in fade-in transition-all duration-700">{renderContent()}</div>
         </main>
       </div>
     </div>

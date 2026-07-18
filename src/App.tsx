@@ -25,6 +25,7 @@ const GuidesPage = lazy(() => import('./pages/GuidesPage').then(m => ({ default:
 const ContentDetailsPage = lazy(() => import('./pages/ContentDetailsPage').then(m => ({ default: m.ContentDetailsPage })));
 const AuthPage = lazy(() => import('./pages/AuthPage').then(m => ({ default: m.AuthPage })));
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
+const WhatsOnPage = lazy(() => import('./pages/WhatsOnPage').then(m => ({ default: m.WhatsOnPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
 const CreatorsPage = lazy(() => import('./pages/CreatorsPage').then(m => ({ default: m.CreatorsPage })));
 const CreatorProfilePage = lazy(() => import('./pages/CreatorProfilePage').then(m => ({ default: m.CreatorProfilePage })));
@@ -49,6 +50,43 @@ const SellerOrderDetailsPage = lazy(() => import('./pages/SellerOrderDetailsPage
 const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })));
 const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const MarketingLayout = lazy(() => import('./pages/marketing/MarketingLayout').then(m => ({ default: m.MarketingLayout })));
+const SpotlightCampaignsPage = lazy(() => import('./pages/marketing/SpotlightCampaignsPage').then(m => ({ default: m.SpotlightCampaignsPage })));
+const SpotlightCampaignEditorPage = lazy(() => import('./pages/marketing/SpotlightCampaignEditorPage').then(m => ({ default: m.SpotlightCampaignEditorPage })));
+const SpotlightPublisherStudioPage = lazy(() => import('./pages/marketing/SpotlightPublisherStudioPage'));
+const SpotlightOpportunityCenterPage = lazy(() => import('./pages/marketing/SpotlightOpportunityCenterPage'));
+const SpotlightIntelligencePage = lazy(() => import('./pages/marketing/SpotlightIntelligencePage').then(m => ({ default: m.SpotlightIntelligencePage })));
+const MarketingHubPage = lazy(() => import('./pages/marketing/MarketingHubPage').then(m => ({ default: m.MarketingHubPage })));
+const MarketingContentPage = lazy(() => import('./pages/marketing/MarketingContentPage').then(m => ({ default: m.MarketingContentPage })));
+const MarketingContentEditorPage = lazy(() => import('./pages/marketing/MarketingContentEditorPage').then(m => ({ default: m.MarketingContentEditorPage })));
+const SponsoredCampaignsManagerPage = lazy(() => import('./pages/marketing/SponsoredCampaignsManagerPage').then(m => ({ default: m.SponsoredCampaignsManagerPage })));
+const SponsoredCampaignEditorPage = lazy(() => import('./pages/marketing/SponsoredCampaignEditorPage').then(m => ({ default: m.SponsoredCampaignEditorPage })));
+const MarketingCollectionsPage = lazy(() => import('./pages/marketing/MarketingCollectionsPage').then(m => ({ default: m.MarketingCollectionsPage })));
+const MarketingLiveEventsPage = lazy(() => import('./pages/marketing/MarketingLiveEventsPage').then(m => ({ default: m.MarketingLiveEventsPage })));
+const MarketingBuyingGuidesPage = lazy(() => import('./pages/marketing/MarketingBuyingGuidesPage').then(m => ({ default: m.MarketingBuyingGuidesPage })));
+const MarketingCreatorContentPage = lazy(() => import('./pages/marketing/MarketingCreatorContentPage').then(m => ({ default: m.MarketingCreatorContentPage })));
+const MarketingBrandCampaignsPage = lazy(() => import('./pages/marketing/MarketingBrandCampaignsPage').then(m => ({ default: m.MarketingBrandCampaignsPage })));
+const MarketingMediaLibraryPage = lazy(() => import('./pages/marketing/MarketingMediaLibraryPage').then(m => ({ default: m.MarketingMediaLibraryPage })));
+const MarketingCalendarPage = lazy(() => import('./pages/marketing/MarketingCalendarPage').then(m => ({ default: m.MarketingCalendarPage })));
+const MarketingPreviewPage = lazy(() => import('./pages/marketing/MarketingPreviewPage').then(m => ({ default: m.MarketingPreviewPage })));
+const MarketingTemplatesPage = lazy(() => import('./pages/marketing/MarketingTemplatesPage').then(m => ({ default: m.MarketingTemplatesPage })));
+const SpotlightContentPage = lazy(() => import('./pages/SpotlightContentPage').then(m => ({ default: m.SpotlightContentPage })));
+const LegacySpotlightContentRedirect = lazy(() => import('./pages/SpotlightContentPage').then(m => ({ default: m.LegacySpotlightContentRedirect })));
+const LegacyGuideContentRedirect = lazy(() => import('./pages/LegacyGuideContentRedirect').then(m => ({ default: m.LegacyGuideContentRedirect })));
+const SpotlightDiscoverPage = lazy(() => import('./pages/SpotlightDiscoverPage').then(m => ({ default: m.SpotlightDiscoverPage })));
+const SpotlightExplorePage = lazy(() => import('./pages/SpotlightExplorePage').then(m => ({ default: m.SpotlightExplorePage })));
+const SpotlightSearchPage = lazy(() => import('./pages/SpotlightSearchPage').then(m => ({ default: m.SpotlightSearchPage })));
+const SpotlightCalendarPage = lazy(() => import('./pages/SpotlightCalendarPage').then(m => ({ default: m.SpotlightCalendarPage })));
+const SpotlightCollectionPage = lazy(() => import('./pages/SpotlightCollectionPage').then(m => ({ default: m.SpotlightCollectionPage })));
+const SpotlightSeriesPage = lazy(() => import('./pages/SpotlightSeriesPage').then(m => ({ default: m.SpotlightSeriesPage })));
+const SpotlightStoryPage = lazy(() => import('./pages/SpotlightStoryPage').then(m => ({ default: m.SpotlightStoryPage })));
+const LegacyLiveContentRedirect = lazy(() =>
+  import('./pages/LegacySpotlightDetailRedirects').then((m) => ({ default: m.LegacyLiveContentRedirect })),
+);
+const LegacyWhatsOnContentRedirect = lazy(() =>
+  import('./pages/LegacySpotlightDetailRedirects').then((m) => ({ default: m.LegacyWhatsOnContentRedirect })),
+);
+const PublisherProfilePage = lazy(() => import('./pages/PublisherProfilePage').then(m => ({ default: m.PublisherProfilePage })));
 
 
 
@@ -135,20 +173,24 @@ function Overview() {
   );
 }
 
-function ScreenPreview({ title, children, id }: { title: string, children: React.ReactNode, id: string }) {
-  return (
-    <div id={id} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      <div className="flex items-center justify-between border-b-2 border-navy/10 pb-4">
-        <div className="flex items-baseline gap-4">
-          <h2 className="text-3xl font-black text-navy uppercase tracking-tighter italic">{title}</h2>
-          <span className="text-[10px] text-gray-400 font-black tracking-widest uppercase">Responsive Desktop</span>
-        </div>
-        <div className="flex items-center gap-2">
-           <div className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded text-[10px] font-bold text-gray-500 uppercase">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-accent"></div>
-              Active View
-           </div>
-           <div className="px-3 py-1 bg-navy text-white text-[10px] font-bold rounded uppercase tracking-widest">1440 × 900</div>
+function MaintenanceGate({ children }: { children: React.ReactNode }) {
+  const { isFeatureEnabled } = useGlobalState();
+  const location = useLocation();
+  const allowedDuringMaintenance = ['/login', '/contact', '/about'];
+  if (
+    isFeatureEnabled('maintenance_mode') &&
+    !allowedDuringMaintenance.some((path) => location.pathname.startsWith(path))
+  ) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A1F] text-white p-8">
+        <div className="text-center max-w-md space-y-4">
+          <h1 className="text-2xl font-extrabold tracking-tight">Maintenance mode</h1>
+          <p className="text-white/60 text-sm">
+            Choosify is undergoing scheduled updates. Please check back soon or contact support.
+          </p>
+          <Link to="/contact" className="inline-block text-orange-primary font-bold text-sm uppercase tracking-widest">
+            Contact Support
+          </Link>
         </div>
       </div>
       <div className="w-full bg-white shadow-high-density overflow-hidden border border-gray-100 rounded-lg relative aspect-video">
@@ -162,7 +204,10 @@ function ScreenPreview({ title, children, id }: { title: string, children: React
   );
 }
 
-import { useGlobalState } from './context/GlobalStateContext';
+function LegacyRecommendationRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={id ? `/spotlight/${encodeURIComponent(id)}` : '/spotlight?tab=recommendations'} replace />;
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useGlobalState();
@@ -193,16 +238,31 @@ function AppContent() {
             <Route path="/brands/:id/products" element={<PageWrapper><BrandDetailPage /></PageWrapper>} />
             <Route path="/categories" element={<PageWrapper><CategoriesPage /></PageWrapper>} />
             <Route path="/deals" element={<PageWrapper><DealsPage /></PageWrapper>} />
-            <Route path="/compare" element={<PageWrapper><ComparePage /></PageWrapper>} />
-            <Route path="/discover" element={<PageWrapper><GuidesPage /></PageWrapper>} />
-            <Route path="/discover/:id" element={<PageWrapper><ContentDetailsPage /></PageWrapper>} />
-            <Route path="/guides" element={<Navigate to="/discover" replace />} />
-            <Route path="/guides/:id" element={<Navigate to="/discover/:id" replace />} />
-            <Route path="/recommendations" element={<Navigate to="/discover" replace />} />
-            <Route path="/recommendations/:id" element={<Navigate to="/discover/:id" replace />} />
-            <Route path="/login" element={<PageWrapper><AuthPage /></PageWrapper>} />
-            <Route path="/signup" element={<PageWrapper><AuthPage /></PageWrapper>} />
+            <Route path="/compare" element={<FeatureFlagRoute flag="enable_comparison_engine"><PageWrapper><ComparePage /></PageWrapper></FeatureFlagRoute>} />
+            <Route path="/guides" element={<Navigate to="/spotlight?tab=guides" replace />} />
+            <Route path="/spotlight/content/:slug" element={<PageWrapper><LegacySpotlightContentRedirect /></PageWrapper>} />
+            <Route path="/spotlight" element={<PageWrapper><SpotlightDiscoverPage /></PageWrapper>} />
+            <Route path="/spotlight/explore" element={<PageWrapper><SpotlightExplorePage /></PageWrapper>} />
+            <Route path="/spotlight/search" element={<PageWrapper><SpotlightSearchPage /></PageWrapper>} />
+            <Route path="/spotlight/calendar" element={<PageWrapper><SpotlightCalendarPage /></PageWrapper>} />
+            <Route path="/spotlight/stories" element={<PageWrapper><SpotlightStoryPage /></PageWrapper>} />
+            <Route path="/spotlight/collections/:slug" element={<PageWrapper><SpotlightCollectionPage /></PageWrapper>} />
+            <Route path="/spotlight/series/:slug" element={<PageWrapper><SpotlightSeriesPage /></PageWrapper>} />
+            <Route path="/spotlight/live/:slug" element={<PageWrapper><LegacyLiveContentRedirect /></PageWrapper>} />
+            <Route path="/spotlight/:slug" element={<PageWrapper><SpotlightContentPage /></PageWrapper>} />
+            <Route path="/publisher/:slug" element={<PageWrapper><PublisherProfilePage /></PageWrapper>} />
+            <Route path="/blogs" element={<Navigate to="/spotlight?tab=blogs" replace />} />
+            <Route path="/blogs/:id" element={<PageWrapper><LegacyGuideContentRedirect /></PageWrapper>} />
+            <Route path="/guides/:id" element={<PageWrapper><LegacyGuideContentRedirect /></PageWrapper>} />
+            <Route path="/reviews/:slug" element={<PageWrapper><LegacyGuideContentRedirect /></PageWrapper>} />
+            <Route path="/recommendations" element={<Navigate to="/spotlight?tab=recommendations" replace />} />
+            <Route path="/recommendations/:id" element={<LegacyRecommendationRedirect />} />
+            <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
+            <Route path="/login" element={<LoginSignUpPage />} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
+            <Route path="/whats-on" element={<PageWrapper><WhatsOnPage /></PageWrapper>} />
+            <Route path="/whats-on/:slug" element={<PageWrapper><LegacyWhatsOnContentRedirect /></PageWrapper>} />
+            <Route path="/customer-favorite" element={<Navigate to="/whats-on" replace />} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
             <Route path="/creators" element={<PageWrapper><CreatorsPage /></PageWrapper>} />
             <Route path="/creators/:id" element={<PageWrapper><CreatorProfilePage /></PageWrapper>} />
@@ -224,7 +284,44 @@ function AppContent() {
             <Route path="/seller/orders" element={<ProtectedRoute><PageWrapper><SellerIncomingOrdersPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/seller/orders/:id" element={<ProtectedRoute><PageWrapper><SellerOrderDetailsPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/cashbook*" element={<Navigate to="/" replace />} />
+            <Route
+              path="/marketing"
+              element={
+                <ProtectedRoute>
+                  <RequireRole roles={['brand', 'admin']} fallback="/dashboard">
+                    <MarketingLayout />
+                  </RequireRole>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<MarketingHubPage />} />
+              <Route path="content" element={<MarketingContentPage />} />
+              <Route path="content/new" element={<MarketingContentEditorPage />} />
+              <Route path="content/:id" element={<MarketingContentEditorPage />} />
+              <Route path="sponsored" element={<SponsoredCampaignsManagerPage />} />
+              <Route path="sponsored/new" element={<SponsoredCampaignEditorPage />} />
+              <Route path="sponsored/:id" element={<SponsoredCampaignEditorPage />} />
+              <Route path="collections" element={<MarketingCollectionsPage />} />
+              <Route path="live-events" element={<MarketingLiveEventsPage />} />
+              <Route path="buying-guides" element={<MarketingBuyingGuidesPage />} />
+              <Route path="creator-content" element={<MarketingCreatorContentPage />} />
+              <Route path="brand-campaigns" element={<MarketingBrandCampaignsPage />} />
+              <Route path="media" element={<MarketingMediaLibraryPage />} />
+              <Route path="calendar" element={<MarketingCalendarPage />} />
+              <Route path="preview" element={<MarketingPreviewPage />} />
+              <Route path="templates" element={<MarketingTemplatesPage />} />
+              <Route path="studio" element={<SpotlightCampaignsPage />} />
+              <Route path="studio/new" element={<SpotlightPublisherStudioPage />} />
+              <Route path="studio/:id" element={<SpotlightPublisherStudioPage />} />
+              <Route path="spotlight" element={<SpotlightCampaignsPage />} />
+              <Route path="spotlight/new" element={<SpotlightPublisherStudioPage />} />
+              <Route path="spotlight/:campaignId" element={<SpotlightPublisherStudioPage />} />
+              <Route path="spotlight/legacy/:campaignId" element={<SpotlightCampaignEditorPage />} />
+              <Route path="opportunity" element={<SpotlightOpportunityCenterPage />} />
+              <Route path="intelligence" element={<SpotlightIntelligencePage />} />
+              <Route path="intelligence/:section" element={<SpotlightIntelligencePage />} />
+              <Route path="intelligence/:section/:entityId" element={<SpotlightIntelligencePage />} />
+            </Route>
             <Route path="/messages" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/messages/:threadId" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/profile/orders" element={<ProtectedRoute><PageWrapper><CustomerOrdersPage /></PageWrapper></ProtectedRoute>} />

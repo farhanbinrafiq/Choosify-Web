@@ -60,7 +60,7 @@ export function AdvertisePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F0F8FF] font-sans">
+    <div className="min-h-screen bg-[#F4F7F9] font-sans">
       {/* 1. HERO SECTION */}
       <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
@@ -78,7 +78,7 @@ export function AdvertisePage() {
               <span className="inline-block bg-[#FF5B00]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
                 Premium Brand Exposure
               </span>
-              <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
+              <h1 className="text-2xl sm:text-3xl md:text-[2.5rem] font-extrabold text-white tracking-tight leading-tight">
                 Advertise on Choosify
               </h1>
               <p className="text-gray-300 text-sm md:text-base font-medium leading-relaxed max-w-xl">
@@ -117,7 +117,7 @@ export function AdvertisePage() {
             
             {/* Why Advertise */}
             <div className="space-y-4">
-              <h2 className="text-xl md:text-2xl font-black text-navy uppercase tracking-tight italic">
+              <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
                 Why Advertise
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
@@ -128,7 +128,7 @@ export function AdvertisePage() {
 
             {/* Audience Overview */}
             <div className="space-y-4">
-              <h2 className="text-xl md:text-2xl font-black text-navy uppercase tracking-tight italic">
+              <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
                 Audience Overview
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
@@ -150,7 +150,7 @@ export function AdvertisePage() {
 
             {/* Placement Opportunities (Advertising Types) */}
             <div className="space-y-4">
-              <h2 className="text-xl md:text-2xl font-black text-navy uppercase tracking-tight italic">
+              <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
                 Placement Opportunities
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
@@ -203,7 +203,7 @@ export function AdvertisePage() {
                     className="space-y-6"
                   >
                     <div>
-                      <h3 className="text-sm font-black text-navy uppercase tracking-widest italic mb-1">Talk To Our Team</h3>
+                      <h3 className="text-sm font-extrabold text-[#1A1A2E] tracking-tight mb-1">Talk To Our Team</h3>
                       <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Start building your custom campaign</p>
                     </div>
 
@@ -304,7 +304,7 @@ export function AdvertisePage() {
                       ✓
                     </div>
                     <div>
-                      <h3 className="text-base font-black text-navy uppercase tracking-widest italic mb-1">Inquiry Sent</h3>
+                      <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">Inquiry Sent</h3>
                       <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Campaign Desk Notified</p>
                     </div>
                     <p className="text-gray-500 text-xs leading-relaxed font-semibold max-w-sm">
