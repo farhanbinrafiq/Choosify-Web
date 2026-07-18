@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Facebook, Instagram, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';

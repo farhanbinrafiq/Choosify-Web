@@ -7,7 +7,6 @@ import { AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
 import { mockGuides } from '../data/mockGuides';
 import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
-import { useGlobalState } from '../context/GlobalStateContext';
 import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '../utils/overviewRegistry';
 import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
 import { catalogGuideHref } from '../lib/spotlight/content';
@@ -29,6 +28,7 @@ const BRAND_COLORS = ['#1428A0', '#FF6900', '#1A1A2E', '#000000', '#0076CE', '#1
 
 /** Choosify.dc.html Search Results */
 export function SearchPage() {
+
   const [searchParams, setSearchParams] = useSearchParams();
   const rawQuery = searchParams.get('q') || '';
   const [localInput, setLocalInput] = useState(rawQuery);
@@ -517,7 +517,6 @@ export function SearchPage() {
             )}
           </section>
         )}
-      </div>
-    </div>
+    </SearchLayout>
   );
 }

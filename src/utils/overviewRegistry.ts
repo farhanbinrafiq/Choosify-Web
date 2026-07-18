@@ -15,7 +15,7 @@ export function getBrandOverviews(brandName: string, customOverviews: CustomOver
            "VERIFIED OUTLET REVIEWS & INSIGHTS",
            "ACTIVE PROMO CODES & CAMPAIGNS",
            "INFLUENCER INSIGHTS & EXPERIENCES",
-           "RETAIL DEAL DISCOVERY & PRICE TRACKING",
+           "B2B WHOLESALE COORDINATION ENGINE",
            "REAL-TIME PRICE HISTORY TRACKER"
         ],
         "Best For Tags": ["#BrandDiscovery", "#ProductComparison", "#Deals", "#Recommendations", "#Creators", "#Marketplace", "#ConsumerInsights", "#ShoppingGuides"],
@@ -25,7 +25,7 @@ export function getBrandOverviews(brandName: string, customOverviews: CustomOver
      baseOverview = {
         "Shop Address & Links": "FFF SOURCING HQ, PLOT 12, ROAD 4, SECTOR 3, UTTARA, DHAKA 1230 BANGLADESH. Website: fff.com.bd",
         "Contact Information": "Email: sourcing@fff.com.bd, Phone: +8801711223344",
-        "Price & Audience": "Price Range: BDT - CUSTOM QUOTES, Age Range: AGE: 18 - 60, Audience: FASHION BRANDS, RETAILERS, IMPORTERS",
+        "Price & Audience": "Price Range: BDT - B2B SERVICE SLAB, Age Range: AGE: 18 - 60, Audience: INTERNATIONAL FASHION BRANDS, RETAILERS, IMPORTERS",
         "Services & Specialties": [
            "GARMENT SOURCING",
            "BUYING HOUSE SERVICES",
@@ -82,39 +82,6 @@ export function getBrandOverviews(brandName: string, customOverviews: CustomOver
   return baseOverview;
 }
 
-export function normalizeExternalUrl(website: string): string {
-  const trimmed = website.trim();
-  if (!trimmed) return 'https://choosify.com';
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  return `https://${trimmed.replace(/^\/\//, '')}`;
-}
-
-export function getBrandOfficialWebsite(brandName: string): string {
-  const name = brandName.toLowerCase();
-
-  if (name.includes('choosify')) return normalizeExternalUrl('choosify.com');
-  if (name.includes('fff')) return normalizeExternalUrl('fff.com.bd');
-  if (name.includes('samsung')) return normalizeExternalUrl('www.samsung.com');
-  if (name.includes('apple')) return normalizeExternalUrl('www.apple.com');
-  if (name.includes('sony')) return normalizeExternalUrl('www.sony.com');
-  if (name.includes('bata')) return normalizeExternalUrl('www.batabd.com');
-  if (name.includes('apex')) return normalizeExternalUrl('www.apex4u.com');
-  if (name.includes('aarong')) return normalizeExternalUrl('www.aarong.com');
-  if (
-    name.includes('sailor') ||
-    name.includes('la reve') ||
-    name.includes('yellow') ||
-    name.includes('ethnic') ||
-    name.includes('fashion') ||
-    name.includes('lotto')
-  ) {
-    return normalizeExternalUrl('www.website.com');
-  }
-
-  const slug = name.replace(/[^a-z0-9]/g, '');
-  return normalizeExternalUrl(`www.${slug || 'brand'}.com.bd`);
-}
-
 export function getProductOverviews(productId: number | string, productTitle: string, productCategory: string, customOverviews: CustomOverview[] = []) {
   // Base default product overview data
   const baseOverview: Record<string, any> = {
@@ -134,7 +101,7 @@ export function getProductOverviews(productId: number | string, productTitle: st
     "Audience & Use Cases": [
       "VALUE ORIENTED BUYERS APPRAISING BUILD INTEGRITY",
       "LIFESTYLE CREATORS REQUIRING RELIABLE WEARS",
-      "EVERYDAY SHOPPERS SEEKING RELIABLE VALUE",
+      "B2B & BULK ORGANIZATIONS WITH B2B PRICE SLAB TARGETS",
       "MODERN BANGLADESHI LIFESTYLE AND ACTIVE CIRCLES"
     ],
     "Customer Support & Assurance": [

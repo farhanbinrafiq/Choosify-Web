@@ -3,6 +3,7 @@ import {
   LayoutDashboard, 
   Heart, 
   Bookmark, 
+  Layers, 
   MessageSquare, 
   Star, 
   Settings, 
@@ -20,33 +21,32 @@ import {
   MoreVertical,
   CheckCircle2,
   Clock,
+  ExternalLink,
   ShieldCheck,
   TrendingUp,
   Filter,
   X,
-  Megaphone,
-  Package,
-  BarChart3,
-  Flame,
-  MapPin,
-  Menu,
+  Truck,
+  FileText,
+  Briefcase,
+  Sparkles,
+  Phone,
+  Laptop,
+  Headphones,
+  Camera,
+  Gamepad,
+  Trophy
 } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
-import { PRODUCT_CARD_GRID, GUIDE_MEDIA_GRID } from '../lib/pageLayout';
-import { renderGuideMediaCard } from './GuidesPage';
-import { PRODUCTS } from '../constants';
+import { SpotlightCard } from '../components/SpotlightCard';
+import { PRODUCTS, BRANDS, BLOGS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { CHOOSIFY_ANNOUNCEMENTS_THREAD_ID } from '../lib/announcements';
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { PublicReviewCard } from '../components/PublicReviewCard';
-import { AddressBookManager } from '../components/address/AddressBookManager';
 import toast from 'react-hot-toast';
-import { toPlatformRole } from '../lib/platform/roles';
-import { getDashboardNavForRole, isDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
-import { SellerWorkspaceSection } from './ReviewDetailPage';
 
 const COLLECTION_TAB_IDS = new Set([
   'saved-products',
@@ -142,6 +142,7 @@ const OverviewSection = ({
             ♛
           </div>
         </div>
+        <PremiumBadgeCard />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.1fr] gap-5">
@@ -213,6 +214,75 @@ const OverviewSection = ({
           </div>
         </div>
       </div>
+
+      {/* Row 2: Recommended For You + Top Categories List */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 font-sans">
+        <div className="lg:col-span-9 space-y-4">
+          <div className="text-left">
+            <h3 className="text-sm font-black text-navy uppercase italic tracking-wider flex items-center gap-2">
+              <span className="text-[#FF5B00]">●</span> Recommended For You
+            </h3>
+            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mt-1">Personalized recommendations based on your activity</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {recommendedItems.map((item) => {
+              const formattedItem = {
+                id: item.id,
+                title: item.title,
+                price: parseFloat(item.price.replace(/,/g, '')),
+                originalPrice: item.originalPrice ? parseFloat(item.originalPrice.replace(/,/g, '')) : undefined,
+                image: item.image,
+                brand: '',
+                discount: '',
+                badge: '',
+                rating: item.rating,
+                reviews: item.reviews.toString(),
+              };
+              return <ProductCard key={item.id} product={formattedItem} isDashboard={true} />;
+            })}
+          </div>
+        </div>
+
+        <div className="lg:col-span-3 space-y-4">
+          <div className="text-left">
+            <h3 className="text-sm font-black text-navy uppercase italic tracking-wider">
+              Top Categories For You
+            </h3>
+            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mt-1">Explore what interests you most</p>
+          </div>
+          <TopCategoriesList />
+        </div>
+      </div>
+
+      {/* Row 3: Recent Orders + Activity Summary with Trophy */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 font-sans">
+        <div className="lg:col-span-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-black text-navy uppercase italic tracking-wider flex items-center gap-2">
+              <span className="text-[#FF5B00]">●</span> Recent Orders
+            </h3>
+            <button 
+              onClick={() => onTabChange && onTabChange('overview')}
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#FF5B00] transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1 font-sans"
+            >
+              View all orders <span>→</span>
+            </button>
+          </div>
+          <RecentOrdersList />
+        </div>
+
+        <div className="lg:col-span-4 space-y-4">
+          <div className="text-left">
+            <h3 className="text-sm font-black text-navy uppercase italic tracking-wider">
+              Activity Summary
+            </h3>
+            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mt-1">Your activity this month</p>
+          </div>
+          <ActivitySummaryCard />
+        </div>
+      </div>
+
     </div>
   );
 };
@@ -241,27 +311,9 @@ const SavedProductsSection = () => {
       </div>
 
       {savedProducts.length > 0 ? (
-        <div className={PRODUCT_CARD_GRID}>
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1200px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
           {savedProducts.map((p) => (
-            <div key={p.id} className="relative group">
-              <button 
-                onClick={() => {
-                  addToCart(p, 1);
-                  toast.success('Added to cart!');
-                }}
-                className="absolute top-6 right-18 z-30 w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-[#E8500A]/20 hover:bg-[#E8500A] hover:text-white cursor-pointer"
-                title="Add to Cart"
-              >
-                <ShoppingBag size={18} />
-              </button>
-              <button 
-                onClick={() => removeSavedProduct(p.id)}
-                className="absolute top-6 right-6 z-30 w-10 h-10 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-red-500/20 hover:bg-red-500 hover:text-white"
-              >
-                <Trash2 size={18} />
-              </button>
-              <ProductCard product={p} variant="grid" />
-            </div>
+            <ProductCard key={p.id} product={p} isDashboard={true} />
           ))}
         </div>
       ) : (
@@ -339,24 +391,29 @@ const SavedBrandsSection = () => {
       </div>
 
       {savedBrands.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 justify-items-center gap-8">
           {savedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
+              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-4.5 hover:border-[#FF5B00]/30 transition-all text-center flex flex-col justify-between shadow-sm shrink-0"
+              style={{
+                boxSizing: 'border-box',
+                width: '199.5px',
+                height: '268.5px'
+              }}
             >
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   removeSavedBrand(brand.id);
                 }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer"
+                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer"
               >
-                <X size={16} />
+                <X size={14} />
               </button>
               
               <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
+                <div className="w-12 h-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-xl mx-auto mb-4 shadow-sm overflow-hidden">
                   {brand.logo && brand.logo.length > 2 ? (
                     <img src={brand.logo} className="w-full h-full object-contain" alt="" />
                   ) : (
@@ -366,13 +423,13 @@ const SavedBrandsSection = () => {
                 <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
+                    <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#FF5B00] fill-current text-current" : "text-gray-150"} />
                   ))}
-                  <span className="text-[10px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
+                  <span className="text-[8.5px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#FF5B00]/50 hover:bg-[#FF5B00]/5 rounded-lg text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center">
                 Visit Brand Hub
               </Link>
             </div>
@@ -405,24 +462,29 @@ const LovedBrandsSection = () => {
       </div>
 
       {lovedBrands.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 justify-items-center gap-8">
           {lovedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
+              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-4.5 hover:border-[#FF5B00]/30 transition-all text-center flex flex-col justify-between shadow-sm shrink-0"
+              style={{
+                boxSizing: 'border-box',
+                width: '199.5px',
+                height: '268.5px'
+              }}
             >
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleLoveBrand(brand);
                 }}
-                className="absolute top-4 right-4 text-rose-550 hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer"
+                className="absolute top-3 right-3 text-rose-550 hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer"
               >
-                <Heart size={16} className="fill-current text-rose-500" />
+                <Heart size={14} className="fill-current text-rose-500" />
               </button>
               
               <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
+                <div className="w-12 h-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-xl mx-auto mb-4 shadow-sm overflow-hidden">
                   {brand.logo && brand.logo.length > 2 ? (
                     <img src={brand.logo} className="w-full h-full object-contain" alt="" />
                   ) : (
@@ -432,13 +494,13 @@ const LovedBrandsSection = () => {
                 <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
+                    <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#FF5B00] fill-current text-current" : "text-gray-150"} />
                   ))}
-                  <span className="text-[10px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
+                  <span className="text-[8.5px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center">
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#FF5B00]/50 hover:bg-[#FF5B00]/5 rounded-lg text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center">
                 Visit Brand Hub
               </Link>
             </div>
@@ -471,24 +533,29 @@ const FollowedBrandsSection = () => {
       </div>
 
       {followedBrands.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 justify-items-center gap-8">
           {followedBrands.map((brand) => (
             <div 
               key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
+              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-4.5 hover:border-[#FF5B00]/30 transition-all text-center flex flex-col justify-between shadow-sm shrink-0"
+              style={{
+                boxSizing: 'border-box',
+                width: '199.5px',
+                height: '268.5px'
+              }}
             >
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleFollowBrand(brand);
                 }}
-                className="absolute top-4 right-4 text-orange-500 hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer font-black text-[10px] tracking-wider uppercase"
+                className="absolute top-3 right-3 text-[#FF5B00] hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer font-black text-[8px] tracking-wider uppercase"
               >
                 Unfollow
               </button>
               
               <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
+                <div className="w-12 h-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-xl mx-auto mb-4 shadow-sm overflow-hidden">
                   {brand.logo && brand.logo.length > 2 ? (
                     <img src={brand.logo} className="w-full h-full object-contain" alt="" />
                   ) : (
@@ -498,15 +565,15 @@ const FollowedBrandsSection = () => {
                 <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
+                    <Star key={s} size={8} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#FF5B00] fill-current text-current" : "text-gray-150"} />
                   ))}
-                  <span className="text-[10px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
+                  <span className="text-[8.5px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
                 </div>
               </div>
 
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/30 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center justify-between flex items-center px-4">
-                <span>View Updates</span>
-                <span className="bg-[#059669] text-[7px] text-white font-black px-1.5 py-0.5 rounded-full uppercase scale-90">Live</span>
+              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-2 bg-gray-50 border border-gray-150 hover:border-[#FF5B00]/30 hover:bg-[#FF5B00]/5 rounded-lg text-[8px] font-black text-navy uppercase tracking-widest transition-all text-center justify-between flex items-center px-3">
+                <span>Updates</span>
+                <span className="bg-[#059669] text-[6px] text-white font-black px-1 py-0.5 rounded-full uppercase scale-90">Live</span>
               </Link>
             </div>
           ))}
@@ -550,11 +617,9 @@ const RecentlyViewedSection = () => {
       </div>
 
       {recentlyViewed.length > 0 ? (
-        <div className={PRODUCT_CARD_GRID}>
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-[1200px]:grid-cols-5 min-[1600px]:grid-cols-6 gap-6">
           {recentlyViewed.map((p) => (
-            <div key={p.id} className="relative group">
-              <ProductCard product={p} variant="grid" />
-            </div>
+            <ProductCard key={p.id} product={p} isDashboard={true} />
           ))}
         </div>
       ) : (
@@ -569,6 +634,81 @@ const RecentlyViewedSection = () => {
   );
 };
 
+const CompareToolSection = () => {
+  const { comparedProducts, removeFromCompare } = useDashboard();
+  
+  return (
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Compare <span className="text-[#059669]">Matrix</span></h2>
+          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Side-by-side analysis for smart decisions</p>
+        </div>
+        <div className="flex items-center gap-4">
+           <button className="px-8 py-3 bg-white border border-gray-200 text-navy rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 flex items-center gap-2 cursor-pointer shadow-sm">
+              <Send size={14} /> Share Link
+           </button>
+           <Link to="/compare" className="px-8 py-3 bg-[#FF5B00] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#FF5B00]/10 hover:scale-105 active:scale-95 transition-all animate-none">Full View</Link>
+        </div>
+      </div>
+
+      <div className="bg-white border border-[#e8edf2] rounded-[5px] overflow-hidden shadow-sm">
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="min-w-[800px]">
+            <div className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-gray-150 border-b border-gray-150">
+               <div className="p-8 flex flex-col justify-center bg-gray-50/50">
+                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic mb-2">Active Slots</span>
+                  <h4 className="text-xl font-black text-navy italic uppercase leading-none">{comparedProducts.length}/4 Models</h4>
+               </div>
+               {[...comparedProducts, ...Array(4 - comparedProducts.length).fill(null)].slice(0, 3).map((p, i) => (
+                 <div key={i} className="p-8 group relative min-h-[200px] flex flex-col items-center justify-center">
+                   {p ? (
+                     <>
+                       <button 
+                         onClick={() => removeFromCompare(p.id)}
+                         className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all font-sans bg-transparent border-none cursor-pointer"
+                       >
+                         <X size={16} />
+                       </button>
+                       <img src={p.image} className="w-20 h-20 object-contain mb-6" alt="" />
+                       <h5 className="text-[11px] font-black text-[#1a1a2e ] italic uppercase text-center line-clamp-1">{p.title}</h5>
+                       <span className="text-[10px] font-bold text-[#FF5B00] mt-1 italic">BDT {p.price}</span>
+                     </>
+                   ) : (
+                     <button className="w-16 h-16 rounded-full border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 hover:border-gray-400 hover:text-gray-500 transition-all bg-transparent cursor-pointer">
+                        <Plus size={24} />
+                     </button>
+                   )}
+                 </div>
+               ))}
+            </div>
+            
+            {/* Comparison Table (Simplified) */}
+            <div className="divide-y divide-gray-150">
+                {[
+                  { label: 'Rating', values: comparedProducts.map(p => p.rating + '/5.0') },
+                  { label: 'Market Value', values: comparedProducts.map(() => 'Premium') },
+                  { label: 'In Stock', values: comparedProducts.map(() => 'Yes (Dhaka)'), color: 'text-[#059669]' },
+                  { label: 'Expert Score', values: comparedProducts.map(() => '92/100'), color: 'text-[#FF5B00]' }
+                ].map((row, i) => (
+                  <div key={i} className="grid grid-cols-[200px_repeat(3,1fr)] divide-x divide-gray-150">
+                     <div className="p-6 bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase italic tracking-widest">{row.label}</div>
+                     {row.values.map((val, vidx) => (
+                       <div key={vidx} className={cn("p-6 text-center text-xs font-bold italic", row.color || "text-navy")}>{val}</div>
+                     ))}
+                     {/* Empty slot fillers */}
+                     {Array(3 - row.values.length).fill(null).map((_, fidx) => (
+                       <div key={`f-${fidx}`} className="p-6 text-center text-gray-300">-</div>
+                     ))}
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Legacy MessagesSection removed in favor of modern /messages page
 const MessagesSection = () => {
@@ -593,7 +733,7 @@ const MessagesSection = () => {
             <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-4">Inbox</h2>
             <div className="relative">
                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-               <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/30 transition-all" placeholder="Search chats..." />
+               <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#FF5B00]/30 transition-all" placeholder="Search chats..." />
             </div>
          </div>
          <div className="flex-1 overflow-y-auto no-scrollbar">
@@ -601,7 +741,7 @@ const MessagesSection = () => {
               <button 
                 key={i} 
                 onClick={() => setActiveChat(i)}
-                className={cn("w-full p-6 flex gap-4 text-left border-b border-gray-100 transition-all hover:bg-gray-50 bg-transparent border-none cursor-pointer", i === 1 && "bg-gray-50/50 border-r-2 border-[#E8500A]")}
+                className={cn("w-full p-6 flex gap-4 text-left border-b border-gray-100 transition-all hover:bg-gray-50 bg-transparent border-none cursor-pointer", i === 1 && "bg-gray-50/50 border-r-2 border-[#FF5B00]")}
               >
                  <div className="relative">
                     <img src={`https://i.pravatar.cc/150?u=${i + 20}`} className="w-12 h-12 rounded-full object-cover" alt="" />
@@ -646,7 +786,7 @@ const MessagesSection = () => {
               <div key={m.id} className={cn("flex flex-col max-w-[90%] md:max-w-[80%]", m.sender === 'user' ? "ml-auto items-end" : "mr-auto items-start")}>
                  <div className={cn(
                    "px-5 py-3 md:px-6 md:py-4 rounded-[16px] md:rounded-[20px] mb-2 text-[11px] md:text-xs font-bold leading-relaxed",
-                   m.sender === 'user' ? "bg-[#E8500A] text-white rounded-tr-none shadow-md shadow-[#E8500A]/10 italic" : "bg-white text-navy rounded-tl-none border border-gray-200"
+                   m.sender === 'user' ? "bg-[#FF5B00] text-white rounded-tr-none shadow-md shadow-[#FF5B00]/10 italic" : "bg-white text-navy rounded-tl-none border border-gray-200"
                  )}>
                     {m.text}
                  </div>
@@ -661,12 +801,12 @@ const MessagesSection = () => {
                  value={inputText}
                  onChange={(e) => setInputText(e.target.value)}
                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                 className="w-full h-12 md:h-14 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/30 transition-all" 
+                 className="w-full h-12 md:h-14 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#FF5B00]/30 transition-all" 
                  placeholder="Type message..." 
                />
                <button 
                  onClick={handleSend}
-                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#E8500A] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#E8500A]/10 border-none cursor-pointer"
+                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#FF5B00] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#FF5B00]/10 border-none cursor-pointer"
                >
                   <Send size={16} />
                </button>
@@ -706,15 +846,15 @@ const NotificationsSection = () => {
               key={n.id} 
               className={cn(
                 "p-8 bg-white border border-[#e8edf2] rounded-[5px] flex items-start gap-6 transition-all hover:bg-gray-50 relative overflow-hidden group shadow-sm",
-                !n.read && "border-[#E8500A]/30 bg-[#E8500A]/5"
+                !n.read && "border-[#FF5B00]/30 bg-[#FF5B00]/5"
               )}
             >
-              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#E8500A]" />}
+              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#FF5B00]" />}
               <div className={cn(
                 "w-12 h-12 rounded-lg flex items-center justify-center shrink-0 shadow-sm",
                 n.type === 'price' ? "bg-[#059669]/10 text-[#059669]" : 
-                n.type === 'reply' ? "bg-[#E8500A]/10 text-[#E8500A]" : 
-                "bg-[#E8500A]/15 text-[#E8500A]"
+                n.type === 'reply' ? "bg-[#FF5B00]/10 text-[#FF5B00]" : 
+                "bg-[#FF5B00]/15 text-[#FF5B00]"
               )}>
                 {n.type === 'price' ? <TrendingUp size={24} /> : n.type === 'reply' ? <MessageSquare size={24} /> : <Bell size={24} />}
               </div>
@@ -738,38 +878,25 @@ const NotificationsSection = () => {
   );
 };
 
-const SETTINGS_TABS = [
-  { id: 'personal', label: 'Personal Information' },
-  { id: 'addresses', label: 'Addresses' },
-  { id: 'security', label: 'Security' },
-  { id: 'notifications', label: 'Notifications' },
-  { id: 'privacy', label: 'Privacy' },
-] as const;
-
-type SettingsSubTab = (typeof SETTINGS_TABS)[number]['id'];
-
-const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: SettingsSubTab }) => {
+const SettingsSection = () => {
   const { currentUser, setCurrentUser } = useGlobalState();
   const [name, setName] = useState(currentUser?.name || '');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
-  const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>(initialSubTab);
-
-  useEffect(() => {
-    setSettingsSubTab(initialSubTab);
-  }, [initialSubTab]);
+  const [address, setAddress] = useState(currentUser?.address || '');
 
   useEffect(() => {
     if (currentUser) {
       setName(currentUser.name || '');
       setEmail(currentUser.email || '');
       setPhone(currentUser.phone || '');
+      setAddress(currentUser.address || '');
     }
   }, [currentUser]);
 
   const handleSave = () => {
-    setCurrentUser({ ...currentUser, name, email, phone });
-    localStorage.setItem('choosify_user_profile', JSON.stringify({ name, email, phone }));
+    setCurrentUser({ ...currentUser, name, email, phone, address });
+    localStorage.setItem('choosify_user_profile', JSON.stringify({ name, email, phone, address }));
     toast.success('Profile settings updated successfully');
   };
 
@@ -791,41 +918,20 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
           >
             Save Changes
           </button>
-        )}
-      </div>
+       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-[#e8edf2] pb-1">
-        {SETTINGS_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setSettingsSubTab(tab.id)}
-            className={cn(
-              'min-h-[44px] px-4 py-2 text-[10px] font-black uppercase tracking-wider rounded-t-lg border-b-2 transition-colors',
-              settingsSubTab === tab.id
-                ? 'border-[#E8500A] text-[#E8500A] bg-[#FFF0E8]/40'
-                : 'border-transparent text-gray-400 hover:text-[#1a1a2e]',
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {settingsSubTab === 'personal' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="space-y-8">
-            <div className="flex flex-col items-center p-8 bg-white border border-[#e8edf2] rounded-[5px] relative overflow-hidden group shadow-sm">
-              <div className="absolute inset-0 bg-gradient-to-b from-[#E8500A]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative w-32 h-32 mb-6 cursor-pointer group/avatar">
-                <img
-                  src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png"
-                  className="w-full h-full rounded-full object-cover border-4 border-[#E8500A]/30 transition-all group-hover/avatar:border-navy"
-                  alt="Profile"
-                />
-                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
-                  <Plus className="text-white" size={32} />
+             <div className="flex flex-col items-center p-8 bg-white border border-[#e8edf2] rounded-[5px] relative overflow-hidden group shadow-sm">
+                <div className="absolute inset-0 bg-gradient-to-b from-[#FF5B00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative w-32 h-32 mb-6 cursor-pointer group/avatar">
+                   <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-full h-full rounded-full object-cover border-4 border-[#FF5B00]/30 transition-all group-hover/avatar:border-navy" alt="Profile" />
+                   <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                      <Plus className="text-white" size={32} />
+                   </div>
                 </div>
+                <h4 className="text-xl font-black text-navy italic uppercase mb-1">{name}</h4>
+                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator • ID: 89BD-001</p>
               </div>
               <h4 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">{name}</h4>
               <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator</p>
@@ -917,25 +1023,257 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                   </h5>
                   <p className="text-[9px] font-bold text-gray-500 italic uppercase">{item.desc}</p>
                 </div>
+             </div>
+
+             <div className="space-y-6">
+                <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Security Zone</h3>
+                <button className="w-full py-4 bg-white border border-gray-200 rounded-lg text-[10px] font-black text-navy uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-3 cursor-pointer shadow-sm">
+                   <ShieldCheck size={16} className="text-[#FF5B00]" /> Reset Multi-Factor Auth
+                </button>
+                <button className="w-full py-4 bg-red-50 border border-red-100 rounded-lg text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all cursor-pointer">
+                   Deactivate Curator Account
+                </button>
+             </div>
+          </div>
+       </div>
+    </div>
+  );
+};
+
+const AdminOverviewsSection = () => {
+  const { customOverviews, addCustomOverview, deleteCustomOverview } = useDashboard();
+  const [targetType, setTargetType] = useState<'brand' | 'product'>('product');
+  const [targetId, setTargetId] = useState('');
+  const [sectionName, setSectionName] = useState('');
+  const [bulletText, setBulletText] = useState('');
+
+  // Set default targetId when targetType changes
+  useEffect(() => {
+    if (targetType === 'brand') {
+      setTargetId(BRANDS[0]?.name.toLowerCase() || '');
+    } else {
+      setTargetId(String(PRODUCTS[0]?.id) || '');
+    }
+  }, [targetType]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!targetId || !sectionName || !bulletText) {
+      toast.error('Please fill in all fields.');
+      return;
+    }
+
+    // Process textarea lines into non-empty bullet points
+    const content = bulletText
+      .split('\n')
+      .map(line => line.trim().replace(/^•\s*/, ''))
+      .filter(line => line.length > 0);
+
+    if (content.length === 0) {
+      toast.error('Please write at least one bullet point.');
+      return;
+    }
+
+    addCustomOverview({
+      targetType,
+      targetId,
+      sectionName: sectionName.trim(),
+      content
+    });
+
+    // Reset form
+    setSectionName('');
+    setBulletText('');
+  };
+
+  return (
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700 text-left">
+      <div>
+        <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">
+          Overviews <span className="text-[#FF5B00]">Manager</span>
+        </h2>
+        <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">
+          Add dynamic overview sections to brands or products in real-time
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Form Column */}
+        <div className="lg:col-span-1 bg-white border border-gray-150 rounded-[5px] p-6 shadow-sm">
+          <h3 className="text-sm font-black text-navy uppercase tracking-wider mb-4 border-b border-gray-150 pb-2 flex items-center gap-2">
+            <span className="text-[#FF5B00]">✦</span> Create Section
+          </h3>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Target Type selector */}
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
+                Target Entity Type
+              </label>
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  className={cn(
-                    'w-12 h-6 rounded-full transition-all relative p-1 min-h-[44px] min-w-[48px] flex items-center',
-                    item.checked ? 'bg-[#059669]' : 'bg-gray-200',
-                  )}
+                  onClick={() => setTargetType('product')}
+                  className={`py-2 text-[10px] font-black uppercase tracking-wider border rounded cursor-pointer ${
+                    targetType === 'product'
+                      ? 'bg-navy text-white border-navy'
+                      : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
+                  }`}
                 >
-                  <div
-                    className={cn(
-                      'w-4 h-4 rounded-full bg-white transition-all shadow-md',
-                      item.checked ? 'translate-x-6' : 'translate-x-0',
-                    )}
-                  />
+                  Product
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTargetType('brand')}
+                  className={`py-2 text-[10px] font-black uppercase tracking-wider border rounded cursor-pointer ${
+                    targetType === 'brand'
+                      ? 'bg-navy text-white border-navy'
+                      : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  Brand
                 </button>
               </div>
-            ))}
+            </div>
+
+            {/* Target selection dropdown */}
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
+                Select {targetType === 'product' ? 'Product' : 'Brand'}
+              </label>
+              <select
+                value={targetId}
+                onChange={(e) => setTargetId(e.target.value)}
+                className="w-full text-[11px] font-bold border border-gray-200 rounded p-2.5 bg-gray-50 uppercase tracking-wide focus:outline-none focus:border-orange-primary"
+              >
+                {targetType === 'product'
+                  ? PRODUCTS.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.title} (ID: {p.id})
+                      </option>
+                    ))
+                  : BRANDS.map(b => (
+                      <option key={b.name} value={b.name.toLowerCase()}>
+                        {b.name}
+                      </option>
+                    ))}
+              </select>
+            </div>
+
+            {/* Section Name */}
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
+                Section Name (Dynamic Header)
+              </label>
+              <input
+                type="text"
+                value={sectionName}
+                onChange={(e) => setSectionName(e.target.value)}
+                placeholder="e.g. Sustainability, Certifications"
+                className="w-full text-[11px] font-bold border border-gray-200 rounded p-2.5 bg-gray-50 uppercase tracking-wide focus:outline-none focus:border-orange-primary"
+                required
+              />
+            </div>
+
+            {/* Content Textarea */}
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
+                Content (One bullet point per line)
+              </label>
+              <textarea
+                value={bulletText}
+                onChange={(e) => setBulletText(e.target.value)}
+                placeholder="• 100% Recycled titanium frame&#10;• Certified organic cotton weave&#10;• Zero plastic packaging used"
+                rows={5}
+                className="w-full text-[11px] font-bold border border-gray-200 rounded p-2.5 bg-gray-50 tracking-wide focus:outline-none focus:border-orange-primary leading-relaxed"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-[#FF5B00] hover:bg-[#ff5d14] text-white py-3 rounded text-[11px] font-black uppercase tracking-widest cursor-pointer select-none shadow-md transition-colors"
+            >
+              Add Section
+            </button>
+          </form>
+        </div>
+
+        {/* Existing Sections Column */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white border border-gray-150 rounded-[5px] p-6 shadow-sm">
+            <h3 className="text-sm font-black text-navy uppercase tracking-wider mb-4 border-b border-gray-150 pb-2 flex items-center gap-2">
+              <span className="text-[#FF5B00]">✦</span> Active Custom Sections ({customOverviews?.length || 0})
+            </h3>
+
+            {customOverviews?.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 border border-dashed border-gray-200 rounded flex flex-col items-center justify-center gap-2">
+                <p className="text-xs font-bold text-gray-450 uppercase tracking-wider italic">
+                  No custom overview sections have been created yet.
+                </p>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Use the form to add a section for a brand or product.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4 max-h-[500px] overflow-y-auto no-scrollbar pr-1">
+                {customOverviews?.map((co) => {
+                  let targetName = co.targetId;
+                  if (co.targetType === 'product') {
+                    const prod = PRODUCTS.find(p => String(p.id) === String(co.targetId));
+                    targetName = prod ? prod.title : `Product ID: ${co.targetId}`;
+                  } else {
+                    const brand = BRANDS.find(b => b.name.toLowerCase() === co.targetId.toLowerCase());
+                    targetName = brand ? brand.name : co.targetId;
+                  }
+
+                  return (
+                    <div
+                      key={co.id}
+                      className="border border-[#e8edf2] rounded-[5px] p-4.5 bg-white hover:shadow-soft transition-all flex justify-between items-start gap-4"
+                    >
+                      <div className="space-y-2 min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                            co.targetType === 'product'
+                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                              : 'bg-purple-100 text-purple-800 border border-purple-200'
+                          }`}>
+                            {co.targetType}
+                          </span>
+                          <span className="text-[10px] font-black uppercase text-navy italic tracking-wide truncate max-w-[200px] sm:max-w-[300px]">
+                            {targetName}
+                          </span>
+                        </div>
+                        <h4 className="font-space font-black text-xs uppercase text-[#1A1D4E] tracking-tight">
+                          {co.sectionName}
+                        </h4>
+                        <div className="space-y-1 pl-2 border-l-2 border-orange-primary/20">
+                          {co.content.map((bullet, idx) => (
+                            <p key={idx} className="text-[10px] font-medium text-gray-500 leading-relaxed uppercase tracking-wider">
+                              • {bullet}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => deleteCustomOverview(co.id)}
+                        className="px-6 py-3 bg-white hover:bg-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border border-red-200 hover:border-red-300"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
+    </div>
+  );
+};
 
       {settingsSubTab === 'privacy' && (
         <div className="max-w-2xl bg-white border border-[#e8edf2] rounded-[5px] p-8 shadow-sm text-left">
@@ -950,22 +1288,22 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
   );
 };
 
-
 // --- MAIN PAGE ---
 
 export function DashboardPage() {
-  const { setIsLoggedIn, currentUser } = useGlobalState();
+  const { setIsLoggedIn } = useGlobalState();
   const { 
     savedProducts, 
     savedBrands, 
-    savedGuides,
     lovedBrands, 
     followedBrands, 
     recentlyViewed,
+    comparedProducts,
     messages,
+    notifications,
+    campaigns,
     reviews,
-    setReviews,
-    threads,
+    customOverviews
   } = useDashboard();
   const location = useLocation();
   const navigate = useNavigate();
@@ -1037,61 +1375,18 @@ export function DashboardPage() {
   const accountOnlyItems = accountItems.filter((i) => !COMMUNICATION_TAB_IDS.has(i.id));
 
   const [activeTab, setActiveTab] = useState('overview');
-  const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>('personal');
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
-    // TODO: addToRecentlyViewed called from ProductDetailPage â€” see Prompt 6
-  }, []);
-
-  const REMOVED_TABS = new Set([
-    'my-comparisons',
-    'admin-campaigns',
-    'admin-overviews',
-    'notifications',
-    'cms-studios',
-    'spotlight-campaigns',
-  ]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const queryTab = params.get('tab');
-    if (queryTab && !REMOVED_TABS.has(queryTab) && isDashboardTabAllowed(queryTab, platformRole)) {
-      setActiveTab(queryTab);
-      if (queryTab === 'settings') {
-        const sub = params.get('section');
-        if (sub === 'addresses' || sub === 'personal' || sub === 'security' || sub === 'notifications' || sub === 'privacy') {
-          setSettingsSubTab(sub);
-        }
-      }
-      return;
+    if (location.state && location.state.activeTab) {
+      setActiveTab(location.state.activeTab);
     }
-
-    if (location.state?.activeTab) {
-      const tab = location.state.activeTab as string;
-      if (REMOVED_TABS.has(tab) || !isDashboardTabAllowed(tab, platformRole)) {
-        setActiveTab('overview');
-      } else {
-        setActiveTab(tab);
-      }
-      if (location.state?.settingsSubTab) {
-        setSettingsSubTab(location.state.settingsSubTab as SettingsSubTab);
-      }
-    }
-  }, [location.state, location.search, platformRole]);
+  }, [location.state]);
 
   useEffect(() => {
     if (activeTab === 'messages') {
       navigate('/messages');
     }
   }, [activeTab, navigate]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('tab') === 'notifications' || activeTab === 'notifications') {
-      navigate(`/messages/${CHOOSIFY_ANNOUNCEMENTS_THREAD_ID}`, { replace: true });
-    }
-  }, [location.search, activeTab, navigate]);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
@@ -1102,6 +1397,15 @@ export function DashboardPage() {
       return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
     }
 
+  const controlItems = menuItems.filter(item => 
+    ['overview', 'saved-products', 'saved-brands', 'loved-brands', 'followed-brands', 'recently-viewed', 'saved-recommendations', 'my-comparisons', 'admin-campaigns', 'admin-overviews'].includes(item.id)
+  );
+
+  const accountItems = menuItems.filter(item => 
+    ['messages', 'notifications', 'my-reviews', 'settings'].includes(item.id)
+  );
+
+  const renderContent = () => {
     switch (activeTab) {
       // Retail Tabs
       case 'overview': return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
@@ -1110,7 +1414,31 @@ export function DashboardPage() {
       case 'loved-brands': return <LovedBrandsSection />;
       case 'followed-brands': return <FollowedBrandsSection />;
       case 'recently-viewed': return <RecentlyViewedSection />;
-      case 'saved-recommendations': return <SavedGuidesSection />;
+      case 'admin-campaigns': return <AdminCampaignsSection />;
+      case 'admin-overviews': return <AdminOverviewsSection />;
+      case 'saved-recommendations': return (
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
+           <div>
+              <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#FF5B00]">Guides</span></h2>
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Knowledge bookmarks for your next big buy</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 justify-items-center gap-8">
+               {BLOGS.slice(0, 4).map((guide: any, i) => (
+                 <SpotlightCard 
+                    key={guide.id} 
+                    variant="standard"
+                    title={guide.title}
+                    image={guide.image || guide.thumbnail}
+                    desc={guide.desc || guide.excerpt}
+                    readTime={guide.readTime}
+                    badge="RECOMMENDED"
+                    badgeBg="bg-[#FF5B00]"
+                 />
+               ))}
+            </div>
+        </div>
+      );
+      case 'my-comparisons': return <CompareToolSection />;
       case 'messages': return (
         <div className="flex flex-col items-center justify-center p-12 text-center max-w-lg mx-auto h-[500px]">
           <div className="w-16 h-16 bg-[#F96500]/10 text-orange-primary rounded-full flex items-center justify-center mb-4">
@@ -1128,24 +1456,7 @@ export function DashboardPage() {
           </Link>
         </div>
       );
-      case 'orders':
-        navigate('/profile/orders');
-        return null;
-      case 'seller-products':
-      case 'seller-orders':
-      case 'spotlight-requests':
-      case 'seller-performance':
-      case 'creator-studio':
-      case 'creator-collaborations':
-      case 'creator-spotlight':
-      case 'mod-queues':
-      case 'mod-approvals':
-        return <SellerWorkspaceSection tab={activeTab} />;
-      case 'brand-spotlight':
-      case 'brand-analytics':
-      case 'admin-marketing':
-        navigate('/marketing/studio');
-        return null;
+      case 'notifications': return <NotificationsSection />;
       case 'my-reviews': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
             <div>
@@ -1157,7 +1468,7 @@ export function DashboardPage() {
                  reviews.map((r, idx) => {
                    const productImage = PRODUCTS.find(p => p.title === r.product)?.image || PLACEHOLDER_IMAGE;
                    return (
-                     <div key={r.id || idx} className="bg-white border border-[#e8edf2] rounded-xl p-6 flex flex-col sm:flex-row gap-6 hover:border-[#E8500A]/20 transition-all shadow-sm">
+                     <div key={r.id || idx} className="bg-white border border-[#e8edf2] rounded-xl p-6 flex flex-col sm:flex-row gap-6 hover:border-[#FF5B00]/20 transition-all shadow-sm">
                        <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 flex items-center justify-center shrink-0">
                          <img src={productImage} alt={r.product} className="w-full h-full object-contain" onError={handleImageError} />
                        </div>
@@ -1168,7 +1479,7 @@ export function DashboardPage() {
                          </div>
                          <div className="flex items-center gap-1.5 mb-3">
                            {[1, 2, 3, 4, 5].map(s => (
-                             <Star key={s} size={12} className={s <= Math.floor(r.rating || 5) ? "text-[#E8500A] fill-[#E8500A]" : "text-gray-250"} />
+                             <Star key={s} size={12} className={s <= Math.floor(r.rating || 5) ? "text-[#FF5B00] fill-[#FF5B00]" : "text-gray-250"} />
                            ))}
                            <span className="text-[10px] font-bold text-gray-400">({r.rating || '5'}.0)</span>
                          </div>
@@ -1185,10 +1496,7 @@ export function DashboardPage() {
             </div>
         </div>
       );
-      case 'settings':
-        return <SettingsSection initialSubTab={settingsSubTab} />;
-      case 'addresses':
-        return <AddressBookManager />;
+      case 'settings': return <SettingsSection />;
 
       default: return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
     }

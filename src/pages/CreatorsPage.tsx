@@ -3,8 +3,14 @@ import { PAGE_LISTING_SINGLE_SHELL, CREATOR_CARD_GRID } from "../lib/pageLayout"
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { cn } from '../lib/utils';
-import { useGlobalState } from '../context/GlobalStateContext';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Search, Star, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, 
+  Users, Laptop, Sparkles, Camera, Box, Tag, ArrowRight, Grid, List, 
+  X, Check, FileText, Sparkle, HelpCircle, ShieldCheck
+} from 'lucide-react';
+import { CREATORS, Creator } from '../data/creators';
+import { CreatorCard } from '../components/CreatorCard';
 import { toast } from 'react-hot-toast';
 import type { Creator } from '../data/creators';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
@@ -51,10 +57,18 @@ export function CreatorsPage() {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Creators');
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'unverified'>('all');
-  const [popularityFilter, setPopularityFilter] = useState<'all' | 'high' | 'normal'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSort, setSelectedSort] = useState('Most Popular');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  // Dropdown states
+  const [nicheDropdown, setNicheDropdown] = useState('All Niches');
+  const [platformDropdown, setPlatformDropdown] = useState('Platform');
+  const [countryDropdown, setCountryDropdown] = useState('Country');
+  
+  // Toggle states
+  const [verifiedOnly, setVerifiedOnly] = useState(true);
+  const [hasReviews, setHasReviews] = useState(true);
 
   // Restore state from sessionStorage on mount
   React.useEffect(() => {
@@ -206,7 +220,7 @@ export function CreatorsPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#E8500A]" />
+          <Search size={13} className="text-[#FF5B00]" />
         </div>
         <input
           type="text"
@@ -224,57 +238,60 @@ export function CreatorsPage() {
       { id: 'fashion', label: 'ðŸ‘— Fashion Influencer', active: selectedCategory === 'Fashion & Beauty', onClick: () => setSelectedCategory(selectedCategory === 'Fashion & Beauty' ? null : 'Fashion & Beauty') }
     ],
     renderFilters: () => (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 mt-4">
         <UniversalFilterRenderer
           profile={{
             entity: 'creators',
             filters: [
               {
-                id: 'niche',
-                name: 'Creator Niche Mode',
+                id: 'expertise',
+                name: 'Expertise',
                 type: 'single_select',
                 options: [
-                  { value: 'all', label: 'All Niches' },
-                  ...['Tech & Gaming', 'Fashion & Beauty', 'Food & Lifestyle', 'Sustainable Wear', 'Youth Budgeting', 'Creative Writing'].map(cat => ({ value: cat, label: cat }))
+                  { value: 'all', label: 'All Expertise' },
+                  { value: 'tech', label: 'Tech & Gadgets' },
+                  { value: 'fashion', label: 'Fashion & Beauty' },
+                  { value: 'lifestyle', label: 'Lifestyle' }
                 ]
               },
               {
-                id: 'verification',
-                name: 'Expert verification',
-                type: 'single_select',
+                id: 'platforms',
+                name: 'Platforms',
+                type: 'multi_select',
                 options: [
-                  { value: 'all', label: 'All Claim Statuses' },
-                  { value: 'verified', label: 'Verified Experts Only' },
-                  { value: 'unverified', label: 'Independent' }
+                  { value: 'youtube', label: 'YouTube' },
+                  { value: 'instagram', label: 'Instagram' },
+                  { value: 'tiktok', label: 'TikTok' }
                 ]
               },
               {
-                id: 'engagement',
-                name: 'Engagement Flow',
+                id: 'followers',
+                name: 'Followers',
                 type: 'single_select',
                 options: [
-                  { value: 'all', label: 'All Engagements' },
-                  { value: 'high', label: 'Top Engagement (4.8+)' },
-                  { value: 'normal', label: 'Standard Tier' }
+                  { value: '1M+', label: '1M+ Followers' },
+                  { value: '500k+', label: '500k+ Followers' },
+                  { value: '100k+', label: '100k+ Followers' }
+                ]
+              },
+              {
+                id: 'verified',
+                name: 'Verified Status',
+                type: 'single_select',
+                options: [
+                  { value: 'verified', label: 'Verified Only' },
+                  { value: 'all', label: 'All Creators' }
                 ]
               }
             ]
           }}
-          activeFilters={{
-            niche: selectedCategory || 'all',
-            verification: verificationFilter,
-            engagement: popularityFilter
-          }}
-          onFilterChange={(filterId, value) => {
-            if (filterId === 'niche') {
-              setSelectedCategory(value === 'all' || !value ? null : value);
-            } else if (filterId === 'verification') {
-              setVerificationFilter(value as any);
-            } else if (filterId === 'engagement') {
-              setPopularityFilter(value as any);
-            }
-          }}
+          activeFilters={{}}
+          onFilterChange={() => {}}
         />
+      </div>
+    ),
+    onClearAll: () => setSearchQuery('')
+  }, [searchQuery]);
 
         {/* Alpha Search (A-Z) */}
         <div className="bg-white rounded-2xl p-4.5 border border-[#eef2f6] shadow-sm flex flex-col gap-2">
@@ -298,36 +315,359 @@ export function CreatorsPage() {
                   selectedLetter === letter ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                 )}
               >
-                {letter}
+                <span className="text-gray-400">Sort by:</span>
+                <span>{selectedSort}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+              </button>
+
+              <AnimatePresence>
+                {isSortOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="absolute right-0 mt-1.5 w-44 bg-white border border-gray-200 rounded-xl shadow-lg py-1.5 z-40 text-left"
+                  >
+                    {['Most Popular', 'Top Rated', 'High Engagement'].map((sortOption) => (
+                      <button
+                        key={sortOption}
+                        onClick={() => {
+                          setSelectedSort(sortOption);
+                          setIsSortOpen(false);
+                        }}
+                        className="w-full px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#FF5B00] transition-colors text-left border-0 cursor-pointer block"
+                      >
+                        {sortOption}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Grid vs List Toggles */}
+            <div className="flex items-center gap-1.5 p-1 bg-white border border-gray-200 rounded-xl shadow-sm">
+              <button 
+                onClick={() => setViewMode('grid')}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer border-0 outline-none ${viewMode === 'grid' ? 'bg-[#FF5B00]/10 text-[#FF5B00]' : 'text-gray-400 hover:text-gray-600'}`}
+                title="Grid view"
+              >
+                <Grid className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => {
+                  setViewMode('list');
+                  toast.success('List mode activated!');
+                }}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer border-0 outline-none ${viewMode === 'list' ? 'bg-[#FF5B00]/10 text-[#FF5B00]' : 'text-gray-400 hover:text-gray-600'}`}
+                title="List view"
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* CONTROLS ROW 2: Custom Dropdowns, Toggles & Clear */}
+        <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between w-full shrink-0">
+          
+          {/* Custom Selector Dropdowns */}
+          <div className="flex flex-wrap items-center gap-3">
+            
+            {/* Niche Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsNicheOpen(!isNicheOpen)}
+                onBlur={() => setTimeout(() => setIsNicheOpen(false), 200)}
+                className="h-10 px-4 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 flex items-center gap-2 shadow-sm cursor-pointer select-none border-0 outline-none"
+              >
+                <span>{nicheDropdown}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+              </button>
+              <AnimatePresence>
+                {isNicheOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="absolute left-0 mt-1.5 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-1.5 z-40 text-left max-h-56 overflow-y-auto"
+                  >
+                    {['All Niches', 'Tech Reviewers', 'Fashion Creators', 'Lifestyle Creators', 'Unboxing Experts', 'Budget Finds'].map((opt) => (
+                      <button
+                        key={opt}
+                        onClick={() => {
+                          setNicheDropdown(opt);
+                          setIsNicheOpen(false);
+                        }}
+                        className="w-full px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#FF5B00] transition-colors text-left border-0 cursor-pointer block"
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Platform Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsPlatformOpen(!isPlatformOpen)}
+                onBlur={() => setTimeout(() => setIsPlatformOpen(false), 200)}
+                className="h-10 px-4 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 flex items-center gap-2 shadow-sm cursor-pointer select-none border-0 outline-none"
+              >
+                <span>{platformDropdown}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+              </button>
+              <AnimatePresence>
+                {isPlatformOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="absolute left-0 mt-1.5 w-44 bg-white border border-gray-200 rounded-xl shadow-lg py-1.5 z-40 text-left"
+                  >
+                    {['Platform', 'YouTube', 'Instagram', 'TikTok', 'Facebook'].map((opt) => (
+                      <button
+                        key={opt}
+                        onClick={() => {
+                          setPlatformDropdown(opt);
+                          setIsPlatformOpen(false);
+                        }}
+                        className="w-full px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#FF5B00] transition-colors text-left border-0 cursor-pointer block"
+                      >
+                        {opt === 'Platform' ? 'All Platforms' : opt}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Country Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsCountryOpen(!isCountryOpen)}
+                onBlur={() => setTimeout(() => setIsCountryOpen(false), 200)}
+                className="h-10 px-4 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 flex items-center gap-2 shadow-sm cursor-pointer select-none border-0 outline-none"
+              >
+                <span>{countryDropdown}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+              </button>
+              <AnimatePresence>
+                {isCountryOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="absolute left-0 mt-1.5 w-44 bg-white border border-gray-200 rounded-xl shadow-lg py-1.5 z-40 text-left"
+                  >
+                    {['Country', 'Bangladesh'].map((opt) => (
+                      <button
+                        key={opt}
+                        onClick={() => {
+                          setCountryDropdown(opt);
+                          setIsCountryOpen(false);
+                        }}
+                        className="w-full px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#FF5B00] transition-colors text-left border-0 cursor-pointer block"
+                      >
+                        {opt === 'Country' ? 'All Countries' : opt}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Toggle verified with green badge */}
+            <button
+              onClick={() => setVerifiedOnly(!verifiedOnly)}
+              className={`h-10 px-4 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border shadow-sm cursor-pointer ${
+                verifiedOnly 
+                  ? 'bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]' 
+                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Check className={`w-3.5 h-3.5 ${verifiedOnly ? 'text-[#22C55E]' : 'text-gray-400'}`} />
+              Verified Only
+            </button>
+
+            {/* Toggle reviews with green badge */}
+            <button
+              onClick={() => setHasReviews(!hasReviews)}
+              className={`h-10 px-4 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border shadow-sm cursor-pointer ${
+                hasReviews 
+                  ? 'bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]' 
+                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Check className={`w-3.5 h-3.5 ${hasReviews ? 'text-[#22C55E]' : 'text-gray-400'}`} />
+              Has Reviews
+            </button>
+
+            {/* Clear All Filters Button */}
+            {(activeTab !== 'All Creators' || searchQuery !== '' || nicheDropdown !== 'All Niches' || platformDropdown !== 'Platform' || countryDropdown !== 'Country' || verifiedOnly || hasReviews) && (
+              <button
+                onClick={handleClearAll}
+                className="text-xs font-bold text-[#FF5B00] hover:text-[#EB4501] transition-colors ml-1 cursor-pointer"
+              >
+                Clear all
+              </button>
+            )}
+
+          </div>
+
+        </div>
+
+        {/* FEED / CARDS GRID SECTION */}
+        <div className="w-full">
+          <AnimatePresence mode="popLayout">
+            {filteredCreators.length === 0 ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 15 }}
+                className="py-16 text-center bg-white rounded-2xl border border-gray-200/80 shadow-sm"
+              >
+                <Search className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                <h3 className="font-sans text-lg font-bold text-[#0E0F23]">No creators found</h3>
+                <p className="text-xs text-gray-400 mt-2 max-w-sm mx-auto">Try refining your search queries or clearing active filters to see other results.</p>
+                <button
+                  onClick={handleClearAll}
+                  className="mt-5 px-6 py-2.5 bg-[#FF5B00] text-white text-xs font-bold uppercase tracking-wider rounded-xl border-0 shadow-md hover:bg-[#FF5B00] transition-colors cursor-pointer"
+                >
+                  Clear All Filters
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={
+                  viewMode === 'grid' 
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full justify-center" 
+                    : "flex flex-col gap-4 w-full"
+                }
+              >
+                {filteredCreators.map((creator) => {
+                  if (viewMode === 'grid') {
+                    return <CreatorCard key={creator.id} creator={creator} />;
+                  } else {
+                    // Custom list-view row for high-craftsmanship list mode
+                    return (
+                      <Link 
+                        to={`/creators/${creator.id}`}
+                        key={creator.id}
+                        className="flex flex-col md:flex-row items-center gap-5 bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-md transition-all duration-200 text-left group"
+                      >
+                        <div className="w-20 h-20 rounded-full border-2 border-[#FF5B00]/10 overflow-hidden shrink-0 flex items-center justify-center bg-gray-50">
+                          <img src={creator.avatar} className="w-full h-full object-cover" alt={creator.name} referrerPolicy="no-referrer" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <h3 className="font-sans text-base font-bold text-[#0E0F23] group-hover:text-[#FF5B00] transition-colors">
+                              {creator.name}
+                            </h3>
+                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                          </div>
+                          <p className="text-xs text-gray-400 mt-0.5 font-semibold uppercase tracking-wider">{creator.bestFor}</p>
+                          <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed max-w-2xl">{creator.bio}</p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-6 shrink-0 text-center px-4 md:border-l border-gray-150">
+                          <div>
+                            <div className="text-sm font-extrabold text-[#0E0F23]">{creator.reviewsCount}</div>
+                            <div className="text-[9px] font-semibold text-gray-400 uppercase">Reviews</div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-extrabold text-[#0E0F23]">{creator.followersCount}</div>
+                            <div className="text-[9px] font-semibold text-gray-400 uppercase">Followers</div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-extrabold text-[#0E0F23]">{creator.trustScore}%</div>
+                            <div className="text-[9px] font-semibold text-gray-400 uppercase">Trust Score</div>
+                          </div>
+                        </div>
+                        <div className="shrink-0 flex items-center justify-center p-2.5">
+                          <div className="w-10 h-10 rounded-full bg-gray-50 group-hover:bg-[#FF5B00]/10 group-hover:text-[#FF5B00] text-gray-400 flex items-center justify-center transition-all">
+                            <ArrowRight className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  }
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* PAGINATION ROW */}
+        {filteredCreators.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-5 pt-8 border-t border-gray-200 mt-6 shrink-0 w-full">
+            <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider text-center sm:text-left">
+              Showing 1-{filteredCreators.length} of {filteredCreators.length} creators
+            </span>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center gap-1.5">
+              <button className="w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-gray-600 flex items-center justify-center transition-colors cursor-pointer outline-none border-0 shadow-sm" disabled>
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button className="w-9 h-9 rounded-xl bg-[#FF5B00] text-white flex items-center justify-center text-xs font-bold cursor-pointer border-0 shadow-sm">
+                1
+              </button>
+              <button className="w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-gray-700 hover:border-gray-300 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors outline-none border-0 shadow-sm">
+                2
+              </button>
+              <button className="w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-gray-700 hover:border-gray-300 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors outline-none border-0 shadow-sm">
+                3
+              </button>
+              <button className="w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-gray-700 hover:border-gray-300 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors outline-none border-0 shadow-sm">
+                4
+              </button>
+              <span className="text-xs font-bold text-gray-400 px-1">...</span>
+              <button className="w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-gray-700 hover:border-gray-300 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors outline-none border-0 shadow-sm">
+                179
+              </button>
+              <button className="w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-gray-700 flex items-center justify-center transition-colors cursor-pointer outline-none border-0 shadow-sm">
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Show per page dropdown */}
+            <div className="relative">
+              <button className="h-9 px-4 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 flex items-center gap-1.5 shadow-sm select-none border-0 outline-none">
+                <span className="text-gray-400">Show:</span>
+                <span>12 per page</span>
+                <ChevronDown className="w-3 h-3 text-gray-400" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* POPULAR CREATOR SEARCHES */}
+        <div className="w-full py-8 border-t border-gray-200 text-left mt-8 shrink-0">
+          <h3 className="font-sans text-sm font-bold text-[#0E0F23] tracking-wide mb-4">
+            Popular creator searches
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {popularSearches.map((term, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setSearchQuery(term);
+                  toast.success(`Filtering for: ${term}`);
+                }}
+                className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[11px] font-bold text-gray-600 hover:text-[#FF5B00] hover:border-[#FF5B00]/40 hover:bg-[#FF5B00]/5 transition-all shadow-sm cursor-pointer select-none border-0"
+              >
+                🔍 &nbsp; {term}
               </button>
             ))}
           </div>
         </div>
-      </div>
-    ),
-    alphabetFilter: { activeLetter: selectedLetter, onLetterChange: setSelectedLetter },
-    scrollTargetId: 'creators-main-display',
-    activeFilterCount: (selectedCategory ? 1 : 0) +
-      (selectedLetter ? 1 : 0) +
-      (verificationFilter !== 'all' ? 1 : 0) +
-      (popularityFilter !== 'all' ? 1 : 0) +
-      (searchQuery ? 1 : 0),
-    onClearAll: () => {
-      setSelectedLetter(null); 
-      setSearchQuery(''); 
-      setActiveTab('All Creators');
-      setSelectedCategory(null);
-      setVerificationFilter('all');
-      setPopularityFilter('all');
-    },
-    sectionNav: {
-      items: sectionNavItems,
-      activeId: activeSectionId,
-      onNavigate: scrollToSection,
-      allLabel: 'Creators',
-      profileLabel: 'Creator hub',
-    },
-  }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
@@ -615,6 +955,9 @@ export function CreatorsPage() {
                 {searchQuery && ` · “${searchQuery}”`}
                 <span className="text-[#8a9bb0] font-semibold"> ({filteredCreators.length})</span>
               </h2>
+              <p className="text-xs md:text-[13px] text-gray-300 font-medium mt-2 leading-relaxed">
+                Join Choosify and grow your audience by sharing honest reviews and helping people make better choices.
+              </p>
             </div>
             
             {(selectedLetter || searchQuery || activeTab !== 'All Creators' || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (

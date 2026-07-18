@@ -1,0 +1,13 @@
+export { MarketplaceHero } from './MarketplaceHero';
+export { CompareSection } from './CompareSection';
+export { ServicesSection } from './ServicesSection';
+export { FeaturedProductsSection } from './FeaturedProductsSection';
+export { DealsSection } from './DealsSection';
+export { FeaturedBrandsSection } from './FeaturedBrandsSection';
+export { SpotlightSection } from './SpotlightSection';
+export { BuyingGuidesSection } from './BuyingGuidesSection';
+export { RecentlyViewedSection } from './RecentlyViewedSection';
+export { CreatorHighlightsSection } from './CreatorHighlightsSection';
+export { CommunityReviewsSection } from './CommunityReviewsSection';
+export { TrustSection } from './TrustSection';
+export { CategoriesSection } from './CategoriesSection';

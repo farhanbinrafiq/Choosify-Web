@@ -5,8 +5,6 @@ import {
   ChevronRight, Mail, MessageCircle, Share2, Phone, MapPin, 
   HelpCircle, ArrowRight, ShieldCheck, CheckCircle
 } from 'lucide-react';
-import { StaticPageHero } from '../components/StaticPageHero';
-import { operationsApi } from '../services/operationsApi';
 
 export function ContactPage() {
   useEffect(() => {
@@ -22,23 +20,11 @@ export function ContactPage() {
 
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.subject) {
       alert('Please fill in Name, Email, and Subject fields.');
       return;
-    }
-    try {
-      await operationsApi.submitLead({
-        brandName: formData.subject,
-        contactPerson: formData.name,
-        email: formData.email,
-        placementInterest: 'contact',
-        message: formData.message,
-        source: 'contact-page',
-      });
-    } catch {
-      // still show success UX
     }
     setSubmitted(true);
   };
@@ -56,12 +42,12 @@ export function ContactPage() {
     },
     {
       title: 'Creator Support',
-      desc: 'Encountered issues syncing your TikTok profile or updating your directory portfolio? Letâ€™s resolve it.',
+      desc: 'Encountered issues syncing your TikTok profile or updating your directory portfolio? Let’s resolve it.',
       badge: 'Creators Desk'
     },
     {
       title: 'Business Inquiries',
-      desc: 'Interested in sponsored guide campaigns, corporate advertising plans, or platform partnerships?',
+      desc: 'Interested in bespoke B2B API integrations, sponsored guide campaigns, or corporate advertising plans?',
       badge: 'BD Team'
     }
   ];
@@ -90,13 +76,20 @@ export function ContactPage() {
   return (
     <div className="min-h-screen bg-[#F4F7F9] font-sans">
       {/* 1. HERO SECTION */}
-      <StaticPageHero>
+      <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
         <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-black uppercase tracking-widest mb-6">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight size={10} className="text-white/20" />
+            <span className="text-white">Contact Us</span>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column */}
             <div className="lg:col-span-7 space-y-4 text-left">
-              <span className="inline-block bg-[#E8500A]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
+              <span className="inline-block bg-[#FF5B00]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
                 Get In Touch
               </span>
               <h1 className="text-2xl sm:text-3xl md:text-[2.5rem] font-extrabold text-white tracking-tight leading-tight">
@@ -127,7 +120,7 @@ export function ContactPage() {
             </div>
           </div>
         </div>
-      </StaticPageHero>
+      </section>
 
       {/* 2. BODY CONTENT SECTION */}
       <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] py-16">
@@ -202,7 +195,7 @@ export function ContactPage() {
           {/* Message Form (Right) */}
           <div className="lg:col-span-5">
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 md:p-8 shadow-xs text-left relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF5B00] to-[#E8500A]" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF5B00] to-[#FF5B00]" />
               
               <AnimatePresence mode="wait">
                 {!submitted ? (
@@ -284,7 +277,7 @@ export function ContactPage() {
                     className="py-12 px-2 text-center flex flex-col items-center justify-center space-y-6"
                   >
                     <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-500 flex items-center justify-center text-3xl">
-                      âœ“
+                      ✓
                     </div>
                     <div>
                       <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">Message Logged</h3>

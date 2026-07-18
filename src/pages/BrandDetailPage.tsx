@@ -1175,94 +1175,183 @@ export function BrandDetailPage() {
     }
     return [
       {
-        label: "MOBILES",
-        img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=600&fit=crop",
+        id: "cr-1",
+        cover: "https://images.unsplash.com/photo-1616348436168-de43ad0db179?q=80&w=600&auto=format&fit=crop",
+        title: `${brandId === 'apple' ? 'iPhone 15 Pro' : brandId === 'samsung' ? 'S24 Ultra' : 'Redmi Note 13'} - 30 Days Later Truth!`,
+        creator: { name: "Marques Brownlee", avatar: "https://i.pravatar.cc/150?u=mb", verified: true },
+        duration: "14:20",
+        views: "3.2M views",
+        date: "2 weeks ago",
+        category: "Review",
+        categoryColor: "bg-purple-500",
+        platform: "youtube" as const
       },
       {
-        label: "GEAR",
-        img: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&h=600&fit=crop",
+        id: "cr-2",
+        cover: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=600&auto=format&fit=crop",
+        title: `Don't buy the new ${brandId} until you watch this...`,
+        creator: { name: "Mrwhosetheboss", avatar: "https://i.pravatar.cc/150?u=mr", verified: true },
+        duration: "18:45",
+        views: "1.8M views",
+        date: "1 month ago",
+        category: "Comparison",
+        categoryColor: "bg-blue-500",
+        platform: "youtube" as const
       },
       {
-        label: "WEARABLES",
-        img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=600&fit=crop",
-      },
+        id: "cr-3",
+        cover: "https://images.unsplash.com/photo-1605236453806-6ff368524d8e?q=80&w=600&auto=format&fit=crop",
+        title: `${brandId.toUpperCase()} Ecosystem Setup 2025`,
+        creator: { name: "iJustine", avatar: "https://i.pravatar.cc/150?u=ij", verified: true },
+        duration: "12:10",
+        views: "890K views",
+        date: "3 days ago",
+        category: "Ecosystem",
+        categoryColor: "bg-[#FF5B00]",
+        platform: "youtube" as const
+      }
     ];
+  }
+  return [
+    {
+      id: "cr-def-1",
+      cover: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600&auto=format&fit=crop",
+      title: `${brandId.toUpperCase()} - Complete Buyer's Guide`,
+      creator: { name: "Tech Expert", avatar: "https://i.pravatar.cc/150?u=te", verified: false },
+      duration: "08:30",
+      views: "45K views",
+      date: "1 week ago",
+      category: "Guide",
+      categoryColor: "bg-gray-500",
+      platform: "youtube" as const
+    }
+  ];
+};
+
+const getCustomerReviewsForBrand = () => {
+  return [
+    {
+      id: "pr-1",
+      name: "Ahmed R.",
+      rating: 5,
+      date: "Oct 12, 2024",
+      text: "The delivery from the official store was incredibly fast. Got authentic product with valid warranty.",
+      avatar: "https://i.pravatar.cc/150?u=ar",
+      helpful: 24,
+      tags: ["Fast Delivery", "Authentic"]
+    },
+    {
+      id: "pr-2",
+      name: "Sarah T.",
+      rating: 4,
+      date: "Sep 28, 2024",
+      text: "Great experience overall. The packaging was pristine. Only taking one star off because customer service took 2 hours to reply.",
+      avatar: "https://i.pravatar.cc/150?u=st",
+      helpful: 12,
+      tags: ["Good Packaging"]
+    },
+    {
+      id: "pr-3",
+      name: "Faisal K.",
+      rating: 5,
+      date: "Sep 15, 2024",
+      text: "100% genuine product. Verified the serial number on the official website immediately after receiving it.",
+      avatar: "https://i.pravatar.cc/150?u=fk",
+      helpful: 56,
+      tags: ["Genuine", "Verified"]
+    }
+  ];
+};
+
+export function BrandDetailPage() {
+  const { id } = useParams();
+  const { allProducts } = useGlobalState();
+  const [selectedReview, setSelectedReview] = useState<CreatorReview | null>(null);
+  const [activeTab, setActiveTab] = useState("overview");
+  
+  // States
+  const [showAllDeals, setShowAllDeals] = useState(false);
+  const [showAllProducts, setShowAllProducts] = useState(false);
+  const [isFollowed, setIsFollowed] = useState(false);
+  const [helpfulCount, setHelpfulCount] = useState<Record<string, number>>({});
+  
+  const [selectedStoreType, setSelectedStoreType] = useState('All');
+  const [selectedCity] = useState('Dhaka');
+
+  // Fallback to apple if brand not found to avoid crash during demo
+  const brandId = id && BRAND_STORES_DB[id] ? id : 'apple';
+  const brand = BRAND_STORES_DB[brandId];
+
+  // Derived Data
+  const brandProducts = useMemo(() => {
+    return allProducts.filter(p => p.brand?.toLowerCase() === brand.name.toLowerCase());
+  }, [allProducts, brand.name]);
+
+  const creatorReviews = useMemo(() => {
+    return getCreatorReviewsForBrand(brandId);
+  }, [brandId]);
+
+  const customerReviews = useMemo(() => {
+    return getCustomerReviewsForBrand();
+  }, []);
+
+  const overviewDetails = useMemo(() => {
+    return BRAND_OVERVIEW_DETAILS[brandId] || BRAND_OVERVIEW_DETAILS['apple'];
+  }, [brandId]);
+
+  const stores = useMemo(() => {
+    const brandLocs = BRAND_STORES_LOCATIONS[brandId] || BRAND_STORES_LOCATIONS['apple'] || [];
+    return brandLocs.filter(s => {
+      const typeMatch = selectedStoreType === 'All' || s.type === selectedStoreType;
+      const cityMatch = selectedCity === 'All' || s.city === selectedCity;
+      return typeMatch && cityMatch;
+    });
+  }, [brandId, selectedStoreType, selectedCity]);
+
+  // Handlers
+  const toggleFollow = () => {
+    setIsFollowed(!isFollowed);
+    if (!isFollowed) toast.success(`Following ${brand.name} official store`);
   };
 
-  const popularCats = getPopularCategoryPreviews();
-
-  const renderBrandLogo = (brandObj: any) => {
-    const term = brandObj.name.toLowerCase();
-    if (term.includes("choosify")) {
-      return (
-        <img
-          src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1782468737/717067140_122103081177325182_5170626542063953926_n_fiefp6.jpg"
-          className="w-full h-full object-cover"
-          alt="Choosify Brand"
-          referrerPolicy="no-referrer"
-        />
-      );
-    }
-    if (term.includes("fff")) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center bg-[#1E293B] w-full text-[#F1F5F9] px-2 py-3 select-none">
-          <span className="font-space tracking-wider text-[28px] font-black leading-none">
-            FFF
-          </span>
-          <span className="text-[6px] tracking-[0.2em] font-mono text-gray-400 font-bold uppercase mt-1.5">
-            SOURCING LTD
-          </span>
-        </div>
-      );
-    }
-    if (term.includes("sailor")) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center bg-[#17192C] w-full text-white px-2 py-3 select-none">
-          <span className="font-serif tracking-widest text-[24px] font-bold leading-none uppercase">
-            sailor
-          </span>
-          <span className="text-[6px] tracking-[0.25em] font-mono text-gray-400 font-bold uppercase mt-1.5">
-            by epyllion
-          </span>
-        </div>
-      );
-    }
-    if (term.includes("apex")) {
-      return (
-        <div className="flex items-center justify-center h-full text-center bg-[#EB1C24] w-full text-white font-black italic tracking-tighter text-3xl select-none">
-          apex
-        </div>
-      );
-    }
-    if (term.includes("bata")) {
-      return (
-        <div className="flex items-center justify-center h-full text-center bg-[#E60012] w-full text-white font-black text-4xl select-none">
-          Bata
-        </div>
-      );
-    }
-    if (term.includes("aarong")) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center bg-[#AC1F24] w-full text-white px-2 py-2 select-none">
-          <span className="font-serif tracking-widest text-[22px] font-extrabold leading-none uppercase">
-            aarong
-          </span>
-        </div>
-      );
-    }
-    if (term.includes("yellow")) {
-      return (
-        <div className="flex items-center justify-center h-full text-center bg-[#FFF100] w-full text-navy font-black text-3xl select-none">
-          YELLOW
-        </div>
-      );
-    }
-    return (
-      <div className="w-full h-full bg-gradient-to-br from-navy to-[#2A2E6B] flex items-center justify-center text-4xl font-extrabold text-white">
-        {brandObj.logo || brandObj.name.substring(0, 2)}
-      </div>
-    );
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Brand store link copied to clipboard");
   };
+
+  const handleHelpful = (id: string) => {
+    setHelpfulCount(prev => ({
+      ...prev,
+      [id]: (prev[id] || 0) + 1
+    }));
+    toast.success("Marked as helpful");
+  };
+
+  const handleNavClick = (sectionId: string) => {
+    setActiveTab(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 145;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const navigationTabs = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'deals', label: 'Deals & Coupons' },
+    { id: 'products', label: 'Products' },
+    { id: 'creator-reviews', label: 'Creator Reviews' },
+    { id: 'public-reviews', label: 'Public Reviews' },
+    { id: 'brand-overview', label: 'Brand Overview' },
+    { id: 'stores', label: 'Stores' }
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
@@ -1995,27 +2084,84 @@ export function BrandDetailPage() {
               ))}
             </div>
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {stores.map((store: any, idx: number) => (
+              <PhysicalStoreCard 
+                key={idx}
+                image={store.image}
+                storeName={store.name}
+                address={`${store.address}, ${store.city}`}
+                isOpen={store.status === 'Open Now'}
+                hours={store.hours}
+                onViewMap={() => toast.success(`Opening directions to ${store.name}`)}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* 9. BRAND CONTACT FOOTER */}
+        <section className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 mb-12">
+          <div className="bg-[#050B2C] border border-white/5 rounded-3xl p-8 text-white text-left relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
+              <div className="lg:col-span-4 space-y-4">
+                <h3 className="text-lg font-black uppercase tracking-widest text-white leading-none">
+                  {brand.name} Contacts
+                </h3>
+                <p className="text-xs text-gray-400 font-semibold leading-relaxed">
+                  Connect with verified authorized agents of {brand.name} directly. Official business verification guarantees direct line safety.
+                </p>
+                <div className="flex gap-3 pt-2">
+                  <a href={brand.contacts.website} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 hover:bg-orange-600 flex items-center justify-center text-white transition-all">
+                    <Globe size={16} />
+                  </a>
+                  <a href={`https://wa.me/${brand.contacts.whatsapp.replace('+', '')}`} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/10 hover:bg-emerald-600 flex items-center justify-center text-white transition-all">
+                    <MessageSquare size={16} />
+                  </a>
+                </div>
+              </div>
+
+              <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">SUPPORT HELPLINE</span>
+                  <p className="text-sm font-black text-white flex items-center gap-1.5">
+                    <Phone size={14} className="text-orange-500" />
+                    <span>{brand.contacts.support}</span>
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">OFFICIAL EMAIL</span>
+                  <p className="text-sm font-black text-white flex items-center gap-1.5">
+                    <Mail size={14} className="text-orange-500" />
+                    <span className="break-all">{brand.contacts.email}</span>
+                  </p>
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">FLAGSHIP STORE PLAZA</span>
+                  <p className="text-xs font-black text-white flex items-center gap-1.5">
+                    <MapPinned size={14} className="text-orange-500 shrink-0" />
+                    <span>{brand.contacts.storeLocator}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 className="text-xs font-black text-white uppercase tracking-wider">Business Compliance</h4>
+                <p className="text-[11px] text-gray-400 font-medium leading-relaxed mt-2.5">
+                  This brand stores its catalogs directly with Choosify under active commercial business license registries. Counterfeits are strictly audited with premium refund coverage flags.
+                </p>
+                <div className="mt-4 flex items-center gap-2 text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
+                  <ShieldCheck size={14} />
+                  <span>100% Verified Authentic Store</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </div>
-
-      <ReportModal
-        isOpen={isReportOpen}
-        onClose={() => setIsReportOpen(false)}
-        type="brand"
-        targetId={String(brand.id)}
-        targetName={brand.name}
-      />
-
-      <ClaimProfileModal
-        isOpen={isClaimModalOpen}
-        onClose={() => setIsClaimModalOpen(false)}
-        targetType="brand"
-        targetId={brand.id}
-        targetName={brand.name}
-        onClaimSubmitted={() => {
-          setLocalClaimStatus("pending");
-        }}
-      />
-    </div>
+    </>
   );
 }

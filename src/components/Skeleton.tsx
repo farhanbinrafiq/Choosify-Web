@@ -1,16 +1,17 @@
 import React from 'react';
 import { cn } from '../lib/utils';
+import { useGlobalState } from '../context/GlobalStateContext';
 
 export function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('choosify-skeleton rounded-md', className)} />
+    <div className={cn("animate-pulse bg-gray-200/80 rounded-md", className)} />
   );
 }
 
 export function ProductSkeleton() {
   return (
-    <div className="bg-white rounded-[5px] p-2.5 border border-[#e8edf2] flex flex-col gap-3 h-full w-full">
-      <Skeleton className="aspect-[4/3] w-full rounded-[5px]" />
+    <div className="bg-white rounded-[20px] p-6 border border-gray-100 flex flex-col gap-4 animate-pulse">
+      <Skeleton className="aspect-square w-full rounded-[15px]" />
       <div className="space-y-2">
         <Skeleton className="h-4 w-2/3" />
         <Skeleton className="h-3 w-1/3" />
@@ -25,11 +26,17 @@ export function ProductSkeleton() {
 
 export function ProductCardSkeleton({ 
   variant = 'grid', 
-  showCountdown = false 
+  showCountdown = false,
+  isGuideDetail = false,
+  isDashboard = false
 }: { 
   variant?: 'grid' | 'list' | 'compact' | 'featured',
-  showCountdown?: boolean
+  showCountdown?: boolean,
+  isGuideDetail?: boolean,
+  isDashboard?: boolean
 }) {
+  const { mode } = useGlobalState();
+
   if (variant === 'featured') {
     return (
       <div className="bg-white rounded-[5px] p-5 md:p-6 h-full flex flex-col md:flex-row gap-6 relative overflow-hidden border border-[#e8edf2] animate-pulse w-full">
@@ -81,7 +88,7 @@ export function ProductCardSkeleton({
   if (variant === 'compact') {
     return (
       <div className="bg-white rounded-[5px] p-3 flex flex-col gap-3 border border-[#e8edf2] h-full animate-pulse">
-        <div className="w-full aspect-square bg-gray-50 rounded-[5px] relative p-2.5 flex items-center justify-center shrink-0">
+        <div className="w-full h-[155px] md:h-[175px] bg-gray-55 rounded-[5px] relative p-1.5 flex items-center justify-center shrink-0">
           <Skeleton className="w-full h-full rounded-[5px]" />
         </div>
 
@@ -138,30 +145,49 @@ export function ProductCardSkeleton({
     );
   }
 
-  // Default Grid layout: mirrors regular card proportions in responsive grid
+  // Default Grid layout: exactly mirrors regular card dimensions and padding
   return (
     <div 
-      className="bg-white rounded-[5px] p-2.5 border border-[#e8edf2] flex flex-col relative overflow-hidden w-full max-w-full min-w-0 h-full self-stretch" 
+      className="bg-white rounded-[5px] p-2.5 border border-[#e8edf2] flex flex-col relative overflow-hidden animate-pulse shrink-0" 
+      style={{
+        boxSizing: 'border-box',
+        width: isDashboard ? '199.5px' : (isGuideDetail ? '229.328px' : '210px'),
+        height: isDashboard ? '268.5px' : (isGuideDetail ? '411px' : '290px')
+      }}
     >
-      <div className="relative w-full aspect-[4/3] bg-[#eef2f7] rounded-[5px] shrink-0 p-2 flex items-center justify-center">
+      <div className={cn(
+        "relative w-full bg-gray-50 rounded-[5px] shrink-0 flex items-center justify-center",
+        isDashboard ? "h-[161px] p-1" : (isGuideDetail ? "h-[246px] p-1.5" : "h-[174px] p-1")
+      )}>
         <Skeleton className="w-full h-full rounded-[5px]" />
       </div>
 
       <div className="pt-1.5 flex flex-col flex-grow min-h-0 justify-between">
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between w-full">
-            <Skeleton className="h-2.5 w-12 rounded" />
-            <Skeleton className="h-2.5 w-8 rounded-full" />
+            <Skeleton className="h-2 w-12 rounded" />
+            <Skeleton className="h-2.5 w-6 rounded" />
           </div>
           <Skeleton className="h-3.5 w-full rounded" />
         </div>
 
-        <div className="mt-auto pt-2 border-t border-[#e8edf2] flex items-center justify-between gap-2 w-full">
-          <div className="space-y-1.5 min-w-0">
-            <Skeleton className="h-2 w-10 rounded" />
-            <Skeleton className="h-4 w-16 rounded" />
+        {isGuideDetail && (
+          <div className="mt-2 pt-1.5 border-t border-dashed border-gray-150 space-y-1 text-left">
+            <Skeleton className="h-2 w-16" />
+            <div className="flex gap-1">
+              <Skeleton className="h-3 w-10 rounded-full" />
+              <Skeleton className="h-3 w-12 rounded-full" />
+            </div>
+            <Skeleton className="h-2 w-full" />
           </div>
-          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+        )}
+
+        <div className="mt-auto pt-1 border-t border-gray-100 flex items-center justify-between gap-1 w-full overflow-hidden">
+          <div className="space-y-1 min-w-0">
+            <Skeleton className="h-1.5 w-6 rounded" />
+            <Skeleton className="h-3.5 w-14 rounded" />
+          </div>
+          <Skeleton className="w-7 h-7 rounded-full shrink-0" />
         </div>
       </div>
     </div>
@@ -254,11 +280,15 @@ export function RecommendationCardSkeleton({
 
 export function CategoryCardSkeleton() {
   return (
-    <div className="choosify-category-photo-card choosify-category-card bg-white border rounded-[5px] flex flex-col overflow-hidden w-full border-[#e8edf2] p-0">
-      <Skeleton className="w-full aspect-[4/3] rounded-none" />
-      <div className="w-full px-3 py-3 border-t border-[#e8edf2] space-y-2">
-        <Skeleton className="h-3 w-4/5 rounded-sm" />
-        <Skeleton className="h-2.5 w-1/3 rounded-sm" />
+    <div className="bg-white border rounded-[5px] p-4 flex flex-col items-start relative overflow-hidden animate-pulse w-full lg:w-[237.328px] border-[#e8edf2]">
+      {/* Circle placeholder around icon */}
+      <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center mb-4 shrink-0">
+        <Skeleton className="w-4 h-4 rounded-full" />
+      </div>
+      
+      <div className="w-full text-left space-y-2">
+        <Skeleton className="h-3 w-2/3 rounded-sm" />
+        <Skeleton className="h-2 w-1/3 rounded-sm" />
       </div>
     </div>
   );

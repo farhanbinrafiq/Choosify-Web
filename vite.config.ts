@@ -3,16 +3,12 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
-import { buildAssets } from './generatePwaAssets.js';
-import { buildLogo } from './generateAttachedLogo.js';
 
-await buildAssets();
-await buildLogo();
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
 
-  return {
+  return { 
     plugins: [
       react(),
       tailwindcss(),
@@ -27,8 +23,8 @@ export default defineConfig(({ mode }) => {
           name: 'Choosify.bd — Verified Brand Discovery',
           short_name: 'Choosify',
           description: 'Bangladesh\'s only verified brand and product discovery platform. Buy with confidence — every brand on Choosify is verified.',
-          theme_color: '#18154c',
-          background_color: '#18154c',
+          theme_color: '#000435',
+          background_color: '#000435',
           display: 'standalone',
           orientation: 'portrait',
           scope: '/',
@@ -218,28 +214,16 @@ export default defineConfig(({ mode }) => {
       })
     ],
 
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
 
     resolve: {
       alias: {
-        '@': path.resolve(new URL('.', import.meta.url).pathname),
+        '@': path.resolve("./src"),
       },
     },
 
     build: {
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (!id.includes('node_modules')) return;
-            if (id.includes('react-dom') || id.includes('/react/')) return 'vendor-react';
-            if (id.includes('react-router')) return 'vendor-router';
-            if (id.includes('motion')) return 'vendor-motion';
-            if (id.includes('lucide-react')) return 'vendor-lucide';
-          },
-        },
-      },
+      outDir: 'dist',
+      emptyOutDir: true,
     },
 
     server: {
