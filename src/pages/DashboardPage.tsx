@@ -31,7 +31,6 @@ import {
   MapPin,
   Menu,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
@@ -49,153 +48,169 @@ import { toPlatformRole } from '../lib/platform/roles';
 import { getDashboardNavForRole, isDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
 
-// Hex Colors as per instruction
-const COLORS = {
-  navy: '#0A0A1F',
-  orange: '#E8500A',
-  green: '#059669',
-};
+const COLLECTION_TAB_IDS = new Set([
+  'saved-products',
+  'saved-brands',
+  'loved-brands',
+  'followed-brands',
+]);
+const ACTIVITY_TAB_IDS = new Set([
+  'recently-viewed',
+  'saved-recommendations',
+  'orders',
+]);
+const COMMUNICATION_TAB_IDS = new Set(['messages', 'my-reviews', 'addresses']);
 
 // --- SUB-COMPONENTS ---
 
-const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
-  <button
-    onClick={onClick}
-    className={cn(
-      "w-full flex items-center gap-4 px-10 py-4 transition-all relative group overflow-hidden border-none text-left bg-transparent cursor-pointer",
-      active ? "text-[#E8500A]" : "text-gray-500 hover:text-navy"
-    )}
-  >
-    {active && (
-      <motion.div 
-        layoutId="active-sidebar"
-        className="absolute inset-0 bg-[#E8500A]/5 border-l-4 border-[#E8500A]"
-      />
-    )}
-    <Icon size={18} className={cn("relative z-10", active ? "text-[#E8500A]" : "text-gray-450 group-hover:text-navy")} />
-    <span className="text-[10px] font-black uppercase tracking-[0.2em] relative z-10 italic">{label}</span>
-  </button>
-);
-
-const TabItem = ({ label, active, onClick }: any) => (
-  <button
-    onClick={onClick}
-    className={cn(
-      "flex-shrink-0 px-6 py-4 text-[10px] font-black uppercase tracking-widest italic transition-all border-b-2 bg-transparent cursor-pointer",
-      active ? "border-[#E8500A] text-navy" : "border-transparent text-gray-400 hover:text-navy"
-    )}
-  >
-    {label}
-  </button>
-);
-
-const StatCard = ({ icon: Icon, label, value, color, onClick }: any) => (
-  <div 
-    onClick={onClick}
-    className="bg-white border border-[#e8edf2] rounded-[5px] p-6 flex items-center gap-5 group hover:border-[#E8500A]/30 transition-all cursor-pointer shadow-sm select-none"
-  >
-    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md", color)}>
-      <Icon size={20} />
-    </div>
-    <div className="text-left">
-      <div className="text-2xl font-black text-navy italic leading-none mb-1">{value}</div>
-      <div className="text-[9px] font-black text-gray-500 uppercase tracking-widest leading-tight">{label}</div>
-    </div>
+const SidebarSectionLabel = ({ children }: { children: React.ReactNode }) => (
+  <div className="text-[10.5px] font-extrabold text-[#9AA0AC] tracking-[0.06em] mb-2.5 mt-5 first:mt-0">
+    {children}
   </div>
+);
+
+const SidebarItem = ({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+  count,
+  badge,
+}: {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+  count?: number | string | null;
+  badge?: number | string | null;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={cn(
+      'w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-[12.5px] font-semibold transition-colors border-none text-left cursor-pointer',
+      active
+        ? 'bg-[#FFF3EA] text-[#FF5B00]'
+        : 'bg-transparent text-[#4B5563] hover:bg-[#F4F7F9]',
+    )}
+  >
+    <span className="flex items-center gap-2.5 min-w-0">
+      <Icon size={15} className={cn('shrink-0', active ? 'text-[#FF5B00]' : 'text-[#9AA0AC]')} />
+      <span className="truncate">{label}</span>
+    </span>
+    {badge != null && badge !== '' ? (
+      <span className="shrink-0 bg-[#FF5B00] text-white text-[10px] font-extrabold rounded-lg px-1.5 py-0.5 leading-none">
+        {badge}
+      </span>
+    ) : count != null && count !== '' ? (
+      <span className="shrink-0 text-[#9AA0AC] font-bold text-[12px]">{count}</span>
+    ) : null}
+  </button>
 );
 
 // --- SECTIONS ---
 
-const OverviewSection = ({ onTabChange }: { onTabChange?: (tab: string) => void }) => {
-  const { savedProducts, savedBrands, lovedBrands, followedBrands, recentlyViewed } = useDashboard();
-  
+const OverviewSection = ({
+  onTabChange,
+  userName,
+}: {
+  onTabChange?: (tab: string) => void;
+  userName?: string;
+}) => {
+  const { recentlyViewed } = useDashboard();
+  const displayName = userName?.trim() || 'there';
+
   return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="space-y-7 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div>
-          <h2 className="text-4xl font-black text-navy uppercase italic tracking-tighter leading-none mb-4">
-            Hi, <span className="text-[#E8500A]">Mr. Farhan</span>
+          <div className="text-[13px] text-[#6B7280] mb-0.5">Welcome back,</div>
+          <h2 className="text-[26px] font-extrabold text-[#1A1A2E] leading-tight mb-1.5">
+            Hi, {displayName}!
           </h2>
-          <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.3em] italic">Bangladesh's best curator since 2024</p>
+          <p className="text-[12.5px] text-[#9AA0AC]">
+            Bangladesh&apos;s smartest product discovery platform.
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex -space-x-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-gray-100 shadow-sm">
-                <img 
-                  src={`https://i.pravatar.cc/150?u=${i + 10}`} 
-                  onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${i}&background=random`; }}
-                  className="w-full h-full object-cover" 
-                  alt="" 
-                />
-              </div>
-            ))}
+        <div className="bg-[#FFF3EA] rounded-xl px-5 py-4 min-w-[260px] relative overflow-hidden">
+          <div className="text-[12.5px] font-bold text-[#1A1A2E] mb-0.5">Premium Member</div>
+          <div className="text-[11px] text-[#9AA0AC] mb-3">Member since Dec 2024</div>
+          <span className="inline-block bg-[#1A1A2E] text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full">
+            ★ PREMIUM ACTIVE
+          </span>
+          <div className="absolute right-[-6px] bottom-[-10px] text-[52px] opacity-15 pointer-events-none" aria-hidden>
+            ♛
           </div>
-          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">12 Active Experts Online</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2 space-y-8">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-black text-navy italic uppercase flex items-center gap-3">
-              <Clock className="text-[#E8500A]" size={20} /> Recently Viewed
+      <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.1fr] gap-5">
+        <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2">
+              <Clock className="text-[#FF5B00]" size={16} /> Recently Viewed
             </h3>
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => onTabChange && onTabChange('recently-viewed')}
-                className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest hover:underline italic bg-transparent border-none cursor-pointer"
-              >
-                See All
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => onTabChange?.('recently-viewed')}
+              className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer"
+            >
+              View all history →
+            </button>
           </div>
-          
+
           {recentlyViewed.length > 0 ? (
-            <div className="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-4 px-2 -mx-2">
+            <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth pb-2">
               {recentlyViewed.map((p, i) => (
-                <div key={i} className="min-w-[280px] sm:min-w-[320px] shrink-0">
+                <div key={i} className="min-w-[240px] sm:min-w-[280px] shrink-0">
                   <ProductCard product={p} variant="grid" />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="py-20 border border-dashed border-gray-200 rounded-[5px] flex flex-col items-center justify-center text-center bg-white w-full shadow-sm">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider italic">No recently viewed history</p>
-              <button 
-                onClick={() => onTabChange && onTabChange('recently-viewed')}
-                className="mt-4 text-[9px] font-black text-[#E8500A] uppercase tracking-widest italic hover:underline"
+            <div className="py-16 border border-dashed border-[#E8EDF2] rounded-xl flex flex-col items-center justify-center text-center bg-[#F4F7F9] w-full">
+              <p className="text-[12px] font-semibold text-[#9AA0AC]">No recently viewed history</p>
+              <button
+                type="button"
+                onClick={() => onTabChange?.('recently-viewed')}
+                className="mt-3 text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer"
               >
-                Learn More
+                Browse products →
               </button>
             </div>
           )}
         </div>
 
-        <div className="space-y-8">
-           <h3 className="text-xl font-black text-navy italic uppercase flex items-center gap-3">
-              <TrendingUp className="text-[#059669]" size={20} /> Today's Pick
-            </h3>
-            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-8 relative overflow-hidden group h-[400px] flex flex-col justify-between shadow-sm">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#E8500A]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-              <img 
-                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop" 
-                loading="lazy"
-                onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE; }}
-                className="w-full h-48 object-contain mb-8 group-hover:scale-110 transition-transform duration-700" 
-                alt="" 
-              />
-              <div className="mt-auto text-left">
-                <span className="text-[9px] font-black text-[#E8500A] uppercase tracking-[0.4em] mb-2 block font-sans">Special Recommendation</span>
-                <h4 className="text-2xl font-black text-navy uppercase italic tracking-tighter leading-none mb-4 font-sans">Apex Premium Runner Elite X</h4>
-                <div className="flex items-center justify-between">
-                  <span className="text-xl font-black text-navy italic font-sans">BDT 4,500</span>
-                  <button className="w-10 h-10 rounded-full bg-gray-50 border border-gray-150 text-navy flex items-center justify-center hover:bg-[#E8500A] hover:text-white transition-all cursor-pointer border-none shadow-sm">
-                    <ArrowLeft className="rotate-180" size={18} />
-                  </button>
-                </div>
-              </div>
+        <div className="bg-white border border-[#E8EDF2] rounded-[14px] overflow-hidden flex flex-col">
+          <div className="h-[130px] bg-[#F4F7F9] shrink-0">
+            <img
+              src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop"
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.src = PLACEHOLDER_IMAGE;
+              }}
+              className="w-full h-full object-cover"
+              alt=""
+            />
+          </div>
+          <div className="p-4 flex-1 flex flex-col">
+            <div className="text-[10.5px] font-extrabold text-[#9AA0AC] tracking-[0.04em] mb-1.5">
+              TODAY&apos;S RECOMMENDATION
             </div>
+            <h4 className="text-[14px] font-extrabold text-[#1A1A2E] leading-snug mb-2">
+              Best Noise Cancelling Headphones in 2025
+            </h4>
+            <p className="text-[11.5px] text-[#9AA0AC] leading-relaxed mb-3 flex-1">
+              Top picks based on your recent views and interests.
+            </p>
+            <button
+              type="button"
+              onClick={() => onTabChange?.('saved-recommendations')}
+              className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer text-left"
+            >
+              Discover Now →
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -210,8 +225,10 @@ const SavedProductsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Vault</span> <span className="text-gray-400 text-2xl">({savedProducts.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your curated list of premium desires</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Saved Products <span className="text-[#9AA0AC] text-lg font-bold">({savedProducts.length})</span>
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">Your curated list of saved products</p>
         </div>
         <div className="flex items-center gap-4 bg-white border border-[#e8edf2] rounded-full px-6 py-2 shadow-sm">
            <Filter size={14} className="text-gray-400" />
@@ -252,9 +269,9 @@ const SavedProductsSection = () => {
           <div className="w-24 h-24 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center text-gray-300 mb-8 scale-110 shadow-sm col-span-full">
             <ShoppingBag size={40} />
           </div>
-          <h3 className="text-xl font-black text-[#1a1a2e] italic uppercase tracking-widest mb-4">Vault is empty</h3>
-          <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">Start exploring Choosify.bd and save products you love to your personal vault.</p>
-          <Link to="/products" className="px-12 py-4 bg-[#E8500A] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-xl shadow-[#E8500A]/10 hover:scale-105 transition-all animate-none">Start Browsing</Link>
+          <h3 className="text-lg font-extrabold text-[#1A1A2E] mb-2">No saved products yet</h3>
+          <p className="text-[#9AA0AC] text-[12.5px] mb-8 max-w-sm">Start exploring Choosify.bd and save products you love.</p>
+          <Link to="/products" className="px-8 py-3 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all">Start browsing</Link>
         </div>
       )}
     </div>
@@ -267,11 +284,10 @@ const SavedGuidesSection = () => {
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="text-left">
-        <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">
-          Saved <span className="text-[#E8500A]">Guides</span>{' '}
-          <span className="text-gray-400 text-2xl">({savedGuides.length})</span>
+        <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+          Saved Guides <span className="text-[#9AA0AC] text-lg font-bold">({savedGuides.length})</span>
         </h2>
-        <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">
+        <p className="text-[#9AA0AC] text-[12.5px]">
           Knowledge bookmarks for your next big buy
         </p>
       </div>
@@ -289,7 +305,7 @@ const SavedGuidesSection = () => {
           <div className="w-24 h-24 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center text-gray-300 mb-8 scale-110 shadow-sm">
             <BookOpen size={40} />
           </div>
-          <h3 className="text-xl font-black text-[#1a1a2e] italic uppercase tracking-widest mb-4">
+          <h3 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-4">
             No saved guides yet
           </h3>
           <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">
@@ -297,7 +313,7 @@ const SavedGuidesSection = () => {
           </p>
           <Link
             to="/guides"
-            className="px-12 py-4 bg-[#E8500A] text-white rounded-full text-[11px] font-black uppercase tracking-widest italic shadow-xl shadow-[#E8500A]/10 hover:scale-105 transition-all"
+            className="px-8 py-3 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all"
           >
             Browse Guides
           </Link>
@@ -315,8 +331,10 @@ const SavedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Saved <span className="text-[#E8500A]">Brands</span> <span className="text-gray-450 text-2xl">({savedBrands.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">â˜† Bookmarked partners for later reference</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Saved Brands <span className="text-[#9AA0AC] text-lg font-bold">({savedBrands.length})</span>
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">Bookmarked partners for later reference</p>
         </div>
       </div>
 
@@ -345,7 +363,7 @@ const SavedBrandsSection = () => {
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-lg font-black text-[#1a1a2e] uppercase italic mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
@@ -363,8 +381,8 @@ const SavedBrandsSection = () => {
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Store size={64} className="mb-8 text-gray-300" />
-          <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No Saved Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Browse All Brands</Link>
+          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No Saved Brands yet</p>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse all brands</Link>
         </div>
       )}
     </div>
@@ -379,8 +397,10 @@ const LovedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Loved <span className="text-[#E8500A]">Brands</span> <span className="text-gray-400 text-2xl">({lovedBrands.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">â™¥ Brands you reacted to with love</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Loved Brands <span className="text-[#9AA0AC] text-lg font-bold">({lovedBrands.length})</span>
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">Brands you reacted to with love</p>
         </div>
       </div>
 
@@ -409,7 +429,7 @@ const LovedBrandsSection = () => {
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-lg font-black text-[#1a1a2e] uppercase italic mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
@@ -427,8 +447,8 @@ const LovedBrandsSection = () => {
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Heart size={64} className="mb-8 text-rose-500" />
-          <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No Loved Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore Brands</Link>
+          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No Loved Brands yet</p>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
         </div>
       )}
     </div>
@@ -443,8 +463,10 @@ const FollowedBrandsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Followed <span className="text-[#E8500A]">Partners</span> <span className="text-gray-400 text-2xl">({followedBrands.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">âš¡ Subscribed to receive updates and deals</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Following <span className="text-[#9AA0AC] text-lg font-bold">({followedBrands.length})</span>
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">Subscribed to receive updates and deals</p>
         </div>
       </div>
 
@@ -473,7 +495,7 @@ const FollowedBrandsSection = () => {
                     brand.logo || brand.name[0]
                   )}
                 </div>
-                <h4 className="text-lg font-black text-[#1a1a2e] uppercase italic mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
+                <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
                 <div className="flex items-center justify-center gap-1.5 mb-6">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
@@ -492,8 +514,8 @@ const FollowedBrandsSection = () => {
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Store size={64} className="mb-8 text-gray-300" />
-          <p className="text-[11px] font-black text-[#1a1a2e ] uppercase tracking-widest italic leading-relaxed font-black mb-4">No Followed Brands yet</p>
-          <Link to="/brands" className="mt-8 px-10 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic shadow-xl">Explore and Follow Brands</Link>
+          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed mb-4">No Followed Brands yet</p>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore and follow brands</Link>
         </div>
       )}
     </div>
@@ -512,13 +534,15 @@ const RecentlyViewedSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Recently <span className="text-[#E8500A]">Viewed</span> <span className="text-gray-400 text-2xl">({recentlyViewed.length})</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">ðŸ•’ Products you recently browsed</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Browsing History <span className="text-[#9AA0AC] text-lg font-bold">({recentlyViewed.length})</span>
+          </h2>
+          <p className="text-[#9AA0AC] text-[12.5px]">Products you recently browsed</p>
         </div>
         {recentlyViewed.length > 0 && (
           <button 
             onClick={handleClearHistory}
-            className="text-[10px] font-black text-red-500 uppercase tracking-widest italic hover:underline bg-transparent border-none cursor-pointer"
+            className="text-[12px] font-bold text-red-500 tracking-tight hover:underline bg-transparent border-none cursor-pointer"
           >
             Clear History
           </button>
@@ -536,9 +560,9 @@ const RecentlyViewedSection = () => {
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Clock size={64} className="mb-8 text-[#E8500A]" />
-          <p className="text-[11px] font-black text-[#1a1a2e] uppercase tracking-widest italic leading-relaxed">No recently viewed products</p>
+          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No recently viewed products</p>
           <p className="text-[10px] font-bold text-gray-405 uppercase mt-2 italic">Product views will automatically populate this section.</p>
-          <Link to="/products" className="mt-8 px-10 py-3 bg-[#E8500A] text-white font-black uppercase tracking-widest italic shadow-xl">Go To Directory</Link>
+          <Link to="/products" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Go to directory</Link>
         </div>
       )}
     </div>
@@ -566,7 +590,7 @@ const MessagesSection = () => {
         activeChat !== null && "hidden md:flex"
       )}>
          <div className="p-6 md:p-8 border-b border-white/5">
-            <h2 className="text-lg md:text-xl font-black text-navy italic uppercase tracking-tighter mb-4">Inbox</h2>
+            <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-4">Inbox</h2>
             <div className="relative">
                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/30 transition-all" placeholder="Search chats..." />
@@ -607,7 +631,7 @@ const MessagesSection = () => {
                </button>
                <img src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png" className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" alt="" />
                <div>
-                  <h4 className="text-xs md:text-sm font-black text-navy italic uppercase tracking-widest leading-none">Farhan Rafiq</h4>
+                  <h4 className="text-xs md:text-sm font-extrabold text-[#1A1A2E] tracking-tight leading-none">Farhan Rafiq</h4>
                   <span className="text-[8px] md:text-[9px] font-bold text-[#059669] uppercase italic font-black">Support Active</span>
                </div>
             </div>
@@ -626,7 +650,7 @@ const MessagesSection = () => {
                  )}>
                     {m.text}
                  </div>
-                 <span className="text-[8px] font-black text-gray-400 uppercase italic px-2">{m.senderName || 'Farhan'} â€¢ {m.time}</span>
+                 <span className="text-[11px] font-medium text-[#9AA0AC] tracking-tight px-2">{m.senderName || 'Farhan'} â€¢ {m.time}</span>
               </div>
             ))}
          </div>
@@ -664,12 +688,12 @@ const NotificationsSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">Notification <span className="text-[#E8500A]">Center</span></h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Updates on your curated world</p>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">Notifications</h2>
+          <p className="text-[#9AA0AC] text-[13px] font-medium">Updates on your curated world</p>
         </div>
         <button 
           onClick={markAllAsRead}
-          className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic hover:underline border-none bg-transparent cursor-pointer"
+            className="text-[12px] font-bold text-[#FF5B00] tracking-tight hover:underline border-none bg-transparent cursor-pointer"
         >
           Mark all as read
         </button>
@@ -696,7 +720,7 @@ const NotificationsSection = () => {
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-lg font-black text-navy uppercase italic tracking-tighter">{n.title}</h4>
+                  <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight">{n.title}</h4>
                   <span className="text-[10px] font-black text-gray-500 uppercase">{n.time}</span>
                 </div>
                 <p className="text-gray-500 text-sm font-bold italic leading-relaxed">{n.message}</p>
@@ -706,7 +730,7 @@ const NotificationsSection = () => {
         ) : (
           <div className="py-32 flex flex-col items-center text-center text-gray-400">
             <Bell size={64} className="mb-8" />
-            <p className="text-[11px] font-black uppercase tracking-widest italic">No new notifications</p>
+            <p className="text-[13px] font-medium text-[#9AA0AC]">No new notifications</p>
           </div>
         )}
       </div>
@@ -753,17 +777,17 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
     <div className="max-w-6xl space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="text-left">
-          <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">
-            Profile <span className="text-[#E8500A]">Settings</span>
+          <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+            Profile Settings
           </h2>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">
+          <p className="text-[#9AA0AC] text-[12.5px]">
             Account center — personal info, addresses, security &amp; preferences
           </p>
         </div>
         {settingsSubTab === 'personal' && (
           <button
             onClick={handleSave}
-            className="px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 italic"
+            className="px-5 py-2.5 bg-[#FF5B00] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-lg transition-all cursor-pointer border-0 shadow-sm flex items-center gap-2"
           >
             Save Changes
           </button>
@@ -803,15 +827,15 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                   <Plus className="text-white" size={32} />
                 </div>
               </div>
-              <h4 className="text-xl font-black text-navy italic uppercase mb-1">{name}</h4>
+              <h4 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">{name}</h4>
               <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator</p>
             </div>
 
             <div className="space-y-6">
-              <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Basic Intel</h3>
+              <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">Profile</h3>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">
+                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-4">
                     Full Display Name
                   </label>
                   <input
@@ -822,7 +846,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">
+                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-4">
                     Email Address
                   </label>
                   <input
@@ -833,7 +857,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 italic">
+                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-4">
                     Phone Number
                   </label>
                   <input
@@ -849,11 +873,11 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
 
           <div className="space-y-8">
             <div className="space-y-6">
-              <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">
-                Quick Links
+              <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">
+                Quick links
               </h3>
               <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 space-y-3 shadow-sm">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                <p className="text-[13px] font-medium text-[#9AA0AC]">
                   Manage delivery locations from the Addresses tab or sidebar menu.
                 </p>
               </div>
@@ -866,7 +890,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
 
       {settingsSubTab === 'security' && (
         <div className="space-y-6 max-w-xl">
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Security Zone</h3>
+          <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">Security</h3>
           <button className="w-full py-4 bg-white border border-gray-200 rounded-lg text-[10px] font-black text-navy uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-3 cursor-pointer shadow-sm min-h-[44px]">
             <ShieldCheck size={16} className="text-[#E8500A]" /> Reset Multi-Factor Auth
           </button>
@@ -878,7 +902,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
 
       {settingsSubTab === 'notifications' && (
         <div className="space-y-6 max-w-2xl">
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2 italic">Notification Matrix</h3>
+          <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">Notifications</h3>
           <div className="bg-white border border-[#e8edf2] rounded-[5px] p-8 space-y-6 shadow-sm">
             {[
               { label: 'Sale Alerts', desc: 'When your saved product goes on flash sale', checked: true },
@@ -888,7 +912,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between gap-6 group">
                 <div className="flex-1 text-left">
-                  <h5 className="text-[11px] font-black text-navy uppercase italic tracking-tighter mb-1">
+                  <h5 className="text-[13px] font-bold text-[#1A1A2E] tracking-tight mb-1">
                     {item.label}
                   </h5>
                   <p className="text-[9px] font-bold text-gray-500 italic uppercase">{item.desc}</p>
@@ -915,7 +939,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
 
       {settingsSubTab === 'privacy' && (
         <div className="max-w-2xl bg-white border border-[#e8edf2] rounded-[5px] p-8 shadow-sm text-left">
-          <h3 className="text-sm font-black italic uppercase tracking-tight text-[#1a1a2e] mb-2">Privacy</h3>
+          <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-2">Privacy</h3>
           <p className="text-[11px] text-gray-500 leading-relaxed">
             Control how your browsing activity and profile data are used across Choosify. Privacy controls
             will expand in a future release.
@@ -972,18 +996,24 @@ export function DashboardPage() {
     MapPin,
   };
 
-  const formatNavLabel = (item: { id: string; label: string }) => {
-    if (item.id === 'saved-products') return `Saved Products (${savedProducts.length})`;
-    if (item.id === 'saved-brands') return `Saved Brands (${savedBrands.length})`;
-    if (item.id === 'loved-brands') return `Loved Brands (${lovedBrands.length})`;
-    if (item.id === 'followed-brands') return `Following (${followedBrands.length})`;
-    if (item.id === 'recently-viewed') return `Browsing History (${recentlyViewed.length})`;
-    if (item.id === 'saved-recommendations') return `Saved Spotlight (${savedGuides.length})`;
-    if (item.id === 'messages') {
+  const formatNavLabel = (item: { id: string; label: string }) => item.label;
+
+  const getNavCount = (id: string): number | string | null => {
+    if (id === 'saved-products') return savedProducts.length;
+    if (id === 'saved-brands') return savedBrands.length;
+    if (id === 'loved-brands') return lovedBrands.length;
+    if (id === 'followed-brands') return followedBrands.length;
+    if (id === 'recently-viewed') return recentlyViewed.length;
+    if (id === 'saved-recommendations') return savedGuides.length;
+    return null;
+  };
+
+  const getNavBadge = (id: string): number | string | null => {
+    if (id === 'messages') {
       const unread = threads.filter((t) => t.unread).length;
-      return unread ? `Messages (${unread} unread)` : 'Messages';
+      return unread > 0 ? unread : null;
     }
-    return item.label;
+    return null;
   };
 
   const mapNavItems = (items: typeof dashboardNav.platform) =>
@@ -992,11 +1022,19 @@ export function DashboardPage() {
       label: formatNavLabel(item),
       icon: DASHBOARD_ICONS[item.icon] ?? LayoutDashboard,
       href: item.href,
+      count: getNavCount(item.id),
+      badge: getNavBadge(item.id),
     }));
 
   const controlItems = mapNavItems(dashboardNav.platform);
   const workspaceItems = mapNavItems(dashboardNav.workspace);
   const accountItems = mapNavItems(dashboardNav.account);
+
+  const overviewItems = controlItems.filter((i) => i.id === 'overview');
+  const collectionItems = controlItems.filter((i) => COLLECTION_TAB_IDS.has(i.id));
+  const activityItems = controlItems.filter((i) => ACTIVITY_TAB_IDS.has(i.id));
+  const communicationItems = accountItems.filter((i) => COMMUNICATION_TAB_IDS.has(i.id));
+  const accountOnlyItems = accountItems.filter((i) => !COMMUNICATION_TAB_IDS.has(i.id));
 
   const [activeTab, setActiveTab] = useState('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>('personal');
@@ -1061,12 +1099,12 @@ export function DashboardPage() {
 
   const renderContent = () => {
     if (!isDashboardTabAllowed(activeTab, platformRole)) {
-      return <OverviewSection onTabChange={setActiveTab} />;
+      return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
     }
 
     switch (activeTab) {
       // Retail Tabs
-      case 'overview': return <OverviewSection onTabChange={setActiveTab} />;
+      case 'overview': return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
       case 'saved-products': return <SavedProductsSection />;
       case 'saved-brands': return <SavedBrandsSection />;
       case 'loved-brands': return <LovedBrandsSection />;
@@ -1078,13 +1116,13 @@ export function DashboardPage() {
           <div className="w-16 h-16 bg-[#F96500]/10 text-orange-primary rounded-full flex items-center justify-center mb-4">
             <MessageSquare size={28} className="animate-pulse" />
           </div>
-          <h3 className="text-md font-black uppercase text-gray-950 italic tracking-tight">Opening Workspace Chat</h3>
-          <p className="text-[10px] text-gray-500 uppercase tracking-widest leading-relaxed font-bold mb-6">
-            Connecting you to your secure buyer/seller network in the unified messenger...
+          <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight">Opening workspace chat</h3>
+          <p className="text-[13px] text-[#9AA0AC] leading-relaxed font-medium mb-6">
+            Connecting you to your buyer/seller network in the messenger…
           </p>
           <Link 
             to="/messages" 
-            className="px-6 py-3 bg-[#F96500] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#FF5B00] transition-all italic leading-none"
+            className="px-6 py-3 bg-[#FF5B00] text-white text-[13px] font-bold tracking-tight rounded-lg hover:brightness-110 transition-all leading-none"
           >
             Go to Messenger
           </Link>
@@ -1111,8 +1149,8 @@ export function DashboardPage() {
       case 'my-reviews': return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
             <div>
-               <h2 className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2">My <span className="text-[#E8500A]">Reviews</span></h2>
-               <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Your community contributions and feedback</p>
+               <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">My Reviews</h2>
+               <p className="text-[#9AA0AC] text-[12.5px]">Your community contributions and feedback</p>
             </div>
             <div className="space-y-6">
                {reviews && reviews.length > 0 ? (
@@ -1125,7 +1163,7 @@ export function DashboardPage() {
                        </div>
                        <div className="flex-grow text-left">
                          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                           <h4 className="font-sans font-black text-navy text-sm uppercase italic tracking-tight">{r.product}</h4>
+                           <h4 className="font-sans font-bold text-[#1A1A2E] text-sm tracking-tight">{r.product}</h4>
                            <span className="text-[10px] font-mono text-gray-400 font-extrabold uppercase">{r.date || r.createdAt || 'Just now'}</span>
                          </div>
                          <div className="flex items-center gap-1.5 mb-3">
@@ -1141,7 +1179,7 @@ export function DashboardPage() {
                  })
                ) : (
                  <div className="py-20 border border-dashed border-gray-200 rounded-[5px] flex flex-col items-center justify-center text-center bg-white shadow-sm w-full">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider italic">No review records found</p>
+                    <p className="text-[13px] font-medium text-[#9AA0AC] tracking-tight">No review records found</p>
                  </div>
                )}
             </div>
@@ -1152,7 +1190,7 @@ export function DashboardPage() {
       case 'addresses':
         return <AddressBookManager />;
 
-      default: return <OverviewSection onTabChange={setActiveTab} />;
+      default: return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
     }
   };
 
@@ -1167,20 +1205,155 @@ export function DashboardPage() {
     }
   };
 
+  const renderSidebarNav = (compact = false) => (
+    <nav className={cn('flex-1 overflow-y-auto no-scrollbar', compact ? 'px-3 py-4' : 'px-1')}>
+      {overviewItems.length > 0 && (
+        <>
+          <SidebarSectionLabel>DASHBOARD</SidebarSectionLabel>
+          {overviewItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              count={item.count}
+              badge={item.badge}
+              onClick={() => handleNavClick(item)}
+            />
+          ))}
+        </>
+      )}
+
+      {collectionItems.length > 0 && (
+        <>
+          <SidebarSectionLabel>MY COLLECTION</SidebarSectionLabel>
+          {collectionItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              count={item.count}
+              badge={item.badge}
+              onClick={() => handleNavClick(item)}
+            />
+          ))}
+        </>
+      )}
+
+      {activityItems.length > 0 && (
+        <>
+          <SidebarSectionLabel>ACTIVITY</SidebarSectionLabel>
+          {activityItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              count={item.count}
+              badge={item.badge}
+              onClick={() => handleNavClick(item)}
+            />
+          ))}
+        </>
+      )}
+
+      {workspaceItems.length > 0 && (
+        <>
+          <SidebarSectionLabel>WORKSPACE</SidebarSectionLabel>
+          {workspaceItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              count={item.count}
+              badge={item.badge}
+              onClick={() => handleNavClick(item)}
+            />
+          ))}
+        </>
+      )}
+
+      {communicationItems.length > 0 && (
+        <>
+          <SidebarSectionLabel>COMMUNICATION</SidebarSectionLabel>
+          {communicationItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              count={item.count}
+              badge={item.badge}
+              onClick={() => handleNavClick(item)}
+            />
+          ))}
+        </>
+      )}
+
+      <SidebarSectionLabel>ACCOUNT</SidebarSectionLabel>
+      {accountOnlyItems.map((item) => (
+        <SidebarItem
+          key={item.id}
+          icon={item.icon}
+          label={item.label}
+          active={activeTab === item.id}
+          count={item.count}
+          badge={item.badge}
+          onClick={() => handleNavClick(item)}
+        />
+      ))}
+      <SidebarItem
+        icon={LogOut}
+        label="Log Out"
+        onClick={() => {
+          setMobileNavOpen(false);
+          setIsLoggedIn(false);
+          navigate('/');
+          toast.success('Successfully logged out.');
+        }}
+      />
+    </nav>
+  );
+
+  const premiumCard = (
+    <div className="bg-[#000435] rounded-[14px] p-5 text-white mb-3.5">
+      <div className="text-[13px] font-extrabold mb-1">Premium Member</div>
+      <div className="text-[11px] text-white/55 mb-3.5">Enjoy exclusive benefits</div>
+      {['Early access to deals', 'Premium support', 'Exclusive rewards'].map((perk) => (
+        <div key={perk} className="flex items-center gap-2 text-[11.5px] text-white/85 mb-2.5">
+          <span className="text-[#FF5B00]">●</span>
+          {perk}
+        </div>
+      ))}
+      <button
+        type="button"
+        className="w-full bg-[#FF5B00] text-white border-none py-2.5 rounded-lg text-[12px] font-extrabold cursor-pointer mt-1.5 hover:brightness-105"
+      >
+        View Benefits
+      </button>
+    </div>
+  );
+
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed text-[#1a1a2e]">
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9] text-[#1A1A2E]">
       {/* Mobile Top Header */}
-      <div className="lg:hidden p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-50">
-        <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border border-gray-200 cursor-pointer">
+      <div className="lg:hidden p-4 border-b border-[#E8EDF2] flex items-center justify-between sticky top-0 bg-white z-50">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="w-10 h-10 rounded-full bg-[#F4F7F9] flex items-center justify-center text-[#1A1A2E] border border-[#E8EDF2] cursor-pointer"
+        >
           <ArrowLeft size={20} />
         </button>
-        <p className="text-[10px] font-black uppercase tracking-wider text-[#1a1a2e] truncate px-2">
+        <p className="text-[13px] font-bold text-[#1A1A2E] truncate px-2">
           {allNavItems.find((item) => item.id === activeTab)?.label ?? 'Dashboard'}
         </p>
         <button
           type="button"
           onClick={() => setMobileNavOpen(true)}
-          className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border border-gray-200 cursor-pointer"
+          className="w-10 h-10 rounded-full bg-[#F4F7F9] flex items-center justify-center text-[#1A1A2E] border border-[#E8EDF2] cursor-pointer"
           aria-label="Open dashboard menu"
         >
           <Menu size={20} />
@@ -1195,145 +1368,50 @@ export function DashboardPage() {
             onClick={() => setMobileNavOpen(false)}
             aria-label="Close menu"
           />
-          <div className="absolute inset-y-0 left-0 w-[min(100%,320px)] bg-[#1a1a2e] text-white shadow-2xl overflow-y-auto">
-            <div className="p-6 border-b border-white/10 flex items-center justify-between">
-              <span className="text-sm font-black uppercase italic tracking-tight">Dashboard Menu</span>
-              <button type="button" onClick={() => setMobileNavOpen(false)} className="text-white/60 hover:text-white">
+          <div className="absolute inset-y-0 left-0 w-[min(100%,300px)] bg-white shadow-2xl overflow-y-auto flex flex-col border-r border-[#E8EDF2]">
+            <div className="p-4 border-b border-[#E8EDF2] flex items-center justify-between">
+              <span className="text-sm font-extrabold text-[#1A1A2E]">Dashboard</span>
+              <button
+                type="button"
+                onClick={() => setMobileNavOpen(false)}
+                className="text-[#9AA0AC] hover:text-[#1A1A2E] bg-transparent border-none cursor-pointer"
+              >
                 <X size={20} />
               </button>
             </div>
-            <nav className="py-4">
-              {allNavItems.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleNavClick(item)}
-                  className={cn(
-                    'w-full flex items-center gap-3 px-6 py-3 text-left text-[11px] font-black uppercase tracking-wider',
-                    activeTab === item.id ? 'text-[#E8500A] bg-white/5' : 'text-white/70 hover:text-white hover:bg-white/5',
-                  )}
-                >
-                  <item.icon size={16} />
-                  {item.label}
-                </button>
-              ))}
-            </nav>
+            {renderSidebarNav(true)}
+            <div className="p-4 mt-auto border-t border-[#E8EDF2]">
+              {premiumCard}
+              <Link
+                to="/"
+                onClick={() => setMobileNavOpen(false)}
+                className="flex items-center gap-2 border border-[#E8EDF2] rounded-[10px] px-3.5 py-2.5 text-[12px] font-semibold text-[#1A1A2E]"
+              >
+                Browse Choosify.bd
+              </Link>
+            </div>
           </div>
         </div>
       )}
 
-      <div className="flex flex-1">
-        {/* Sidebar Desktop */}
-        <aside className="hidden lg:flex w-[320px] flex-col border-r border-white/5 choosify-dark-gradient text-white h-screen sticky top-0 overflow-y-auto no-scrollbar">
-          <div className="p-10 border-b border-white/5">
-            <Link to="/" className="flex flex-col items-start group mb-8 text-white">
-              <div className="flex gap-1 mb-1">
-                <div className="w-4 h-4 rounded-full border-2 border-[#E8500A] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-[#E8500A] rounded-full" />
-                </div>
-                <div className="w-4 h-4 rounded-full border-2 border-[#E8500A] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-[#E8500A] rounded-full" />
-                </div>
-              </div>
-              <span className="text-2xl font-black tracking-tight lowercase font-sans text-white">choosify.bd</span>
-              <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mt-1 italic">Dashboard v2.0</span>
-            </Link>
-          </div>
-
-          <nav className="flex-1 py-4 overflow-y-auto no-scrollbar">
-            <div className="px-10 text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-4 italic">Platform Control</div>
-            {controlItems.map((item) => (
-              <SidebarItem
-                key={item.id}
-                icon={item.icon}
-                label={item.label}
-                active={activeTab === item.id}
-                onClick={() => {
-                  if (item.href) {
-                    navigate(item.href);
-                  } else {
-                    setActiveTab(item.id);
-                  }
-                }}
-              />
-            ))}
-
-            {workspaceItems.length > 0 && (
-              <>
-                <div className="mt-12 px-10 text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-4 italic">Workspace</div>
-                {workspaceItems.map((item) => (
-                  <SidebarItem
-                    key={item.id}
-                    icon={item.icon}
-                    label={item.label}
-                    active={activeTab === item.id}
-                    onClick={() => {
-                      if (item.href) {
-                        navigate(item.href);
-                      } else {
-                        setActiveTab(item.id);
-                      }
-                    }}
-                  />
-                ))}
-              </>
-            )}
-            
-            <div className="mt-12 px-10 text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mb-4 italic">Communication & Account</div>
-            {accountItems.map((item) => (
-              <SidebarItem
-                key={item.id}
-                icon={item.icon}
-                label={item.label}
-                active={activeTab === item.id}
-                onClick={() => {
-                  if (item.href) {
-                    navigate(item.href);
-                  } else {
-                    setActiveTab(item.id);
-                  }
-                }}
-              />
-            ))}
-          </nav>
-
-          <div className="p-10 mt-auto border-t border-white/5 space-y-4">
-            <Link to="/" className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-navy rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-black/20">
-               <ShoppingBag size={16} /> Browse Choosify.bd
-            </Link>
-            <button 
-              onClick={() => {
-                setIsLoggedIn(false);
-                navigate('/');
-                toast.success('Successfully logged out.');
-              }}
-              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest italic hover:bg-white/10 transition-all cursor-pointer"
+      <div className="flex flex-1 w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-7 gap-7 items-start">
+        {/* Sidebar Desktop — light sticky */}
+        <aside className="hidden lg:flex w-[240px] shrink-0 flex-col sticky top-[88px] max-h-[calc(100vh-100px)] overflow-y-auto no-scrollbar">
+          {renderSidebarNav()}
+          <div className="mt-4 pt-2">
+            {premiumCard}
+            <Link
+              to="/"
+              className="flex items-center gap-2 border border-[#E8EDF2] rounded-[10px] px-3.5 py-2.5 text-[12px] font-semibold text-[#1A1A2E] hover:bg-white transition-colors bg-white"
             >
-               <LogOut size={16} className="text-[#E8500A]" /> Curator Log Out
-            </button>
+              Browse Choosify.bd
+            </Link>
           </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 w-full relative">
-
-
-           <div className="p-8 md:p-12 lg:p-20 max-w-[1400px] mx-auto min-h-screen">
-              <div className="animate-in fade-in transition-all duration-700">
-                {renderContent()}
-              </div>
-           </div>
-           
-           {/* Footer Accent */}
-           <div className="py-20 text-center opacity-20 hidden lg:block">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <div className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                </div>
-                <span className="text-xl font-bold tracking-tight lowercase">choosify.bd</span>
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em]">SECURE CURATOR TERMINAL â€¢ v2.6.0</p>
-           </div>
+        <main className="flex-1 w-full min-w-0 relative">
+          <div className="animate-in fade-in transition-all duration-700">{renderContent()}</div>
         </main>
       </div>
     </div>

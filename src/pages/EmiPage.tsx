@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
-import { PageHeroHeader } from '../components/PageHeroHeader';
-import { ChoosifyIconLogo } from '../components/ChoosifyIconLogo';
+import { Link } from 'react-router-dom';
+import { EmiAiLogo } from '../components/EmiAiLogo';
 import { LoadingFallback } from '../components/LoadingFallback';
 
 const EmiChatPanel = lazy(() =>
@@ -9,24 +9,32 @@ const EmiChatPanel = lazy(() =>
 
 export function EmiPage() {
   return (
-    <div className="min-h-screen bg-choosify-feed flex flex-col">
-      <PageHeroHeader variant="gradient" className="px-6 py-10">
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#E8500A] mb-2 flex items-center justify-center gap-2">
-            <ChoosifyIconLogo size={22} className="w-[22px] h-[22px]" />
+    <div className="min-h-screen bg-[#F4F7F9] flex flex-col">
+      <header className="bg-[#000435] text-white px-5 sm:px-10 py-8">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-[11px] font-bold text-[#FF5B00] tracking-wide mb-2 inline-flex items-center justify-center gap-2">
+            <span className="w-8 h-8 rounded-full bg-white flex items-center justify-center overflow-hidden p-0.5">
+              <EmiAiLogo size={28} className="w-7 h-7" />
+            </span>
             Choosify Assistant
           </p>
-          <h1 className="text-3xl md:text-4xl font-black text-white uppercase italic tracking-tighter mb-2">
+          <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight mb-2">
             Chat with Emi
           </h1>
-          <p className="text-sm text-white/60 max-w-lg mx-auto">
+          <p className="text-[13px] text-white/55 max-w-lg mx-auto m-0">
             Product discovery, deal tips, and comparison guidance — grounded in Choosify listings.
           </p>
+          <p className="mt-3 text-[12px] text-white/40">
+            Or go back to{' '}
+            <Link to="/" className="text-[#FF5B00] font-semibold hover:underline">
+              Home
+            </Link>
+          </p>
         </div>
-      </PageHeroHeader>
+      </header>
 
       <div className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 md:py-8">
-        <div className="h-[min(70vh,720px)] rounded-[5px] border border-[#e8edf2] bg-white shadow-sm overflow-hidden flex flex-col">
+        <div className="h-[min(70vh,720px)] rounded-xl border border-[#E8EDF2] bg-white shadow-sm overflow-hidden flex flex-col">
           <Suspense fallback={<LoadingFallback />}>
             <EmiChatPanel variant="page" className="h-full" />
           </Suspense>

@@ -69,7 +69,7 @@ function AddressCard({
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h4 className="text-sm font-black italic uppercase tracking-tight text-[#1a1a2e] truncate">
+              <h4 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] truncate">
                 {address.label}
               </h4>
               {address.isDefault && (
@@ -167,7 +167,7 @@ function CheckoutPreviewCard({ address }: { address: CustomerAddress }) {
     <div className="rounded-[5px] border border-[#e8edf2] bg-white p-5 shadow-sm text-left">
       <div className="flex items-center gap-2 mb-3">
         <Truck size={16} className="text-[#E8500A]" />
-        <h4 className="text-xs font-black uppercase italic tracking-tight text-[#1a1a2e]">
+        <h4 className="text-xs font-bold tracking-tight text-[#1A1A2E]">
           Default Delivery Address
         </h4>
       </div>
@@ -263,20 +263,20 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
           <div className="text-left">
             <h2
               id="address-book-heading"
-              className="text-3xl font-black text-navy italic uppercase tracking-tighter mb-2"
+              className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-2"
             >
-              My <span className="text-[#E8500A]">Addresses</span>
+              My addresses
             </h2>
-            <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">
+            <p className="text-[#9AA0AC] text-[13px] font-medium">
               Manage your delivery locations for faster checkout
             </p>
           </div>
           <button
             type="button"
             onClick={openCreate}
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest italic hover:bg-[#CF4400]"
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight hover:brightness-110"
           >
-            <Plus size={14} /> Add New Address
+            <Plus size={14} /> Add new address
           </button>
         </div>
       )}
@@ -284,17 +284,17 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
       {embedded && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="text-left">
-            <h3 className="text-lg font-black italic uppercase tracking-tight text-[#1a1a2e]">Addresses</h3>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+            <h3 className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">Addresses</h3>
+            <p className="text-[13px] font-medium text-[#9AA0AC]">
               Saved delivery locations
             </p>
           </div>
           <button
             type="button"
             onClick={openCreate}
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-[#CF4400]"
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight hover:brightness-110"
           >
-            <Plus size={14} /> Add New Address
+            <Plus size={14} /> Add new address
           </button>
         </div>
       )}
@@ -302,7 +302,7 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
       {customerAddresses.length === 0 ? (
         <div className="py-16 border border-dashed border-[#e8edf2] rounded-[5px] bg-white text-center">
           <MapPin size={40} className="mx-auto text-[#E8500A] mb-4" />
-          <h4 className="text-base font-black italic uppercase tracking-tight text-[#1a1a2e]">
+          <h4 className="text-base font-extrabold tracking-tight text-[#1A1A2E]">
             No saved addresses yet
           </h4>
           <p className="text-[11px] font-bold text-gray-500 mt-2 max-w-sm mx-auto">

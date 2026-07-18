@@ -2,9 +2,9 @@
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  ShoppingCart, MessageSquare, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp, ArrowRight
+  ShoppingCart, MessageCircle, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp, ArrowRight
 } from 'lucide-react';
-import { ChoosifyIconLogo } from './ChoosifyIconLogo';
+import { EmiAiLogo } from './EmiAiLogo';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { cn } from '../lib/utils';
@@ -228,11 +228,14 @@ export function FloatingOverlays() {
     }
   }, [totalCartItems, activePanel]);
 
-  // Stack calculation based on active item volumes
-  const visibleButtonsCount =
-    (showEmiFab ? 1 : 0) + (showMessagesFab ? 1 : 0) + (totalCartItems > 0 ? 1 : 0);
-  // Each trigger is h-12 (48px) and equal spacing is gap-3 (12px)
-  const triggerStackHeight = visibleButtonsCount * 48 + (visibleButtonsCount - 1) * 12;
+  // Stack calculation based on active FAB sizes (Emi 52px, cart/messages 48px)
+  const triggerHeights: number[] = [];
+  if (showEmiFab) triggerHeights.push(52);
+  if (totalCartItems > 0) triggerHeights.push(48);
+  if (showMessagesFab) triggerHeights.push(48);
+  const triggerStackHeight =
+    triggerHeights.reduce((sum, h) => sum + h, 0) +
+    (triggerHeights.length > 1 ? (triggerHeights.length - 1) * 12 : 0);
 
   // Custom motion transitions matching standard Choosify velocity
   const desktopDrawerTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
@@ -326,10 +329,10 @@ export function FloatingOverlays() {
       </AnimatePresence>
 
       
-      {/* Desktop / tablet pill stack — Emi + cart + messages */}
-      <div className="hidden sm:flex flex-col-reverse items-end gap-3 w-[185px]">
+      {/* Desktop / tablet circular FAB stack — Emi + cart + messages */}
+      <div className="hidden sm:flex flex-col-reverse items-end gap-3">
 
-        {/* EMi ASSISTANT — always available when feature flag is on */}
+        {/* EMI ASSISTANT — always available when feature flag is on */}
         <AnimatePresence>
           {showEmiFab && (
             <motion.button
@@ -342,20 +345,17 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                'w-[185px] h-12 rounded-full border flex items-center justify-center gap-2 px-4 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none',
-                activePanel === 'emi'
-                  ? 'bg-[#1A1D4E] border-[#1A1D4E] text-white'
-                  : 'bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40',
+                'w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none p-1 overflow-hidden',
+                activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
               )}
               title="Ask Emi — Choosify Assistant"
             >
-              <ChoosifyIconLogo size={22} className="w-[22px] h-[22px] shrink-0" />
-              <span className="text-[11px] font-bold tracking-tight">Ask Emi</span>
+              <EmiAiLogo size={44} className="w-11 h-11" />
             </motion.button>
           )}
         </AnimatePresence>
 
-        {/* BUTTON 2: QUICK CART (visible when cart has items) */}
+        {/* CART FAB (visible when cart has items) */}
         <AnimatePresence>
           {totalCartItems > 0 && (
             <motion.button
@@ -368,35 +368,16 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
-                activePanel === 'cart'
-                  ? "bg-[#FFF0E8] border-[#E8500A] text-[#E8500A]"
-                  : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40"
+                "relative w-12 h-12 rounded-full bg-[#000435] text-white shadow-[0_8px_20px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none",
+                activePanel === 'cart' && "ring-2 ring-[#FF5B00]/50 brightness-110",
               )}
               title="Quick Cart Checklist"
             >
-              <div className="flex items-center gap-2">
-                <ShoppingCart 
-                  size={15} 
-                  className={cn(
-                    "transition-colors",
-                    activePanel === 'cart' ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A]"
-                  )} 
-                />
-                <span className="text-[10px] font-black uppercase tracking-wider">
-                  QUICK CART
-                </span>
-              </div>
-              
-              <motion.span 
+              <ShoppingCart size={20} strokeWidth={2} />
+              <motion.span
                 animate={cartBadgeBounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className={cn(
-                  "font-mono text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center leading-none",
-                  activePanel === 'cart' 
-                    ? "bg-[#E8500A] text-white"
-                    : "bg-gradient-to-br from-[#FF6A00] to-[#FF9E2C] text-white"
-                )}
+                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center leading-none"
               >
                 {totalCartItems > 99 ? '99+' : totalCartItems}
               </motion.span>
@@ -404,8 +385,7 @@ export function FloatingOverlays() {
           )}
         </AnimatePresence>
 
-
-        {/* MESSAGES PILL — only when unread conversations exist */}
+        {/* MESSAGES FAB — only when unread conversations exist */}
         <AnimatePresence>
           {showMessagesFab && (
             <motion.button
@@ -418,30 +398,16 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none",
-                activePanel === 'messages'
-                  ? "bg-[#FFF0E8] border-[#E8500A] text-[#E8500A]"
-                  : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40"
+                "relative w-12 h-12 rounded-full bg-[#000435] text-white shadow-[0_8px_20px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none",
+                activePanel === 'messages' && "ring-2 ring-[#FF5B00]/50 brightness-110",
               )}
               title="Merchant Conversations"
             >
-              <div className="flex items-center gap-2">
-                <MessageSquare 
-                  size={15} 
-                  className={cn(
-                    "transition-colors",
-                    activePanel === 'messages' ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A]"
-                  )} 
-                />
-                <span className="text-[10px] font-black uppercase tracking-wider">
-                  MESSAGES
-                </span>
-              </div>
-              
-              <motion.span 
+              <MessageCircle size={20} strokeWidth={2} />
+              <motion.span
                 animate={inboxBadgeBounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="font-mono text-[9px] font-black min-w-[1.25rem] h-5 px-1 rounded-full flex items-center justify-center leading-none bg-gradient-to-br from-[#FF6A00] to-[#FF9E2C] text-white animate-pulse"
+                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center leading-none"
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </motion.span>
@@ -466,8 +432,8 @@ export function FloatingOverlays() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={cn(
-              'fixed z-[218] w-11 h-11 rounded-full border border-[#e8edf2] bg-white text-[#1A1D4E] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#E8500A]/40 hover:text-[#E8500A] flex items-center justify-center cursor-pointer pointer-events-auto transition-colors',
-              isMobile ? 'bottom-20 right-4' : 'bottom-6 right-[212px] lg:bottom-8 lg:right-[220px]',
+              'fixed z-[218] w-11 h-11 rounded-full border border-[#e8edf2] bg-white text-[#1A1D4E] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#FF5B00]/40 hover:text-[#FF5B00] flex items-center justify-center cursor-pointer pointer-events-auto transition-colors',
+              isMobile ? 'bottom-20 right-4' : 'bottom-6 right-20 lg:bottom-8 lg:right-24',
             )}
             aria-label="Scroll to top"
             title="Back to top"
@@ -528,11 +494,11 @@ export function FloatingOverlays() {
               {/* Header */}
               <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3 text-left">
-                  <div className="w-11 h-11 rounded-full bg-[#E8500A]/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
-                    <SlidersHorizontal size={18} className="text-[#E8500A]" />
+                  <div className="w-11 h-11 rounded-full bg-[#FF5B00]/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
+                    <SlidersHorizontal size={18} className="text-[#FF5B00]" />
                   </div>
                   <div>
-                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#E8500A]">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#FF5B00]">
                       {filterConfig.pageName || 'Page Filters'}
                     </div>
                     <h3 className="text-xs font-black text-[#1A1A2E] leading-tight uppercase">
@@ -544,7 +510,7 @@ export function FloatingOverlays() {
                   {filterConfig.onClearAll && filterConfig.activeFilterCount > 0 && (
                     <button
                       onClick={filterConfig.onClearAll}
-                      className="text-[9px] font-black uppercase tracking-wider text-[#E8500A] bg-[#E8500A]/8 hover:bg-[#E8500A]/15 px-3 py-1.5 rounded-full transition-colors border-0 cursor-pointer flex items-center gap-1"
+                      className="text-[9px] font-black uppercase tracking-wider text-[#FF5B00] bg-[#FF5B00]/8 hover:bg-[#FF5B00]/15 px-3 py-1.5 rounded-full transition-colors border-0 cursor-pointer flex items-center gap-1"
                     >
                       <RotateCcw size={9} /> Clear All
                     </button>
@@ -589,7 +555,7 @@ export function FloatingOverlays() {
                           className={cn(
                             "px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all cursor-pointer flex items-center gap-1.5 border",
                             qf.active
-                              ? "bg-[#E8500A] text-white border-transparent shadow-sm font-black italic"
+                              ? "bg-[#FF5B00] text-white border-transparent shadow-sm font-black italic"
                               : "bg-white border-[#e8edf2] text-gray-500 hover:border-[#1A1D4E]/25 hover:text-[#1A1D4E]"
                           )}
                         >
@@ -623,7 +589,7 @@ export function FloatingOverlays() {
                 <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
                   <button
                     onClick={closeFilterPanel}
-                    className="w-full py-3.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[11px] font-black uppercase tracking-widest rounded-[5px] transition-colors cursor-pointer border-0"
+                    className="w-full py-3.5 bg-[#FF5B00] hover:bg-[#E04E00] text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-colors cursor-pointer border-0"
                   >
                     Show Results
                   </button>
@@ -644,34 +610,30 @@ export function FloatingOverlays() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className={cn(
-            "w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto",
-            filterOpen
-              ? "bg-[#FFF0E8] border-[#E8500A] text-[#E8500A]"
-              : "bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#E8500A]/40"
+            "h-[52px] rounded-[26px] bg-white border border-[#e8edf2] flex items-center gap-2.5 px-5 shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto",
+            filterOpen && "ring-2 ring-[#FF5B00]/30",
           )}
         >
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal
-              size={15}
-              className={cn(
-                "transition-colors",
-                filterOpen ? "text-[#E8500A]" : "text-[#8a9bb0] group-hover:text-[#E8500A]"
-              )}
-            />
-            <span className="text-[10px] font-black uppercase tracking-wider">
-              FILTERS
-            </span>
-            {filterConfig.activeFilterCount > 0 && (
-              <span className="w-5 h-5 rounded-full bg-[#E8500A] text-white text-[9px] font-black flex items-center justify-center leading-none">
-                {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
-              </span>
+          <SlidersHorizontal
+            size={18}
+            className={cn(
+              "transition-colors shrink-0",
+              filterOpen ? "text-[#FF5B00]" : "text-[#8a9bb0] group-hover:text-[#FF5B00]"
             )}
-          </div>
+          />
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#1A1A2E]">
+            FILTERS
+          </span>
+          {filterConfig.activeFilterCount > 0 && (
+            <span className="min-w-[18px] h-[18px] px-1 rounded-lg bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center leading-none">
+              {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
+            </span>
+          )}
           <ArrowRight
             size={14}
             className={cn(
-              "transition-transform duration-300",
-              filterOpen ? "text-[#E8500A] rotate-90" : "text-[#8a9bb0] group-hover:text-[#E8500A] group-hover:translate-x-1"
+              "transition-transform duration-300 shrink-0 ml-1",
+              filterOpen ? "text-[#FF5B00] rotate-90" : "text-[#8a9bb0] group-hover:text-[#FF5B00] group-hover:translate-x-0.5"
             )}
           />
         </motion.button>
@@ -686,16 +648,14 @@ export function FloatingOverlays() {
         onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[219] bottom-4 left-4 w-14 h-14 rounded-full border shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-colors pointer-events-auto sm:hidden p-2.5',
-          activePanel === 'emi'
-            ? 'bg-[#1A1D4E] border-[#1A1D4E] text-white'
-            : 'bg-white border-[#e8edf2] text-white',
+          'fixed z-[219] bottom-4 left-4 w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-1 overflow-hidden bg-white',
+          activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
         )}
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         aria-label="Ask Emi"
         title="Ask Emi"
       >
-        <ChoosifyIconLogo size={36} className="w-9 h-9" />
+        <EmiAiLogo size={48} className="w-12 h-12" />
       </motion.button>
     )}
 
@@ -705,17 +665,17 @@ export function FloatingOverlays() {
         onClick={openMobileFilters}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[220] bottom-4 right-4 w-14 h-14 rounded-full border shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-colors pointer-events-auto sm:hidden',
+          'fixed z-[220] bottom-4 right-4 w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden relative',
           filterOpen || drawerFilterOpen
-            ? 'bg-heading border-heading text-white'
-            : 'bg-orange-primary border-orange-primary text-white',
+            ? 'bg-[#000435] text-white ring-2 ring-[#FF5B00]/40'
+            : 'bg-[#000435] text-white',
         )}
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         aria-label="Open filters"
       >
         <SlidersHorizontal size={22} />
         {filterConfig.activeFilterCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-white text-orange-primary text-[9px] font-black border-2 border-orange-primary flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center">
             {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
           </span>
         )}

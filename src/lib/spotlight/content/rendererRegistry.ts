@@ -1,6 +1,6 @@
 /**
  * Renderer registry — maps SpotlightContentType to detail layout strategy.
- * All public cards route to Spotlight Content Page; renderers adapt the layout.
+ * All public item cards open the Guide Detail shell via Spotlight Content Page.
  */
 import type { SpotlightContentType } from '../../../types/spotlight/experience/contentTypes';
 
@@ -38,12 +38,14 @@ export const RENDERER_REGISTRY: SpotlightRendererDefinition[] = [
   {
     rendererId: 'campaign_commerce',
     contentTypes: ['campaign', 'promotion', 'new_launch', 'brand_story', 'announcement'],
-    description: 'Campaign hero, merchandising, CTA',
+    description: 'Campaign hero, merchandising, CTA — Guide Detail shell',
+    reusesGuideDetail: true,
   },
   {
     rendererId: 'live_player',
     contentTypes: ['live', 'livestream_replay'],
-    description: 'Live / replay player with commerce overlay',
+    description: 'Live / replay in Guide Detail hero + live sections',
+    reusesGuideDetail: true,
   },
   {
     rendererId: 'editorial_article',
@@ -55,6 +57,7 @@ export const RENDERER_REGISTRY: SpotlightRendererDefinition[] = [
     rendererId: 'event_card',
     contentTypes: ['event'],
     description: 'Event schedule and brand context',
+    reusesGuideDetail: true,
   },
 ];
 
@@ -67,4 +70,9 @@ export function resolveRendererId(contentType: SpotlightContentType): SpotlightR
       reusesGuideDetail: true,
     }
   );
+}
+
+/** All public content types use Guide Detail — kept for callers/docs */
+export function contentPageUsesGuideLayout(_contentType?: SpotlightContentType): boolean {
+  return true;
 }

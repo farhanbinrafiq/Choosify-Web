@@ -23,7 +23,7 @@ export function buildSpotlightHub(content: SpotlightContent, allContent: Spotlig
 
   const sections = [
     { id: 'overview' as const, title: 'Overview', contentIds: [content.contentId], href: `/spotlight/${slug}` },
-    { id: 'live' as const, title: 'Live', contentIds: live.map((c) => c.contentId), href: content.isLive ? `/spotlight/live/${slug}` : undefined },
+    { id: 'live' as const, title: 'Live', contentIds: live.map((c) => c.contentId), href: undefined },
     { id: 'replay' as const, title: 'Replay', contentIds: live.filter((c) => c.live?.status === 'replay' || c.live?.status === 'ended').map((c) => c.contentId) },
     { id: 'products' as const, title: 'Products', contentIds: [], href: content.connections.productIds[0] ? `/products/${content.connections.productIds[0]}` : undefined },
     { id: 'guides' as const, title: 'Guides', contentIds: guides.map((c) => c.contentId) },
@@ -75,7 +75,7 @@ export function inferCampaignJourney(content: SpotlightContent): SpotlightCampai
     stage,
     label: CAMPAIGN_JOURNEY_LABELS[stage],
     contentId: stage === activeStage ? content.contentId : undefined,
-    href: stage === 'live' && content.isLive ? `/spotlight/live/${content.slug}` : content.href,
+    href: content.href,
     isActive: stage === activeStage,
     isComplete: i < activeIdx,
   }));

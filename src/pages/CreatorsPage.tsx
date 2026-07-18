@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL, CREATOR_CARD_GRID } from "../lib/pageLayout";
-import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -10,14 +9,12 @@ import { toast } from 'react-hot-toast';
 import type { Creator } from '../data/creators';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
-import { PaginationBar } from '../components/PaginationBar';
-import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
-import { buildCreatorsPopularSearchTerms } from '../utils/pagePopularSearches';
+import { DcListingHero } from '../components/design/DcListingHero';
+import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
-import { InfeedSponsoredCard } from '../components/SponsoredPlacementCard';
+import { AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
@@ -50,7 +47,7 @@ const CREATOR_PROMOS: CreatorPromo[] = [
 ];
 
 export function CreatorsPage() {
-  const { getCreatorClaimStatus, creatorClaimStatuses, allCreators, siteConfig } = useGlobalState();
+  const { getCreatorClaimStatus, creatorClaimStatuses, allCreators } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Creators');
@@ -171,82 +168,32 @@ export function CreatorsPage() {
     return result;
   }, [mappedCreators, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter]);
 
-  const originalFeaturedCreators = React.useMemo(() => [mappedCreators[0], mappedCreators[1], mappedCreators[3]].filter(Boolean), [mappedCreators]);
-
-  const filteredFeaturedCreators = React.useMemo(() => {
-    let result = [...originalFeaturedCreators];
-
-    // 1. Filter by Active Tab selection
-    if (activeTab === 'Trending Creators') {
-      result = result.filter(c => c.isHot || c.rating >= 4.7);
-    } else if (activeTab === 'Featured Creators') {
-      result = result.filter(c => c.isFeatured || c.rating >= 4.8);
-    } else if (activeTab === 'Hot Deals Creators') {
-      result = result.filter(c => c.isHot);
-    } else if (activeTab === 'Top Rated Creators') {
-      result = result.filter(c => c.rating >= 4.8);
-    }
-
-    // 2. Filter by search query across Name, bestFor, handle, or bio
-    const q = searchQuery.toLowerCase().trim();
-    if (q) {
-      result = result.filter(c => 
-        c.name.toLowerCase().includes(q) ||
-        (c.bestFor || '').toLowerCase().includes(q) ||
-        (c.handle || '').toLowerCase().includes(q) ||
-        (c.bio || '').toLowerCase().includes(q)
-      );
-    }
-
-    // 3. Filter by Selected Letter
-    if (selectedLetter) {
-      result = result.filter(c => c.name.toUpperCase().startsWith(selectedLetter));
-    }
-
-    // 4. Filter by Category
-    if (selectedCategory) {
-      result = result.filter(c => (c as any).category?.toLowerCase() === selectedCategory.toLowerCase() || (c as any).bestFor?.toLowerCase().includes(selectedCategory.toLowerCase()));
-    }
-
-    // 5. Filter by Verification
-    if (verificationFilter === 'verified') {
-      result = result.filter(c => c.id === 'creator-farhan' || c.id === 'creator-sarah' || c.id === 'creator-mily');
-    } else if (verificationFilter === 'unverified') {
-      result = result.filter(c => c.id !== 'creator-farhan' && c.id !== 'creator-sarah' && c.id !== 'creator-mily');
-    }
-
-    // 6. Filter by Popularity
-    if (popularityFilter === 'high') {
-      result = result.filter(c => c.rating >= 4.8);
-    } else if (popularityFilter === 'normal') {
-      result = result.filter(c => c.rating < 4.8);
-    }
-
-    return result;
-  }, [originalFeaturedCreators, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter]);
-
-  const popularSearchTerms = React.useMemo(
-    () =>
-      buildCreatorsPopularSearchTerms({
-        cmsTerms: siteConfig?.popularSearches,
-        creatorNames: filteredCreators.map((c) => c.name),
-        limit: 12,
-      }),
-    [siteConfig?.popularSearches, filteredCreators],
-  );
-
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_CREATOR, {
     limit: INFEED_MAX_PER_PAGE,
     entityType: 'creator',
   });
 
-  const groupedCreators = letters.reduce((acc, letter) => {
-    const filtered = filteredCreators.filter(c => c.name.toUpperCase().startsWith(letter));
-    if (filtered.length > 0) {
-      acc[letter] = filtered;
-    }
-    return acc;
-  }, {} as Record<string, typeof filteredCreators[0][]>);
+  const creatorFeed = useMemo(
+    () =>
+      injectPlacementsIntoFeed(
+        filteredCreators,
+        (creator) => `creator-${creator.id}`,
+        infeedPlacements,
+        INFEED_INTERVAL.creator,
+        3,
+      ),
+    [filteredCreators, infeedPlacements],
+  );
+
+  const {
+    visibleItems: visibleCreatorFeed,
+    sentinelRef,
+    hasMore,
+  } = useInfiniteListBatch(creatorFeed, {
+    initial: 24,
+    loadMore: 12,
+    resetKey: searchQuery + (selectedLetter ?? ''),
+  });
 
   const sectionNavItems = useMemo(
     () => [{ id: 'creators-main-display', label: 'Creators', icon: <Users size={13} /> }],
@@ -266,15 +213,15 @@ export function CreatorsPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search creators..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
         />
       </div>
     ),
     quickFilters: [
       { id: 'verified', label: '✓ Verified Expert', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
-      { id: 'high-eng', label: '🔥 High Engagement (4.8+)', active: popularityFilter === 'high', onClick: () => setPopularityFilter(popularityFilter === 'high' ? 'all' : 'high') },
-      { id: 'tech', label: '💻 Tech Niches', active: selectedCategory === 'Tech & Gaming', onClick: () => setSelectedCategory(selectedCategory === 'Tech & Gaming' ? null : 'Tech & Gaming') },
-      { id: 'fashion', label: '👗 Fashion Influencer', active: selectedCategory === 'Fashion & Beauty', onClick: () => setSelectedCategory(selectedCategory === 'Fashion & Beauty' ? null : 'Fashion & Beauty') }
+      { id: 'high-eng', label: 'ðŸ”¥ High Engagement (4.8+)', active: popularityFilter === 'high', onClick: () => setPopularityFilter(popularityFilter === 'high' ? 'all' : 'high') },
+      { id: 'tech', label: 'ðŸ’» Tech Niches', active: selectedCategory === 'Tech & Gaming', onClick: () => setSelectedCategory(selectedCategory === 'Tech & Gaming' ? null : 'Tech & Gaming') },
+      { id: 'fashion', label: 'ðŸ‘— Fashion Influencer', active: selectedCategory === 'Fashion & Beauty', onClick: () => setSelectedCategory(selectedCategory === 'Fashion & Beauty' ? null : 'Fashion & Beauty') }
     ],
     renderFilters: () => (
       <div className="flex flex-col gap-4">
@@ -330,13 +277,13 @@ export function CreatorsPage() {
         />
 
         {/* Alpha Search (A-Z) */}
-        <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-2">
+        <div className="bg-white rounded-2xl p-4.5 border border-[#eef2f6] shadow-sm flex flex-col gap-2">
           <h3 className="text-[11px] font-black text-[#8a9bb0] uppercase tracking-wider mb-2">Alpha Search (A-Z)</h3>
           <div className="grid grid-cols-5 gap-1.5 max-h-32 overflow-y-auto no-scrollbar">
             <button 
               onClick={() => setSelectedLetter(null)}
               className={cn(
-                "col-span-5 py-1.5 rounded-[5px] text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
+                "col-span-5 py-1.5 rounded-2xl text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
                 selectedLetter === null ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
               )}
             >
@@ -347,7 +294,7 @@ export function CreatorsPage() {
                 key={letter} 
                 onClick={() => setSelectedLetter(letter)}
                 className={cn(
-                  "h-5.5 rounded-[5px] text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                  "h-5.5 rounded-2xl text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
                   selectedLetter === letter ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                 )}
               >
@@ -383,9 +330,75 @@ export function CreatorsPage() {
   }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <PageHeroBanner pageKey="creators" />
-      <HeroMarqueeTicker pageKey="creators" siteConfig={siteConfig} />
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <DcListingHero
+        titleBefore="Follow Trusted"
+        titleHighlight="Creators"
+        searchPlaceholder="Search creators..."
+        quickChips={['Tech', 'Fashion', 'Beauty', 'Food', 'Lifestyle', 'Gaming']}
+        onSearch={(q) => setSearchQuery(q)}
+        onChipClick={(q) => setSearchQuery(q)}
+      />
+
+      <DcListingStickyFilters
+        overlapHero
+        items={[
+          {
+            id: 'tech',
+            icon: '💻',
+            name: 'Tech Reviewers',
+            sub: '320 creators',
+            bg: '#EAF1FD',
+            active: selectedCategory === 'Tech Reviewers',
+            onClick: () => setSelectedCategory(selectedCategory === 'Tech Reviewers' ? null : 'Tech Reviewers'),
+          },
+          {
+            id: 'beauty',
+            icon: '💄',
+            name: 'Beauty & Lifestyle',
+            sub: '210 creators',
+            bg: '#FDECEC',
+            active: selectedCategory === 'Beauty & Lifestyle',
+            onClick: () => setSelectedCategory(selectedCategory === 'Beauty & Lifestyle' ? null : 'Beauty & Lifestyle'),
+          },
+          {
+            id: 'fashion',
+            icon: '👗',
+            name: 'Fashion',
+            sub: '180 creators',
+            bg: '#EFECFD',
+            active: selectedCategory === 'Fashion',
+            onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion'),
+          },
+          {
+            id: 'fitness',
+            icon: '💪',
+            name: 'Fitness & Health',
+            sub: '140 creators',
+            bg: '#E6F9EA',
+            active: selectedCategory === 'Fitness & Health',
+            onClick: () => setSelectedCategory(selectedCategory === 'Fitness & Health' ? null : 'Fitness & Health'),
+          },
+          {
+            id: 'food',
+            icon: '🍳',
+            name: 'Food & Cooking',
+            sub: '95 creators',
+            bg: '#FEF3E2',
+            active: selectedCategory === 'Food & Cooking',
+            onClick: () => setSelectedCategory(selectedCategory === 'Food & Cooking' ? null : 'Food & Cooking'),
+          },
+          {
+            id: 'home',
+            icon: '🏠',
+            name: 'Home & Living',
+            sub: '110 creators',
+            bg: '#EAF1FD',
+            active: selectedCategory === 'Home & Living',
+            onClick: () => setSelectedCategory(selectedCategory === 'Home & Living' ? null : 'Home & Living'),
+          },
+        ]}
+      />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -405,15 +418,7 @@ export function CreatorsPage() {
         }}
       />
 
-      <StickySectionNav
-        sections={sectionNavItems}
-        activeId={activeSectionId}
-        onNavigate={scrollToSection}
-        allLabel="Creators"
-        profileLabel="Creator directory"
-      />
-
-      <div className={`max-w-[1680px] mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+      <div className={`max-w-[1680px] mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-10 md:py-12 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
@@ -427,12 +432,12 @@ export function CreatorsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search creators..."
-              className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+              className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
             />
           </div>
 
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
-          <div id="creators-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
+          <div id="creators-sidebar-filters" className="transition-all duration-300 rounded-2xl w-full">
             <FullSidebarFilterPanel
               title="Filter Creators"
               searchQuery={searchQuery}
@@ -467,13 +472,13 @@ export function CreatorsPage() {
               advancedSection={
                 <div className="flex flex-col gap-4">
                   {/* Initial Index selection A-Z */}
-                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-2">
+                  <div className="bg-white rounded-2xl p-4.5 border border-[#eef2f6] shadow-sm flex flex-col gap-2">
                     <h3 className="text-[11px] font-black text-[#8a9bb0] uppercase tracking-wider mb-2">Alpha Search (A-Z)</h3>
                     <div className="grid grid-cols-5 gap-1.5 max-h-32 overflow-y-auto no-scrollbar">
                       <button 
                         onClick={() => setSelectedLetter(null)}
                         className={cn(
-                          "col-span-5 py-1.5 rounded-[5px] text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
+                          "col-span-5 py-1.5 rounded-2xl text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
                           selectedLetter === null ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                         )}
                       >
@@ -484,7 +489,7 @@ export function CreatorsPage() {
                           key={letter} 
                           onClick={() => setSelectedLetter(letter)}
                           className={cn(
-                            "h-5.5 rounded-[5px] text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                            "h-5.5 rounded-2xl text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
                             selectedLetter === letter ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                           )}
                         >
@@ -551,7 +556,7 @@ export function CreatorsPage() {
           {/* BUSINESS SELLERS INFO CARD */}
           <div 
             id="section-sellers-brands" 
-            className="w-full bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
+            className="w-full bg-white rounded-2xl border border-[#eef2f6] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
             style={{ height: '410px' }}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
@@ -570,7 +575,7 @@ export function CreatorsPage() {
               </p>
             </div>
 
-            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-2xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">POST CAMPAIGN BRIEFS</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                 Submit campaign details to top ranking tech, fashion, lifestyle, and financial creators.
@@ -590,8 +595,8 @@ export function CreatorsPage() {
           </div>
 
           <ListingAdRail
-            sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_LANDSCAPE}
-            sponsoredVariant="landscape"
+            sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
+            sponsoredVariant="portrait"
             showAdSense={false}
           />
         </aside>
@@ -599,16 +604,16 @@ export function CreatorsPage() {
         {/* Main Content Area */}
         <main id="creators-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 space-y-6">
           {/* Header info bar (Unified list view) */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8edf2] font-sans">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#eef2f6] font-sans">
             <div>
-              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] italic leading-none">
-                OUR PARTNERS • CREATOR DIRECTORY
+              <h3 className="text-[10px] font-bold text-[#8a9bb0] uppercase tracking-[0.2em] leading-none">
+                Our partners • Creator directory
               </h3>
-              <h2 className="text-xl font-black text-[#1A1D4E] italic uppercase tracking-tighter mt-2 leading-none">
-                {activeTab === 'All Creators' ? 'ALL CREATORS' : activeTab.toUpperCase()}
-                {selectedLetter && ` • STARTING WITH "${selectedLetter}"`}
-                {searchQuery && ` • SEARCH: "${searchQuery.toUpperCase()}"`}
-                <span className="text-orange-primary"> ({filteredCreators.length} FOUND)</span>
+              <h2 className="text-xl font-black text-[#1A1D4E] tracking-tight mt-2 leading-none">
+                {activeTab === 'All Creators' ? 'All Creators' : activeTab}
+                {selectedLetter && ` · Starting with “${selectedLetter}”`}
+                {searchQuery && ` · “${searchQuery}”`}
+                <span className="text-[#8a9bb0] font-semibold"> ({filteredCreators.length})</span>
               </h2>
             </div>
             
@@ -622,7 +627,7 @@ export function CreatorsPage() {
                   setVerificationFilter('all');
                   setPopularityFilter('all');
                 }}
-                className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#e8edf2] px-3.5 py-2 rounded-[5px] shadow-sm self-start sm:self-auto hover:text-[#CF4400] cursor-pointer"
+                className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#eef2f6] px-3.5 py-2 rounded-2xl shadow-sm self-start sm:self-auto hover:text-[#CF4400] cursor-pointer"
               >
                 Reset All Filters
               </button>
@@ -633,34 +638,34 @@ export function CreatorsPage() {
           {(selectedLetter || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (
             <div className="flex flex-wrap items-center gap-3 font-sans">
               {selectedLetter && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#eef2f6] rounded-2xl text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
                   Letter: {selectedLetter} 
-                  <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setSelectedLetter(null)}>×</span>
+                  <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setSelectedLetter(null)}>Ã—</span>
                 </div>
               )}
               {selectedCategory && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#eef2f6] rounded-2xl text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
                   Niche: {selectedCategory} 
-                  <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setSelectedCategory(null)}>×</span>
+                  <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setSelectedCategory(null)}>Ã—</span>
                 </div>
               )}
               {verificationFilter !== 'all' && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#eef2f6] rounded-2xl text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
                   Verification: {verificationFilter === 'verified' ? 'Verified Experts' : 'Independent'} 
-                  <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setVerificationFilter('all')}>×</span>
+                  <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setVerificationFilter('all')}>Ã—</span>
                 </div>
               )}
               {popularityFilter !== 'all' && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-[5px] text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#eef2f6] rounded-2xl text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
                   Engagement: {popularityFilter === 'high' ? 'Top Engagement' : 'Regular'} 
-                  <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setPopularityFilter('all')}>×</span>
+                  <span className="text-orange-primary cursor-pointer font-black ml-1 scale-110" onClick={() => setPopularityFilter('all')}>Ã—</span>
                 </div>
               )}
             </div>
           )}
 
           {/* Tablet/Mobile Collapsible A-Z Filter Card */}
-          <div className="lg:hidden bg-white rounded-[5px] p-4 border border-[#e8edf2] shadow-sm mb-6 font-sans">
+          <div className="lg:hidden bg-white rounded-2xl p-4 border border-[#eef2f6] shadow-sm mb-6 font-sans">
             <div 
               className="flex items-center justify-between cursor-pointer" 
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
@@ -688,7 +693,7 @@ export function CreatorsPage() {
                       setIsMobileFilterOpen(false);
                     }}
                     className={cn(
-                      "col-span-6 sm:col-span-9 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
+                      "col-span-6 sm:col-span-9 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
                       selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                     )}
                   >
@@ -702,7 +707,7 @@ export function CreatorsPage() {
                         setIsMobileFilterOpen(false);
                       }}
                       className={cn(
-                        "h-8 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                        "h-8 rounded-2xl text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
                         selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
                       )}
                     >
@@ -714,81 +719,50 @@ export function CreatorsPage() {
             )}
           </div>
 
-          {/* Choosify Recommends Section */}
-          {filteredFeaturedCreators.length > 0 && (
-            <div className="mb-12">
-              <div className="flex items-center gap-4 mb-8 overflow-hidden">
-                <div className="flex items-center gap-2.5 bg-gradient-to-r from-[#FF5B00] via-[#E8500A] to-[#CF4400] px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/30 flex-shrink-0 border border-orange-primary/40">
-                   <Sparkles size={14} className="text-white shrink-0" />
-                   <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
-                   <div className="flex gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white/90 animate-pulse" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-                   </div>
-                </div>
-                <span className="text-[10px] font-black text-[#5C2AFE] uppercase tracking-widest whitespace-nowrap">
-                  {filteredFeaturedCreators.length} Creator{filteredFeaturedCreators.length !== 1 ? 's' : ''}
-                </span>
-                <div className="flex-1 h-px bg-orange-primary/20" />
-              </div>
+          <div className="bg-[#DCFCE7] text-[#166534] rounded-lg px-[18px] py-3 text-[12.5px] font-semibold mb-5">
+            ✓ Trusted & Verified — All creators are verified by Choosify for authenticity and quality.
+          </div>
 
-              <div className={CREATOR_CARD_GRID}>
-                {injectPlacementsIntoFeed(
-                  filteredFeaturedCreators,
-                  (creator) => `featured-creator-${creator.id}`,
-                  infeedPlacements.slice(0, 1),
-                  INFEED_INTERVAL.creator,
-                  1,
-                ).map((entry) =>
+          {filteredCreators.length > 0 ? (
+            <>
+              <div className={cn(CREATOR_CARD_GRID, 'mb-8')}>
+                {visibleCreatorFeed.map((entry) =>
                   entry.kind === 'placement' ? (
-                    <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
+                    <AdvertiseHereCard key={entry.key} variant="creator" />
                   ) : (
                     <CreatorCardDesign key={entry.key} creator={entry.item} />
                   ),
                 )}
+                {infeedPlacements.length === 0 && <AdvertiseHereCard variant="creator" />}
+              </div>
+              <div ref={sentinelRef} className="h-8" aria-hidden />
+              {hasMore && (
+                <p className="text-center text-[12px] text-[#9AA0AC] font-semibold py-4">Loading more…</p>
+              )}
+            </>
+          ) : null}
+
+          <div className="bg-[#000435] rounded-xl px-7 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white mb-8">
+            <div>
+              <div className="text-[15px] font-bold mb-1">Are you a creator?</div>
+              <div className="text-[12px] text-white/55">
+                Join Choosify and grow your audience by sharing honest reviews.
               </div>
             </div>
-          )}
-
-          {Object.entries(groupedCreators).map(([letter, letterCreators], letterIndex) => (
-            <div key={letter} className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center text-xl font-black">{letter}</div>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{letterCreators.length} Creators</span>
-              </div>
-
-              <div className={CREATOR_CARD_GRID}>
-                {injectPlacementsIntoFeed(
-                  letterCreators,
-                  (creator) => `creator-${creator.id}`,
-                  infeedPlacements.slice(letterIndex % Math.max(infeedPlacements.length, 1)),
-                  INFEED_INTERVAL.creator,
-                  letterIndex === 0 ? 0 : 1,
-                ).map((entry) =>
-                  entry.kind === 'placement' ? (
-                    <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
-                  ) : (
-                    <CreatorCardDesign key={entry.key} creator={entry.item} />
-                  ),
-                )}
-              </div>
-            </div>
-          ))}
-
-          <PaginationBar showingCount={filteredCreators.length} totalCount={mappedCreators.length} />
-
-          <PopularSearchKeywords
-            title="Popular creator searches"
-            terms={popularSearchTerms}
-            className="mt-0 pt-10"
-          />
+            <Link
+              to="/advertise"
+              className="bg-[#FF5B00] text-white px-[22px] py-3 rounded-lg text-[12px] font-bold no-underline hover:brightness-110 shrink-0"
+            >
+              JOIN AS CREATOR
+            </Link>
+          </div>
 
           <AdSenseSlot format="infeed" className="mt-6" />
 
           {filteredCreators.length === 0 && (
              <div className="py-20 text-center">
                 <Search size={48} className="mx-auto text-gray-300 mb-4" />
-                <h3 className="text-2xl font-black text-navy uppercase tracking-tight mb-2 italic">No Creators Found</h3>
+                <h3 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">No creators found</h3>
                 <p className="text-gray-400 font-medium">Try searching for a different creator name or clear filters.</p>
                 <button 
                   onClick={() => {setSearchQuery(''); setSelectedLetter(null);}}
@@ -803,8 +777,8 @@ export function CreatorsPage() {
         {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           {/* FEATURED CREATOR DEALS SECTION */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full text-left animate-fade-in">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+          <div className="bg-white rounded-2xl border border-[#eef2f6] p-4.5 shadow-sm w-full text-left animate-fade-in">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#eef2f6] px-1">
               <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
                 Featured Campaigns
               </h3>
@@ -821,7 +795,7 @@ export function CreatorsPage() {
                 <Link 
                   to={`/creators/${item.id}`}
                   key={item.id} 
-                  className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-[5px] p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                  className="flex items-center gap-3 bg-white border border-[#eef2f6]/60 rounded-2xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
                 >
                   <div className={cn("w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-transparent flex items-center justify-center text-white font-semibold text-xs shadow-sm")}>
                     <img src={item.avatar} className="w-full h-full object-cover" alt={item.name} referrerPolicy="no-referrer" />
@@ -843,8 +817,8 @@ export function CreatorsPage() {
           </div>
 
           {/* FEATURED PROMOCODES SECTION */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full text-left animate-fade-in">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+          <div className="bg-white rounded-2xl border border-[#eef2f6] p-4.5 shadow-sm w-full text-left animate-fade-in">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#eef2f6] px-1">
               <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
                 Creator Promo Codes
               </h3>
@@ -855,7 +829,7 @@ export function CreatorsPage() {
                 <Link 
                   to={`/creators/${item.creatorId}`}
                   key={idx} 
-                  className="bg-white border border-[#e8edf2]/65 hover:border-[#E8500A]/15 rounded-[5px] p-2.5 hover:shadow-soft transition-all duration-300 group cursor-pointer flex flex-col gap-2 text-left"
+                  className="bg-white border border-[#eef2f6]/65 hover:border-[#E8500A]/15 rounded-2xl p-2.5 hover:shadow-soft transition-all duration-300 group cursor-pointer flex flex-col gap-2 text-left"
                 >
                   {/* Header row with brand details */}
                   <div className="flex items-center justify-between gap-2">
@@ -876,7 +850,7 @@ export function CreatorsPage() {
                         navigator.clipboard.writeText(item.code);
                         toast.success(`Coupon code "${item.code}" copied to clipboard!`);
                       }}
-                      className="px-2.5 py-1 bg-[#E8500A]/10 hover:bg-[#E8500A] text-[#E8500A] hover:text-white transition-all cursor-pointer rounded-[5px] text-[8px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0"
+                      className="px-2.5 py-1 bg-[#E8500A]/10 hover:bg-[#E8500A] text-[#E8500A] hover:text-white transition-all cursor-pointer rounded-2xl text-[8px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0"
                     >
                       <Copy className="w-2.5 h-2.5" />
                       Copy
@@ -884,7 +858,7 @@ export function CreatorsPage() {
                   </div>
                   
                   {/* Code display window */}
-                  <div className="bg-gray-50 border border-dashed border-[#e8edf2] rounded-[5px] px-2.5 py-1.5 flex items-center justify-between font-mono text-[9.5px] font-semibold text-gray-650 tracking-wider">
+                  <div className="bg-gray-50 border border-dashed border-[#eef2f6] rounded-2xl px-2.5 py-1.5 flex items-center justify-between font-mono text-[9.5px] font-semibold text-gray-650 tracking-wider">
                     <span>{item.code}</span>
                     <span className="text-[7.5px] font-sans font-semibold text-gray-400 uppercase">ACTIVE</span>
                   </div>

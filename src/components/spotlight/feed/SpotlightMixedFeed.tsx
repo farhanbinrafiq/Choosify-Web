@@ -29,6 +29,8 @@ import {
 } from '../../content';
 
 import { cn } from '../../../lib/utils';
+import { ChoosifySponsoredCard } from '../../commerce/ChoosifySponsoredCard';
+import { useSponsoredFeedEntries } from '../../../hooks/useSponsoredFeedEntries';
 
 
 
@@ -198,7 +200,12 @@ export function SpotlightMixedFeed({
 
   const visibleItems = mixedItems.slice(0, visibleCount);
 
-
+  const spotlightFeedEntries = useSponsoredFeedEntries(
+    'spotlight',
+    visibleItems,
+    (content) => content.contentId,
+    { enabled: visibleItems.length > 0 },
+  );
 
   return (
 
@@ -206,12 +213,17 @@ export function SpotlightMixedFeed({
 
       <div id="spotlight-feed" className={GUIDE_MEDIA_GRID} aria-label="Spotlight shopping feed">
 
-        {visibleItems.map((content) => {
+        {spotlightFeedEntries.map((entry) => {
+          if (entry.kind === 'sponsored') {
+            return <ChoosifySponsoredCard key={entry.key} item={entry.sponsored} />;
+          }
+
+          const content = entry.item;
           const product = primaryProductForContent(content, products);
           const model = spotlightToContentCardModel(content, product);
           return (
             <UniversalCommerceCard
-              key={content.contentId}
+              key={entry.key}
               mode="commerce"
               variant={resolveCommerceCardVariant(model.layoutVariant, model.aspectRatio)}
               model={model}

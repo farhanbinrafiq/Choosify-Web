@@ -1,64 +1,66 @@
 import React from 'react';
-import { PageHeroHeader } from '../components/PageHeroHeader';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Star, ArrowRight, ShoppingBag } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { BLOGS, PRODUCTS } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
+import { catalogGuideHref } from '../lib/spotlight/content';
 
 export function GuideProductsPage() {
   const { id } = useParams();
-  
-  const guide = BLOGS.find(b => b.id === Number(id));
-  
+
+  const guide = BLOGS.find((b) => b.id === Number(id));
+
   if (!guide) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-[#F4F7F9] flex items-center justify-center px-4">
         <div className="text-center">
-          <h2 className="text-2xl font-black text-navy uppercase italic">Guide Not Found</h2>
-          <Link to="/guides" className="text-orange-primary font-bold mt-4 block uppercase tracking-widest text-[10px]">Back to Guides</Link>
+          <h2 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight">Guide not found</h2>
+          <Link to="/spotlight?tab=guides" className="text-[#FF5B00] font-bold mt-4 block text-[12.5px] hover:underline">
+            Back to guides
+          </Link>
         </div>
       </div>
     );
   }
 
-  // Define recommendedProducts as number[] or default to empty
   const recommendedProductIds = (guide as any).recommendedProducts || [];
-  const guideProducts = PRODUCTS.filter(p => recommendedProductIds.includes(p.id));
+  const guideProducts = PRODUCTS.filter((p) => recommendedProductIds.includes(p.id));
 
   return (
-    <div className="bg-choosify-feed min-h-screen pb-32">
-      {/* Header Section */}
-      <PageHeroHeader>
-        <div className="max-w-[1914px] mx-auto w-full h-[303px] px-6 flex items-center justify-between relative z-10 animate-fade-in">
-          <div className="flex items-center gap-6">
-            <Link 
-              to={`/guides/${id}`}
-              className="flex items-center gap-2 text-[10px] font-black text-white/40 hover:text-white uppercase tracking-[0.2em] italic transition-colors group"
-            >
-              <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-              Back
-            </Link>
-            
-            <div className="flex items-center gap-3">
-              <div className="bg-orange-primary text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em] italic shadow-md">
-                RECOMMENDED PRODUCTS
-              </div>
-              <h1 className="text-sm md:text-md lg:text-lg font-black text-white italic tracking-tighter uppercase leading-none">
-                Selected for <span className="text-orange-primary">"{guide.title}"</span>
-              </h1>
-            </div>
+    <div className="bg-[#F4F7F9] min-h-screen pb-20">
+      <header className="bg-[#000435] text-white px-5 sm:px-10 py-7">
+        <div className="max-w-[1280px] mx-auto">
+          <Link
+            to={catalogGuideHref({ id: id ?? guide.id, slug: (guide as { slug?: string }).slug })}
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white transition-colors mb-3"
+          >
+            <ArrowLeft size={14} />
+            Back to guide
+          </Link>
+          <div className="text-[11px] font-bold text-[#FF5B00] tracking-wide mb-1.5">
+            RECOMMENDED PRODUCTS
           </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight leading-tight max-w-3xl">
+            Selected for “{guide.title}”
+          </h1>
         </div>
-      </PageHeroHeader>
+      </header>
 
-      {/* Products Grid */}
-      <div className="max-w-[1440px] mx-auto px-6 mt-8 relative z-20">
-        <div className={PRODUCT_CARD_GRID}>
-          {guideProducts.map(product => (
-            <ProductCard key={product.id} product={product} variant="grid" />
-          ))}
-        </div>
+      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 py-8">
+        {guideProducts.length === 0 ? (
+          <div className="bg-white border border-[#E8EDF2] rounded-xl p-10 text-center">
+            <p className="text-[13px] font-semibold text-[#9AA0AC]">
+              No recommended products linked to this guide yet.
+            </p>
+          </div>
+        ) : (
+          <div className={PRODUCT_CARD_GRID}>
+            {guideProducts.map((p) => (
+              <ProductCard key={p.id} product={p as any} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

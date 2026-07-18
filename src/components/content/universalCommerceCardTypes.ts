@@ -27,12 +27,21 @@ export interface UniversalCommerceCardModel extends UniversalContentCardModel {
   popularityScore?: number;
   publishedAt?: string;
   creatorAvatar?: string;
+  /** Publisher trust signal for the feed header */
+  isVerified?: boolean;
+  /** e.g. Brand / Creator / Verified Seller */
+  publisherTypeLabel?: string;
 }
 
 export interface UniversalCommerceCardProps {
   model: UniversalCommerceCardModel;
   variant: CommerceCardVariant;
   mode?: ContentCardMode;
+  /**
+   * LE-006 — render brand/creator identity above the media (Facebook-style).
+   * Opt-in so preview surfaces (Guides, Product Details) keep their layout.
+   */
+  showPublisherHeader?: boolean;
   onNavigate?: () => void;
   className?: string;
 }

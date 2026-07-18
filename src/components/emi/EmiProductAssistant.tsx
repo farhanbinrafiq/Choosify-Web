@@ -5,6 +5,7 @@ import { EmiContextPanel } from './EmiContextPanel';
 import { EmiShoppingCoach } from './EmiShoppingCoach';
 import { emiShoppingMemory } from '../../lib/emi/emiMemory';
 import { openEmiPanel } from '../../lib/emi';
+import { EmiAiLogo } from '../EmiAiLogo';
 
 interface EmiProductAssistantProps {
   product: CatalogProduct;
@@ -46,8 +47,9 @@ export function EmiProductAssistant({ product, inStock }: EmiProductAssistantPro
       <button
         type="button"
         onClick={() => openEmiPanel(`Tell me more about ${product.title} and alternatives`)}
-        className="text-[10px] font-bold uppercase text-[#E8500A] hover:underline"
+        className="text-[10px] font-bold uppercase text-[#FF5B00] hover:underline inline-flex items-center gap-1.5"
       >
+        <EmiAiLogo size={14} className="w-3.5 h-3.5" />
         Ask Emi in chat →
       </button>
     </div>

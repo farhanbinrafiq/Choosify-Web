@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home, Search } from 'lucide-react';
-import { cn } from '../lib/utils';
 
 export default function NotFoundPage() {
   const navigate = useNavigate();
@@ -18,52 +17,58 @@ export default function NotFoundPage() {
   return (
     <div
       ref={heroRef}
-      className="min-h-[calc(100vh-5rem)] choosify-dark-gradient flex flex-col items-center justify-center p-8 text-center relative"
+      className="min-h-[calc(100vh-5rem)] bg-[#000435] flex flex-col items-center justify-center p-8 text-center relative"
     >
+      <div className="max-w-xl relative z-10 flex-1 flex flex-col items-center justify-center">
+        <h1 className="text-[100px] sm:text-[140px] font-extrabold text-white/10 leading-none mb-[-28px] tracking-tight">
+          404
+        </h1>
 
-      <div className="max-w-xl relative z-10 animate-in fade-in zoom-in duration-700 flex-1 flex flex-col items-center justify-center">
-        <h1 className="text-[120px] sm:text-[180px] font-black text-white/5 leading-none mb-[-40px] italic tracking-tighter">404</h1>
-        
-        <div className="space-y-6">
-          <h2 className="text-4xl sm:text-5xl font-black text-white italic uppercase tracking-tighter leading-tight">
-            Lost in the <br />
-            <span className="text-orange-primary">Discovery</span> Matrix
+        <div className="space-y-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            Page not found
           </h2>
-          
-          <p className="text-gray-400 text-sm font-bold uppercase tracking-[0.2em] italic max-w-sm mx-auto leading-relaxed">
-            The curated piece you&apos;re looking for has moved beyond the horizon or never existed in this timeline.
+
+          <p className="text-white/55 text-[13px] font-medium max-w-sm mx-auto leading-relaxed">
+            The page you&apos;re looking for moved or never existed. Try searching or head back home.
           </p>
 
-          <div className="pt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button 
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
               type="button"
               onClick={() => navigate(-1)}
-              className="w-full sm:w-auto px-10 py-4 bg-white/5 border border-white/10 text-white rounded-full text-[11px] font-black uppercase tracking-widest italic flex items-center justify-center gap-3 hover:bg-white/10 transition-all"
+              className="w-full sm:w-auto px-6 py-3 bg-white/8 border border-white/15 text-white rounded-lg text-[12.5px] font-bold flex items-center justify-center gap-2 hover:bg-white/12 transition-colors cursor-pointer"
             >
-              <ArrowLeft size={16} /> Go Back
+              <ArrowLeft size={16} /> Go back
             </button>
-            <button 
+            <button
               type="button"
               onClick={() => navigate('/')}
-              className="w-full sm:w-auto px-10 py-4 bg-orange-primary text-white rounded-full text-[11px] font-black uppercase tracking-widest italic flex items-center justify-center gap-3 shadow-2xl shadow-orange-primary/30 hover:scale-105 active:scale-95 transition-all"
+              className="w-full sm:w-auto px-6 py-3 bg-[#FF5B00] text-white rounded-lg text-[12.5px] font-bold flex items-center justify-center gap-2 hover:bg-[#E8500A] transition-colors cursor-pointer border-0"
             >
-              <Home size={16} /> Return Home
+              <Home size={16} /> Return home
             </button>
           </div>
         </div>
 
-        <div id="not-found-search" className="mt-20 pt-10 border-t border-white/5 w-full">
-          <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.5em] italic mb-6">Try searching instead</p>
+        <div id="not-found-search" className="mt-14 pt-8 border-t border-white/10 w-full">
+          <p className="text-[11px] font-semibold text-white/40 mb-4">Try searching instead</p>
           <form onSubmit={handleSearch} className="relative max-w-md mx-auto">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" size={18} />
-            <input 
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none" size={18} />
+            <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search products, brands, or deals..."
-              className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl pl-14 pr-6 text-white text-sm font-bold placeholder:text-white/20 focus:outline-none focus:border-orange-primary/50 transition-all"
+              className="w-full h-12 bg-white/8 border border-white/15 rounded-xl pl-12 pr-5 text-white text-[13px] font-semibold placeholder:text-white/30 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
             />
           </form>
+          <p className="mt-4 text-[12px] text-white/35">
+            Or browse{' '}
+            <Link to="/products" className="text-[#FF5B00] font-semibold hover:underline">
+              products
+            </Link>
+          </p>
         </div>
       </div>
     </div>

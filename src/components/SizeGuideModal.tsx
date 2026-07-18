@@ -68,12 +68,12 @@ export function SizeGuideModal({ open, onClose, sizeGuide }: SizeGuideModalProps
               <div>
                 <h3
                   id="size-guide-title"
-                  className="text-lg font-black text-[#1A1D4E] uppercase tracking-tight leading-tight"
+                  className="text-lg font-extrabold text-[#1A1A2E] tracking-tight leading-tight"
                 >
                   {sizeGuide.title || 'Size Guide'}
                 </h3>
                 {sizeGuide.unitLabel && (
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  <p className="text-[12px] font-medium text-[#9AA0AC]">
                     Measurements in {sizeGuide.unitLabel}
                   </p>
                 )}
@@ -97,7 +97,7 @@ export function SizeGuideModal({ open, onClose, sizeGuide }: SizeGuideModalProps
             {sizeGuide.rows && sizeGuide.rows.length > 0 && headers.length > 0 && (
               <div className="overflow-x-auto rounded-xl border border-[#e8edf2]">
                 <table className="w-full text-left text-xs min-w-[320px]">
-                  <thead className="bg-[#FFF0E8] text-[#1A1D4E] uppercase tracking-wider text-[9px] font-black">
+                  <thead className="bg-[#FFF0E8] text-[#1A1A2E] tracking-tight text-[12px] font-bold">
                     <tr>
                       {headers.map((header) => (
                         <th key={header} className="px-4 py-3 border-b border-[#e8edf2] whitespace-nowrap">

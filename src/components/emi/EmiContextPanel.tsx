@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { EmiRecommendation } from '../../types/emi';
 import { EmiConfidenceBadge } from './EmiConfidenceBadge';
+import { EmiAiLogo } from '../EmiAiLogo';
 import { cn } from '../../lib/utils';
 
 interface EmiContextPanelProps {
@@ -40,9 +41,11 @@ export function EmiContextPanel({
         className="w-full flex items-center justify-between gap-2 px-4 py-3 border-b border-[#e8edf2] bg-[#fafbfc] hover:bg-[#FFF0E8]/30 transition-colors"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <Sparkles size={16} className="text-[#E8500A] shrink-0" aria-hidden />
+          <span className="w-7 h-7 rounded-full bg-white border border-[#E8EDF2] flex items-center justify-center shrink-0 overflow-hidden p-0.5">
+            <EmiAiLogo size={22} className="w-[22px] h-[22px]" />
+          </span>
           <div className="min-w-0 text-left">
-            <p className="text-[10px] font-black uppercase tracking-widest text-[#E8500A]">{title}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[#FF5B00]">{title}</p>
             {!compact && <p className="text-[10px] text-gray-400 truncate">{subtitle}</p>}
           </div>
         </div>

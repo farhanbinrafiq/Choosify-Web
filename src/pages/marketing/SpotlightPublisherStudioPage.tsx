@@ -87,7 +87,7 @@ function ContentTypePicker({
     <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="text-center mb-8">
         <Sparkles className="h-10 w-10 text-[#E8500A] mx-auto mb-3" aria-hidden />
-        <h1 className="text-2xl font-black text-navy uppercase italic">Create Spotlight Content</h1>
+        <h1 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight">Create Spotlight Content</h1>
         <p className="text-muted-foreground mt-2 max-w-lg mx-auto text-sm">
           Choose a content type. One universal editor adapts to how your experience is rendered.
         </p>

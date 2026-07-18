@@ -17,7 +17,6 @@ import {
   MessageSquare,
   ChevronLeft,
   ChevronRight,
-  Youtube,
   Eye,
   Heart,
   HelpCircle,
@@ -28,36 +27,23 @@ import {
   PartyPopper,
   Ruler,
   Shirt,
-  CalendarDays,
   Check,
   X,
-  Facebook,
-  Twitter,
-  ShieldCheck,
-  Layers,
   Package,
   Award,
   User,
-  Gift,
-  Clock,
-  RefreshCw,
+  ThumbsUp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { BLOGS, PRODUCTS } from "../constants";
+import { BLOGS, PRODUCTS, PLACEHOLDER_IMAGE } from "../constants";
 import { cn } from "../lib/utils";
-import { PRODUCT_CARD_GRID, DETAIL_SINGLE_FEED, GUIDE_MEDIA_GRID } from "../lib/pageLayout";
-import { renderGuideMediaCard } from "./GuidesPage";
+import { PRODUCT_CARD_GRID, DETAIL_SINGLE_FEED } from "../lib/pageLayout";
 import { StickySectionNav } from "../components/StickySectionNav";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { EvaluationData, ComparisonProduct } from "../types/evaluation";
 import evaluationsData from "../data/evaluations.json";
 import { RecommendationMediaGallery } from "../components/RecommendationMediaGallery";
 import { SpotlightContentHero, type SpotlightHeroVariant } from "../components/spotlight/feed/SpotlightContentHero";
-import {
-  DetailHeroSummaryBar,
-  detailHeroSummaryActionPrimaryClass,
-  detailHeroSummaryActionSecondaryClass,
-} from "../components/DetailHeroSummaryBar";
 import { DYNAMIC_GUIDES, DEFAULT_DYNAMIC_GUIDE } from "../data/mockGuides";
 import { CATEGORY_SPEC_CONFIGS } from "../data/guideSpecConfigs";
 import { ProductCard } from "../components/ProductCard";
@@ -66,9 +52,24 @@ import { useGlobalState } from "../context/GlobalStateContext";
 import toast from "react-hot-toast";
 import { FollowButton } from "../components/FollowButton";
 import { useRegisterPageFilters, UniversalFilterRenderer } from "../components/FilterEngine";
-import { PopularSearchKeywords } from "../components/PopularSearchKeywords";
-import { buildGuidePopularSearchTerms } from "../utils/pagePopularSearches";
 import type { CatalogGuide } from "../types/catalog";
+import type { SpotlightContent } from "../types/spotlight/experience/content";
+import type { SpotlightPageSectionId } from "../types/spotlight/experience/pageSections";
+import {
+  isGuideNavSectionVisible,
+  isPageSectionVisible,
+  shouldShowBrandProfileCard,
+  shouldShowCreatorProfileCard,
+} from "../lib/spotlight/content/sectionManifestRegistry";
+import { catalogGuideHref } from "../lib/spotlight/content";
+import { SpotlightLiveStatusSection } from "../components/spotlight/experience/SpotlightLiveStatusSection";
+import { SpotlightBrandMiniCard } from "../components/spotlight/experience/SpotlightBrandMiniCard";
+import { SpotlightDetailsDescriptionSection } from "../components/spotlight/experience/SpotlightDetailsDescriptionSection";
+import { SpotlightDetailsServicesSection } from "../components/spotlight/experience/SpotlightDetailsServicesSection";
+import { SpotlightDetailsRelatedRail } from "../components/spotlight/experience/SpotlightDetailsRelatedRail";
+import { useSpotlightExperience } from "../hooks/useSpotlightExperience";
+import { openEmiPanel } from "../lib/emi";
+import { EmiAiLogo } from "../components/EmiAiLogo";
 
 const evaluations = evaluationsData as EvaluationData[];
 
@@ -155,6 +156,8 @@ export function GuideDetailPage({
   spotlightPosterImage,
   backHref,
   backLabel = 'Back',
+  sectionManifest,
+  spotlightContent,
 }: {
   guideIdOverride?: string;
   spotlightGuideOverride?: CatalogGuide & { recommendedProducts?: string[]; date?: string };
@@ -164,12 +167,16 @@ export function GuideDetailPage({
   spotlightPosterImage?: string;
   backHref?: string;
   backLabel?: string;
+  /** CMS-resolved visible sections (UX-08) */
+  sectionManifest?: SpotlightPageSectionId[];
+  spotlightContent?: SpotlightContent;
 } = {}) {
   const heroRef = useRef<HTMLElement>(null);
   const { id: routeId } = useParams();
   const id = guideIdOverride ?? routeId;
   const navigate = useNavigate();
-  const { allGuides, siteConfig, allBrands, addToCart } = useGlobalState();
+  const { allGuides, allBrands, addToCart, allCatalogProducts } = useGlobalState();
+  const { allContent: spotlightAllContent } = useSpotlightExperience();
   const [relatedPlatformFilter, setRelatedPlatformFilter] = useState<string>('all');
   const [relatedTopicFilter, setRelatedTopicFilter] = useState<string>('all');
 
@@ -181,18 +188,50 @@ export function GuideDetailPage({
     BLOGS[0];
 
   const guideSectionNavItems = useMemo(
-    () => [
-      { id: "winner", label: "Winner", icon: <Award size={13} /> },
-      { id: "why-won", label: "Why It Won", icon: <CheckCircle2 size={13} /> },
-      { id: "quick-verdict", label: "Verdict", icon: <Zap size={13} /> },
-      { id: "takeaways", label: "Takeaways", icon: <Sparkles size={13} /> },
-      { id: "top-3", label: "Top 3", icon: <Star size={13} /> },
-      { id: "all-products", label: "Products", icon: <ShoppingBag size={13} /> },
-      { id: "review-context", label: "Reviewed", icon: <Package size={13} /> },
-      { id: "reviewer-profile", label: "Reviewer", icon: <User size={13} /> },
-    ],
-    [],
+    () =>
+      [
+        { id: "winner", label: "Winner", icon: <Award size={13} /> },
+        { id: "why-won", label: "Why It Won", icon: <CheckCircle2 size={13} /> },
+        { id: "quick-verdict", label: "Verdict", icon: <Zap size={13} /> },
+        { id: "takeaways", label: "Takeaways", icon: <Sparkles size={13} /> },
+        { id: "top-3", label: "Top 3", icon: <Star size={13} /> },
+        { id: "all-products", label: "Products", icon: <ShoppingBag size={13} /> },
+        { id: "review-context", label: "Reviewed", icon: <Package size={13} /> },
+        { id: "reviewer-profile", label: "Reviewer", icon: <User size={13} /> },
+      ].filter((item) => isGuideNavSectionVisible(sectionManifest, item.id)),
+    [sectionManifest],
   );
+
+  const showSection = (sectionId: SpotlightPageSectionId) =>
+    isPageSectionVisible(sectionManifest, sectionId);
+
+  const isSpotlightDetails = Boolean(spotlightContent);
+
+  const relatedSpotlightItems = useMemo(() => {
+    if (!spotlightContent) return [];
+    const graphIds = new Set([
+      ...spotlightContent.graph.relatedContentIds,
+      ...spotlightContent.graph.relatedGuideIds,
+      ...spotlightContent.connections.spotlightContentIds,
+    ]);
+    const fromGraph = spotlightAllContent.filter(
+      (c) => c.contentId !== spotlightContent.contentId && graphIds.has(c.contentId),
+    );
+    if (fromGraph.length >= 2) return fromGraph.slice(0, 4);
+    return spotlightAllContent
+      .filter((c) => c.contentId !== spotlightContent.contentId)
+      .slice(0, 4);
+  }, [spotlightContent, spotlightAllContent]);
+
+  const showBrandCard =
+    spotlightContent &&
+    showSection('brand_profile_card') &&
+    shouldShowBrandProfileCard(spotlightContent);
+  const showCreatorCard =
+    spotlightContent &&
+    showSection('creator_profile_card') &&
+    shouldShowCreatorProfileCard(spotlightContent) &&
+    !(showBrandCard && spotlightContent.publisher.publisherType === 'brand');
 
   const { activeId: activeSectionId, scrollToSection } =
     useSectionScrollSpy(guideSectionNavItems);
@@ -380,18 +419,6 @@ export function GuideDetailPage({
       .slice(0, 4);
   }, [allGuides, guide.id, relatedPlatformFilter, relatedTopicFilter]);
 
-  const guidePopularSearchTerms = useMemo(
-    () =>
-      buildGuidePopularSearchTerms({
-        cmsTerms: siteConfig?.popularSearches,
-        guideTitle: guide.title,
-        guideCategory: guide.category,
-        guideTags: (guide as any).tags,
-        relatedGuideTitles: relatedGuides.map((g) => g.title),
-      }),
-    [siteConfig?.popularSearches, guide, relatedGuides],
-  );
-
   const handleViewProducts = () => {
     if (allGuideProducts.length > 6) {
       navigate(`/guides/${id}/products`);
@@ -400,137 +427,221 @@ export function GuideDetailPage({
     }
   };
 
-  const overallWinnerProduct = displayProducts[0] || allGuideProducts[0] || PRODUCTS[0];
-  const bestBudgetProduct = useMemo(() => {
-    if (!allGuideProducts.length) return PRODUCTS[1] || PRODUCTS[0];
-    return [...allGuideProducts].sort((a, b) => {
-      const priceA = parseFloat(String(a.price || 0).replace(/,/g, ""));
-      const priceB = parseFloat(String(b.price || 0).replace(/,/g, ""));
-      return priceA - priceB;
-    })[0];
-  }, [allGuideProducts]);
-
-  const formatProductLabel = (product?: { brand?: string; title?: string }) => {
-    if (!product) return "TBD";
-    const label = `${product.brand || ""} ${product.title || ""}`.trim();
-    return label.length > 42 ? `${label.slice(0, 39)}…` : label;
-  };
-
   const guideReadTime =
     (guide as { readTime?: string }).readTime?.replace(/_/g, " ") || "12 Min Read";
-  const guideLastUpdated = "June 2026";
+  const guideLastUpdated = "Updated June 2026";
+  const guideViewCount = 12_480;
+  const guideKindLabel = useMemo(() => {
+    if (spotlightContent?.contentType) {
+      return String(spotlightContent.contentType).replace(/_/g, " ").toUpperCase();
+    }
+    return String(guide.category || "Buying Guide").toUpperCase();
+  }, [spotlightContent?.contentType, guide.category]);
+  const authorInitial = (creator?.name || "C").charAt(0).toUpperCase();
+
+  const descriptionTitle = useMemo(() => {
+    if (!spotlightContent) return 'Overview';
+    if (['campaign', 'promotion', 'new_launch', 'brand_story'].includes(spotlightContent.contentType)) {
+      return 'Campaign Description';
+    }
+    if (spotlightContent.contentType === 'live') return 'Event Description';
+    if (spotlightContent.contentType === 'editorial') return 'Article';
+    if (spotlightContent.contentType === 'community_pick') return 'Collection Description';
+    return 'Overview';
+  }, [spotlightContent]);
 
   return (
-    <div className="bg-white min-h-screen">
-      {/* Unified Guide Hero — breadcrumbs, media, guide info, and summary in one section */}
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      {/* Breadcrumbs — above media (Choosify.dc Guide Detail) */}
+      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 pt-7 pb-0 w-full">
+        {backHref && (
+          <Link
+            to={backHref}
+            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#9AA0AC] hover:text-[#FF5B00] mb-2"
+          >
+            <ArrowLeft size={14} /> {backLabel}
+          </Link>
+        )}
+        <nav className="text-xs text-[#9AA0AC] mb-3.5" aria-label="Breadcrumb">
+          <Link to="/" className="hover:text-[#FF5B00]">Home</Link>
+          {' '}&nbsp;›&nbsp;{' '}
+          <Link to="/spotlight" className="hover:text-[#FF5B00]">Discover</Link>
+          {' '}&nbsp;›&nbsp;{' '}
+          <Link to="/guides" className="hover:text-[#FF5B00]">Buying Guides</Link>
+          {' '}&nbsp;›&nbsp;{' '}
+          <span className="text-[#1A1A2E]">{guide.title}</span>
+        </nav>
+      </div>
+
+      {/* Media gallery — navy band only (no title on dark chrome) */}
       <section
         ref={heroRef}
-        className="relative w-full choosify-dark-gradient border-b border-white/5"
+        className="relative w-full bg-[#000435] py-7 mb-6 border-b border-white/5"
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.18),transparent_42%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
-
-        <div className="relative z-10">
-          {backHref && (
-            <div className="max-w-[1080px] mx-auto px-6 pt-4">
-              <Link
-                to={backHref}
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/70 hover:text-[#E8500A]"
-              >
-                <ArrowLeft size={14} /> {backLabel}
-              </Link>
-            </div>
+        <div className="w-full relative">
+          {spotlightHeroVariant ? (
+            <SpotlightContentHero
+              guide={guide}
+              variant={spotlightHeroVariant}
+              liveEmbedUrl={spotlightLiveEmbedUrl}
+              videoUrl={spotlightVideoUrl}
+              posterImage={spotlightPosterImage}
+              headline={spotlightContent?.headline}
+              media={spotlightContent?.media ?? undefined}
+              live={spotlightContent?.live}
+            />
+          ) : (
+            <RecommendationMediaGallery guide={guide} />
           )}
-          <div className="w-full bg-transparent relative">
-            {spotlightHeroVariant ? (
-              <SpotlightContentHero
-                guide={guide}
-                variant={spotlightHeroVariant}
-                liveEmbedUrl={spotlightLiveEmbedUrl}
-                videoUrl={spotlightVideoUrl}
-                posterImage={spotlightPosterImage}
-              />
-            ) : (
-              <RecommendationMediaGallery guide={guide} />
-            )}
-          </div>
-
-          <div className="max-w-[1080px] mx-auto px-6 pb-6 text-left">
-            <h1 className="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-tight mb-4 font-sans drop-shadow-xl">
-              {guide.title}
-            </h1>
-
-            <p className="text-white/85 text-sm md:text-base font-medium italic uppercase tracking-wider leading-relaxed max-w-4xl font-sans">
-              {guide.excerpt ||
-                "An in-depth expert curation guiding your next big decision, backed by extensive testing and research."}
-            </p>
-          </div>
-
-          <DetailHeroSummaryBar
-            actionsPlacement="bottom-center"
-            items={[
-              {
-                id: 'published',
-                icon: CalendarDays,
-                label: `Published ${guide.date || 'May 12, 2026'}`,
-              },
-              {
-                id: 'read-time',
-                icon: Clock,
-                label: guideReadTime,
-              },
-              {
-                id: 'products-reviewed',
-                icon: Package,
-                label: `${allGuideProducts.length || 8} Products Reviewed`,
-              },
-              {
-                id: 'winner',
-                icon: Award,
-                wide: true,
-                label: `Winner: ${formatProductLabel(overallWinnerProduct)}`,
-              },
-              {
-                id: 'best-budget',
-                icon: Gift,
-                wide: true,
-                label: `Best Budget: ${formatProductLabel(bestBudgetProduct)}`,
-              },
-              {
-                id: 'updated',
-                icon: RefreshCw,
-                label: `Updated ${guideLastUpdated}`,
-              },
-            ]}
-            actions={
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    toast.success('Guide saved to your dashboard!');
-                  }}
-                  className={detailHeroSummaryActionSecondaryClass}
-                >
-                  <Bookmark size={13} className="text-[#E8500A]" />
-                  Save
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                    toast.success('Share link copied to clipboard!');
-                  }}
-                  className={detailHeroSummaryActionPrimaryClass}
-                >
-                  <Share2 size={13} />
-                  Share
-                </button>
-              </>
-            }
-          />
         </div>
       </section>
 
+      {/* Engagement strip + title card — below gallery */}
+      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 w-full -mt-2 mb-4">
+        <div className="bg-white rounded-xl border border-[#E8EDF2] border-t-[3px] border-t-[#2323FF] px-[26px] py-[18px] mb-4 flex flex-wrap items-center justify-center gap-8 sm:gap-14 text-center">
+          <div>
+            <div className="text-[15px] font-extrabold text-[#1A1A2E] tabular-nums">
+              {guideViewCount.toLocaleString()}
+            </div>
+            <div className="text-[10px] text-[#9AA0AC] mt-0.5">Views</div>
+          </div>
+          <div>
+            <div className="text-[15px] font-extrabold text-[#1A1A2E] tabular-nums">
+              {interactions.loved.toLocaleString()}
+            </div>
+            <button
+              type="button"
+              onClick={() => toggleInteraction("isLoved")}
+              className={cn(
+                "mt-1 bg-[#F4F7F9] border-0 text-[9.5px] font-bold px-2.5 py-0.5 rounded-[10px] cursor-pointer inline-flex items-center gap-1",
+                interactions.isLoved ? "text-[#FF5B00]" : "text-[#4B5563]",
+              )}
+            >
+              <Heart size={11} className={cn(interactions.isLoved && "fill-current")} />
+              Love React
+            </button>
+          </div>
+          <div>
+            <div className="text-[15px] font-extrabold text-[#1A1A2E] tabular-nums">
+              {interactions.helpful.toLocaleString()}
+            </div>
+            <button
+              type="button"
+              onClick={() => toggleInteraction("isHelpful")}
+              className={cn(
+                "mt-1 bg-[#F4F7F9] border-0 text-[9.5px] font-bold px-2.5 py-0.5 rounded-[10px] cursor-pointer inline-flex items-center gap-1",
+                interactions.isHelpful ? "text-[#2323FF]" : "text-[#4B5563]",
+              )}
+            >
+              <ThumbsUp size={11} className={cn(interactions.isHelpful && "fill-current")} />
+              Helpful
+            </button>
+          </div>
+          <div>
+            <div className="text-[15px] font-extrabold text-[#FF5B00] tabular-nums">
+              {interactions.purchases.toLocaleString()}
+            </div>
+            <button
+              type="button"
+              onClick={() => toggleInteraction("isPurchased")}
+              className={cn(
+                "mt-1 bg-[#F4F7F9] border-0 text-[9.5px] font-bold px-2.5 py-0.5 rounded-[10px] cursor-pointer inline-flex items-center gap-1",
+                interactions.isPurchased ? "text-[#FF5B00]" : "text-[#4B5563]",
+              )}
+            >
+              <ShoppingBag size={11} />
+              Purchased
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#E8EDF2] p-[26px] mb-4 text-left">
+          <span className="inline-block bg-[#EB4501] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-[5px] mb-3.5 uppercase tracking-wide">
+            {guideKindLabel}
+          </span>
+          <h1 className="text-2xl font-extrabold text-[#1A1A2E] mb-2 leading-snug">
+            {guide.title}
+          </h1>
+          <p className="text-[13px] text-[#6B7280] leading-relaxed m-0 mb-[18px]">
+            {guide.excerpt ||
+              "An in-depth expert curation guiding your next big decision, backed by extensive testing and research."}
+          </p>
+          <div className="flex items-center gap-2.5 mb-5">
+            {creator?.avatar ? (
+              <img
+                src={creator.avatar}
+                alt=""
+                className="w-[34px] h-[34px] rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <div className="w-[34px] h-[34px] rounded-full bg-[#FF5B00] flex items-center justify-center text-white text-xs font-extrabold shrink-0">
+                {authorInitial}
+              </div>
+            )}
+            <div>
+              <div className="text-[12.5px] font-bold text-[#1A1A2E] flex items-center gap-1.5">
+                {creator?.name || "Choosify Editorial"}
+                <CheckCircle2 size={14} className="text-[#3B82F6] shrink-0" aria-label="Verified" />
+              </div>
+              <div className="text-[11px] text-[#9AA0AC]">
+                {guideLastUpdated} · {guideReadTime} · {guideViewCount.toLocaleString()} views
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2.5 items-center">
+            <button
+              type="button"
+              onClick={() =>
+                openEmiPanel(`Tell me about this buying guide: ${guide.title}`)
+              }
+              className="inline-flex items-center gap-1.5 bg-[linear-gradient(90deg,#6C4CFF,#FF5B00)] text-white border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 transition-all"
+            >
+              <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center overflow-hidden p-px shrink-0">
+                <EmiAiLogo size={16} className="w-4 h-4" />
+              </span>
+              Ask Emi about this Discovery
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleInteraction("isLoved")}
+              className={cn(
+                "inline-flex items-center gap-1.5 bg-[#F4F7F9] border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer transition-colors",
+                interactions.isLoved ? "text-[#FF5B00]" : "text-[#1A1A2E]",
+              )}
+            >
+              <Heart size={14} className={cn(interactions.isLoved && "fill-current")} />
+              Love React
+            </button>
+            <div className="flex gap-2.5 sm:ml-auto">
+              <button
+                type="button"
+                onClick={() => toast.success("Guide saved to your dashboard!")}
+                className="inline-flex items-center gap-1.5 bg-[#F4F7F9] text-[#1A1A2E] border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:bg-[#E8EDF2] transition-colors"
+              >
+                <Bookmark size={14} />
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Share link copied to clipboard!");
+                }}
+                className="inline-flex items-center gap-1.5 bg-[#F4F7F9] text-[#1A1A2E] border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:bg-[#E8EDF2] transition-colors"
+              >
+                <Share2 size={14} />
+                Share
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {spotlightContent && showSection('live_status') && (
+        <SpotlightLiveStatusSection content={spotlightContent} className="-mt-2" />
+      )}
+
+      {guideSectionNavItems.length > 0 && (
       <StickySectionNav
         sections={guideSectionNavItems}
         activeId={activeSectionId}
@@ -538,18 +649,63 @@ export function GuideDetailPage({
         allLabel="Guide"
         profileLabel="Guide sections"
       />
+      )}
 
       <div id="all-section" className="scroll-mt-36">
-        <div className="max-w-[1440px] mx-auto px-4 py-5 w-full">
+        <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 py-8 md:py-10 w-full">
           <div className={`${DETAIL_SINGLE_FEED}`}>
             <main className="flex flex-col gap-12 w-full">
+              {showSection('description') && (spotlightContent?.description || guide.excerpt) && (
+                <SpotlightDetailsDescriptionSection
+                  title={descriptionTitle}
+                  description={spotlightContent?.description ?? guide.excerpt ?? ''}
+                />
+              )}
+
+              {showSection('pricing') && spotlightContent && (
+                <section className="scroll-mt-36" aria-labelledby="spotlight-pricing-heading">
+                  <div className="mb-4 text-left">
+                    <h2 id="spotlight-pricing-heading" className="text-2xl font-extrabold text-[#1A1A2E] mb-0.5">
+                      Offer Details
+                    </h2>
+                    <p className="text-[13px] font-bold text-[#9AA0AC]">
+                      Pricing and availability
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm text-left flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <p className="text-[11px] font-bold text-[#FF5B00] mb-1">Limited offer</p>
+                      <p className="text-sm font-bold text-[#1a1a2e]">{spotlightContent.headline}</p>
+                      {spotlightContent.endsAt && (
+                        <p className="text-[11px] text-[#9AA0AC] mt-1">
+                          Expires {new Date(spotlightContent.endsAt).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    {spotlightContent.commerce.primaryCta && (
+                      <Link
+                        to={spotlightContent.commerce.primaryCta.href}
+                        className="px-5 py-2.5 rounded-full bg-orange-primary hover:brightness-110 text-white text-[12px] font-bold transition-all"
+                      >
+                        {spotlightContent.commerce.primaryCta.label}
+                      </Link>
+                    )}
+                  </div>
+                </section>
+              )}
+
+              {showSection('associated_services') && spotlightContent && (
+                <SpotlightDetailsServicesSection content={spotlightContent} />
+              )}
+
               {/* SECTION 1: #1 OVERALL WINNER PRODUCT */}
+              {showSection('winner') && (
               <div id="winner" className="scroll-mt-36">
                 <div className="mb-4 text-left">
-                  <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                    #1 OVERALL WINNER PRODUCT
+                  <h2 className="text-2xl font-extrabold text-[#1A1A2E] mb-0.5">
+                    #1 Overall winner product
                   </h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
+                  <p className="text-[13px] font-bold text-[#9AA0AC]">
                     The highest performing option matching overall premium
                     metrics
                   </p>
@@ -558,21 +714,21 @@ export function GuideDetailPage({
                 {displayProducts.length > 0 && (
                   <div
                     id="prod-sec-0"
-                    className="group relative w-full rounded-[5px] overflow-hidden shadow-2xl flex flex-col hero-gradient text-white p-6 md:p-8 mb-8 mt-2 scroll-mt-36 border border-white/5"
+                    className="group relative w-full rounded-xl overflow-hidden shadow-sm flex flex-col bg-[#000435] text-white p-6 md:p-8 mb-8 mt-2 scroll-mt-36 border border-white/5"
                   >
                     {/* 1. CARD HEADER */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-black text-[#F97316] uppercase tracking-[0.25em]">
-                            EDITORIAL CHAMPION
+                          <span className="text-[11px] font-extrabold text-[#FBBF24] tracking-wide">
+                            Editorial champion
                           </span>
-                          <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-[#F97316]/90 border border-[#F97316]/30 uppercase bg-[#F97316]/10 rounded-full">
-                            APPROVED
+                          <span className="px-1.5 py-0.5 text-[9px] font-bold text-[#F97316]/90 border border-[#F97316]/30 bg-[#F97316]/10 rounded-full">
+                            Approved
                           </span>
                         </div>
-                        <h3 className="text-xl md:text-2xl font-black text-white mt-1 italic tracking-tight uppercase">
-                          OVERALL WINNER
+                        <h3 className="text-xl md:text-2xl font-extrabold text-white mt-1">
+                          Overall winner
                         </h3>
                         <p className="text-xs text-gray-400 mt-1">
                           First-place gold standard with peak scoring across all
@@ -580,8 +736,8 @@ export function GuideDetailPage({
                         </p>
                       </div>
                       <div>
-                        <span className="rounded-full px-2.5 py-1 text-[10px] font-extrabold tracking-wider bg-white/5 text-gray-300 border border-white/10 uppercase">
-                          ★ #1 RANKED
+                        <span className="rounded-full px-2.5 py-1 text-[10px] font-bold bg-white/5 text-gray-300 border border-white/10">
+                          ★ #1 ranked
                         </span>
                       </div>
                     </div>
@@ -599,7 +755,7 @@ export function GuideDetailPage({
                         onClick={() => navigate(`/products/${displayProducts[0]?.id}`)}
                       >
                         <div className="relative w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md border-2 border-[#F97316]/50 transition-transform hover:scale-105 shrink-0">
-                          <span className="text-[#060922] font-black text-xl tracking-tighter">
+                          <span className="text-[#000435] font-extrabold text-xl tracking-tight">
                             {displayProducts[0]?.brand?.charAt(0) || "W"}
                           </span>
                           <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm">
@@ -617,11 +773,11 @@ export function GuideDetailPage({
                           </span>
                         </div>
                         <div className="text-left">
-                          <span className="text-[9px] font-extrabold text-[#F97316] uppercase tracking-widest block mb-0.5">
-                            ESTABLISHED CHAMPION
+                          <span className="text-[11px] font-extrabold text-[#F97316] block mb-0.5">
+                            Established champion
                           </span>
-                          <span className="text-[10px] font-bold text-gray-400 hover:text-white transition-colors">
-                            BEST CRITIC SCORE ➔
+                          <span className="text-[11px] font-bold text-gray-400 hover:text-white transition-colors">
+                            Best critic score ➔
                           </span>
                         </div>
                       </div>
@@ -629,11 +785,11 @@ export function GuideDetailPage({
                       {/* Zone B: Identity Info */}
                       <div className="text-left md:border-l md:border-white/10 md:pl-6">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="text-base font-bold text-white tracking-tight uppercase">
+                          <h4 className="text-base font-bold text-white">
                             {displayProducts[0]?.brand}
                           </h4>
-                          <span className="bg-[#22C55E]/15 text-[#22C55E] text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-[#22C55E]/20">
-                            TOP PICK
+                          <span className="bg-[#22C55E]/15 text-[#22C55E] text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#22C55E]/20">
+                            Top pick
                           </span>
                         </div>
                         <p className="text-xs text-gray-400 capitalize">
@@ -682,18 +838,18 @@ export function GuideDetailPage({
                           className="max-h-[90%] max-w-[90%] object-contain transition-transform duration-500 group-hover:scale-105"
                           alt={displayProducts[0]?.title}
                         />
-                        <div className="absolute top-2 left-2 bg-black/70 text-white text-[8px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full z-10">
-                          VERIFIED SOURCE
+                        <div className="absolute top-2 left-2 bg-black/70 text-white text-[9px] font-bold px-2 py-0.5 rounded-full z-10">
+                          Verified source
                         </div>
                       </div>
 
                       {/* Right: Expert Summary, Price & Primary Action */}
                       <div className="md:col-span-8 flex flex-col justify-between text-left h-full">
                         <div className="pt-1">
-                          <span className="text-[9px] font-black tracking-widest text-[#F97316] uppercase block mb-1">
-                            EXPERT LAB WINNER DETAILS
+                          <span className="text-[11px] font-extrabold text-[#F97316] block mb-1">
+                            Expert lab winner details
                           </span>
-                          <h4 className="text-lg font-bold text-white mb-2 uppercase">
+                          <h4 className="text-lg font-bold text-white mb-2">
                             {displayProducts[0]?.brand}{" "}
                             {displayProducts[0]?.title}
                           </h4>
@@ -725,15 +881,15 @@ export function GuideDetailPage({
                               onClick={() => {
                                 navigate(`/products/${displayProducts[0]?.id}`);
                               }}
-                              className="bg-[#F97316] hover:bg-[#E8500A] text-white px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest italic transition-all shadow-lg active:scale-95 cursor-pointer border-0 font-bold"
+                              className="bg-[#F97316] hover:bg-[#E8500A] text-white px-5 py-2.5 rounded-full text-[12px] font-bold transition-all shadow-lg active:scale-95 cursor-pointer border-0"
                             >
-                              Shop Now
+                              Shop now
                             </button>
                             <Link
                               to={`/products/${displayProducts[0]?.id}`}
-                              className="bg-white/15 hover:bg-white/25 text-white px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest italic transition-all border border-white/10 cursor-pointer font-bold"
+                              className="bg-white/15 hover:bg-white/25 text-white px-5 py-2.5 rounded-full text-[12px] font-bold transition-all border border-white/10 cursor-pointer"
                             >
-                              See Best Price
+                              See best price
                             </Link>
                           </div>
                         </div>
@@ -742,8 +898,8 @@ export function GuideDetailPage({
 
                     {/* 4. OUR SCORE MATRIX FOOTER */}
                     <div className="mt-8 border-t border-white/10 pt-6">
-                      <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-4 text-left font-mono">
-                        OUR SCORE MATRIX
+                      <h4 className="text-[11px] font-bold text-white/50 mb-4 text-left">
+                        Our score matrix
                       </h4>
                       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                         {[
@@ -757,7 +913,7 @@ export function GuideDetailPage({
                             key={i}
                             className="bg-white/5 rounded-[5px] p-3 border border-white/5 flex flex-col justify-between text-left"
                           >
-                            <span className="text-[8px] font-bold text-white/50 uppercase tracking-wider leading-tight mb-2 line-clamp-1">
+                            <span className="text-[10px] font-bold text-white/50 leading-tight mb-2 line-clamp-1">
                               {item.label}
                             </span>
                             <div className="flex items-baseline gap-1">
@@ -781,14 +937,16 @@ export function GuideDetailPage({
                   </div>
                 )}
               </div>
+              )}
 
               {/* SECTION 2: #1 WHY THIS WON */}
+              {showSection('why_it_won') && (
               <div id="why-won" className="scroll-mt-36">
                 <div className="mb-4 text-left">
-                  <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                    #1 WHY THIS WON
+                  <h2 className="text-2xl font-extrabold text-[#1A1A2E] mb-0.5">
+                    Why this won
                   </h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
+                  <p className="text-[13px] font-bold text-[#9AA0AC]">
                     Crucial hardware & testing decision signals
                   </p>
                 </div>
@@ -832,7 +990,7 @@ export function GuideDetailPage({
                     <span
                       key={idx}
                       className={cn(
-                        "px-4 py-2 text-[10px] font-black uppercase tracking-wider border rounded-xl flex items-center gap-1.5",
+                        "px-4 py-2 text-[11px] font-bold border rounded-xl flex items-center gap-1.5",
                         chip.color,
                       )}
                     >
@@ -841,14 +999,16 @@ export function GuideDetailPage({
                   ))}
                 </div>
               </div>
+              )}
 
               {/* SECTION 3: RECOMMENDATION & QUICK VERDICT */}
+              {(showSection('verdict') || showSection('pros') || showSection('cons')) && (
               <div id="quick-verdict" className="scroll-mt-36">
                 <div className="mb-4 text-left">
-                  <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                    RECOMMENDATION & QUICK VERDICT
+                  <h2 className="text-2xl font-extrabold text-[#1A1A2E] mb-0.5">
+                    Recommendation & quick verdict
                   </h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
+                  <p className="text-[13px] font-bold text-[#9AA0AC]">
                     High level, scannable advice
                   </p>
                 </div>
@@ -856,8 +1016,8 @@ export function GuideDetailPage({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Best for */}
                   <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
-                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
-                      <Check size={12} className="text-emerald-500" /> BEST FOR
+                    <span className="text-[11px] font-extrabold text-emerald-500 flex items-center gap-1.5 mb-2">
+                      <Check size={12} className="text-emerald-500" /> Best for
                     </span>
                     <ul className="space-y-1.5 pl-1.5 list-none">
                       {[
@@ -867,7 +1027,7 @@ export function GuideDetailPage({
                       ].map((item, i) => (
                         <li
                           key={i}
-                          className="text-[10px] font-bold uppercase text-navy/70 flex items-center gap-1.5"
+                          className="text-[12px] font-bold text-[#1A1A2E]/70 flex items-center gap-1.5"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />{" "}
                           {item}
@@ -878,8 +1038,8 @@ export function GuideDetailPage({
 
                   {/* Not For */}
                   <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
-                    <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
-                      <X size={12} className="text-red-500" /> NOT FOR
+                    <span className="text-[11px] font-extrabold text-red-500 flex items-center gap-1.5 mb-2">
+                      <X size={12} className="text-red-500" /> Not for
                     </span>
                     <ul className="space-y-1.5 pl-1.5 list-none">
                       {[
@@ -889,7 +1049,7 @@ export function GuideDetailPage({
                       ].map((item, i) => (
                         <li
                           key={i}
-                          className="text-[10px] font-bold uppercase text-navy/70 flex items-center gap-1.5"
+                          className="text-[12px] font-bold text-[#1A1A2E]/70 flex items-center gap-1.5"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />{" "}
                           {item}
@@ -900,8 +1060,8 @@ export function GuideDetailPage({
 
                   {/* What we like */}
                   <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
-                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
-                      <Star size={12} className="text-blue-500" /> WHAT WE LIKE
+                    <span className="text-[11px] font-extrabold text-blue-500 flex items-center gap-1.5 mb-2">
+                      <Star size={12} className="text-blue-500" /> What we like
                     </span>
                     <ul className="space-y-1.5 pl-1.5 list-none">
                       {[
@@ -911,7 +1071,7 @@ export function GuideDetailPage({
                       ].map((item, i) => (
                         <li
                           key={i}
-                          className="text-[10px] font-bold uppercase text-navy/70 flex items-center gap-1.5"
+                          className="text-[12px] font-bold text-[#1A1A2E]/70 flex items-center gap-1.5"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />{" "}
                           {item}
@@ -922,9 +1082,9 @@ export function GuideDetailPage({
 
                   {/* What to consider */}
                   <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
-                    <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-widest italic flex items-center gap-1.5 mb-2">
-                      <Info size={12} className="text-[#E8500A]" /> WHAT TO
-                      CONSIDER
+                    <span className="text-[11px] font-extrabold text-[#E8500A] flex items-center gap-1.5 mb-2">
+                      <Info size={12} className="text-[#E8500A]" /> What to
+                      consider
                     </span>
                     <ul className="space-y-1.5 pl-1.5 list-none">
                       {[
@@ -934,7 +1094,7 @@ export function GuideDetailPage({
                       ].map((item, i) => (
                         <li
                           key={i}
-                          className="text-[10px] font-bold uppercase text-navy/70 flex items-center gap-1.5"
+                          className="text-[12px] font-bold text-[#1A1A2E]/70 flex items-center gap-1.5"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-[#E8500A]/50 shrink-0" />{" "}
                           {item}
@@ -943,16 +1103,15 @@ export function GuideDetailPage({
                     </ul>
                   </div>
                 </div>
-              </div>
 
               {/* GENERAL SCORING DETAILS BLOCK */}
               <div className="bg-white border border-gray-100 rounded-[5px] p-6 shadow-sm text-left">
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 last:border-0 text-left">
-                  <h3 className="text-xl font-black text-navy uppercase italic tracking-tighter leading-none">
-                    Detail Evaluation
+                  <h3 className="text-xl font-extrabold text-[#1A1A2E] leading-none">
+                    Detail evaluation
                   </h3>
-                  <div className="text-[8px] bg-gray-50 text-gray-400 italic px-3 py-1.5 rounded-full uppercase tracking-widest font-black font-mono">
-                    Score Matrix
+                  <div className="text-[10px] bg-gray-50 text-[#9AA0AC] px-3 py-1.5 rounded-full font-bold">
+                    Score matrix
                   </div>
                 </div>
 
@@ -975,16 +1134,16 @@ export function GuideDetailPage({
                         >
                           <div className="flex items-center justify-between text-left">
                             <div className="flex flex-col text-left">
-                              <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest italic mb-1 font-mono">
-                                CRITERIA 0{i + 1}
+                              <span className="text-[10px] font-bold text-[#9AA0AC] mb-1">
+                                Criteria 0{i + 1}
                               </span>
-                              <h4 className="text-sm font-black text-navy uppercase italic tracking-tight leading-none">
+                              <h4 className="text-sm font-extrabold text-[#1A1A2E] leading-none">
                                 {crt.name}
                               </h4>
                             </div>
-                            <div className="text-xl font-black text-[#1B5CFF] italic leading-none font-mono">
+                            <div className="text-xl font-extrabold text-[#1B5CFF] leading-none">
                               {score}{" "}
-                              <span className="text-[10px] text-gray-300 font-mono">
+                              <span className="text-[10px] text-[#9AA0AC]">
                                 /10
                               </span>
                             </div>
@@ -996,7 +1155,7 @@ export function GuideDetailPage({
                               style={{ width: `${score * 10}%` }}
                             />
                           </div>
-                          <p className="text-[11px] font-semibold text-gray-400 italic uppercase tracking-wider leading-relaxed text-left">
+                          <p className="text-[12px] font-semibold text-[#9AA0AC] leading-relaxed text-left">
                             {detailText}
                           </p>
                         </div>
@@ -1005,41 +1164,39 @@ export function GuideDetailPage({
                   )}
                 </div>
               </div>
+              </div>
+              )}
 
               {/* SECTION 4: KEY TAKEAWAYS & FINAL RECOMMENDATION */}
+              {showSection('takeaways') && (
               <div id="takeaways" className="scroll-mt-36">
-                <div className="mb-4 text-left">
-                  <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                    KEY TAKEAWAYS
+                <div className="mb-3.5 text-left">
+                  <h2 className="text-[13px] font-extrabold text-[#1A1A2E] tracking-wide uppercase">
+                    Key Takeaways
                   </h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                    Final direct expert conclusion
-                  </p>
                 </div>
-                <div className="hero-gradient text-white rounded-[5px] p-6 text-left shadow-sm border border-white/5 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-full bg-[#E8500A]/10 blur-xl pointer-events-none" />
-                  <p className="text-[13px] font-black uppercase tracking-wider italic text-[#FF5C38] mb-1 leading-none">
-                    The Verdict
+                <div className="bg-white text-[#1A1A2E] rounded-[10px] p-6 text-left border border-[#E8EDF2]">
+                  <p className="text-[13px] font-extrabold text-[#FF5B00] mb-2 leading-none">
+                    The verdict
                   </p>
-                  <p className="text-[12px] font-bold text-gray-200 leading-relaxed italic uppercase max-w-2xl text-left">
-                    "If you value pristine hardware stability, direct sourcing
+                  <p className="text-[13px] font-bold text-[#4B5563] leading-relaxed max-w-2xl text-left">
+                    If you value pristine hardware stability, direct sourcing
                     authenticity, and optimal value return on your premium
                     hardware spend, the overall winner remains our absolute
                     recommendation for this year. Do not settle for unverified
-                    alternatives."
+                    alternatives.
                   </p>
                 </div>
               </div>
+              )}
 
               {/* SECTION 5: OTHER PRODUCTS MENTIONED | TOP 3 */}
+              {showSection('top_3') && (
               <div id="top-3" className="scroll-mt-36">
-                <div className="mb-4 text-left">
-                  <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                    OTHER PRODUCTS MENTIONED | TOP 3
+                <div className="mb-3.5 text-left">
+                  <h2 className="text-[13px] font-extrabold text-[#1A1A2E] tracking-wide uppercase">
+                    Other Products Mentioned | Top 3
                   </h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                    High-tier alternative models evaluated
-                  </p>
                 </div>
                 <div className={PRODUCT_CARD_GRID}>
                   {displayProducts.slice(1, 4).map((product, idx) => (
@@ -1057,20 +1214,23 @@ export function GuideDetailPage({
                   ))}
                 </div>
               </div>
+              )}
 
               {/* SECTION 6: OTHER PRODUCTS MENTIONED */}
+              {(showSection('associated_products') ||
+                showSection('products_reviewed') ||
+                showSection('creator_profile_card') ||
+                showSection('brand_profile_card')) && (
               <div id="all-products" className="scroll-mt-36">
-                <div className="mb-4 text-left">
-                  <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                    OTHER PRODUCTS MENTIONED
+                <div className="mb-3.5 text-left">
+                  <h2 className="text-[13px] font-extrabold text-[#1A1A2E] tracking-wide uppercase">
+                    Other Products Mentioned
                   </h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                    Every model covered during continuous testing
-                  </p>
                 </div>
 
                 <div className={PRODUCT_CARD_GRID}>
-                  {displayProducts.map((product) => (
+                  {showSection('associated_products') &&
+                  displayProducts.map((product) => (
                     <ProductCard
                       key={product.id}
                       product={product}
@@ -1080,33 +1240,50 @@ export function GuideDetailPage({
                   ))}
                 </div>
 
-                {allGuideProducts.length > displayProducts.length && (
+                {showSection('associated_products') &&
+                allGuideProducts.length > displayProducts.length && (
                   <div className="text-center mt-8 font-bold">
                     <button
                       onClick={() => setVisibleCount((prev) => prev + 4)}
-                      className="px-8 py-3.5 border border-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white text-[#1A1D4E] font-black text-[10px] uppercase tracking-widest rounded-full italic transition-all cursor-pointer bg-white"
+                      className="px-8 py-3.5 border border-[#1A1A2E] hover:bg-[#1A1A2E] hover:text-white text-[#1A1A2E] font-bold text-[12px] rounded-full transition-all cursor-pointer bg-white"
                     >
                       Load More Products
                     </button>
                   </div>
                 )}
 
-                {/* What was reviewed + how this review was made — above reviewer profile */}
+                {/* HOW THIS REVIEW WAS MADE | WHAT IS DISCUSSED — Choosify.dc.html */}
+                {showSection('products_reviewed') && (
                 <div
                   id="review-context"
-                  className="grid grid-cols-1 lg:grid-cols-2 gap-5 scroll-mt-36 mt-12"
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-4 scroll-mt-36 mt-9 items-start"
                 >
-                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
-                    <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#e8edf2] px-0.5">
-                      <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none">
-                        <span className="w-1.5 h-3 bg-[#E8500A] rounded-full inline-block" />
-                        What Was Reviewed
-                      </h3>
-                      <span className="text-[9px] font-black text-[#E8500A] uppercase tracking-widest">
-                        {displayProducts.length} items
-                      </span>
+                  <div className="bg-white rounded-[10px] p-5 border border-[#E8EDF2] text-center">
+                    <div className="text-[13px] font-extrabold text-[#1A1A2E] mb-4">
+                      HOW <span className="text-[#FF5B00]">THIS REVIEW</span> WAS MADE
                     </div>
-                    <div className="flex flex-col gap-2 max-h-[320px] overflow-y-auto no-scrollbar">
+                    <div className="h-px bg-[#F1F1F3] mb-4" />
+                    <div className="flex flex-col gap-3.5 text-left">
+                      {[
+                        'Tested for 30 days',
+                        `Compared with ${Math.max(displayProducts.length, 3)} competitors`,
+                        'Real world usage',
+                        'No sponsored placement',
+                      ].map((label) => (
+                        <div key={label} className="flex items-center gap-2.5">
+                          <span className="text-[#FF5B00] text-base shrink-0">●</span>
+                          <span className="text-[13px] font-bold italic text-[#1A1A2E]">{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-[10px] p-5 border border-[#E8EDF2]">
+                    <div className="text-[13px] font-extrabold text-[#1A1A2E] text-center mb-4">
+                      WHAT IS <span className="text-[#FF5B00]">DISCUSSED?</span>
+                    </div>
+                    <div className="h-px bg-[#F1F1F3] mb-2.5" />
+                    <div className="flex flex-col max-h-[360px] overflow-y-auto no-scrollbar">
                       {displayProducts.map((p, idx) => {
                         const isActive = activeProductIdx === idx;
                         return (
@@ -1123,185 +1300,181 @@ export function GuideDetailPage({
                               }
                             }}
                             className={cn(
-                              "w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left cursor-pointer",
-                              isActive
-                                ? "bg-[#E8500A]/5 border-[#E8500A]/30 text-[#E8500A] shadow-sm"
-                                : "bg-white border-gray-100 text-navy hover:border-gray-200",
+                              "w-full flex items-center gap-2.5 px-1.5 py-2.5 border-b border-[#F4F7F9] text-left cursor-pointer bg-transparent",
+                              isActive && "bg-[#FFF3EA]",
                             )}
                           >
-                            <span className="text-xs font-black tracking-tight shrink-0 w-5">
-                              {idx + 1}.
-                            </span>
-                            <div className="w-8 h-8 rounded bg-gray-50 border border-[#e8edf2] p-0.5 shrink-0 overflow-hidden flex items-center justify-center">
-                              <img
-                                src={p.image}
-                                className="w-full h-full object-contain"
-                                alt=""
-                              />
+                            <div
+                              className={cn(
+                                "w-[22px] h-[22px] rounded-full shrink-0 flex items-center justify-center text-[11px] font-extrabold",
+                                idx === 0
+                                  ? "bg-[#FF5B00] text-white"
+                                  : "bg-[#F4F7F9] text-[#9AA0AC]",
+                              )}
+                            >
+                              {idx === 0 ? '👑' : idx + 1}
                             </div>
-                            <span className="text-[11px] font-semibold uppercase truncate tracking-tight">
+                            <span className="flex-1 text-[11.5px] font-bold text-[#1A1A2E] truncate">
                               {p.brand} {p.title}
                             </span>
+                            <div className="w-10 h-[30px] rounded overflow-hidden shrink-0 bg-[#F4F7F9]">
+                              <img src={p.image} className="w-full h-full object-contain" alt="" />
+                            </div>
                           </button>
                         );
                       })}
                     </div>
                   </div>
-
-                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm text-left">
-                    <h4 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider flex items-center gap-1.5 leading-none pb-3 mb-3 border-b border-[#e8edf2]">
-                      <span className="w-1.5 h-3 bg-[#1B5CFF] rounded-full inline-block" />
-                      How This Review Was Made
-                    </h4>
-                    <div className="space-y-2">
-                      {[
-                        {
-                          label: "Tested For 30 Days",
-                          icon: <CalendarDays size={13} className="text-[#E8500A]" />,
-                        },
-                        {
-                          label: `Compared With ${Math.max(displayProducts.length, 3)} Competitors`,
-                          icon: <Layers size={13} className="text-[#1B5CFF]" />,
-                        },
-                        {
-                          label: "Real World Usage",
-                          icon: <Globe size={13} className="text-emerald-500" />,
-                        },
-                        {
-                          label: "No Sponsored Placement",
-                          icon: <ShieldCheck size={13} className="text-purple-500" />,
-                        },
-                      ].map((item, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-2 p-2.5 bg-gray-50 rounded-lg text-[10px] font-semibold text-navy uppercase tracking-wider border border-gray-100"
-                        >
-                          {item.icon}
-                          <span>{item.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="mt-4 text-[11px] text-gray-500 leading-relaxed font-semibold">
-                      Choosify editorial reviews combine hands-on testing, verified retail pricing,
-                      and creator field notes before any product earns a ranking.
-                    </p>
-                  </div>
                 </div>
+                )}
 
-                {/* Reviewer profile */}
-                <div
-                  id="reviewer-profile"
-                  className="bg-white border border-[#e8edf2] rounded-[5px] p-6 shadow-sm flex flex-col items-center text-center scroll-mt-36 mt-8 animate-in fade-in duration-300"
-                >
-                  <div className="w-20 h-20 rounded-full border-2 border-orange-primary/20 p-0.5 mb-4 shrink-0">
-                    <img
-                      src={creator.avatar}
-                      className="w-full h-full object-cover rounded-full"
-                      alt={creator.name}
+                {showBrandCard && (
+                  <div className="mt-8 max-w-sm mx-auto">
+                    <SpotlightBrandMiniCard
+                      publisher={spotlightContent!.publisher}
+                      brandId={spotlightContent!.connections.brandIds[0]}
                     />
                   </div>
+                )}
 
-                  <h4 className="text-base font-black text-navy italic tracking-tighter uppercase mb-1 leading-none">
-                    {creator.name}
-                  </h4>
-                  <span className="text-[8px] font-black text-orange-primary uppercase tracking-widest italic bg-orange-primary/5 px-2.5 py-1 rounded border border-orange-primary/10 mb-4">
-                    {creator.verifiedStatus}
-                  </span>
-
-                  <p className="text-[11px] font-bold text-gray-500 italic mb-4 leading-relaxed max-w-md">
-                    {creator.bio}
-                  </p>
-
-                  <div className="flex gap-4 justify-center mb-5 shrink-0">
-                    {creator.socials.facebook && (
-                      <a
-                        href={creator.socials.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
-                        aria-label="Facebook"
-                      >
-                        <Facebook size={20} />
-                      </a>
-                    )}
-                    {creator.socials.twitter && (
-                      <a
-                        href={creator.socials.twitter}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
-                        aria-label="Twitter"
-                      >
-                        <Twitter size={20} />
-                      </a>
-                    )}
-                    {creator.socials.youtube && (
-                      <a
-                        href={creator.socials.youtube}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 flex items-center justify-center transition-all duration-300 active:scale-95 shadow-sm"
-                        aria-label="YouTube"
-                      >
-                        <Youtube size={20} />
-                      </a>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-2.5 w-full max-w-xs">
+                {/* ABOUT THE AUTHOR | IN THIS GUIDE — Choosify.dc.html */}
+                {showCreatorCard && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-9">
+                  <div
+                    id="reviewer-profile"
+                    className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 text-center scroll-mt-36"
+                  >
+                    <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide text-left mb-3.5">
+                      ABOUT THE AUTHOR
+                    </div>
+                    <div className="relative w-[72px] h-[72px] mx-auto mb-3">
+                      <img
+                        src={creator.avatar}
+                        className="w-full h-full object-cover rounded-full"
+                        alt={creator.name}
+                      />
+                      <div className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-full bg-[#6C4CFF] border-2 border-white flex items-center justify-center text-white text-[11px]">
+                        ✓
+                      </div>
+                    </div>
+                    <div className="text-[14px] font-extrabold text-[#1A1A2E] mb-0.5">{creator.name}</div>
+                    <div className="text-[11.5px] text-[#9AA0AC] mb-3.5">
+                      {creator.verifiedStatus || 'Choosify Editor'}
+                    </div>
+                    <div className="flex items-center justify-center border-y border-[#F1F1F3] py-3 mb-3.5">
+                      <div className="flex-1">
+                        <div className="text-[14px] font-extrabold text-[#1A1A2E]">24</div>
+                        <div className="text-[9.5px] text-[#9AA0AC]">Reviews</div>
+                      </div>
+                      <div className="w-px h-[26px] bg-[#F1F1F3]" />
+                      <div className="flex-1">
+                        <div className="text-[14px] font-extrabold text-[#1A1A2E]">12.4K</div>
+                        <div className="text-[9.5px] text-[#9AA0AC]">Followers</div>
+                      </div>
+                      <div className="w-px h-[26px] bg-[#F1F1F3]" />
+                      <div className="flex-1">
+                        <div className="text-[14px] font-extrabold text-[#1A1A2E]">4.9</div>
+                        <div className="text-[9.5px] text-[#9AA0AC]">Rating</div>
+                      </div>
+                    </div>
                     <FollowButton
                       id={`creator-${creator.name}`}
                       name={creator.name}
                       type="creator"
-                      className="flex-1 py-3 rounded-xl border border-[#e8edf2] text-[10px]"
+                      className="w-full mb-2 h-9 rounded-lg text-[11.5px] font-bold"
                     />
                     <Link
                       to={`/creators/${creator.id || 'creator-farhan'}`}
-                      className="flex-1 py-3 rounded-xl bg-[#E8500A] hover:bg-[#CF4400] text-center text-white text-[10px] font-black uppercase tracking-wider transition-all duration-300 transform hover:scale-[1.03] active:scale-95 border border-transparent cursor-pointer inline-flex items-center justify-center select-none shadow-md italic shadow-orange-primary/10"
+                      className="block w-full bg-[#000435] hover:bg-[#FF5B00] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors"
                     >
-                      Visit Profile
+                      View Profile
                     </Link>
                   </div>
+
+                  <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 text-left">
+                    <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5">
+                      IN THIS GUIDE
+                    </div>
+                    <div className="flex flex-col gap-2.5">
+                      {[
+                        'Overall winner & rating',
+                        'Key takeaways',
+                        'Recommendations & quick verdict',
+                        'Other products mentioned',
+                        'How this review was made',
+                      ].map((item, i) => (
+                        <div key={item} className="text-[12px] text-[#4B5563] flex gap-2">
+                          <span className="font-bold text-[#1A1A2E]">{i + 1}.</span>
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
+                )}
               </div>
+              )}
             </main>
           </div>
         </div>
       </div>
 
       {/* Related Recommendations (End of Page) */}
-      <div className="max-w-[1440px] mx-auto px-6 w-full mb-32">
+      {showSection('related_spotlight') && (
+      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 w-full mb-32">
+        {isSpotlightDetails ? (
+          <SpotlightDetailsRelatedRail
+            items={relatedSpotlightItems}
+            products={allCatalogProducts}
+            viewAllHref="/spotlight"
+            viewAllLabel="Browse Spotlight"
+          />
+        ) : (
         <section className="pt-20 border-t border-gray-100">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10 text-left">
-            <div>
-              <h3 className="text-3xl md:text-4xl font-black text-navy italic tracking-tighter uppercase mb-3">
-                You May Also Like
-              </h3>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic leading-relaxed">
-                More expert recommendations — YouTube, Reels, and blog guides.
-              </p>
-            </div>
+          <div className="flex items-baseline justify-between gap-3 mb-3.5">
+            <h3 className="text-[13px] font-extrabold text-[#1A1A2E] tracking-wide uppercase">
+              You May Also Like
+            </h3>
             <Link
               to="/guides"
-              className="px-8 py-3.5 bg-navy text-white rounded-full text-[10px] font-black uppercase tracking-widest italic hover:bg-[#E8500A] transition-all shadow-lg shrink-0"
+              className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] shrink-0"
             >
-              View All Recommendations
+              View All Guides ›
             </Link>
           </div>
 
-          <div className={GUIDE_MEDIA_GRID}>
-            {relatedGuides.map((g) => (
-              <div key={g.id}>{renderGuideMediaCard(g)}</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-8">
+            {relatedGuides.slice(0, 5).map((g) => (
+              <Link key={g.id} to={catalogGuideHref(g)} className="min-w-0 group">
+                <div className="relative h-[120px] rounded-lg overflow-hidden mb-2 bg-[#F4F7F9]">
+                  <img
+                    src={g.image || PLACEHOLDER_IMAGE}
+                    alt=""
+                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <span className="absolute top-1.5 left-1.5 bg-[#FF5B00] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-sm pointer-events-none">
+                    {g.type === 'video'
+                      ? 'VIDEO'
+                      : g.type === 'reels' || g.type === 'shorts'
+                        ? 'REELS'
+                        : 'GUIDE'}
+                  </span>
+                </div>
+                <div className="text-[11.5px] font-semibold text-[#1A1A2E] leading-snug line-clamp-2 mb-1">
+                  {g.title}
+                </div>
+                <div className="text-[10px] text-[#9AA0AC]">
+                  {g.readTime || g.duration || 'Choosify Editorial'}
+                </div>
+              </Link>
             ))}
           </div>
 
-          <PopularSearchKeywords
-            title="Popular searches for this guide"
-            terms={guidePopularSearchTerms}
-            className="mt-10 pt-10 border-t border-gray-100"
-          />
         </section>
+        )}
       </div>
+      )}
     </div>
   );
 }

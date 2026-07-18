@@ -214,7 +214,27 @@
 }
 
 .footer-brand-gradient {
-  background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
+  background:
+    radial-gradient(1200px 500px at 15% 0%, hsla(22, 100%, 50%, 0.18), transparent 65%),
+    radial-gradient(900px 500px at 90% 20%, hsla(12, 92%, 45%, 0.14), transparent 65%),
+    rgba(10, 10, 31, 0.96) !important;
+}
+
+.choosify-chrome-header {
+  background:
+    radial-gradient(900px 200px at 15% 0%, hsla(22, 100%, 50%, 0.16), transparent 70%),
+    radial-gradient(700px 200px at 90% 100%, hsla(12, 92%, 45%, 0.12), transparent 70%),
+    rgba(10, 10, 31, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.choosify-discover-pill {
+  background: linear-gradient(90deg, #6C4CFF, #FF5B00);
+  color: #fff !important;
+  font-weight: 800 !important;
+  padding: 5px 14px;
+  border-radius: 9999px;
 }
 
 .shadow-soft {
@@ -274,8 +294,15 @@
   }
 }
 
+/* Row 2 shares choosify-chrome-header (Header.dc.html) — no solid override */
+/* Categories row — same chrome gradient as header, slightly more translucent */
 .choosify-navbar-categories {
-  background: linear-gradient(180deg, #0d0d28 0%, #000435 100%);
+  background:
+    radial-gradient(900px 200px at 15% 0%, hsla(22, 100%, 50%, 0.16), transparent 70%),
+    radial-gradient(700px 200px at 90% 100%, hsla(12, 92%, 45%, 0.12), transparent 70%),
+    rgba(10, 10, 31, 0.82) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 /* Sticky page section nav sits flush below the two-row navbar */
@@ -483,12 +510,12 @@
  * Cards fill their grid track; layout adds/removes columns, not card scale.
  */
 
-/* Product cards — 2 → 3 → 4 → 5 columns; rows stretch so cards match height */
+/* Product cards — Choosify.dc.html Products List: 2 → 3 → 4 → 5 cols, gap 16px */
 .choosify-product-grid,
 .choosify-detail-feed-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(0.75rem, 1.15vw, 1.25rem);
+  gap: 16px;
   align-items: stretch;
   justify-items: stretch;
 }
@@ -514,7 +541,7 @@
   }
 }
 
-/* Category browse cards — same 5-col cap as products; fixed card footprint */
+/* Category browse cards — 4-col cap matching Choosify.dc.html; fixed card footprint */
 .choosify-category-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -537,7 +564,7 @@
 
 @media (min-width: 1280px) {
   .choosify-category-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -584,20 +611,23 @@
   }
 }
 
-/* Brand, creator & guide media cards — max 4 columns */
+/* Brand & creator directory — flat grid, 4–5 per row */
 .choosify-brand-grid,
-.choosify-creator-grid,
-.choosify-guide-media-grid {
+.choosify-creator-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: clamp(0.75rem, 1.15vw, 1.25rem);
+  gap: 16px;
   align-items: stretch;
   justify-items: stretch;
 }
 
 /* Guide media rows mix reels (9:16) and horizontal cards — keep natural heights */
 .choosify-guide-media-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 16px;
   align-items: start;
+  justify-items: stretch;
 }
 
 @media (min-width: 520px) {
@@ -626,10 +656,37 @@
 
 @media (min-width: 1280px) {
   .choosify-brand-grid,
-  .choosify-creator-grid,
-  .choosify-guide-media-grid {
+  .choosify-creator-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
+  .choosify-guide-media-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.choosify-spotlight-related-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.15vw, 1.25rem);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .choosify-spotlight-related-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-spotlight-related-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.choosify-spotlight-related-grid > * {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
 }
 
 /* What's On feed — max 4 cards per row; columns scale down on smaller viewports */
@@ -920,5 +977,19 @@
   );
   background-size: 200% 100%;
   animation: choosify-shimmer 1.35s ease-in-out infinite;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.mask-fade-x {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
 }
 

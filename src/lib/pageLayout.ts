@@ -38,7 +38,7 @@
  *   pages do not need per-file `2xl:` visibility classes.
  * - Prefer `SIDEBAR_LEFT` / `SIDEBAR_RIGHT` on new markup for explicit intent.
  * - Product grids: `.choosify-product-grid` (max 5 cols @ 1280px+)
- * - Brand/creator grids: `.choosify-brand-grid` / `.choosify-creator-grid` (max 4 cols @ 1024px+)
+ * - Brand/creator grids: `.choosify-brand-grid` / `.choosify-creator-grid` (4 cols @ 1024px, 5 @ 1280px+)
  */
 
 /** Matches Tailwind defaults — keep in sync with tailwind.config if customized */

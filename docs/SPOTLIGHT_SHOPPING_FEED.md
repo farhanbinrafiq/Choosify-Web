@@ -294,3 +294,45 @@ Opens Spotlight on the **reviews** tab with `product` or `brand` query params. D
 - Spotlight Feed, Homepage, Recommendation pages  
 - Legacy `InfluencerReviews.tsx` retained for reference; detail pages use `CreatorReviewsPreview`
 
+---
+
+## Commerce Feed Evolution — LE-006 Phase 1
+
+Frontend-only upgrade of the Spotlight Feed into a premium commerce discovery feed. No backend, CMS, API, routing, or data-model changes.
+
+### Sticky filter bar
+
+`SpotlightFeedFilterBar` (`src/components/spotlight/feed/SpotlightFeedFilterBar.tsx`) — sticky chip navigation below the navbar on `/spotlight`, sharing state with the floating filter drawer via `useSpotlightFloatingFilters` (single source of truth).
+
+Chips in order: All · Reels · Videos · Guides · Brands · Collections · Offers · Campaigns · Reviews · Blogs · Live · Services · Trending · Following · Saved · Nearby (`SPOTLIGHT_STICKY_FILTER_IDS`).
+
+### Publisher header (Facebook-style)
+
+`UniversalCommerceCard` gained an **opt-in** `showPublisherHeader` prop — brand/creator identity renders **above the media**:
+
+```
+Publisher avatar + name → Verified badge → Sponsored label → Media → Content Badge → Title → Product Preview → Stats → CTA
+```
+
+Only `SpotlightMixedFeed` opts in. Guides page, Creator Reviews preview, and Product Details previews keep their existing layout untouched.
+
+### Sponsored posts
+
+- Same card dimensions as organic posts — no layout break
+- Small bordered `Sponsored` pill in the header + "Sponsored" subline (replaces date)
+- `isVerified` + `publisherTypeLabel` added to `UniversalCommerceCardModel` (adapter: `spotlightToContentCardModel`)
+
+### Feed mixing (de-clustering v2)
+
+`mixSpotlightFeedItems()` now de-clusters by **content type AND card variant** (reel/landscape/blog/square/live), and re-inserts deferred items at the first non-clustering slot instead of appending them at the tail — reels, blogs, and videos interleave through the entire feed.
+
+### Grid (unchanged, verified)
+
+`choosify-guide-media-grid`: 1 col mobile → 2 @520px → 3 @768px → 4 @1024px → 5 @1280px. Aligned rows (`align-items: start`), natural media heights, **no masonry**. Batched lazy loading (24 initial / +12) with scroll restore retained.
+
+### What did NOT change (LE-006 P1)
+
+- Card visual design (colors, typography, spacing, radius, compact CTA footer)
+- Homepage, Recommendations, Deals, Categories, Brands, Product Details, Guide Details, Creator Reviews, Dashboard
+- Backend, CMS, APIs, routing, data models, floating filter drawer
+

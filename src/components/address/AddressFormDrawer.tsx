@@ -21,7 +21,7 @@ const ADDRESS_TYPES: Array<{ id: AddressType; label: string }> = [
 
 function FieldLabel({ children, required = false }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">
+    <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-1">
       {children}
       {required && <span className="text-[#E8500A] ml-1">*</span>}
     </label>
@@ -105,7 +105,7 @@ export function AddressFormDrawer({
       <div className="relative w-full max-w-xl h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
         <div className="flex items-center justify-between gap-4 border-b border-[#e8edf2] px-5 py-4 shrink-0">
           <div className="text-left">
-            <h2 id="address-form-title" className="text-lg font-black italic uppercase tracking-tight text-[#1a1a2e]">
+            <h2 id="address-form-title" className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">
               {editing ? 'Edit Address' : 'Add New Address'}
             </h2>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">

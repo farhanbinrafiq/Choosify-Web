@@ -1,6 +1,8 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { Heart } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { cn } from '../lib/utils';
 
 interface CreatorCardDesignProps {
   creator: {
@@ -13,21 +15,26 @@ interface CreatorCardDesignProps {
     platforms: string[];
     rating: number;
     reviews: number;
+    followers?: number | Record<string, string>;
     isHot?: boolean;
     isFeatured?: boolean;
     coverImage?: string;
     bio?: string;
+    niche?: string;
   };
   onClick?: () => void;
 }
 
-const CREATOR_COVERS: Record<string, string> = {
-  "creator-farhan": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&q=80",
-  "creator-sarah": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80",
-  "creator-mily": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80",
-  "creator-imtiaz": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80",
-  "creator-shakib": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=600&q=80"
-};
+const AVATAR_COLORS = [
+  '#FF5B00',
+  '#2323FF',
+  '#07A828',
+  '#6C4CFF',
+  '#000435',
+  '#EB4501',
+  '#0F766E',
+  '#BE123C',
+];
 
 function formatNumber(num: number): string {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -35,174 +42,116 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
-export const CreatorCardDesign = memo(function CreatorCardDesign({ creator, onClick }: CreatorCardDesignProps) {
+function hashColor(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+
+/** Choosify.dc.html Creators List directory tile */
+export const CreatorCardDesign = memo(function CreatorCardDesign({
+  creator,
+  onClick,
+}: CreatorCardDesignProps) {
+  const [isSaved, setIsSaved] = useState(false);
   const rating = creator.rating || 4.7;
   const reviewsCount = creator.reviews || 85;
-  const score = creator.score || 90;
-  const mainPlatform = creator.platforms && creator.platforms.length > 0 ? creator.platforms[0] : 'YouTube';
-  const bestForText = creator.bestFor || 'Lifestyles';
-  const bioText = creator.bio || `Creative influencer sharing content at ${creator.handle}`;
+  const followersRaw = creator.followers;
+  const followers =
+    typeof followersRaw === 'number'
+      ? followersRaw
+      : Math.max(
+          1200,
+          Math.round(
+            reviewsCount * 48 + (Number(String(creator.id).replace(/\D/g, '')) || 0) % 9000,
+          ),
+        );
+  const niche = creator.niche || creator.bestFor || creator.platforms?.[0] || 'Lifestyle';
+  const initial = (creator.name || '?').charAt(0).toUpperCase();
+  const bg = hashColor(String(creator.id || creator.name));
+  const hasPhoto = Boolean(creator.avatar && (creator.avatar.startsWith('http') || creator.avatar.startsWith('/')));
 
-  const coverUrl = creator.coverImage 
-    || CREATOR_COVERS[creator.id] 
-    || "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=600&q=80";
+  const toggleWish = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsSaved((prev) => {
+      const next = !prev;
+      toast.success(next ? 'Saved creator' : 'Removed from saved creators');
+      return next;
+    });
+  };
 
   return (
     <Link
       to={`/creators/${creator.id}`}
       onClick={onClick}
-      className="block w-full min-w-0 h-full bg-white rounded-[10px] border border-[#e8edf2] hover:shadow-lg hover:border-orange-primary/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative"
+      className="block w-full min-w-0 h-full bg-white rounded-[10px] border border-[#E8EDF2] p-5 text-center relative group select-none"
     >
-      {/* FEATURED BADGE */}
-      {creator.isFeatured && (
-        <div className="absolute top-3 right-3 z-20">
-          <span className="bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
-            Featured
-          </span>
-        </div>
-      )}
-      {creator.isHot && !creator.isFeatured && (
-        <div className="absolute top-3 right-3 z-20">
-          <span className="bg-orange-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
-            Hot
-          </span>
-        </div>
-      )}
-
-      {/* COVER PHOTO SECTION */}
-      <div className="relative w-full h-[112px] bg-gradient-to-r from-heading/10 to-orange-primary/10 overflow-hidden shrink-0">
-        <img 
-          src={coverUrl}
-          alt={`${creator.name} cover`}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-          loading="lazy"
+      <button
+        type="button"
+        onClick={toggleWish}
+        className="absolute top-3.5 right-3.5 w-6 h-6 rounded-full bg-[#F4F7F9] flex items-center justify-center border-0 cursor-pointer z-10"
+        aria-label={isSaved ? 'Unsave creator' : 'Save creator'}
+      >
+        <Heart
+          size={11}
+          strokeWidth={1.6}
+          className={cn('text-[#FF5B00]', isSaved && 'fill-[#FF5B00]')}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/5" />
-      </div>
+      </button>
 
-      {/* AVATAR - overlapping cover at bottom-left */}
-      <div className="absolute top-[72px] left-3 z-10">
-        <div className="w-16 h-16 rounded-full border-[3px] border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
-          <img 
-            src={creator.avatar} 
-            className="w-full h-full object-cover" 
-            alt={creator.name}
-            loading="lazy"
-          />
-        </div>
-      </div>
-
-      {/* CREATOR INFO SECTION */}
-      <div className="px-3 pt-11 pb-2.5 text-left flex-1 flex flex-col justify-center min-w-0">
-        <h3 className="text-sm font-black text-heading uppercase line-clamp-1 mb-1 leading-tight tracking-tight">
-          {creator.name}
-        </h3>
-        
-        <p className="text-[11px] text-gray-500 mb-1.5 line-clamp-1 leading-normal font-medium">
-          {creator.handle} • {bioText}
-        </p>
-        
-        <div className="flex items-center gap-1.5 leading-none mt-0.5">
-          <div className="flex items-center text-yellow-400">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star 
-                key={i} 
-                size={11} 
-                className={cn(
-                  "fill-current", 
-                  i < Math.floor(rating) ? "text-yellow-400" : "text-gray-200 fill-none"
-                )} 
-              />
-            ))}
-          </div>
-          <span className="text-xs font-bold text-heading">
-            {rating.toFixed(1)}
-          </span>
-          <span className="text-[11px] text-gray-400">
-            ({formatNumber(reviewsCount)} reviews)
-          </span>
-        </div>
-      </div>
-
-      {/* STATS SECTION - 3 COLUMNS */}
-      <div className="border-t border-b border-[#e8edf2] px-3 py-2.5 bg-[#F8FBFD] shrink-0">
-        <div className="grid grid-cols-3 gap-1">
-          {/* Column 1: Best For */}
-          <div className="text-center min-w-0">
-            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
-              Best For
-            </div>
-            <div className="text-xs font-black text-heading truncate leading-tight">
-              {bestForText}
-            </div>
-          </div>
-          
-          {/* Column 2: Creator Score — circular SVG meter */}
-          <div className="text-center border-l border-r border-[#e8edf2] min-w-0 px-1 flex flex-col items-center justify-center">
-            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1 leading-none">
-              Score
-            </div>
-            <div className="relative w-9 h-9 shrink-0">
-              <svg viewBox="0 0 44 44" className="w-9 h-9 -rotate-90">
-                {/* Background track */}
-                <circle
-                  cx="22"
-                  cy="22"
-                  r="18"
-                  fill="none"
-                  stroke="#E5E7EB"
-                  strokeWidth="4"
-                />
-                {/* Progress arc */}
-                <circle
-                  cx="22"
-                  cy="22"
-                  r="18"
-                  fill="none"
-                  stroke="currentColor"
-                  className="text-orange-primary"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 18}`}
-                  strokeDashoffset={`${2 * Math.PI * 18 * (1 - score / 100)}`}
-                  style={{ transition: 'stroke-dashoffset 0.8s ease-out' }}
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-black text-orange-primary leading-none">
-                  {score}%
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Column 3: Platform */}
-          <div className="text-center min-w-0 flex flex-col items-center justify-center">
-            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
-              Platform
-            </div>
-            <div className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-black text-[10px] leading-none uppercase tracking-wide">
-              {mainPlatform}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA BUTTON */}
-      <div className="px-3 py-2.5 shrink-0 bg-white">
-        <button 
-          type="button"
-          className="w-full py-2 bg-heading hover:bg-navy text-white text-[10px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group"
+      {/* Avatar 72×72 + verified badge */}
+      <div className="relative w-[72px] h-[72px] mx-auto mb-3">
+        <div
+          className="w-full h-full rounded-full overflow-hidden flex items-center justify-center text-white text-[20px] font-extrabold"
+          style={{ background: bg }}
         >
-          View Profile
-          <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>
-        </button>
+          {hasPhoto ? (
+            <img
+              src={creator.avatar}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            initial
+          )}
+        </div>
+        <div className="absolute -bottom-0.5 -right-0.5 w-[22px] h-[22px] rounded-full bg-[#6C4CFF] border-2 border-white flex items-center justify-center text-white text-[10px] font-extrabold">
+          ✓
+        </div>
       </div>
+
+      <h3 className="text-[14px] font-extrabold text-[#1A1A2E] mb-0.5 truncate">{creator.name}</h3>
+      <p className="text-[11.5px] text-[#9AA0AC] mb-3.5 truncate">{niche}</p>
+
+      {/* Stats: Reviews | Followers | Rating */}
+      <div className="flex items-center justify-between border-y border-[#F1F1F3] py-3 mb-4">
+        <div className="flex-1 text-center">
+          <div className="text-[14px] font-extrabold text-[#1A1A2E] leading-none">
+            {formatNumber(reviewsCount)}
+          </div>
+          <div className="text-[9.5px] text-[#9AA0AC] mt-1">Reviews</div>
+        </div>
+        <div className="w-px h-[26px] bg-[#F1F1F3]" />
+        <div className="flex-1 text-center">
+          <div className="text-[14px] font-extrabold text-[#1A1A2E] leading-none">
+            {formatNumber(followers)}
+          </div>
+          <div className="text-[9.5px] text-[#9AA0AC] mt-1">Followers</div>
+        </div>
+        <div className="w-px h-[26px] bg-[#F1F1F3]" />
+        <div className="flex-1 text-center">
+          <div className="text-[14px] font-extrabold text-[#1A1A2E] leading-none">
+            {rating.toFixed(1)}
+          </div>
+          <div className="text-[9.5px] text-[#9AA0AC] mt-1">Rating</div>
+        </div>
+      </div>
+
+      <span className="block w-full bg-[#000435] hover:bg-[#FF5B00] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors">
+        View Profile
+      </span>
     </Link>
   );
 });
-
-// Simple cn utility local helper in case not fully defined
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
-}

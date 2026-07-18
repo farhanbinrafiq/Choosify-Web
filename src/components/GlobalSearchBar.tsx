@@ -32,7 +32,7 @@ interface GlobalSearchBarProps {
 
 export function GlobalSearchBar({
   initialValue = '',
-  placeholder = "Discover products, brands, campaigns, guides...",
+  placeholder = "Search Products, Brands, Reviews...",
   className = '',
   onSubmit,
   variant = 'standard',
@@ -474,7 +474,7 @@ export function GlobalSearchBar({
           type="submit"
           aria-label={submitLabel}
           className={cn(
-            'absolute right-1 sm:right-1.5 top-1 sm:top-1.5 bottom-1 sm:bottom-1.5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white font-black tracking-widest uppercase flex items-center justify-center gap-1 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer',
+            'absolute right-1 sm:right-1.5 top-1 sm:top-1.5 bottom-1 sm:bottom-1.5 rounded-full bg-[#FF5B00] hover:bg-[#E8500A] text-white font-bold tracking-wide uppercase flex items-center justify-center gap-1 transition-all duration-200 cursor-pointer',
             mode === 'overlay'
               ? 'px-4 text-[9px]'
               : 'px-2 sm:px-2.5 md:px-4 lg:px-5 text-[8px] sm:text-[8px] md:text-[9px] min-w-[2rem] sm:min-w-[2.25rem] md:min-w-0',
@@ -599,7 +599,7 @@ export function GlobalSearchBar({
             />
             <button
               type="submit"
-              className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#E8500A] hover:from-[#E8500A] hover:to-[#CF4400] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1.5 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-[#FF5B00] hover:bg-[#E8500A] text-white text-[11px] font-bold tracking-wide uppercase flex items-center gap-1.5 transition-all duration-200 cursor-pointer"
             >
               {submitLabel}
             </button>
@@ -863,7 +863,7 @@ export function GlobalSearchBar({
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 text-left">
-                              <div className="w-8 h-8 rounded-full bg-[#120713] text-white flex items-center justify-center font-black text-xs shrink-0 shadow-sm uppercase italic">
+                              <div className="w-8 h-8 rounded-full bg-[#000435] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm tracking-tight">
                                 {item.title.substring(0, 2)}
                               </div>
                               <div className="min-w-0">

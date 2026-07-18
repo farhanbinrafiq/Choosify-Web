@@ -119,7 +119,7 @@ export function SpotlightHeroCarousel({
           transition={{ delay: 0.15, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
           className="absolute inset-x-0 bottom-0 p-6 flex flex-col items-start gap-2.5 z-10"
         >
-          <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white uppercase leading-none tracking-tight italic line-clamp-2">
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white leading-none tracking-tight line-clamp-2">
             {item.title}
           </h3>
           <p className="text-white/55 text-[10px] font-bold uppercase tracking-widest">{item.subtitle}</p>

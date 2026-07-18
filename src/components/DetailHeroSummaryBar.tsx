@@ -29,7 +29,7 @@ export function DetailHeroSummaryBar({
   return (
     <div
       className={cn(
-        'w-full hero-gradient text-white border-y border-white/5',
+        'w-full bg-white text-[#1A1A2E] border-y border-[#E8EDF2]',
         className,
       )}
     >
@@ -52,10 +52,10 @@ export function DetailHeroSummaryBar({
                 <Icon
                   size={14}
                   strokeWidth={2.5}
-                  className="text-[#E8500A] shrink-0 mt-[3px]"
+                  className="text-[#FF5B00] shrink-0 mt-[3px]"
                   aria-hidden
                 />
-                <span className="text-[10px] sm:text-[11px] font-space font-bold italic uppercase tracking-[0.1em] sm:tracking-[0.12em] leading-snug text-white/95 break-words whitespace-normal">
+                <span className="text-[12px] sm:text-[13px] font-semibold tracking-tight leading-snug text-[#1A1A2E]/90 break-words whitespace-normal">
                   {label}
                 </span>
               </li>
@@ -82,14 +82,14 @@ export function DetailHeroSummaryBar({
 
 /** Shared pill buttons for detail hero summary bars. */
 export const detailHeroSummaryActionClass =
-  'inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer';
+  'inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-bold tracking-tight transition-all cursor-pointer';
 
 export const detailHeroSummaryActionSecondaryClass = cn(
   detailHeroSummaryActionClass,
-  'bg-white/10 hover:bg-white/15 border border-white/20 text-white',
+  'bg-[#F4F7F9] hover:bg-[#E8EDF2] border border-[#E8EDF2] text-[#1A1A2E]',
 );
 
 export const detailHeroSummaryActionPrimaryClass = cn(
   detailHeroSummaryActionClass,
-  'bg-[#E8500A] hover:bg-[#FF6B00] text-white border border-[#E8500A]/30',
+  'bg-[#FF5B00] hover:brightness-110 text-white border border-[#FF5B00]/30',
 );

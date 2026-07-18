@@ -22,9 +22,9 @@ export function BrandInfluencerReviewsSection({
         context="brand"
         brandId={brandId ? String(brandId) : undefined}
         brandName={brandName}
-        eyebrow="Spotlight Preview"
-        title={`Creator Reviews for ${brandName}`}
-        subtitle="Influencer reviews and official creator collaborations."
+        eyebrow=""
+        title="CREATORS REVIEW"
+        subtitle="Video reviews from YouTube, Instagram & Facebook creators"
       />
     </Suspense>
   );

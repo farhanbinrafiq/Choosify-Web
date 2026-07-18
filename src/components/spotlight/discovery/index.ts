@@ -1,3 +1,7 @@
+export { DiscoverHero } from './DiscoverHero';
+export { DiscoverStructuredFeed } from './DiscoverStructuredFeed';
+export type { DiscoverQuickFilter } from './DiscoverStructuredFeed';
+export { DiscoverLowerSections } from './DiscoverLowerSections';
 export { SpotlightDiscoveryNav } from './SpotlightDiscoveryNav';
 export { SpotlightContentTabs } from './SpotlightContentTabs';
 export { SpotlightBreadcrumbs } from './SpotlightBreadcrumbs';

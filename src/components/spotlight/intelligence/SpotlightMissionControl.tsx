@@ -53,7 +53,7 @@ export function SpotlightMissionControl({ data }: SpotlightMissionControlProps) 
       <div className="bg-[#050514] text-white rounded-xl p-5 flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-[10px] font-bold uppercase text-[#E8500A] tracking-widest">Spotlight Mission Control</p>
-          <h2 className="text-xl font-black uppercase italic mt-1">Your Spotlight ecosystem at a glance</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mt-1">Your Spotlight ecosystem at a glance</h2>
           <p className="text-xs text-gray-400 mt-1 max-w-xl">
             What is performing, what needs attention, what is trending, and what is scheduled — the operating system for Spotlight.
           </p>

@@ -38,10 +38,10 @@ function NavButton({
       data-section-nav-item={itemId}
       onClick={onClick}
       className={cn(
-        'shrink-0 px-4 py-2.5 sm:py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap relative touch-manipulation min-h-[40px] sm:min-h-0',
+        'shrink-0 px-4 py-2.5 sm:py-2 rounded-lg text-[12px] font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap relative touch-manipulation min-h-[40px] sm:min-h-0 border-0',
         active
-          ? 'bg-[#E8500A] text-white shadow-md shadow-[#E8500A]/25 border border-[#E8500A]'
-          : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A]',
+          ? 'bg-[#FFF3EA] text-[#FF5B00]'
+          : 'bg-transparent text-[#4B5563] hover:bg-[#F4F7F9] hover:text-[#1A1A2E]',
       )}
     >
       {icon}
@@ -49,8 +49,8 @@ function NavButton({
       {badge != null && badge > 0 && (
         <span
           className={cn(
-            'min-w-[16px] h-4 px-1 rounded-full text-[8px] font-black flex items-center justify-center leading-none',
-            active ? 'bg-white text-[#E8500A]' : 'bg-[#E8500A] text-white',
+            'min-w-[16px] h-4 px-1 rounded-full text-[8px] font-bold flex items-center justify-center leading-none',
+            active ? 'bg-[#FF5B00] text-white' : 'bg-[#FF5B00] text-white',
           )}
         >
           {badge > 9 ? '9+' : badge}
@@ -60,6 +60,7 @@ function NavButton({
   );
 }
 
+/** Light sticky section nav — matches Choosify.dc.html white chrome (not dark header) */
 export function StickySectionNav({
   sections,
   activeId,
@@ -76,13 +77,10 @@ export function StickySectionNav({
   const { ref: scrollTrackRef, props: scrollTrackProps } = useDragScroll({ grabCursor: false });
   const userScrollUntilRef = useRef(0);
 
-  // Auto-center the active pill in the horizontal track as the page scrolls
-  // between sections, so on mobile the current section is always visible.
   useEffect(() => {
     const track = scrollTrackRef.current;
     if (!track) return;
     if (track.scrollWidth <= track.clientWidth + 4) return;
-    // Don't fight the user while they are actively swiping the track.
     if (Date.now() < userScrollUntilRef.current) return;
 
     const target = track.querySelector<HTMLElement>(
@@ -108,26 +106,25 @@ export function StickySectionNav({
     <nav
       aria-label="Page sections"
       className={cn(
-        'choosify-sticky-section-nav sticky z-40 w-full border-t border-white/10 bg-[#000435]/90 backdrop-blur-md',
+        'choosify-sticky-section-nav sticky z-40 w-full px-4 sm:px-5 lg:px-6 py-2 bg-[#F4F7F9]/90 backdrop-blur-sm',
         className,
       )}
     >
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-3">
-        <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between min-w-0">
+      <div className="max-w-[1440px] mx-auto">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between min-w-0 bg-white border border-[#E8EDF2] rounded-[14px] px-3 sm:px-4 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-2 shrink-0 min-w-0 select-none">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 whitespace-nowrap truncate">
+            <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-[#9AA0AC] whitespace-nowrap truncate">
               {profileLabel}
             </span>
-            <div className="w-2 h-2 rounded-full bg-[#E8500A] animate-pulse shrink-0" />
           </div>
 
           <div className="relative min-w-0 w-full md:w-auto md:max-w-full">
             <div
-              className="pointer-events-none absolute inset-y-0 left-0 w-5 bg-gradient-to-r from-[#000435] to-transparent z-10 md:hidden"
+              className="pointer-events-none absolute inset-y-0 left-0 w-5 bg-gradient-to-r from-white to-transparent z-10 md:hidden"
               aria-hidden
             />
             <div
-              className="pointer-events-none absolute inset-y-0 right-0 w-5 bg-gradient-to-l from-[#000435] to-transparent z-10 md:hidden"
+              className="pointer-events-none absolute inset-y-0 right-0 w-5 bg-gradient-to-l from-white to-transparent z-10 md:hidden"
               aria-hidden
             />
             <div
@@ -136,36 +133,36 @@ export function StickySectionNav({
               onTouchStart={markUserScroll}
               onTouchMove={markUserScroll}
               onWheel={markUserScroll}
-              className="choosify-sticky-nav-track flex items-center gap-2 min-w-0 w-full md:w-auto"
+              className="choosify-sticky-nav-track flex items-center gap-1 min-w-0 w-full md:w-auto"
             >
-            <NavButton
-              active={activeId === allId}
-              onClick={() => onNavigate(allId)}
-              label={allLabel}
-              itemId={allId}
-            />
-            {items.map((section) => (
               <NavButton
-                key={section.id}
-                active={activeId === section.id}
-                onClick={() => onNavigate(section.id)}
-                icon={section.icon}
-                label={section.label}
-                itemId={section.id}
+                active={activeId === allId}
+                onClick={() => onNavigate(allId)}
+                label={allLabel}
+                itemId={allId}
               />
-            ))}
-            {filterVisible && (
-              <>
-                <div className="w-px h-6 bg-white/10 shrink-0 mx-0.5" aria-hidden />
+              {items.map((section) => (
                 <NavButton
-                  active={isFiltersOpen}
-                  onClick={openFilters}
-                  icon={<SlidersHorizontal size={13} />}
-                  label="Filter"
-                  badge={activeFilterCount}
+                  key={section.id}
+                  active={activeId === section.id}
+                  onClick={() => onNavigate(section.id)}
+                  icon={section.icon}
+                  label={section.label}
+                  itemId={section.id}
                 />
-              </>
-            )}
+              ))}
+              {filterVisible && (
+                <>
+                  <div className="w-px h-6 bg-[#E8EDF2] shrink-0 mx-0.5" aria-hidden />
+                  <NavButton
+                    active={isFiltersOpen}
+                    onClick={openFilters}
+                    icon={<SlidersHorizontal size={13} />}
+                    label="Filter"
+                    badge={activeFilterCount}
+                  />
+                </>
+              )}
             </div>
           </div>
         </div>

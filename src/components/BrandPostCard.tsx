@@ -3,6 +3,7 @@ import { CalendarDays, MapPin, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 import type { BrandPost } from '../types/brandPost';
 import { formatBrandPostDateRange } from '../lib/brandPosts';
+import { spotlightContentHref } from '../lib/spotlight/content';
 import { CardEngagementStrip } from './CardEngagementStrip';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { resolveEventBadges } from '../utils/eventBadges';
@@ -21,7 +22,7 @@ export function BrandPostCard({ post, variant = 'grid', compact = false, classNa
 
   return (
     <Link
-      to={`/whats-on/${post.slug}`}
+      to={spotlightContentHref(post.slug)}
       className={cn(
         'group flex flex-col bg-white rounded-[5px] border border-[#e8edf2] overflow-hidden shadow-sm',
         'hover:border-[#E8500A]/35 hover:shadow-md transition-all duration-300 text-left h-full',

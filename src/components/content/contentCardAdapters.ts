@@ -2,6 +2,7 @@ import type { CatalogGuide, CatalogProduct } from '../../types/catalog';
 import type { SpotlightContent } from '../../types/spotlight/experience/content';
 import type { UniversalAspectRatio } from '../media/types/mediaModel';
 import { resolveCtaLabel } from '../../lib/spotlight/content/ctaRegistry';
+import { catalogGuideHref } from '../../lib/spotlight/content';
 import {
   resolveFeedCardVariant,
   type SpotlightFeedCardVariant,
@@ -15,6 +16,7 @@ import type {
 import type { UniversalCommerceCardModel } from './universalCommerceCardTypes';
 import type { LegacyCreatorContentItem } from '../../utils/creatorReviewsPreview';
 import { buildCreatorReviewsViewAllHref } from '../../utils/creatorReviewsPreview';
+import { SPOTLIGHT_PUBLISHER_TYPE_LABELS } from '../../types/spotlight/experience/publisher';
 
 const ASPECT_FROM_UNIVERSAL: Record<UniversalAspectRatio, ContentCardAspectRatio> = {
   '9:16': '9/16',
@@ -49,9 +51,9 @@ function platformForVariant(variant: SpotlightFeedCardVariant): ContentCardPlatf
 }
 
 function badgeForVariant(variant: SpotlightFeedCardVariant): string {
-  if (variant === 'reel') return 'REEL';
+  if (variant === 'reel') return 'REELS';
   if (variant === 'live') return 'LIVE';
-  if (variant === 'landscape') return 'VIDEO';
+  if (variant === 'landscape') return 'YOUTUBE';
   if (variant === 'square') return 'SHOP';
   return 'GUIDE';
 }
@@ -112,6 +114,8 @@ export function spotlightToContentCardModel(
       ? `${Math.floor(content.media.duration / 60)}:${String(content.media.duration % 60).padStart(2, '0')}`
       : undefined,
     isSponsored: content.isSponsored,
+    isVerified: content.publisher.isVerified,
+    publisherTypeLabel: SPOTLIGHT_PUBLISHER_TYPE_LABELS[content.publisher.publisherType],
     brandName:
       content.publisher.publisherType === 'brand'
         ? content.publisher.name
@@ -240,7 +244,7 @@ export function guideToContentCardModel(guide: CatalogGuide & { excerpt?: string
 
   return {
     id: String(guide.id),
-    href: `/guides/${guide.id}`,
+    href: catalogGuideHref(guide),
     title: guide.title,
     excerpt: guide.excerpt,
     layoutVariant,
@@ -248,12 +252,15 @@ export function guideToContentCardModel(guide: CatalogGuide & { excerpt?: string
     image: guide.image,
     videoUrl: guide.videoUrl,
     badgeLabel:
-      layoutVariant === 'reel' ? 'REEL' : layoutVariant === 'landscape' ? 'VIDEO' : 'GUIDE',
+      layoutVariant === 'reel' ? 'REELS' : layoutVariant === 'landscape' ? 'YOUTUBE' : 'GUIDE',
     platform,
     platformLabel:
       platform === 'instagram' ? 'Instagram' : platform === 'youtube' ? 'Youtube' : 'Blog',
     duration: guide.duration,
     readTime: guide.readTime ?? '5 MIN READ',
+    creatorName: (guide as { author?: string }).author ?? 'Choosify Editorial',
+    brandName: 'Choosify',
+    isVerified: true,
     views: guide.views,
     likes: guide.views,
     shares: guide.shares,

@@ -1,32 +1,38 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Construction, LayoutGrid, PenTool, Search, Sparkles, Users, X } from 'lucide-react';
+import { Check, PenTool, Search, Sparkles, Users, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
-import { CategoryPhotoCard } from '../components/CategoryPhotoCard';
-import { CategorySubcategoryPanel } from '../components/CategorySubcategoryPanel';
+import { CategoryPremiumCard } from '../components/categories/CategoryPremiumCard';
+import { CategoriesDiscoveryHero } from '../components/categories/CategoriesDiscoveryHero';
+import { CategoriesQuickNav } from '../components/categories/CategoriesQuickNav';
 import { buildCategoryDisplayList, type CategoryDisplayItem } from '../utils/categoryDisplay';
-import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
+import { buildCategoriesPageStats, getCategoryStatBlock } from '../utils/categoryStats';
+import { ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
-import { StickySectionNav } from '../components/StickySectionNav';
-import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
+import { CATEGORY_CONTENT_MAX } from '../lib/design/categoryTokens';
 import { ListingAdRail } from '../components/ListingAdRail';
-import { AdSenseSlot } from '../components/AdSenseSlot';
 import { PLACEMENT_KEYS } from '../lib/placements';
-import { SpotlightIntegrationRail } from '../components/spotlight/SpotlightIntegrationRail';
+import { SponsoredFeedInjector } from '../components/commerce/SponsoredFeedInjector';
+import { ChoosifySponsoredCard } from '../components/commerce/ChoosifySponsoredCard';
 
 type CategoryItem = CategoryDisplayItem;
 
 export function CategoriesPage() {
-  const { allCategories, allCatalogProducts, siteConfig } = useGlobalState();
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const {
+    allCategories,
+    allCatalogProducts,
+    allCatalogBrands,
+    allBrands,
+    allDeals,
+    allGuides,
+    allCreators,
+  } = useGlobalState();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState('All Categories');
-  const [isBrandsCollapsed, setIsBrandsCollapsed] = useState(false);
+  const [quickNavId, setQuickNavId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   // V2 Discovery Filter States
@@ -58,7 +64,31 @@ export function CategoriesPage() {
     setSelectedContent(null);
     setSearchQuery('');
     setActiveCategoryTab('All Categories');
+    setQuickNavId('');
   };
+
+  const handleQuickNavSelect = (id: string, filterType: string | null) => {
+    setQuickNavId(id);
+    if (id === 'more') {
+      setSelectedCategoryType(null);
+      return;
+    }
+    if (filterType) {
+      setSelectedCategoryType(filterType);
+    }
+  };
+
+  const pageStats = useMemo(
+    () =>
+      buildCategoriesPageStats({
+        products: allCatalogProducts ?? [],
+        brands: allCatalogBrands.length ? allCatalogBrands : allBrands,
+        deals: allDeals,
+        guides: allGuides,
+        creators: allCreators,
+      }),
+    [allCatalogProducts, allCatalogBrands, allBrands, allDeals, allGuides, allCreators],
+  );
 
   const matchCategoryType = (catName: string, type: string) => {
     const name = catName.toLowerCase();
@@ -164,8 +194,8 @@ export function CategoriesPage() {
         }
         advancedSection={
           <div className="flex flex-col gap-4">
-            <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left font-sans">
-              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Availability</h3>
+            <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left font-sans">
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Availability</h3>
               <div className="space-y-1">
                 {[
                   { value: 'products', label: 'Categories with Products' },
@@ -188,7 +218,7 @@ export function CategoriesPage() {
                 ))}
               </div>
 
-              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mt-4 mb-3">Content Availability</h3>
+              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mt-4 mb-3">Content Availability</h3>
               <div className="space-y-1">
                 {[
                   { value: 'brands', label: 'Has Brands' },
@@ -214,8 +244,8 @@ export function CategoriesPage() {
           </div>
         }
       >
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Type</h3>
+        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Category Type</h3>
           <div className="space-y-1 max-h-56 overflow-y-auto no-scrollbar">
             {[
               { value: 'Electronics', label: 'Electronics Catalog' },
@@ -247,8 +277,8 @@ export function CategoriesPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Status</h3>
+        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Category Status</h3>
           <div className="space-y-1">
             {[
               { value: 'featured', label: 'Featured Categories' },
@@ -273,8 +303,8 @@ export function CategoriesPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Alphabetical</h3>
+        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Alphabetical</h3>
           <div className="space-y-1">
             {[
               { value: 'a-z', label: 'Alphabetical: A–Z' },
@@ -298,15 +328,6 @@ export function CategoriesPage() {
       </FullSidebarFilterPanel>
     );
   };
-
-  const brandsYouFollow = [
-    { name: "AARONG", sub: "Traditional Handcrafted Products", init: "AA", bg: "bg-[#452a1b]" },
-    { name: "ADIDAS", sub: "Premium Athletic Wear", init: "AD", bg: "bg-black" },
-    { name: "COCA-COLA", sub: "Refreshing Quality Beverages", init: "CC", bg: "bg-[#E31B23]" },
-    { name: "STARBUCKS", sub: "Premium Coffee Blends", init: "SB", bg: "bg-[#00704A]" },
-    { name: "YELLOW", sub: "Modern Apparel & Fashion", init: "YL", bg: "bg-[#E9C400]" },
-    { name: "BATA SHOES", sub: "Premium Class Footwear", init: "BT", bg: "bg-[#C8102E]" }
-  ];
 
   const categoriesList = React.useMemo(
     () => buildCategoryDisplayList(allCategories ?? [], allCatalogProducts ?? []),
@@ -383,16 +404,6 @@ export function CategoriesPage() {
     return result;
   }, [searchQuery, activeCategoryTab, selectedCategoryType, selectedCategoryStatus, selectedAvailability, selectedContent, selectedAlphabetical, categoriesList]);
 
-  const handleCategoryClick = (catName: string) => {
-    setExpandedCategory(expandedCategory === catName ? null : catName);
-  };
-
-  const sectionNavItems = useMemo(
-    () => [{ id: 'categories-main-display', label: 'Browse', icon: <LayoutGrid size={13} /> }],
-    [],
-  );
-  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
-
   useRegisterPageFilters({
     pageName: 'Categories',
     scrollTargetId: 'categories-main-display',
@@ -406,7 +417,7 @@ export function CategoriesPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search categories, subcategories..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
         />
       </div>
     ),
@@ -419,7 +430,7 @@ export function CategoriesPage() {
       },
       {
         id: 'trending-pill',
-        label: '🔥 Trending',
+        label: 'ðŸ”¥ Trending',
         active: selectedCategoryStatus === 'trending' || activeCategoryTab === 'Trending',
         onClick: () => {
           setSelectedCategoryStatus(selectedCategoryStatus === 'trending' ? null : 'trending');
@@ -436,7 +447,7 @@ export function CategoriesPage() {
       },
       {
         id: 'popular-pill',
-        label: '💎 Popular',
+        label: 'ðŸ’Ž Popular',
         active: selectedCategoryStatus === 'popular' || activeCategoryTab === 'Popular',
         onClick: () => {
           setSelectedCategoryStatus(selectedCategoryStatus === 'popular' ? null : 'popular');
@@ -445,7 +456,7 @@ export function CategoriesPage() {
       },
       {
         id: 'new-pill',
-        label: '📅 New Arrivals',
+        label: 'ðŸ“… New Arrivals',
         active: selectedCategoryStatus === 'newly-added' || activeCategoryTab === 'New Arrivals',
         onClick: () => {
           setSelectedCategoryStatus(selectedCategoryStatus === 'newly-added' ? null : 'newly-added');
@@ -456,8 +467,8 @@ export function CategoriesPage() {
     renderFilters: () => (
       <div className="flex flex-col gap-4">
         {/* Availability */}
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left font-sans">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Availability</h3>
+        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left font-sans">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Availability</h3>
           <div className="space-y-1">
             {[
               { value: 'products', label: 'Categories with Products' },
@@ -480,7 +491,7 @@ export function CategoriesPage() {
             ))}
           </div>
 
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mt-4 mb-3">Content Availability</h3>
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mt-4 mb-3">Content Availability</h3>
           <div className="space-y-1">
             {[
               { value: 'brands', label: 'Has Brands' },
@@ -505,8 +516,8 @@ export function CategoriesPage() {
         </div>
 
         {/* Category Type */}
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Type</h3>
+        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Category Type</h3>
           <div className="space-y-1 max-h-56 overflow-y-auto no-scrollbar">
             {[
               { value: 'Electronics', label: 'Electronics Catalog' },
@@ -539,8 +550,8 @@ export function CategoriesPage() {
         </div>
 
         {/* Category Status */}
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Category Status</h3>
+        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Category Status</h3>
           <div className="space-y-1">
             {[
               { value: 'featured', label: 'Featured Categories' },
@@ -566,8 +577,8 @@ export function CategoriesPage() {
         </div>
 
         {/* Alphabetical */}
-        <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Alphabetical</h3>
+        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Alphabetical</h3>
           <div className="space-y-1">
             {[
               { value: 'a-z', label: 'Alphabetical: A–Z' },
@@ -598,13 +609,6 @@ export function CategoriesPage() {
       (activeCategoryTab !== 'All Categories' ? 1 : 0) +
       (searchQuery ? 1 : 0),
     onClearAll: handleClearAllFilters,
-    sectionNav: {
-      items: sectionNavItems,
-      activeId: activeSectionId,
-      onNavigate: scrollToSection,
-      allLabel: 'Categories',
-      profileLabel: 'Category hub',
-    },
   }, [
     searchQuery,
     activeCategoryTab,
@@ -613,40 +617,33 @@ export function CategoriesPage() {
     selectedAlphabetical,
     selectedAvailability,
     selectedContent,
-    sectionNavItems,
-    activeSectionId,
-    scrollToSection,
   ]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <PageHeroBanner pageKey="categories" />
-      <HeroMarqueeTicker pageKey="categories" siteConfig={siteConfig} />
-
-      {/* ACTIVE FILTER CHIPS ROW */}
-      <ActiveFilterChips
-        chips={[
-          selectedCategoryType ? { id: 'categoryType', label: `Type: ${selectedCategoryType}`, onRemove: () => setSelectedCategoryType(null) } : null,
-          selectedCategoryStatus ? { id: 'status', label: `Status: ${selectedCategoryStatus}`, onRemove: () => setSelectedCategoryStatus(null) } : null,
-          selectedAlphabetical ? { id: 'alphabetical', label: `Alphabetical: ${selectedAlphabetical}`, onRemove: () => setSelectedAlphabetical(null) } : null,
-          selectedAvailability ? { id: 'availability', label: `Availability: ${selectedAvailability}`, onRemove: () => setSelectedAvailability(null) } : null,
-          selectedContent ? { id: 'content', label: `Content: ${selectedContent}`, onRemove: () => setSelectedContent(null) } : null,
-          activeCategoryTab !== 'All Categories' ? { id: 'tab', label: `Tab: ${activeCategoryTab}`, onRemove: () => setActiveCategoryTab('All Categories') } : null,
-        ].filter(Boolean) as any[]}
-        onClearAll={handleClearAllFilters}
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <CategoriesDiscoveryHero
+        stats={pageStats}
+        onSearch={(q) => setSearchQuery(q)}
       />
+      <CategoriesQuickNav activeId={quickNavId} onSelect={handleQuickNavSelect} />
 
-      <StickySectionNav
-        sections={sectionNavItems}
-        activeId={activeSectionId}
-        onNavigate={scrollToSection}
-        allLabel="Categories"
-        profileLabel="Category browse"
-      />
+      <div className={cn(CATEGORY_CONTENT_MAX, 'py-4')}>
+        <ActiveFilterChips
+          chips={[
+            selectedCategoryType ? { id: 'categoryType', label: `Type: ${selectedCategoryType}`, onRemove: () => { setSelectedCategoryType(null); setQuickNavId(''); } } : null,
+            selectedCategoryStatus ? { id: 'status', label: `Status: ${selectedCategoryStatus}`, onRemove: () => setSelectedCategoryStatus(null) } : null,
+            selectedAlphabetical ? { id: 'alphabetical', label: `Alphabetical: ${selectedAlphabetical}`, onRemove: () => setSelectedAlphabetical(null) } : null,
+            selectedAvailability ? { id: 'availability', label: `Availability: ${selectedAvailability}`, onRemove: () => setSelectedAvailability(null) } : null,
+            selectedContent ? { id: 'content', label: `Content: ${selectedContent}`, onRemove: () => setSelectedContent(null) } : null,
+            activeCategoryTab !== 'All Categories' ? { id: 'tab', label: `Tab: ${activeCategoryTab}`, onRemove: () => setActiveCategoryTab('All Categories') } : null,
+          ].filter(Boolean) as any[]}
+          onClearAll={handleClearAllFilters}
+        />
+      </div>
 
       <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         {/* LEFT COLUMN: FULL FILTER PANEL */}
-        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-28 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           {/* LEFT COLUMN SEARCH BAR */}
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -657,16 +654,16 @@ export function CategoriesPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search categories, subcategories..."
-              className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+              className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
             />
           </div>
 
-          <div id="categories-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
+          <div id="categories-sidebar-filters" className="transition-all duration-300 rounded-2xl w-full">
             {renderFilterPanel()}
           </div>
         </aside>
 
-        <div id="categories-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10">
+        <div id="categories-main-display" className="choosify-middle-feed scroll-mt-40 min-w-0 pb-10">
           {isLoading ? (
             <div className={CATEGORY_CARD_GRID}>
               {Array.from({ length: 12 }).map((_, idx) => (
@@ -675,51 +672,50 @@ export function CategoriesPage() {
             </div>
           ) : (
             <div className={CATEGORY_CARD_GRID}>
-              {filteredCategoriesList.map((cat) => {
-                const isExpanded = expandedCategory === cat.name;
+            <SponsoredFeedInjector
+              surface="categories"
+              items={filteredCategoriesList}
+              getItemKey={(cat) => cat.name}
+            >
+              {(entries) =>
+                entries.map((entry) => {
+                  if (entry.kind === 'sponsored') {
+                    return <ChoosifySponsoredCard key={entry.key} item={entry.sponsored} />;
+                  }
 
-                return (
-                  <React.Fragment key={cat.name}>
-                    <CategoryPhotoCard
+                  const cat = entry.item;
+
+                  return (
+                    <CategoryPremiumCard
+                      key={entry.key}
                       name={cat.name}
-                      productCount={cat.count}
+                      stats={getCategoryStatBlock(cat, allCatalogProducts ?? [])}
+                      icon={cat.icon}
                       image={cat.image}
-                      onClick={() => handleCategoryClick(cat.name)}
-                      isExpanded={isExpanded}
+                      subcategories={cat.subcategories}
+                      featuredBrand={
+                        (allCatalogProducts ?? []).find(
+                          (p) =>
+                            String(p.categoryName ?? '')
+                              .toLowerCase()
+                              .includes(cat.name.toLowerCase().split(/\s+/)[0] ?? '') &&
+                            p.brandName,
+                        )?.brandName
+                      }
                     />
-
-                    <AnimatePresence mode="sync">
-                      {isExpanded ? (
-                        <CategorySubcategoryPanel
-                          category={cat}
-                          onClose={() => setExpandedCategory(null)}
-                          products={allCatalogProducts ?? []}
-                          cmsTerms={siteConfig?.popularSearches}
-                        />
-                      ) : null}
-                    </AnimatePresence>
-                  </React.Fragment>
-                );
-              })}
+                  );
+                })
+              }
+            </SponsoredFeedInjector>
             </div>
-          )}
-
-          {(expandedCategory || (activeCategoryTab !== 'All Categories' && activeCategoryTab)) && (
-            <SpotlightIntegrationRail
-              title={`${expandedCategory ?? activeCategoryTab} Spotlight`}
-              subtitle="Latest launches, creator reviews, campaigns, and live events."
-              categoryName={expandedCategory ?? activeCategoryTab}
-              source="category"
-              viewAllHref="/spotlight/explore"
-            />
           )}
         </div>
 
         {/* RIGHT COLUMN: FOR BUSINESS & SELLERS CARD & SPONSORED AD */}
-        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
+        <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-28 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           <div 
             id="section-sellers" 
-            className="bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
+            className="bg-white rounded-2xl border border-[#eef2f6] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
             style={{ height: '464px' }}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
@@ -738,7 +734,7 @@ export function CategoriesPage() {
               </p>
             </div>
 
-            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-2xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                 Gain entry to featured deal slots, exposure metrics, and buyer engagement streams.
@@ -759,8 +755,8 @@ export function CategoriesPage() {
 
           {/* Sponsored Ad Section */}
           <ListingAdRail
-            sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_LANDSCAPE}
-            sponsoredVariant="landscape"
+            sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
+            sponsoredVariant="portrait"
             sponsoredDescription="New collection available from verified partners."
             showAdSense
             adSenseFormat="sidebar"

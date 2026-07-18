@@ -25,6 +25,7 @@ export interface ComparisonItem {
   rating: number;
   isWinner?: boolean;
   score?: number;
+  category?: string;
   highlightText?: string;
   specs: Record<string, any>;
 }

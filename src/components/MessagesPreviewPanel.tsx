@@ -68,7 +68,7 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
     <div className={cn('flex flex-col min-h-0 h-full', className)}>
       <div className="px-4 sm:px-5 py-4 border-b border-[#e8edf2] flex items-center justify-between shrink-0 bg-white gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A] shrink-0">
+          <div className="w-9 h-9 rounded-full bg-[#FF5B00]/10 flex items-center justify-center text-[#FF5B00] shrink-0">
             <MessageSquare size={16} />
           </div>
           <div className="min-w-0 text-left">
@@ -85,7 +85,7 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
             <button
               type="button"
               onClick={markAllAsRead}
-              className="text-[9px] font-black uppercase tracking-wider text-[#E8500A] hover:underline cursor-pointer border-0 bg-transparent px-1"
+              className="text-[9px] font-black uppercase tracking-wider text-[#FF5B00] hover:underline cursor-pointer border-0 bg-transparent px-1"
             >
               Mark all read
             </button>
@@ -93,7 +93,7 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full border border-[#e8edf2] hover:border-[#E8500A]/30 flex items-center justify-center text-[#8a9bb0] hover:text-[#E8500A] transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full border border-[#e8edf2] hover:border-[#FF5B00]/30 flex items-center justify-center text-[#8a9bb0] hover:text-[#FF5B00] transition-colors cursor-pointer"
             aria-label="Close messages"
           >
             <X size={16} />
@@ -124,7 +124,7 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
                   <p className="text-[9px] text-[#8a9bb0] truncate mt-0.5">{thread.lastMessage}</p>
                 </div>
                 {thread.unread && (
-                  <span className="w-2 h-2 rounded-full bg-[#E8500A] shrink-0 mt-1" />
+                  <span className="w-2 h-2 rounded-full bg-[#FF5B00] shrink-0 mt-1" />
                 )}
               </div>
             </button>
@@ -141,7 +141,7 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
                 <button
                   type="button"
                   onClick={() => openFullInbox(activeThread)}
-                  className="text-[9px] font-black uppercase tracking-wider text-[#E8500A] flex items-center gap-1 shrink-0 cursor-pointer border-0 bg-transparent"
+                  className="text-[9px] font-black uppercase tracking-wider text-[#FF5B00] flex items-center gap-1 shrink-0 cursor-pointer border-0 bg-transparent"
                 >
                   Open <ArrowRight size={10} />
                 </button>
@@ -157,10 +157,10 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
                     <div
                       key={msg.id}
                       className={cn(
-                        'max-w-[92%] rounded-xl px-3 py-2 text-[11px] leading-relaxed',
+                        'max-w-[92%] rounded-[10px] px-3 py-2 text-[11px] leading-relaxed',
                         msg.sender === 'user'
-                          ? 'ml-auto bg-[#E8500A] text-white'
-                          : 'mr-auto bg-white border border-[#e8edf2] text-[#1A1D4E]',
+                          ? 'ml-auto bg-[#FFF3EC] border border-[#FFD9C2] text-[#1A1A2E]'
+                          : 'mr-auto bg-white border border-[#E8EDF2] text-[#1A1D4E]',
                       )}
                     >
                       {msg.text}
@@ -177,13 +177,13 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Type a message…"
-                    className="flex-1 h-10 px-3 rounded-lg border border-[#e8edf2] text-xs outline-none focus:border-[#E8500A]/40"
+                    className="flex-1 h-10 px-3 rounded-lg border border-[#e8edf2] text-xs outline-none focus:border-[#FF5B00]/40"
                   />
                   <button
                     type="button"
                     onClick={handleSend}
                     disabled={!draft.trim()}
-                    className="h-10 w-10 rounded-lg bg-[#E8500A] hover:bg-[#CF4400] text-white flex items-center justify-center disabled:opacity-40 cursor-pointer border-0 shrink-0"
+                    className="h-[42px] w-[42px] rounded-lg bg-[#FF5B00] hover:bg-[#E04E00] text-white flex items-center justify-center disabled:opacity-40 cursor-pointer border-0 shrink-0"
                     aria-label="Send message"
                   >
                     <Send size={14} />
@@ -203,7 +203,7 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
         <button
           type="button"
           onClick={() => openFullInbox()}
-          className="w-full h-11 rounded-xl bg-[#1A1D4E] hover:bg-[#12153a] text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer border-0"
+          className="w-full h-11 rounded-lg bg-[#1A1A2E] hover:bg-[#121528] text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer border-0"
         >
           Open full inbox
           <ArrowRight size={14} />

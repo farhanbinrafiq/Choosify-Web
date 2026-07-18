@@ -113,10 +113,10 @@ export function BrandPostDetailPage() {
     post.status === 'live' ? 'Live Now' : post.status === 'scheduled' ? 'Upcoming' : 'Ended';
 
   return (
-    <div className="bg-choosify-feed min-h-screen pb-16">
+    <div className="bg-[#F4F7F9] min-h-screen pb-16">
       <section
         ref={heroRef}
-        className="relative w-full choosify-dark-gradient border-b border-white/5"
+        className="relative w-full bg-[#000435] border-b border-white/5"
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.18),transparent_42%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
@@ -134,13 +134,13 @@ export function BrandPostDetailPage() {
                 </span>
               ))}
               {dateLabel && (
-                <div className="flex items-center gap-2 text-[10px] font-black text-white/80 uppercase tracking-widest italic bg-white/5 border border-white/10 px-4 py-2 rounded-full">
-                  <CalendarDays size={14} className="text-orange-primary" />
+                <div className="flex items-center gap-2 text-[12px] font-semibold text-white/80 tracking-tight bg-white/5 border border-white/10 px-3.5 py-2 rounded-lg">
+                  <CalendarDays size={14} className="text-[#FF5B00]" />
                   {dateLabel}
                 </div>
               )}
-              <div className="flex items-center gap-2 text-[10px] font-black text-orange-primary uppercase tracking-widest italic bg-orange-primary/10 px-4 py-2 rounded-full border border-orange-primary/20">
-                <Sparkles size={14} className="text-orange-primary" />
+              <div className="flex items-center gap-2 text-[12px] font-semibold text-[#FF5B00] tracking-tight bg-[#FF5B00]/10 px-3.5 py-2 rounded-lg border border-[#FF5B00]/20">
+                <Sparkles size={14} className="text-[#FF5B00]" />
                 {statusLabel}
               </div>
             </div>
@@ -149,11 +149,11 @@ export function BrandPostDetailPage() {
           <BrandPostBannerGallery images={bannerImages} alt={post.title} />
 
           <div className="max-w-[1080px] mx-auto px-6 pb-8 text-left">
-            <h1 className="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-tight mb-4 font-sans drop-shadow-xl">
+            <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4 font-sans drop-shadow-xl">
               {post.title}
             </h1>
 
-            <p className="text-white/85 text-sm md:text-base font-medium italic uppercase tracking-wider leading-relaxed mb-6 max-w-4xl font-sans">
+            <p className="text-white/80 text-sm md:text-base font-medium leading-relaxed mb-6 max-w-4xl font-sans">
               {post.excerpt}
             </p>
           </div>
@@ -253,7 +253,7 @@ export function BrandPostDetailPage() {
         profileLabel="Event sections"
       />
 
-      <main id="all-section" className="bg-choosify-feed py-5 scroll-mt-36">
+      <main id="all-section" className="bg-[#F4F7F9] py-5 scroll-mt-36">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 w-full">
           <button
             type="button"
@@ -267,10 +267,10 @@ export function BrandPostDetailPage() {
           <div className={DETAIL_SINGLE_FEED}>
             <StudioWrap sectionId="event-about" className="scroll-mt-36 w-full">
               <div className="mb-4 text-left">
-                <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
+                <h2 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-0.5">
                   Event Details
                 </h2>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
+                <p className="text-[12px] font-semibold text-[#9AA0AC]">
                   Official brand announcement and event information
                 </p>
               </div>
@@ -321,10 +321,10 @@ export function BrandPostDetailPage() {
             {linkedProducts.length > 0 && (
               <StudioWrap sectionId="related-products" className="scroll-mt-36 w-full">
                 <div className="mb-4 text-left">
-                  <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                    Related <span className="text-[#E8500A]">Products</span>
+                  <h2 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-0.5">
+                    Related Products
                   </h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
+                  <p className="text-[12px] font-semibold text-[#9AA0AC]">
                     Items linked to this event from {post.brandName}
                   </p>
                 </div>
@@ -340,10 +340,10 @@ export function BrandPostDetailPage() {
               <StudioWrap sectionId="more-events" className="scroll-mt-36 w-full">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4 text-left">
                   <div>
-                    <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                      More from <span className="text-[#E8500A]">{post.brandName}</span>
+                    <h2 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-0.5">
+                      More from {post.brandName}
                     </h2>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
+                    <p className="text-[12px] font-semibold text-[#9AA0AC]">
                       Other upcoming events and announcements
                     </p>
                   </div>

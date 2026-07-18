@@ -56,7 +56,7 @@ export function SpotlightCampaignsPage() {
       <main className="flex-grow p-6 space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-navy uppercase italic">Spotlight Publisher Studio</h1>
+            <h1 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight">Spotlight Publisher Studio</h1>
             <p className="text-xs text-gray-500">{total} Spotlight experiences</p>
           </div>
           <Link

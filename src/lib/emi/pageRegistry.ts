@@ -13,7 +13,7 @@ export const EMI_PAGE_REGISTRY: EmiPageDefinition[] = [
   { id: 'product', label: 'Product', pathPattern: /^\/products\//, sidecarEnabled: true, panelPlacement: 'inline' },
   { id: 'brand', label: 'Brand', pathPattern: /^\/brands\//, sidecarEnabled: true, panelPlacement: 'inline' },
   { id: 'compare', label: 'Compare', pathPattern: /^\/compare/, sidecarEnabled: true, panelPlacement: 'aside' },
-  { id: 'spotlight', label: 'Spotlight', pathPattern: /^\/spotlight\/?(\?|$)/, sidecarEnabled: true, panelPlacement: 'inline' },
+  { id: 'spotlight', label: 'Spotlight', pathPattern: /^\/spotlight\/?(\?|$)/, sidecarEnabled: false, panelPlacement: 'inline' },
   { id: 'spotlight_content', label: 'Spotlight Content', pathPattern: /^\/spotlight\/content\//, sidecarEnabled: true, panelPlacement: 'inline' },
   { id: 'search', label: 'Search', pathPattern: /^\/search/, sidecarEnabled: true, panelPlacement: 'inline' },
   { id: 'category', label: 'Categories', pathPattern: /^\/categories/, sidecarEnabled: true, panelPlacement: 'inline' },

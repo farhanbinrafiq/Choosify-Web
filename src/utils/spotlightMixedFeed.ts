@@ -45,6 +45,31 @@ export function resolveFeedCardVariant(content: SpotlightContent): SpotlightFeed
   return content.media?.videoUrl ? 'landscape' : 'blog';
 }
 
+/** Discover page lane buckets — Choosify.dc.html structured layout */
+export interface DiscoverFeedLanes {
+  youtube: SpotlightContent[];
+  reels: SpotlightContent[];
+  live: SpotlightContent[];
+  blogs: SpotlightContent[];
+}
+
+export function partitionDiscoverFeedLanes(items: SpotlightContent[]): DiscoverFeedLanes {
+  const youtube: SpotlightContent[] = [];
+  const reels: SpotlightContent[] = [];
+  const live: SpotlightContent[] = [];
+  const blogs: SpotlightContent[] = [];
+
+  for (const item of items) {
+    const variant = resolveFeedCardVariant(item);
+    if (variant === 'live') live.push(item);
+    else if (variant === 'reel') reels.push(item);
+    else if (variant === 'landscape' || variant === 'square') youtube.push(item);
+    else blogs.push(item);
+  }
+
+  return { youtube, reels, live, blogs };
+}
+
 export function filterSpotlightFeedItems(
   items: SpotlightContent[],
   filters: SpotlightDiscoverFilters,
@@ -67,7 +92,9 @@ export function filterSpotlightFeedItems(
     if (filters.promotionsOnly && !['promotion', 'campaign', 'new_launch'].includes(item.contentType)) return false;
     if (filters.sponsoredOnly && !item.isSponsored) return false;
     if (filters.trendingOnly && (item.discoveryScore?.overall ?? item.popularityScore ?? 0) < 60) return false;
-    if (filters.query) {
+    if (filters.query === '__collection__') {
+      if (!item.badges.some((b) => /collection/i.test(b))) return false;
+    } else if (filters.query) {
       const q = filters.query.toLowerCase();
       const hay = `${item.headline} ${item.description ?? ''} ${item.publisher.name}`.toLowerCase();
       if (!hay.includes(q)) return false;
@@ -76,7 +103,12 @@ export function filterSpotlightFeedItems(
   });
 }
 
-/** Natural mix — commerce-first score with type de-clustering */
+/**
+ * Natural mix — commerce-first score with de-clustering by content type AND
+ * card variant, so reels/blogs/videos interleave like a living feed.
+ * Deferred items are re-inserted at the first position where they fit
+ * instead of clumping at the tail (LE-006 Phase 1).
+ */
 export function mixSpotlightFeedItems(items: SpotlightContent[]): SpotlightContent[] {
   const sorted = [...items].sort((a, b) => {
     const aCommerce = (a.commerce.featuredProductIds.length ? 3 : 0) + (a.connections.productIds.length ? 2 : 0);
@@ -85,22 +117,43 @@ export function mixSpotlightFeedItems(items: SpotlightContent[]): SpotlightConte
     return sortByDiscoveryScore(a, b);
   });
 
+  const variantOf = new Map<string, SpotlightFeedCardVariant>();
+  const getVariant = (item: SpotlightContent): SpotlightFeedCardVariant => {
+    let v = variantOf.get(item.contentId);
+    if (!v) {
+      v = resolveFeedCardVariant(item);
+      variantOf.set(item.contentId, v);
+    }
+    return v;
+  };
+
   const result: SpotlightContent[] = [];
   const deferred: SpotlightContent[] = [];
 
-  for (const item of sorted) {
+  const createsRun = (item: SpotlightContent): boolean => {
     const last = result[result.length - 1];
     const prev = result[result.length - 2];
-    const sameTypeRun =
-      last &&
-      prev &&
-      last.contentType === item.contentType &&
-      prev.contentType === item.contentType;
+    if (!last || !prev) return false;
+    const typeRun = last.contentType === item.contentType && prev.contentType === item.contentType;
+    const variantRun = getVariant(last) === getVariant(item) && getVariant(prev) === getVariant(item);
+    return typeRun || variantRun;
+  };
 
-    if (sameTypeRun) {
+  for (const item of sorted) {
+    if (createsRun(item)) {
       deferred.push(item);
-    } else {
-      result.push(item);
+      continue;
+    }
+    result.push(item);
+
+    // Flush any deferred items that now fit without creating a run
+    let i = 0;
+    while (i < deferred.length) {
+      if (!createsRun(deferred[i])) {
+        result.push(deferred.splice(i, 1)[0]);
+      } else {
+        i += 1;
+      }
     }
   }
 

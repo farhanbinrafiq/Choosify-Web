@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2, RotateCcw, Send, Sparkles, X } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { ChoosifyIconLogo } from './ChoosifyIconLogo';
+import { EmiAiLogo } from './EmiAiLogo';
 import { useEmiChat } from '../hooks/useEmiChat';
 import type { EmiCatalogPick } from '../lib/emiCatalogSearch';
 import {
@@ -38,13 +38,13 @@ function renderInlineMarkdown(text: string) {
       const isInternal = href.startsWith('/');
       if (isInternal) {
         return (
-          <Link key={i} to={href} className="text-[#E8500A] font-bold hover:underline">
+          <Link key={i} to={href} className="text-[#FF5B00] font-bold hover:underline">
             {label}
           </Link>
         );
       }
       return (
-        <a key={i} href={href} className="text-[#E8500A] font-bold hover:underline" target="_blank" rel="noreferrer">
+        <a key={i} href={href} className="text-[#FF5B00] font-bold hover:underline" target="_blank" rel="noreferrer">
           {label}
         </a>
       );
@@ -58,7 +58,7 @@ function PickCard({ pick }: { pick: EmiCatalogPick }) {
     return (
       <Link
         to={pick.url}
-        className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#E8500A]/35 transition-colors text-left"
+        className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#FF5B00]/35 transition-colors text-left"
       >
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-bold text-[#1A1D4E] truncate">{pick.title}</p>
@@ -67,7 +67,7 @@ function PickCard({ pick }: { pick: EmiCatalogPick }) {
             {pick.price != null ? ` · ৳${pick.price.toLocaleString()}` : ''}
           </p>
         </div>
-        <ArrowRight size={12} className="text-[#E8500A] shrink-0" />
+        <ArrowRight size={12} className="text-[#FF5B00] shrink-0" />
       </Link>
     );
   }
@@ -75,20 +75,20 @@ function PickCard({ pick }: { pick: EmiCatalogPick }) {
     return (
       <Link
         to={pick.url}
-        className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#E8500A]/35 transition-colors text-left"
+        className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#FF5B00]/35 transition-colors text-left"
       >
         <p className="text-[10px] font-bold text-[#1A1D4E] truncate flex-1">{pick.name}</p>
-        <ArrowRight size={12} className="text-[#E8500A] shrink-0" />
+        <ArrowRight size={12} className="text-[#FF5B00] shrink-0" />
       </Link>
     );
   }
   return (
     <Link
       to={pick.url}
-      className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#E8500A]/35 transition-colors text-left"
+      className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#FF5B00]/35 transition-colors text-left"
     >
       <p className="text-[10px] font-bold text-[#1A1D4E] truncate flex-1">{pick.title}</p>
-      <ArrowRight size={12} className="text-[#E8500A] shrink-0" />
+      <ArrowRight size={12} className="text-[#FF5B00] shrink-0" />
     </Link>
   );
 }
@@ -127,14 +127,14 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
 
   return (
     <div className={cn('flex flex-col min-h-0 h-full', className)}>
-      <div className="px-4 sm:px-5 py-4 border-b border-[#e8edf2] flex items-center justify-between shrink-0 bg-gradient-to-r from-[#1A1D4E] to-[#252a6e] text-white gap-3">
+      <div className="px-4 sm:px-5 py-4 border-b border-[#e8edf2] flex items-center justify-between shrink-0 bg-[#000435] text-white gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-lg p-1.5">
-            <ChoosifyIconLogo size={28} />
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-lg p-1 overflow-hidden">
+            <EmiAiLogo size={32} className="w-8 h-8" />
           </div>
           <div className="min-w-0 text-left">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60 flex items-center gap-1">
-              <Sparkles size={10} className="text-[#E8500A]" />
+              <Sparkles size={10} className="text-[#FF5B00]" />
               Choosify Assistant
             </p>
             <h3 className="text-sm font-black uppercase tracking-wide truncate">Emi</h3>
@@ -171,10 +171,10 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
           >
             <div
               className={cn(
-                'rounded-2xl px-3.5 py-2.5 text-[12px] leading-relaxed whitespace-pre-wrap',
+                'rounded-[10px] px-3.5 py-2.5 text-[12px] leading-relaxed whitespace-pre-wrap',
                 msg.role === 'user'
-                  ? 'bg-[#E8500A] text-white rounded-tr-sm'
-                  : 'bg-white border border-[#e8edf2] text-[#1A1D4E] rounded-tl-sm shadow-sm',
+                  ? 'bg-[#FF5B00] text-white'
+                  : 'bg-white border border-[#e8edf2] text-[#1A1D4E] shadow-sm',
               )}
             >
               {renderInlineMarkdown(msg.content)}
@@ -190,7 +190,7 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
         ))}
         {isLoading ? (
           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#8a9bb0]">
-            <Loader2 size={14} className="animate-spin text-[#E8500A]" />
+            <Loader2 size={14} className="animate-spin text-[#FF5B00]" />
             Emi is thinking…
           </div>
         ) : null}
@@ -204,7 +204,7 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
               type="button"
               onClick={() => void sendMessage(prompt)}
               disabled={isLoading}
-              className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide border border-[#e8edf2] text-[#64748b] hover:border-[#E8500A]/40 hover:text-[#E8500A] bg-white cursor-pointer transition-colors disabled:opacity-50"
+              className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide border border-[#e8edf2] text-[#64748b] hover:border-[#FF5B00]/40 hover:text-[#FF5B00] bg-white cursor-pointer transition-colors disabled:opacity-50"
             >
               {prompt}
             </button>
@@ -220,13 +220,13 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
           placeholder="Ask Emi anything about Choosify…"
           disabled={isLoading}
-          className="flex-1 h-11 px-3 rounded-xl border border-[#e8edf2] text-xs outline-none focus:border-[#E8500A]/40 disabled:opacity-60"
+          className="flex-1 h-11 px-3 rounded-lg border border-[#e8edf2] text-xs outline-none focus:border-[#FF5B00]/40 disabled:opacity-60"
         />
         <button
           type="button"
           onClick={handleSend}
           disabled={!draft.trim() || isLoading}
-          className="h-11 w-11 rounded-xl bg-[#E8500A] hover:bg-[#CF4400] text-white flex items-center justify-center disabled:opacity-40 cursor-pointer border-0 shrink-0"
+          className="h-11 w-11 rounded-lg bg-[#FF5B00] hover:bg-[#E04E00] text-white flex items-center justify-center disabled:opacity-40 cursor-pointer border-0 shrink-0"
           aria-label="Send to Emi"
         >
           <Send size={15} />
@@ -238,7 +238,7 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
           <Link
             to="/emi"
             onClick={onClose}
-            className="text-[9px] font-black uppercase tracking-wider text-[#8a9bb0] hover:text-[#E8500A] flex items-center justify-center gap-1"
+            className="text-[9px] font-black uppercase tracking-wider text-[#8a9bb0] hover:text-[#FF5B00] flex items-center justify-center gap-1"
           >
             Open full Emi chat <ArrowRight size={10} />
           </Link>

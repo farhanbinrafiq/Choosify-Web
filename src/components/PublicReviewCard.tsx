@@ -1,24 +1,24 @@
 import React from 'react';
-import { Star, CheckCircle2, ThumbsUp } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export interface ReviewData {
   name: string;
   avatar?: string;
-  dp?: string; // Support both naming variants from source files
+  dp?: string;
   time?: string;
-  date?: string; // Support both key mappings
+  date?: string;
   purchaseDate?: string;
   comment?: string;
-  content?: string; // Support both key mappings
+  content?: string;
   rating: number | string;
   verified?: boolean;
   productImages?: string[];
-  images?: string[]; // Support both key mappings
+  images?: string[];
   helpful?: number;
-  // Product details specifically for dashboard view
   productName?: string;
   productImage?: string;
+  tags?: string[];
 }
 
 interface PublicReviewCardProps {
@@ -31,6 +31,7 @@ interface PublicReviewCardProps {
   showActions?: boolean;
 }
 
+/** Choosify.dc.html public review card — Product / Brand detail feeds */
 export function PublicReviewCard({
   review,
   isDark = false,
@@ -40,197 +41,164 @@ export function PublicReviewCard({
   showActions = false,
 }: PublicReviewCardProps) {
   const ratingNum = typeof review.rating === 'string' ? parseFloat(review.rating) : review.rating;
-  const avatarUrl = review.dp || review.avatar || "https://i.pravatar.cc/150?u=anonymous";
-  const displayComment = review.comment || review.content || "";
-  const displayDate = review.date || review.time || "Recently";
+  const avatarUrl = review.dp || review.avatar;
+  const displayComment = review.comment || review.content || '';
+  const displayDate = review.date || review.time || 'Recently';
   const displayProductImages = review.productImages || review.images || [];
-  const isVerified = review.verified !== false; // Default to true unless explicitly false
+  const isVerified = review.verified !== false;
+  const initial = (review.name || '?').charAt(0).toUpperCase();
 
   return (
-    <div 
+    <div
       className={cn(
-        "border transition-all duration-300 flex flex-col group rounded-[5px]",
-        isDark 
-          ? "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:shadow-lg hover:shadow-[#059669]/5" 
-          : "bg-gray-50 border-gray-100/50 text-[#1A1D4E] hover:shadow-md"
+        'rounded-[14px] p-[18px] flex flex-col text-left',
+        isDark
+          ? 'bg-white/5 border border-white/10 text-white'
+          : 'bg-white border border-[#E8EDF2]',
       )}
-      style={{ borderRadius: '5px' }}
     >
-      {/* Product Header (custom layout for dashboard/user reviews if applicable) */}
       {review.productName && (
-        <div className={cn(
-          "p-4 border-b flex items-center gap-4",
-          isDark ? "border-white/10" : "border-gray-100"
-        )}>
+        <div
+          className={cn(
+            'pb-3 mb-3 border-b flex items-center gap-3',
+            isDark ? 'border-white/10' : 'border-[#F1F1F3]',
+          )}
+        >
           {review.productImage && (
-            <div className="w-12 h-12 rounded-[5px] bg-white p-1 shrink-0 flex items-center justify-center border border-gray-150">
-              <img src={review.productImage} className="w-full h-full object-contain rounded-[3px]" alt={review.productName} />
+            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-[#F4F7F9]">
+              <img src={review.productImage} alt="" className="w-full h-full object-cover" />
             </div>
           )}
-          <div className="flex-1 min-w-0">
-            <span className={cn(
-              "text-[8px] font-black uppercase tracking-widest block mb-0.5",
-              isDark ? "text-gray-500" : "text-gray-400"
-            )}>
-              REVIEWED PRODUCT
-            </span>
-            <h4 className={cn(
-              "text-xs font-black uppercase italic truncate",
-              isDark ? "text-white" : "text-navy"
-            )}>
+          <div className="min-w-0">
+            <div className="text-[9px] font-bold text-[#9AA0AC] uppercase tracking-wide">
+              Reviewed product
+            </div>
+            <div className={cn('text-[13px] font-bold truncate', isDark ? 'text-white' : 'text-[#1A1A2E]')}>
               {review.productName}
-            </h4>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Main Review Body */}
-      <div className="p-6 flex flex-col flex-1 gap-4">
-        {/* Profile Area & Rating Row */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-12 h-12 rounded-[5px] overflow-hidden border-2 p-0.5 shrink-0 bg-white",
-              isDark ? "border-[#F96500]/45" : "border-[#E8500A]"
-            )}>
-              <img src={avatarUrl} className="w-full h-full object-cover rounded-[3px]" alt={review.name} />
+      <div className="flex items-center justify-between mb-3 gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          {avatarUrl ? (
+            <div className="w-[42px] h-[42px] rounded-full overflow-hidden shrink-0 bg-[#F4F7F9]">
+              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
             </div>
-            <div>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className={cn(
-                  "font-extrabold text-sm italic",
-                  isDark ? "text-white" : "text-[#1A1D4E]"
-                )}>
-                  {review.name}
-                </span>
-                {isVerified && (
-                  <span className="bg-[#4DBC15]/10 text-[#4DBC15] text-[7px] font-black uppercase px-1.5 py-0.5 rounded-[5px] flex items-center gap-0.5 whitespace-nowrap">
-                    <CheckCircle2 size={8} className="text-[#4DBC15]" /> Verified
-                  </span>
-                )}
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-[#FF5B00] text-white flex items-center justify-center text-[13px] font-extrabold shrink-0">
+              {initial}
+            </div>
+          )}
+          <div className="min-w-0">
+            <div
+              className={cn(
+                'text-[13.5px] font-bold mb-0.5 truncate',
+                isDark ? 'text-white' : 'text-[#1A1A2E]',
+              )}
+            >
+              {review.name}
+            </div>
+            {isVerified && (
+              <div className="flex items-center gap-1 text-[11px] text-[#16A34A] font-bold">
+                <svg width="12" height="12" viewBox="0 0 20 20" fill="#16A34A" aria-hidden>
+                  <circle cx="10" cy="10" r="9" />
+                  <path d="M6 10l3 3 5-6" stroke="#fff" strokeWidth="1.8" fill="none" />
+                </svg>
+                Verified Buyer
               </div>
-              <span className={cn(
-                "text-[8px] font-bold uppercase tracking-wider block mt-0.5",
-                isDark ? "text-gray-500" : "text-gray-400"
-              )}>
-                {displayDate.startsWith("Posted") || displayDate.startsWith("POSTED") ? displayDate : `Posted ${displayDate}`}
-              </span>
-            </div>
-          </div>
-
-          <div className="text-right shrink-0">
-            <div className="flex gap-0.5 justify-end">
-              {[1, 2, 3, 4, 5].map(star => (
-                <Star 
-                  key={star} 
-                  size={10} 
-                  className={cn(
-                    "fill-current", 
-                    star <= ratingNum 
-                      ? (isDark ? "text-[#F96500]" : "text-[#E8500A]") 
-                      : (isDark ? "text-white/10" : "text-gray-200")
-                  )} 
-                />
-              ))}
-            </div>
-            <div className={cn(
-              "text-sm font-black mt-0.5 italic",
-              isDark ? "text-white" : "text-[#1A1D4E]"
-            )}>
-              {ratingNum} <span className={cn("text-[8px] font-sans", isDark ? "text-white/30" : "text-gray-300")}>/ 5</span>
-            </div>
+            )}
           </div>
         </div>
+        <div className="text-[11px] text-[#9AA0AC] whitespace-nowrap shrink-0">{displayDate}</div>
+      </div>
 
-        {/* Thumbnail Attachments */}
-        {displayProductImages.length > 0 && (
-          <div className="flex gap-2 flex-wrap">
-            {displayProductImages.map((img, j) => (
-              <div key={j} className={cn(
-                "w-16 h-16 rounded-[5px] overflow-hidden border cursor-zoom-in shrink-0 bg-white p-0.5",
-                isDark ? "border-white/10" : "border-gray-200"
-              )}>
-                <img src={img} className="w-full h-full object-cover rounded-[3px] hover:scale-110 transition-transform duration-500" alt="review attachment" />
-              </div>
-            ))}
-          </div>
+      <div className="flex items-center gap-1.5 mb-2.5">
+        <span className={cn('text-[15px] font-extrabold', isDark ? 'text-white' : 'text-[#1A1A2E]')}>
+          {Number.isFinite(ratingNum) ? ratingNum.toFixed(1).replace(/\.0$/, '') : ratingNum}
+        </span>
+        <span className="text-[#FBBF24] text-sm tracking-widest" aria-hidden>
+          {'★'.repeat(Math.min(5, Math.round(ratingNum || 0)))}
+          {'☆'.repeat(Math.max(0, 5 - Math.round(ratingNum || 0)))}
+        </span>
+      </div>
+
+      <p
+        className={cn(
+          'text-[13px] leading-relaxed m-0 mb-3.5',
+          isDark ? 'text-white/80' : 'text-[#374151]',
         )}
+      >
+        {displayComment}
+      </p>
 
-        {/* Review Comment Box */}
-        <div className={cn(
-          "p-4 border relative flex-1 min-h-[70px] flex items-center rounded-[5px]",
-          isDark 
-            ? "bg-white/5 border-white/10" 
-            : "bg-white border-gray-100"
-        )}>
-          <p className={cn(
-            "text-xs font-bold leading-relaxed italic border-0 p-0 m-0",
-            isDark ? "text-gray-300" : "text-navy/80"
-          )}>
-            "{displayComment}"
-          </p>
+      {displayProductImages.length > 0 && (
+        <div className="flex gap-2 mb-3.5 flex-wrap">
+          {displayProductImages.slice(0, 4).map((img, j) => (
+            <div
+              key={j}
+              className="w-16 h-16 rounded-[10px] overflow-hidden shrink-0 bg-[#F4F7F9]"
+            >
+              <img src={img} alt="" className="w-full h-full object-cover" />
+            </div>
+          ))}
         </div>
+      )}
 
-        {/* Card Footer / Reaction Bar */}
-        <div className={cn(
-          "flex items-center justify-between mt-auto pt-3 border-t",
-          isDark ? "border-white/10" : "border-gray-100/50"
-        )}>
-          {review.purchaseDate ? (
-            <div className="flex flex-col">
-              <span className={cn(
-                "text-[7px] font-black uppercase tracking-widest italic mb-0.5",
-                isDark ? "text-gray-500" : "text-gray-400"
-              )}>
-                Purchase Date
-              </span>
-              <span className={cn(
-                "text-[9px] font-black uppercase tracking-wider italic",
-                isDark ? "text-white" : "text-[#1A1D4E]"
-              )}>
-                {review.purchaseDate}
-              </span>
-            </div>
-          ) : (
-            <div />
-          )}
+      {review.tags && review.tags.length > 0 && (
+        <div className="flex gap-2 mb-3.5 flex-wrap">
+          {review.tags.map((tg) => (
+            <span
+              key={tg}
+              className="bg-[#F4F7F9] text-[10.5px] font-semibold text-[#4B5563] px-2.5 py-1 rounded-xl"
+            >
+              {tg}
+            </span>
+          ))}
+        </div>
+      )}
 
-          {/* Action buttons slot */}
-          {showActions ? (
-            <div className="flex items-center gap-4">
-              {onEditClick && (
-                <button 
-                  onClick={onEditClick}
-                  className="text-[9px] font-black text-[#F96500] uppercase tracking-[0.2em] italic hover:underline cursor-pointer border-0 bg-transparent active:scale-95 transition-transform"
-                >
-                  Edit Review
-                </button>
-              )}
-              {onDeleteClick && (
-                <button 
-                  onClick={onDeleteClick}
-                  className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] italic hover:text-white cursor-pointer border-0 bg-transparent active:scale-95 transition-transform"
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={onHelpfulClick}
-                className={cn(
-                  "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest italic transition-colors cursor-pointer",
-                  isDark
-                    ? "bg-white/5 border-white/10 hover:border-white hover:bg-white/10 text-white"
-                    : "bg-white border-gray-100 hover:border-navy text-[#1A1D4E]"
-                )}
+      <div
+        className={cn(
+          'flex justify-between items-center pt-3 border-t mt-auto',
+          isDark ? 'border-white/10' : 'border-[#F1F1F3]',
+        )}
+      >
+        {showActions ? (
+          <div className="flex items-center gap-4">
+            {onEditClick && (
+              <button
+                type="button"
+                onClick={onEditClick}
+                className="text-[12px] font-bold text-[#FF5B00] bg-transparent border-0 cursor-pointer p-0"
               >
-                <ThumbsUp size={10} /> Helpful ({review.helpful || 0})
+                Edit Review
               </button>
-            </div>
-          )}
-        </div>
+            )}
+            {onDeleteClick && (
+              <button
+                type="button"
+                onClick={onDeleteClick}
+                className="text-[12px] font-bold text-[#9AA0AC] bg-transparent border-0 cursor-pointer p-0"
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onHelpfulClick}
+            className="inline-flex items-center gap-1.5 text-[12px] text-[#4B5563] font-bold bg-transparent border-0 cursor-pointer p-0"
+          >
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#4B5563" strokeWidth="1.7" aria-hidden>
+              <path d="M2 9h3v9H2zM5 9l3-7c1 0 2 1 2 2v3h5c1 0 2 1 1.5 2l-1.5 7c-.3 1-1 2-2 2H5" />
+            </svg>
+            Helpful ({review.helpful || 0})
+          </button>
+        )}
+        {!showActions && <MoreHorizontal size={16} className="text-[#9AA0AC]" aria-hidden />}
       </div>
     </div>
   );

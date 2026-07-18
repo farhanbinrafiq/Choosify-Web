@@ -1,0 +1,219 @@
+<div data-screen-label="Home">
+    <div style="position:relative;width:100%;height:460px;overflow:hidden;clip-path:polygon(0 0,100% 0,100% calc(100% - 36px),0 100%)">
+      <image-slot id="{{ heroSlideCurrent.id }}" shape="rect" placeholder="{{ heroSlideCurrent.label }}" style="width:100%;height:100%"></image-slot>
+      <button onClick="{{ heroPrevImg }}" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;cursor:pointer;font-size:16px;box-shadow:0 4px 12px rgba(0,0,0,0.25);z-index:2">‹</button>
+      <button onClick="{{ heroNextImg }}" style="position:absolute;right:100px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;cursor:pointer;font-size:16px;box-shadow:0 4px 12px rgba(0,0,0,0.25);z-index:2">›</button>
+      <div style="position:absolute;left:50%;transform:translateX(-50%);bottom:20px;display:flex;gap:6px;z-index:2">
+        <sc-for list="{{ heroDots }}" as="dt" hint-placeholder-count="4">
+          <div style="{{ dt.style }}" onClick="{{ dt.onClick }}"></div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="max-width:1280px;margin:-70px auto 0;padding:0 40px 44px;position:relative;z-index:3">
+      <div style="background:#fff;border-radius:14px;padding:22px 24px 6px;box-shadow:0 16px 40px rgba(0,0,0,0.12)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+        <div style="font-size:19px;font-weight:800;color:#1A1A2E">Top Categories</div>
+        <a href="#" onClick="{{ goCategories }}" style="font-size:12px;font-weight:700">VIEW ALL CATEGORIES ›</a>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:44px">
+        <sc-for list="{{ topCategories }}" as="c" hint-placeholder-count="12">
+          <div style="background:#fff;border-radius:10px;padding:20px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;border:1px solid #E8EDF2" onClick="{{ goCategories }}">
+            <div style="width:40px;height:40px;border-radius:50%;background:{{ c.bg }};display:flex;align-items:center;justify-content:center;font-size:18px">{{ c.icon }}</div>
+            <div style="font-size:12px;font-weight:600;color:#1A1A2E;text-align:center">{{ c.name }}</div>
+          </div>
+        </sc-for>
+      </div>
+      </div>
+    </div>
+
+    <div style="max-width:1280px;margin:24px auto 0;padding:0 40px 44px;position:relative;z-index:3">
+      <div style="background:#fff;border-radius:14px;padding:22px 24px 6px;box-shadow:0 16px 40px rgba(0,0,0,0.12)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:19px;font-weight:800;color:#1A1A2E"><span style="color:#FF000D;font-size:17px">✦</span> Viral Today</div>
+        <a href="#" onClick="{{ spotlightViewAll.onClick }}" style="font-size:12px;font-weight:700">{{ spotlightViewAll.label }}</a>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px">
+        <sc-for list="{{ homeViralYoutube }}" as="yt" hint-placeholder-count="4">
+          <div style="cursor:pointer;min-width:0" onClick="{{ goGuideDetail }}">
+            <div style="position:relative;aspect-ratio:16/9;border-radius:10px;overflow:hidden;margin-bottom:10px">
+              <image-slot id="{{ yt.slotId }}" shape="rect" placeholder="{{ yt.title }}" style="width:100%;height:100%"></image-slot>
+              <div style="position:absolute;top:8px;left:8px;background:#FF000D;color:#fff;font-size:8.5px;font-weight:800;padding:3px 8px;border-radius:4px;pointer-events:none">YOUTUBE</div>
+              <div style="position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer" onClick="{{ stopClick }}"><svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="1.8"><path d="M5 3h10v14l-5-4-5 4z"/></svg></div>
+              <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.75);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;pointer-events:none">{{ yt.duration }}</div>
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none"><div style="width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,0.35);border:1.5px solid rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-style:solid;border-width:7px 0 7px 11px;border-color:transparent transparent transparent #fff;margin-left:2px"></div></div></div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <div style="width:28px;height:28px;border-radius:50%;background:{{ yt.avatarBg }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;flex-shrink:0">{{ yt.initial }}</div>
+              <div style="min-width:0">
+                <div style="font-size:12.5px;font-weight:700;color:#1A1A2E;line-height:1.3;margin-bottom:4px">{{ yt.title }}</div>
+                <div style="font-size:11px;color:#4B5563;display:flex;align-items:center;gap:4px">{{ yt.channel }} <span style="color:#2323FF">✓</span></div>
+                <div style="font-size:10.5px;color:#9AA0AC">{{ yt.views }} · {{ yt.time }}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:10px;font-size:11px;font-weight:700;color:#4B5563"><svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#4B5563" stroke-width="1.8"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M7 13l6-6M9 7h4v4"/></svg>{{ yt.chipsTotal }} Products</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;flex-wrap:nowrap;overflow-x:auto;gap:14px;margin-bottom:44px;scroll-snap-type:x mandatory;padding-bottom:4px">
+        <sc-for list="{{ discoverReels }}" as="rl" hint-placeholder-count="6">
+          <div style="width:150px;flex-shrink:0;scroll-snap-align:start;cursor:pointer" onClick="{{ goGuideDetail }}">
+            <div style="position:relative;aspect-ratio:9/16;border-radius:10px;overflow:hidden;margin-bottom:8px">
+              <image-slot id="{{ rl.slotId }}" shape="rect" placeholder="{{ rl.title }}" style="width:100%;height:100%"></image-slot>
+              <div style="position:absolute;top:8px;left:8px;background:#FF000D;color:#fff;font-size:8px;font-weight:800;padding:3px 7px;border-radius:4px;pointer-events:none;display:flex;align-items:center;gap:2px">⏵ REELS</div>
+              <div style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1" onClick="{{ stopClick }}"><svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="1.8"><path d="M5 3h10v14l-5-4-5 4z"/></svg></div>
+              <sc-if value="{{ rl.duration }}"><div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.75);color:#fff;font-size:9.5px;font-weight:700;padding:2px 5px;border-radius:4px;pointer-events:none">{{ rl.duration }}</div></sc-if>
+            </div>
+            <div style="font-size:11.5px;font-weight:700;color:#1A1A2E;line-height:1.3;margin-bottom:6px">{{ rl.title }}</div>
+            <sc-if value="{{ rl.creator }}"><div style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:#4B5563;margin-bottom:4px"><div style="width:20px;height:20px;border-radius:50%;background:{{ rl.avatarBg }};flex-shrink:0"></div>{{ rl.creator }} <span style="color:#2323FF">✓</span></div></sc-if>
+            <sc-if value="{{ rl.likes }}"><div style="font-size:10.5px;color:#9AA0AC">♡ {{ rl.likes }}</div></sc-if>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:8px;font-size:10px;font-weight:700;color:#4B5563"><svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="#4B5563" stroke-width="1.8"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M7 13l6-6M9 7h4v4"/></svg>{{ rl.chipsTotal }} Products</div>
+          </div>
+        </sc-for>
+      </div>
+
+      </div>
+    </div>
+
+    <div style="max-width:1280px;margin:24px auto 0;padding:0 40px 44px;position:relative;z-index:3">
+      <div style="background:#fff;border-radius:14px;padding:22px 24px 6px;box-shadow:0 16px 40px rgba(0,0,0,0.12)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+        <div style="font-size:19px;font-weight:800;color:#1A1A2E">Featured Products</div>
+        <a href="#" onClick="{{ goProducts }}" style="font-size:12px;font-weight:700">VIEW ALL PRODUCTS ›</a>
+      </div>
+      <p style="font-size:12.5px;color:#9AA0AC;margin:0 0 16px">Handpicked deals you'll love</p>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:44px">
+        <sc-for list="{{ featuredProducts }}" as="p" hint-placeholder-count="6">
+          <div style="background:#fff;border-radius:10px;overflow:hidden;border:1px solid #E8EDF2;cursor:pointer" onClick="{{ p.onOpen }}">
+            <div style="position:relative;height:170px">
+              <image-slot id="{{ p.slotId }}" shape="rect" placeholder="{{ p.name }}" style="width:100%;height:100%"></image-slot>
+              <sc-if value="{{ p.badge }}"><div style="position:absolute;top:8px;left:8px;background:{{ p.badgeBg }};color:#fff;font-size:9px;font-weight:800;padding:3px 7px;border-radius:4px;pointer-events:none">{{ p.badge }}</div></sc-if>
+              <div style="position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;cursor:pointer" onClick="{{ p.onToggleWish }}"><svg width="12" height="12" viewBox="0 0 20 20" fill="{{ p.wishFill }}" stroke="#FF5B00" stroke-width="1.6"><path d="M10 17s-6.5-4.1-8-8.3C1 5.6 3 3 6 3c1.8 0 3.2 1 4 2.3C10.8 4 12.2 3 14 3c3 0 5 2.6 4 5.7-1.5 4.2-8 8.3-8 8.3z"/></svg></div>
+              <sc-if value="{{ p.rating }}"><div style="position:absolute;bottom:8px;left:8px;background:#07A828;color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:12px">{{ p.rating }} ★</div></sc-if>
+            </div>
+            <div style="padding:11px 12px 12px">
+              <div style="font-size:12.5px;font-weight:700;color:#1A1A2E;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</div>
+              <sc-if value="{{ p.variant }}"><div style="font-size:10px;color:#6B7280;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.variant }}</div></sc-if>
+              <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-bottom:3px">
+                <div style="font-size:13.5px;font-weight:800;color:#1A1A2E">{{ p.price }}</div>
+                <sc-if value="{{ p.orig }}"><div style="font-size:10px;color:#9AA0AC;text-decoration:line-through">{{ p.orig }}</div></sc-if>
+              </div>
+              <sc-if value="{{ p.cashback }}"><div style="font-size:10px;color:#6B7280;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Up to <span style="color:#FF5B00;font-weight:700">{{ p.cashback }}</span> cashback</div></sc-if>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid #F1F1F3">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <sc-if value="{{ p.official }}"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#2323FF" stroke-width="1.8"><path d="M10 2l7 3v5c0 4.5-3 7.5-7 8-4-0.5-7-3.5-7-8V5z"/><path d="M7 10l2 2 4-4" stroke-width="1.6"/></svg></sc-if>
+                  <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#4B5563" stroke-width="1.7" style="cursor:pointer" onClick="{{ stopClick }}"><path d="M4 7h9l-2.5-2.5M16 13H7l2.5 2.5"/></svg>
+                </div>
+                <div style="width:28px;height:28px;border-radius:50%;background:#FF5B00;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" onClick="{{ stopClick }}">
+                  <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="1.7"><circle cx="7" cy="17" r="1.2" fill="#fff" stroke="none"/><circle cx="15" cy="17" r="1.2" fill="#fff" stroke="none"/><path d="M1 2h2l2 11h10l2-8H4"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+        <div style="background:#FFF6EF;border-radius:10px;overflow:hidden;border:1.5px dashed #FF5B00;position:relative">
+          <div style="position:absolute;top:6px;left:6px;background:#1A1A2E;color:#fff;font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px;z-index:1">AD</div>
+          <div style="height:110px;background:linear-gradient(120deg,#FF5B00,#2323FF);display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;color:#fff;font-size:10.5px;font-weight:800;text-align:center">YOUR BRAND HERE</div>
+          <div style="padding:10px 12px 14px">
+            <div style="font-size:11px;font-weight:700;color:#1A1A2E;margin-bottom:8px;line-height:1.3">Reach 2M+ shoppers on Choosify</div>
+            <button style="width:100%;background:#FF5B00;color:#fff;border:none;padding:8px;border-radius:6px;font-size:10px;font-weight:800;cursor:pointer">ADVERTISE HERE</button>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div style="position:relative;height:200px;border-radius:14px;overflow:hidden;margin-bottom:44px">
+        <image-slot id="home-sponsored-1" shape="rect" placeholder="Sponsored product" style="width:100%;height:100%"></image-slot>
+        <div style="position:absolute;top:14px;left:14px;background:#FF5B00;color:#fff;font-size:9px;font-weight:800;letter-spacing:0.4px;padding:4px 10px;border-radius:4px">SPONSORED AD</div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:22%;min-height:64px;background:linear-gradient(0deg,rgba(0,0,0,0.85),transparent);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 20px">
+          <div style="min-width:0">
+            <div style="font-size:14px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Walton WD Series — Now with 0% EMI</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Official Walton store · Free nationwide delivery</div>
+          </div>
+          <button style="background:#FF5B00;color:#fff;border:none;padding:9px 18px;border-radius:20px;font-size:11.5px;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap">Shop Now →</button>
+        </div>
+      </div>
+
+      <div style="font-size:19px;font-weight:800;color:#1A1A2E;margin-bottom:16px">Today's Deals</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:44px">
+        <sc-for list="{{ deals }}" as="d" hint-placeholder-count="4">
+          <div style="background:{{ d.bg }};border-radius:12px;padding:22px;color:#fff;min-height:120px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer">
+            <div>
+              <div style="font-size:9px;font-weight:800;background:rgba(255,255,255,0.22);display:inline-block;padding:3px 8px;border-radius:4px;margin-bottom:10px;letter-spacing:0.4px">{{ d.tag }}</div>
+              <div style="font-size:16px;font-weight:800;line-height:1.3">{{ d.title }}</div>
+            </div>
+            <div style="font-size:11px;font-weight:700">{{ d.cta }} ›</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background:#fff;border-radius:12px;padding:28px;border:1px solid #E8EDF2;margin-bottom:44px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+          <div style="font-size:17px;font-weight:800;color:#1A1A2E">Compare Anything</div>
+          <a href="#" style="font-size:12px;font-weight:700">VIEW ALL COMPARISONS ›</a>
+        </div>
+        <p style="font-size:12.5px;color:#9AA0AC;margin:0 0 18px">Find the best by comparing side by side</p>
+        <div style="display:flex;align-items:center;gap:14px">
+          <input placeholder="Search for first product" style="flex:1;height:44px;border-radius:8px;border:1px solid #E5E7EB;padding:0 16px;font-size:13px"/>
+          <div style="width:34px;height:34px;border-radius:50%;background:#000435;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">VS</div>
+          <input placeholder="Search for second product" style="flex:1;height:44px;border-radius:8px;border:1px solid #E5E7EB;padding:0 16px;font-size:13px"/>
+          <button style="background:#000435;color:#fff;border:none;padding:0 28px;height:44px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">COMPARE</button>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+        <div style="font-size:19px;font-weight:800;color:#1A1A2E">Top Buying Guides</div>
+        <a href="#" onClick="{{ goDiscoverAll }}" style="font-size:12px;font-weight:700">DISCOVER ALL ›</a>
+      </div>
+      <div style="display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin-bottom:44px;padding-bottom:4px">
+        <sc-for list="{{ guides }}" as="g" hint-placeholder-count="6">
+          <div style="cursor:pointer;flex:0 0 190px;scroll-snap-align:start">
+            <div style="height:130px;border-radius:10px;overflow:hidden;margin-bottom:10px">
+              <image-slot id="{{ g.slotId }}" shape="rect" placeholder="{{ g.name }}" style="width:100%;height:100%"></image-slot>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:#1A1A2E;line-height:1.3">{{ g.name }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+        <div style="font-size:19px;font-weight:800;color:#1A1A2E">Featured Brands</div>
+        <a href="#" onClick="{{ goBrands }}" style="font-size:12px;font-weight:700">VIEW ALL BRANDS ›</a>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:12px;margin-bottom:44px">
+        <sc-for list="{{ featuredBrands }}" as="b" hint-placeholder-count="8">
+          <div style="background:#fff;border:1px solid #E8EDF2;border-radius:10px;height:56px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:{{ b.color }};cursor:pointer" onClick="{{ goBrands }}">{{ b.name }}</div>
+        </sc-for>
+      </div>
+
+      <div style="font-size:19px;font-weight:800;color:#1A1A2E;margin-bottom:16px">Popular Services</div>
+      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:12px;margin-bottom:44px">
+        <sc-for list="{{ services }}" as="sv" hint-placeholder-count="8">
+          <div style="background:#fff;border:1px solid #E8EDF2;border-radius:10px;padding:18px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer">
+            <div style="width:34px;height:34px;border-radius:50%;background:{{ sv.bg }};display:flex;align-items:center;justify-content:center;color:{{ sv.fg }};font-size:12px;font-weight:800">{{ sv.letter }}</div>
+            <div style="font-size:11px;font-weight:600;color:#1A1A2E;text-align:center">{{ sv.name }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="font-size:19px;font-weight:800;color:#1A1A2E;margin-bottom:16px">Recently Viewed</div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px">
+        <sc-for list="{{ homeRecentlyViewed }}" as="rv" hint-placeholder-count="4">
+          <div style="background:#fff;border-radius:10px;overflow:hidden;border:1px solid #E8EDF2;cursor:pointer" onClick="{{ rv.onOpen }}">
+            <div style="position:relative;height:150px">
+              <image-slot id="{{ rv.slotId }}" shape="rect" placeholder="{{ rv.name }}" style="width:100%;height:100%"></image-slot>
+              <div style="position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;cursor:pointer" onClick="{{ rv.onToggleWish }}"><svg width="13" height="13" viewBox="0 0 20 20" fill="{{ rv.wishFill }}" stroke="#FF5B00" stroke-width="1.6"><path d="M10 17s-6.5-4.1-8-8.3C1 5.6 3 3 6 3c1.8 0 3.2 1 4 2.3C10.8 4 12.2 3 14 3c3 0 5 2.6 4 5.7-1.5 4.2-8 8.3-8 8.3z"/></svg></div>
+            </div>
+            <div style="padding:10px 12px 14px">
+              <div style="font-size:13px;font-weight:800;color:#EB4501">{{ rv.price }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ CATEGORIES ============ -->
+  <sc-if value="{{ isCategories }}">
+  

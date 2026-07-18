@@ -11,6 +11,7 @@ import type { SpotlightContentGraph } from './contentGraph';
 import type { SpotlightCommerceOverlay } from './commerceOverlay';
 import type { SpotlightLiveConfig } from './live';
 import type { SpotlightDiscoveryScore } from '../discovery/discoveryScore';
+import type { SpotlightPageSectionConfig } from './pageSections';
 
 export interface SpotlightContent {
   contentId: string;
@@ -49,6 +50,9 @@ export interface SpotlightContent {
 
   extraProductCount?: number;
   seasonalTheme?: string;
+
+  /** CMS section manifest — controls which page blocks render (UX-08) */
+  pageSections?: SpotlightPageSectionConfig[];
 }
 
 export interface SpotlightDiscoverSection {
@@ -101,7 +105,7 @@ export const SPOTLIGHT_DISCOVER_SECTION_META: Record<
   SpotlightDiscoverSectionId,
   { title: string; subtitle?: string; layout: SpotlightDiscoverSection['layout'] }
 > = {
-  featured_today: { title: 'Featured Spotlight', subtitle: 'Top shoppable experiences today', layout: 'hero' },
+  featured_today: { title: 'Featured Today', subtitle: 'Top shoppable experiences today', layout: 'hero' },
   trending_now: { title: 'Trending Now', subtitle: 'Products shoppers are discovering', layout: 'carousel' },
   editors_picks: { title: "Editor's Picks", subtitle: 'Curated deals and guides', layout: 'carousel' },
   recommended_for_you: { title: 'Recommended For You', subtitle: 'Based on your browsing', layout: 'carousel' },

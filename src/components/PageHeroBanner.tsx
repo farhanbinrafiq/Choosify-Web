@@ -53,8 +53,8 @@ const PAGE_DEFAULT_SLIDES: Record<PageHeroBannerKey, HeroBannerSlide[]> = {
   products: [
     {
       id: 'products-default',
-      title: 'Discover Verified Products',
-      subtitle: 'Compare verified retail listings with confidence.',
+      title: 'Shop Verified Products',
+      subtitle: 'Compare authentic retail listings from verified outlets — buy original with confidence.',
       ctaText: 'Browse Catalog',
       ctaLink: '/products',
       image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1920&q=80',
@@ -63,8 +63,8 @@ const PAGE_DEFAULT_SLIDES: Record<PageHeroBannerKey, HeroBannerSlide[]> = {
   categories: [
     {
       id: 'categories-default',
-      title: 'Explore Every Category',
-      subtitle: 'Fashion, tech, lifestyle and more — all verified outlets.',
+      title: 'Shop by Categories',
+      subtitle: 'Explore products across fashion, tech, lifestyle and more — all verified outlets.',
       ctaText: 'Browse Categories',
       ctaLink: '/categories',
       image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&q=80',
@@ -73,8 +73,8 @@ const PAGE_DEFAULT_SLIDES: Record<PageHeroBannerKey, HeroBannerSlide[]> = {
   brands: [
     {
       id: 'brands-default',
-      title: 'Verified Brand Directory',
-      subtitle: 'Shop directly from authentic Bangladeshi and global brands.',
+      title: 'Verified Brands Only',
+      subtitle: 'Shop original from authentic Bangladeshi and global brand partners.',
       ctaText: 'View Brands',
       ctaLink: '/brands',
       image: 'https://images.unsplash.com/photo-1441984904996-e0b6a6879d31?w=1920&q=80',
@@ -93,8 +93,8 @@ const PAGE_DEFAULT_SLIDES: Record<PageHeroBannerKey, HeroBannerSlide[]> = {
   deals: [
     {
       id: 'deals-default',
-      title: 'Flash Deals & Offers',
-      subtitle: 'Limited-time discounts from verified sellers.',
+      title: 'Verified Deals & Offers',
+      subtitle: 'Limited-time savings from authentic outlets — flash deals you can trust.',
       ctaText: 'Grab Deals',
       ctaLink: '/deals',
       image: 'https://images.unsplash.com/photo-1607083206869-4c7672f72a96?w=1920&q=80',
@@ -114,8 +114,8 @@ const PAGE_DEFAULT_SLIDES: Record<PageHeroBannerKey, HeroBannerSlide[]> = {
   creators: [
     {
       id: 'creators-default',
-      title: 'Trusted Creators & Reviewers',
-      subtitle: 'Follow experts who verify products before you buy.',
+      title: 'Creators Who Verify First',
+      subtitle: 'Follow trusted reviewers helping you choose original products with confidence.',
       ctaText: 'Meet Creators',
       ctaLink: '/creators',
       image: 'https://images.unsplash.com/photo-1611162616305-c69b3037c814?w=1920&q=80',
@@ -124,8 +124,8 @@ const PAGE_DEFAULT_SLIDES: Record<PageHeroBannerKey, HeroBannerSlide[]> = {
   search: [
     {
       id: 'search-default',
-      title: 'Search Everything on Choosify',
-      subtitle: 'Products, brands, creators, categories — one omni search.',
+      title: 'Search Choosify',
+      subtitle: 'Find verified products, brands, creators, and categories in one place.',
       ctaText: 'Browse Products',
       ctaLink: '/products',
       image: 'https://images.unsplash.com/photo-1557821552-17105176675c?w=1920&q=80',
@@ -273,19 +273,19 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
     return (
       <section
         className={cn(
-          'relative w-full border-b border-black/10 select-none choosify-dark-gradient',
+          'relative w-full border-b border-white/5 select-none choosify-chrome-header',
           className,
         )}
         aria-label={`${compactTitle} page header`}
       >
-        <div className="relative w-full h-[112px] sm:h-[128px] md:h-[140px] overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#000435]/92 via-[#1A1D4E]/85 to-[#3A1E22]/75" />
+        <div className="relative w-full h-[112px] sm:h-[128px] md:h-[140px] overflow-hidden bg-[#0A0A1F]/40">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A1F]/55 via-transparent to-[#0A0A1F]/25" />
           <div className="relative z-10 h-full max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 flex flex-col justify-center items-start text-left">
             <h1 className="font-space font-black text-white text-xl sm:text-2xl md:text-[1.65rem] uppercase tracking-tight leading-none">
               {compactTitle}
             </h1>
             {compactSubtitle ? (
-              <p className="mt-1.5 text-[10px] sm:text-xs text-white/65 max-w-xl leading-relaxed line-clamp-1">
+              <p className="mt-1.5 text-[10px] sm:text-xs text-white/65 max-w-xl leading-relaxed line-clamp-2 sm:line-clamp-1">
                 {compactSubtitle}
               </p>
             ) : null}

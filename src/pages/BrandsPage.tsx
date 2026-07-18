@@ -7,19 +7,16 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { BrandCardDesign } from '../components/BrandCardDesign';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
-import { PaginationBar } from '../components/PaginationBar';
-import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
-import { buildBrandsPopularSearchTerms } from '../utils/pagePopularSearches';
+import { DcListingHero } from '../components/design/DcListingHero';
+import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
-import { InfeedSponsoredCard } from '../components/SponsoredPlacementCard';
+import { AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 import {BRAND_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
-import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 
 interface BrandDeal {
@@ -68,7 +65,7 @@ interface Brand {
 }
 
 export function BrandsPage() {
-  const { allBrands: globalBrands, getBrandClaimStatus, siteConfig } = useGlobalState();
+  const { allBrands: globalBrands, getBrandClaimStatus } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Brands');
@@ -375,83 +372,33 @@ export function BrandsPage() {
     return result;
   }, [brands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus]);
 
-  const originalFeaturedBrands = React.useMemo(() => [brands[0], brands[1], brands[2]], [brands]);
-
-  const filteredFeaturedBrands = React.useMemo(() => {
-    let result = [...originalFeaturedBrands];
-
-    // 1. Filter by Active Tab selection
-    if (activeTab === 'Trending Brands') {
-      result = result.filter(b => b.isHot || b.rating >= 4.7);
-    } else if (activeTab === 'Featured Brands') {
-      result = result.filter(b => b.isFeatured || b.rating >= 4.8);
-    } else if (activeTab === 'Hot Deals Brands') {
-      result = result.filter(b => b.isHot);
-    } else if (activeTab === 'Top Rated Brands') {
-      result = result.filter(b => b.rating >= 4.8);
-    }
-
-    // 2. Filter by search query across Name, bestFor, category, or description
-    const q = searchQuery.toLowerCase().trim();
-    if (q) {
-      result = result.filter(b => 
-        b.name.toLowerCase().includes(q) ||
-        (b.bestFor || '').toLowerCase().includes(q) ||
-        (b.category || '').toLowerCase().includes(q) ||
-        (b.description || '').toLowerCase().includes(q)
-      );
-    }
-
-    // 3. Filter by Selected Letter
-    if (selectedLetter) {
-      result = result.filter(b => b.name.toUpperCase().startsWith(selectedLetter));
-    }
-
-    // 4. Filter by Category
-    if (selectedCategory) {
-      result = result.filter(b => b.category?.toLowerCase() === selectedCategory.toLowerCase());
-    }
-
-    // 5. Filter by Verification Status
-    if (verificationFilter === 'verified') {
-      result = result.filter(b => getBrandClaimStatus(b.id) === 'verified');
-    } else if (verificationFilter === 'unverified') {
-      result = result.filter(b => getBrandClaimStatus(b.id) !== 'verified');
-    }
-
-    // 6. Filter by Popularity Status
-    if (popularityFilter === 'hot') {
-      result = result.filter(b => b.isHot);
-    } else if (popularityFilter === 'featured') {
-      result = result.filter(b => b.isFeatured);
-    } else if (popularityFilter === 'top-rated') {
-      result = result.filter(b => b.rating >= 4.8);
-    }
-
-    return result;
-  }, [originalFeaturedBrands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus]);
-
-  const popularSearchTerms = React.useMemo(
-    () =>
-      buildBrandsPopularSearchTerms({
-        cmsTerms: siteConfig?.popularSearches,
-        brandNames: filteredBrands.map((b) => b.name),
-        limit: 12,
-      }),
-    [siteConfig?.popularSearches, filteredBrands],
-  );
-
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_BRAND, {
     limit: INFEED_MAX_PER_PAGE,
   });
 
-  const groupedBrands = letters.reduce((acc, letter) => {
-    const filtered = filteredBrands.filter(b => b.name.toUpperCase().startsWith(letter));
-    if (filtered.length > 0) {
-      acc[letter] = filtered;
-    }
-    return acc;
-  }, {} as Record<string, Brand[]>);
+  const brandFeed = useMemo(
+    () =>
+      injectPlacementsIntoFeed(
+        filteredBrands,
+        (brand) => `brand-${brand.id}`,
+        infeedPlacements,
+        INFEED_INTERVAL.brand,
+        3,
+      ),
+    [filteredBrands, infeedPlacements],
+  );
+
+  const {
+    visibleItems: visibleBrandFeed,
+    sentinelRef,
+    hasMore,
+    visibleCount,
+    totalCount,
+  } = useInfiniteListBatch(brandFeed, {
+    initial: 24,
+    loadMore: 12,
+    resetKey: searchQuery + (selectedLetter ?? ''),
+  });
 
   const sectionNavItems = useMemo(
     () => [{ id: 'brands-main-display', label: 'Directory', icon: <Store size={13} /> }],
@@ -471,16 +418,16 @@ export function BrandsPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by Brand Name or Category..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
         />
       </div>
     ),
     quickFilters: [
       { id: 'verified', label: '✓ Verified Claims', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
-      { id: 'hot', label: '🔥 Hot Brands', active: popularityFilter === 'hot', onClick: () => setPopularityFilter(popularityFilter === 'hot' ? 'all' : 'hot') },
+      { id: 'hot', label: 'ðŸ”¥ Hot Brands', active: popularityFilter === 'hot', onClick: () => setPopularityFilter(popularityFilter === 'hot' ? 'all' : 'hot') },
       { id: 'top-rated', label: '⭐ Top Rated', active: popularityFilter === 'top-rated', onClick: () => setPopularityFilter(popularityFilter === 'top-rated' ? 'all' : 'top-rated') },
-      { id: 'fashion', label: '👗 Fashion Brands', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
-      { id: 'tech', label: '💻 Tech Devices', active: selectedCategory === 'Tech', onClick: () => setSelectedCategory(selectedCategory === 'Tech' ? null : 'Tech') }
+      { id: 'fashion', label: 'ðŸ‘— Fashion Brands', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
+      { id: 'tech', label: 'ðŸ’» Tech Devices', active: selectedCategory === 'Tech', onClick: () => setSelectedCategory(selectedCategory === 'Tech' ? null : 'Tech') }
     ],
     renderFilters: () => (
       <div className="flex flex-col gap-4">
@@ -513,7 +460,7 @@ export function BrandsPage() {
                 type: 'single_select',
                 options: [
                   { value: 'all', label: 'All Tiers' },
-                  { value: 'hot', label: '🔥 Hot Brands' },
+                  { value: 'hot', label: 'ðŸ”¥ Hot Brands' },
                   { value: 'featured', label: '⭐ Featured' },
                   { value: 'top-rated', label: '✨ Top Rated (4.8+)' }
                 ]
@@ -537,13 +484,13 @@ export function BrandsPage() {
         />
 
         {/* Alpha search (A-Z) */}
-        <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-2">
+        <div className="bg-white rounded-2xl p-4.5 border border-[#eef2f6] shadow-sm flex flex-col gap-2">
           <h3 className="text-[11px] font-black text-[#8a9bb0] uppercase tracking-wider mb-2">Alpha search (A-Z)</h3>
           <div className="grid grid-cols-5 gap-1.5 max-h-32 overflow-y-auto no-scrollbar">
             <button 
               onClick={() => setSelectedLetter(null)}
               className={cn(
-                "col-span-5 py-1.5 rounded-[5px] text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
+                "col-span-5 py-1.5 rounded-2xl text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
                 selectedLetter === null ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
               )}
             >
@@ -554,7 +501,7 @@ export function BrandsPage() {
                 key={letter} 
                 onClick={() => setSelectedLetter(letter)}
                 className={cn(
-                  "h-5.5 rounded-[5px] text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                  "h-5.5 rounded-2xl text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
                   selectedLetter === letter ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                 )}
               >
@@ -590,9 +537,75 @@ export function BrandsPage() {
   }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <PageHeroBanner pageKey="brands" />
-      <HeroMarqueeTicker pageKey="brands" siteConfig={siteConfig} />
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <DcListingHero
+        titleBefore="Discover Verified"
+        titleHighlight="Brands"
+        searchPlaceholder="Search brands..."
+        quickChips={['Fashion', 'Electronics', 'Beauty', 'Home', 'Sports', 'Food']}
+        onSearch={(q) => setSearchQuery(q)}
+        onChipClick={(q) => setSearchQuery(q)}
+      />
+
+      <DcListingStickyFilters
+        overlapHero
+        items={[
+          {
+            id: 'top-rated',
+            icon: '🏆',
+            name: 'Top Rated',
+            sub: '4.5+ stars',
+            bg: '#FFF3EA',
+            active: popularityFilter === 'top-rated',
+            onClick: () => setPopularityFilter(popularityFilter === 'top-rated' ? 'all' : 'top-rated'),
+          },
+          {
+            id: 'new-brands',
+            icon: '✨',
+            name: 'New Brands',
+            sub: 'This week',
+            bg: '#EFECFD',
+            active: activeTab === 'Trending Brands',
+            onClick: () => setActiveTab(activeTab === 'Trending Brands' ? 'All Brands' : 'Trending Brands'),
+          },
+          {
+            id: 'featured',
+            icon: '⭐',
+            name: 'Featured',
+            sub: 'Handpicked',
+            bg: '#FEF3E2',
+            active: popularityFilter === 'featured',
+            onClick: () => setPopularityFilter(popularityFilter === 'featured' ? 'all' : 'featured'),
+          },
+          {
+            id: 'most-reviewed',
+            icon: '💬',
+            name: 'Most Reviewed',
+            sub: '10K+ reviews',
+            bg: '#EAF1FD',
+            active: activeTab === 'Top Rated Brands',
+            onClick: () => setActiveTab(activeTab === 'Top Rated Brands' ? 'All Brands' : 'Top Rated Brands'),
+          },
+          {
+            id: 'budget',
+            icon: '💰',
+            name: 'Budget Friendly',
+            sub: 'Under ৳5K',
+            bg: '#E6F9EA',
+            active: activeTab === 'Hot Deals Brands',
+            onClick: () => setActiveTab(activeTab === 'Hot Deals Brands' ? 'All Brands' : 'Hot Deals Brands'),
+          },
+          {
+            id: 'premium',
+            icon: '👑',
+            name: 'Premium',
+            sub: 'Exclusive',
+            bg: '#FDECEC',
+            active: verificationFilter === 'verified',
+            onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified'),
+          },
+        ]}
+      />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -612,15 +625,7 @@ export function BrandsPage() {
         }}
       />
 
-      <StickySectionNav
-        sections={sectionNavItems}
-        activeId={activeSectionId}
-        onNavigate={scrollToSection}
-        allLabel="Brands"
-        profileLabel="Brand directory"
-      />
-
-      <div className={`max-w-[1680px] mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+      <div className={`max-w-[1680px] mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-10 md:py-12 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
@@ -634,12 +639,12 @@ export function BrandsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by Brand Name or Category..."
-              className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+              className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
             />
           </div>
 
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
-          <div id="brands-sidebar-filters" className="transition-all duration-300 rounded-[5px]">
+          <div id="brands-sidebar-filters" className="transition-all duration-300 rounded-2xl">
             <FullSidebarFilterPanel
               title="Filter Brands"
               searchQuery={searchQuery}
@@ -651,10 +656,10 @@ export function BrandsPage() {
                   onOpenFullFilters={() => {}}
                   filters={[
                     { id: 'verified', label: '✓ Verified Claims', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
-                    { id: 'hot', label: '🔥 Hot Brands', active: popularityFilter === 'hot', onClick: () => setPopularityFilter(popularityFilter === 'hot' ? 'all' : 'hot') },
+                    { id: 'hot', label: 'ðŸ”¥ Hot Brands', active: popularityFilter === 'hot', onClick: () => setPopularityFilter(popularityFilter === 'hot' ? 'all' : 'hot') },
                     { id: 'top-rated', label: '⭐ Top Rated', active: popularityFilter === 'top-rated', onClick: () => setPopularityFilter(popularityFilter === 'top-rated' ? 'all' : 'top-rated') },
-                    { id: 'fashion', label: '👗 Fashion Brands', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
-                    { id: 'tech', label: '💻 Tech Devices', active: selectedCategory === 'Tech', onClick: () => setSelectedCategory(selectedCategory === 'Tech' ? null : 'Tech') }
+                    { id: 'fashion', label: 'ðŸ‘— Fashion Brands', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
+                    { id: 'tech', label: 'ðŸ’» Tech Devices', active: selectedCategory === 'Tech', onClick: () => setSelectedCategory(selectedCategory === 'Tech' ? null : 'Tech') }
                   ]}
                 />
               }
@@ -687,13 +692,13 @@ export function BrandsPage() {
               advancedSection={
                 <div className="flex flex-col gap-4">
                   {/* Initial Index selection A-Z */}
-                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm flex flex-col gap-2">
+                  <div className="bg-white rounded-2xl p-4.5 border border-[#eef2f6] shadow-sm flex flex-col gap-2">
                     <h3 className="text-[11px] font-black text-[#8a9bb0] uppercase tracking-wider mb-2">Alpha search (A-Z)</h3>
                     <div className="grid grid-cols-5 gap-1.5 max-h-32 overflow-y-auto no-scrollbar">
                       <button 
                         onClick={() => setSelectedLetter(null)}
                         className={cn(
-                          "col-span-5 py-1.5 rounded-[5px] text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
+                          "col-span-5 py-1.5 rounded-2xl text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
                           selectedLetter === null ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                         )}
                       >
@@ -704,7 +709,7 @@ export function BrandsPage() {
                           key={letter} 
                           onClick={() => setSelectedLetter(letter)}
                           className={cn(
-                            "h-5.5 rounded-[5px] text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                            "h-5.5 rounded-2xl text-[9.5px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
                             selectedLetter === letter ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                           )}
                         >
@@ -745,7 +750,7 @@ export function BrandsPage() {
                       type: 'single_select',
                       options: [
                         { value: 'all', label: 'All Tiers' },
-                        { value: 'hot', label: '🔥 Hot Brands' },
+                        { value: 'hot', label: 'ðŸ”¥ Hot Brands' },
                         { value: 'featured', label: '⭐ Featured' },
                         { value: 'top-rated', label: '✨ Top Rated (4.8+)' }
                       ]
@@ -772,7 +777,7 @@ export function BrandsPage() {
           {/* BUSINESS SELLERS INFO CARD */}
           <div 
             id="section-sellers-brands" 
-            className="w-full bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
+            className="w-full bg-white rounded-2xl border border-[#eef2f6] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-center shrink-0 mx-auto" 
             style={{ height: '410px' }}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
@@ -791,7 +796,7 @@ export function BrandsPage() {
               </p>
             </div>
 
-            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+            <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-2xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
               <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES</h4>
               <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                 Gain entry to featured deal slots, exposure metrics, and buyer engagement streams.
@@ -812,8 +817,8 @@ export function BrandsPage() {
 
           {/* SPONSOR AD */}
           <ListingAdRail
-            sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_LANDSCAPE}
-            sponsoredVariant="landscape"
+            sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
+            sponsoredVariant="portrait"
             showAdSense={false}
           />
         </aside>
@@ -821,16 +826,16 @@ export function BrandsPage() {
         {/* Main Content Area */}
         <main id="brands-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 space-y-6">
           {/* Header info bar (Unified with Brand Deals layout cohesion) */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8edf2] font-sans">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#eef2f6] font-sans">
             <div>
-              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] italic leading-none">
-                OUR PARTNERS • BRANDS
+              <h3 className="text-[10px] font-bold text-[#8a9bb0] uppercase tracking-[0.2em] leading-none">
+                Our partners • Brands
               </h3>
-              <h2 className="text-xl font-black text-[#1A1D4E] italic uppercase tracking-tighter mt-2 leading-none">
-                {activeTab === 'All Brands' ? 'ALL BRANDS' : activeTab.toUpperCase()}
-                {selectedLetter && ` • STARTING WITH "${selectedLetter}"`}
-                {searchQuery && ` • SEARCH: "${searchQuery.toUpperCase()}"`}
-                <span className="text-orange-primary"> ({filteredBrands.length} FOUND)</span>
+              <h2 className="text-xl font-black text-[#1A1D4E] tracking-tight mt-2 leading-none">
+                {activeTab === 'All Brands' ? 'All Brands' : activeTab}
+                {selectedLetter && ` · Starting with “${selectedLetter}”`}
+                {searchQuery && ` · “${searchQuery}”`}
+                <span className="text-[#8a9bb0] font-semibold"> ({filteredBrands.length})</span>
               </h2>
             </div>
             
@@ -844,7 +849,7 @@ export function BrandsPage() {
                   setVerificationFilter('all');
                   setPopularityFilter('all');
                 }}
-                className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#e8edf2] px-3.5 py-2 rounded-[5px] shadow-sm self-start sm:self-auto hover:text-[#CF4400] cursor-pointer"
+                className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#eef2f6] px-3.5 py-2 rounded-2xl shadow-sm self-start sm:self-auto hover:text-[#CF4400] cursor-pointer"
               >
                 Reset All Filters
               </button>
@@ -855,25 +860,25 @@ export function BrandsPage() {
           {(selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all' || selectedLetter) && (
             <div className="flex flex-wrap items-center gap-3">
               {selectedLetter && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#eef2f6] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
                   Letter: {selectedLetter} 
                   <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setSelectedLetter(null)} />
                 </div>
               )}
               {selectedCategory && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#eef2f6] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
                   Category: {selectedCategory} 
                   <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setSelectedCategory(null)} />
                 </div>
               )}
               {verificationFilter !== 'all' && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#eef2f6] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
                   Verification: {verificationFilter === 'verified' ? 'Verified' : 'Unverified'} 
                   <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setVerificationFilter('all')} />
                 </div>
               )}
               {popularityFilter !== 'all' && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8edf2] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[#eef2f6] rounded-full text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
                   Popularity: {popularityFilter.toUpperCase()} 
                   <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setPopularityFilter('all')} />
                 </div>
@@ -882,7 +887,7 @@ export function BrandsPage() {
           )}
 
           {/* Tablet/Mobile Collapsible A-Z Filter Card */}
-          <div className="lg:hidden bg-white rounded-[5px] p-4 border border-[#e8edf2] shadow-sm mb-6 font-sans">
+          <div className="lg:hidden bg-white rounded-2xl p-4 border border-[#eef2f6] shadow-sm mb-6 font-sans">
             <div 
               className="flex items-center justify-between cursor-pointer" 
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
@@ -910,7 +915,7 @@ export function BrandsPage() {
                       setIsMobileFilterOpen(false);
                     }}
                     className={cn(
-                      "col-span-6 sm:col-span-9 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
+                      "col-span-6 sm:col-span-9 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
                       selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                     )}
                   >
@@ -924,7 +929,7 @@ export function BrandsPage() {
                         setIsMobileFilterOpen(false);
                       }}
                       className={cn(
-                        "h-8 rounded-[5px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
+                        "h-8 rounded-2xl text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer",
                         selectedLetter === letter ? "bg-orange-primary text-white shadow-md shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:text-navy hover:bg-gray-100/70"
                       )}
                     >
@@ -936,80 +941,49 @@ export function BrandsPage() {
             )}
           </div>
 
-          {/* Choosify Recommends Section */}
-          {filteredFeaturedBrands.length > 0 && (
-            <div className="mb-12">
-              <div className="flex items-center gap-4 mb-8 overflow-hidden">
-                <div className="flex items-center gap-2.5 bg-gradient-to-r from-[#FF5B00] via-[#E8500A] to-[#CF4400] px-5 py-2.5 rounded-full shadow-lg shadow-orange-primary/30 flex-shrink-0 border border-orange-primary/40">
-                   <Sparkles size={14} className="text-white shrink-0" />
-                   <span className="text-[10px] font-black text-white uppercase tracking-widest">Choosify.bd Recommends</span>
-                   <div className="flex gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white/90 animate-pulse" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-                   </div>
-                </div>
-                <span className="text-[10px] font-black text-[#5C2AFE] uppercase tracking-widest whitespace-nowrap">
-                  {filteredFeaturedBrands.length} Brand{filteredFeaturedBrands.length !== 1 ? 's' : ''}
-                </span>
-                <div className="flex-1 h-px bg-orange-primary/20" />
-              </div>
-
-              <div className={BRAND_CARD_GRID}>
-                {injectPlacementsIntoFeed(
-                  filteredFeaturedBrands,
-                  (brand) => `featured-brand-${brand.id}`,
-                  infeedPlacements.slice(0, 1),
-                  INFEED_INTERVAL.brand,
-                  1,
-                ).map((entry) =>
+          {filteredBrands.length > 0 ? (
+            <>
+              <p className="text-[12.5px] text-[#9AA0AC] font-semibold mb-4">
+                Showing 1–{visibleCount} of {totalCount} brands
+              </p>
+              <div className={cn(BRAND_CARD_GRID, 'mb-8')}>
+                {visibleBrandFeed.map((entry) =>
                   entry.kind === 'placement' ? (
-                    <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
+                    <AdvertiseHereCard key={entry.key} variant="brand" />
                   ) : (
                     <BrandCardDesign key={entry.key} brand={entry.item} />
                   ),
                 )}
+                {infeedPlacements.length === 0 && <AdvertiseHereCard variant="brand" />}
+              </div>
+              <div ref={sentinelRef} className="h-8" aria-hidden />
+              {hasMore && (
+                <p className="text-center text-[12px] text-[#9AA0AC] font-semibold py-4">Loading more…</p>
+              )}
+            </>
+          ) : null}
+
+          <div className="bg-[#000435] rounded-xl px-7 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white mb-8">
+            <div>
+              <div className="text-[15px] font-bold mb-1">Want exclusive brand deals?</div>
+              <div className="text-[12px] text-white/55">
+                Follow your favorite brands and get notified about deals & new arrivals.
               </div>
             </div>
-          )}
-          {Object.entries(groupedBrands).map(([letter, letterBrands], letterIndex) => (
-            <div key={letter} className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center text-xl font-black">{letter}</div>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{letterBrands.length} Brands</span>
-              </div>
-
-              <div className={BRAND_CARD_GRID}>
-                {injectPlacementsIntoFeed(
-                  letterBrands,
-                  (brand) => `brand-${brand.id}`,
-                  infeedPlacements.slice(letterIndex % Math.max(infeedPlacements.length, 1)),
-                  INFEED_INTERVAL.brand,
-                  letterIndex === 0 ? 0 : 1,
-                ).map((entry) =>
-                  entry.kind === 'placement' ? (
-                    <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
-                  ) : (
-                    <BrandCardDesign key={entry.key} brand={entry.item} />
-                  ),
-                )}
-              </div>
-            </div>
-          ))}
-
-          <PaginationBar showingCount={100} totalCount={150} />
-
-          <PopularSearchKeywords
-            title="Popular brand searches"
-            terms={popularSearchTerms}
-            className="mt-0 pt-10"
-          />
+            <Link
+              to="/brands"
+              className="bg-[#FF5B00] text-white px-[22px] py-3 rounded-lg text-[12px] font-bold no-underline hover:brightness-110 shrink-0"
+            >
+              FOLLOW BRANDS
+            </Link>
+          </div>
 
           <AdSenseSlot format="infeed" className="mt-6" />
 
-          {Object.keys(groupedBrands).length === 0 && (
+          {filteredBrands.length === 0 && (
              <div className="py-20 text-center">
                 <Search size={48} className="mx-auto text-gray-300 mb-4" />
-                <h3 className="text-2xl font-black text-navy uppercase tracking-tight mb-2 italic">No Brands Found</h3>
+                <h3 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">No brands found</h3>
                 <p className="text-gray-400 font-medium">Try searching for a different brand name or clear filters.</p>
                 <button 
                   onClick={() => {setSearchQuery(''); setSelectedLetter(null);}}
@@ -1024,8 +998,8 @@ export function BrandsPage() {
         {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           {/* FEATURED BRAND DEALS SECTION */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full text-left animate-fade-in">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+          <div className="bg-white rounded-2xl border border-[#eef2f6] p-4.5 shadow-sm w-full text-left animate-fade-in">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#eef2f6] px-1">
               <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
                 Featured Brand Deals
               </h3>
@@ -1039,7 +1013,7 @@ export function BrandsPage() {
 
             <div className="flex flex-col gap-2.5">
               {BRAND_DEALS.length === 0 ? (
-                <div className="text-center py-6 border border-dashed border-gray-200 rounded-[5px]">
+                <div className="text-center py-6 border border-dashed border-gray-200 rounded-2xl">
                   <p className="text-xs text-gray-400 font-medium">Featured brand deals will appear here.</p>
                 </div>
               ) : (
@@ -1047,7 +1021,7 @@ export function BrandsPage() {
                   <Link 
                     to={`/brands/${item.id}`}
                     key={item.id} 
-                    className="flex items-center gap-3 bg-white border border-[#e8edf2]/60 rounded-[5px] p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                    className="flex items-center gap-3 bg-white border border-[#eef2f6]/60 rounded-2xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
                   >
                     <div className={cn("w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-transparent flex items-center justify-center text-white font-semibold text-xs shadow-sm", item.bgClass)}>
                       {item.logo}
@@ -1070,8 +1044,8 @@ export function BrandsPage() {
           </div>
 
           {/* FEATURED PROMOCODES SECTION */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm w-full text-left animate-fade-in">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+          <div className="bg-white rounded-2xl border border-[#eef2f6] p-4.5 shadow-sm w-full text-left animate-fade-in">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#eef2f6] px-1">
               <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
                 Featured Promocodes
               </h3>
@@ -1079,7 +1053,7 @@ export function BrandsPage() {
 
             <div className="flex flex-col gap-2.5">
               {PROMO_CODES.length === 0 ? (
-                <div className="text-center py-6 border border-dashed border-gray-200 rounded-[5px]">
+                <div className="text-center py-6 border border-dashed border-gray-200 rounded-2xl">
                   <p className="text-xs text-gray-400 font-medium">No active promo codes available right now.</p>
                 </div>
               ) : (
@@ -1087,7 +1061,7 @@ export function BrandsPage() {
                   <Link 
                     to={`/brands/${item.brandId}`}
                     key={idx} 
-                    className="bg-white border border-[#e8edf2]/65 hover:border-[#E8500A]/15 rounded-[5px] p-2.5 hover:shadow-soft transition-all duration-300 group cursor-pointer flex flex-col gap-2 text-left"
+                    className="bg-white border border-[#eef2f6]/65 hover:border-[#E8500A]/15 rounded-2xl p-2.5 hover:shadow-soft transition-all duration-300 group cursor-pointer flex flex-col gap-2 text-left"
                   >
                     {/* Header row with brand details */}
                     <div className="flex items-center justify-between gap-2">
@@ -1108,7 +1082,7 @@ export function BrandsPage() {
                           navigator.clipboard.writeText(item.code);
                           toast.success(`Coupon code "${item.code}" copied to clipboard!`);
                         }}
-                        className="px-2.5 py-1 bg-[#E8500A]/10 hover:bg-[#E8500A] text-[#E8500A] hover:text-white transition-all cursor-pointer rounded-[5px] text-[8px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0"
+                        className="px-2.5 py-1 bg-[#E8500A]/10 hover:bg-[#E8500A] text-[#E8500A] hover:text-white transition-all cursor-pointer rounded-2xl text-[8px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0"
                       >
                         <Copy className="w-2.5 h-2.5" />
                         Copy
@@ -1116,7 +1090,7 @@ export function BrandsPage() {
                     </div>
                     
                     {/* Code display window */}
-                    <div className="bg-gray-50 border border-dashed border-[#e8edf2] rounded-[5px] px-2.5 py-1.5 flex items-center justify-between font-mono text-[9.5px] font-semibold text-gray-650 tracking-wider">
+                    <div className="bg-gray-50 border border-dashed border-[#eef2f6] rounded-2xl px-2.5 py-1.5 flex items-center justify-between font-mono text-[9.5px] font-semibold text-gray-650 tracking-wider">
                       <span>{item.code}</span>
                       <span className="text-[7.5px] font-sans font-semibold text-gray-400 uppercase">ACTIVE</span>
                     </div>

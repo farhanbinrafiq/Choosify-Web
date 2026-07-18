@@ -18,7 +18,7 @@ export function buildExploreSections(allContent: SpotlightContent[]): SpotlightE
       title: 'Browse by Type',
       tiles: [
         { dimension: 'campaign', label: 'Campaigns', href: '/spotlight?type=campaign', count: allContent.filter((c) => c.contentType === 'campaign').length },
-        { dimension: 'live', label: 'Live', href: '/spotlight/live', count: allContent.filter((c) => c.isLive).length },
+        { dimension: 'live', label: 'Live', href: '/spotlight?tab=live', count: allContent.filter((c) => c.isLive).length },
         { dimension: 'guide', label: 'Guides', href: '/guides', count: allContent.filter((c) => ['buying_guide', 'tutorial'].includes(c.contentType)).length },
         { dimension: 'recommendation', label: 'Recommendations', href: '/recommendations', count: allContent.filter((c) => c.contentType === 'recommendation').length },
         { dimension: 'collection', label: 'Collections', href: '/spotlight/explore?tab=collections' },

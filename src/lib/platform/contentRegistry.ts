@@ -104,7 +104,7 @@ export const CONTENT_ROUTE_REGISTRY: ContentRouteRule[] = [
   },
   {
     contentType: 'comparison',
-    primaryRoute: () => '/compare',
+    primaryRoute: (slug) => spotlightContentHref(slug),
     ctaLabel: 'Compare',
   },
 ];
@@ -114,7 +114,6 @@ export function resolveContentHref(
   slug: string,
   options?: { isLive?: boolean; entityId?: string },
 ): string {
-  if (contentType === 'comparison') return '/compare';
   const rule = CONTENT_ROUTE_REGISTRY.find((r) => r.contentType === contentType);
   if (rule) return rule.primaryRoute(slug, options?.entityId);
   return spotlightContentHref(slug);

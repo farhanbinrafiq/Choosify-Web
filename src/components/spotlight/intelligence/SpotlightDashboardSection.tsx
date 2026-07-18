@@ -20,7 +20,7 @@ export function SpotlightDashboardSection({
     <section className={cn('space-y-4', className)}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-lg font-black text-navy uppercase italic">{title}</h2>
+          <h2 className="text-lg font-extrabold text-[#1A1A2E] tracking-tight">{title}</h2>
           {description && <p className="text-xs text-gray-500 mt-0.5">{description}</p>}
         </div>
         {action}

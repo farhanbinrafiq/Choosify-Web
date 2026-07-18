@@ -7,13 +7,11 @@ import { ArrowRight, ShoppingBag, ShieldCheck, Tag, Zap, Star, Search, Shirt, Sp
 import { BRANDS } from '../constants';
 import { cn } from '../lib/utils';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
-import { useGlobalState } from '../context/GlobalStateContext';
+import { DcListingHero } from '../components/design/DcListingHero';
+import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
 
 export function BrandDealsPage() {
   const navigate = useNavigate();
-  const { siteConfig } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All');
@@ -225,9 +223,66 @@ export function BrandDealsPage() {
   }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <PageHeroBanner pageKey="brand-deals" />
-      <HeroMarqueeTicker pageKey="brand-deals" siteConfig={siteConfig} />
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <DcListingHero
+        titleBefore="Brand"
+        titleHighlight="Deals"
+        searchPlaceholder="Search brand deals..."
+        quickChips={['Flash', 'Verified', 'Fashion', 'Electronics', 'Beauty', 'Home']}
+        onSearch={(q) => setSearchQuery(q)}
+        onChipClick={(q) => setSearchQuery(q)}
+      />
+
+      <DcListingStickyFilters
+        overlapHero
+        items={[
+          {
+            id: 'verified',
+            icon: '🛡',
+            name: 'Verified Brands',
+            sub: 'Trusted only',
+            bg: '#FFF3EA',
+            active: verificationFilter === 'verified',
+            onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified'),
+          },
+          {
+            id: 'top',
+            icon: '🏆',
+            name: 'Top Rated',
+            sub: '4.5+ stars',
+            bg: '#FEF3E2',
+            active: popularityFilter === 'high',
+            onClick: () => setPopularityFilter(popularityFilter === 'high' ? 'all' : 'high'),
+          },
+          {
+            id: 'flash',
+            icon: '⚡',
+            name: 'Flash Deals',
+            sub: 'Ending soon',
+            bg: '#FDECEC',
+            active: activeTab === 'Flash',
+            onClick: () => setActiveTab(activeTab === 'Flash' ? 'All' : 'Flash'),
+          },
+          {
+            id: 'fashion',
+            icon: '👗',
+            name: 'Fashion',
+            sub: 'Apparel & more',
+            bg: '#EFECFD',
+            active: selectedCategory === 'Fashion',
+            onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion'),
+          },
+          {
+            id: 'electronics',
+            icon: '💻',
+            name: 'Electronics',
+            sub: 'Tech deals',
+            bg: '#EAF1FD',
+            active: selectedCategory === 'Electronics',
+            onClick: () => setSelectedCategory(selectedCategory === 'Electronics' ? null : 'Electronics'),
+          },
+        ]}
+      />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -257,7 +312,7 @@ export function BrandDealsPage() {
       />
 
       {/* CORE THREE-COLUMN SYSTEM LAYOUT INTEGRATION */}
-      <div className="w-full bg-choosify-feed min-h-screen py-8">
+      <div className="w-full bg-[#F4F7F9] min-h-screen py-8">
         <div id="brand-deals-main" className={`scroll-mt-36 max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
           
           {/* Left Sidebar */}
@@ -408,24 +463,24 @@ export function BrandDealsPage() {
             </div>
 
             {/* Promo spotlight card */}
-            <div className="bg-gradient-to-br from-[#0A0A1F] to-[#16163F] text-white rounded-[5px] border border-[#ff5b00]/10 p-5 shadow-lg relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
+            <div className="bg-[#000435] text-white rounded-xl border border-[#E8EDF2]/10 p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
               <div className="absolute top-0 right-0 w-28 h-28 bg-[#FF5B00]/10 rounded-full blur-2xl pointer-events-none" />
               
               <div>
-                <span className="px-2.5 py-1 rounded-[5px] bg-[#FF5B00] text-white text-[8.5px] font-black uppercase tracking-widest italic leading-none">
-                  SPOTLIGHT DEAL
+                <span className="px-2.5 py-1 rounded-md bg-[#FF5B00] text-white text-[11px] font-bold tracking-tight leading-none">
+                  Spotlight deal
                 </span>
-                <h3 className="font-sans text-lg font-black italic uppercase tracking-tight text-white text-left leading-snug mt-4">
-                  EXCLUSIVE S26 <span className="text-[#FF5B00]">BUNDLE PACKS</span>
+                <h3 className="font-sans text-lg font-extrabold tracking-tight text-white text-left leading-snug mt-4">
+                  Exclusive S26 <span className="text-[#FF5B00]">bundle packs</span>
                 </h3>
-                <p className="text-[11px] text-white/50 font-semibold mt-2 leading-relaxed">
-                  Unlock dynamic distributor pricing structures on Samsung Mobile nodes and premium accessories under distributor backing.
+                <p className="text-[13px] text-white/55 font-medium mt-2 leading-relaxed">
+                  Unlock dynamic distributor pricing on Samsung Mobile and premium accessories.
                 </p>
               </div>
               
               <button 
                 onClick={() => navigate('/brands/1/products')}
-                className="w-full py-3 bg-[#FF5B00] hover:bg-[#E8500A] text-white font-black rounded-[5px] text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all mt-4 italic shadow-md shadow-orange-primary/10 cursor-pointer border-0"
+                className="w-full py-3 bg-[#FF5B00] hover:brightness-110 text-white font-bold rounded-lg text-[13px] tracking-tight flex items-center justify-center gap-2 transition-all mt-4 shadow-sm cursor-pointer border-0"
               >
                 Explore S26 Deals <ArrowRight size={13} />
               </button>
@@ -557,7 +612,7 @@ export function BrandDealsPage() {
                       setActiveTab('All');
                       setIsMobileFilterOpen(false);
                     }}
-                    className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-black rounded-[5px] text-[10px] uppercase tracking-widest transition-all italic border-0"
+                    className="w-full py-3 bg-[#F4F7F9] hover:bg-[#E8EDF2] text-[#1A1A2E] font-bold rounded-lg text-[13px] tracking-tight transition-all border-0"
                   >
                     Reset All Filters
                   </button>
@@ -568,10 +623,10 @@ export function BrandDealsPage() {
             {/* Header info bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8edf2]">
               <div>
-                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] italic">
+                <h3 className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight">
                   OFFICIAL STORES • ACTIVE COUPONS
                 </h3>
-                <h2 className="text-xl font-black text-navy italic uppercase tracking-tighter mt-1">
+                <h2 className="text-xl font-extrabold text-navy tracking-tight mt-1">
                   {activeTab === 'All' ? 'ALL BRANDS' : `${activeTab.toUpperCase()} EXTRA`} 
                   {searchQuery && ` SEARCH: "${searchQuery.toUpperCase()}"`}
                   <span className="text-orange-primary"> ({filteredBrands.length} FOUND)</span>
@@ -656,7 +711,7 @@ export function BrandDealsPage() {
 
                           <div className="w-full h-px bg-gray-50 relative z-10" />
 
-                          <div className="flex items-center gap-2 text-[10px] font-black text-navy uppercase tracking-widest italic group-hover:text-orange-primary transition-colors relative z-10">
+                          <div className="flex items-center gap-2 text-[13px] font-bold text-[#1A1A2E] tracking-tight group-hover:text-[#FF5B00] transition-colors relative z-10">
                             Grab This Offer <ArrowRight size={13} className="-rotate-45 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                           </div>
                         </div>
@@ -671,7 +726,7 @@ export function BrandDealsPage() {
                   <p className="text-xs text-gray-400 font-semibold max-w-sm">No partners match your selected criteria. Try resetting the search input or alphabet letter filter.</p>
                   <button 
                     onClick={() => {setSelectedLetter(null); setSearchQuery(''); setActiveTab('All');}}
-                    className="px-5 py-2.5 bg-orange-primary hover:bg-[#CF4400] text-white text-[10px] font-black uppercase tracking-widest rounded-[5px] transition-all italic shadow-md"
+                    className="px-5 py-2.5 bg-[#FF5B00] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-lg transition-all shadow-sm"
                   >
                     Clear All Filters
                   </button>
@@ -699,7 +754,7 @@ export function BrandDealsPage() {
               
               <button 
                 onClick={() => navigate('/post-offer')}
-                className="w-full py-3 bg-white border-2 border-gray-150 hover:border-navy text-navy font-black rounded-[5px] text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all italic cursor-pointer"
+                className="w-full py-3 bg-white border border-[#E8EDF2] hover:border-[#000435] text-[#1A1A2E] font-bold rounded-lg text-[13px] tracking-tight flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 Submit Partnership Query
               </button>
@@ -710,21 +765,28 @@ export function BrandDealsPage() {
         </div>
       </div>
 
-      {/* CTA Section */}
-      <section className="py-20 choosify-dark-gradient px-4 md:px-8 relative overflow-hidden">
-        <div className="max-w-4xl mx-auto text-center relative z-10 font-sans">
-          <h2 className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter mb-8 leading-tight">
-            NOT FINDING YOUR <span className="text-orange-primary">FAVORITE BRAND?</span>
+      <section className="py-16 bg-[#000435] px-5 sm:px-8 relative overflow-hidden">
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-3 leading-tight">
+            Not finding your favorite brand?
           </h2>
-          <p className="text-white/40 text-sm md:text-base font-bold uppercase tracking-[0.2em] italic mb-12">
-            Suggest a brand or request an offer. We'll verify and bring it to you.
+          <p className="text-white/55 text-[13px] font-medium mb-8">
+            Suggest a brand or request an offer — we&apos;ll verify and bring it to you.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <button className="w-full sm:w-auto px-12 py-5 bg-white text-navy font-black text-[11px] uppercase tracking-widest italic rounded-[5px] hover:bg-orange-primary hover:text-white transition-all shadow-2xl">
-              Request A Brand
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/about#suggest-brand')}
+              className="w-full sm:w-auto px-7 py-3 bg-white text-[#1A1A2E] font-bold text-[12.5px] rounded-lg hover:bg-[#FF5B00] hover:text-white transition-colors cursor-pointer border-0"
+            >
+              Request a brand
             </button>
-            <button className="w-full sm:w-auto px-12 py-5 bg-navy border-2 border-white/20 text-white font-black text-[11px] uppercase tracking-widest italic rounded-[5px] hover:border-white transition-all">
-              Notify Me Of New Deals
+            <button
+              type="button"
+              onClick={() => navigate('/deals')}
+              className="w-full sm:w-auto px-7 py-3 bg-transparent border border-white/25 text-white font-bold text-[12.5px] rounded-lg hover:border-white transition-colors cursor-pointer"
+            >
+              Notify me of new deals
             </button>
           </div>
         </div>

@@ -31,7 +31,7 @@ export function SpotlightRecommendationCard({ opportunity, estimatedTotalImpact,
   return (
     <div className="bg-gradient-to-br from-[#050514] to-navy text-white rounded-xl p-5 space-y-4">
       <p className="text-[10px] font-bold uppercase text-[#E8500A] tracking-widest">Publisher Success Coach</p>
-      <h3 className="text-xl font-black uppercase italic">What should you improve next?</h3>
+      <h3 className="text-xl font-extrabold tracking-tight">What should you improve next?</h3>
       {missingCount != null && missingCount > 0 ? (
         <>
           <p className="text-sm text-gray-300">Your Spotlight content has <strong className="text-white">{missingCount} opportunities</strong> to improve quality, discovery, and commerce.</p>

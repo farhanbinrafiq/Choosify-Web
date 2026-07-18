@@ -1,8 +1,8 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays, ChevronRight, Search, Rocket, PartyPopper, Megaphone, Store } from 'lucide-react';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
+import { DcListingHero } from '../components/design/DcListingHero';
+import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
 import { BrandPostCard } from '../components/BrandPostCard';
 import {
   ActiveFilterChips,
@@ -13,7 +13,6 @@ import { filterBrandPosts, getAllBrandPosts } from '../lib/brandPosts';
 import { BRAND_POST_KIND_LABELS, type BrandPostKind } from '../types/brandPost';
 import { PAGE_SHELL_WRAPPER, PAGE_LISTING_SINGLE_SHELL, WHATS_ON_CARD_GRID } from '../lib/pageLayout';
 import { StickySectionNav } from '../components/StickySectionNav';
-import { useGlobalState } from '../context/GlobalStateContext';
 import { cn } from '../lib/utils';
 
 const KIND_TABS: Array<{ id: BrandPostKind | 'all'; label: string }> = [
@@ -27,11 +26,23 @@ const KIND_TABS: Array<{ id: BrandPostKind | 'all'; label: string }> = [
   { id: 'store_moment', label: 'Store Moments' },
 ];
 
+const KIND_STICKY_META: Record<
+  BrandPostKind,
+  { icon: string; name: string; sub: string; bg: string }
+> = {
+  event: { icon: '📅', name: 'Events', sub: 'Brand happenings', bg: '#EAF1FD' },
+  announcement: { icon: '📣', name: 'Announcements', sub: 'Brand news', bg: '#EFECFD' },
+  launch: { icon: '🚀', name: 'Launches', sub: 'New drops', bg: '#FFF3EA' },
+  festival: { icon: '🎉', name: 'Festivals', sub: 'Seasonal moments', bg: '#FEF3E2' },
+  carnival: { icon: '🎡', name: 'Carnivals', sub: 'Pop-up energy', bg: '#FDECEC' },
+  campaign: { icon: '📢', name: 'Campaigns', sub: 'Promotions', bg: '#E6F9EA' },
+  store_moment: { icon: '🏪', name: 'Store Moments', sub: 'In-store posts', bg: '#F4F7F9' },
+};
+
 type StatusFilter = 'all' | 'live' | 'scheduled';
 type DateRangeFilter = 'all' | 'this_month' | 'next_30';
 
 export function WhatsOnPage() {
-  const { siteConfig } = useGlobalState();
   const [query, setQuery] = useState('');
   const [activeKind, setActiveKind] = useState<BrandPostKind | 'all'>('all');
   const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
@@ -40,23 +51,25 @@ export function WhatsOnPage() {
   const [sponsoredOnly, setSponsoredOnly] = useState(false);
   const [dateRange, setDateRange] = useState<DateRangeFilter>('all');
 
+  const allPosts = useMemo(() => getAllBrandPosts(), []);
+
   const brandOptions = useMemo(() => {
     const seen = new Map<number, string>();
-    getAllBrandPosts().forEach((post) => {
+    allPosts.forEach((post) => {
       if (!seen.has(post.brandId)) seen.set(post.brandId, post.brandName);
     });
     return Array.from(seen.entries())
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, []);
+  }, [allPosts]);
 
   const locationOptions = useMemo(() => {
     const seen = new Set<string>();
-    getAllBrandPosts().forEach((post) => {
+    allPosts.forEach((post) => {
       if (post.location?.trim()) seen.add(post.location.trim());
     });
     return Array.from(seen).sort();
-  }, []);
+  }, [allPosts]);
 
   const posts = useMemo(() => {
     let result = filterBrandPosts({
@@ -151,6 +164,42 @@ export function WhatsOnPage() {
     ],
     [],
   );
+
+  const stickyFilterItems = useMemo(() => {
+    const liveCount = allPosts.filter((p) => p.status === 'live').length;
+    const kindItems = (Object.keys(KIND_STICKY_META) as BrandPostKind[]).map((kind) => {
+      const meta = KIND_STICKY_META[kind];
+      const count = allPosts.filter((p) => p.kind === kind).length;
+      return {
+        id: kind,
+        icon: meta.icon,
+        name: meta.name,
+        sub: count > 0 ? `${count} posts` : meta.sub,
+        bg: meta.bg,
+        active: activeKind === kind,
+        onClick: () => {
+          setActiveKind(activeKind === kind ? 'all' : kind);
+          setStatusFilter('all');
+        },
+      };
+    });
+
+    return [
+      {
+        id: 'live',
+        icon: '🔴',
+        name: 'Live',
+        sub: liveCount > 0 ? `${liveCount} now` : 'Happening now',
+        bg: '#FFF3EA',
+        active: statusFilter === 'live',
+        onClick: () => {
+          setStatusFilter(statusFilter === 'live' ? 'all' : 'live');
+          setActiveKind('all');
+        },
+      },
+      ...kindItems,
+    ];
+  }, [allPosts, activeKind, statusFilter]);
 
   const handleCategoryNavigate = useCallback((id: string) => {
     setActiveKind(id === 'all' ? 'all' : (id as BrandPostKind));
@@ -289,9 +338,39 @@ export function WhatsOnPage() {
   );
 
   return (
-    <div className="bg-choosify-feed min-h-screen pb-16">
-      <PageHeroBanner pageKey="whats-on" />
-      <HeroMarqueeTicker pageKey="whats-on" siteConfig={siteConfig} />
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9] pb-16">
+      <DcListingHero
+        titleBefore="What's"
+        titleHighlight="On"
+        searchPlaceholder="Search events, posts, brands..."
+        quickChips={['Events', 'Launches', 'Festivals', 'Live', 'Campaigns', 'Store Moments']}
+        onSearch={(q) => setQuery(q)}
+        onChipClick={(chip) => {
+          if (chip === 'Live') {
+            setStatusFilter('live');
+            setActiveKind('all');
+            setQuery('');
+            return;
+          }
+          const kindMap: Record<string, BrandPostKind> = {
+            Events: 'event',
+            Launches: 'launch',
+            Festivals: 'festival',
+            Campaigns: 'campaign',
+            'Store Moments': 'store_moment',
+          };
+          const kind = kindMap[chip];
+          if (kind) {
+            setActiveKind(kind);
+            setStatusFilter('all');
+            setQuery('');
+            return;
+          }
+          setQuery(chip);
+        }}
+      />
+
+      <DcListingStickyFilters overlapHero items={stickyFilterItems} />
 
       <ActiveFilterChips chips={activeChips} onClearAll={handleClearAll} />
 
@@ -317,7 +396,7 @@ export function WhatsOnPage() {
         <main id="whats-on-feed" className="scroll-mt-36 min-w-0 flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-black text-[#1A1D4E] uppercase italic tracking-tighter">What&apos;s On</h2>
+              <h2 className="text-xl font-extrabold text-[#1A1D4E]">What&apos;s On</h2>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
                 {posts.length} live brand moments
               </p>

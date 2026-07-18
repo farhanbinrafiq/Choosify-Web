@@ -48,7 +48,7 @@ export function buildCalendarEvents(allContent: SpotlightContent[]): SpotlightCa
     endsAt: c.schedule.endAt,
     timezone: c.schedule.timezone ?? 'Asia/Dhaka',
     campaignId: c.campaignId,
-    href: c.campaignType === 'livestream' ? `/spotlight/live/${c.campaignSlug}` : `/spotlight/${c.campaignSlug}`,
+    href: `/spotlight/${c.campaignSlug}`,
   }));
 
   return [...fromContent, ...fromCampaigns].sort(

@@ -2,13 +2,12 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { PAGE_LISTING_SINGLE_SHELL, PAGE_MIDDLE_FEED } from '../lib/pageLayout';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
 import { useSpotlightExperience } from '../hooks/useSpotlightExperience';
 import { createSpotlightImpressionLogger } from '../hooks/useSpotlightImpression';
 import { useSpotlightHistory } from '../hooks/useSpotlightHistory';
 import { SpotlightEmptyState } from '../components/spotlight/homepage/SpotlightEmptyState';
-import { SpotlightMixedFeed } from '../components/spotlight/feed/SpotlightMixedFeed';
+import { DiscoverHero } from '../components/spotlight/discovery/DiscoverHero';
+import { DiscoverStructuredFeed } from '../components/spotlight/discovery/DiscoverStructuredFeed';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { contentTypesForTab } from '../lib/spotlight/content/contentTypeRegistry';
 import type { SpotlightContentTabId } from '../types/spotlight/discovery/navigation';
@@ -18,7 +17,7 @@ import { filterSpotlightFeedItems, SPOTLIGHT_FEED_VISIBLE_KEY } from '../utils/s
 
 export function SpotlightDiscoverPage() {
   const { allContent, filters, setFilters, hasContent } = useSpotlightExperience();
-  const { allCatalogProducts, siteConfig } = useGlobalState();
+  const { allCatalogProducts } = useGlobalState();
   const { recordView } = useSpotlightHistory(allContent);
   const impressionCallbacks = useMemo(() => {
     const base = createSpotlightImpressionLogger();
@@ -41,7 +40,7 @@ export function SpotlightDiscoverPage() {
   const [replayOnly, setReplayOnly] = useState(false);
   const [upcomingOnly, setUpcomingOnly] = useState(false);
 
-  useSpotlightFloatingFilters({
+  const { quickFilters } = useSpotlightFloatingFilters({
     filters,
     setFilters,
     activeTab,
@@ -94,59 +93,52 @@ export function SpotlightDiscoverPage() {
     return base;
   }, [allContent, filters, activeTab, followedIds, savedIds, replayOnly, upcomingOnly, linkedProductId, linkedBrandId]);
 
+  const clearAllFilters = () => {
+    setFilters({
+      ...filters,
+      contentTypes: [],
+      query: '',
+      liveOnly: false,
+      sponsoredOnly: false,
+      verifiedOnly: false,
+      trendingOnly: false,
+      promotionsOnly: false,
+      publisherTypes: [],
+    });
+    setReplayOnly(false);
+    setUpcomingOnly(false);
+  };
+
   return (
-    <div id="spotlight-root" className="flex flex-col min-h-screen bg-choosify-feed">
-      <PageHeroBanner pageKey="guides" />
-      <HeroMarqueeTicker pageKey="guides" siteConfig={siteConfig} />
+    <div id="spotlight-root" className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <DiscoverHero
+        query={filters.query ?? ''}
+        onQuerySubmit={(q) => setFilters({ ...filters, query: q })}
+      />
 
-      <main className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+      <main className={`max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 pb-[60px] w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         <div className={`${PAGE_MIDDLE_FEED} choosify-listing-single-feed`}>
-          <header className="mb-6 text-left">
-            <h1 className="text-2xl font-bold text-[#1a1a2e]">Spotlight</h1>
-            <p className="text-sm text-gray-500 mt-2 max-w-2xl">
-              Discover products and services through shoppable reels, videos, guides, and offers — one mixed shopping feed.
-            </p>
-          </header>
-
           {!hasContent ? (
-            <SpotlightEmptyState />
-          ) : feedItems.length === 0 ? (
-            <div className="text-center py-16 border border-dashed border-[#e8edf2] rounded-lg">
-              <p className="text-sm text-gray-500">No Spotlight content matches your filters.</p>
-              <button
-                type="button"
-                onClick={() => {
-                  setFilters({
-                    ...filters,
-                    contentTypes: [],
-                    query: '',
-                    liveOnly: false,
-                    sponsoredOnly: false,
-                    verifiedOnly: false,
-                    trendingOnly: false,
-                    promotionsOnly: false,
-                    publisherTypes: [],
-                  });
-                  setReplayOnly(false);
-                  setUpcomingOnly(false);
-                }}
-                className="mt-4 text-xs font-bold uppercase text-[#E8500A] hover:underline min-h-[44px] px-4"
-              >
-                Clear filters
-              </button>
+            <div className="pt-10">
+              <SpotlightEmptyState />
             </div>
           ) : (
-            <SpotlightMixedFeed
+            <DiscoverStructuredFeed
               items={feedItems}
               products={allCatalogProducts}
               impressionCallbacks={impressionCallbacks}
+              quickFilters={quickFilters}
+              filters={filters}
+              setFilters={setFilters}
+              activeTab={activeTab}
+              onClearFilters={clearAllFilters}
             />
           )}
 
           <div className="mt-12 text-center">
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#E8500A] hover:underline min-h-[44px]"
+              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#FF5B00] hover:underline min-h-[44px]"
             >
               Back to Home
               <ChevronRight size={14} />

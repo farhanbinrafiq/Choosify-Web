@@ -33,6 +33,10 @@ import { slugifyPublisher } from './spotlightPublisherProfile';
 import { buildCampaignCollaborationGraph, contributionsToMembers } from './spotlightCollaborationEngine';
 import { enrichCommerceOverlay } from '../types/spotlight/commerce/overlay';
 import { brandPostToUniversalMedia, detectEmbedPlatform, guideToUniversalMedia, toEmbedUrl } from './spotlightMediaAdapters';
+import {
+  buildDemoSpotlightFeed,
+  getDemoSpotlightContentBySlug,
+} from '../data/spotlight/spotlightDemoFeedFactory';
 import type { SpotlightCollaborator } from '../types/spotlight/experience/collaboration';
 import type { SpotlightCollaborationRole } from '../types/spotlight/collaboration/engine';
 import type { SpotlightCollaboratorRole } from '../types/spotlight/experience/collaboration';
@@ -88,9 +92,14 @@ function mapGuideTypeToContent(guide: CatalogGuide): SpotlightContentType {
   if (tags.some((t) => t.includes('comparison')) || cat.includes('comparison')) return 'comparison';
   if (tags.some((t) => t.includes('tutorial')) || cat.includes('tutorial')) return 'tutorial';
   if (tags.some((t) => t.includes('tip')) || cat.includes('tip')) return 'tips';
-  if (guide.type === 'reels' || guide.type === 'shorts' || guide.type === 'video') {
+  if (guide.type === 'reels' || guide.type === 'shorts') return 'recommendation';
+  if (guide.type === 'video') {
     if (tags.some((t) => t.includes('review'))) return 'product_review';
-    return 'recommendation';
+    return 'product_review';
+  }
+  if (guide.type === 'article') {
+    if (cat.includes('buying') || tags.some((t) => t.includes('buying'))) return 'buying_guide';
+    return 'editorial';
   }
   if (cat.includes('buying') || tags.some((t) => t.includes('buying'))) return 'buying_guide';
   return 'editorial';
@@ -217,10 +226,7 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
     .filter(Boolean) as CatalogProduct[];
 
   const slug = guide.slug || guide.id;
-  const href =
-    contentType === 'comparison'
-      ? '/compare'
-      : resolveContentHref(contentType, String(slug));
+  const href = resolveContentHref(contentType, String(slug));
 
   return {
     contentId: `guide-${guide.id}`,
@@ -360,6 +366,8 @@ export interface SpotlightExperienceSources {
 }
 
 export function resolveSpotlightExperience(sources: SpotlightExperienceSources): SpotlightContent[] {
+  const demoFeed = buildDemoSpotlightFeed();
+
   const campaigns = listHomepageSpotlightCampaigns();
   const campaignContent = campaigns.map((c) =>
     campaignToSpotlightContent(c, sources.catalog, sources.brandLogos),
@@ -370,14 +378,11 @@ export function resolveSpotlightExperience(sources: SpotlightExperienceSources):
 
   const postContent = sources.brandPosts.map(brandPostToSpotlightContent);
 
-  const creatorContent = sources.creators
-    .filter((c) => c.score >= 70)
-    .slice(0, 12)
-    .map(creatorToSpotlightContent);
-
   const byId = new Map<string, SpotlightContent>();
-  [...campaignContent, ...guideContent, ...postContent, ...creatorContent].forEach((item) => {
-    byId.set(item.contentId, item);
+  [...demoFeed, ...campaignContent, ...guideContent, ...postContent].forEach((item) => {
+    if (!byId.has(item.contentId)) {
+      byId.set(item.contentId, item);
+    }
   });
 
   return Array.from(byId.values()).map(enrichContentWithDiscoveryScore);
@@ -394,6 +399,9 @@ export function getSpotlightContentBySlug(
   slug: string,
   sources: SpotlightExperienceSources,
 ): SpotlightContent | undefined {
+  const fromDemoRegistry = getDemoSpotlightContentBySlug(slug);
+  if (fromDemoRegistry) return fromDemoRegistry;
+
   const all = resolveSpotlightExperience(sources);
   const bySlug = all.find((c) => c.slug === slug);
   if (bySlug) return bySlug;

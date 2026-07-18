@@ -7,20 +7,16 @@ import { ProductCard } from '../components/ProductCard';
 import { ProductCardSkeleton } from '../components/Skeleton';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
+import { DcListingHero } from '../components/design/DcListingHero';
+import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
 import { PaginationBar } from '../components/PaginationBar';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
-import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
-import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
-import { buildPagePopularSearchTerms } from '../utils/pagePopularSearches';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
-import { InfeedSponsoredCard } from '../components/SponsoredPlacementCard';
-import { usePlacements } from '../hooks/usePlacements';
-import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
-import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
+import { ProductsSponsoredBanner } from '../components/commerce/AdvertiseHereCard';
+import { useSponsoredFeedEntries } from '../hooks/useSponsoredFeedEntries';
+import { PLACEMENT_KEYS } from '../lib/placements';
 
 const SPONSORED_RECOMMENDATIONS = [
   {
@@ -55,7 +51,7 @@ const SPONSORED_RECOMMENDATIONS = [
 export function AllProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchParams, setSearchParams] = useSearchParams();
-  const { allCatalogProducts, allBrands, siteConfig } = useGlobalState();
+  const { allCatalogProducts, allBrands } = useGlobalState();
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All Products');
 
@@ -207,13 +203,13 @@ export function AllProductsPage() {
           onChange={(e) => setSidebarSearch(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
           placeholder="Search products, brands or details..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
         />
       </div>
     ),
     quickFilters: [
       { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
-      { id: 'trending', label: '🔥 Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
+      { id: 'trending', label: 'ðŸ”¥ Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
       { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'COD Ready', onClick: () => setActiveTab(activeTab === 'COD Ready' ? 'All Products' : 'COD Ready') },
       { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
     ],
@@ -224,7 +220,7 @@ export function AllProductsPage() {
           <select
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value as any)}
-            className="w-full h-10 px-3 bg-[#F4F8FA] border border-[#e8edf2] rounded-[5px] text-xs font-semibold text-navy outline-none focus:border-orange-primary/30"
+            className="w-full h-10 px-3 bg-[#F4F8FA] border border-[#eef2f6] rounded-2xl text-xs font-semibold text-navy outline-none focus:border-orange-primary/30"
           >
             <option value="featured">Featured / Recommended</option>
             <option value="price-asc">Price: Low to High</option>
@@ -324,8 +320,8 @@ export function AllProductsPage() {
           }}
         />
 
-        <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4 text-left">
-          <div className="flex items-center justify-between pb-2 border-b border-[#e8edf2]">
+        <div className="bg-white rounded-2xl p-4.5 border border-[#eef2f6] shadow-sm space-y-4 text-left">
+          <div className="flex items-center justify-between pb-2 border-b border-[#eef2f6]">
             <h3 className="text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">
               Price Range
             </h3>
@@ -540,43 +536,80 @@ export function AllProductsPage() {
     setSearchParams(new URLSearchParams());
   }
 
-  const popularSearchTerms = useMemo(
-    () =>
-      buildPagePopularSearchTerms({
-        cmsTerms: siteConfig?.popularSearches,
-        products: allCatalogProducts ?? [],
-        categoryNames: [...new Set((allCatalogProducts ?? []).map((p) => p.categoryName).filter(Boolean))].slice(0, 12) as string[],
-        brandNames: allBrands?.map((b) => b.name).slice(0, 12),
-        limit: 30,
-      }),
-    [siteConfig?.popularSearches, allCatalogProducts, allBrands],
+  const productFeed = useSponsoredFeedEntries(
+    'products',
+    filteredProducts,
+    (product) => `product-${product.id}`,
+    { enabled: viewMode === 'grid' },
   );
 
-  const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_PRODUCT, {
-    limit: INFEED_MAX_PER_PAGE,
-  });
-
-  const productFeed = useMemo(() => {
-    if (viewMode !== 'grid') {
-      return filteredProducts.map((product) => ({
-        kind: 'item' as const,
-        key: `product-${product.id}`,
-        item: product,
-      }));
-    }
-    return injectPlacementsIntoFeed(
-      filteredProducts,
-      (product) => `product-${product.id}`,
-      infeedPlacements,
-      INFEED_INTERVAL.product,
-      INFEED_MAX_PER_PAGE,
-    );
-  }, [filteredProducts, infeedPlacements, viewMode]);
+  const productsSponsoredBanner = useMemo(() => {
+    const entry = productFeed.find((e) => e.kind === 'sponsored');
+    if (!entry || entry.kind !== 'sponsored') return null;
+    return entry.sponsored;
+  }, [productFeed]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <PageHeroBanner pageKey="products" />
-      <HeroMarqueeTicker pageKey="products" siteConfig={siteConfig} />
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <DcListingHero
+        titleBefore="Explore Every"
+        titleHighlight="Product"
+        searchPlaceholder="Search products..."
+        quickChips={['Smartphones', 'Laptops', 'AC', 'TV', 'Fashion', 'Beauty']}
+        onSearch={(q) => executeSearch(q)}
+        onChipClick={(q) => executeSearch(q)}
+      />
+
+      <DcListingStickyFilters
+        overlapHero
+        items={[
+          {
+            id: 'verified',
+            icon: '🛡',
+            name: 'Verified Products',
+            sub: 'Trusted only',
+            bg: '#FFF3EA',
+            active: availabilityFilter === 'in-stock',
+            onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock'),
+          },
+          {
+            id: 'reviews',
+            icon: '★',
+            name: 'Real Reviews',
+            sub: 'User verified',
+            bg: '#FFF3EA',
+            active: ratingFilter === 4.5,
+            onClick: () => setRatingFilter(ratingFilter === 4.5 ? null : 4.5),
+          },
+          {
+            id: 'deals',
+            icon: '🔥',
+            name: 'Top Deals & Offers',
+            sub: 'Save more',
+            bg: '#FDECEC',
+            active: activeTab === 'Flash Deals',
+            onClick: () => setActiveTab(activeTab === 'Flash Deals' ? 'All Products' : 'Flash Deals'),
+          },
+          {
+            id: 'new',
+            icon: '✨',
+            name: 'New Arrivals',
+            sub: 'Just launched',
+            bg: '#EFECFD',
+            active: activeTab === 'New Arrivals',
+            onClick: () => setActiveTab(activeTab === 'New Arrivals' ? 'All Products' : 'New Arrivals'),
+          },
+          {
+            id: 'popular',
+            icon: '⭐',
+            name: 'Popular Picks',
+            sub: 'Trending now',
+            bg: '#FEF3E2',
+            active: activeTab === 'Bestsellers',
+            onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers'),
+          },
+        ]}
+      />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -595,15 +628,7 @@ export function AllProductsPage() {
         onClearAll={handleResetFilters}
       />
 
-      <StickySectionNav
-        sections={sectionNavItems}
-        activeId={activeSectionId}
-        onNavigate={scrollToSection}
-        allLabel="Products"
-        profileLabel="Product catalog"
-      />
-
-      <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+      <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-6 md:py-10 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 min-w-0 w-full max-w-full animate-fade-in text-left">
@@ -618,12 +643,12 @@ export function AllProductsPage() {
               onChange={(e) => setSidebarSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
               placeholder="Search products, brands or details..."
-              className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+              className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
             />
           </div>
           
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
-          <div id="global-sidebar-filters" className="transition-all duration-300 rounded-[5px]">
+          <div id="global-sidebar-filters" className="transition-all duration-300 rounded-2xl">
             <FullSidebarFilterPanel
               title="Filter Catalog"
               onReset={handleResetFilters}
@@ -637,7 +662,7 @@ export function AllProductsPage() {
                   onOpenFullFilters={() => {}}
                   filters={[
                     { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
-                    { id: 'trending', label: '🔥 Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
+                    { id: 'trending', label: 'ðŸ”¥ Trending', active: activeTab === 'Bestsellers', onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers') },
                     { id: 'top-rated', label: '⭐ Top Rated', active: activeTab === 'COD Ready', onClick: () => setActiveTab(activeTab === 'COD Ready' ? 'All Products' : 'COD Ready') },
                     { id: 'price-low', label: 'Under ৳5,000', active: maxPrice === '5000', onClick: () => { setMinPrice(''); setMaxPrice(maxPrice === '5000' ? '' : '5000'); } }
                   ]}
@@ -666,7 +691,7 @@ export function AllProductsPage() {
                   <select
                     value={sortOption}
                     onChange={(e) => setSortOption(e.target.value as any)}
-                    className="w-full h-10 px-3 bg-[#F4F8FA] border border-[#e8edf2] rounded-[5px] text-xs font-semibold text-navy outline-none focus:border-orange-primary/30"
+                    className="w-full h-10 px-3 bg-[#F4F8FA] border border-[#eef2f6] rounded-2xl text-xs font-semibold text-navy outline-none focus:border-orange-primary/30"
                   >
                     <option value="featured">Featured / Recommended</option>
                     <option value="price-asc">Price: Low to High</option>
@@ -718,8 +743,8 @@ export function AllProductsPage() {
                   />
 
                   {/* Price Range Section (Fix 2) */}
-                  <div className="bg-white rounded-[5px] p-4.5 border border-[#e8edf2] shadow-sm space-y-4 text-left">
-                    <div className="flex items-center justify-between pb-2 border-b border-[#e8edf2]">
+                  <div className="bg-white rounded-2xl p-4.5 border border-[#eef2f6] shadow-sm space-y-4 text-left">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#eef2f6]">
                       <h3 className="text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">
                         Price Range
                       </h3>
@@ -919,6 +944,21 @@ export function AllProductsPage() {
             </div>
           </div>
 
+          {/* Choosify.dc.html — full-width sponsored banner above grid */}
+          {!isLoading && filteredProducts.length > 0 && (
+            <ProductsSponsoredBanner
+              title={productsSponsoredBanner?.title || undefined}
+              subtitle={
+                productsSponsoredBanner?.subtitle ||
+                productsSponsoredBanner?.sponsorName ||
+                undefined
+              }
+              href={productsSponsoredBanner?.href || '/advertise'}
+              imageUrl={productsSponsoredBanner?.image || undefined}
+              ctaLabel={productsSponsoredBanner?.ctaLabel || 'Shop Now →'}
+            />
+          )}
+
           {/* Product Grid */}
           {isLoading ? (
             <div className={cn(
@@ -934,9 +974,9 @@ export function AllProductsPage() {
           ) : filteredProducts.length === 0 ? (
             <div className="py-24 text-center bg-white rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-4 text-gray-400">
               <SlidersHorizontal size={40} className="stroke-1 text-gray-300" />
-              <div className="text-xs font-black uppercase tracking-widest italic text-navy">No products matched active filters.</div>
+              <div className="text-sm font-semibold tracking-tight text-[#1A1A2E]">No products matched active filters.</div>
               <p className="text-[10px] max-w-sm leading-relaxed font-bold">Try lowering your minimum order quantity filter or clearing search queries to explore the full authorized selection.</p>
-              <button onClick={handleResetFilters} className="px-6 py-2.5 bg-orange-primary text-white text-[9px] font-black uppercase tracking-widest italic rounded-full shadow-lg">Clear Filters</button>
+              <button onClick={handleResetFilters} className="px-5 py-2.5 bg-[#FF5B00] text-white text-[13px] font-bold tracking-tight rounded-lg shadow-sm hover:brightness-110">Clear Filters</button>
             </div>
           ) : (
             <div className={cn(
@@ -946,13 +986,17 @@ export function AllProductsPage() {
                 : "flex flex-col gap-6"
             )}>
               {productFeed.map((entry) =>
-                entry.kind === 'placement' ? (
-                  <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
+                entry.kind === 'sponsored' ? null : viewMode === 'list' ? (
+                  <ProductCard
+                    key={entry.key}
+                    product={entry.item}
+                    variant="list"
+                  />
                 ) : (
                   <ProductCard
                     key={entry.key}
                     product={entry.item}
-                    variant={viewMode === 'list' ? 'list' : 'grid'}
+                    variant="grid"
                   />
                 ),
               )}
@@ -964,22 +1008,16 @@ export function AllProductsPage() {
             totalCount={filteredProducts.length}
           />
 
-          <PopularSearchKeywords
-            title="Popular searches"
-            terms={popularSearchTerms}
-            className="mt-0 pt-10 border-t-0"
-          />
-
           <AdSenseSlot format="infeed" className="mt-6" />
         </main>
 
         {/* RIGHT SIDEBAR WITH PREMIUM AARONG AD BANNER */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
           {/* Sponsored Recommendations Card */}
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-4.5 shadow-sm text-left relative overflow-hidden w-full flex flex-col">
-             <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#e8edf2] px-1">
+          <div className="bg-white rounded-2xl border border-[#eef2f6] p-4.5 shadow-sm text-left relative overflow-hidden w-full flex flex-col">
+             <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#eef2f6] px-1">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
-                   👉 Sponsored Recommendations
+                   ðŸ‘‰ Sponsored Recommendations
                 </h3>
                 <Link 
                    to="/recommendations" 
@@ -991,7 +1029,7 @@ export function AllProductsPage() {
 
              <div className="flex flex-col gap-3">
                 {SPONSORED_RECOMMENDATIONS.length === 0 ? (
-                   <div className="text-center py-6 border border-dashed border-gray-200 rounded-[5px]">
+                   <div className="text-center py-6 border border-dashed border-gray-200 rounded-2xl">
                       <p className="text-xs text-gray-400 font-medium px-2">Sponsored recommendations will appear here.</p>
                    </div>
                 ) : (
@@ -999,7 +1037,7 @@ export function AllProductsPage() {
                       <Link 
                          to={`/recommendations/${item.id}`}
                          key={item.id} 
-                         className="flex items-start gap-3 bg-white border border-[#e8edf2]/60 rounded-[5px] p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                         className="flex items-start gap-3 bg-white border border-[#eef2f6]/60 rounded-2xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
                       >
                          <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-gray-100 bg-gray-50 flex items-center justify-center relative">
                             <img 
@@ -1016,7 +1054,7 @@ export function AllProductsPage() {
                                {item.title}
                             </h4>
                             <p className="text-[8px] font-bold text-gray-450 truncate mt-0.5 uppercase tracking-wide">
-                               {item.readTime} · BY {item.author}
+                               {item.readTime} Â· BY {item.author}
                             </p>
                           </div>
                       </Link>

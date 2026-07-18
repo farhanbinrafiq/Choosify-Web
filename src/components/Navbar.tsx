@@ -15,6 +15,7 @@ import { cn } from '../lib/utils';
 import { PRIMARY_NAV_ITEMS, resolveSiteNavigation } from '../lib/navigation';
 import { isNavPathEnabled } from '../lib/featureFlags';
 import toast from 'react-hot-toast';
+import { ChoosifyWordmarkLogo } from './ChoosifyWordmarkLogo';
 
 export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,9 +29,10 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { retailCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig, featureFlags } = useGlobalState();
-  const { threads } = useDashboard();
+  const { threads, savedProducts } = useDashboard();
 
   const unreadMsgCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
+  const wishlistCount = Array.isArray(savedProducts) ? savedProducts.length : 0;
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const { ref: categoryStripRef, props: categoryStripProps } = useDragScroll({ grabCursor: false });
@@ -149,10 +151,8 @@ export function Navbar() {
   const dashboardMiniMenu: Array<{ label: string; path: string; icon: any; tab?: string; dividerAbove?: boolean }> = [
     { label: 'My Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'My Orders', path: '/profile/orders', icon: Package },
+    { label: 'Wishlist', path: '/dashboard', tab: 'saved-products', icon: Heart },
     { label: 'Messages', path: '/messages', icon: MessageSquare },
-    { label: 'Saved Products', path: '/dashboard', tab: 'saved-products', icon: Heart },
-    { label: 'Addresses', path: '/dashboard', tab: 'addresses', icon: MapPin },
-    { label: 'Settings', path: '/dashboard', tab: 'settings', icon: Settings },
   ];
 
   const navigateProfileItem = (item: (typeof dashboardMiniMenu)[number]) => {
@@ -170,12 +170,19 @@ export function Navbar() {
   const defaultAvatar = 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png';
 
   const getLinkClass = (path: string) => {
-    const isActive = path === '/' 
-      ? location.pathname === '/' 
+    const isActive = path === '/'
+      ? location.pathname === '/'
       : location.pathname.startsWith(path);
+    const isDiscover = path === '/spotlight';
+    if (isDiscover) {
+      return cn(
+        'choosify-discover-pill whitespace-nowrap text-[11.5px] transition-opacity hover:opacity-90',
+        !isActive && 'opacity-95',
+      );
+    }
     return cn(
-      "transition-colors hover:text-orange-primary whitespace-nowrap",
-      isActive ? "text-orange-primary font-black" : "text-gray-300"
+      'text-[11.5px] whitespace-nowrap transition-colors hover:text-[#FF5B00]',
+      isActive ? 'text-[#FF5B00] font-bold' : 'text-white/80 font-medium',
     );
   };
 
@@ -198,9 +205,9 @@ export function Navbar() {
           {siteConfig.announcementBarText}
         </div>
       )}
-      <header className="w-full min-w-0 z-50 sticky top-0 shadow-2xl" id="main-navbar">
-        {/* Row 1 — Logo, prominent search, account actions (Amazon-style top bar) */}
-        <nav className="choosify-dark-gradient text-white h-14 sm:h-16 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 xl:px-8 border-b border-white/5 lg:border-b-0">
+      <header className="w-full min-w-0 z-50 sticky top-0 shadow-2xl border-b border-white/[0.07]" id="main-navbar">
+        {/* Row 1 — Logo, prominent search, account actions (Choosify 3.0) */}
+        <nav className="choosify-chrome-header text-white h-14 sm:h-16 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 xl:px-8 border-b border-white/5 lg:border-b-0">
         
         {/* Mobile hamburger — left side */}
         <button
@@ -212,26 +219,13 @@ export function Navbar() {
           <Menu size={20} className={cn("transition-transform duration-300", isMobileMenuOpen && "rotate-90")} />
         </button>
 
-        {/* LOGO SECTOR */}
+        {/* LOGO — official Choosify wordmark */}
         <div className="flex items-center shrink-0">
-          <Link to="/" className="flex flex-col items-center group" aria-label="Choosify Home">
-            <svg 
-              id="Layer_1" 
-              data-name="Layer 1" 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 3311.76 744.41"
-              className="h-8 sm:h-9 lg:h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
-            >
-              <path className="fill-white" d="M0,391.36c0-127.52,86.85-224.74,219.95-224.74,113.18,0,183.35,64.55,198.44,156.98h-121.1c-8.75-39.05-34.26-63.76-75.68-63.76-63,0-94.85,51.8-94.85,131.52s31.84,129.89,94.85,129.89c46.18,0,74.1-27.88,79.68-76.51h120.35c-4,96.43-80.51,171.36-198.44,171.36C87.68,616.1,0,518.09,0,391.36Z"/>
-              <path className="fill-white" d="M605.22,602.56h-125.18V9.6h125.18v163.4c0,3.96,0,38.26-.83,66.14h2.41c25.5-45.42,68.51-72.51,127.52-72.51,93.19,0,147.44,62.14,147.44,156.98v278.95h-124.35v-255.04c0-46.22-24.67-77.3-70.93-77.3-48.59,0-81.26,39.05-81.26,93.26v239.08Z"/>
-              <path className="fill-white" d="M941.82,391.36c0-127.52,89.26-224.74,224.78-224.74s223.12,97.22,223.12,224.74-88.43,224.74-223.12,224.74-224.78-98.02-224.78-224.74ZM1263.03,391.36c0-80.51-35.09-135.48-97.26-135.48s-97.19,54.97-97.19,135.48,33.43,133.89,97.19,133.89,97.26-54.21,97.26-133.89Z"/>
-              <path className="fill-white" d="M1433.1,391.36c0-127.52,89.26-224.74,224.78-224.74s223.12,97.22,223.12,224.74-88.43,224.74-223.12,224.74-224.78-98.02-224.78-224.74ZM1754.31,391.36c0-80.51-35.09-135.48-97.26-135.48s-97.19,54.97-97.19,135.48,33.43,133.89,97.19,133.89,97.26-54.21,97.26-133.89Z"/>
-              <path className="fill-white" d="M1917.14,471.84h117.94c7.17,39.88,37.5,62.17,86.09,62.17,44.67,0,70.17-18.34,70.17-48.59,0-38.26-50.25-43.05-109.18-54.21-75.76-14.34-152.27-33.46-152.27-132.31,0-86.85,78.93-132.27,178.52-132.27,117.94,0,176.94,51.01,188.11,125.1h-116.35c-8-30.26-31.92-45.42-71.76-45.42s-62.93,15.96-62.93,43.05c0,31.88,46.18,36.67,104.35,47.01,75.76,13.54,161.85,33.46,161.85,140.27,0,91.68-81.34,139.48-191.28,139.48-122.76,0-196.86-58.97-203.27-144.27Z"/>
-              <rect className="fill-white" x="2374.09" y="178.54" width="125.18" height="424.02"/>
-              <path className="fill-white" d="M2745.71,259.85v342.71h-125.18v-342.71h-63.76v-81.3h63.76v-35.84c0-45.42,11.17-77.3,35.92-99.64,27.84-24.71,71.68-34.26,125.86-33.46,16.75,0,34.33.79,51.84,3.17v89.26c-62.93-2.38-88.43,1.62-88.43,49.42v27.09h88.43v81.3h-88.43Z"/>
-              <path className="fill-white" d="M2921.97,742.83v-98.02h6.41c1.58.79,37.43.79,40.67.79,39.01,0,58.18-14.34,60.51-43.05,0-14.34-7.17-47.01-22.26-85.26l-131.52-338.75h131.52l54.18,162.6c19.09,57.38,35.09,147.44,35.09,147.44h1.58s19.09-90.85,37.43-147.44l51.84-162.6h124.35l-151.44,434.39c-34.33,98.02-73.34,131.48-154.61,131.48-4,0-81.34-.79-83.75-1.58Z"/>
-              <path className="fill-[#ef3c23]" d="M2437.08,135.56c37.42,0,67.74-30.36,67.74-67.78,0-37.42-30.32-67.78-67.74-67.78s-67.78,30.36-67.78,67.78c0,6.5.92,12.75,2.61,18.69,4.25-2.61,9.3-4.13,14.68-4.13,15.6,0,28.23,12.63,28.23,28.19,0,7.06-2.61,13.52-6.86,18.45,8.82,4.21,18.69,6.58,29.12,6.58Z"/>
-            </svg>
+          <Link to="/" className="flex items-center group" aria-label="Choosify Home">
+            <ChoosifyWordmarkLogo
+              fluid
+              className="h-[26px] sm:h-7 w-auto max-w-[min(168px,42vw)] group-hover:opacity-95 transition-opacity"
+            />
           </Link>
         </div>
 
@@ -240,7 +234,7 @@ export function Navbar() {
           <div className="flex items-center gap-1.5 sm:flex-1 sm:min-w-0 sm:gap-0">
             <GlobalSearchBar
               initialValue={searchQuery}
-              placeholder="Discover products, brands, campaigns, guides..."
+              placeholder="Search Products, Brands, Reviews..."
               onSubmit={(val) => {
                 setSearchQuery(val);
                 navigate(`/search?q=${encodeURIComponent(val)}`);
@@ -249,7 +243,7 @@ export function Navbar() {
               layout="navbar-fluid"
               enableSuggestions
               className="min-w-0 sm:w-full choosify-navbar-hero-search relative z-[55]"
-              submitLabel="Search"
+              submitLabel="DISCOVER"
               onMobileExpandedChange={(expanded) => {
                 if (expanded) closeAllMobileOverlays();
               }}
@@ -275,50 +269,55 @@ export function Navbar() {
         {/* ACTIONS & MESSAGES */}
         <div className="flex items-center gap-1 sm:gap-1.5 xl:gap-2 shrink-0 nav-actions">
           
-          {/* CART + ACCOUNT ACTIONS (messages only when logged in) */}
-          <div className="hidden sm:flex items-center gap-2 xl:gap-4 border-r border-[#ffffff1a] pr-2 xl:pr-5 shrink-0">
+          {/* ACTIONS — Header.dc.html: Wishlist → Cart → Messages */}
+          <div className="hidden sm:flex items-center gap-3 xl:gap-4 border-r border-[#ffffff1a] pr-2 xl:pr-5 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (isLoggedIn) navigate('/dashboard', { state: { activeTab: 'saved-products' } });
+                else navigate('/login');
+              }}
+              className="relative text-white/85 hover:text-white transition-colors"
+              aria-label="Wishlist"
+              title="Wishlist"
+            >
+              <Heart size={19} className="transition-colors" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#FF5B00] rounded-lg flex items-center justify-center leading-none">
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
+                </span>
+              )}
+            </button>
             <button 
               type="button"
               onClick={openCartPreview}
-              className="relative text-white/60 hover:text-white transition-colors"
+              className="relative text-white/85 hover:text-white transition-colors"
               aria-label="Shopping cart"
               aria-expanded={isCartOpen}
               title="Shopping Cart"
             >
-              <ShoppingBag size={20} className="transition-colors" />
+              <ShoppingBag size={19} className="transition-colors" />
               {activeCartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 text-white text-[8px] font-black bg-orange-primary rounded-full flex items-center justify-center border-2 border-[#0A0A1F] animate-bounce">
-                  {activeCartCount}
+                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#FF5B00] rounded-lg flex items-center justify-center leading-none">
+                  {activeCartCount > 99 ? '99+' : activeCartCount}
                 </span>
               )}
             </button>
-            {isLoggedIn && (
-              <button 
-                type="button"
-                onClick={() => navigate('/messages')}
-                className="relative text-white/60 hover:text-white transition-colors"
-                title="Secure Support Chats"
-              >
-                <div className="relative">
-                  <MessageSquare size={19} className={cn("text-orange-primary", unreadMsgCount > 0 && "animate-pulse")} />
-                  {unreadMsgCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-primary text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none">
-                      {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
-                    </span>
-                  )}
-                </div>
-              </button>
-            )}
+            <button 
+              type="button"
+              onClick={() => (isLoggedIn ? navigate('/messages') : navigate('/login'))}
+              className="relative text-white/85 hover:text-white transition-colors"
+              title="Messages"
+              aria-label="Messages"
+            >
+              <MessageSquare size={19} />
+              {unreadMsgCount > 0 && (
+                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#FF5B00] rounded-lg flex items-center justify-center leading-none">
+                  {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
+                </span>
+              )}
+            </button>
           </div>
-
-          {/* POST YOUR DEAL BUTTON FOR VISITORS */}
-          {!isLoggedIn && (
-            <Link to="/post-offer" className="hidden xl:block shrink-0">
-              <button className="h-9 px-4 bg-white/5 border border-white/10 text-white text-[9px] uppercase font-black rounded-full tracking-widest hover:bg-white/10 transition-all flex items-center gap-1.5 italic whitespace-nowrap">
-                Post Deal <ChevronRight size={12} className="text-orange-primary" />
-              </button>
-            </Link>
-          )}
           
           {isLoggedIn ? (
             <div className="relative profile-avatar" ref={profileMenuRef}>
@@ -331,20 +330,16 @@ export function Navbar() {
                   }
                   openMobileProfileMenu();
                 }}
-                className="flex items-center gap-3 group cursor-pointer animate-in fade-in bg-transparent border-0 p-0"
+                className="flex items-center gap-1.5 group cursor-pointer animate-in fade-in bg-transparent border-0 p-0 whitespace-nowrap"
                 aria-label="Open account menu"
               >
-                <div className="w-10 h-10 rounded-full border-2 border-orange-primary overflow-hidden group-hover:scale-105 transition-all cursor-pointer nav-avatar hover:opacity-80 flex items-center justify-center bg-white/5 shrink-0">
-                  <img 
-                    src={currentUser?.avatar || defaultAvatar} 
-                    className="w-full h-full object-cover" 
-                    alt="Profile" 
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+                  {(currentUser?.name || 'F').charAt(0).toUpperCase()}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block italic text-white/70 group-hover:text-white transition-colors">
-                  Hi, {currentUser?.name?.split(' ')[0] || 'You'}
+                <span className="text-[11.5px] font-semibold hidden lg:block text-white">
+                  Hi, {currentUser?.name?.split(' ')[0] || 'Farhan'}
                 </span>
+                <span className="text-[8px] text-white/50 hidden lg:inline">▾</span>
               </button>
 
               <AnimatePresence>
@@ -355,58 +350,42 @@ export function Navbar() {
                       initial={{ opacity: 0, scale: 0.95, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute right-0 mt-4 choosify-dark-gradient border border-white/10 rounded-2xl shadow-2xl p-4 z-50 overflow-hidden min-w-[240px] hidden lg:block"
+                      className="absolute right-0 top-[38px] bg-white rounded-[10px] shadow-[0_12px_32px_rgba(0,0,0,0.22)] w-[200px] overflow-hidden z-50 hidden lg:block"
                     >
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 blur-2xl rounded-full" />
-                      
-                      <div className="flex items-center gap-3 p-3 mb-4 bg-white/5 rounded-xl border border-white/5">
-                        <img 
-                          src={currentUser?.avatar || defaultAvatar} 
-                          className="w-10 h-10 rounded-full object-cover border border-orange-primary/30" 
-                          alt="" 
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                        />
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-black text-white italic uppercase truncate">{currentUser?.name || "Farhan Bin Rafiq"}</p>
-                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate">Corporate Sourcing Desk</p>
-                        </div>
+                      <div className="px-4 py-3.5 bg-[#F4F7F9] border-b border-[#E8EDF2]">
+                        <p className="text-[12.5px] font-bold text-[#1A1A2E] truncate">{currentUser?.name || 'Farhan'}</p>
+                        <p className="text-[10.5px] text-[#9AA0AC] truncate">{currentUser?.email || 'kamaluddin@gmail.com'}</p>
                       </div>
 
-                      <div className="space-y-1">
+                      <div>
                         {dashboardMiniMenu.map((item, idx) => (
-                          <React.Fragment key={idx}>
-                            {item.dividerAbove && (
-                              <div className="my-1 border-t border-white/5" />
-                            )}
-                            <button
-                              onClick={() => navigateProfileItem(item)}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-white hover:bg-white/5 rounded-xl transition-all group"
-                            >
-                              <div className="relative flex items-center justify-center">
-                                <item.icon size={16} className="group-hover:text-orange-primary transition-colors" />
-                                {item.icon === MessageSquare && unreadMsgCount > 0 && (
-                                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-orange-primary text-white text-[7px] font-black rounded-full flex items-center justify-center leading-none">
-                                    {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
-                                  </span>
-                                )}
-                              </div>
-                              <span className="italic">{item.label}</span>
-                            </button>
-                          </React.Fragment>
-                        ))}
-                        <div className="mt-2 pt-2 border-t border-white/5">
-                          <button 
-                            onClick={() => {
-                              setIsUserMenuOpen(false);
-                              setIsLoggedIn(false);
-                              toast.success('Successfully logged out.');
-                            }}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black text-red-400 uppercase tracking-widest hover:bg-red-500/5 rounded-xl transition-all group"
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => navigateProfileItem(item)}
+                            className="w-full flex items-center gap-2 px-4 py-[11px] text-xs font-semibold text-[#1A1A2E] border-b border-[#F1F1F3] hover:bg-[#F4F7F9] transition-colors"
                           >
-                            <LogIn size={16} className="rotate-180" />
-                            <span className="italic">Sign Out</span>
+                            <item.icon size={14} className="text-[#9AA0AC]" />
+                            <span>{item.label}</span>
+                            {item.icon === MessageSquare && unreadMsgCount > 0 && (
+                              <span className="ml-auto min-w-[16px] h-4 px-1 bg-[#FF5B00] text-white text-[9px] font-bold rounded-lg flex items-center justify-center">
+                                {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
+                              </span>
+                            )}
                           </button>
-                        </div>
+                        ))}
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            setIsLoggedIn(false);
+                            toast.success('Successfully logged out.');
+                          }}
+                          className="w-full flex items-center gap-2 px-4 py-[11px] text-xs font-semibold text-[#FF000D] hover:bg-red-50 transition-colors"
+                        >
+                          <LogIn size={14} className="rotate-180" />
+                          <span>Sign Out</span>
+                        </button>
                       </div>
                     </motion.div>
                   </>
@@ -436,25 +415,14 @@ export function Navbar() {
         
         </nav>
 
-        {/* Row 2 — Category strip (desktop only) */}
-        <div className="choosify-navbar-categories choosify-dark-gradient border-b border-white/5 text-white hidden lg:block">
+        {/* Row 2 — Primary nav (Choosify 3.0) */}
+        <div className="choosify-navbar-categories choosify-chrome-header border-t border-white/[0.06] text-white hidden lg:block">
           <div
             ref={categoryStripRef}
             {...categoryStripProps}
-            className="choosify-touch-scroll-row flex items-center gap-0 overflow-x-auto no-scrollbar px-2 sm:px-4 lg:px-6 xl:px-8 max-w-[100vw]"
+            className="choosify-touch-scroll-row flex items-center gap-5 xl:gap-[22px] overflow-x-auto no-scrollbar px-4 sm:px-6 lg:px-6 xl:px-8 h-[38px] max-w-[100vw]"
           >
-            {renderNavLinks((path) => {
-              const isActive =
-                path === '/'
-                  ? location.pathname === '/'
-                  : location.pathname.startsWith(path);
-              return cn(
-                'inline-flex shrink-0 px-3 sm:px-4 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide transition-colors whitespace-nowrap border-r border-white/5 last:border-r-0',
-                isActive
-                  ? 'text-[#FF6B00] bg-white/5'
-                  : 'text-gray-300 hover:text-white hover:bg-white/5',
-              );
-            })}
+            {renderNavLinks(getLinkClass)}
           </div>
         </div>
       </header>
@@ -485,7 +453,7 @@ export function Navbar() {
             >
               <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <span className="text-sm font-black uppercase tracking-widest text-[#FF5B00] italic">Browse</span>
+                  <span className="text-sm font-bold tracking-tight text-[#FF5B00]">Browse</span>
                   <button
                     type="button"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -582,7 +550,7 @@ export function Navbar() {
             >
               <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <span className="text-sm font-black uppercase tracking-widest text-[#FF5B00] italic">My Account</span>
+                  <span className="text-sm font-bold tracking-tight text-[#FF5B00]">My Account</span>
                   <button
                     type="button"
                     onClick={() => setIsMobileProfileOpen(false)}
@@ -601,7 +569,7 @@ export function Navbar() {
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                   <div className="min-w-0">
-                    <p className="text-sm font-black text-white italic uppercase leading-tight truncate">
+                    <p className="text-sm font-bold text-white tracking-tight leading-tight truncate">
                       {currentUser?.name || 'My Account'}
                     </p>
                     <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate mt-0.5">

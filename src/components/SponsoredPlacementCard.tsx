@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import type { ResolvedPlacement } from '../utils/resolvePlacementContent';
+import { ChoosifySponsoredCardFromResolved } from './commerce/ChoosifySponsoredCard';
 
 export type SponsoredPlacementVariant = 'portrait' | 'landscape' | 'infeed';
 
@@ -124,9 +125,9 @@ export function InfeedSponsoredCard({
   className?: string;
 }) {
   return (
-    <SponsoredPlacementCard
+    <ChoosifySponsoredCardFromResolved
       placement={placement}
-      variant="infeed"
+      sponsorName={placement.subtitle}
       className={cn('min-h-full', className)}
     />
   );

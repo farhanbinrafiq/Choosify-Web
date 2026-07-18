@@ -60,7 +60,7 @@ export function CardEngagementStrip({
             type="button"
             onClick={toggleLove}
             className={cn(
-              'h-9 px-4 rounded-full font-black text-[10px] uppercase tracking-wider italic flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md whitespace-nowrap',
+              'h-9 px-4 rounded-lg font-bold text-[12px] tracking-tight flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm whitespace-nowrap',
               hasLoved
                 ? 'bg-[#E8500A] text-white border border-[#E8500A]'
                 : 'bg-white text-[#E8500A] border border-white hover:bg-[#FFF0E8]',
@@ -80,7 +80,7 @@ export function CardEngagementStrip({
             type="button"
             onClick={toggleSave}
             className={cn(
-              'h-9 px-4 rounded-full font-black text-[10px] uppercase tracking-wider italic flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md whitespace-nowrap border',
+              'h-9 px-4 rounded-lg font-bold text-[12px] tracking-tight flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm whitespace-nowrap border',
               isSaved
                 ? 'bg-white text-[#E8500A] border-white'
                 : 'bg-[#1A1D4E] text-white border-white/15 hover:bg-[#252a6e]',

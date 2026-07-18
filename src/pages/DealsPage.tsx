@@ -1,25 +1,31 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ProductCard } from '../components/ProductCard';
-import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ExternalLink, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle, ShieldCheck, Flame } from 'lucide-react';
+import { FlashDealCard, DealOfTheDayCard } from '../components/deals/FlashDealCard';
+import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle, ShieldCheck, Flame } from 'lucide-react';
 import { PRODUCTS, BRANDS } from '../constants';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
+import { DcListingHero } from '../components/design/DcListingHero';
+import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
 import { PaginationBar } from '../components/PaginationBar';
-import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
-import { buildDealsPopularSearchTerms } from '../utils/pagePopularSearches';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
-import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
-import { InfeedSponsoredCard } from '../components/SponsoredPlacementCard';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
+import { ProductsSponsoredBanner, AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
+import {
+  DealsAuthenticationStrip,
+  DealsBrandDealsCard,
+  DealsPopularCategoriesCard,
+  DealsSubscribeBanner,
+  DealsTopCouponsCard,
+  DealsVerticalSponsoredCard,
+} from '../components/deals/DealsLowerSections';
 
 const PROMO_CODES = [
   { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
@@ -29,25 +35,53 @@ const PROMO_CODES = [
 ];
 
 function FlashDealCountdown({ validUntil }: { validUntil?: string }) {
-  const [timeLeft, setTimeLeft] = useState('');
+  const [parts, setParts] = useState({ h: '12', m: '00', s: '00' });
   useEffect(() => {
     const target = validUntil ? new Date(validUntil) : new Date(Date.now() + 12 * 60 * 60 * 1000);
-    const interval = setInterval(() => {
+    const tick = () => {
       const diff = target.getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft('EXPIRED'); clearInterval(interval); return; }
+      if (diff <= 0) {
+        setParts({ h: '00', m: '00', s: '00' });
+        return;
+      }
       const h = Math.floor(diff / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
-      setTimeLeft(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
-    }, 1000);
+      setParts({
+        h: String(h).padStart(2, '0'),
+        m: String(m).padStart(2, '0'),
+        s: String(s).padStart(2, '0'),
+      });
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [validUntil]);
-  return <span className="font-mono font-black text-orange-primary text-[11px]">{timeLeft || '12:00:00'}</span>;
+
+  return (
+    <div className="flex gap-1">
+      {(
+        [
+          { value: parts.h, label: 'HRS' },
+          { value: parts.m, label: 'MIN' },
+          { value: parts.s, label: 'SEC' },
+        ] as const
+      ).map((cd) => (
+        <div
+          key={cd.label}
+          className="bg-[#1A1A2E] text-white rounded-md px-2 py-1 text-[12px] font-extrabold min-w-[30px] text-center"
+        >
+          {cd.value}
+          <div className="text-[7px] font-semibold text-white/50">{cd.label}</div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function DealsPage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals, siteConfig } = useGlobalState();
+  const { allProducts, allBrands, allDeals } = useGlobalState();
   const [searchParams, setSearchParams] = useSearchParams();
   const getInitialTab = () => {
     const t = searchParams.get('tab');
@@ -137,7 +171,7 @@ export function DealsPage() {
     sessionStorage.setItem('choosify_deals_filters', JSON.stringify(filters));
   }, [selectedCategory, minDiscount, activeTab]);
 
-  // ScrollSpy removed — section navigation handled by StickySectionNav
+  // Section navigation registered via useRegisterPageFilters / useSectionScrollSpy
 
   const filteredProducts = React.useMemo(() => {
     let result = [...productSource];
@@ -181,19 +215,6 @@ export function DealsPage() {
     }
     return result;
   }, [searchQuery, activeTab, selectedCategory, minDiscount, productSource]);
-
-  const popularSearchTerms = React.useMemo(
-    () =>
-      buildDealsPopularSearchTerms({
-        cmsTerms: siteConfig?.popularSearches,
-        products: filteredProducts,
-        limit: 12,
-      }),
-    [siteConfig?.popularSearches, filteredProducts],
-  );
-
-  const featuredDealProducts = (filteredProducts.length > 0 ? filteredProducts : productSource).slice(0, 2);
-  const secondaryDealProducts = (filteredProducts.length > 1 ? filteredProducts : productSource).slice(2, 6);
 
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_DEAL, {
     limit: INFEED_MAX_PER_PAGE,
@@ -244,14 +265,14 @@ export function DealsPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search brand deals..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
         />
       </div>
     ),
     quickFilters: [
       { id: 'all-deals', label: 'All Deals', active: activeTab === 'All Deals', onClick: () => setActiveTab('All Deals') },
-      { id: 'fashion-pill', label: '👗 Fashion Deals', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
-      { id: 'discount-25', label: '🔥 25% Off +', active: minDiscount === 25, onClick: () => setMinDiscount(minDiscount === 25 ? 0 : 25) }
+      { id: 'fashion-pill', label: 'ðŸ‘— Fashion Deals', active: selectedCategory === 'Fashion', onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion') },
+      { id: 'discount-25', label: 'ðŸ”¥ 25% Off +', active: minDiscount === 25, onClick: () => setMinDiscount(minDiscount === 25 ? 0 : 25) }
     ],
     renderFilters: () => (
       <div className="flex flex-col gap-4">
@@ -328,34 +349,98 @@ export function DealsPage() {
   }, [searchQuery, activeTab, selectedCategory, minDiscount, activeSectionId, dealsSectionNavItems, scrollToSection]);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <PageHeroBanner pageKey="deals" />
-      <div className="w-full bg-[#000435] border-b border-white/5 py-2 px-6">
-        <div className="max-w-[1440px] mx-auto flex flex-row items-center justify-center gap-4 md:gap-6 flex-wrap">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[12px] py-1 px-2.5 flex items-center gap-3.5 shadow-lg shrink-0">
-            <div className="flex items-center gap-1.5">
-              <Zap size={10} className="text-orange-primary fill-orange-primary animate-pulse" />
-              <span className="text-[7px] font-black text-orange-primary uppercase tracking-[0.15em] italic">ENDS IN</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <FlashDealCountdown validUntil={(filteredProducts[0] as any)?.dealValidUntil} />
-            </div>
-          </div>
-          <button 
-            onClick={() => navigate('/post-offer')}
-            className="group flex items-center gap-1.5 px-3 py-1 bg-white rounded-full transition-all hover:scale-105 hover:shadow-md active:scale-95 text-navy cursor-pointer"
-          >
-            <div className="w-4 h-4 rounded-full bg-orange-primary flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
-              <ExternalLink size={8} />
-            </div>
-            <span className="text-[8px] font-black text-navy uppercase tracking-[0.12em] italic">Post Your Deals</span>
-          </button>
-        </div>
-      </div>
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <DcListingHero
+        titleBefore="Grab Today's Best"
+        titleHighlight="Deals"
+        searchPlaceholder="Search deals..."
+        quickChips={['Flash Sale', 'Bank Offer', 'Cashback', 'Coupons', 'Weekend', 'Clearance']}
+        onSearch={(q) => setSearchQuery(q)}
+        onChipClick={(q) => setSearchQuery(q)}
+      />
 
-      <HeroMarqueeTicker pageKey="deals" siteConfig={siteConfig} />
+      <DcListingStickyFilters
+        overlapHero
+        items={[
+          {
+            id: 'flash',
+            icon: '⚡',
+            name: 'Flash Sale',
+            sub: 'Limited time',
+            bg: '#FFF3EA',
+            active: activeTab === 'Flash Deals',
+            onClick: () => handleTabChange(activeTab === 'Flash Deals' ? 'All Deals' : 'Flash Deals'),
+          },
+          {
+            id: 'coupons',
+            icon: '🎟',
+            name: 'Coupons',
+            sub: 'Promo codes',
+            bg: '#EFECFD',
+            active: activeTab === 'Promo Codes',
+            onClick: () => handleTabChange(activeTab === 'Promo Codes' ? 'All Deals' : 'Promo Codes'),
+          },
+          {
+            id: 'brand',
+            icon: '📷',
+            name: 'Brand Deals',
+            sub: 'Partner offers',
+            bg: '#FEF3E2',
+            active: activeTab === 'Brand Deals',
+            onClick: () => handleTabChange(activeTab === 'Brand Deals' ? 'All Deals' : 'Brand Deals'),
+          },
+          {
+            id: 'weekend',
+            icon: '🏷',
+            name: 'Weekend',
+            sub: 'Seasonal sales',
+            bg: '#E6F9EA',
+            active: activeTab === 'Seasonal Campaigns',
+            onClick: () => handleTabChange(activeTab === 'Seasonal Campaigns' ? 'All Deals' : 'Seasonal Campaigns'),
+          },
+          {
+            id: 'clearance',
+            icon: '🏬',
+            name: 'Clearance',
+            sub: 'Big savings',
+            bg: '#FDECEC',
+            active: activeTab === 'Expired Deals',
+            onClick: () => handleTabChange(activeTab === 'Expired Deals' ? 'All Deals' : 'Expired Deals'),
+          },
+          {
+            id: 'electronics',
+            icon: '📺',
+            name: 'Electronics',
+            sub: '350 deals',
+            bg: '#EAF1FD',
+            active: selectedCategory === 'Electronics',
+            onClick: () => setSelectedCategory(selectedCategory === 'Electronics' ? null : 'Electronics'),
+          },
+          {
+            id: 'fashion',
+            icon: '👗',
+            name: 'Fashion',
+            sub: '550 deals',
+            bg: '#FFF3EA',
+            active: selectedCategory === 'Fashion',
+            onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion'),
+          },
+          {
+            id: 'bank',
+            icon: '🏦',
+            name: 'Bank Offer',
+            sub: 'Card savings',
+            bg: '#F1F1F3',
+            active: activeTab === 'All Deals' && minDiscount === 25,
+            onClick: () => {
+              handleTabChange('All Deals');
+              setMinDiscount(minDiscount === 25 ? 0 : 25);
+            },
+          },
+        ]}
+      />
 
-      <main className="w-full bg-choosify-feed min-h-screen">
+      <main className="w-full bg-[#F7F8FA] min-h-screen">
 
         {/* ACTIVE FILTER CHIPS ROW */}
         <ActiveFilterChips
@@ -371,16 +456,8 @@ export function DealsPage() {
           }}
         />
 
-        <StickySectionNav
-          sections={dealsSectionNavItems}
-          activeId={activeSectionId}
-          onNavigate={scrollToSection}
-          allLabel="Deals"
-          profileLabel="Deal hub"
-        />
-
         {/* Master Flex Column Structure below sticky bar */}
-        <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+        <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-10 md:py-12 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
           
           {/* Left Sidebar */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
@@ -394,12 +471,12 @@ export function DealsPage() {
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
                  placeholder="Search brand deals..."
-                 className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+                 className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
                />
              </div>
              
              {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
-             <div id="deals-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">
+             <div id="deals-sidebar-filters" className="transition-all duration-300 rounded-2xl w-full">
                <FullSidebarFilterPanel
                  title="Filter Deals"
                   searchQuery={searchQuery}
@@ -410,8 +487,8 @@ export function DealsPage() {
                       title="Deals Quick Specs"
                       onOpenFullFilters={() => {}}
                       filters={[
-                        { id: 'savings-20', label: '🔥 20%+ Off', active: minDiscount === 20, onClick: () => setMinDiscount(minDiscount === 20 ? 0 : 20) },
-                        { id: 'savings-45', label: '💥 45%+ Off', active: minDiscount === 45, onClick: () => setMinDiscount(minDiscount === 45 ? 0 : 45) }
+                        { id: 'savings-20', label: 'ðŸ”¥ 20%+ Off', active: minDiscount === 20, onClick: () => setMinDiscount(minDiscount === 20 ? 0 : 20) },
+                        { id: 'savings-45', label: 'ðŸ’¥ 45%+ Off', active: minDiscount === 45, onClick: () => setMinDiscount(minDiscount === 45 ? 0 : 45) }
                       ]}
                     />
                   }
@@ -495,7 +572,7 @@ export function DealsPage() {
              {/* Redesigned For Business & Sellers Card */}
              <div 
                id="section-sellers-deals-left" 
-               className="bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
+               className="bg-white rounded-2xl border border-[#eef2f6] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
                style={{ height: '410px' }}
              >
                <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
@@ -514,7 +591,7 @@ export function DealsPage() {
                  </p>
                </div>
 
-               <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-[5px] p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+               <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-2xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
                  <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
                  <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                    Gain entry to featured deal slots, exposure metrics, and buyer engagement streams.
@@ -538,153 +615,215 @@ export function DealsPage() {
           {/* LEFT MAIN AREA */}
           <div className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 flex flex-col gap-10">
             
-            {/* Featured Deals Showcase Grid */}
+            {/* FLASH DEALS + DEAL OF THE DAY — Choosify.dc.html */}
             <section className="w-full">
-              <div className="mb-12 border-l-4 border-orange-primary px-6 flex flex-col md:flex-row md:items-end justify-between gap-6 w-full">
-                 <div>
-                    <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-2">FEATURED <span className="text-orange-primary">DEALS</span></h2>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic">Handpicked Top Offers • Limited Time Selection</p>
-                 </div>
-                 <div className="flex items-center gap-3 bg-[#F8FAFC] px-6 py-3 rounded-[5px] border border-gray-100 shadow-sm">
-                    <ShoppingBag size={16} className="text-navy" />
-                    <span className="text-[11px] font-black text-navy uppercase tracking-widest italic">{filteredProducts.length} ITEMS AVAILABLE</span>
-                 </div>
-              </div>
-   
-              <div className="flex flex-col gap-6 items-center w-full">
-                 {/* Two featured deal cards */}
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                    {featuredDealProducts.map((product, idx) => (
-                      <div key={product.id} className="w-full lg:min-h-[320px] relative">
-                        <ProductCard
-                          product={{
-                            ...product,
-                            tag: idx === 0 ? 'HOT' : 'SALE',
-                            tagColor: idx === 0 ? 'bg-[#E93B3B]' : 'bg-[#E98B8B]',
-                            originalPrice: idx === 0 ? '3,500' : product.originalPrice,
-                          }}
-                          variant="featured"
-                          titleStyle={{ minHeight: '60px', marginBottom: '11px' }}
-                          showCountdown={idx === 0}
-                        />
-                        {idx === 0 ? (
-                          <div className="absolute top-4 right-4 z-30 bg-white/95 px-3 py-1.5 rounded-full border border-orange-primary/20 shadow-sm flex items-center gap-1.5">
-                            <Zap size={11} className="text-orange-primary fill-orange-primary animate-pulse" />
-                            <span className="text-[8px] font-black text-navy uppercase tracking-widest">ENDS IN:</span>
-                            <FlashDealCountdown validUntil={(product as { dealValidUntil?: string })?.dealValidUntil} />
-                          </div>
-                        ) : null}
-                      </div>
-                    ))}
-                 </div>
-                 
-                 {/* Small Cards Row */}
-                 <div className={cn(PRODUCT_CARD_GRID, "text-left")}>
-                    {secondaryDealProducts.map((product) => (
-                       <div key={product.id} className="w-full h-full">
-                         <ProductCard 
-                           product={{
-                             ...product,
-                             tag: "SALE",
-                             tagColor: "bg-[#E98B8B]",
-                           }} 
-                           variant="grid"
-                         />
-                       </div>
-                    ))}
-                 </div>
-              </div>
-            </section>
-
-            {/* ALL DEALS Section Container */}
-            <section id="all-deals" className="w-full">
-              <div className="mb-12 border-l-4 border-orange-primary px-6 text-left">
-                 <h2 className="text-4xl md:text-5xl font-black text-navy uppercase tracking-tighter italic leading-none mb-2">ALL <span className="text-orange-primary">DEALS</span></h2>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] italic px-2 border-l-4 border-orange-primary">Browse All Handpicked Offers</p>
-              </div>
-
-              <div className={cn(PRODUCT_CARD_GRID, "text-left")}>
-                {activeTab === 'Promo Codes' ? (
-                  promoCodes.map((promo) => (
-                    <div key={promo.code} className="bg-white border border-gray-150 rounded-[5px] p-5 flex flex-col justify-between min-h-[180px] relative overflow-hidden shadow-sm group hover:border-[#E8500A]/30 transition-all duration-300">
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-[#E8500A]/[0.04] rounded-full -translate-y-1/2 translate-x-1/2 blur-md" />
-                      <div>
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <Gift size={13} className="text-[#E8500A]" />
-                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{promo.brandName}</span>
-                        </div>
-                        <h4 className="text-sm font-black text-navy uppercase tracking-tight italic mb-2 leading-tight">
-                          {promo.discount}
-                        </h4>
-                      </div>
-                      
-                      <div className="mt-4">
-                        <div className="bg-gray-50 border border-gray-150 rounded-lg p-1.5 flex items-center justify-between gap-2">
-                          <code className="font-mono font-black text-[11px] text-navy tracking-wider px-1.5">
-                            {promo.code}
-                          </code>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(promo.code);
-                              setCopiedCode(promo.code);
-                              setTimeout(() => setCopiedCode(null), 2000);
-                            }}
-                            className="px-3 py-1 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[9px] font-black uppercase tracking-wider italic rounded cursor-pointer transition-colors border-none font-sans"
-                          >
-                            {copiedCode === promo.code ? 'Copied' : 'Copy'}
-                          </button>
-                        </div>
-                      </div>
+              <div className="grid grid-cols-1 lg:grid-cols-[2.6fr_1fr] gap-5 mb-9">
+                <div className="bg-white rounded-xl border border-[#E8EDF2] p-[22px]">
+                  <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
+                    <div className="text-[15px] font-extrabold text-[#1A1A2E] flex items-center gap-1.5">
+                      ⚡ FLASH DEALS
                     </div>
-                  ))
-                ) : (
-                  dealFeed.map((entry) =>
-                    entry.kind === 'placement' ? (
-                      <InfeedSponsoredCard key={entry.key} placement={entry.placement} />
-                    ) : (
-                      <div key={entry.key} className="w-full h-full">
-                        <ProductCard
-                          product={{
-                            ...entry.item,
-                            tag: 'SALE',
-                            tagColor: 'bg-[#E98B8B]',
-                          }}
-                          variant="grid"
-                        />
-                      </div>
-                    ),
-                  )
-                )}
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-[11px] text-[#9AA0AC]">Ends in</span>
+                      <FlashDealCountdown />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 mb-3.5">
+                    {(filteredProducts.length > 0 ? filteredProducts : productSource)
+                      .slice(0, 3)
+                      .map((product: any, idx: number) => {
+                        const orig =
+                          typeof product.originalPrice === 'number'
+                            ? product.originalPrice
+                            : product.originalPrice
+                              ? Number(String(product.originalPrice).replace(/[^\d]/g, ''))
+                              : undefined;
+                        const price =
+                          typeof product.price === 'number'
+                            ? product.price
+                            : Number(String(product.price ?? 0).replace(/[^\d]/g, '')) || 0;
+                        const pct =
+                          orig && orig > price
+                            ? Math.round(((orig - price) / orig) * 100)
+                            : 15 + idx * 5;
+                        return (
+                          <FlashDealCard
+                            key={product.id}
+                            id={product.id}
+                            name={product.title || product.name}
+                            image={product.image}
+                            category={product.categoryName || product.category || 'Deals'}
+                            price={price}
+                            originalPrice={orig}
+                            badge={`${pct}% OFF`}
+                            claimedPct={55 + idx * 12}
+                            likes={product.likes || `${(1.1 + idx * 0.3).toFixed(1)}K`}
+                          />
+                        );
+                      })}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange('Flash Deals')}
+                    className="block w-full text-center text-[12px] font-bold text-[#1A1A2E] border-0 bg-transparent cursor-pointer hover:text-[#FF5B00]"
+                  >
+                    VIEW ALL FLASH DEALS ›
+                  </button>
+                </div>
+
+                {(() => {
+                  const dotd =
+                    (filteredProducts.length > 0 ? filteredProducts : productSource)[0] || productSource[0];
+                  if (!dotd) return null;
+                  const orig =
+                    typeof dotd.originalPrice === 'number'
+                      ? dotd.originalPrice
+                      : Number(String(dotd.originalPrice ?? '').replace(/[^\d]/g, '')) || undefined;
+                  const price =
+                    typeof dotd.price === 'number'
+                      ? dotd.price
+                      : Number(String(dotd.price ?? 0).replace(/[^\d]/g, '')) || 0;
+                  const pct =
+                    orig && orig > price ? Math.round(((orig - price) / orig) * 100) : 55;
+                  return (
+                    <DealOfTheDayCard
+                      id={dotd.id}
+                      name={dotd.title || dotd.name}
+                      image={dotd.image}
+                      price={price}
+                      originalPrice={orig}
+                      badge={`${pct}% OFF`}
+                      rating={dotd.rating || 4.8}
+                      reviews={dotd.reviewCount || 214}
+                      sold="1.2K"
+                      claimedPct={72}
+                    />
+                  );
+                })()}
               </div>
-
-              <PaginationBar
-                showingCount={Math.min(12, filteredProducts.length)}
-                totalCount={filteredProducts.length}
-              />
-
-              <PopularSearchKeywords
-                title="Popular deal searches"
-                terms={popularSearchTerms}
-                className="mt-0 pt-10"
-              />
-
-              <AdSenseSlot format="infeed" className="mt-6" />
             </section>
+
+            {/* Choosify.dc.html — horizontal sponsored banner */}
+            <ProductsSponsoredBanner
+              title="Xiaomi Mega Sale — Up to 40% off"
+              subtitle="Official Xiaomi store · Limited stock"
+              href="/advertise"
+              className="mb-9"
+            />
+
+            {/* TOP DEALS + TOP COUPONS */}
+            <section id="all-deals" className="w-full mb-9">
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.6fr)_minmax(0,1fr)] gap-5">
+                <div>
+                  <div className="mb-4 flex items-baseline justify-between gap-3">
+                    <div>
+                      <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight mb-1 flex items-center gap-1.5">
+                        🛡 TOP DEALS
+                      </h2>
+                      <p className="text-[12px] text-[#9AA0AC] m-0">
+                        Handpicked best offers for you
+                      </p>
+                    </div>
+                    <span className="text-[11px] font-bold text-[#9AA0AC]">
+                      {filteredProducts.length} available
+                    </span>
+                  </div>
+
+                  <div className={cn(PRODUCT_CARD_GRID, 'text-left')}>
+                    {activeTab === 'Promo Codes' ? (
+                      promoCodes.map((promo) => (
+                        <div
+                          key={promo.code}
+                          className="bg-white border border-gray-150 rounded-2xl p-5 flex flex-col justify-between min-h-[180px] relative overflow-hidden shadow-sm group hover:border-[#E8500A]/30 transition-all duration-300"
+                        >
+                          <div className="absolute top-0 right-0 w-20 h-20 bg-[#E8500A]/[0.04] rounded-full -translate-y-1/2 translate-x-1/2 blur-md" />
+                          <div>
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <Gift size={13} className="text-[#E8500A]" />
+                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                                {promo.brandName}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-extrabold text-[#1A1A2E] tracking-tight mb-2 leading-tight">
+                              {promo.discount}
+                            </h4>
+                          </div>
+                          <div className="mt-4">
+                            <div className="bg-gray-50 border border-gray-150 rounded-lg p-1.5 flex items-center justify-between gap-2">
+                              <code className="font-mono font-black text-[11px] text-navy tracking-wider px-1.5">
+                                {promo.code}
+                              </code>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(promo.code);
+                                  setCopiedCode(promo.code);
+                                  setTimeout(() => setCopiedCode(null), 2000);
+                                }}
+                                className="px-3 py-1.5 bg-[#FF5B00] hover:brightness-110 text-white text-[12px] font-bold tracking-tight rounded-md cursor-pointer transition-colors border-none font-sans"
+                              >
+                                {copiedCode === promo.code ? 'Copied' : 'Copy'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        {dealFeed.map((entry) =>
+                          entry.kind === 'placement' ? (
+                            <AdvertiseHereCard key={entry.key} variant="product-tile" />
+                          ) : (
+                            <div key={entry.key} className="w-full h-full">
+                              <ProductCard
+                                product={{
+                                  ...entry.item,
+                                  tag: 'SALE',
+                                  tagColor: 'bg-[#E98B8B]',
+                                }}
+                                variant="grid"
+                              />
+                            </div>
+                          ),
+                        )}
+                        <AdvertiseHereCard variant="product-tile" />
+                      </>
+                    )}
+                  </div>
+
+                  <PaginationBar
+                    showingCount={Math.min(12, filteredProducts.length)}
+                    totalCount={filteredProducts.length}
+                  />
+                </div>
+
+                <DealsTopCouponsCard className="self-start lg:sticky lg:top-28" />
+              </div>
+            </section>
+
+            {/* Choosify authentication / trust */}
+            <DealsAuthenticationStrip className="mb-6" />
+
+            {/* Popular categories + Brand deals */}
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1.4fr] gap-4 mb-6">
+              <DealsPopularCategoriesCard
+                onCategoryClick={(name) => {
+                  setSelectedCategory(name);
+                  document.getElementById('all-deals')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              />
+              <DealsBrandDealsCard />
+            </div>
+
+            <DealsSubscribeBanner className="mb-8" />
+
+            <AdSenseSlot format="infeed" className="mt-6" />
 
           </div>
 
-          {/* RIGHT SIDEBAR COLUMN */}
+          {/* RIGHT SIDEBAR — vertical sponsored + listing rail */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-             <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left font-sans">
-                <h4 className="text-[11px] font-black text-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                   <ShieldCheck size={14} className="text-green-500 shrink-0" />
-                   Verified Sourcing
-                </h4>
-                <p className="text-[10px] text-gray-400 leading-relaxed font-semibold">
-                   Each listed bargain point is validated against native brand catalogs. Rest assured, checkout is immediate, safe, and transparent.
-                </p>
-             </div>
+             <DealsVerticalSponsoredCard />
 
              <ListingAdRail
                sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
@@ -695,58 +834,6 @@ export function DealsPage() {
           </aside>
 
         </div>
-
-        {/* Featured Brand Deals Section */}
-        <section id="featured-brand-deals-section" className="py-20 bg-white px-8 relative overflow-hidden border-t border-gray-100 scroll-mt-36">
-          <div className="max-w-7xl mx-auto relative z-10">
-             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-                <div>
-                   <h2 className="text-3xl font-semibold text-[#1a1a2e] uppercase tracking-tight leading-none mb-3">Featured <span className="text-[#E8500A]">Brand Deals</span></h2>
-                   <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1 px-2 border-l-4 border-orange-primary">Curated Premium Partner Offers • Limited Time</p>
-                </div>
-             </div>
-             
-             <div className={PRODUCT_CARD_GRID}>
-                {[brandSource[0], brandSource[1], brandSource[2], brandSource[8]].filter(Boolean).map((brand, i) => {
-                  return (
-                    <div 
-                      key={i} 
-                      onClick={() => navigate(`/brands/${brand.id}/products`)}
-                      className="bg-white rounded-[5px] p-8 flex flex-col items-center text-center gap-6 hover:border-[#E8500A]/30 hover:scale-[1.01] transition-all duration-300 cursor-pointer border border-[#e8edf2] group relative overflow-hidden shadow-none"
-                    >
-                       <div className="absolute top-0 right-0 w-40 h-40 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-125 transition-transform duration-500" />
-                       
-                       <div className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] font-semibold text-2xl border border-[#e8edf2] relative z-10">
-                          {brand.logo}
-                       </div>
-                       
-                       <div className="flex flex-col items-center gap-2 relative z-10">
-                          <h4 className="text-xl font-semibold text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors uppercase tracking-tight leading-tight">{brand.name}</h4>
-                          <div className="px-4 py-1.5 bg-[#E8500A] text-white rounded text-[10px] font-semibold uppercase tracking-wider shadow-none">
-                             Up to {i % 2 === 0 ? '40%' : '50%'} OFF
-                          </div>
-                       </div>
-
-                       <div className="w-full h-px bg-gray-50 relative z-10" />
-
-                       <div className="flex items-center gap-3 text-[11px] font-semibold text-[#1a1a2e] uppercase tracking-widest group-hover:text-[#E8500A] transition-colors relative z-10">
-                          Grab This Deal <ArrowRight size={16} className="-rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                       </div>
-                    </div>
-                  );
-                })}
-             </div>
-             
-             <div className="mt-12 flex justify-center">
-                <button 
-                  onClick={() => navigate('/brand-deals')}
-                  className="px-8 py-3 bg-[#1A1D4E] hover:bg-[#E8500A] text-white text-xs font-semibold uppercase tracking-wider rounded transition-colors shadow-none"
-                >
-                   View All Brand Deals
-                </button>
-             </div>
-          </div>
-        </section>
       </main>
 
       <style>{`

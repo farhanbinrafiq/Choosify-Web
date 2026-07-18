@@ -1,52 +1,22 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Search,
-  Youtube,
-  Star,
-  ChevronDown,
   CheckCircle2,
-  Bookmark,
-  ChevronLeft,
-  ChevronRight,
-  Zap,
-  TrendingUp,
-  HelpCircle,
-  AlertCircle,
-  Share2,
-  MessageCircle,
-  BarChart3,
-  Users,
-  Play,
-  Smartphone,
   Gift,
-  Shirt,
-  Info,
-  Package,
-  DollarSign,
-  ShieldCheck,
-  ThumbsUp,
-  Heart,
   X,
-  ArrowRight,
   Lock,
-  Sparkles,
-  Clock,
-  Facebook,
-  Instagram,
-  Megaphone,
-  Flame,
+  ShieldCheck,
 } from "lucide-react";
 import { BRANDS, PRODUCTS } from "../constants";
 import { ProductCard } from "../components/ProductCard";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
-import { DETAIL_SINGLE_FEED, DETAIL_FEED_GRID_5 } from "../lib/pageLayout";
-import { StickySectionNav } from "../components/StickySectionNav";
+import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
+import { DcUnderlineTabs } from "../components/design/DcUnderlineTabs";
 import { CardEngagementStrip } from "../components/CardEngagementStrip";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { StudioWrap } from "../components/studio/StudioWrap";
 import { BrandPostCarouselSection } from "../components/BrandPostCarouselSection";
-import { SpotlightIntegrationRail } from "../components/spotlight/SpotlightIntegrationRail";
 import { getBrandPostsByBrandId } from "../lib/brandPosts";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import { useCarousel } from "../hooks/useCarousel";
@@ -55,6 +25,7 @@ import { useGlobalState } from "../context/GlobalStateContext";
 import { toast } from "react-hot-toast";
 import { BrandOverviewSection } from "../components/BrandOverviewSection";
 import { FollowButton } from "../components/FollowButton";
+import { BrandDetailHero } from "../components/brand/BrandDetailHero";
 import { ClaimProfileModal } from "../components/ClaimProfileModal";
 import {
   DragScrollContainer,
@@ -68,9 +39,15 @@ import { PaginationBar } from "../components/PaginationBar";
 import { PublicReviewCard } from "../components/PublicReviewCard";
 import { TikTokIcon } from "../components/brand/TikTokIcon";
 import { BrandInfluencerReviewsSection } from "../components/brand/BrandInfluencerReviewsSection";
+import { BrandCouponsSection, buildBrandCoupons } from "../components/brand/BrandCouponsSection";
+import { BrandWhereToBuySection } from "../components/brand/BrandWhereToBuySection";
+import { BrandFaqSection } from "../components/brand/BrandFaqSection";
+
+const BRAND_FEED_GRID =
+  "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3.5 w-full";
 
 export function BrandDetailPage() {
-  const brandHeroRef = useRef<HTMLElement>(null);
+  const brandHeroRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { id } = useParams();
   const {
@@ -82,8 +59,6 @@ export function BrandDetailPage() {
   } = useGlobalState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isReportOpen, setIsReportOpen] = useState(false);
-  const [isLoved, setIsLoved] = useState(false);
-  const [isFollowed, setIsFollowed] = useState(false);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
   // Filter States (from Brand Products page)
@@ -220,45 +195,37 @@ export function BrandDetailPage() {
   const sectionNavItems = useMemo(
     () => [
       {
-        id: "deals-section",
-        label: "Deals",
-        icon: <Gift size={13} />,
-        hidden: !previewShowDealsSection,
+        id: "brand-overview-section",
+        label: "Overview",
       },
       {
         id: "products-section",
         label: "Products",
-        icon: <Package size={13} />,
         hidden: !previewShowProductCatalogSection,
       },
       {
+        id: "deals-section",
+        label: "Deals",
+        hidden: !previewShowDealsSection,
+      },
+      {
         id: "creator-reviews-section",
-        label: "Creator Reviews",
-        icon: <Sparkles size={13} />,
-      },
-      {
-        id: "spotlight-section",
-        label: "Spotlight",
-        icon: <Flame size={13} />,
-      },
-      {
-        id: "campaigns-section",
-        label: "Events",
-        icon: <Megaphone size={13} />,
-        hidden: brandWhatsOnPosts.length === 0,
+        label: "Creators Review",
       },
       {
         id: "public-reviews-section",
-        label: "Public Reviews",
-        icon: <MessageCircle size={13} />,
+        label: "Public Review",
       },
       {
-        id: "brand-overview-section",
-        label: "Brand Overview",
-        icon: <Info size={13} />,
+        id: "store-location-section",
+        label: "Store Location",
+      },
+      {
+        id: "faq-section",
+        label: "FAQ",
       },
     ],
-    [previewShowDealsSection, previewShowProductCatalogSection, brandWhatsOnPosts.length],
+    [previewShowDealsSection, previewShowProductCatalogSection],
   );
 
   const { activeId: activeSectionId, scrollToSection } =
@@ -1120,6 +1087,8 @@ export function BrandDetailPage() {
     },
   ];
 
+  const brandCoupons = buildBrandCoupons(brand.name);
+
   const overviewData = getBrandOverviews(brand.name);
 
   const getPopularCategoryPreviews = () => {
@@ -1296,420 +1265,37 @@ export function BrandDetailPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed">
-      {/* 1. Brand Hero Section */}
-      <motion.section
-        ref={brandHeroRef}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="hero-gradient relative pt-10 pb-12 border-b border-white/5"
-      >
-        <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 blur-3xl pointer-events-none">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-primary rounded-full translate-x-1/2 -translate-y-1/2" />
-        </div>
-
-
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
-          <div className="flex flex-col lg:grid lg:grid-cols-[1.5fr_1fr] xl:grid-cols-[1.6fr_1fr] gap-8 xl:gap-12 lg:items-stretch w-full">
-            {/* Left Side: Brand Profile Details & Info */}
-            <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left gap-6 order-1 lg:order-none lg:justify-between lg:h-full">
-              <div className="w-full flex-1 flex flex-col items-center lg:items-start gap-6">
-                <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white overflow-hidden flex items-center justify-center shadow-2xl border-4 border-white relative shrink-0 mx-auto lg:mx-0">
-                  {renderBrandLogo(brand)}
-                  {localClaimStatus === "verified" && (
-                    <div className="absolute -top-1.5 -right-1.5 w-7 h-7 bg-[#E8500A] rounded-full flex items-center justify-center text-white border-2 border-[#10133A] shadow-lg">
-                      <CheckCircle2
-                        size={13}
-                        fill="currentColor"
-                        className="text-white stroke-[#E8500A]"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="w-full flex-1 flex flex-col items-center lg:items-start">
-                  <div className="flex flex-col sm:flex-row items-center gap-3 mb-2 flex-wrap justify-center lg:justify-start">
-                    <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none text-center lg:text-left">
-                      {brand.name}
-                    </h1>
-                    {localClaimStatus === "verified" && (
-                      <div className="bg-[#4DBC15] px-3 py-1 rounded-full flex items-center gap-2 shadow-md">
-                        <ShieldCheck size={11} className="text-white" />
-                        <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">
-                          Verified Brand Owner
-                        </span>
-                      </div>
-                    )}
-                    {localClaimStatus === "pending" && (
-                      <div className="bg-amber-500/80 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2 shadow-md border border-white/10">
-                        <HelpCircle size={11} className="text-white" />
-                        <span className="text-[9px] font-black text-white uppercase tracking-widest italic whitespace-nowrap">
-                          Ownership Verification Pending
-                        </span>
-                      </div>
-                    )}
-                    {localClaimStatus === "community" && (
-                      <div className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2 shadow-sm border border-white/5">
-                        <Users size={11} className="text-white/70" />
-                        <span className="text-[9px] font-black text-white/90 uppercase tracking-widest italic whitespace-nowrap">
-                          Community Brand Profile
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <p className="text-[10px] md:text-[11px] font-extrabold text-[#E8500A]/90 uppercase tracking-[0.2em] mb-3 text-center lg:text-left">
-                    {brand.category || "Fashion & Clothing"} • Premium Showcase
-                  </p>
-
-                  <p className="text-xs md:text-sm font-medium text-white/70 max-w-md mb-4 text-center lg:text-left leading-relaxed">
-                    Experience the perfect balance of elite-tier product
-                    selections, verified customer rankings, and high-quality
-                    local trust.
-                  </p>
-
-                  <div className="flex items-center gap-4 flex-wrap justify-center lg:justify-start">
-                    <div className="flex items-center gap-2">
-                      <Heart
-                        size={14}
-                        className="text-[#E8500A] fill-current"
-                      />
-                      <span className="text-white font-extrabold text-[9px] md:text-[10px] uppercase tracking-widest italic whitespace-nowrap">
-                        50,000 Love This Brand
-                      </span>
-                    </div>
-                    <div className="h-4 w-px bg-white/15 hidden sm:block" />
-                    <div className="flex items-center gap-2">
-                      <TrendingUp size={14} className="text-green-accent" />
-                      <span className="text-white font-extrabold text-[9px] md:text-[10px] uppercase tracking-widest italic whitespace-nowrap">
-                        Score: 92/100
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action buttons */}
-                <div className="flex flex-wrap gap-3.5 justify-center lg:justify-start text-white w-full">
-                  {/*
-                       <button 
-                         onClick={() => setIsLoved(!isLoved)}
-                         className={cn(
-                           "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
-                           isLoved 
-                             ? "bg-white text-[#E8500A] border-white shadow-white/5" 
-                             : "bg-[#E8500A] text-white border-[#E8500A]/30 hover:bg-[#ff5d14]"
-                         )}
-                       >
-                          <Heart size={14} className={cn("transition-colors", isLoved && "fill-current text-[#E8500A]")} />
-                          {isLoved ? "Loved" : "Love Brand"}
-                       </button>
-                       
-                       <button 
-                         onClick={() => {
-                           setIsFollowed(!isFollowed);
-                           toast.success(isFollowed ? `Unfollowed ${brand.name}` : `Following ${brand.name} for exclusive drops!`);
-                         }}
-                         className={cn(
-                           "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer",
-                           isFollowed
-                             ? "bg-[#4DBC15] text-white border-[#4DBC15]" 
-                             : "bg-white text-[#1A1D4E] border-white hover:bg-gray-50"
-                         )}
-                       >
-                          {isFollowed ? "Following" : "Follow the Brand"}
-                       </button>
-
-                       <button 
-                       */}
-                  <button
-                    onClick={() => setIsLoved(!isLoved)}
-                    className={cn(
-                      "text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border flex items-center gap-2 cursor-pointer",
-                      isLoved
-                        ? "bg-white text-[#E8500A] border-white shadow-white/5"
-                        : "bg-[#E8500A] text-white border-[#E8500A]/30 hover:bg-[#ff5d14]",
-                    )}
-                  >
-                    <Heart
-                      size={14}
-                      className={cn(
-                        "transition-colors",
-                        isLoved && "fill-current text-[#E8500A]",
-                      )}
-                    />
-                    {isLoved ? "Loved" : "Love Brand"}
-                  </button>
-
-                  <FollowButton
-                    id={String(brand.id)}
-                    name={brand.name}
-                    type="brand"
-                    className="px-6 md:px-8 py-3.5 md:py-4.5 rounded-full"
-                  />
-
-                  {localClaimStatus === "community" && (
-                    <button
-                      onClick={() => {
-                        setIsClaimModalOpen(true);
-                        return;
-                        setTimeout(() => {
-                          updateBrandClaimStatus(brand.id, "pending");
-                          toast.success(
-                            "Claim submitted successfully! Status changed to Pending Review.",
-                            { duration: 5000 },
-                          );
-                        }, 1500);
-                      }}
-                      className="text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-xl transition-all transform hover:scale-105 active:scale-95 italic border cursor-pointer bg-white text-navy border-white hover:bg-gray-100 flex items-center gap-1.5"
-                    >
-                      <ShieldCheck size={14} className="shrink-0" />
-                      <span>Claim Ownership</span>
-                    </button>
-                  )}
-
-                  {localClaimStatus === "pending" && (
-                    <div className="text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider shadow-md bg-amber-500 text-white border border-amber-500/35 italic flex items-center gap-1.5 select-none hover:cursor-default">
-                      <Clock size={14} className="shrink-0" />
-                      <span>Verification Pending</span>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={() => scrollToSection("public-reviews-section")}
-                    className="bg-transparent text-white border border-white/20 hover:bg-white/10 hover:border-white/40 text-[10px] md:text-[11px] font-black uppercase px-6 md:px-8 py-3.5 md:py-4.5 rounded-full tracking-wider transition-all italic cursor-pointer"
-                  >
-                    Write a Review
-                  </button>
-                </div>
-              </div>
-
-              {/* Desktop Social links */}
-              <div className="hidden lg:flex items-center gap-4 mt-2 flex-wrap justify-start">
-                <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">
-                  Find Us On
-                </span>
-                <div className="flex items-center gap-5">
-                  <a
-                    href="#"
-                    className="group flex flex-col items-center gap-1.5 focus:outline-none"
-                  >
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                      <Facebook size={20} />
-                    </div>
-                    <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                      Facebook
-                    </span>
-                  </a>
-                  <a
-                    href="#"
-                    className="group flex flex-col items-center gap-1.5 focus:outline-none"
-                  >
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                      <Instagram size={20} />
-                    </div>
-                    <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                      Instagram
-                    </span>
-                  </a>
-                  <a
-                    href="#"
-                    className="group flex flex-col items-center gap-1.5 focus:outline-none"
-                  >
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                      <TikTokIcon size={20} />
-                    </div>
-                    <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                      TikTok
-                    </span>
-                  </a>
-                  <a
-                    href="#"
-                    className="group flex flex-col items-center gap-1.5 focus:outline-none"
-                  >
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95 shadow-md">
-                      <Youtube size={20} />
-                    </div>
-                    <span className="text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                      YouTube
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Side: Score card */}
-            <div className="w-full lg:w-full max-w-md relative order-3 lg:order-none flex flex-col justify-between h-auto lg:h-full mx-auto lg:mx-0 gap-5 lg:gap-4">
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-white relative overflow-hidden group mb-auto">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/10 blur-2xl rounded-full translate-x-1/3 -translate-y-1/3" />
-
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <div className="text-[9px] font-black uppercase text-[#4DBC15] tracking-widest mb-0.5">
-                      Choosify Score
-                    </div>
-                    <div className="text-5xl font-black italic">
-                      4.3 <span className="text-xl text-white/55">/5</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex gap-0.5 justify-end mb-1">
-                      {[1, 2, 3, 4].map((i) => (
-                        <Star
-                          key={i}
-                          size={13}
-                          className="fill-[#E8500A] text-[#E8500A]"
-                        />
-                      ))}
-                      <Star size={13} className="text-white/20 fill-white/20" />
-                    </div>
-                    <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider">
-                      Based on 500+ Reviews
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3.5 mb-6">
-                  {[
-                    { label: "Quality", value: 85, color: "bg-[#E8500A]" },
-                    { label: "Service", value: 90, color: "bg-[#4DBC15]" },
-                    { label: "Value", value: 81, color: "bg-[#E8500A]" },
-                    { label: "Delivery", value: 90, color: "bg-[#4DBC15]" },
-                    { label: "Packaging", value: 75, color: "bg-[#4DBC15]" },
-                  ].map((m, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="w-16 text-[9px] font-bold uppercase tracking-wider text-white/60">
-                        {m.label}
-                      </div>
-                      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${m.value}%` }}
-                          transition={{ delay: 0.3, duration: 0.8 }}
-                          className={cn("h-full rounded-full", m.color)}
-                        />
-                      </div>
-                      <div className="w-8 text-[9px] font-black text-right text-white/80">
-                        {m.value}%
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between pt-5 border-t border-white/10">
-                  <div className="text-center w-full">
-                    <div className="text-4xl font-black text-[#50DC17] leading-none mb-1">
-                      85%
-                    </div>
-                    <div className="text-[9px] font-black text-white/50 uppercase tracking-widest">
-                      Of Buyers Recommend This Brand
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile Social links */}
-            <div className="flex lg:hidden items-center gap-3 sm:gap-4 mt-8 flex-wrap justify-center order-5 w-full">
-              <span className="text-white text-[10px] font-black uppercase tracking-widest border-b-2 border-[#E8500A] pb-1 italic">
-                Find Us On
-              </span>
-              <div className="flex items-center gap-3.5 sm:gap-6 justify-center flex-wrap">
-                {/* Facebook */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
-                  <a
-                    href="#"
-                    className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
-                    aria-label="Facebook"
-                  >
-                    <Facebook size={18} />
-                  </a>
-                  <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                    Facebook
-                  </span>
-                </div>
-
-                {/* Instagram */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
-                  <a
-                    href="#"
-                    className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
-                    aria-label="Instagram"
-                  >
-                    <Instagram size={18} />
-                  </a>
-                  <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                    Instagram
-                  </span>
-                </div>
-
-                {/* TikTok */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
-                  <a
-                    href="#"
-                    className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
-                    aria-label="TikTok"
-                  >
-                    <TikTokIcon size={18} />
-                  </a>
-                  <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                    TikTok
-                  </span>
-                </div>
-
-                {/* YouTube */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer">
-                  <a
-                    href="#"
-                    className="w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] transition-all duration-300 active:scale-95"
-                    aria-label="YouTube"
-                  >
-                    <Youtube size={18} />
-                  </a>
-                  <span className="text-[11px] sm:text-[14px] text-white/50 group-hover:text-[#F97316] font-normal transition-colors">
-                    YouTube
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* 2. SECTION SUMMARY BAR */}
-      <div className="w-full hero-gradient text-white py-4.5 border-y border-white/5 font-space font-black italic uppercase tracking-[0.2em] text-[11px] md:text-xs">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-wrap justify-center sm:justify-around items-center gap-y-4 gap-x-8 text-center">
-          <CardEngagementStrip
-            variant="hero"
-            entityType="brand"
-            entityId={brand.id}
-            payload={brand as unknown as Record<string, unknown>}
-            showShare
-            shareUrl={typeof window !== 'undefined' ? window.location.href : undefined}
-          />
-          <div className="hidden sm:block h-4 w-px bg-white/20" />
-          <div className="flex items-center gap-2">
-            <span className="text-[#E8500A] text-lg font-space font-black">
-              ★
-            </span>
-            <span>{totalDealsFound} Deals Found</span>
-          </div>
-          <div className="hidden sm:block h-4 w-px bg-white/20" />
-          <div className="flex items-center gap-2">
-            <span className="text-[#E8500A] text-lg font-space font-black">
-              ✦
-            </span>
-            <span>{totalProductsFound} Products Found</span>
-          </div>
-          <div className="hidden sm:block h-4 w-px bg-white/20" />
-          <div className="flex items-center gap-2">
-            <span className="text-[#E8500A] text-lg font-space font-black">
-              🎁
-            </span>
-            <span>3 Promo Codes Found</span>
-          </div>
-        </div>
+    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <div ref={brandHeroRef}>
+        <BrandDetailHero
+          brand={brand}
+          logoNode={renderBrandLogo(brand)}
+          claimStatus={localClaimStatus}
+          categoryLabel={brand.category || "Fashion & Clothing"}
+          onShare={() => {
+            navigator.clipboard.writeText(window.location.href);
+            toast.success("Share link copied!");
+          }}
+          onClaim={() => setIsClaimModalOpen(true)}
+          onExploreProducts={() => scrollToSection("products-section")}
+          websiteUrl={
+            (brand as any).website
+              ? String((brand as any).website).startsWith("http")
+                ? String((brand as any).website)
+                : `https://${(brand as any).website}`
+              : undefined
+          }
+          facts={[
+            { label: "Products", value: String(totalProductsFound || (brand as any).productCount || (brand as any).products || "120+") },
+            { label: "Deals", value: String(totalDealsFound || "24") },
+            { label: "Followers", value: "50K+" },
+            { label: "Categories", value: "8" },
+            { label: "Creators", value: "18" },
+            { label: "Since", value: String((brand as any).founded || "2012") },
+          ]}
+        />
       </div>
+
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -1869,27 +1455,32 @@ export function BrandDetailPage() {
         onClearAll={clearAllFilters}
       />
 
-      <StickySectionNav
-        sections={sectionNavItems}
-        activeId={activeSectionId}
+      <DcUnderlineTabs
+        tabs={sectionNavItems
+          .filter((s) => !s.hidden)
+          .map((s) => ({ id: s.id, label: s.label }))}
+        activeId={
+          activeSectionId === "all"
+            ? sectionNavItems.find((s) => !s.hidden)?.id || "brand-overview-section"
+            : activeSectionId
+        }
         onNavigate={scrollToSection}
-        allLabel="Brand"
-        profileLabel="Brand profile"
+        maxWidthClass="max-w-[1440px]"
       />
 
       {/* 4. Unified Scrollable Body Wrapper */}
-      <div className="max-w-[1440px] mx-auto px-4 py-5 w-full flex flex-col gap-8">
+      <div className="max-w-[1440px] mx-auto px-4 py-10 md:py-12 w-full flex flex-col gap-8">
         <div className={`${DETAIL_SINGLE_FEED}`}>
             {/* Brand Claim Acquisition Card (Part 6) */}
             {(localClaimStatus === "community" ||
               localClaimStatus === "pending") && (
-              <div className="bg-gradient-to-r from-[#FFF0E8]/50 to-[#FFE5D9]/30 border-2 border-[#FFE5D9] rounded-[5px] p-6 md:p-8 shadow-xs flex flex-col md:flex-row items-center gap-6 text-left animate-fade-in relative overflow-hidden mb-6">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#E8500A]/5 blur-xl rounded-full" />
-                <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center shrink-0 font-bold text-[#E8500A]">
-                  <ShieldCheck className="w-6 h-6 text-[#E8500A]" />
+              <div className="bg-gradient-to-r from-[#FFF0E8]/50 to-[#FFE5D9]/30 border-2 border-[#FFE5D9] rounded-2xl p-6 md:p-8 shadow-xs flex flex-col md:flex-row items-center gap-6 text-left animate-fade-in relative overflow-hidden mb-6">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/5 blur-xl rounded-full" />
+                <div className="w-12 h-12 rounded-full bg-orange-primary/10 flex items-center justify-center shrink-0 font-bold text-orange-primary">
+                  <ShieldCheck className="w-6 h-6 text-orange-primary" />
                 </div>
                 <div className="flex-1 space-y-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-[#FFF0E8] text-[#E8500A] border border-[#FFE5D9]">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-[#FFF0E8] text-orange-primary border border-[#FFE5D9]">
                     {localClaimStatus === "pending"
                       ? "Verification Pending Review"
                       : "Claim Acquisition Panel"}
@@ -1951,7 +1542,7 @@ export function BrandDetailPage() {
                           );
                         }, 1500);
                       }}
-                      className="w-full md:w-auto px-6 py-4 bg-[#E8500A] hover:bg-[#ff5d14] text-white font-black uppercase text-[10px] tracking-widest italic rounded-full shadow-lg hover:shadow-[#E8500A]/30 active:scale-95 transition-all text-center cursor-pointer border-none"
+                      className="w-full md:w-auto px-6 py-3 bg-[#FF5B00] hover:brightness-110 text-white font-bold text-[13px] tracking-tight rounded-lg shadow-sm active:scale-95 transition-all text-center cursor-pointer border-none"
                     >
                       Claim Ownership
                     </button>
@@ -1960,7 +1551,7 @@ export function BrandDetailPage() {
                       <span className="text-[8px] font-black text-amber-700 uppercase tracking-wider">
                         ● Verification Active
                       </span>
-                      <span className="text-[10px] font-black text-navy uppercase italic">
+                      <span className="text-[12px] font-bold text-[#1A1A2E] tracking-tight">
                         Under Review
                       </span>
                     </div>
@@ -1969,134 +1560,39 @@ export function BrandDetailPage() {
               </div>
             )}
 
-            {/* A. DEALS SECTION */}
-            {showDealsSection && (
-              <StudioWrap sectionId="brand-deals" className="scroll-mt-36">
-                <div className="mb-6 text-left">
-                  <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                    Exclusive Deals
-                  </h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                    Deals, promo codes & exclusive offers
-                  </p>
-                </div>
+            <BrandOverviewSection
+              brandName={brand.name}
+              overviewData={overviewData}
+              claimStatus={'claimStatus' in brand ? brand.claimStatus : undefined}
+            />
 
-                {localClaimStatus !== "verified" ? (
-                  <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-10">
-                    <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
-                      <Lock className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight">
-                      Active Exclusive Deals Locked
-                    </h3>
-                    <p className="text-xs text-gray-500 font-bold max-w-sm">
-                      Merchant-published coupons, flash discounts, and
-                      promotional banners are locked until ownership is
-                      verified.
-                    </p>
-                    {localClaimStatus === "community" && (
-                      <button
-                        onClick={() => {
-                          toast.loading(
-                            "Initiating secure brand verification link...",
-                            { duration: 1500 },
-                          );
-                          setTimeout(() => {
-                            updateBrandClaimStatus(brand.id, "pending");
-                            toast.success(
-                              "Verification submission parsed! Your status is now Pending Review.",
-                            );
-                          }, 1500);
-                        }}
-                        className="bg-[#E8500A] hover:bg-[#ff5d14] text-white py-2 px-6 rounded-full text-[10px] font-black uppercase tracking-wider italic mt-2 cursor-pointer transition-all border-none"
-                      >
-                        Claim Brand Ownership
-                      </button>
-                    )}
-                    {localClaimStatus === "pending" && (
-                      <div className="text-[10px] font-black text-amber-600 uppercase italic tracking-widest mt-2">
-                        Ownership Verification Under Review
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className={DETAIL_FEED_GRID_5}>
-                    {finalDeals.map((product: any, i: number) => (
-                      <ProductCard
-                        key={product.id || i}
-                        product={product}
-                        variant="grid"
-                      />
-                    ))}
-                    {brandPromos.map((promo, idx) => (
-                      <div
-                        key={`promo-${idx}`}
-                        className="bg-white border border-[#e8edf2] p-3.5 rounded-[5px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all shadow-sm h-full"
-                      >
-                        <div className="w-7 h-7 rounded-lg bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
-                          <Gift size={14} />
-                        </div>
-                        <h4 className="text-xs font-semibold text-[#1A1D4E] uppercase tracking-wider mb-0.5">
-                          {promo.title}
-                        </h4>
-                        <div className="text-sm font-semibold text-[#E8500A] uppercase mb-3 leading-none">
-                          {promo.discount}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(promo.code);
-                            toast.success(
-                              `Promo Code "${promo.code}" copied to clipboard!`,
-                            );
-                          }}
-                          className="w-full py-2 bg-white rounded-lg border border-dashed border-[#e8edf2] hover:border-[#E8500A] font-mono text-xs font-semibold text-[#1A1D4E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer shadow-xs"
-                        >
-                          <span className="text-[8px] text-gray-400 font-sans tracking-wide uppercase font-semibold">
-                            PROMO CODE
-                          </span>
-                          <span>{promo.code}</span>
-                        </button>
-                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2 block">
-                          {promo.expiry}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </StudioWrap>
-            )}
-
-            {/* B. PRODUCTS SECTION */}
+            {/* A. PRODUCTS SECTION (DC: before deals) */}
             {showProductCatalogSection && (
               <StudioWrap sectionId="brand-catalog" className="scroll-mt-36">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 text-left">
-                  <div>
-                    <h2 className="text-2xl font-black text-[#1A1D4E] italic tracking-tighter uppercase mb-0.5">
-                      Products
-                    </h2>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                      Full authorized selection available
-                    </p>
-                  </div>
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic font-mono bg-white border border-gray-150 rounded-full px-4 py-2">
-                    Showing{" "}
-                    <span className="text-[#1A1D4E] font-black">
-                      {filteredProducts.length}
-                    </span>{" "}
-                    items
-                  </span>
+                <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
+                  <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
+                    {brand.name.toUpperCase()} PRODUCTS
+                  </h2>
+                  <Link
+                    to={`/brands/${brand.id}/products`}
+                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#FF5B00] shrink-0"
+                  >
+                    VIEW ALL PRODUCTS ›
+                  </Link>
                 </div>
+                <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
+                  Explore all products from {brand.name}
+                </p>
 
                 {localClaimStatus !== "verified" ? (
-                  <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-12">
+                  <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-12">
                     <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
                       <Lock className="w-5 h-5" />
                     </div>
-                    <h3 className="text-sm font-black text-[#1A1D4E] uppercase tracking-tight">
+                    <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
                       Products Locked
                     </h3>
-                    <p className="text-xs text-gray-500 font-bold max-w-sm">
+                    <p className="text-xs text-gray-500 font-medium max-w-sm">
                       The full catalog, price list sync, inventory metrics, and
                       product grids are locked. Currently unclaimed profiles are
                       restricted from showing merchant content.
@@ -2115,19 +1611,19 @@ export function BrandDetailPage() {
                             );
                           }, 1500);
                         }}
-                        className="bg-[#E8500A] hover:bg-[#ff5d14] text-white py-2 px-6 rounded-full text-[10px] font-black uppercase tracking-wider italic mt-2 cursor-pointer transition-all border-none"
+                        className="bg-[#FF5B00] hover:brightness-110 text-white py-2 px-5 rounded-lg text-[12px] font-bold tracking-tight mt-2 cursor-pointer transition-all border-none"
                       >
                         Claim Brand Ownership
                       </button>
                     )}
                     {localClaimStatus === "pending" && (
-                      <div className="text-[10px] font-black text-amber-600 uppercase italic tracking-widest mt-2">
+                      <div className="text-[12px] font-semibold text-amber-600 tracking-tight mt-2">
                         Verification Pending Review
                       </div>
                     )}
                   </div>
                 ) : filteredProducts.length > 0 ? (
-                  <div className={DETAIL_FEED_GRID_5}>
+                  <div className={BRAND_FEED_GRID}>
                     {paginatedProducts.map((product: any, i: number) => (
                       <ProductCard
                         key={product.id || i}
@@ -2137,11 +1633,11 @@ export function BrandDetailPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-16 text-center bg-white border border-gray-150 rounded-3xl text-gray-400 text-xs font-black uppercase space-y-2">
-                    <p>No Products Match Chosen Criteria.</p>
+                  <div className="p-12 text-center bg-white border border-[#E8EDF2] rounded-xl text-gray-400 text-xs font-bold space-y-2">
+                    <p>No products match chosen criteria.</p>
                     <button
                       onClick={clearAllFilters}
-                      className="text-[#E8500A] underline hover:text-[#ff5d14] text-[10px]"
+                      className="text-[#E8500A] underline hover:text-[#ff5d14] text-[10px] cursor-pointer bg-transparent border-0"
                     >
                       Clear Selections
                     </button>
@@ -2160,17 +1656,138 @@ export function BrandDetailPage() {
               </StudioWrap>
             )}
 
+            {/* B. DEALS + COUPONS */}
+            {showDealsSection && (
+              <StudioWrap sectionId="brand-deals" className="scroll-mt-36">
+                <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
+                  <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
+                    TOP DEALS ON {brand.name.toUpperCase()}
+                  </h2>
+                  <Link
+                    to="/deals"
+                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#FF5B00] shrink-0"
+                  >
+                    VIEW ALL DEALS ›
+                  </Link>
+                </div>
+                <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
+                  Limited-time offers on {brand.name} products
+                </p>
+
+                {localClaimStatus !== "verified" ? (
+                  <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-10">
+                    <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                      <Lock className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
+                      Active Exclusive Deals Locked
+                    </h3>
+                    <p className="text-xs text-gray-500 font-medium max-w-sm">
+                      Merchant-published coupons, flash discounts, and
+                      promotional banners are locked until ownership is
+                      verified.
+                    </p>
+                    {localClaimStatus === "community" && (
+                      <button
+                        onClick={() => {
+                          toast.loading(
+                            "Initiating secure brand verification link...",
+                            { duration: 1500 },
+                          );
+                          setTimeout(() => {
+                            updateBrandClaimStatus(brand.id, "pending");
+                            toast.success(
+                              "Verification submission parsed! Your status is now Pending Review.",
+                            );
+                          }, 1500);
+                        }}
+                        className="bg-[#FF5B00] hover:brightness-110 text-white py-2 px-5 rounded-lg text-[12px] font-bold tracking-tight mt-2 cursor-pointer transition-all border-none"
+                      >
+                        Claim Brand Ownership
+                      </button>
+                    )}
+                    {localClaimStatus === "pending" && (
+                      <div className="text-[12px] font-semibold text-amber-600 tracking-tight mt-2">
+                        Ownership Verification Under Review
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className={BRAND_FEED_GRID}>
+                    {finalDeals.map((product: any, i: number) => (
+                      <ProductCard
+                        key={product.id || i}
+                        product={product}
+                        variant="grid"
+                      />
+                    ))}
+                    {brandPromos.map((promo, idx) => (
+                      <div
+                        key={`promo-${idx}`}
+                        className="bg-white border border-[#E8EDF2] p-3.5 rounded-[10px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all shadow-sm h-full"
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
+                          <Gift size={14} />
+                        </div>
+                        <h4 className="text-xs font-semibold text-[#1A1A2E] mb-0.5">
+                          {promo.title}
+                        </h4>
+                        <div className="text-sm font-semibold text-[#E8500A] mb-3 leading-none">
+                          {promo.discount}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(promo.code);
+                            toast.success(
+                              `Promo Code "${promo.code}" copied to clipboard!`,
+                            );
+                          }}
+                          className="w-full py-2 bg-white rounded-lg border border-dashed border-[#E8EDF2] hover:border-[#E8500A] font-mono text-xs font-semibold text-[#1A1A2E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer shadow-xs"
+                        >
+                          <span className="text-[8px] text-gray-400 font-sans tracking-wide uppercase font-semibold">
+                            PROMO CODE
+                          </span>
+                          <span>{promo.code}</span>
+                        </button>
+                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2 block">
+                          {promo.expiry}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-9">
+                  <BrandCouponsSection
+                    brandName={brand.name}
+                    coupons={brandCoupons}
+                  />
+                </div>
+              </StudioWrap>
+            )}
+
+            {/* Coupons fallback when deals section is hidden */}
+            {!showDealsSection && (
+              <div className="w-full">
+                <BrandCouponsSection
+                  brandName={brand.name}
+                  coupons={brandCoupons}
+                />
+              </div>
+            )}
+
           {/* Creator reviews */}
           <div id="creator-reviews-section" className="scroll-mt-36 w-full">
             {localClaimStatus !== "verified" ? (
-              <div className="bg-white rounded-[5px] p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-sm border border-gray-100/80 py-12">
+              <div className="bg-white rounded-[10px] p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-sm border border-[#E8EDF2] py-12">
                 <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
                   <Lock className="w-5 h-5" />
                 </div>
-                <h3 className="text-sm font-black text-navy uppercase tracking-tight">
+                <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
                   Creator Collaborations Locked
                 </h3>
-                <p className="text-xs text-gray-500 font-bold max-w-sm mb-1">
+                <p className="text-xs text-gray-500 font-medium max-w-sm mb-1">
                   Professional influencer reviews and creator campaign
                   collaborations are locked until ownership is verified.
                 </p>
@@ -2183,16 +1800,6 @@ export function BrandDetailPage() {
                 fullWidth
               />
             )}
-          </div>
-
-          <div id="spotlight-section" className="scroll-mt-36 w-full">
-            <SpotlightIntegrationRail
-              brandId={String(brand.id)}
-              title="Spotlight"
-              subtitle="Campaigns, live events, announcements, and creator reviews."
-              source="brand"
-              viewAllHref="/spotlight"
-            />
           </div>
 
           {brandWhatsOnPosts.length > 0 && (
@@ -2209,20 +1816,24 @@ export function BrandDetailPage() {
             </div>
           )}
 
-          <div
-            id="public-reviews-section"
-            className="scroll-mt-36 w-full bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80"
-          >
-            <div className="text-center mb-8 border-b border-gray-100 pb-5">
-              <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-2">
-                Public Reviews
+          <div id="public-reviews-section" className="scroll-mt-36 w-full">
+            <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
+              <h3 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
+                WHAT CUSTOMERS SAY
               </h3>
-              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
-                Verified Customer Experiences
-              </p>
+              <button
+                type="button"
+                onClick={() => toast.success("Loading all customer reviews...")}
+                className="text-[12px] font-bold text-[#1A1A2E] bg-transparent border-0 cursor-pointer hover:text-[#FF5B00] shrink-0 p-0"
+              >
+                VIEW ALL REVIEWS ›
+              </button>
             </div>
+            <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
+              Real reviews from verified buyers
+            </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               {[
                 {
                   name: "Tanvir Hasan",
@@ -2260,147 +1871,129 @@ export function BrandDetailPage() {
                 />
               ))}
             </div>
+          </div>
 
-            <div className="mt-8 flex justify-center">
+          <BrandWhereToBuySection brandName={brand.name} />
+
+          <BrandFaqSection brandName={brand.name} />
+
+          {/* Compare — softened DC-style */}
+          <div className="w-full">
+            <h3 className="text-[15px] font-extrabold text-[#1A1A2E] mb-3.5">
+              COMPARE {brand.name.toUpperCase()} WITH OTHER BRANDS
+            </h3>
+            <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden mb-3.5">
+              <div className="hidden sm:grid grid-cols-[1.4fr_1fr_0.8fr_0.8fr_0.8fr_1.2fr] gap-2.5 px-5 py-3 bg-[#F4F7F9] text-[10px] font-extrabold text-[#9AA0AC]">
+                <div>BRAND</div>
+                <div>OVERALL SCORE</div>
+                <div>QUALITY</div>
+                <div>VALUE</div>
+                <div>SUPPORT</div>
+                <div>POPULAR PRODUCTS</div>
+              </div>
+              {[
+                {
+                  name: brand.name,
+                  logo: brand.name.slice(0, 1).toUpperCase(),
+                  logoBg: "#1A1A2E",
+                  overall: "4.3/5",
+                  quality: "4.5/5",
+                  value: "4.1/5",
+                  support: "4.0/5",
+                  products: "+12",
+                },
+                {
+                  name: "Samsung",
+                  logo: "S",
+                  logoBg: "#1428A0",
+                  overall: "4.1/5",
+                  quality: "4.2/5",
+                  value: "4.0/5",
+                  support: "3.9/5",
+                  products: "+18",
+                },
+                {
+                  name: "Sony",
+                  logo: "S",
+                  logoBg: "#000000",
+                  overall: "4.0/5",
+                  quality: "4.1/5",
+                  value: "3.8/5",
+                  support: "4.2/5",
+                  products: "+15",
+                },
+                {
+                  name: "Xiaomi",
+                  logo: "X",
+                  logoBg: "#FF6900",
+                  overall: "3.9/5",
+                  quality: "3.9/5",
+                  value: "4.2/5",
+                  support: "3.6/5",
+                  products: "+20",
+                },
+              ].map((row) => (
+                <div
+                  key={row.name}
+                  className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr_0.8fr_0.8fr_0.8fr_1.2fr] gap-2.5 px-5 py-3.5 border-t border-[#F1F1F3] items-center"
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-6 h-6 rounded-md text-white text-[10px] font-extrabold flex items-center justify-center shrink-0"
+                      style={{ background: row.logoBg }}
+                    >
+                      {row.logo}
+                    </div>
+                    <span className="text-[12px] font-bold text-[#1A1A2E]">
+                      {row.name}
+                    </span>
+                  </div>
+                  <div className="text-[11.5px] text-[#1A1A2E]">
+                    {row.overall}{" "}
+                    <span className="text-[#FBBF24]">★★★★</span>
+                  </div>
+                  <div className="text-[11.5px] text-[#4B5563]">{row.quality}</div>
+                  <div className="text-[11.5px] text-[#4B5563]">{row.value}</div>
+                  <div className="text-[11.5px] text-[#4B5563]">{row.support}</div>
+                  <div className="text-[11px] text-[#9AA0AC]">{row.products}</div>
+                </div>
+              ))}
+            </div>
+            <div className="text-center mb-2">
               <button
-                onClick={() => toast.success("Loading all customer reviews...")}
-                className="px-10 py-3.5 border border-[#1A1D4E] text-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white transition-all text-[9.5px] font-black uppercase tracking-widest rounded-full italic cursor-pointer"
+                type="button"
+                onClick={() => navigate("/compare")}
+                className="bg-[#14161f] text-white border-0 px-5 py-2.5 rounded-lg text-[12px] font-bold cursor-pointer hover:brightness-110"
               >
-                Load More Reviews
+                COMPARE MORE BRANDS
               </button>
             </div>
           </div>
 
-          <BrandOverviewSection
-            brandName={brand.name}
-            overviewData={overviewData}
-            claimStatus={'claimStatus' in brand ? brand.claimStatus : undefined}
-          />
-
-          <div className="bg-white rounded-[5px] border border-[#e8edf2] p-5 shadow-sm text-left font-sans w-full">
-            <h4 className="text-[11px] font-black text-[#1A1D4E] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <ShieldCheck size={14} className="text-green-500 shrink-0" />
-              Verified Sourcing
-            </h4>
-            <p className="text-[10px] text-gray-400 leading-relaxed font-semibold">
-              Each listed bargain point is validated against native brand
-              catalogs. Rest assured, checkout is immediate, safe, and
-              transparent.
-            </p>
-          </div>
-        </div>
-
-        {/* TRUST STATEMENT BACKGROUND BANNER */}
-        <div className="w-full hero-gradient rounded-[5px] p-8 md:p-12 text-center text-white relative overflow-hidden shadow-lg border border-white/5">
-          <div className="relative z-10 space-y-4">
-            <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto text-[#4DBC15] border border-white/10">
-              <ShieldCheck size={24} />
+          {/* Trust strip — DC style */}
+          <div className="w-full bg-[#14161f] rounded-xl px-7 py-5 text-center text-white">
+            <div className="text-[13px] font-extrabold mb-1">
+              CHOSEN BY MILLIONS. TRUSTED WORLDWIDE.
             </div>
-            <h3 className="font-space font-black italic text-2xl tracking-tight uppercase">
-              CHOOSIFY.BD TRUST STATEMENT
-            </h3>
-            <p className="text-sm text-gray-300 font-semibold leading-relaxed max-w-2xl mx-auto italic">
-              "Only verified sellers and completely unbiased, authentic brand
-              experiences are list on Choosify."
-            </p>
-          </div>
-        </div>
-
-        {/* Similar Brands Comparison Table */}
-        <div className="bg-white rounded-[5px] p-6 md:p-8 shadow-sm border border-gray-100/80">
-          <h3 className="text-xl md:text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-8 text-center italic">
-            Similar Brands Comparison
-          </h3>
-
-          <div className="overflow-x-auto no-scrollbar rounded-[5px] border border-gray-100">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-wider italic">
-                  <th className="py-4.5 px-6">Brand Identity</th>
-                  <th className="py-4.5 px-6 text-center">Quality</th>
-                  <th className="py-4.5 px-6 text-center">Price Range</th>
-                  <th className="py-4.5 px-6 text-center">Rating</th>
-                  <th className="py-2.5 px-6 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 text-xs">
-                {[
-                  {
-                    name: "Apex Shoes",
-                    id: 3,
-                    logo: "Ap",
-                    quality: "Premium",
-                    price: "High (৳৳৳)",
-                    score: "4.8",
-                  },
-                  {
-                    name: "Aarong Brand",
-                    id: 10,
-                    logo: "Aa",
-                    quality: "Elite",
-                    price: "Mid (৳৳)",
-                    score: "4.7",
-                  },
-                  {
-                    name: "Lotto Wear",
-                    id: 6,
-                    logo: "L",
-                    quality: "Basic",
-                    price: "Economy (৳)",
-                    score: "4.2",
-                  },
-                  {
-                    name: "Yellow Shop",
-                    id: 11,
-                    logo: "Y",
-                    quality: "Fashion",
-                    price: "Premium (৳৳৳)",
-                    score: "4.5",
-                  },
-                ].map((item, idx) => (
-                  <tr
-                    key={idx}
-                    className="hover:bg-gray-50/50 transition-colors"
-                  >
-                    <td className="py-4.5 px-6 text-left">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#1A1D4E] text-white font-extrabold flex items-center justify-center text-[10px]">
-                          {item.logo}
-                        </div>
-                        <span className="font-extrabold text-[#1A1D4E] italic">
-                          {item.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4.5 px-6 text-center">
-                      <span className="px-2.5 py-0.5 bg-[#4DBC15]/10 text-[#4DBC15] text-[8px] font-black uppercase rounded tracking-wider italic">
-                        {item.quality}
-                      </span>
-                    </td>
-                    <td className="py-4.5 px-6 text-center text-[10px] font-semibold text-gray-500 italic">
-                      {item.price}
-                    </td>
-                    <td className="py-4.5 px-6 text-center">
-                      <div className="flex items-center justify-center gap-1 text-[11px] font-extrabold text-navy italic">
-                        <Star
-                          size={10}
-                          className="fill-[#E8500A] text-[#E8500A]"
-                        />
-                        <span>{item.score}</span>
-                      </div>
-                    </td>
-                    <td className="py-4.5 px-6 text-right">
-                      <button
-                        onClick={() => navigate(`/brands/${item.id}`)}
-                        className="px-4 py-1.5 border border-[#1A1D4E] hover:bg-[#1A1D4E] hover:text-white text-[#1A1D4E] font-black text-[9px] uppercase tracking-wider rounded-full italic transition-all inline-block cursor-pointer"
-                      >
-                        Visit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="text-[11.5px] text-white/50 mb-5">
+              100% authentic products, official warranty & dedicated support from{" "}
+              {brand.name}.
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { value: "1M+", label: "Happy Customers" },
+                { value: "50+", label: "Countries" },
+                { value: "2.4K+", label: "Reviews" },
+                { value: "4.3/5", label: "Brand Score" },
+              ].map((ts) => (
+                <div key={ts.label}>
+                  <div className="text-[20px] font-extrabold text-[#FF5B00]">
+                    {ts.value}
+                  </div>
+                  <div className="text-[10.5px] text-white/50">{ts.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

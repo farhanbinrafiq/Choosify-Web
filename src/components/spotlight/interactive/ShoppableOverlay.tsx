@@ -36,7 +36,7 @@ export function ShoppableOverlay({ event, products, activeChapter, heroProductId
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/spotlight/live/${event.slug}`;
+    const url = `${window.location.origin}/spotlight/${event.slug}`;
     if (navigator.share) {
       await navigator.share({ title: event.title, url }).catch(() => undefined);
     } else {

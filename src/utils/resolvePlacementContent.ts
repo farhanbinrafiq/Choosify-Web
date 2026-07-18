@@ -6,6 +6,7 @@ import type {
   CatalogPlacement,
   CatalogProduct,
 } from '../types/catalog';
+import { catalogGuideHref } from '../lib/spotlight/content';
 
 export type ResolvedPlacement = {
   id: string;
@@ -122,7 +123,10 @@ export function resolvePlacementContent(
     }
     case 'guide': {
       if (!guide && !title) return null;
-      href = `/guides/${guide?.slug ?? guide?.id ?? placement.entityId}`;
+      href = catalogGuideHref({
+        slug: guide?.slug,
+        id: guide?.id ?? placement.entityId ?? 'guide',
+      });
       title = title || guide?.title || 'Featured Guide';
       subtitle = subtitle ?? guide?.author;
       image = pickEntityImage(image, guide?.image);

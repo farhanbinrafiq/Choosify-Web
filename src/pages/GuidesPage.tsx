@@ -7,13 +7,12 @@ import { Link } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
+import { catalogGuideHref } from '../lib/spotlight/content';
 import { RecommendationCardSkeleton } from '../components/Skeleton';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { HeroMarqueeTicker } from '../components/HeroMarqueeTicker';
+import { DcListingHero } from '../components/design/DcListingHero';
+import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
 import { PaginationBar } from '../components/PaginationBar';
-import { PopularSearchKeywords } from '../components/PopularSearchKeywords';
-import { buildGuidesPopularSearchTerms } from '../utils/pagePopularSearches';
 import { AdSenseSlot } from '../components/AdSenseSlot';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { InfeedSponsoredCard } from '../components/SponsoredPlacementCard';
@@ -72,7 +71,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
 
   return (
     <Link
-      to={`/guides/${guide.id}`}
+      to={catalogGuideHref(guide)}
       className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden shadow-none hover:border-orange-primary/30 transition-all duration-300 w-full"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -133,7 +132,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
 
       {/* Content Section below Media */}
       <div className="pt-5 flex flex-col gap-2.5">
-        <h3 className="font-sans text-xl md:text-3xl font-black italic uppercase tracking-tighter text-heading leading-tight hover:text-orange-primary transition-colors text-left">
+        <h3 className="font-sans text-xl md:text-2xl font-extrabold tracking-tight text-heading leading-tight hover:text-orange-primary transition-colors text-left">
           {guide.title}
         </h3>
         
@@ -143,7 +142,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
 
         {/* Footer with Stats and Bookmark */}
         <div className="pt-4 border-t border-gray-100 flex items-center justify-between mt-2.5">
-          <div className="flex items-center gap-6 text-[11px] font-black text-[#8a92a6] uppercase tracking-wider italic">
+          <div className="flex items-center gap-6 text-[12px] font-semibold text-[#9AA0AC] tracking-tight">
             <span className="flex items-center gap-1.5 hover:text-rose-500 transition-colors">
               <Heart size={15} className="text-rose-500 stroke-[2.5]" /> {guide.shares || '12k'}
             </span>
@@ -180,7 +179,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
 export { ReelCard, HorizontalMediaCard } from '../components/guide/GuideMediaCards';
 
 export function GuidesPage() {
-  const { allGuides, siteConfig } = useGlobalState();
+  const { allGuides } = useGlobalState();
   const guideSource = allGuides;
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -566,16 +565,6 @@ export function GuidesPage() {
 
   const filteredBlogs = getFilteredBlogs();
 
-  const popularSearchTerms = useMemo(
-    () =>
-      buildGuidesPopularSearchTerms({
-        cmsTerms: siteConfig?.popularSearches,
-        guideTitles: filteredBlogs.map((blog) => blog.title),
-        limit: 12,
-      }),
-    [siteConfig?.popularSearches, filteredBlogs],
-  );
-
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_GUIDE, {
     limit: INFEED_MAX_PER_PAGE,
     entityType: 'guide',
@@ -783,7 +772,7 @@ export function GuidesPage() {
         {(selectedPlatform === 'youtube' || selectedContentType === 'video') && (
           <div className="space-y-4">
             <div className="py-2 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#E8500A] italic block">📺 YouTube Smart Specs</span>
+              <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">📺 YouTube specs</span>
             </div>
 
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
@@ -831,7 +820,7 @@ export function GuidesPage() {
         {(selectedPlatform === 'instagram' || selectedContentType === 'reels' || selectedContentType === 'shorts') && (
           <div className="space-y-4">
             <div className="py-2 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#E8500A] italic block">📱 Reels Dynamic Specs</span>
+              <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">📱 Reels specs</span>
             </div>
 
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
@@ -879,7 +868,7 @@ export function GuidesPage() {
         {(selectedPlatform === 'blog' || selectedContentType === 'article') && (
           <div className="space-y-4">
             <div className="py-2 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#E8500A] italic block">✍️ Blog / Article Specs</span>
+              <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">✍️ Blog specs</span>
             </div>
 
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
@@ -1253,9 +1242,83 @@ export function GuidesPage() {
   ]);
 
   return (
-    <div id="guides-root" className="flex flex-col min-h-screen bg-choosify-feed">
-      <PageHeroBanner pageKey="guides" />
-      <HeroMarqueeTicker pageKey="guides" siteConfig={siteConfig} />
+    <div id="guides-root" className="flex flex-col min-h-screen bg-[#F4F7F9]">
+      <DcListingHero
+        titleBefore="Top Buying"
+        titleHighlight="Guides"
+        searchPlaceholder="Search guides, topics..."
+        quickChips={['Phones', 'Laptops', 'AC', 'Fashion', 'Beauty', 'Home']}
+        onSearch={(q) => setSearchQuery(q)}
+        onChipClick={(q) => setSearchQuery(q)}
+      />
+
+      <DcListingStickyFilters
+        overlapHero
+        items={[
+          {
+            id: 'featured',
+            icon: '★',
+            name: 'Featured',
+            sub: 'Editor picks',
+            bg: '#FFF3EA',
+            active: activeTab === 'Featured',
+            onClick: () => setActiveTab(activeTab === 'Featured' ? 'All' : 'Featured'),
+          },
+          {
+            id: 'youtube',
+            icon: '▶',
+            name: 'YouTube Guides',
+            sub: 'Video reviews',
+            bg: '#FDECEC',
+            active: selectedPlatform === 'youtube' || selectedContentType === 'video',
+            onClick: () => {
+              const on = selectedPlatform === 'youtube' || selectedContentType === 'video';
+              setSelectedPlatform(on ? null : 'youtube');
+              setSelectedContentType(on ? null : 'video');
+            },
+          },
+          {
+            id: 'blogs',
+            icon: '✍',
+            name: 'Buying Guides',
+            sub: 'In-depth reads',
+            bg: '#EFECFD',
+            active: selectedPlatform === 'blog' || selectedContentType === 'article',
+            onClick: () => {
+              const on = selectedPlatform === 'blog' || selectedContentType === 'article';
+              setSelectedPlatform(on ? null : 'blog');
+              setSelectedContentType(on ? null : 'article');
+            },
+          },
+          {
+            id: 'reels',
+            icon: '📱',
+            name: 'Reels & Shorts',
+            sub: 'Quick takes',
+            bg: '#EAF1FD',
+            active: selectedContentType === 'reels',
+            onClick: () => setSelectedContentType(selectedContentType === 'reels' ? null : 'reels'),
+          },
+          {
+            id: 'editors',
+            icon: '✨',
+            name: "Editor's Choice",
+            sub: 'Curated',
+            bg: '#E6F9EA',
+            active: activeTab === 'Editors Choice',
+            onClick: () => setActiveTab(activeTab === 'Editors Choice' ? 'All' : 'Editors Choice'),
+          },
+          {
+            id: 'popular',
+            icon: '🔥',
+            name: 'Most Popular',
+            sub: 'Trending now',
+            bg: '#FEF3E2',
+            active: activeTab === 'Most Popular',
+            onClick: () => setActiveTab(activeTab === 'Most Popular' ? 'All' : 'Most Popular'),
+          },
+        ]}
+      />
 
       {/* ACTIVE FILTER CHIPS ROW */}
       <ActiveFilterChips
@@ -1289,7 +1352,7 @@ export function GuidesPage() {
         activeId={activeSectionId}
         onNavigate={scrollToSection}
         allLabel="Discover & Learn"
-        profileLabel="Discover & Learn"
+        profileLabel="Buying guides"
       />
 
       <main className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
@@ -1313,8 +1376,8 @@ export function GuidesPage() {
             </div>
 
             <ListingAdRail
-              sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_LANDSCAPE}
-              sponsoredVariant="landscape"
+              sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
+              sponsoredVariant="portrait"
               showAdSense={false}
             />
          </aside>
@@ -1339,14 +1402,14 @@ export function GuidesPage() {
                        <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 mb-4 border border-gray-100">
                          <Search size={24} />
                        </div>
-                       <h3 className="font-sans text-lg font-black italic uppercase tracking-tighter text-[#1A1D4E] mb-1">No Results Found</h3>
+                       <h3 className="font-sans text-lg font-extrabold tracking-tight text-[#1A1D4E] mb-1">No results found</h3>
                        <p className="text-gray-400 text-xs font-semibold leading-relaxed max-w-sm">We couldn't find any guides matching your criteria. Try adjusting your search query or category.</p>
                      </div>
                   ) : (
                      <div id="guides-hybrid-feed" className="flex flex-col gap-6 scroll-mt-36 animate-fade-in duration-500">
                         {isAnyFilterActive && (
-                          <h4 className="font-sans text-xs font-black uppercase tracking-[0.25em] text-[#8a92a6] italic text-left">
-                            Filtered Results ({filteredBlogs.length})
+                          <h4 className="font-sans text-[13px] font-semibold tracking-tight text-[#9AA0AC] text-left">
+                            Filtered results ({filteredBlogs.length})
                           </h4>
                         )}
                         <div className={GUIDE_MEDIA_GRID}>
@@ -1366,12 +1429,6 @@ export function GuidesPage() {
              )}
              
              <PaginationBar showingCount={8} totalCount={156} className="mt-24 pt-16" />
-
-            <PopularSearchKeywords
-              title="Popular recommendation searches"
-              terms={popularSearchTerms}
-              className="mt-0 pt-10"
-            />
 
             <AdSenseSlot format="infeed" className="mt-6" />
          </div>

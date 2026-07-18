@@ -1,13 +1,18 @@
 import React, { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { Megaphone } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { getAllBrandPosts } from '../lib/brandPosts';
-import { getSpotlightContentBySlug } from '../utils/spotlightContentResolver';
+import {
+  getSpotlightContentBySlug,
+} from '../utils/spotlightContentResolver';
 import {
   resolveHeroVariant,
   spotlightContentToGuideShape,
 } from '../utils/spotlightMixedFeed';
+import { resolvePageSectionManifest } from '../lib/spotlight/content/sectionManifestRegistry';
+import { spotlightContentHref } from '../lib/spotlight/content';
+import { applySpotlightDetailsDemoOverlay, buildSpotlightDetailsDemoContent } from '../data/spotlight/spotlightDetailsDemos';
 import { GuideDetailPage } from './GuideDetailPage';
 
 const BRAND_LOGOS: Record<string, string> = {
@@ -16,7 +21,8 @@ const BRAND_LOGOS: Record<string, string> = {
 };
 
 /**
- * Universal Spotlight Content Page — restored Guide Details layout with adaptive hero only.
+ * Universal Spotlight Content Page — `/spotlight/:slug`
+ * Section-driven renderer; approved Guide Details visual shell.
  */
 export function SpotlightContentPage() {
   const { slug = '' } = useParams<{ slug: string }>();
@@ -33,7 +39,11 @@ export function SpotlightContentPage() {
     [allCatalogProducts, allCatalogGuides, allCreators],
   );
 
-  const content = useMemo(() => getSpotlightContentBySlug(slug, sources), [slug, sources]);
+  const content = useMemo(() => {
+    const resolved = getSpotlightContentBySlug(slug, sources);
+    const base = resolved ?? buildSpotlightDetailsDemoContent(slug);
+    return base ? applySpotlightDetailsDemoOverlay(base) : undefined;
+  }, [slug, sources]);
 
   const catalogGuide = useMemo(() => {
     if (!content) return undefined;
@@ -48,14 +58,18 @@ export function SpotlightContentPage() {
   }, [content, catalogGuide]);
 
   const heroVariant = content ? resolveHeroVariant(content) : undefined;
+  const sectionManifest = useMemo(
+    () => (content ? resolvePageSectionManifest(content) : []),
+    [content],
+  );
 
   if (!content || !guideShape) {
     return (
-      <div className="min-h-screen bg-choosify-feed flex flex-col items-center justify-center p-8 text-center">
-        <Megaphone size={32} className="text-gray-300 mb-4" />
-        <h1 className="text-xl font-black text-navy uppercase italic mb-2">Content Not Found</h1>
-        <p className="text-sm text-gray-500 mb-6">This Spotlight content may have moved or is no longer available.</p>
-        <Link to="/spotlight" className="text-[#E8500A] text-xs font-bold uppercase tracking-widest hover:underline">
+      <div className="min-h-screen bg-[#F4F7F9] flex flex-col items-center justify-center p-8 text-center font-sans">
+        <Megaphone size={32} className="text-[#9AA0AC] mb-4" />
+        <h1 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">Content not found</h1>
+        <p className="text-sm text-[#9AA0AC] mb-6">This Spotlight content may have moved or is no longer available.</p>
+        <Link to="/spotlight" className="text-[#FF5B00] text-sm font-bold hover:underline">
           Browse Spotlight
         </Link>
       </div>
@@ -76,6 +90,14 @@ export function SpotlightContentPage() {
       }
       backHref="/spotlight"
       backLabel="Back to Spotlight"
+      sectionManifest={sectionManifest}
+      spotlightContent={content}
     />
   );
+}
+
+/** Legacy `/spotlight/content/:slug` → canonical `/spotlight/:slug` */
+export function LegacySpotlightContentRedirect() {
+  const { slug = '' } = useParams<{ slug: string }>();
+  return <Navigate to={spotlightContentHref(slug)} replace />;
 }

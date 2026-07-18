@@ -29,12 +29,12 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
   ) : [];
 
   return (
-    <div id="brand-overview-section" className="bg-white rounded-[5px] p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36">
-      <div className="text-center mb-8 border-b border-gray-100 pb-5">
-        <h3 className="text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-1">
-          Brand Overview
+    <div id="brand-overview-section" className="scroll-mt-36 w-full">
+      <div className="mb-3.5 text-left">
+        <h3 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight mb-0.5">
+          BRAND OVERVIEW
         </h3>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic font-mono bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
+        <p className="text-[11.5px] text-[#9AA0AC] m-0">
           About {brandName}
         </p>
       </div>

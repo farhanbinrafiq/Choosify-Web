@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, X, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { X, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 
 interface ReportModalProps {
@@ -22,7 +22,7 @@ export function ReportModal({ isOpen, onClose, type, targetId, targetName }: Rep
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!description.trim()) return;
-    
+
     addReport(type, targetId, reason, description, evidence || undefined);
     setSubmitted(true);
     setTimeout(() => {
@@ -40,62 +40,61 @@ export function ReportModal({ isOpen, onClose, type, targetId, targetName }: Rep
     'Pricing Manipulation / Fraud',
     'Prohibited or Illegal Material',
     'Poor Business Practice / Abuse',
-    'Other'
+    'Other',
   ];
 
   return (
-    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-[#050514]/80 backdrop-blur-sm" onClick={onClose} />
-      
-      {/* Modal Card */}
-      <div className="relative w-full max-w-xl bg-white rounded-[32px] overflow-hidden shadow-high-density border border-gray-100 z-10 p-8 md:p-10 animate-in fade-in zoom-in-95 duration-200">
-        <button 
+    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 font-sans">
+      <div className="absolute inset-0 bg-[#000435]/55 backdrop-blur-sm" onClick={onClose} />
+
+      <div className="relative w-full max-w-xl bg-white rounded-2xl overflow-hidden shadow-2xl border border-[#E8EDF2] z-10 p-6 sm:p-8 animate-in fade-in zoom-in-95 duration-200">
+        <button
           onClick={onClose}
-          className="absolute top-6 right-6 w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-navy hover:bg-gray-100 transition-colors"
+          className="absolute top-5 right-5 w-9 h-9 rounded-lg bg-[#F4F7F9] flex items-center justify-center text-[#9AA0AC] hover:text-[#1A1A2E] hover:bg-[#E8EDF2] transition-colors"
         >
-          <X size={18} />
+          <X size={16} />
         </button>
 
         {submitted ? (
           <div className="text-center py-10">
-            <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center text-green-500 mx-auto mb-6">
-              <CheckCircle2 size={40} />
+            <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-5">
+              <CheckCircle2 size={32} />
             </div>
-            <h3 className="text-2xl font-black text-navy italic tracking-tight uppercase mb-3">Report Submitted</h3>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest italic">
-              Our safety compliance desk is reviewing your claim.
+            <h3 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">
+              Report submitted
+            </h3>
+            <p className="text-[13px] font-medium text-[#9AA0AC]">
+              Our team is reviewing your report.
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex items-center gap-4 border-b border-gray-50 pb-6">
-              <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500">
-                <ShieldAlert size={24} />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="flex items-center gap-3 border-b border-[#E8EDF2] pb-5">
+              <div className="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+                <ShieldAlert size={22} />
               </div>
               <div>
-                <h4 className="text-lg font-black text-navy uppercase italic tracking-tight">Report Safe Portal</h4>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic">
-                  Flagging {type}: <span className="text-orange-primary">{targetName}</span> (ID: {targetId})
+                <h4 className="text-lg font-extrabold text-[#1A1A2E] tracking-tight">Report an issue</h4>
+                <p className="text-[13px] font-medium text-[#9AA0AC]">
+                  Flagging {type}: <span className="text-[#FF5B00]">{targetName}</span>
                 </p>
               </div>
             </div>
 
-            {/* Reason Selection */}
             <div>
-              <label className="block text-[9px] font-black uppercase text-gray-400 tracking-widest mb-3 italic">
-                Reason for Reporting
+              <label className="block text-[12px] font-semibold text-[#9AA0AC] mb-2.5">
+                Reason
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {reasons.map((r, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setReason(r)}
-                    className={`px-5 py-3 rounded-2xl text-left text-xs font-bold border transition-all ${
-                      reason === r 
-                        ? 'bg-navy text-white border-navy shadow-lg shadow-navy/20' 
-                        : 'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100'
+                    className={`px-4 py-2.5 rounded-xl text-left text-[13px] font-semibold border transition-all ${
+                      reason === r
+                        ? 'bg-[#000435] text-white border-[#000435]'
+                        : 'bg-[#F4F7F9] text-[#1A1A2E]/80 border-[#E8EDF2] hover:border-[#d5dce5]'
                     }`}
                   >
                     {r}
@@ -104,49 +103,46 @@ export function ReportModal({ isOpen, onClose, type, targetId, targetName }: Rep
               </div>
             </div>
 
-            {/* Description Details */}
             <div>
-              <label className="block text-[9px] font-black uppercase text-gray-400 tracking-widest mb-3 italic">
-                Detailed Explanation
+              <label className="block text-[12px] font-semibold text-[#9AA0AC] mb-2.5">
+                Details
               </label>
               <textarea
                 required
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe the discrepancy, fake representation, or scam attempt in detail to aid verification..."
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-xs font-bold text-navy placeholder:text-gray-300 focus:outline-none focus:border-navy focus:bg-white transition-all resize-none"
+                placeholder="Describe the issue to help our review team…"
+                className="w-full bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl p-3.5 text-sm font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00]/40 focus:bg-white transition-all resize-none"
               />
             </div>
 
-            {/* Evidence Link */}
             <div>
-              <label className="block text-[9px] font-black uppercase text-gray-400 tracking-widest mb-3 italic">
-                Evidence Link / Image URL (Optional)
+              <label className="block text-[12px] font-semibold text-[#9AA0AC] mb-2.5">
+                Evidence link (optional)
               </label>
               <input
                 type="text"
                 value={evidence}
                 onChange={(e) => setEvidence(e.target.value)}
-                placeholder="https://imgur.com/your-proof.png"
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-xs font-bold text-navy placeholder:text-gray-300 focus:outline-none focus:border-navy focus:bg-white transition-all"
+                placeholder="https://…"
+                className="w-full bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl px-3.5 py-3 text-sm font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00]/40 focus:bg-white transition-all"
               />
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-4 pt-4 border-t border-gray-50">
+            <div className="flex gap-3 pt-4 border-t border-[#E8EDF2]">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-4 bg-gray-50 hover:bg-gray-100 text-gray-500 text-[10px] font-black uppercase tracking-widest rounded-full transition-colors italic"
+                className="flex-1 py-3 bg-[#F4F7F9] hover:bg-[#E8EDF2] text-[#1A1A2E] text-[13px] font-bold tracking-tight rounded-xl transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] italic"
+                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white text-[13px] font-bold tracking-tight rounded-xl transition-all"
               >
-                Submit Report
+                Submit report
               </button>
             </div>
           </form>

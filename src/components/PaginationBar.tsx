@@ -9,6 +9,9 @@ export interface PaginationBarProps {
   totalCount?: number;
   onPageChange?: (page: number) => void;
   className?: string;
+  /** Choosify.dc.html pageNums: square 32px, no arrows, no summary (default). */
+  showArrows?: boolean;
+  showSummary?: boolean;
 }
 
 function buildPageList(current: number, total: number): (number | '...')[] {
@@ -20,6 +23,7 @@ function buildPageList(current: number, total: number): (number | '...')[] {
   return [1, '...', current, '...', total];
 }
 
+/** Choosify.dc.html `pageNums` — 32×32, radius 6px, active #FF5B00 */
 export function PaginationBar({
   currentPage = 1,
   totalPages = 12,
@@ -27,27 +31,40 @@ export function PaginationBar({
   totalCount,
   onPageChange,
   className,
+  showArrows = false,
+  showSummary = false,
 }: PaginationBarProps) {
   const pages = buildPageList(currentPage, totalPages);
   const showing = showingCount ?? totalCount ?? 0;
   const total = totalCount ?? showing;
 
+  const pageBtn =
+    'w-8 h-8 min-w-[32px] min-h-[32px] shrink-0 rounded-md flex items-center justify-center text-xs font-bold transition-colors cursor-pointer';
+
   return (
-    <div className={cn('mt-16 pt-12 border-t border-gray-100 flex flex-col items-center gap-6', className)}>
-      <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-full px-2">
-        <button
-          type="button"
-          disabled={currentPage <= 1}
-          onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
-          className="w-9 h-9 min-w-[36px] min-h-[36px] shrink-0 rounded-full flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all disabled:opacity-40 disabled:pointer-events-none group"
-          aria-label="Previous page"
-        >
-          <ArrowRight size={15} className="rotate-180 group-hover:-translate-x-0.5 transition-transform" />
-        </button>
+    <div className={cn('mt-7 flex flex-col items-center gap-4', className)}>
+      <div className="flex flex-wrap items-center justify-center gap-2 max-w-full px-2">
+        {showArrows && (
+          <button
+            type="button"
+            disabled={currentPage <= 1}
+            onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
+            className={cn(
+              pageBtn,
+              'bg-white border border-[#E5E7EB] text-[#1A1A2E] hover:border-[#FF5B00] hover:text-[#FF5B00] disabled:opacity-40 disabled:pointer-events-none',
+            )}
+            aria-label="Previous page"
+          >
+            <ArrowRight size={14} className="rotate-180" />
+          </button>
+        )}
 
         {pages.map((page, i) =>
           page === '...' ? (
-            <span key={`ellipsis-${i}`} className="w-9 h-9 flex items-center justify-center text-[11px] font-bold text-gray-300">
+            <span
+              key={`ellipsis-${i}`}
+              className="w-8 h-8 flex items-center justify-center text-xs font-bold text-[#9AA0AC]"
+            >
               …
             </span>
           ) : (
@@ -56,10 +73,10 @@ export function PaginationBar({
               type="button"
               onClick={() => onPageChange?.(page)}
               className={cn(
-                'w-9 h-9 min-w-[36px] min-h-[36px] shrink-0 rounded-full flex items-center justify-center text-[11px] font-black transition-all',
+                pageBtn,
                 page === currentPage
-                  ? 'bg-[#E8500A] text-white border border-[#E8500A]'
-                  : 'bg-white border border-[#e8edf2] text-navy hover:border-[#E8500A] hover:text-[#E8500A]',
+                  ? 'bg-[#FF5B00] text-white border-0'
+                  : 'bg-white border border-[#E5E7EB] text-[#1A1A2E] hover:border-[#FF5B00] hover:text-[#FF5B00]',
               )}
               aria-label={`Page ${page}`}
               aria-current={page === currentPage ? 'page' : undefined}
@@ -69,20 +86,26 @@ export function PaginationBar({
           ),
         )}
 
-        <button
-          type="button"
-          disabled={currentPage >= totalPages}
-          onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
-          className="w-9 h-9 min-w-[36px] min-h-[36px] shrink-0 rounded-full flex items-center justify-center bg-white border border-[#e8edf2] text-navy hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A] transition-all disabled:opacity-40 disabled:pointer-events-none group"
-          aria-label="Next page"
-        >
-          <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
-        </button>
+        {showArrows && (
+          <button
+            type="button"
+            disabled={currentPage >= totalPages}
+            onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
+            className={cn(
+              pageBtn,
+              'bg-white border border-[#E5E7EB] text-[#1A1A2E] hover:border-[#FF5B00] hover:text-[#FF5B00] disabled:opacity-40 disabled:pointer-events-none',
+            )}
+            aria-label="Next page"
+          >
+            <ArrowRight size={14} />
+          </button>
+        )}
       </div>
 
-      {(showing > 0 || total > 0) && (
-        <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">
-          Showing <span className="text-navy">{showing}</span> of <span className="text-navy">{total}</span> results
+      {showSummary && (showing > 0 || total > 0) && (
+        <p className="text-[10px] font-bold text-[#9AA0AC] uppercase tracking-[0.16em]">
+          Showing <span className="text-[#1A1A2E]">{showing}</span> of{' '}
+          <span className="text-[#1A1A2E]">{total}</span> results
         </p>
       )}
     </div>

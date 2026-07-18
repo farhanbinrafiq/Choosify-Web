@@ -25,7 +25,7 @@ export function PageBreadcrumbsBar({ className }: { className?: string }) {
       )}
     >
       <div className="max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-4">
-        <ol className="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 italic list-none m-0 p-0">
+        <ol className="flex flex-wrap items-center gap-2 text-[12px] font-medium tracking-tight text-[#9AA0AC] list-none m-0 p-0">
           {items.map((crumb, index) => {
             const isLast = index === items.length - 1;
 

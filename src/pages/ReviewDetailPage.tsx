@@ -15,14 +15,13 @@ import { CREATORS } from '../data/creators';
 import { mockGuides } from '../data/mockGuides';
 import { ProductCard } from '../components/ProductCard';
 import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
-import { PageHeroBanner } from '../components/PageHeroBanner';
-import { cn } from '../lib/utils';
+import { catalogGuideHref } from '../lib/spotlight/content';
 
 function WorkspacePlaceholder({ title, description }: { title: string; description: string }) {
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-[5px] border border-[#e8edf2] shadow-sm min-h-[280px]">
-      <h3 className="text-lg font-black uppercase text-navy italic tracking-tight mb-2">{title}</h3>
-      <p className="text-[11px] text-gray-500 max-w-md leading-relaxed">{description}</p>
+    <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-xl border border-[#E8EDF2] shadow-sm min-h-[280px]">
+      <h3 className="text-lg font-extrabold text-[#1A1A2E] tracking-tight mb-2">{title}</h3>
+      <p className="text-[12.5px] text-[#9AA0AC] max-w-md leading-relaxed">{description}</p>
     </div>
   );
 }
@@ -83,122 +82,144 @@ export function ReviewDetailPage() {
 
   if (!review) {
     return (
-      <div className="min-h-screen bg-choosify-feed flex flex-col items-center justify-center p-8 text-center">
-        <h1 className="text-xl font-black text-navy uppercase italic mb-2">Review Not Found</h1>
-        <p className="text-sm text-gray-500 mb-6">This review may have moved or is no longer available.</p>
-        <Link to="/guides" className="text-[#E8500A] text-xs font-bold uppercase tracking-widest hover:underline">
-          Back to Discover & Learn
+      <div className="min-h-screen bg-[#F4F7F9] flex flex-col items-center justify-center p-8 text-center">
+        <h1 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">Review not found</h1>
+        <p className="text-sm text-[#9AA0AC] mb-6">This review may have moved or is no longer available.</p>
+        <Link to="/guides" className="text-[#FF5B00] text-[12.5px] font-bold hover:underline">
+          Back to buying guides
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-choosify-feed">
-      <PageHeroBanner pageKey="guides" />
+    <div className="min-h-screen bg-[#F4F7F9]">
+      <div className="bg-[#000435] text-white px-5 sm:px-10 py-7">
+        <div className="max-w-5xl mx-auto">
+          <nav className="text-xs text-white/45 mb-3" aria-label="Breadcrumb">
+            <Link to="/" className="hover:text-white/80">Home</Link>
+            <span className="mx-1.5">›</span>
+            <Link to="/guides" className="hover:text-white/80">Guides</Link>
+            <span className="mx-1.5">›</span>
+            <span className="text-[#FF5B00]">Review</span>
+          </nav>
+          <div className="text-[11px] font-bold text-[#FF5B00] tracking-wide mb-1.5">REVIEW DETAILS</div>
+          <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight leading-tight max-w-3xl">
+            {review.title}
+          </h1>
+        </div>
+      </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-5 py-8 -mt-4 relative z-[1]">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-[#E8500A] mb-6 bg-transparent border-none cursor-pointer"
+          className="inline-flex items-center gap-2 text-[12px] font-semibold text-[#9AA0AC] hover:text-[#FF5B00] mb-5 bg-transparent border-none cursor-pointer"
         >
           <ArrowLeft size={14} /> Back
         </button>
 
-        <header className="bg-white rounded-[5px] border border-[#e8edf2] p-6 md:p-8 shadow-sm text-left mb-6">
-          <p className="text-[10px] font-black uppercase tracking-widest text-[#E8500A] mb-2">Review Details</p>
-          <h1 className="text-2xl md:text-3xl font-black text-navy italic uppercase tracking-tight leading-tight mb-3">
-            {review.title}
-          </h1>
-          <p className="text-sm text-gray-500 leading-relaxed mb-4">{review.excerpt}</p>
-          <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-            <span className="inline-flex items-center gap-1"><Star size={12} className="text-[#E8500A]" /> Verified review</span>
+        <header className="bg-white rounded-xl border border-[#E8EDF2] p-6 md:p-8 shadow-sm text-left mb-6">
+          <p className="text-[12.5px] text-[#4B5563] leading-relaxed mb-4">{review.excerpt}</p>
+          <div className="flex flex-wrap items-center gap-3 text-[11.5px] font-semibold text-[#9AA0AC]">
+            <span className="inline-flex items-center gap-1"><Star size={12} className="text-[#FF5B00]" /> Verified review</span>
             {review.creatorId && (
-              <Link to={`/creators/${review.creatorId}`} className="inline-flex items-center gap-1 text-[#E8500A] hover:underline">
+              <Link to={`/creators/${review.creatorId}`} className="inline-flex items-center gap-1 text-[#FF5B00] hover:underline">
                 <User size={12} /> {review.author}
               </Link>
+            )}
+            {!review.creatorId && review.author && (
+              <span className="inline-flex items-center gap-1"><User size={12} /> {review.author}</span>
             )}
           </div>
         </header>
 
-        {review.thumbnail && (
-          <div className="relative aspect-video rounded-[5px] overflow-hidden border border-[#e8edf2] bg-black mb-6 group">
-            <img src={review.thumbnail} alt={review.title} className="w-full h-full object-cover opacity-90" />
+        {(review.thumbnail || review.videoUrl) && (
+          <div className="bg-[#000435] rounded-xl overflow-hidden mb-6 aspect-video relative">
+            {review.thumbnail ? (
+              <img src={review.thumbnail} alt="" className="w-full h-full object-cover opacity-90" />
+            ) : null}
             {review.videoUrl && (
               <a
                 href={review.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors"
+                className="absolute inset-0 flex items-center justify-center bg-black/25 hover:bg-black/35 transition-colors"
               >
-                <span className="w-14 h-14 rounded-full bg-[#E8500A] text-white flex items-center justify-center shadow-lg">
-                  <Play size={24} fill="currentColor" />
+                <span className="w-14 h-14 rounded-full bg-[#FF5B00] text-white flex items-center justify-center shadow-lg">
+                  <Play size={22} fill="currentColor" />
                 </span>
               </a>
             )}
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-8">
-          <Link to="/compare" className={cn('inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#e8edf2] bg-white hover:border-[#E8500A]/30')}>
-            <Scale size={12} /> Compare
-          </Link>
-          <button type="button" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#e8edf2] bg-white hover:border-[#E8500A]/30 cursor-pointer">
-            <Heart size={12} /> Wishlist
-          </button>
-          {linkedProducts[0] && (
-            <Link to={`/products/${linkedProducts[0].id}#buy`} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest bg-[#E8500A] text-white hover:bg-[#CF4400]">
-              <ShoppingBag size={12} /> Buy Now
-            </Link>
-          )}
-        </div>
-
-        {linkedProducts.length > 0 && (
-          <section className="mb-10 text-left">
-            <div className="flex items-end justify-between mb-4 border-b border-gray-100 pb-3">
-              <h2 className="text-base font-semibold text-[#1a1a2e]">Featured <span className="text-[#E8500A]">Products</span></h2>
-              <Link to={`/guides/${slug}/products`} className="text-[10px] font-bold uppercase text-[#E8500A] hover:underline inline-flex items-center gap-1">
-                View all <ChevronRight size={12} />
-              </Link>
-            </div>
+        <section className="mb-10">
+          <h2 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">Linked products</h2>
+          <p className="text-[12.5px] text-[#9AA0AC] mb-4">Shop items featured in this review</p>
+          {linkedProducts.length > 0 ? (
             <div className={PRODUCT_CARD_GRID}>
-              {linkedProducts.slice(0, 4).map((product) => (
-                <ProductCard key={product.id} product={product} variant="grid" />
+              {linkedProducts.map((p) => (
+                <ProductCard key={String(p.id)} product={p as any} />
               ))}
             </div>
-          </section>
-        )}
+          ) : (
+            <WorkspacePlaceholder
+              title="No linked products"
+              description="Products for this review will appear here when available."
+            />
+          )}
+        </section>
 
-        {review.creatorId && (
-          <section className="mb-10 bg-white rounded-[5px] border border-[#e8edf2] p-6 text-left">
-            <h2 className="text-sm font-black uppercase text-navy mb-2 flex items-center gap-2">
-              <User size={16} className="text-[#E8500A]" /> About the Creator
-            </h2>
-            <p className="text-xs text-gray-500 mb-4">Creator profile is secondary — explore the full profile when you want more context.</p>
-            <Link to={`/creators/${review.creatorId}`} className="text-[10px] font-black uppercase tracking-widest text-[#E8500A] hover:underline inline-flex items-center gap-1">
-              View Creator Profile <ChevronRight size={12} />
+        <section className="mb-10">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <h2 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight">Related reviews</h2>
+            <Link to="/guides" className="text-[12.5px] font-bold text-[#FF5B00] inline-flex items-center gap-1 hover:underline">
+              View all <ChevronRight size={14} />
             </Link>
-          </section>
-        )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {relatedReviews.map((g: any) => (
+              <Link
+                key={String(g.id || g.slug)}
+                to={catalogGuideHref(g)}
+                className="bg-white border border-[#E8EDF2] rounded-xl overflow-hidden hover:border-[#FF5B00]/40 transition-colors"
+              >
+                <div className="aspect-[16/10] bg-[#F4F7F9]">
+                  {(g.thumbnail || g.image) && (
+                    <img src={g.thumbnail || g.image} alt="" className="w-full h-full object-cover" />
+                  )}
+                </div>
+                <div className="p-3.5">
+                  <p className="text-[13px] font-bold text-[#1A1A2E] line-clamp-2">{g.title}</p>
+                  <p className="text-[11px] text-[#9AA0AC] mt-1">{g.author || 'Choosify Guides'}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-        {relatedReviews.length > 0 && (
-          <section className="text-left">
-            <h2 className="text-base font-semibold text-[#1a1a2e] mb-4">Related <span className="text-[#E8500A]">Reviews</span></h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {relatedReviews.map((g: any) => (
-                <Link
-                  key={g.id}
-                  to={`/reviews/${g.slug || g.id}`}
-                  className="block p-4 bg-white border border-[#e8edf2] rounded-[5px] hover:border-[#E8500A]/30 transition-colors"
-                >
-                  <p className="text-[11px] font-bold text-navy line-clamp-2">{g.title}</p>
-                  <p className="text-[10px] text-gray-400 mt-1">{g.author}</p>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+        <div className="flex flex-wrap gap-2.5">
+          <Link
+            to="/products"
+            className="inline-flex items-center gap-1.5 bg-[#FF5B00] text-white px-4 py-2.5 rounded-lg text-xs font-bold"
+          >
+            <ShoppingBag size={14} /> Browse products
+          </Link>
+          <Link
+            to="/compare"
+            className="inline-flex items-center gap-1.5 bg-white border border-[#E8EDF2] text-[#1A1A2E] px-4 py-2.5 rounded-lg text-xs font-bold"
+          >
+            <Scale size={14} /> Compare
+          </Link>
+          <Link
+            to="/dashboard"
+            state={{ activeTab: 'saved-products' }}
+            className="inline-flex items-center gap-1.5 bg-white border border-[#E8EDF2] text-[#1A1A2E] px-4 py-2.5 rounded-lg text-xs font-bold"
+          >
+            <Heart size={14} /> Wishlist
+          </Link>
+        </div>
       </div>
     </div>
   );

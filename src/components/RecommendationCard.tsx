@@ -4,8 +4,11 @@ import { BookOpen, Play, Heart, ArrowRight, Share2, Eye, Youtube, Instagram } fr
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
 
+import { catalogGuideHref } from '../lib/spotlight/content';
+
 export function RecommendationCard(props: any) {
   const { guide, index, variant } = props;
+  const detailHref = catalogGuideHref(guide);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
 
@@ -39,7 +42,7 @@ export function RecommendationCard(props: any) {
   if (isFeatured) {
     return (
       <Link 
-        to={`/guides/${guide.id}`} 
+        to={detailHref} 
         className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] hover:border-orange-primary/30 transition-all duration-300 w-full relative p-3"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -114,7 +117,7 @@ export function RecommendationCard(props: any) {
   if (isShorts && !isFeatured) {
     return (
       <Link 
-        to={`/guides/${guide.id}`} 
+        to={detailHref} 
         className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 h-full relative p-3 max-w-[285px] sm:max-w-[320px] md:max-w-none mx-auto w-full"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -180,7 +183,7 @@ export function RecommendationCard(props: any) {
 
   return (
     <Link 
-      to={`/guides/${guide.id}`} 
+      to={detailHref} 
       className="group cursor-pointer block bg-white rounded-[5px] overflow-hidden border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 flex flex-col h-full"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

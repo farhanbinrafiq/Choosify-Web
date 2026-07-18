@@ -20,7 +20,7 @@ interface SearchableSelectFieldProps {
 
 function FieldLabel({ children, required = false }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">
+    <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-1">
       {children}
       {required && <span className="text-[#E8500A] ml-1">*</span>}
     </label>

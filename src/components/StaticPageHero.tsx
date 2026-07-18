@@ -8,7 +8,7 @@ type StaticPageHeroProps = {
   resetKey?: string | number;
 };
 
-/** Standard dark gradient page hero for legal and static pages. */
+/** Compact navy hero for legal/static pages — Choosify.dc.html #000435 chrome */
 export function StaticPageHero({
   children,
   className,
@@ -16,7 +16,7 @@ export function StaticPageHero({
   return (
     <section
       className={cn(
-        'relative h-[303px] flex items-center choosify-dark-gradient text-white border-b border-white/5',
+        'relative min-h-[160px] sm:min-h-[180px] flex items-center bg-[#000435] text-white border-b border-white/5',
         className,
       )}
     >

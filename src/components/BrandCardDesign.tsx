@@ -1,6 +1,9 @@
 import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, ArrowRight } from 'lucide-react';
+import { Heart } from 'lucide-react';
+import { useDashboard } from '../context/DashboardContext';
+import toast from 'react-hot-toast';
+import { cn } from '../lib/utils';
 
 interface BrandCardDesignProps {
   brand: {
@@ -22,38 +25,21 @@ interface BrandCardDesignProps {
     isHot?: boolean;
     isFeatured?: boolean;
     coverImage?: string;
+    brandColor?: string;
   };
   onClick?: () => void;
 }
 
-const BRAND_COVERS: Record<string, string> = {
-  "Samsung": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&q=80",
-  "Apple": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=600&q=80",
-  "Apex": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80",
-  "Bata": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=80",
-  "Sony": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
-  "Lotto": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&q=80",
-  "La Reve": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80",
-  "Le Reve": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80",
-  "Perfume World": "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&q=80",
-  "Pickaboo": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80",
-  "Aarong": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&q=80",
-  "Yellow": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80",
-  "Sailor": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80",
-  "Ecstasy": "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80",
-  "Richman": "https://images.unsplash.com/photo-1488161628813-04466f872be2?w=600&q=80",
-  "Star Tech": "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=600&q=80",
-  "Choosify": "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=600&q=80",
-  "FFF Sourcing Ltd": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&q=80"
-};
-
-const CATEGORY_COVERS: Record<string, string> = {
-  "Fashion": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80",
-  "Tech": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80",
-  "Electronics": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
-  "Beauty": "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&q=80",
-  "Sports": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&q=80",
-};
+const BRAND_COLORS = [
+  '#000435',
+  '#FF5B00',
+  '#2323FF',
+  '#07A828',
+  '#EB4501',
+  '#6C4CFF',
+  '#0F766E',
+  '#BE123C',
+];
 
 function formatNumber(num: number): string {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -61,10 +47,21 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
+function hashColor(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) | 0;
+  return BRAND_COLORS[Math.abs(h) % BRAND_COLORS.length];
+}
+
 export function mapBrandToCardDesign(brand: any, fallback?: any) {
   const originalBrand = fallback || brand;
   const category = brand.category || originalBrand?.category || 'Fashion';
-  const bestFor = category === 'Fashion' ? 'Footwear' : category === 'Tech' || category === 'Electronics' ? 'Electronics' : category;
+  const bestFor =
+    category === 'Fashion'
+      ? 'Footwear'
+      : category === 'Tech' || category === 'Electronics'
+        ? 'Electronics'
+        : category;
   const priceRange =
     originalBrand?.priceRange ||
     (category === 'Fashion' ? '৳500-2000' : '৳5000-25000');
@@ -77,197 +74,140 @@ export function mapBrandToCardDesign(brand: any, fallback?: any) {
     bestFor,
     priceRange,
     rating: brand.rating || brand.ratings || 4.8,
-    reviewCount: brand.reviewCount ?? brand.reviews ?? (Math.floor((brand.followers || 8400) * 0.1) || 840),
+    reviewCount:
+      (brand.reviewCount ?? brand.reviews ?? Math.floor((brand.followers || 8400) * 0.1)) || 840,
     isFeatured: !!(brand.isFeatured || brand.featuredFlag),
     isHot: !!brand.isHot,
-    successScore: brand.successScore || (brand.recommended ? parseInt(String(brand.recommended), 10) : undefined) || Math.round((brand.rating || 4.8) * 20),
-    tagline: brand.tagline || brand.description || originalBrand?.description || 'Traditional & contemporary clothing',
+    successScore:
+      brand.successScore ||
+      (brand.recommended ? parseInt(String(brand.recommended), 10) : undefined) ||
+      Math.round((brand.rating || 4.8) * 20),
+    tagline:
+      brand.tagline ||
+      brand.description ||
+      originalBrand?.description ||
+      'Traditional & contemporary clothing',
     coverImage: brand.coverImage,
+    brandColor: brand.brandColor || brand.primaryColor,
   };
 }
 
-export const BrandCardDesign = memo(function BrandCardDesign({ brand, onClick }: BrandCardDesignProps) {
-  const reviewsCount = brand.reviews ?? brand.reviewCount ?? 840;
+/** Choosify.dc.html Brands List directory tile */
+export const BrandCardDesign = memo(function BrandCardDesign({
+  brand,
+  onClick,
+}: BrandCardDesignProps) {
+  const { savedBrands, setSavedBrands } = useDashboard();
   const bestForText = brand.bestFor ?? brand.category ?? 'Fashion';
-  const taglineText = brand.tagline || brand.description || 'Traditional & contemporary clothing';
-  
+  const score =
+    brand.successScore ||
+    (brand.recommended ? parseInt(String(brand.recommended), 10) : null) ||
+    Math.round((brand.rating || 4.5) * 20);
+
   let priceText = '৳500-2000';
-  if (brand.priceRange) {
-    priceText = brand.priceRange;
-  } else if (brand.minPrice !== undefined && brand.maxPrice !== undefined) {
+  if (brand.priceRange) priceText = brand.priceRange;
+  else if (brand.minPrice !== undefined && brand.maxPrice !== undefined) {
     priceText = `৳${formatNumber(brand.minPrice)}-${formatNumber(brand.maxPrice)}`;
   } else if (brand.minPrice !== undefined) {
-    priceText = `৳${formatNumber(brand.minPrice)}`;
+    priceText = `From ৳${formatNumber(brand.minPrice)}`;
   }
 
-  const score = brand.successScore 
-    || (brand.recommended ? parseInt(brand.recommended) : null)
-    || Math.round((brand.rating || 4.5) * 20);
+  const bannerBg = brand.brandColor || hashColor(brand.name);
+  const isSaved = savedBrands?.some((b: any) => String(b.id) === String(brand.id));
 
-  const coverUrl = brand.coverImage 
-    || BRAND_COVERS[brand.name] 
-    || CATEGORY_COVERS[brand.category || ''] 
-    || "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=600&q=80";
+  const circumference = 2 * Math.PI * 18;
+  const dashOffset = circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
+
+  const toggleWish = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!setSavedBrands) return;
+    if (isSaved) {
+      setSavedBrands((prev: any[]) => prev.filter((b) => String(b.id) !== String(brand.id)));
+      toast.success('Removed from saved brands');
+    } else {
+      setSavedBrands((prev: any[]) => [...prev, brand]);
+      toast.success('Saved brand');
+    }
+  };
 
   return (
     <Link
       to={`/brands/${brand.id}`}
       onClick={onClick}
-      className="block w-full min-w-0 h-full bg-white rounded-[10px] border border-[#e8edf2] hover:shadow-lg hover:border-orange-primary/40 transition-all duration-300 overflow-hidden group select-none flex flex-col justify-between relative"
+      className="block w-full min-w-0 h-full bg-white rounded-[10px] border border-[#E8EDF2] overflow-hidden relative group select-none"
     >
-      {/* FEATURED BADGE */}
-      {brand.isFeatured && (
-        <div className="absolute top-3 right-3 z-20">
-          <span className="bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
-            Featured
-          </span>
-        </div>
-      )}
-      {brand.isHot && !brand.isFeatured && (
-        <div className="absolute top-3 right-3 z-20">
-          <span className="bg-orange-deep text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
-            Hot
-          </span>
-        </div>
-      )}
-
-      {/* COVER PHOTO SECTION */}
-      <div className="relative w-full h-[112px] bg-gradient-to-r from-heading/10 to-orange-primary/10 overflow-hidden shrink-0">
-        <img 
-          src={coverUrl}
-          alt={`${brand.name} cover`}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/5" />
-      </div>
-
-      {/* LOGO - overlapping cover at bottom-left */}
-      <div className="absolute top-[72px] left-3 z-10">
-        <div className="w-16 h-16 rounded-[8px] border-[3px] border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
-          {brand.logo.startsWith('http') || brand.logo.startsWith('/') ? (
-            <img 
-              src={brand.logo} 
-              className="w-full h-full object-cover" 
-              alt={brand.name}
-              loading="lazy"
-            />
-          ) : (
-            <span className="text-xl font-black text-heading tracking-tight">{brand.logo}</span>
-          )}
-        </div>
-      </div>
-
-      {/* BRAND INFO SECTION */}
-      <div className="px-3 pt-11 pb-2.5 text-left flex-1 flex flex-col justify-center min-w-0">
-        <h3 className="text-sm font-black text-heading uppercase line-clamp-1 mb-1 leading-tight tracking-tight">
+      {/* Color banner — Choosify.dc.html */}
+      <div
+        className="relative h-[100px] flex items-center justify-center px-3"
+        style={{ background: bannerBg }}
+      >
+        <div className="text-[22px] font-extrabold text-white text-center leading-tight line-clamp-2">
           {brand.name}
-        </h3>
-        
-        <p className="text-[11px] text-gray-500 mb-1.5 line-clamp-1 leading-normal font-medium">
-          {taglineText}
-        </p>
-        
-        <div className="flex items-center gap-1.5 leading-none mt-0.5">
-          <div className="flex items-center text-yellow-400">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star 
-                key={i} 
-                size={11} 
-                className={cn(
-                  "fill-current", 
-                  i < Math.floor(brand.rating) ? "text-yellow-400" : "text-gray-200 fill-none"
-                )} 
-              />
-            ))}
-          </div>
-          <span className="text-xs font-bold text-heading">
-            {brand.rating.toFixed(1)}
-          </span>
-          <span className="text-[11px] text-gray-400">
-            ({formatNumber(reviewsCount)} reviews)
-          </span>
         </div>
+        <button
+          type="button"
+          onClick={toggleWish}
+          className="absolute top-2 right-2 w-[26px] h-[26px] rounded-full bg-white/92 flex items-center justify-center border-0 cursor-pointer z-10"
+          aria-label={isSaved ? 'Unsave brand' : 'Save brand'}
+        >
+          <Heart
+            size={12}
+            strokeWidth={1.6}
+            className={cn('text-[#FF5B00]', isSaved && 'fill-[#FF5B00]')}
+          />
+        </button>
       </div>
 
-      {/* STATS SECTION - 3 COLUMNS */}
-      <div className="border-t border-b border-[#e8edf2] px-3 py-2.5 bg-[#F8FBFD] shrink-0">
-        <div className="grid grid-cols-3 gap-1">
-          {/* Column 1: Best For */}
-          <div className="text-center min-w-0">
-            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
-              Best For
-            </div>
-            <div className="text-xs font-black text-heading truncate leading-tight">
-              {bestForText}
-            </div>
+      <div className="p-4 text-center flex flex-col flex-1">
+        <div className="flex items-center justify-center gap-1 mb-0.5">
+          <h3 className="text-[14px] font-extrabold text-[#1A1A2E] truncate">{brand.name}</h3>
+          <span className="text-[#6C4CFF] text-[12px] font-extrabold" aria-label="Verified">
+            ✓
+          </span>
+        </div>
+        <p className="text-[11px] text-[#9AA0AC] mb-3">✓ Verified Brand</p>
+
+        {/* Stats — dc Brands List: Best For | Price Range | Success ring */}
+        <div className="flex items-center justify-between gap-1 px-1 py-3.5 mb-3.5">
+          <div className="min-w-0 text-left">
+            <div className="text-[13px] font-extrabold text-[#1A1A2E] leading-tight">Best For</div>
+            <div className="text-[12px] font-bold text-[#FF000D] truncate">{bestForText}</div>
           </div>
-          
-          {/* Column 2: Price Range */}
-          <div className="text-center border-l border-r border-[#e8edf2] min-w-0 px-1">
-            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 leading-none">
-              Price Range
+          <div className="min-w-0 text-center px-1">
+            <div className="text-[15px] font-extrabold text-[#2323FF] truncate leading-tight">
+              {priceText.replace(/^From\s+/i, '').split('-')[0] || priceText}
             </div>
-            <div className="text-xs font-black text-orange-primary truncate leading-tight">
-              {priceText}
-            </div>
+            <div className="text-[9.5px] text-[#4B5563]">Price Range</div>
           </div>
-          
-          {/* Column 3: Success Score — circular SVG meter */}
-          <div className="text-center min-w-0 flex flex-col items-center justify-center">
-            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1 leading-none">
-              Success
-            </div>
-            <div className="relative w-9 h-9 shrink-0">
-              <svg viewBox="0 0 44 44" className="w-9 h-9 -rotate-90">
-                {/* Background track */}
+          <div className="min-w-0 flex flex-col items-center text-center">
+            <div className="relative w-11 h-11 mb-0.5">
+              <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
+                <circle cx="22" cy="22" r="18" fill="none" stroke="#F1F1F3" strokeWidth="4" />
                 <circle
                   cx="22"
                   cy="22"
                   r="18"
                   fill="none"
-                  stroke="#E5E7EB"
-                  strokeWidth="4"
-                />
-                {/* Progress arc */}
-                <circle
-                  cx="22"
-                  cy="22"
-                  r="18"
-                  fill="none"
-                  stroke="#10B981"
+                  stroke="#07DD05"
                   strokeWidth="4"
                   strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 18}`}
-                  strokeDashoffset={`${2 * Math.PI * 18 * (1 - score / 100)}`}
-                  style={{ transition: 'stroke-dashoffset 0.8s ease-out' }}
+                  strokeDasharray={circumference}
+                  strokeDashoffset={dashOffset}
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-black text-emerald-600 leading-none">
-                  {score}%
-                </span>
+                <span className="text-[10px] font-extrabold text-[#1A1A2E]">{score}%</span>
               </div>
             </div>
+            <div className="text-[9px] text-[#9AA0AC]">Success</div>
           </div>
         </div>
-      </div>
 
-      {/* CTA BUTTON */}
-      <div className="px-3 py-2.5 shrink-0 bg-white">
-        <button 
-          type="button"
-          className="w-full py-2 bg-heading hover:bg-navy text-white text-[10px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group"
-        >
-          Visit Brand
-          <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>
-        </button>
+        <span className="mt-auto block w-full bg-[#000435] hover:bg-[#FF5B00] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors">
+          View Brand
+        </span>
       </div>
     </Link>
   );
 });
-
-// Simple cn utility local helper in case not fully defined
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
-}

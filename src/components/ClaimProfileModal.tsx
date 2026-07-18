@@ -330,10 +330,10 @@ export function ClaimProfileModal({
                   <ShieldCheck size={22} className="stroke-[2.5]" />
                 </div>
                 <div>
-                  <h2 className="text-base md:text-lg font-black uppercase text-[#1A1A2E] leading-tight mb-0.5 tracking-tight">
+                  <h2 className="text-base md:text-lg font-extrabold text-[#1A1A2E] leading-tight mb-0.5 tracking-tight">
                     Claim {targetType === 'brand' ? 'Brand Ownership' : 'Creator Profile'}
                   </h2>
-                  <p className="text-[9px] text-[#6B7280] font-black uppercase tracking-widest font-mono">
+                  <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">
                     Professional Verification Network For <span className="text-[#F97316]">{targetName}</span>
                   </p>
                 </div>
@@ -361,7 +361,7 @@ export function ClaimProfileModal({
                   {!isLoggedIn ? (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <h3 className="text-lg font-black uppercase text-[#1A1A2E] italic">Authentication Required</h3>
+                        <h3 className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">Authentication required</h3>
                         <p className="text-xs text-gray-500 font-bold leading-relaxed uppercase">
                           Please sign in or configure your profile representation to initiate the secure claiming workflow.
                         </p>
@@ -369,7 +369,7 @@ export function ClaimProfileModal({
                       <button
                         type="button"
                         onClick={handleLogIn}
-                        className="w-full h-13 rounded-2xl bg-[#F97316] text-white hover:bg-[#EA580C] font-black text-xs uppercase tracking-widest italic shadow-md flex items-center justify-center gap-1.5 border-none cursor-pointer scale-100 hover:scale-[1.01] transition-transform"
+                        className="w-full h-12 rounded-xl bg-[#FF5B00] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
                       >
                         Sign In as Representative <ArrowRight size={13} />
                       </button>
@@ -377,8 +377,8 @@ export function ClaimProfileModal({
                   ) : targetType === 'brand' && currentUser.role !== 'seller' ? (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <h4 className="text-[10px] font-black uppercase text-[#F97316] tracking-widest block font-mono">Eligibility Gating Check</h4>
-                        <h3 className="text-lg font-black uppercase text-[#1A1A2E] italic">Seller Profile Required</h3>
+                        <h4 className="text-[12px] font-bold text-[#FF5B00] tracking-tight block">Eligibility check</h4>
+                        <h3 className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">Seller profile required</h3>
                         <p className="text-xs text-[#1A1A2E] font-bold leading-relaxed bg-[#F97316]/5 border border-[#F97316]/20 p-3.5 rounded-xl">
                           "Create Seller Profile to continue claiming brands"
                         </p>
@@ -390,7 +390,7 @@ export function ClaimProfileModal({
                       <button
                         type="button"
                         onClick={handleCreateSellerProfile}
-                        className="w-full h-13 rounded-2xl bg-[#F97316] text-white hover:bg-[#EA580C] font-black text-xs uppercase tracking-widest italic shadow-md flex items-center justify-center gap-1.5 border-none cursor-pointer scale-100 hover:scale-[1.01] transition-transform"
+                        className="w-full h-12 rounded-xl bg-[#FF5B00] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
                       >
                         Create Seller Profile <ArrowRight size={13} />
                       </button>
@@ -398,8 +398,8 @@ export function ClaimProfileModal({
                   ) : targetType === 'creator' && currentUser.role !== 'creator' ? (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <h4 className="text-[10px] font-black uppercase text-[#F97316] tracking-widest block font-mono">Eligibility Gating Check</h4>
-                        <h3 className="text-lg font-black uppercase text-[#1A1A2E] italic">Creator Profile Required</h3>
+                        <h4 className="text-[12px] font-bold text-[#FF5B00] tracking-tight block">Eligibility check</h4>
+                        <h3 className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">Creator profile required</h3>
                         <p className="text-xs text-[#1A1A2E] font-bold leading-relaxed bg-[#F97316]/5 border border-[#F97316]/20 p-3.5 rounded-xl">
                           "Create Creator Profile to continue claiming your creator page"
                         </p>
@@ -411,7 +411,7 @@ export function ClaimProfileModal({
                       <button
                         type="button"
                         onClick={handleCreateCreatorProfile}
-                        className="w-full h-13 rounded-2xl bg-[#F97316] text-white hover:bg-[#EA580C] font-black text-xs uppercase tracking-widest italic shadow-md flex items-center justify-center gap-1.5 border-none cursor-pointer scale-100 hover:scale-[1.01] transition-transform"
+                        className="w-full h-12 rounded-xl bg-[#FF5B00] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
                       >
                         Create Creator Profile <ArrowRight size={13} />
                       </button>
@@ -438,12 +438,12 @@ export function ClaimProfileModal({
                               : 'bg-white border-gray-200/60 text-gray-500 hover:bg-gray-100 hover:text-[#1A1A2E]'
                           }`}
                         >
-                          <span className="text-[10px] font-black uppercase font-mono shrink-0 bg-white border border-gray-200/50 w-6 h-6 rounded-lg flex items-center justify-center shadow-xs">
+                          <span className="text-[11px] font-bold tracking-tight shrink-0 bg-white border border-gray-200/50 w-6 h-6 rounded-lg flex items-center justify-center shadow-xs">
                             {sec.key}
                           </span>
                           <div className="min-w-0">
-                            <span className="text-[8px] font-black uppercase text-gray-400 tracking-wider block leading-none">{sec.step}</span>
-                            <span className="text-[11px] font-bold uppercase tracking-tight block truncate mt-0.5">{sec.name}</span>
+                            <span className="text-[11px] font-medium text-[#9AA0AC] tracking-tight block leading-none">{sec.step}</span>
+                            <span className="text-[12px] font-bold tracking-tight block truncate mt-0.5">{sec.name}</span>
                           </div>
                         </button>
                       ))}
@@ -461,13 +461,13 @@ export function ClaimProfileModal({
                           {activeSection === 'A' && (
                             <div className="space-y-4 animate-fade-in">
                               <div>
-                                <h3 className="text-sm font-black uppercase text-[#1A1A2E] mb-0.5">Section A: Profile Representative Identity</h3>
-                                <p className="text-[9px] text-[#6B7280] uppercase tracking-wider font-bold">Contact dossier of authorized manager</p>
+                                <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-0.5">Section A: Profile Representative Identity</h3>
+                                <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">Contact dossier of authorized manager</p>
                               </div>
 
                               <div className="space-y-3.5">
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Full Legal Name</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Full Legal Name</label>
                                   <input 
                                     type="text"
                                     required
@@ -479,7 +479,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Corporate Email Address (Prefilled)</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Corporate Email Address (Prefilled)</label>
                                   <input 
                                     type="email"
                                     disabled
@@ -489,7 +489,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Direct Contact Phone Number</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Direct Contact Phone Number</label>
                                   <input 
                                     type="tel"
                                     required
@@ -501,7 +501,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Target Brand Identity (Read-only)</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Target Brand Identity (Read-only)</label>
                                   <input 
                                     type="text"
                                     disabled
@@ -511,7 +511,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1.5">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Official Corporate Authorization Status</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Official Corporate Authorization Status</label>
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {[
                                       { value: 'owner', label: 'Primary Brand Owner / Founder' },
@@ -521,7 +521,7 @@ export function ClaimProfileModal({
                                         key={opt.value}
                                         type="button"
                                         onClick={() => setRoleSelection(opt.value as any)}
-                                        className={`p-3 rounded-lg text-[9px] font-black uppercase tracking-wider border text-left transition-all ${
+                                        className={`p-3 rounded-lg text-[12px] font-bold tracking-tight border text-left transition-all ${
                                           roleSelection === opt.value 
                                             ? 'bg-orange-50 border-[#F97316] text-[#F97316]' 
                                             : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -540,13 +540,13 @@ export function ClaimProfileModal({
                           {activeSection === 'B' && (
                             <div className="space-y-4 animate-fade-in">
                               <div>
-                                <h3 className="text-sm font-black uppercase text-[#1A1A2E] mb-0.5">Section B: Trade & Commercial Registry</h3>
-                                <p className="text-[9px] text-[#6B7280] uppercase tracking-wider font-bold">Government-issued commercial authorization certs</p>
+                                <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-0.5">Section B: Trade & Commercial Registry</h3>
+                                <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">Government-issued commercial authorization certs</p>
                               </div>
 
                               <div className="space-y-3.5">
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Trade License or Registration Number</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Trade License or Registration Number</label>
                                   <input 
                                     type="text"
                                     required
@@ -558,7 +558,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1.5">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Business Registration Document (Upload)</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Business Registration Document (Upload)</label>
                                   <div 
                                     onClick={() => simulateFileUpload('Trade License', setLicenseFile)}
                                     className="border-2 border-dashed border-gray-200 hover:border-[#F97316]/50 bg-white rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
@@ -572,7 +572,7 @@ export function ClaimProfileModal({
                                     ) : (
                                       <>
                                         <Upload className="w-6 h-6 text-gray-400" />
-                                        <span className="text-[10px] font-black text-gray-600 uppercase">Attach Physical License Document Package</span>
+                                        <span className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight">Attach Physical License Document Package</span>
                                         <span className="text-[8px] font-bold text-gray-400 uppercase font-mono">Accepts PDF, JPG, PNG up to 10MB</span>
                                       </>
                                     )}
@@ -580,7 +580,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Official Brand Website URL</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Official Brand Website URL</label>
                                   <div className="relative">
                                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400">https://</span>
                                     <input 
@@ -595,7 +595,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Corporate Domain Email Verification</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Corporate Domain Email Verification</label>
                                   <input 
                                     type="email"
                                     required
@@ -604,7 +604,7 @@ export function ClaimProfileModal({
                                     placeholder="executive@branddomain.com"
                                     className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
                                   />
-                                  <span className="text-[8.5px] font-semibold text-orange-600 uppercase italic mt-1 block">
+                                  <span className="text-[12px] font-medium text-[#FF5B00] tracking-tight mt-1 block">
                                     ⚠ Domain verification link will be cross-referenced with your website DNS configuration.
                                   </span>
                                 </div>
@@ -616,13 +616,13 @@ export function ClaimProfileModal({
                           {activeSection === 'C' && (
                             <div className="space-y-4 animate-fade-in">
                               <div>
-                                <h3 className="text-sm font-black uppercase text-[#1A1A2E] mb-0.5">Section C: Representative Identity Matching</h3>
-                                <p className="text-[9px] text-[#6B7280] uppercase tracking-wider font-bold">National database integration credentials</p>
+                                <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-0.5">Section C: Representative Identity Matching</h3>
+                                <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">National database integration credentials</p>
                               </div>
 
                               <div className="space-y-3.5">
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">National ID Number (NID)</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">National ID Number (NID)</label>
                                   <input 
                                     type="text"
                                     required
@@ -635,7 +635,7 @@ export function ClaimProfileModal({
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                   <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-gray-500 uppercase block">NID Document (Front)</label>
+                                    <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">NID Document (Front)</label>
                                     <div 
                                       onClick={() => simulateFileUpload('NID Front Card', setNidFront)}
                                       className="border border-dashed border-gray-200 bg-gray-50/50 hover:bg-white rounded-lg p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
@@ -645,14 +645,14 @@ export function ClaimProfileModal({
                                       ) : (
                                         <>
                                           <Upload className="w-5 h-5 text-gray-400" />
-                                          <span className="text-[9px] font-black text-gray-500 uppercase">Attach Front JPG/PDF</span>
+                                          <span className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight">Attach Front JPG/PDF</span>
                                         </>
                                       )}
                                     </div>
                                   </div>
 
                                   <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-gray-500 uppercase block">NID Document (Back)</label>
+                                    <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">NID Document (Back)</label>
                                     <div 
                                       onClick={() => simulateFileUpload('NID Back Card', setNidBack)}
                                       className="border border-dashed border-gray-200 bg-gray-50/50 hover:bg-white rounded-lg p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
@@ -662,7 +662,7 @@ export function ClaimProfileModal({
                                       ) : (
                                         <>
                                           <Upload className="w-5 h-5 text-gray-400" />
-                                          <span className="text-[9px] font-black text-gray-500 uppercase">Attach Back JPG/PDF</span>
+                                          <span className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight">Attach Back JPG/PDF</span>
                                         </>
                                       )}
                                     </div>
@@ -671,7 +671,7 @@ export function ClaimProfileModal({
 
                                 {/* Dynamic Webcam selfie placeholder UI */}
                                 <div className="bg-orange-50/20 border border-[#F97316]/10 p-4 rounded-xl space-y-2">
-                                  <span className="text-[9px] font-black text-[#F97316] uppercase tracking-wider block">National Registry Face Matching API</span>
+                                  <span className="text-[12px] font-bold text-[#FF5B00] tracking-tight block">National Registry Face Matching API</span>
                                   <div className="flex flex-col sm:flex-row items-center gap-4">
                                     <div className="w-20 h-20 rounded-full border border-gray-200 bg-white overflow-hidden shrink-0 flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: selfiePreview ? `url(${selfiePreview})` : 'none' }}>
                                       {!selfiePreview && <Camera className="w-6 h-6 text-gray-400" />}
@@ -685,7 +685,7 @@ export function ClaimProfileModal({
                                         type="button"
                                         onClick={handleTakeSelfie}
                                         disabled={isCapturing}
-                                        className="h-9 px-4 mt-1 bg-[#1A1A2E] hover:bg-[#2A2A4E] text-white text-[9px] font-sans font-black uppercase tracking-wider italic rounded-lg cursor-pointer border-none shadow-sm transition-transform active:scale-95"
+                                        className="h-9 px-4 mt-1 bg-[#000435] hover:bg-[#1a1a5e] text-white text-[12px] font-sans font-bold tracking-tight rounded-lg cursor-pointer border-none shadow-sm transition-all"
                                       >
                                         {isCapturing ? 'Acquiring Cam Lens...' : selfieCaptured ? 'Retake Biometric Verification' : 'Initialize Webcam Selfie'}
                                       </button>
@@ -694,7 +694,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Passport / Driving License Number (Optional)</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Passport / Driving License Number (Optional)</label>
                                   <input 
                                     type="text"
                                     value={passportDrivingNum}
@@ -711,14 +711,14 @@ export function ClaimProfileModal({
                           {activeSection === 'D' && (
                             <div className="space-y-4 animate-fade-in">
                               <div>
-                                <h3 className="text-sm font-black uppercase text-[#1A1A2E] mb-0.5">Section D: Financial & Settlement Auditing</h3>
-                                <p className="text-[9px] text-[#6B7280] uppercase tracking-wider font-bold">Revenue tracking TIN accounts and settlement bank details</p>
+                                <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-0.5">Section D: Financial & Settlement Auditing</h3>
+                                <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">Revenue tracking TIN accounts and settlement bank details</p>
                               </div>
 
                               <div className="space-y-3.5">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-1 border-b border-gray-100">
                                   <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-gray-500 uppercase">TIN Number (NBR Tax ID)</label>
+                                    <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight">TIN Number (NBR Tax ID)</label>
                                     <input 
                                       type="text"
                                       required
@@ -730,7 +730,7 @@ export function ClaimProfileModal({
                                   </div>
 
                                   <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-gray-500 uppercase">VAT Registration Number (Optional)</label>
+                                    <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight">VAT Registration Number (Optional)</label>
                                     <input 
                                       type="text"
                                       value={vatNumber}
@@ -744,12 +744,12 @@ export function ClaimProfileModal({
                                 <div className="bg-gray-50/75 border border-gray-150 p-4.5 rounded-xl space-y-3">
                                   <div className="flex items-center gap-1.5 text-[#1A1A2E]">
                                     <Landmark size={15} className="text-[#F97316]" />
-                                    <span className="text-[9px] font-black uppercase tracking-wider">Business Bank Account Details</span>
+                                    <span className="text-[12px] font-bold tracking-tight">Business Bank Account Details</span>
                                   </div>
 
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div className="space-y-1">
-                                      <label className="text-[8px] font-black text-gray-500 uppercase block">Settlement Account Legal Name</label>
+                                      <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Settlement Account Legal Name</label>
                                       <input 
                                         type="text"
                                         required
@@ -761,7 +761,7 @@ export function ClaimProfileModal({
                                     </div>
 
                                     <div className="space-y-1">
-                                      <label className="text-[8px] font-black text-gray-500 uppercase block">Account Number</label>
+                                      <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Account Number</label>
                                       <input 
                                         type="text"
                                         required
@@ -773,7 +773,7 @@ export function ClaimProfileModal({
                                     </div>
 
                                     <div className="space-y-1">
-                                      <label className="text-[8px] font-black text-gray-500 uppercase block">Settlement Bank Name</label>
+                                      <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Settlement Bank Name</label>
                                       <input 
                                         type="text"
                                         required
@@ -785,7 +785,7 @@ export function ClaimProfileModal({
                                     </div>
 
                                     <div className="space-y-1">
-                                      <label className="text-[8px] font-black text-gray-500 uppercase block">Branch & Routing Code</label>
+                                      <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Branch & Routing Code</label>
                                       <input 
                                         type="text"
                                         required
@@ -799,7 +799,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1.5">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Business Bank Account/Cheque Verification document</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Business Bank Account/Cheque Verification document</label>
                                   <div 
                                     onClick={() => simulateFileUpload('Settlement Bank Statement', setBankFile)}
                                     className="border border-dashed border-gray-200 bg-gray-50/50 hover:bg-white rounded-lg p-3 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
@@ -809,7 +809,7 @@ export function ClaimProfileModal({
                                     ) : (
                                       <>
                                         <Upload className="w-5 h-5 text-gray-400" />
-                                        <span className="text-[9px] font-black text-gray-500 uppercase">Attach bank verification statement (.PDF)</span>
+                                        <span className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight">Attach bank verification statement (.PDF)</span>
                                       </>
                                     )}
                                   </div>
@@ -822,8 +822,8 @@ export function ClaimProfileModal({
                           {activeSection === 'E' && (
                             <div className="space-y-4 animate-fade-in">
                               <div>
-                                <h3 className="text-sm font-black uppercase text-[#1A1A2E] mb-0.5">Section E: Representative Legal Undertaking</h3>
-                                <p className="text-[9px] text-[#6B7280] uppercase tracking-wider font-bold">Authorized signature parameters check</p>
+                                <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-0.5">Section E: Representative Legal Undertaking</h3>
+                                <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">Authorized signature parameters check</p>
                               </div>
 
                               <div className="space-y-4">
@@ -872,13 +872,13 @@ export function ClaimProfileModal({
                           {activeSection === 'A' && (
                             <div className="space-y-4 animate-fade-in col-span-1 border-none bg-transparent">
                               <div>
-                                <h3 className="text-sm font-black uppercase text-[#1A1A2E] mb-0.5">Section A: Creator Profile Registration</h3>
-                                <p className="text-[9px] text-[#6B7280] uppercase tracking-wider font-bold">Primary profile database variables</p>
+                                <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-0.5">Section A: Creator Profile Registration</h3>
+                                <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">Primary profile database variables</p>
                               </div>
 
                               <div className="space-y-3.5 bg-trans">
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Creator Display Name</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Creator Display Name</label>
                                   <input 
                                     type="text"
                                     required
@@ -890,7 +890,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Username / Handle</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Username / Handle</label>
                                   <input 
                                     type="text"
                                     required
@@ -902,7 +902,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Primary Creator Email</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Primary Creator Email</label>
                                   <input 
                                     type="email"
                                     required
@@ -914,7 +914,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Contact Phone Number</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Contact Phone Number</label>
                                   <input 
                                     type="tel"
                                     required
@@ -926,7 +926,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block">Creator Category Focus</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Creator Category Focus</label>
                                   <select 
                                     value={creatorCategory}
                                     onChange={(e) => setCreatorCategory(e.target.value as any)}
@@ -946,13 +946,13 @@ export function ClaimProfileModal({
                           {activeSection === 'B' && (
                             <div className="space-y-4 animate-fade-in col-span-1 border-none bg-transparent">
                               <div>
-                                <h3 className="text-sm font-black uppercase text-[#1A1A2E] mb-0.5">Section B: Social Identity Integration</h3>
-                                <p className="text-[9px] text-[#6B7280] uppercase tracking-wider font-bold">Social profiles ownership links registry</p>
+                                <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-0.5">Section B: Social Identity Integration</h3>
+                                <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">Social profiles ownership links registry</p>
                               </div>
 
                               <div className="space-y-3.5">
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block flex items-center gap-1">
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block flex items-center gap-1">
                                     <Video size={10} className="text-red-500" /> YouTube Channel URL
                                   </label>
                                   <input 
@@ -965,7 +965,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block flex items-center gap-1">
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block flex items-center gap-1">
                                     <Instagram size={10} className="text-pink-500" /> Instagram Profile URL
                                   </label>
                                   <input 
@@ -978,7 +978,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block flex items-center gap-1">
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block flex items-center gap-1">
                                     <Rss size={10} className="text-violet-500" /> TikTok Profile URL
                                   </label>
                                   <input 
@@ -991,7 +991,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase tracking-wider block flex items-center gap-1">
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block flex items-center gap-1">
                                     <Facebook size={10} className="text-blue-500" /> Facebook Page (Optional)
                                   </label>
                                   <input 
@@ -1010,13 +1010,13 @@ export function ClaimProfileModal({
                           {activeSection === 'C' && (
                             <div className="space-y-4 animate-fade-in col-span-1 border-none bg-transparent">
                               <div>
-                                <h3 className="text-sm font-black uppercase text-[#1A1A2E] mb-0.5">Section C: Government Identity Proof</h3>
-                                <p className="text-[9px] text-[#6B7280] uppercase tracking-wider font-bold">Physical identification checks</p>
+                                <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-0.5">Section C: Government Identity Proof</h3>
+                                <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">Physical identification checks</p>
                               </div>
 
                               <div className="space-y-3.5">
                                 <div className="space-y-1">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase block">NID Number</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">NID Number</label>
                                   <input 
                                     type="text"
                                     required
@@ -1028,7 +1028,7 @@ export function ClaimProfileModal({
                                 </div>
 
                                 <div className="space-y-1.5">
-                                  <label className="text-[8px] font-black text-gray-500 uppercase block">Government ID Document (Front Photo / Scan)</label>
+                                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Government ID Document (Front Photo / Scan)</label>
                                   <div 
                                     onClick={() => simulateFileUpload('Government ID', setCreatorGovId)}
                                     className="border-2 border-dashed border-gray-200 hover:border-[#F97316]/50 bg-white rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
@@ -1042,7 +1042,7 @@ export function ClaimProfileModal({
                                     ) : (
                                       <>
                                         <Upload className="w-6 h-6 text-gray-400" />
-                                        <span className="text-[10px] font-black text-gray-600 uppercase font-sans">Upload NID or Passport File</span>
+                                        <span className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight font-sans">Upload NID or Passport File</span>
                                         <span className="text-[8px] font-bold text-gray-400 uppercase font-mono">PDF, PNG, JPG up to 12MB</span>
                                       </>
                                     )}
@@ -1051,7 +1051,7 @@ export function ClaimProfileModal({
 
                                 {/* Dynamic Webcam selfie placeholder UI */}
                                 <div className="bg-orange-50/20 border border-[#F97316]/10 p-4 rounded-xl space-y-2">
-                                  <span className="text-[9px] font-black text-[#F97316] uppercase tracking-wider block font-mono">Biometric Presence Matching</span>
+                                  <span className="text-[12px] font-bold text-[#FF5B00] tracking-tight block font-mono">Biometric Presence Matching</span>
                                   <div className="flex flex-col sm:flex-row items-center gap-4">
                                     <div className="w-20 h-20 rounded-full border border-gray-200 bg-white overflow-hidden shrink-0 flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: selfiePreview ? `url(${selfiePreview})` : 'none' }}>
                                       {!selfiePreview && <Camera className="w-6 h-6 text-gray-400" />}
@@ -1065,7 +1065,7 @@ export function ClaimProfileModal({
                                         type="button"
                                         onClick={handleTakeSelfie}
                                         disabled={isCapturing}
-                                        className="h-9 px-4 mt-1 bg-[#1A1A2E] hover:bg-[#2A2A4E] text-white text-[9px] font-sans font-black uppercase tracking-wider italic rounded-lg cursor-pointer border-none shadow-sm transition-transform active:scale-95"
+                                        className="h-9 px-4 mt-1 bg-[#000435] hover:bg-[#1a1a5e] text-white text-[12px] font-sans font-bold tracking-tight rounded-lg cursor-pointer border-none shadow-sm transition-all"
                                       >
                                         {isCapturing ? 'Acquiring Cam Lens...' : selfieCaptured ? 'Retake Biometric Verification' : 'Initialize Webcam Selfie'}
                                       </button>
@@ -1080,8 +1080,8 @@ export function ClaimProfileModal({
                           {activeSection === 'D' && (
                             <div className="space-y-4 animate-fade-in col-span-1 border-none bg-transparent">
                               <div>
-                                <h3 className="text-sm font-black uppercase text-[#1A1A2E] mb-0.5">Section D: Creator Authorization</h3>
-                                <p className="text-[9px] text-[#6B7280] uppercase tracking-wider font-bold">Mandatory digital owner undertaking</p>
+                                <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-0.5">Section D: Creator Authorization</h3>
+                                <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">Mandatory digital owner undertaking</p>
                               </div>
 
                               <div className="space-y-4">
@@ -1158,7 +1158,7 @@ export function ClaimProfileModal({
                 <div id="submitting-processing" className="max-w-md mx-auto py-16 space-y-5 text-center animate-fade-in flex flex-col items-center justify-center">
                   <div className="w-12 h-12 rounded-full border-3 border-[#F97316] border-t-transparent animate-spin shrink-0" />
                   <div className="space-y-1 shrink-0">
-                    <h3 className="text-base font-black uppercase tracking-tight text-[#1A1A2E] italic">Submitting verification documents...</h3>
+                    <h3 className="text-base font-extrabold tracking-tight text-[#1A1A2E]">Submitting verification…</h3>
                     <p className="text-[9px] text-[#F97316] font-black uppercase tracking-widest font-mono">Securing corporate credentials network...</p>
                   </div>
                   <p className="text-[10.5px] text-gray-500 font-bold max-w-sm leading-relaxed uppercase">
@@ -1176,11 +1176,11 @@ export function ClaimProfileModal({
                   </div>
 
                   <div className="space-y-2 shrink-0">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[12px] font-bold tracking-tight bg-amber-100 text-amber-800 border border-amber-200">
                       Ownership Verification Pending
                     </span>
-                    <h3 className="text-xl font-black uppercase italic text-[#1a1a2e] tracking-tight">Your submission is under review</h3>
-                    <p className="text-[11px] text-gray-500 font-sans font-bold uppercase leading-relaxed max-w-sm">
+                    <h3 className="text-xl font-extrabold tracking-tight text-[#1A1A2E]">Your submission is under review</h3>
+                    <p className="text-[13px] text-[#9AA0AC] font-medium leading-relaxed max-w-sm">
                       "We will notify you once verification is complete"
                     </p>
                   </div>
@@ -1189,7 +1189,7 @@ export function ClaimProfileModal({
                   <div className="w-full bg-white border border-gray-150 rounded-2xl p-5 text-left space-y-4">
                     <div className="flex items-center gap-1.5 border-b border-gray-100 pb-2 pb-1.5 shrink-0">
                       <Award size={13} className="text-[#F97316]" />
-                      <span className="text-[9px] font-black text-navy uppercase tracking-widest font-mono">Registry Processing Track</span>
+                      <span className="text-[12px] font-bold text-[#1A1A2E] tracking-tight">Registry Processing Track</span>
                     </div>
 
                     <div className="relative pl-6 space-y-6 border-l border-gray-200/80">

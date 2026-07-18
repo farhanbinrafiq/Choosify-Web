@@ -1,36 +1,18 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ArrowRight,
-  BookOpen,
-  Eye,
-  Heart,
-  Instagram,
-  LucidePenTool,
-  Play,
-  Share2,
-  Youtube,
-} from 'lucide-react';
+import { Bookmark, Package } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../../constants';
 import type {
   CommerceCardVariant,
-  ContentCardPlatform,
   UniversalCommerceCardProps,
 } from './universalCommerceCardTypes';
-
-function PlatformIcon({ platform, size = 14 }: { platform: ContentCardPlatform; size?: number }) {
-  if (platform === 'instagram') return <Instagram size={size} />;
-  if (platform === 'youtube') return <Youtube size={size} />;
-  if (platform === 'live') return <Play size={size} />;
-  return <LucidePenTool size={size} />;
-}
 
 function formatCompactDate(value?: string): string | undefined {
   if (!value) return undefined;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return undefined;
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
 function formatCount(value?: string | number): string | undefined {
@@ -42,14 +24,22 @@ function formatCount(value?: string | number): string | undefined {
 }
 
 const MEDIA_ASPECT: Record<CommerceCardVariant, string> = {
-  'landscape-video': 'aspect-[16/10]',
+  'landscape-video': 'aspect-video',
   'portrait-reel': 'aspect-[9/16]',
-  blog: 'aspect-[16/10]',
-  image: 'aspect-[16/10]',
-  live: 'aspect-[16/10]',
-  guide: 'aspect-[16/10]',
+  blog: 'aspect-[4/3]',
+  image: 'aspect-video',
+  live: 'aspect-video',
+  guide: 'aspect-[4/3]',
   square: 'aspect-square',
 };
+
+const AVATAR_COLORS = ['#FF5B00', '#2323FF', '#07A828', '#EB4501', '#000435', '#6C4CFF'];
+
+function avatarColor(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
 
 interface CommerceCardMediaProps {
   variant: CommerceCardVariant;
@@ -58,16 +48,17 @@ interface CommerceCardMediaProps {
   liveEmbedUrl?: string;
   badgeLabel: string;
   readTime?: string;
-  platform: ContentCardPlatform;
   duration?: string;
   hasVideo: boolean;
   isHovering: boolean;
   title?: string;
-  showOverlayTitle: boolean;
+  viewersLabel?: string;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   onImageError: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+  onBookmarkClick: (e: React.MouseEvent) => void;
 }
 
+/** Choosify.dc.html — Viral Today / Discover media chrome */
 function CommerceCardMedia({
   variant,
   image,
@@ -75,27 +66,36 @@ function CommerceCardMedia({
   liveEmbedUrl,
   badgeLabel,
   readTime,
-  platform,
   duration,
   hasVideo,
   isHovering,
   title,
-  showOverlayTitle,
+  viewersLabel,
   videoRef,
   onImageError,
+  onBookmarkClick,
 }: CommerceCardMediaProps) {
   const isReel = variant === 'portrait-reel';
   const isBlog = variant === 'blog' || variant === 'guide';
+  const isLive = variant === 'live';
+  const showPlay = variant === 'landscape-video' || variant === 'image' || (hasVideo && !isReel);
+
+  const badgeText = isBlog
+    ? (readTime ?? badgeLabel)
+    : isLive
+      ? 'LIVE'
+      : isReel
+        ? `⏵ ${(badgeLabel || 'REELS').toUpperCase().replace(/^⏵\s*/, '')}`
+        : (badgeLabel || 'YOUTUBE').toUpperCase();
 
   return (
     <div
       className={cn(
-        'overflow-hidden relative bg-gray-50 shrink-0 w-full',
+        'overflow-hidden relative bg-[#F4F7F9] shrink-0 w-full rounded-[10px]',
         MEDIA_ASPECT[variant],
-        !isReel && 'bg-slate-950',
       )}
     >
-      {liveEmbedUrl && variant === 'live' ? (
+      {liveEmbedUrl && isLive ? (
         <iframe src={liveEmbedUrl} title={title ?? 'Live'} className="w-full h-full" loading="lazy" />
       ) : hasVideo ? (
         <div className="relative w-full h-full">
@@ -108,81 +108,159 @@ function CommerceCardMedia({
             playsInline
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2.5s]"
           />
-          <div
-            className={cn(
-              'absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-transparent transition-all duration-500',
-              isHovering ? 'opacity-0' : 'opacity-100',
-            )}
-          >
+          {showPlay && (
             <div
               className={cn(
-                'rounded-full bg-play-red flex items-center justify-center border border-white/20',
-                isReel ? 'w-12 h-12' : 'w-14 h-14',
+                'absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-transparent transition-all duration-500 pointer-events-none',
+                isHovering ? 'opacity-0' : 'opacity-100',
               )}
             >
-              <Play className="text-white fill-white ml-0.5" size={isReel ? 18 : 20} />
-            </div>
-          </div>
-          {duration && (
-            <div
-              className={cn(
-                'absolute bg-black/75 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-mono text-white',
-                isReel ? 'bottom-4 right-4' : 'bottom-4 right-4',
-              )}
-            >
-              {duration}
+              <div className="w-[42px] h-[42px] rounded-full bg-black/35 flex items-center justify-center border-[1.5px] border-white/90">
+                <div
+                  className="w-0 h-0 ml-0.5"
+                  style={{
+                    borderStyle: 'solid',
+                    borderWidth: '7px 0 7px 11px',
+                    borderColor: 'transparent transparent transparent #fff',
+                  }}
+                />
+              </div>
             </div>
           )}
         </div>
       ) : (
-        <img
-          src={image || PLACEHOLDER_IMAGE}
-          loading="lazy"
-          onError={onImageError}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]"
-          alt=""
-        />
+        <>
+          <img
+            src={image || PLACEHOLDER_IMAGE}
+            loading="lazy"
+            onError={onImageError}
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+            alt=""
+          />
+          {showPlay && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[42px] h-[42px] rounded-full bg-black/35 border-[1.5px] border-white/90 flex items-center justify-center">
+                <div
+                  className="w-0 h-0 ml-0.5"
+                  style={{
+                    borderStyle: 'solid',
+                    borderWidth: '7px 0 7px 11px',
+                    borderColor: 'transparent transparent transparent #fff',
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
 
-      {isReel && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none z-10" />
-      )}
-
-      <div className={cn('absolute top-4 left-4 z-10', isReel && 'top-4 left-4 z-20')}>
+      <div className="absolute top-2 left-2 z-10 flex gap-1.5">
         <div
           className={cn(
-            'bg-white px-2.5 py-1 rounded flex items-center gap-1.5 border border-gray-100 w-max',
-            isReel && 'shadow-none',
+            'px-2 py-0.5 rounded text-white font-extrabold w-max pointer-events-none',
+            isReel ? 'text-[8px] bg-[#FF000D]' : 'text-[8.5px] bg-[#FF000D]',
+            isBlog && 'bg-[#F59E0B] text-[8px] text-[#1A1A2E]',
+            isLive && 'bg-[#FF000D] text-[9px]',
           )}
         >
-          {isBlog ? (
-            <>
-              <BookOpen size={11} className="text-orange-primary" />
-              <span className="text-[9px] font-mono text-gray-500 leading-none">
-                {readTime ?? badgeLabel}
-              </span>
-            </>
-          ) : (
-            <span className="text-[9px] font-semibold text-black uppercase tracking-wider leading-none">
-              {badgeLabel}
-            </span>
+          {badgeText}
+        </div>
+        {isLive && viewersLabel && (
+          <div className="bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded pointer-events-none">
+            👁 {viewersLabel}
+          </div>
+        )}
+      </div>
+
+      <button
+        type="button"
+        className={cn(
+          'absolute top-2 right-2 z-10 rounded-full bg-black/40 flex items-center justify-center text-white border-0 cursor-pointer',
+          isReel ? 'w-[22px] h-[22px]' : 'w-6 h-6',
+        )}
+        onClick={onBookmarkClick}
+        aria-label="Save"
+      >
+        <Bookmark size={isReel ? 10 : 11} strokeWidth={1.8} />
+      </button>
+
+      {duration && !isLive && (
+        <div
+          className={cn(
+            'absolute bottom-2 right-2 bg-black/75 text-white font-bold rounded pointer-events-none z-10',
+            isReel ? 'text-[9.5px] px-1.5 py-0.5' : 'text-[10px] px-1.5 py-0.5',
           )}
-        </div>
-      </div>
-
-      <div className={cn('absolute top-4 right-4 z-10', isReel && 'z-20')}>
-        <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 text-white">
-          <PlatformIcon platform={platform} size={14} />
-        </div>
-      </div>
-
-      {showOverlayTitle && isReel && title && (
-        <div className="absolute inset-x-0 bottom-0 p-4 z-20 pt-20 pointer-events-none">
-          <h3 className="text-sm font-semibold text-white tracking-tight leading-snug mb-1.5 group-hover:text-orange-primary transition-colors text-left line-clamp-2">
-            {title}
-          </h3>
+        >
+          {duration}
         </div>
       )}
+    </div>
+  );
+}
+
+/** LE-006 — brand/creator identity above media (opt-in; not used on dc Viral Today tiles) */
+function CommerceCardPublisherHeader({
+  name,
+  avatar,
+  typeLabel,
+  date,
+  isVerified,
+  isSponsored,
+  className,
+}: {
+  name?: string;
+  avatar?: string;
+  typeLabel?: string;
+  date?: string;
+  isVerified?: boolean;
+  isSponsored?: boolean;
+  className?: string;
+}) {
+  if (!name) return null;
+  const subline = isSponsored ? 'Sponsored' : (date ?? typeLabel);
+
+  return (
+    <div className={cn('flex items-center gap-2 min-w-0', className)}>
+      {avatar ? (
+        <img
+          src={avatar}
+          alt=""
+          className="w-7 h-7 rounded-full object-cover border border-[#E8EDF2] shrink-0"
+          loading="lazy"
+        />
+      ) : (
+        <span
+          className="w-7 h-7 rounded-full text-white text-[10px] font-extrabold flex items-center justify-center shrink-0"
+          style={{ background: avatarColor(name) }}
+        >
+          {name.slice(0, 1).toUpperCase()}
+        </span>
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1 min-w-0">
+          <span className="text-[11px] font-bold text-[#1A1A2E] truncate leading-tight">{name}</span>
+          {isVerified && <span className="text-[#2323FF] text-[10px] shrink-0">✓</span>}
+        </div>
+        {subline && (
+          <p className="text-[9px] text-[#9AA0AC] uppercase tracking-wide leading-tight truncate">
+            {subline}
+          </p>
+        )}
+      </div>
+      {isSponsored && (
+        <span className="shrink-0 text-[8px] font-bold uppercase tracking-wider text-[#9AA0AC] border border-[#E8EDF2] rounded px-1.5 py-0.5">
+          Sponsored
+        </span>
+      )}
+    </div>
+  );
+}
+
+function ProductsChip({ count }: { count: number }) {
+  return (
+    <div className="flex items-center gap-1 mt-2.5 text-[11px] font-bold text-[#4B5563]">
+      <Package size={12} strokeWidth={1.8} />
+      {count} Products
     </div>
   );
 }
@@ -191,20 +269,25 @@ export function UniversalCommerceCard({
   model,
   variant,
   mode = 'editorial',
+  showPublisherHeader = false,
   onNavigate,
   className,
 }: UniversalCommerceCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const isReel = variant === 'portrait-reel';
-  const isCommerce = mode === 'commerce';
-  const isPreview = mode === 'preview';
-  const showReelBody = isReel && (isCommerce || isPreview);
+  const isBlog = variant === 'blog' || variant === 'guide';
+  const isLive = variant === 'live';
+  const isLandscape = variant === 'landscape-video' || variant === 'image' || variant === 'square';
   const hasVideo = Boolean(model.videoUrl);
-  const showOverlayTitle = isReel;
-  const ctaLabel = model.ctaLabel ?? model.primaryCta?.label ?? 'Explore';
   const formattedDate = formatCompactDate(model.publishedAt);
   const viewLabel = formatCount(model.views) ?? formatCount(model.popularityScore);
+  const likesLabel = formatCount(model.likes);
+  const publisherName = model.creatorName ?? model.brandName;
+  const channelName = model.creatorName ?? model.brandName ?? 'Choosify';
+  const hasPublisherHeader = showPublisherHeader && Boolean(publisherName);
+  const productCount = model.product ? 1 : 0;
+  const timeLabel = formattedDate ?? 'Recently';
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = PLACEHOLDER_IMAGE;
@@ -224,91 +307,142 @@ export function UniversalCommerceCard({
     }
   }, []);
 
+  const stopBookmark = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   const cardShell = cn(
-    'group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 flex flex-col h-full w-full text-left',
-    isReel ? 'p-3 max-w-[285px] sm:max-w-[320px] md:max-w-none mx-auto' : 'overflow-hidden',
+    'group cursor-pointer block flex flex-col h-full w-full text-left min-w-0',
+    isBlog || isLive
+      ? 'bg-white rounded-[10px] border border-[#E8EDF2] overflow-hidden'
+      : 'bg-transparent',
+    isReel ? 'max-w-[150px]' : '',
     className,
   );
 
-  const bodyContent = (
+  /** Choosify.dc.html YouTube / landscape body */
+  const landscapeBody = (
     <>
-      {!showOverlayTitle && (
-        <div className="flex-1 flex flex-col text-left min-w-0">
-          <h3 className="text-xs font-semibold uppercase text-[#1a1a2e] group-hover:text-orange-primary transition-colors leading-snug line-clamp-2 mb-1">
-            {model.title}
-          </h3>
-
-          {model.excerpt && (
-            <p className="text-gray-400 text-[11px] leading-relaxed mb-2 line-clamp-2">{model.excerpt}</p>
-          )}
-        </div>
-      )}
-
-      {(isCommerce || isPreview) && model.product && (
-        <div className="flex items-center gap-2 mb-2 min-w-0">
-          {model.product.image && (
-            <img
-              src={model.product.image}
-              alt=""
-              className="w-8 h-8 rounded object-cover border border-gray-100 shrink-0"
-              loading="lazy"
-            />
-          )}
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-semibold text-[#1a1a2e] line-clamp-1">{model.product.title}</p>
-            <p className="text-[10px] font-black text-orange-primary">
-              ৳{model.product.price.toLocaleString()}
-            </p>
+      <div className="flex gap-2.5">
+        {model.creatorAvatar ? (
+          <img
+            src={model.creatorAvatar}
+            alt=""
+            className="w-7 h-7 rounded-full object-cover shrink-0"
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-extrabold shrink-0"
+            style={{ background: avatarColor(channelName) }}
+          >
+            {channelName.charAt(0).toUpperCase()}
           </div>
+        )}
+        <div className="min-w-0">
+          <div className="text-[12.5px] font-bold text-[#1A1A2E] leading-snug line-clamp-2 mb-1">
+            {model.title}
+          </div>
+          <div className="text-[11px] text-[#4B5563] flex items-center gap-1">
+            <span className="truncate">{channelName}</span>
+            {(model.isVerified !== false) && <span className="text-[#2323FF] shrink-0">✓</span>}
+          </div>
+          {(viewLabel || timeLabel) && (
+            <div className="text-[10.5px] text-[#9AA0AC]">
+              {[viewLabel, timeLabel].filter(Boolean).join(' · ')}
+            </div>
+          )}
         </div>
+      </div>
+      {(mode === 'commerce' || mode === 'preview' || productCount > 0) && (
+        <ProductsChip count={productCount} />
       )}
+    </>
+  );
 
-      {(isCommerce || isPreview) && (model.creatorName || model.creatorAvatar || formattedDate) && (
-        <div className="flex items-center gap-2 mb-2 min-w-0">
+  /** Choosify.dc.html Reels body — title under media, no overlay */
+  const reelBody = (
+    <>
+      <div className="text-[11.5px] font-bold text-[#1A1A2E] leading-snug line-clamp-2 mb-1.5">
+        {model.title}
+      </div>
+      {publisherName && (
+        <div className="flex items-center gap-1.5 text-[10.5px] text-[#4B5563] mb-1 min-w-0">
           {model.creatorAvatar ? (
             <img
               src={model.creatorAvatar}
               alt=""
-              className="w-5 h-5 rounded-full object-cover border border-gray-100 shrink-0"
+              className="w-5 h-5 rounded-full object-cover shrink-0"
               loading="lazy"
             />
           ) : (
-            <div className="w-5 h-5 rounded-full bg-gray-100 shrink-0" aria-hidden />
+            <div
+              className="w-5 h-5 rounded-full shrink-0"
+              style={{ background: avatarColor(publisherName) }}
+            />
           )}
-          <div className="min-w-0 flex-1 flex items-center gap-2 text-[10px] text-gray-400">
-            {model.creatorName && (
-              <span className="font-semibold text-gray-500 truncate">{model.creatorName}</span>
-            )}
-            {formattedDate && <span className="truncate">{formattedDate}</span>}
-          </div>
+          <span className="truncate">{publisherName}</span>
+          <span className="text-[#2323FF] shrink-0">✓</span>
         </div>
       )}
+      {likesLabel && <div className="text-[10.5px] text-[#9AA0AC]">♡ {likesLabel}</div>}
+      {(mode === 'commerce' || mode === 'preview' || productCount > 0) && (
+        <div className="flex items-center gap-1 mt-2 text-[10px] font-bold text-[#4B5563]">
+          <Package size={11} strokeWidth={1.8} />
+          {productCount} Products
+        </div>
+      )}
+    </>
+  );
 
-      <div className="pt-3 border-t border-gray-100 flex items-center justify-between mt-auto gap-2">
-        <div className="flex items-center gap-3 sm:gap-4 text-[10px] font-mono text-gray-400 min-w-0">
-          <span className="flex items-center gap-1">
-            <Heart size={13} className="text-rose-500" /> {formatCount(model.likes) ?? viewLabel ?? '12K'}
-          </span>
-          <span className="flex items-center gap-1">
-            <Eye size={13} /> {viewLabel ?? formatCount(model.likes) ?? '1.2k'}
-          </span>
-          <span className="hidden sm:flex items-center gap-1">
-            <Share2 size={13} /> {formatCount(model.shares) ?? '450'}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {(isCommerce || isPreview) && (
-            <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 group-hover:text-orange-primary transition-colors hidden sm:inline">
-              {ctaLabel}
-            </span>
-          )}
-          <div className="w-6 h-6 rounded-full bg-gray-50 text-gray-600 group-hover:bg-orange-primary group-hover:text-white transition-colors flex items-center justify-center">
-            <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-          </div>
-        </div>
+  /** Choosify.dc.html Blog Stories sidebar tile */
+  const blogBody = (
+    <>
+      <div className="text-[12px] font-bold text-[#1A1A2E] leading-snug line-clamp-2 mb-1.5">
+        {model.title}
+      </div>
+      <div className="text-[10.5px] text-[#9AA0AC]">
+        By {channelName} <span className="text-[#2323FF]">✓</span>
+        {model.readTime ? ` · ${model.readTime}` : ''}
       </div>
     </>
   );
+
+  /** Discover Live — compact vertical fallback of horizontal live card */
+  const liveBody = (
+    <>
+      <div className="text-[15px] font-bold text-[#1A1A2E] mb-1.5 line-clamp-2">{model.title}</div>
+      {model.excerpt && (
+        <p className="text-[12px] text-[#6B7280] mb-3 line-clamp-2">{model.excerpt}</p>
+      )}
+      <div className="flex items-center justify-between gap-3 mt-auto">
+        <div className="flex items-center gap-2 min-w-0">
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-extrabold shrink-0"
+            style={{ background: avatarColor(channelName) }}
+          >
+            {channelName.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <div className="text-[12px] font-bold text-[#1A1A2E] flex items-center gap-1 truncate">
+              {channelName} <span className="text-[#2323FF]">✓</span>
+            </div>
+            {model.publisherTypeLabel && (
+              <div className="text-[10.5px] text-[#9AA0AC] truncate">{model.publisherTypeLabel}</div>
+            )}
+          </div>
+        </div>
+        <span className="shrink-0 bg-[#FF000D] text-white text-[11.5px] font-bold px-4 py-2 rounded-md">
+          WATCH LIVE
+        </span>
+      </div>
+      <ProductsChip count={productCount} />
+    </>
+  );
+
+  const body =
+    isReel ? reelBody : isBlog ? blogBody : isLive ? liveBody : landscapeBody;
 
   return (
     <Link
@@ -319,7 +453,19 @@ export function UniversalCommerceCard({
       onMouseLeave={hasVideo ? stopPreview : undefined}
       aria-label={model.title}
     >
-      <div className={cn(isReel && 'rounded-[5px] overflow-hidden relative bg-slate-950 shrink-0')}>
+      {hasPublisherHeader && (
+        <CommerceCardPublisherHeader
+          name={publisherName}
+          avatar={model.creatorAvatar}
+          typeLabel={model.publisherTypeLabel}
+          date={formattedDate}
+          isVerified={model.isVerified}
+          isSponsored={model.isSponsored}
+          className={isReel ? 'pb-2.5' : 'px-4 pt-3 pb-2.5'}
+        />
+      )}
+
+      <div className={cn(isReel && 'shrink-0', isBlog || isLive ? 'p-0' : 'mb-2.5')}>
         <CommerceCardMedia
           variant={variant}
           image={model.image}
@@ -327,22 +473,28 @@ export function UniversalCommerceCard({
           liveEmbedUrl={model.liveEmbedUrl}
           badgeLabel={model.badgeLabel}
           readTime={model.readTime}
-          platform={model.platform}
           duration={model.duration}
           hasVideo={hasVideo}
           isHovering={isHovering}
           title={model.title}
-          showOverlayTitle={showOverlayTitle}
+          viewersLabel={viewLabel}
           videoRef={videoRef}
           onImageError={handleImageError}
+          onBookmarkClick={stopBookmark}
         />
       </div>
 
-      {(showReelBody || !showOverlayTitle) && (
-        <div className={cn('flex-1 flex flex-col min-w-0 bg-white', isReel ? 'pt-3' : 'p-4')}>
-          {bodyContent}
-        </div>
-      )}
+      <div
+        className={cn(
+          'flex-1 flex flex-col min-w-0',
+          isReel && 'pt-0',
+          isBlog && 'px-0 pt-2.5 pb-3.5',
+          isLive && 'p-4',
+          isLandscape && !hasPublisherHeader && '',
+        )}
+      >
+        {body}
+      </div>
     </Link>
   );
 }

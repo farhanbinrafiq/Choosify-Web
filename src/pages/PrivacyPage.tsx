@@ -50,7 +50,7 @@ export function PrivacyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F8FF] font-sans text-left">
+    <div className="min-h-screen bg-[#F4F7F9] font-sans text-left">
       {/* Reading progress indicator bar */}
       <div 
         className="fixed top-0 left-0 h-1 bg-orange-primary z-50 transition-all duration-100" 
@@ -67,7 +67,7 @@ export function PrivacyPage() {
               <span className="inline-block bg-[#E8500A]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
                 User Protection
               </span>
-              <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
+              <h1 className="text-2xl sm:text-3xl md:text-[2.5rem] font-extrabold text-white tracking-tight leading-tight">
                 Privacy Policy
               </h1>
               <p className="text-gray-300 text-sm md:text-base font-medium leading-relaxed max-w-xl">
@@ -98,7 +98,7 @@ export function PrivacyPage() {
           {/* Sticky Left Navigation Index */}
           <aside className="hidden lg:block lg:col-span-4 lg:sticky lg:top-28 space-y-6 flex-shrink-0 text-left">
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 shadow-xs">
-              <h3 className="text-xs font-black text-navy uppercase tracking-widest italic mb-4 pb-2 border-b border-[#e8edf2] flex items-center gap-2">
+              <h3 className="text-[13px] font-bold text-[#1A1A2E] tracking-tight mb-4 pb-2 border-b border-[#e8edf2] flex items-center gap-2">
                 <FileText size={14} className="text-orange-primary" />
                 Document Index
               </h3>
@@ -125,7 +125,7 @@ export function PrivacyPage() {
             
             {/* Section: Information We Collect */}
             <div id="collect" className="space-y-4 scroll-mt-24">
-              <h2 className="text-lg md:text-xl font-black text-navy uppercase tracking-tight italic flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight flex items-center gap-2">
                 <span className="text-orange-primary">01.</span> Information We Collect
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-4" />
@@ -141,7 +141,7 @@ export function PrivacyPage() {
 
             {/* Section: How We Use Information */}
             <div id="use" className="space-y-4 scroll-mt-24">
-              <h2 className="text-lg md:text-xl font-black text-navy uppercase tracking-tight italic flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight flex items-center gap-2">
                 <span className="text-orange-primary">02.</span> How We Use Information
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-4" />
@@ -158,7 +158,7 @@ export function PrivacyPage() {
 
             {/* Section: Cookies & Tracking */}
             <div id="cookies" className="space-y-4 scroll-mt-24">
-              <h2 className="text-lg md:text-xl font-black text-navy uppercase tracking-tight italic flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight flex items-center gap-2">
                 <span className="text-orange-primary">03.</span> Cookies & Tracking Technologies
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-4" />
@@ -172,7 +172,7 @@ export function PrivacyPage() {
 
             {/* Section: Security Measures */}
             <div id="security" className="space-y-4 scroll-mt-24">
-              <h2 className="text-lg md:text-xl font-black text-navy uppercase tracking-tight italic flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight flex items-center gap-2">
                 <span className="text-orange-primary">04.</span> Security Measures
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-4" />
@@ -186,7 +186,7 @@ export function PrivacyPage() {
 
             {/* Section: Third Party Services */}
             <div id="third-party" className="space-y-4 scroll-mt-24">
-              <h2 className="text-lg md:text-xl font-black text-navy uppercase tracking-tight italic flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight flex items-center gap-2">
                 <span className="text-orange-primary">05.</span> Third Party Services
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-4" />
@@ -197,7 +197,7 @@ export function PrivacyPage() {
 
             {/* Section: User Rights */}
             <div id="rights" className="space-y-4 scroll-mt-24">
-              <h2 className="text-lg md:text-xl font-black text-navy uppercase tracking-tight italic flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight flex items-center gap-2">
                 <span className="text-orange-primary">06.</span> User Rights
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-4" />
@@ -213,7 +213,7 @@ export function PrivacyPage() {
 
             {/* Section: Data Retention */}
             <div id="retention" className="space-y-4 scroll-mt-24">
-              <h2 className="text-lg md:text-xl font-black text-navy uppercase tracking-tight italic flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight flex items-center gap-2">
                 <span className="text-orange-primary">07.</span> Data Retention
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-4" />
@@ -224,7 +224,7 @@ export function PrivacyPage() {
 
             {/* Section: Contact Information */}
             <div id="contact" className="space-y-4 scroll-mt-24">
-              <h2 className="text-lg md:text-xl font-black text-navy uppercase tracking-tight italic flex items-center gap-2">
+              <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight flex items-center gap-2">
                 <span className="text-orange-primary">08.</span> Contact Information
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-4" />

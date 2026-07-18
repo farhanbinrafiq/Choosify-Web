@@ -604,7 +604,7 @@ export function InfluencerReviews({
           <span className="w-5 h-px bg-[#e8edf2]" />
         </p>
 
-        <h2 className="font-space text-xl sm:text-2xl md:text-[1.75rem] font-black leading-[1.15] tracking-tight text-[#1A1D4E] mt-1 mb-4 uppercase italic">
+        <h2 className="font-sans text-xl sm:text-2xl md:text-[1.75rem] font-extrabold leading-[1.15] tracking-tight text-[#1A1A2E] mt-1 mb-4">
           {renderSubtitleText()}
         </h2>
 

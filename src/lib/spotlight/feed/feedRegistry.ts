@@ -30,23 +30,45 @@ export interface SpotlightFloatingFilter {
   group?: 'content' | 'commerce' | 'social' | 'discovery';
 }
 
-/** Full UX-02 floating filter set */
+/** Full filter set — LE-006 Phase 1 order (sticky bar + floating drawer share this) */
 export const SPOTLIGHT_FLOATING_FILTERS: SpotlightFloatingFilter[] = [
   { id: 'all', label: 'All', group: 'discovery' },
-  { id: 'products', label: 'Products', group: 'commerce' },
-  { id: 'services', label: 'Services', group: 'commerce' },
-  { id: 'videos', label: 'Videos', group: 'content' },
   { id: 'reels', label: 'Reels', group: 'content' },
-  { id: 'shorts', label: 'Shorts', group: 'content' },
-  { id: 'live', label: 'Live', group: 'content' },
-  { id: 'reviews', label: 'Reviews', group: 'content' },
+  { id: 'videos', label: 'Videos', group: 'content' },
   { id: 'guides', label: 'Guides', group: 'content' },
   { id: 'brands', label: 'Brands', group: 'commerce' },
-  { id: 'offers', label: 'Offers', group: 'commerce' },
   { id: 'collections', label: 'Collections', group: 'discovery' },
-  { id: 'series', label: 'Series', group: 'discovery' },
-  { id: 'nearby', label: 'Nearby', group: 'discovery' },
+  { id: 'offers', label: 'Offers', group: 'commerce' },
+  { id: 'campaigns', label: 'Campaigns', group: 'commerce' },
+  { id: 'reviews', label: 'Reviews', group: 'content' },
+  { id: 'blogs', label: 'Blogs', group: 'content' },
+  { id: 'live', label: 'Live', group: 'content' },
+  { id: 'services', label: 'Services', group: 'commerce' },
   { id: 'trending', label: 'Trending', group: 'discovery' },
-  { id: 'saved', label: 'Saved', group: 'social' },
   { id: 'following', label: 'Following', group: 'social' },
+  { id: 'saved', label: 'Saved', group: 'social' },
+  { id: 'nearby', label: 'Nearby', group: 'discovery' },
+  { id: 'products', label: 'Products', group: 'commerce' },
+  { id: 'shorts', label: 'Shorts', group: 'content' },
+  { id: 'series', label: 'Series', group: 'discovery' },
 ];
+
+/** LE-006 Phase 1 — chips shown in the sticky feed filter bar, in order */
+export const SPOTLIGHT_STICKY_FILTER_IDS = [
+  'all',
+  'reels',
+  'videos',
+  'guides',
+  'brands',
+  'collections',
+  'offers',
+  'campaigns',
+  'reviews',
+  'blogs',
+  'live',
+  'services',
+  'trending',
+  'following',
+  'saved',
+  'nearby',
+] as const;

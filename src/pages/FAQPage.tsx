@@ -12,26 +12,25 @@ export function FAQPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F0F8FF] font-sans text-left">
-      <StaticPageHero className="h-[280px]">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30" />
-        <div className="relative z-10 mx-auto w-full max-w-[1440px] px-6 md:px-[64px]">
-          <div className="mb-6 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/40">
-            <Link to="/" className="transition-colors hover:text-white">
+    <div className="min-h-screen bg-[#F4F7F9] font-sans text-left">
+      <StaticPageHero>
+        <div className="relative z-10 mx-auto w-full max-w-[1280px] px-5 sm:px-10 py-8">
+          <div className="mb-3 flex items-center gap-1.5 text-xs text-white/45">
+            <Link to="/" className="transition-colors hover:text-white/80">
               Home
             </Link>
-            <ChevronRight size={10} className="text-white/20" />
-            <span className="text-white">FAQ</span>
+            <span>›</span>
+            <span className="text-[#FF5B00]">FAQ</span>
           </div>
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-primary/15 text-orange-primary">
-              <HelpCircle className="h-6 w-6" />
+          <div className="flex items-start gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#FF5B00]/15 text-[#FF5B00] shrink-0">
+              <HelpCircle className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-3xl font-black uppercase italic tracking-tighter text-white md:text-5xl">
-                Frequently Asked Questions
+              <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-white">
+                Frequently asked questions
               </h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-relaxed text-gray-300 md:text-base">
+              <p className="mt-2 max-w-2xl text-[13px] font-medium leading-relaxed text-white/55">
                 Quick answers about comparing products, verified brands, deals, and how Choosify works.
               </p>
             </div>

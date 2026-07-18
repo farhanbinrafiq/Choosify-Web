@@ -1,7 +1,7 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
 import type { EmiRecommendation } from '../../types/emi';
 import { EmiInsightCard } from './EmiContextPanel';
+import { EmiAiLogo } from '../EmiAiLogo';
 import { cn } from '../../lib/utils';
 
 interface EmiAssistantCardProps {
@@ -14,9 +14,11 @@ interface EmiAssistantCardProps {
 export function EmiAssistantCard({ title, description, recommendations, className }: EmiAssistantCardProps) {
   if (!recommendations.length) return null;
   return (
-    <div className={cn('bg-white border border-[#e8edf2] rounded-[5px] p-4 space-y-3', className)}>
+    <div className={cn('bg-white border border-[#e8edf2] rounded-[10px] p-4 space-y-3', className)}>
       <div className="flex items-center gap-2">
-        <Sparkles size={14} className="text-[#E8500A]" aria-hidden />
+        <span className="w-7 h-7 rounded-full bg-[#F4F7F9] border border-[#E8EDF2] flex items-center justify-center overflow-hidden p-0.5 shrink-0">
+          <EmiAiLogo size={22} className="w-[22px] h-[22px]" />
+        </span>
         <h3 className="text-xs font-black uppercase tracking-widest text-navy">{title}</h3>
       </div>
       {description && <p className="text-[11px] text-gray-500">{description}</p>}
@@ -35,9 +37,9 @@ interface EmiSummaryCardProps {
 
 export function EmiSummaryCard({ headline, summary, className }: EmiSummaryCardProps) {
   return (
-    <div className={cn('border-l-2 border-[#E8500A] pl-3 space-y-1', className)}>
-      <p className="text-[10px] font-black uppercase text-[#E8500A] flex items-center gap-1">
-        <Sparkles size={10} aria-hidden /> Emi Summary
+    <div className={cn('border-l-2 border-[#FF5B00] pl-3 space-y-1', className)}>
+      <p className="text-[10px] font-black uppercase text-[#FF5B00] flex items-center gap-1.5">
+        <EmiAiLogo size={14} className="w-3.5 h-3.5" /> Emi Summary
       </p>
       <h4 className="text-sm font-bold text-navy">{headline}</h4>
       <p className="text-xs text-gray-600 leading-relaxed">{summary}</p>

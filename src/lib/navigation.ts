@@ -11,16 +11,16 @@ export type PrimaryNavItem = {
   heroTitle: string;
 };
 
-/** Canonical primary navigation — single source for navbar, hamburger, and hero titles */
+/** Canonical primary navigation — Choosify 3.0 order */
 export const PRIMARY_NAV_ITEMS: PrimaryNavItem[] = [
   { id: 'home', path: '/', label: 'Home', heroTitle: 'Home' },
   { id: 'categories', path: '/categories', label: 'Categories', heroTitle: 'Categories' },
-  { id: 'spotlight', path: '/spotlight', label: 'Spotlight', heroTitle: 'Spotlight' },
   { id: 'products', path: '/products', label: 'Products', heroTitle: 'Products' },
   { id: 'brands', path: '/brands', label: 'Brands', heroTitle: 'Brands' },
-  { id: 'compare', path: '/compare', label: 'Compare', heroTitle: 'Compare' },
-  { id: 'deals', path: '/deals', label: 'Deals', heroTitle: 'Deals' },
+  { id: 'spotlight', path: '/spotlight', label: 'Discover', heroTitle: 'Discover' },
   { id: 'creators', path: '/creators', label: 'Creators', heroTitle: 'Creators' },
+  { id: 'deals', path: '/deals', label: 'Deals', heroTitle: 'Deals' },
+  { id: 'compare', path: '/compare', label: 'Compare', heroTitle: 'Compare' },
 ];
 
 const NAV_PATH_LABEL_OVERRIDES: Record<string, string> = {

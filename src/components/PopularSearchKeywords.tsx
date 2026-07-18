@@ -2,6 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { colors } from '../design-system/tokens/colors';
+import { radius } from '../design-system/tokens/radius';
+import { shadows } from '../design-system/tokens/shadows';
+import { motionClass } from '../design-system/tokens/motion';
 
 interface PopularSearchKeywordsProps {
   title: string;
@@ -23,19 +27,22 @@ export function PopularSearchKeywords({
   return (
     <section
       className={cn(
-        'mt-8 pt-8 border-t border-[#e8edf2] text-left',
-        isHero && 'border-white/15',
+        'mt-8 pt-8 border-t text-left',
+        isHero ? 'border-white/15' : '',
         className,
       )}
-      aria-label={title}
+      style={!isHero && !className?.includes('border-0') ? { borderColor: colors.border.DEFAULT } : undefined}
+      aria-label={title || 'Popular searches'}
     >
       <h2
         className={cn(
           'text-xl sm:text-2xl font-bold tracking-tight mb-5',
-          isHero ? 'text-white' : 'text-[#1a1a2e]',
+          isHero ? 'text-white' : '',
+          !title && 'sr-only',
         )}
+        style={!isHero ? { color: colors.text.heading } : undefined}
       >
-        {title}
+        {title || 'Popular searches'}
       </h2>
       <div className="flex flex-wrap gap-2.5 sm:gap-3">
         {terms.map((term) => (
@@ -43,15 +50,22 @@ export function PopularSearchKeywords({
             key={term}
             to={`/search?q=${encodeURIComponent(term)}`}
             className={cn(
-              'inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors',
+              'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold min-h-[44px]',
+              motionClass.hoverLift,
               isHero
-                ? 'bg-white text-[#1A1D4E] border border-white/20 hover:bg-white/95 hover:border-white shadow-sm'
-                : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#E8500A]/25 hover:bg-[#fafbfc] shadow-sm',
+                ? 'bg-white border border-white/20 shadow-sm'
+                : 'bg-white border shadow-sm',
             )}
+            style={{
+              borderRadius: radius.full,
+              borderColor: isHero ? undefined : colors.border.DEFAULT,
+              color: colors.text.body,
+            }}
           >
             <Search
               size={14}
-              className={cn('shrink-0', isHero ? 'text-[#E8500A]' : 'text-[#6b7280]')}
+              className="shrink-0"
+              style={{ color: colors.brand.orange.legacy }}
               strokeWidth={2.25}
             />
             <span>{term}</span>
