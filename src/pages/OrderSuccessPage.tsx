@@ -15,26 +15,74 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { ProductCard } from '../components/ProductCard';
+import type { Order } from '../types/schemas';
+import { cn } from '../lib/utils';
+
+const formatMoney = (amount: number) => `৳${amount.toLocaleString()}`;
+
+const formatDateTime = (iso: string) => {
+  try {
+    return new Date(iso).toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
+};
 
 export function OrderSuccessPage() {
+  const heroRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const order = (location.state as any)?.order;
-  const { clearCart } = useGlobalState();
+  const { orderId } = useParams<{ orderId: string }>();
+  const { orders, clearCart } = useGlobalState();
+
+  const locationOrder = (location.state as { order?: Order } | null)?.order;
+
+  const order = useMemo(() => {
+    if (locationOrder) return locationOrder;
+
+    const targetId = orderId || sessionStorage.getItem('choosify_last_order_id');
+    if (targetId) {
+      const match = orders.find((o) => o.orderId === targetId);
+      if (match) return match;
+    }
+
+    const savedSnapshot = sessionStorage.getItem('choosify_last_order_snapshot');
+    if (savedSnapshot) {
+      try {
+        const parsed = JSON.parse(savedSnapshot) as Order;
+        if (!targetId || parsed.orderId === targetId) return parsed;
+      } catch {}
+    }
+
+    return orders[0] ?? null;
+  }, [locationOrder, orderId, orders]);
 
   React.useEffect(() => {
-    // Clear cart after successful order display
-    const timer = setTimeout(() => {
-      if (typeof clearCart === 'function') clearCart();
-    }, 500);
-    return () => clearTimeout(timer);
+    if (typeof clearCart === 'function') clearCart();
   }, [clearCart]);
 
+  const subtotal =
+    order?.subtotal ??
+    order?.subOrders.reduce(
+      (sum, sub) => sum + sub.items.reduce((acc, item) => acc + item.price * item.quantity, 0),
+      0,
+    ) ??
+    0;
+
+  const deliveryTotal =
+    order?.deliveryTotal ??
+    order?.subOrders.reduce((sum, sub) => sum + sub.deliveryFee, 0) ??
+    0;
+
   const handleDownloadInvoice = () => {
-    toast.success('Invoice file compiled successfully! Initializing download buffer.');
+    toast.success('Invoice ready — PDF download will be available in a future update.');
   };
 
   if (!order) {
@@ -58,117 +106,11 @@ export function OrderSuccessPage() {
     );
   }
 
-  const activeOrder = order || defaultOrder;
-  const orderId = activeOrder.orderId;
-  const orderFullName = activeOrder.fullName || defaultOrder.fullName;
-  const orderPhone = activeOrder.phone || defaultOrder.phone;
-  const orderAddress = activeOrder.address || defaultOrder.address;
-  const orderLandmark = activeOrder.landmark || defaultOrder.landmark;
-
-  // Formatting date and time
-  const formattedDate = activeOrder.createdAt && activeOrder.createdAt !== defaultOrder.createdAt
-    ? new Date(activeOrder.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    : 'May 12, 2025';
-  
-  const formattedTime = activeOrder.createdAt && activeOrder.createdAt !== defaultOrder.createdAt
-    ? new Date(activeOrder.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-    : '10:18 AM';
-
-  // Calculate costs dynamically or fallback to exact matching sums
-  const subOrdersList = activeOrder.subOrders || defaultOrder.subOrders;
-  const totalProductsSubtotal = subOrdersList.reduce((acc: number, sub: any) => {
-    const items = sub.items || [];
-    return acc + items.reduce((itAcc: number, item: any) => itAcc + (item.price * item.quantity), 0);
-  }, 0);
-
-  const totalDeliveryFee = subOrdersList.reduce((acc: number, sub: any) => acc + (sub.deliveryFee || 0), 0);
-  const platformFee = 80;
-  const overallTotalPaid = totalProductsSubtotal + totalDeliveryFee + platformFee;
-
-  // Interactive slide ref for Recommended Carousel
-  const carouselRef = React.useRef<HTMLDivElement>(null);
-
-  const slideLeft = () => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: -300, behavior: 'smooth' });
-    }
-  };
-
-  const slideRight = () => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: 300, behavior: 'smooth' });
-    }
-  };
-
-  // Matches recommended products from screenshot
-  const recommendedProducts = [
-    {
-      id: 201,
-      title: "Apex Men's Sports Sneakers",
-      price: 4200,
-      originalPrice: 4900,
-      rating: 4.6,
-      reviews: 128,
-      category: "Fashion & Lifestyle",
-      categoryLabel: "FASHION",
-      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop"
-    },
-    {
-      id: 202,
-      title: "Sony WH-1000XM5 Wireless Headphones",
-      price: 28900,
-      originalPrice: 34900,
-      rating: 4.7,
-      reviews: 845,
-      category: "Tech & Electronics",
-      categoryLabel: "ELECTRONICS",
-      image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop"
-    },
-    {
-      id: 203,
-      title: "MacBook Air M3 13-inch Laptop",
-      price: 132000,
-      originalPrice: 139000,
-      rating: 4.8,
-      reviews: 672,
-      category: "Tech & Electronics",
-      categoryLabel: "ELECTRONICS",
-      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=400&fit=crop"
-    },
-    {
-      id: 204,
-      title: "Samsung Galaxy Watch 6 Classic",
-      price: 25800,
-      originalPrice: 29900,
-      rating: 4.5,
-      reviews: 310,
-      category: "Tech & Electronics",
-      categoryLabel: "ELECTRONICS",
-      image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&h=400&fit=crop"
-    },
-    {
-      id: 205,
-      title: "iPhone 15 Pro Max 256GB",
-      price: 145000,
-      originalPrice: 155000,
-      rating: 4.6,
-      reviews: 542,
-      category: "Mobiles & Phones",
-      categoryLabel: "PHONES",
-      image: "https://images.unsplash.com/photo-1616348436168-de43ad0db179?w=400&h=400&fit=crop"
-    },
-    {
-      id: 206,
-      title: "Canon EOS R50 Mirrorless Camera",
-      price: 85900,
-      originalPrice: 92900,
-      rating: 4.5,
-      reviews: 217,
-      category: "Tech & Electronics",
-      categoryLabel: "ELECTRONICS",
-      image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop"
-    }
-  ];
+  const shipping = order.shipping;
+  const paymentLabel =
+    order.paymentMethod === 'cod' || order.isCOD
+      ? 'Cash on Delivery (COD)'
+      : 'Commercial Credit / Prepayment';
 
   const pointsEarned = Math.max(10, Math.round(order.overallTotal / 100));
 
@@ -243,182 +185,6 @@ export function OrderSuccessPage() {
                       <p className="text-[9.5px] font-bold text-[#9AA0AC] uppercase">Recipient</p>
                       <p className="text-[12.5px] font-semibold text-[#1A1A2E]">{shipping.fullName}</p>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column (35%) */}
-          <div className="space-y-6">
-            
-            {/* ORDER & PAYMENT SUMMARY */}
-            <div className="bg-white rounded-2xl border border-[#EEF2F7] shadow-sm p-6 md:p-8 text-left">
-              <h3 className="text-base font-black uppercase text-[#050B2C] tracking-tight border-b border-[#EEF2F7] pb-4 mb-5">
-                Order &amp; Payment Summary
-              </h3>
-
-              <div className="space-y-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider pb-4 mb-4 border-b border-[#EEF2F7]">
-                <div className="flex justify-between items-center">
-                  <span>Products Subtotal</span>
-                  <span className="font-mono text-[#050B2C]">৳{totalProductsSubtotal.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1.5">
-                    <span>Seller Delivery Fee</span>
-                    <span className="w-3.5 h-3.5 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-[9px] cursor-pointer" title="Supplier fulfillment delivery fee">?</span>
-                  </div>
-                  <span className="font-mono text-[#050B2C]">৳{totalDeliveryFee.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1.5">
-                    <span>Platform Service Fee</span>
-                    <span className="w-3.5 h-3.5 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-[9px] cursor-pointer" title="Fidelity routing security charge">?</span>
-                  </div>
-                  <span className="font-mono text-[#050B2C]">৳{platformFee}</span>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-end mb-5">
-                <div>
-                  <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider leading-none mb-1.5">Total Paid</p>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide leading-none">Net sum amount</p>
-                </div>
-                <p className="text-2xl font-mono font-black text-[#FF5B00] leading-none">
-                  ৳{overallTotalPaid.toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            {/* SECURE PAYMENT CARD */}
-            <div className="bg-[#ECFDF5] border border-emerald-500/15 rounded-xl p-4 flex items-start gap-3.5 text-left">
-              <div className="w-9 h-9 rounded-lg bg-[#10B981]/15 flex items-center justify-center text-[#10B981] shrink-0">
-                <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black uppercase text-emerald-900 tracking-tight mb-0.5 leading-none">Secure Payment</h4>
-                <p className="text-[10px] text-emerald-600 font-bold leading-normal">Your payment details are 100% secure protected by SSL encryption.</p>
-              </div>
-            </div>
-
-            {/* RATE ORDER CARD */}
-            <div className="bg-[#050B2C] rounded-2xl p-6 text-left text-white relative overflow-hidden shadow-md">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF5B00]/10 rounded-full blur-xl pointer-events-none" />
-              
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-2 bg-[#FF5B00]/10 border border-[#FF5B00]/20 rounded-full px-2.5 py-1 w-fit">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00] animate-pulse" />
-                  <span className="text-[8px] font-black uppercase tracking-wider text-[#FF5B00] leading-none">Love Choosify?</span>
-                </div>
-                <h4 className="text-sm font-black uppercase text-white tracking-tight leading-tight mb-2">
-                  Rate your experience &amp; earn 20 points!
-                </h4>
-                <p className="text-[10px] text-gray-400 font-bold leading-normal mb-5 uppercase tracking-wide">
-                  Help us optimize our verification routing algorithm.
-                </p>
-
-                <button 
-                  onClick={() => {
-                    toast.success('Thank you for rating! 20 points credited.');
-                  }}
-                  className="w-full py-3 bg-[#FF5B00] hover:bg-[#E04F00] active:scale-98 text-white text-[10.5px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
-                >
-                  <span>Rate Order</span>
-                  <Star className="w-3.5 h-3.5 stroke-[2.5]" />
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* 4. Order Timeline Section */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 mb-12">
-        <div className="bg-white rounded-2xl border border-[#EEF2F7] shadow-sm p-6 md:p-8 text-left">
-          
-          <div className="flex items-center justify-between mb-8 border-b border-[#EEF2F7] pb-4">
-            <div>
-              <h3 className="text-base font-black uppercase text-[#050B2C] tracking-tight">
-                What's Next?
-              </h3>
-              <p className="text-xs font-semibold text-[#6B7280] mt-1">
-                We'll keep you updated at every step. Track your packages in real-time.
-              </p>
-            </div>
-            <button 
-              onClick={() => navigate('/order-tracking', { state: { order: activeOrder } })}
-              className="px-4 py-1.5 border border-[#FF5B00] hover:bg-[#FF5B00]/5 bg-white rounded-lg text-[10px] font-black uppercase tracking-wider text-[#FF5B00] transition-all cursor-pointer"
-            >
-              Track Order
-            </button>
-          </div>
-
-          {/* Stepper Grid Row */}
-          <div className="relative flex flex-col md:flex-row items-start justify-between gap-8 md:gap-4 md:pt-4">
-            <div className="absolute top-[21px] left-8 right-8 h-0.5 border-t border-dashed border-gray-200 hidden md:block z-0" />
-            
-            {[
-              {
-                label: 'Order Confirmed',
-                desc: 'May 12, 10:18 AM',
-                status: 'completed',
-                icon: CheckCircle2,
-                color: 'border-[#22C55E] bg-[#22C55E]/15 text-[#22C55E]'
-              },
-              {
-                label: 'Seller Confirmation',
-                desc: 'We will notify you',
-                status: 'active',
-                icon: Store,
-                color: 'border-[#FF5B00] bg-[#FF5B00]/15 text-[#FF5B00]'
-              },
-              {
-                label: 'Order Packed',
-                desc: 'Soon',
-                status: 'future',
-                icon: Package,
-                color: 'border-gray-200 bg-gray-50 text-gray-400'
-              },
-              {
-                label: 'Out for Delivery',
-                desc: 'Soon',
-                status: 'future',
-                icon: Truck,
-                color: 'border-gray-200 bg-gray-50 text-gray-400'
-              },
-              {
-                label: 'Delivered',
-                desc: 'Estimated: May 14-16',
-                status: 'future',
-                icon: Home,
-                color: 'border-gray-200 bg-gray-50 text-gray-400'
-              }
-            ].map((step, idx) => {
-              const StepIcon = step.icon;
-              return (
-                <div key={idx} className="flex md:flex-col items-center md:items-center text-left md:text-center gap-4 md:gap-3 flex-1 relative z-10 w-full md:w-auto">
-                  <div className={cn(
-                    "w-11 h-11 rounded-full border-2 flex items-center justify-center shrink-0 bg-white shadow-sm relative",
-                    step.color
-                  )}>
-                    <StepIcon className="w-5 h-5 stroke-[2.5]" />
-                    {step.status === 'active' && (
-                      <span className="absolute inset-0 rounded-full border-2 border-[#FF5B00] animate-ping opacity-30 pointer-events-none" />
-                    )}
-                  </div>
-                  <div>
-                    <p className={cn(
-                      "text-[11px] font-black uppercase tracking-tight",
-                      step.status === 'future' ? 'text-gray-400' : 'text-[#050B2C]'
-                    )}>
-                      {step.label}
-                    </p>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase mt-1 leading-none tracking-wider">
-                      {step.desc}
-                    </p>
                   </div>
                   <div className="flex items-start gap-3">
                     <Phone size={16} className="text-[#9AA0AC] shrink-0 mt-0.5" />
@@ -656,7 +422,9 @@ export function OrderSuccessPage() {
               onClick={() => navigate('/messages')}
               className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#FF5B00] hover:bg-[#E8500A] text-white text-[11px] font-bold uppercase tracking-wide transition-colors cursor-pointer border-0"
             >
-              Contact Support
+              <MessageSquare size={14} />
+              Message sellers
+              <ArrowRight size={14} />
             </button>
           </div>
           <button
@@ -668,15 +436,7 @@ export function OrderSuccessPage() {
             Close this page
           </button>
         </div>
-      </section>
-
-      {/* Back to Home routing */}
-      <div className="text-center pt-4">
-        <Link to="/" className="text-xs font-black text-[#050B2C] uppercase tracking-widest hover:text-[#FF5B00] transition-all">
-          ← Return to Home Shopping Stream
-        </Link>
       </div>
-
     </div>
   );
 }

@@ -1,7 +1,11 @@
-import React, { useRef, useState, useEffect, createContext, useContext } from 'react';
+import React, { useRef, useState, useEffect, createContext, useContext, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
-import { Star, ShieldCheck, HelpCircle, Check, Sparkles, Flame, Tag, DollarSign, Filter, Search, X, ChevronRight } from 'lucide-react';
+import { Star, ShieldCheck, HelpCircle, Check, Sparkles, Flame, Tag, DollarSign, Filter, Search, X, ChevronRight, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getFloatingPanelClassName } from './FloatingPanelShell';
+import { AlphabetFilterStrip } from './AlphabetFilterStrip';
+import type { SectionNavItem } from '../hooks/useSectionScrollSpy';
 
 // ==========================================
 // LAYER 1: FILTER ENGINE (GLOBAL DEFINITIONS)
@@ -29,51 +33,125 @@ export interface FilterDefinition {
 }
 
 export interface FilterProfile {
-  entity: 'products' | 'brands' | 'deals' | 'creators' | 'recommendations' | 'categories' | 'guides';
+  entity: 'products' | 'brands' | 'deals' | 'creators' | 'recommendations' | 'guides' | 'whats-on';
   filters: FilterDefinition[];
 }
 
 // ==========================================
 // DRAG SCROLL HELPER HOOK FOR HORIZONTAL SCROLL
 // ==========================================
-export function useDragScroll() {
+const DRAG_SCROLL_SWIPE_THRESHOLD_PX = 6;
+
+/** Scroll to the page results section after closing the floating filter drawer. */
+export function scrollToFilterResultsTarget(targetId?: string | null, offset = 200) {
+  if (!targetId) return;
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+}
+
+export interface AlphabetFilterConfig {
+  activeLetter: string | null;
+  onLetterChange: (letter: string | null) => void;
+}
+
+export function useDragScroll(options?: { grabCursor?: boolean }) {
+  const grabCursor = options?.grabCursor ?? true;
   const ref = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const dragState = useRef({
+    pointerDown: false,
+    moved: false,
+    startX: 0,
+    scrollLeft: 0,
+  });
+
+  const endPointer = () => {
+    dragState.current.pointerDown = false;
+    setIsDragging(false);
+  };
 
   const onMouseDown = (e: React.MouseEvent) => {
     if (!ref.current) return;
+    dragState.current.pointerDown = true;
+    dragState.current.moved = false;
+    dragState.current.startX = e.pageX - ref.current.offsetLeft;
+    dragState.current.scrollLeft = ref.current.scrollLeft;
     setIsDragging(true);
-    setStartX(e.pageX - ref.current.offsetLeft);
-    setScrollLeft(ref.current.scrollLeft);
-  };
-
-  const onMouseLeave = () => {
-    setIsDragging(false);
-  };
-
-  const onMouseUp = () => {
-    setIsDragging(false);
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !ref.current) return;
+    if (!dragState.current.pointerDown || !ref.current) return;
     e.preventDefault();
     const x = e.pageX - ref.current.offsetLeft;
-    const walk = (x - startX) * 1.5; // scroll speed multiplier
-    ref.current.scrollLeft = scrollLeft - walk;
+    const walk = (x - dragState.current.startX) * 1.5;
+    if (Math.abs(walk) > DRAG_SCROLL_SWIPE_THRESHOLD_PX) {
+      dragState.current.moved = true;
+    }
+    ref.current.scrollLeft = dragState.current.scrollLeft - walk;
   };
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    // Touch scrolling is left fully native (touch-action: pan-x +
+    // -webkit-overflow-scrolling) so momentum/inertia is preserved.
+    // We only observe movement to suppress accidental clicks after a swipe.
+    const onTouchStart = (e: TouchEvent) => {
+      dragState.current.pointerDown = true;
+      dragState.current.moved = false;
+      dragState.current.startX = e.touches[0]?.pageX ?? 0;
+      dragState.current.scrollLeft = el.scrollLeft;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!dragState.current.pointerDown) return;
+      const x = e.touches[0]?.pageX ?? dragState.current.startX;
+      const walk = dragState.current.startX - x;
+      if (Math.abs(walk) > DRAG_SCROLL_SWIPE_THRESHOLD_PX) {
+        dragState.current.moved = true;
+      }
+    };
+
+    const onTouchEnd = () => {
+      endPointer();
+    };
+
+    const suppressClickAfterSwipe = (e: MouseEvent) => {
+      if (!dragState.current.moved) return;
+      e.preventDefault();
+      e.stopPropagation();
+      dragState.current.moved = false;
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    el.addEventListener('touchend', onTouchEnd);
+    el.addEventListener('touchcancel', onTouchEnd);
+    el.addEventListener('click', suppressClickAfterSwipe, true);
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
+      el.removeEventListener('click', suppressClickAfterSwipe, true);
+    };
+  }, []);
 
   return {
     ref,
     props: {
       onMouseDown,
-      onMouseLeave,
-      onMouseUp,
+      onMouseLeave: endPointer,
+      onMouseUp: endPointer,
       onMouseMove,
-      style: { cursor: isDragging ? 'grabbing' : 'grab' }
-    }
+      style: grabCursor
+        ? ({ cursor: isDragging ? 'grabbing' : 'grab' } as React.CSSProperties)
+        : undefined,
+    },
   };
 }
 
@@ -97,7 +175,7 @@ export function DragScrollContainer({ children, className, ...props }: ScrollCon
         ref={ref}
         {...dragProps}
         className={cn(
-          "flex flex-row items-stretch gap-4 overflow-x-auto no-scrollbar scroll-smooth select-none pb-1 py-1 w-full -webkit-overflow-scrolling-touch",
+          "flex flex-row items-stretch gap-4 overflow-x-auto no-scrollbar select-none pb-1 py-1 w-full choosify-touch-scroll-row",
           className
         )}
         {...props}
@@ -112,107 +190,11 @@ export function DragScrollContainer({ children, className, ...props }: ScrollCon
 // LAYER 2: SYSTEM FILTER PROFILES DEFINITIONS
 // ==========================================
 
-export const PRODUCTS_PAGE_FILTER_PROFILE: FilterProfile = {
-  entity: 'products',
-  filters: [
-    {
-      id: 'price_custom',
-      name: 'Price Scope (BDT)',
-      type: 'price_custom',
-    },
-    {
-      id: 'category',
-      name: 'Categories',
-      type: 'single_select',
-    },
-    {
-      id: 'brand',
-      name: 'Featured Brands',
-      type: 'single_select',
-    },
-    {
-      id: 'rating',
-      name: 'Rating Score',
-      type: 'single_select',
-    },
-    {
-      id: 'availability',
-      name: 'Availability',
-      type: 'single_select',
-      options: [
-        { value: 'all', label: 'All Items' },
-        { value: 'in-stock', label: 'In Stock' },
-        { value: 'out-of-stock', label: 'Out of Stock' }
-      ]
-    }
-  ]
-};
-
-export const DEALS_PAGE_FILTER_PROFILE: FilterProfile = {
-  entity: 'deals',
-  filters: [
-    {
-      id: 'category',
-      name: 'Category Channel',
-      type: 'single_select'
-    },
-    {
-      id: 'deal_channel',
-      name: 'Wholesale vs Retail',
-      type: 'single_select',
-      options: [
-        { value: 'all', label: 'All Channels' },
-        { value: 'retail', label: 'Retail Only' },
-        { value: 'wholesale', label: 'Wholesale Only' }
-      ]
-    },
-    {
-      id: 'discount_range',
-      name: 'Minimum Discount',
-      type: 'range',
-      min: 0,
-      max: 70,
-      step: 10,
-      unit: '% Off'
-    }
-  ]
-};
-
-export const CREATORS_PAGE_FILTER_PROFILE: FilterProfile = {
-  entity: 'creators',
-  filters: [
-    {
-      id: 'alphabet',
-      name: 'Initial Selector',
-      type: 'alphabet'
-    },
-    {
-      id: 'niche',
-      name: 'Niche Markets',
-      type: 'single_select'
-    },
-    {
-      id: 'verification',
-      name: 'Verified Badges',
-      type: 'single_select',
-      options: [
-        { value: 'all', label: 'All Creators' },
-        { value: 'verified', label: 'Verified Only' },
-        { value: 'unverified', label: 'Independent' }
-      ]
-    },
-    {
-      id: 'engagement',
-      name: 'Engagement Rating',
-      type: 'single_select',
-      options: [
-        { value: 'all', label: 'All Ratings' },
-        { value: 'high', label: 'Top-Tier Engagement (4.8+)' },
-        { value: 'normal', label: 'Standard Rating' }
-      ]
-    }
-  ]
-};
+export {
+  PRODUCTS_PAGE_FILTER_PROFILE,
+  DEALS_PAGE_FILTER_PROFILE,
+  CREATORS_PAGE_FILTER_PROFILE,
+} from './filter/filterProfiles';
 
 // ==========================================
 // LAYER 3: DEDICATED CUSTOM PRICE FILTER COMPONENT
@@ -540,7 +522,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
       <div className="max-w-[1440px] mx-auto px-6 w-full flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] whitespace-nowrap">{title}</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E8500A]" />
         </div>
 
         <div className="flex-1 min-w-0 pr-2">
@@ -553,7 +535,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
                   className={cn(
                     "px-4 py-2 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 border shrink-0 hover:scale-[1.02] active:scale-[0.98]",
                     filter.active
-                      ? "bg-[#FF5B00] text-white border-transparent shadow-xs font-black italic"
+                      ? "bg-[#E8500A] text-white border-transparent shadow-xs font-black italic"
                       : "bg-white border-[#e8edf2] text-gray-550 hover:border-[#1A1D4E]/25 hover:text-[#1A1D4E]"
                   )}
                 >
@@ -566,7 +548,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
             {onOpenFullFilters && (
               <button
                 onClick={onOpenFullFilters}
-                className="px-4 py-2 rounded-full text-[10.5px] font-black uppercase tracking-widest text-[#FF5B00] bg-orange-primary/5 hover:bg-orange-primary/10 border border-dashed border-[#FF5B00]/30 flex items-center gap-1 shrink-0 cursor-pointer"
+                className="px-4 py-2 rounded-full text-[10.5px] font-black uppercase tracking-widest text-[#E8500A] bg-orange-primary/5 hover:bg-orange-primary/10 border border-dashed border-[#E8500A]/30 flex items-center gap-1 shrink-0 cursor-pointer"
               >
                 <span>More Filters</span>
                 <span className="font-mono text-xs">▼</span>
@@ -605,12 +587,12 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
           {chips.map((chip, idx) => (
             <div
               key={`${chip.id}-${idx}`}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F4F8FA] border border-[#D9E6ED] rounded-[4px] text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider shadow-2xs hover:border-[#FF5B00]/30 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F4F8FA] border border-[#D9E6ED] rounded-[4px] text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider shadow-2xs hover:border-[#E8500A]/30 transition-all"
             >
               <span>{chip.label}</span>
               <button
                 onClick={chip.onRemove}
-                className="text-[#FF5B00] hover:text-[#EB4501] transition-colors p-[1.5px] rounded-full hover:bg-red-500/10 cursor-pointer border-none bg-none flex items-center justify-center"
+                className="text-[#E8500A] hover:text-[#CF4400] transition-colors p-[1.5px] rounded-full hover:bg-red-500/10 cursor-pointer border-none bg-none flex items-center justify-center"
                 aria-label={`Remove filter ${chip.label}`}
               >
                 <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -622,7 +604,7 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
 
           <button
             onClick={onClearAll}
-            className="text-[10px] font-extrabold text-[#FF5B00] uppercase tracking-widest hover:text-[#EB4501] ml-3 transition-colors cursor-pointer border-none bg-transparent hover:underline"
+            className="text-[10px] font-extrabold text-[#E8500A] uppercase tracking-widest hover:text-[#CF4400] ml-3 transition-colors cursor-pointer border-none bg-transparent hover:underline"
           >
             Clear All
           </button>
@@ -930,90 +912,67 @@ export function FullSidebarFilterPanel({
   sorting
 }: FullSidebarFilterPanelProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const { registerPageFilters, setIsOpen } = useFloatingFilters();
-
-  const latestPropsRef = useRef({
-    searchQuery,
-    setSearchQuery,
-    onSearchSubmit,
-    searchPlaceholder,
-    quickFilters,
-    activeChips,
-    sorting,
-    children,
-    advancedSection,
-    onReset
-  });
-
-  latestPropsRef.current = {
-    searchQuery,
-    setSearchQuery,
-    onSearchSubmit,
-    searchPlaceholder,
-    quickFilters,
-    activeChips,
-    sorting,
-    children,
-    advancedSection,
-    onReset
-  };
+  const { registerPageFilters, setIsOpen, closeDrawer } = useFloatingFilters();
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window.location.pathname.includes('/overview') || window.location.hash.includes('overview'))) {
-      return;
-    }
-
     const pageId = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
     
-    const delegate = {
-      get searchQuery() { return latestPropsRef.current.searchQuery; },
-      get setSearchQuery() { return latestPropsRef.current.setSearchQuery; },
-      get onSearchSubmit() { return latestPropsRef.current.onSearchSubmit; },
-      get searchPlaceholder() { return latestPropsRef.current.searchPlaceholder; },
-      get quickFilters() { return latestPropsRef.current!.quickFilters; },
-      get activeChips() { return latestPropsRef.current.activeChips; },
-      get sorting() { return latestPropsRef.current.sorting; },
-      get fullFilters() {
-        const { children: curChildren, advancedSection: curAdvanced } = latestPropsRef.current;
-        return (
-          <div className="flex flex-col gap-4 text-left">
-            {curChildren}
-            {curAdvanced && (
-              <div className="flex flex-col gap-4 border-t border-[#e8edf2] pt-4 mt-1">
-                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Advanced Refinements</div>
-                {curAdvanced}
-              </div>
-            )}
-          </div>
-        );
-      },
-      get footerActions() {
-        return (
-          <>
+    return registerPageFilters(pageId, {
+      searchQuery,
+      setSearchQuery,
+      onSearchSubmit,
+      searchPlaceholder,
+      quickFilters,
+      activeChips,
+      sorting,
+      fullFilters: (
+        <div className="flex flex-col gap-4 text-left">
+          {children}
+          {advancedSection && (
+            <div className="flex flex-col gap-4 border-t border-[#e8edf2] pt-4 mt-1">
+              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Advanced Refinements</div>
+              {advancedSection}
+            </div>
+          )}
+        </div>
+      ),
+      footerActions: (
+        <>
+          <button
+            type="button"
+            onClick={() => closeDrawer()}
+            className="flex-1 py-3 bg-orange-primary text-white hover:bg-orange-deep font-sans text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs border-none"
+          >
+            Apply Filters
+          </button>
+          {onReset && (
             <button
-              onClick={() => setIsOpen(false)}
-              className="flex-1 py-3 bg-[#FF5B00] text-white hover:bg-[#EB4501] font-sans text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs border-none"
+              type="button"
+              onClick={() => {
+                onReset();
+                setIsOpen(false);
+              }}
+              className="flex-1 py-3 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-sans text-[10px] font-black uppercase tracking-wider rounded-lg border border-[#e8edf2] hover:border-rose-200 flex items-center justify-center transition-all cursor-pointer"
             >
-              Apply Filters
+              Reset All
             </button>
-            {latestPropsRef.current.onReset && (
-              <button
-                onClick={() => {
-                  latestPropsRef.current.onReset?.();
-                  setIsOpen(false);
-                }}
-                className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-sans text-[10px] font-black uppercase tracking-wider rounded-lg border border-white/15 flex items-center justify-center transition-all cursor-pointer"
-              >
-                Reset All
-              </button>
-            )}
-          </>
-        );
-      }
-    };
-
-    return registerPageFilters(pageId, delegate);
-  }, [title, registerPageFilters]);
+          )}
+        </>
+      )
+    });
+  }, [
+    title,
+    children,
+    advancedSection,
+    onReset,
+    searchQuery,
+    setSearchQuery,
+    onSearchSubmit,
+    searchPlaceholder,
+    quickFilters,
+    activeChips,
+    sorting
+  ]);
 
   return (
     <div className="flex flex-col gap-4 w-full animate-fade-in text-left font-sans">
@@ -1027,7 +986,7 @@ export function FullSidebarFilterPanel({
         {onReset && (
           <button
             onClick={onReset}
-            className="text-[9px] font-bold text-[#FF5B00] hover:text-[#EB4501] uppercase tracking-wider transition-colors border-none bg-none cursor-pointer"
+            className="text-[9px] font-bold text-[#E8500A] hover:text-[#CF4400] uppercase tracking-wider transition-colors border-none bg-none cursor-pointer"
           >
             Reset All
           </button>
@@ -1071,11 +1030,21 @@ export interface FloatingFilterData {
   setSearchQuery?: (q: string) => void;
   onSearchSubmit?: (q: string) => void;
   searchPlaceholder?: string;
+  sectionNav?: {
+    items: SectionNavItem[];
+    activeId: string;
+    onNavigate: (id: string) => void;
+    allLabel?: string;
+    allId?: string;
+    profileLabel?: string;
+  } | null;
   quickFilters?: React.ReactNode;
   activeChips?: React.ReactNode;
   fullFilters?: React.ReactNode;
   sorting?: React.ReactNode;
   footerActions?: React.ReactNode;
+  alphabetFilter?: AlphabetFilterConfig | null;
+  scrollTargetId?: string | null;
 }
 
 interface DrawerFilterContextType {
@@ -1084,25 +1053,40 @@ interface DrawerFilterContextType {
   activeFiltersData: FloatingFilterData | null;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  closeDrawer: () => void;
 }
 
 const DrawerFilterContext = createContext<DrawerFilterContextType | undefined>(undefined);
 
 export function DrawerFilterProvider({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
   const [activeFiltersMap, setActiveFiltersMap] = useState<Record<string, FloatingFilterData>>({});
   const [activePageId, setActivePageId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const filterDrawerRef = useRef<HTMLDivElement>(null);
+  const filterContainerRef = useRef<HTMLDivElement>(null);
+
+  const desktopDrawerTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
+  const mobileDrawerTransition = { type: 'tween' as const, ease: [0.32, 0.72, 0, 1] as const, duration: 0.28 };
 
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 768px)");
-    setIsMobile(media.matches);
-    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
+    const mobileMedia = window.matchMedia('(max-width: 640px)');
+    const tabletMedia = window.matchMedia('(min-width: 641px) and (max-width: 1023px)');
+    setIsMobile(mobileMedia.matches);
+    setIsTablet(tabletMedia.matches);
+    const onMobile = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    const onTablet = (e: MediaQueryListEvent) => setIsTablet(e.matches);
+    mobileMedia.addEventListener('change', onMobile);
+    tabletMedia.addEventListener('change', onTablet);
+    return () => {
+      mobileMedia.removeEventListener('change', onMobile);
+      tabletMedia.removeEventListener('change', onTablet);
+    };
   }, []);
 
-  const registerPageFilters = React.useCallback((id: string, data: FloatingFilterData) => {
+  const registerPageFilters = (id: string, data: FloatingFilterData) => {
     setActiveFiltersMap((prev) => ({ ...prev, [id]: data }));
     setActivePageId(id);
     return () => {
@@ -1113,18 +1097,42 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
       });
       setActivePageId((prev) => (prev === id ? null : prev));
     };
-  }, []);
+  };
 
   const activeFiltersData = activePageId ? activeFiltersMap[activePageId] : null;
+
+  const closeDrawer = useCallback(() => {
+    const targetId = activePageId ? activeFiltersMap[activePageId]?.scrollTargetId : null;
+    setIsOpen(false);
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => scrollToFilterResultsTarget(targetId), 80);
+    });
+  }, [activePageId, activeFiltersMap]);
 
   // ESC key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.key === 'Escape' && isOpen) closeDrawer();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isOpen, closeDrawer]);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!isOpen) return;
+      const target = event.target as Node;
+      if (filterDrawerRef.current?.contains(target)) return;
+      if (!isMobile && filterContainerRef.current?.contains(target)) return;
+      closeDrawer();
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [isOpen, isMobile, closeDrawer]);
 
   return (
     <DrawerFilterContext.Provider
@@ -1134,176 +1142,252 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
         activeFiltersData,
         isOpen,
         setIsOpen,
+        closeDrawer,
       }}
     >
       {children}
 
-      {/* FLOATING LAUNCHER BUTTON ON BOTTOM LEFT */}
-      <AnimatePresence>
-        {activeFiltersData && !isOpen && (
-          <div className={cn(
-            "fixed z-[220] flex flex-col items-start font-sans",
-            isMobile ? "bottom-4 left-4" : "bottom-6 left-6 lg:bottom-8 lg:left-8"
-          )}>
-            <motion.button
-              id="floating-filters-launcher"
-              onClick={() => setIsOpen(true)}
-              initial={{ scale: 0, opacity: 0, y: 15 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0, opacity: 0, y: 15 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 cursor-pointer bg-white border-[#e8edf2] text-[#1A1A2E] hover:border-[#FF5B00]/40 focus:outline-none group"
-              title="Filters & Search"
-            >
-              <div className="flex items-center gap-2">
-                <Filter size={15} className="text-[#8a9bb0] group-hover:text-[#FF5B00] transition-colors" />
-                <span className="text-[10px] font-black uppercase tracking-wider">
-                  Filters & Search
-                </span>
-              </div>
-              <ChevronRight size={14} className="text-[#8a9bb0] group-hover:text-[#FF5B00] group-hover:translate-x-1 transition-all" />
-            </motion.button>
-          </div>
+      {activeFiltersData && (
+        <>
+        {!isMobile && isOpen && (
+          <motion.button
+            type="button"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
+            aria-label="Close filters"
+            onClick={() => closeDrawer()}
+          />
         )}
-      </AnimatePresence>
-
-      {/* FILTER DRAWER / BOTTOM SHEET */}
-      <AnimatePresence>
-        {isOpen && activeFiltersData && (
-          <>
-            {/* Backdrop Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 z-[240]"
-              onClick={() => setIsOpen(false)}
-            />
-
-            {/* Drawer */}
-            <motion.div
-              id="floating-filter-drawer"
-              initial={isMobile ? { y: '100%' } : { x: '-100%' }}
-              animate={isMobile ? { y: 0 } : { x: 0 }}
-              exit={isMobile ? { y: '100%' } : { x: '-100%' }}
-              transition={{ type: "spring", damping: 25, stiffness: 350 }}
-              className={cn(
-                "bg-[#0A0B1E]/95 backdrop-blur-xl border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] text-white flex flex-col z-[250]",
-                isMobile
-                  ? "fixed bottom-0 left-0 right-0 h-[85vh] rounded-t-[32px] w-full border-t border-white/10"
-                  : "fixed left-0 top-0 bottom-0 w-[420px] max-w-full border-r border-white/10"
-              )}
-            >
-              {/* Drawer Header */}
-              <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02] shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-[#FF5B00]/10 flex items-center justify-center text-[#FF5B00]">
-                    <Filter size={16} />
-                  </div>
-                  <div>
-                    <div className="text-[10px] uppercase tracking-widest text-[#FF5B00] font-extrabold text-left">Consolidated discovery</div>
-                    <h3 className="text-sm font-black uppercase italic tracking-wider text-left">Filter & Search Panel</h3>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/15 hover:border-white/20 transition-all text-white shrink-0 cursor-pointer"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-
-              {/* Drawer Scrollable Body with Clean light theme style for perfect high-contrast filter rendering */}
-              <div className="flex-1 overflow-y-auto bg-[#F8FBFD] text-navy scroll-smooth p-6 space-y-6 text-left">
-                {/* 1. Page Search */}
-                {(activeFiltersData.searchQuery !== undefined || activeFiltersData.onSearchSubmit) && (
-                  <div className="flex flex-col gap-2">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Page Directory Search</div>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        if (activeFiltersData.onSearchSubmit) {
-                          activeFiltersData.onSearchSubmit(activeFiltersData.searchQuery || '');
-                        }
-                      }}
-                      className="relative w-full bg-[#0A0B1E]/5 p-1 rounded-full border border-gray-200 focus-within:border-[#FF5B00]/40 transition-all duration-300"
-                    >
-                      <div className="flex items-center bg-white rounded-full overflow-hidden">
-                        <div className="pl-4 text-[#FF5B00] shrink-0">
-                          <Search className="w-4 h-4" />
-                        </div>
-                        <input
-                          type="text"
-                          value={activeFiltersData.searchQuery || ''}
-                          onChange={(e) => {
-                            if (activeFiltersData.setSearchQuery) {
-                              activeFiltersData.setSearchQuery(e.target.value);
-                            }
-                          }}
-                          placeholder={activeFiltersData.searchPlaceholder || "Search catalog..."}
-                          className="w-full h-10 bg-transparent outline-none pl-3 pr-20 text-navy text-xs font-semibold placeholder-gray-400 focus:outline-none focus:ring-0 border-none"
-                        />
-                        <button
-                          type="submit"
-                          className="absolute right-1.5 top-1.5 bottom-1.5 px-4 rounded-full bg-gradient-to-r from-[#FF5B00] to-[#FF5B00] hover:from-[#FF5B00] hover:to-[#EB4501] text-white text-[9px] font-black tracking-widest uppercase flex items-center gap-1 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border-0"
-                        >
-                          Search
-                        </button>
-                      </div>
-                    </form>
-                  </div>
+        <div
+          ref={filterContainerRef}
+          className={cn(
+            'fixed z-[219] flex flex-col-reverse items-start gap-3',
+            isMobile ? 'pointer-events-none' : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
+          )}
+        >
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                ref={filterDrawerRef}
+                id="floating-filter-drawer"
+                initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
+                animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0 }}
+                exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
+                transition={isMobile ? mobileDrawerTransition : desktopDrawerTransition}
+                style={{ willChange: 'transform' }}
+                drag={isMobile ? 'y' : false}
+                dragConstraints={{ top: 0, bottom: 250 }}
+                dragElastic={{ top: 0.1, bottom: 0.8 }}
+                onDragEnd={(_e, info) => {
+                  if (info.offset.y > 120) closeDrawer();
+                }}
+                className={getFloatingPanelClassName({
+                  isMobile,
+                  isTablet,
+                  textClass: 'text-[#1A1A2E]',
+                })}
+              >
+                {isMobile && (
+                  <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
                 )}
 
-                {/* 2. Quick Filters */}
-                {activeFiltersData!.quickFilters && (
-                  <div className="flex flex-col gap-2">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Quick Filters</div>
-                    <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3 shadow-sm">
-                      {activeFiltersData!.quickFilters}
+                <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-3 text-left">
+                    <div className="w-11 h-11 rounded-full bg-orange-primary/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
+                      <SlidersHorizontal size={18} className="text-orange-primary" />
                     </div>
-                  </div>
-                )}
-
-                {/* 3. Active Chips */}
-                {activeFiltersData.activeChips && (
-                  <div className="flex flex-col gap-2">
-                    {activeFiltersData.activeChips}
-                  </div>
-                )}
-
-                {/* 4. Full Filter Architecture V2 */}
-                {activeFiltersData.fullFilters && (
-                  <div className="flex flex-col gap-2">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Advanced Refinements</div>
                     <div>
-                      {activeFiltersData.fullFilters}
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-orange-primary">
+                        Consolidated Discovery
+                      </div>
+                      <h3 className="text-xs font-black text-heading leading-tight uppercase">
+                        Filters & Search
+                      </h3>
                     </div>
                   </div>
-                )}
-
-                {/* 5. Sorting */}
-                {activeFiltersData.sorting && (
-                  <div className="flex flex-col gap-2">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] text-left">Sorting & Display</div>
-                    <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm">
-                      {activeFiltersData.sorting}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 6. Footer Actions */}
-              {activeFiltersData.footerActions && (
-                <div className="p-4 border-t border-white/5 bg-white/[0.02] flex gap-2 shrink-0">
-                  {activeFiltersData.footerActions}
+                  <button
+                    type="button"
+                    onClick={() => closeDrawer()}
+                    className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-heading transition-all border border-[#e8edf2] cursor-pointer"
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
+
+                <div className="flex-1 overflow-y-auto bg-[#F8FBFD] text-navy scroll-smooth p-5 space-y-5 text-left no-scrollbar">
+                  {(activeFiltersData.searchQuery !== undefined || activeFiltersData.onSearchSubmit) && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">Page Search</div>
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (activeFiltersData.onSearchSubmit) {
+                            activeFiltersData.onSearchSubmit(activeFiltersData.searchQuery || '');
+                          }
+                        }}
+                        className="relative w-full"
+                      >
+                        <div className="flex items-center bg-white rounded-[5px] border border-[#e8edf2] overflow-hidden focus-within:border-orange-primary/40 transition-all">
+                          <div className="pl-4 text-orange-primary shrink-0">
+                            <Search className="w-4 h-4" />
+                          </div>
+                          <input
+                            type="text"
+                            value={activeFiltersData.searchQuery || ''}
+                            onChange={(e) => {
+                              if (activeFiltersData.setSearchQuery) {
+                                activeFiltersData.setSearchQuery(e.target.value);
+                              }
+                            }}
+                            placeholder={activeFiltersData.searchPlaceholder || 'Search catalog...'}
+                            className="w-full h-11 bg-transparent outline-none pl-3 pr-4 text-heading text-xs font-semibold placeholder-gray-400 border-none"
+                          />
+                        </div>
+                      </form>
+                    </div>
+                  )}
+
+                  {activeFiltersData.alphabetFilter && (
+                    <AlphabetFilterStrip
+                      activeLetter={activeFiltersData.alphabetFilter.activeLetter}
+                      onLetterChange={activeFiltersData.alphabetFilter.onLetterChange}
+                      compact
+                    />
+                  )}
+
+                  {activeFiltersData.sectionNav && activeFiltersData.sectionNav.items.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">
+                        {activeFiltersData.sectionNav.profileLabel || 'On this page'}
+                      </div>
+                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3 shadow-sm">
+                        <DragScrollContainer className="gap-2 pb-0 py-0 items-center">
+                          <button
+                            type="button"
+                            onClick={() => activeFiltersData.sectionNav?.onNavigate(activeFiltersData.sectionNav.allId || 'all')}
+                            className={cn(
+                              'shrink-0 px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
+                              activeFiltersData.sectionNav.activeId === (activeFiltersData.sectionNav.allId || 'all')
+                                ? 'bg-[#E8500A] text-white border border-[#E8500A] shadow-md shadow-[#E8500A]/20'
+                                : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A]',
+                            )}
+                          >
+                            {activeFiltersData.sectionNav.allLabel || 'Overview'}
+                          </button>
+                          {activeFiltersData.sectionNav.items
+                            .filter((item) => !item.hidden)
+                            .map((item) => (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => activeFiltersData.sectionNav?.onNavigate(item.id)}
+                                className={cn(
+                                  'shrink-0 px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
+                                  activeFiltersData.sectionNav?.activeId === item.id
+                                    ? 'bg-[#E8500A] text-white border border-[#E8500A] shadow-md shadow-[#E8500A]/20'
+                                    : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A]',
+                                )}
+                              >
+                                {item.icon}
+                                <span>{item.label}</span>
+                              </button>
+                            ))}
+                        </DragScrollContainer>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeFiltersData.quickFilters && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">Quick Filters</div>
+                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3 shadow-sm">
+                        {activeFiltersData.quickFilters}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeFiltersData.activeChips && (
+                    <div className="flex flex-col gap-2">{activeFiltersData.activeChips}</div>
+                  )}
+
+                  {activeFiltersData.fullFilters && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">All Filters</div>
+                      <div>{activeFiltersData.fullFilters}</div>
+                    </div>
+                  )}
+
+                  {activeFiltersData.sorting && (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">Sorting & Display</div>
+                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-4 shadow-sm">
+                        {activeFiltersData.sorting}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {activeFiltersData.footerActions && (
+                  <div className="p-4 border-t border-[#e8edf2] bg-gray-50 flex gap-2 shrink-0">
+                    {activeFiltersData.footerActions}
+                  </div>
+                )}
+
+                {isMobile && !activeFiltersData.footerActions && (
+                  <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => closeDrawer()}
+                      className="w-full py-3.5 bg-orange-primary hover:bg-orange-deep text-white text-[11px] font-black uppercase tracking-widest rounded-[5px] transition-colors cursor-pointer border-0"
+                    >
+                      Show Results
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {!isMobile && (
+          <motion.button
+            id="floating-filters-launcher"
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={cn(
+              'w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto',
+              isOpen
+                ? 'bg-surface-selected border-orange-primary text-orange-primary'
+                : 'bg-white border-[#e8edf2] text-heading hover:border-orange-primary/40',
+            )}
+            title="Filters & Search"
+          >
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal
+                size={15}
+                className={cn(
+                  'transition-colors',
+                  isOpen ? 'text-orange-primary' : 'text-[#8a9bb0] group-hover:text-orange-primary',
+                )}
+              />
+              <span className="text-[10px] font-black uppercase tracking-wider">Filters & Search</span>
+            </div>
+            <ChevronRight
+              size={14}
+              className={cn(
+                'transition-transform duration-300',
+                isOpen ? 'text-orange-primary rotate-90' : 'text-[#8a9bb0] group-hover:text-orange-primary group-hover:translate-x-1',
               )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+            />
+          </motion.button>
+          )}
+        </div>
+        </>
+      )}
     </DrawerFilterContext.Provider>
   );
 }
@@ -1316,12 +1400,48 @@ export function useFloatingFilters() {
   return context;
 }
 
+/** Opens the page floating filter drawer (DrawerFilterProvider or legacy FloatingOverlays panel). */
+export function useOpenPageFilters() {
+  const { config } = useFloatingFilter();
+  const { activeFiltersData, setIsOpen, isOpen: drawerOpen } = useFloatingFilters();
+
+  const hasDrawerFilters = !!activeFiltersData;
+  const hasLegacyFilters =
+    !hasDrawerFilters &&
+    Boolean(
+      config.renderFilters ||
+        config.renderSearch ||
+        (config.quickFilters && config.quickFilters.length > 0),
+    );
+
+  const canOpenFilters = hasDrawerFilters || hasLegacyFilters;
+  const activeFilterCount = config.activeFilterCount ?? 0;
+
+  const openFilters = useCallback(() => {
+    if (hasDrawerFilters) {
+      setIsOpen(true);
+      return;
+    }
+    if (hasLegacyFilters) {
+      window.dispatchEvent(new CustomEvent('choosify:open-filters'));
+    }
+  }, [hasDrawerFilters, hasLegacyFilters, setIsOpen]);
+
+  return {
+    canOpenFilters,
+    openFilters,
+    isFiltersOpen: drawerOpen,
+    activeFilterCount,
+  };
+}
+
 export function RegisterPageFilters({
   id,
   searchQuery,
   setSearchQuery,
   onSearchSubmit,
   searchPlaceholder,
+  sectionNav,
   quickFilters,
   activeChips,
   fullFilters,
@@ -1330,49 +1450,20 @@ export function RegisterPageFilters({
 }: { id: string } & FloatingFilterData) {
   const { registerPageFilters } = useFloatingFilters();
 
-  const latestPropsRef = useRef({
-    searchQuery,
-    setSearchQuery,
-    onSearchSubmit,
-    searchPlaceholder,
-    quickFilters,
-    activeChips,
-    fullFilters,
-    sorting,
-    footerActions
-  });
-  
-  latestPropsRef.current = {
-    searchQuery,
-    setSearchQuery,
-    onSearchSubmit,
-    searchPlaceholder,
-    quickFilters,
-    activeChips,
-    fullFilters,
-    sorting,
-    footerActions
-  };
-
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window.location.pathname.includes('/overview') || window.location.hash.includes('overview'))) {
-      return;
-    }
-
-    const delegate: FloatingFilterData = {
-      get searchQuery() { return latestPropsRef.current.searchQuery; },
-      get setSearchQuery() { return latestPropsRef.current.setSearchQuery; },
-      get onSearchSubmit() { return latestPropsRef.current.onSearchSubmit; },
-      get searchPlaceholder() { return latestPropsRef.current.searchPlaceholder; },
-      get quickFilters() { return latestPropsRef.current!.quickFilters; },
-      get activeChips() { return latestPropsRef.current.activeChips; },
-      get sorting() { return latestPropsRef.current.sorting; },
-      get fullFilters() { return latestPropsRef.current.fullFilters; },
-      get footerActions() { return latestPropsRef.current.footerActions; }
-    };
-
-    return registerPageFilters(id, delegate);
-  }, [id, registerPageFilters]);
+    return registerPageFilters(id, {
+      searchQuery,
+      setSearchQuery,
+      onSearchSubmit,
+      searchPlaceholder,
+      sectionNav,
+      quickFilters,
+      activeChips,
+      fullFilters,
+      sorting,
+      footerActions
+    });
+  }, [id, searchQuery, setSearchQuery, onSearchSubmit, searchPlaceholder, sectionNav, quickFilters, activeChips, fullFilters, sorting, footerActions]);
 
   return null;
 }
@@ -1388,14 +1479,26 @@ export interface FloatingFilterConfig {
   renderFilters: (() => React.ReactNode) | null;
   // The page search bar — render prop
   renderSearch: (() => React.ReactNode) | null;
+  sectionNav?: {
+    items: SectionNavItem[];
+    activeId: string;
+    onNavigate: (id: string) => void;
+    allLabel?: string;
+    allId?: string;
+    profileLabel?: string;
+  } | null;
   // Active filter count for the badge
-  activeFilterCount?: number;
+  activeFilterCount: number;
   // Quick filter bar chips for this page
-  quickFilters?: QuickFilter[];
+  quickFilters: QuickFilter[];
   // Page name for the drawer header
   pageName: string;
   // Clear all filters for this page
   onClearAll: (() => void) | null;
+  /** A–Z letter strip shown below search in the floating filter drawer */
+  alphabetFilter?: AlphabetFilterConfig | null;
+  /** Section id to scroll to when the filter drawer closes */
+  scrollTargetId?: string | null;
 }
 
 const defaultConfig: FloatingFilterConfig = {
@@ -1410,13 +1513,9 @@ const defaultConfig: FloatingFilterConfig = {
 export const FloatingFilterContext = createContext<{
   config: FloatingFilterConfig;
   setConfig: (config: FloatingFilterConfig) => void;
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
 }>({
   config: defaultConfig,
   setConfig: () => {},
-  isOpen: false,
-  setIsOpen: () => {},
 });
 
 export function useFloatingFilter() {
@@ -1426,9 +1525,8 @@ export function useFloatingFilter() {
 // Provider — wrap App with this
 export function FloatingFilterProvider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<FloatingFilterConfig>(defaultConfig);
-  const [isOpen, setIsOpen] = useState(false);
   return (
-    <FloatingFilterContext.Provider value={{ config, setConfig, isOpen, setIsOpen }}>
+    <FloatingFilterContext.Provider value={{ config, setConfig }}>
       {children}
     </FloatingFilterContext.Provider>
   );
@@ -1439,28 +1537,14 @@ export function FloatingFilterProvider({ children }: { children: React.ReactNode
 export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[]) {
   const { setConfig } = useFloatingFilter();
   
-  const latestConfigRef = useRef(config);
-  latestConfigRef.current = config;
-
   const prevDepsRef = useRef<any[] | undefined>(undefined);
   const prevConfigRef = useRef<FloatingFilterConfig | undefined>(undefined);
 
-  // Cleanup on unmount to clear registered filters
   useEffect(() => {
-    return () => {
-      setConfig(defaultConfig);
-    };
-  }, []);
-
-  // Update registered filter config when dependencies or contents change
-  useEffect(() => {
-    if (typeof window !== 'undefined' && (window.location.pathname.includes('/overview') || window.location.hash.includes('overview'))) {
-      return;
-    }
-
     let shouldUpdate = false;
 
     if (deps) {
+      // Compare deps array manually if provided
       if (!prevDepsRef.current) {
         shouldUpdate = true;
       } else {
@@ -1468,6 +1552,7 @@ export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[
       }
       prevDepsRef.current = deps;
     } else {
+      // Do a robust semantic comparison of the config properties if no deps are provided
       if (!prevConfigRef.current) {
         shouldUpdate = true;
       } else {
@@ -1475,36 +1560,31 @@ export function useRegisterPageFilters(config: FloatingFilterConfig, deps?: any[
         const isSame = 
           prev.pageName === config.pageName &&
           prev.activeFilterCount === config.activeFilterCount &&
-          (prev.quickFilters?.length || 0) === (config.quickFilters?.length || 0) &&          (prev.quickFilters || []).every((q, i) => {            const target = (config.quickFilters || [])[i];
+          prev.onClearAll === config.onClearAll &&
+          prev.quickFilters.length === config.quickFilters.length &&
+          prev.quickFilters.every((q, i) => {
+            const target = config.quickFilters[i];
             return target && q.id === target.id && q.label === target.label && q.active === target.active;
           });
         shouldUpdate = !isSame;
       }
     }
 
-    let timeoutId: any;
     if (shouldUpdate) {
-      const delegate: FloatingFilterConfig = {
-        pageName: config.pageName,
-        activeFilterCount: config.activeFilterCount,
-        quickFilters: config?.quickFilters || [],
-        get onClearAll() { return latestConfigRef.current.onClearAll; },
-        get renderFilters() { return latestConfigRef.current.renderFilters; },
-        get renderSearch() { return latestConfigRef.current.renderSearch; }
-      };
-      timeoutId = setTimeout(() => {
-        setConfig(delegate);
-      }, 0);
+      setConfig(config);
     }
-    
-    prevConfigRef.current = config;
 
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
+    prevConfigRef.current = config;
   }); // Runs on every render to manually check dependency/config updates safely
+
+  // Reset config only on true unmount — a per-render cleanup would wipe the
+  // registration whenever the page re-renders without config changes.
+  useEffect(() => {
+    return () => {
+      setConfig(defaultConfig);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 }
 
 

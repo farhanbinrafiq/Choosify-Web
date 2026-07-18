@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Plus, ChevronRight, Info, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { operationsApi } from '../services/operationsApi';
+import { cn } from '../lib/utils';
 
 export function PostOfferPage() {
   const [step, setStep] = useState(1);
@@ -30,6 +32,7 @@ export function PostOfferPage() {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
 
   // Load draft on mount
   useEffect(() => {
@@ -98,7 +101,7 @@ export function PostOfferPage() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (step === 1) {
       if (!productName.trim()) {
         toast.error('Please enter a product name.');
@@ -152,8 +155,18 @@ export function PostOfferPage() {
       }
       
       // Submit
-      window.dispatchEvent(new CustomEvent('choosify-offer-submitted', { 
-        detail: { productName, category, brand, price, description, sellerName } 
+      await operationsApi.submitSellerOffer({
+        productName,
+        category,
+        brand,
+        price,
+        description,
+        sellerName,
+        sellerPhone,
+        sellerRegion,
+      });
+      window.dispatchEvent(new CustomEvent('choosify-offer-submitted', {
+        detail: { productName, category, brand, price, description, sellerName }
       }));
       toast.success('Offer submitted! Our team will review within 24 hours.');
       
@@ -374,7 +387,7 @@ export function PostOfferPage() {
                            type="checkbox" 
                            checked={isDeal}
                            onChange={(e) => setIsDeal(e.target.checked)}
-                           className="w-5 h-5 rounded accent-[#FF5B00]" 
+                           className="w-5 h-5 rounded accent-[#E8500A]" 
                          />
                          <span className="text-xs font-bold text-[#1A1A2E]">Is this a promotional deal?</span>
                       </label>
@@ -445,7 +458,7 @@ export function PostOfferPage() {
                            type="checkbox" 
                            checked={agreeToTerms}
                            onChange={(e) => setAgreeToTerms(e.target.checked)}
-                           className="w-5 h-5 rounded accent-[#FF5B00]" 
+                           className="w-5 h-5 rounded accent-[#E8500A]" 
                          />
                          <span className="text-xs font-bold text-[#1A1A2E]">I agree to the terms of service and guarantee product authenticity.</span>
                       </label>
@@ -494,6 +507,7 @@ export function PostOfferPage() {
                </div>
             </section>
          </div>
+        </div>
       </div>
     </div>
   );

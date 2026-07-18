@@ -1,7 +1,6 @@
 import React from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { Badge } from './ui/badges/Badge';
 
 export interface ReviewData {
   name: string;
@@ -30,20 +29,16 @@ interface PublicReviewCardProps {
   onEditClick?: () => void;
   onDeleteClick?: () => void;
   showActions?: boolean;
-  onOptionsClick?: () => void;
-  className?: string;
 }
 
 /** Choosify.dc.html public review card — Product / Brand detail feeds */
 export function PublicReviewCard({
   review,
   isDark = false,
-  showActions = false,
   onHelpfulClick,
   onEditClick,
   onDeleteClick,
-  onOptionsClick,
-  className,
+  showActions = false,
 }: PublicReviewCardProps) {
   const ratingNum = typeof review.rating === 'string' ? parseFloat(review.rating) : review.rating;
   const avatarUrl = review.dp || review.avatar;
@@ -83,7 +78,7 @@ export function PublicReviewCard({
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="flex items-center justify-between mb-3 gap-2">
         <div className="flex items-center gap-2.5 min-w-0">

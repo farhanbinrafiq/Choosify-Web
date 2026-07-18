@@ -1,6 +1,15 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { PRODUCTS, BRANDS } from '../constants';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { loadMockCatalog } from '../data/loadMockCatalog';
 import toast from 'react-hot-toast';
+import {
+  CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+  CHOOSIFY_ANNOUNCEMENTS_TITLE,
+  CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+  CHOOSIFY_ANNOUNCEMENTS_WELCOME,
+  formatAnnouncementBody,
+} from '../lib/announcements';
+import type { CustomerAddress } from '../lib/address/addressTypes';
+import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from '../lib/address/addressUtils';
 
 export interface MessageThread {
   id: string;
@@ -8,9 +17,10 @@ export interface MessageThread {
   avatar: string;
   lastMessage: string;
   time: string;
-  type: 'retail' | 'wholesale' | 'general';
+  type: 'retail' | 'general' | 'announcement';
   unread: boolean;
   orderRef?: string;
+  readOnly?: boolean;
 }
 
 export interface ThreadMessage {
@@ -87,11 +97,13 @@ interface DashboardContextType {
   setCampaigns: React.Dispatch<React.SetStateAction<Campaign[]>>;
   customOverviews: CustomOverview[];
   setCustomOverviews: React.Dispatch<React.SetStateAction<CustomOverview[]>>;
-  addCampaign: (campaign: Omit<Campaign, 'id'>) => void;
-  updateCampaign: (campaign: Campaign) => void;
-  deleteCampaign: (id: string) => void;
-  addCustomOverview: (overview: Omit<CustomOverview, 'id'>) => void;
-  deleteCustomOverview: (id: string) => void;
+  customerAddresses: CustomerAddress[];
+  setCustomerAddresses: React.Dispatch<React.SetStateAction<CustomerAddress[]>>;
+  defaultCustomerAddress?: CustomerAddress;
+  addCustomerAddress: (address: CustomerAddress) => void;
+  updateCustomerAddress: (address: CustomerAddress) => void;
+  deleteCustomerAddress: (id: string) => void;
+  setDefaultCustomerAddress: (id: string) => void;
   removeSavedProduct: (id: number) => void;
   removeSavedBrand: (id: number) => void;
   toggleLoveBrand: (brand: any) => void;
@@ -101,7 +113,7 @@ interface DashboardContextType {
   removeFromCompare: (id: number) => void;
   addMessage: (text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator') => void;
   addThreadMessage: (threadId: string, text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', senderName?: string, productCard?: any) => void;
-  createNewThread: (id: string, title: string, avatar: string, type: 'retail' | 'wholesale' | 'general', lastMessage: string, orderRef?: string) => void;
+  createNewThread: (id: string, title: string, avatar: string, type: 'retail' | 'general' | 'announcement', lastMessage: string, orderRef?: string) => void;
   markAllAsRead: () => void;
   addToRecentlyViewed: (product: any) => void;
   addNotification: (message: string, type: 'order' | 'message' | 'system' | 'deal') => void;
@@ -109,46 +121,35 @@ interface DashboardContextType {
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
+function readStoredArray(key: string): any[] {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
-  const [savedProducts, setSavedProducts] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_saved_products');
-      return saved ? JSON.parse(saved) : [PRODUCTS[0], PRODUCTS[3], PRODUCTS[5]];
-    } catch { return [PRODUCTS[0], PRODUCTS[3], PRODUCTS[5]]; }
-  });
-
-  const [savedBrands, setSavedBrands] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_saved_brands');
-      return saved ? JSON.parse(saved) : [BRANDS[0], BRANDS[2], BRANDS[9]];
-    } catch { return [BRANDS[0], BRANDS[2], BRANDS[9]]; }
-  });
-
-  const [lovedBrands, setLovedBrands] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_loved_brands');
-      return saved ? JSON.parse(saved) : [BRANDS[1], BRANDS[3], BRANDS[4]];
-    } catch { return [BRANDS[1], BRANDS[3], BRANDS[4]]; }
-  });
-
-  const [followedBrands, setFollowedBrands] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_followed_brands');
-      return saved ? JSON.parse(saved) : [BRANDS[2], BRANDS[5], BRANDS[6], BRANDS[10]];
-    } catch { return [BRANDS[2], BRANDS[5], BRANDS[6], BRANDS[10]]; }
-  });
-
-  const [recentlyViewed, setRecentlyViewed] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_recently_viewed');
-      return saved ? JSON.parse(saved) : [PRODUCTS[1], PRODUCTS[2], PRODUCTS[4]];
-    } catch { return [PRODUCTS[1], PRODUCTS[2], PRODUCTS[4]]; }
-  });
+  const [savedProducts, setSavedProducts] = useState<any[]>(() => readStoredArray('choosify_saved_products'));
+  const [savedBrands, setSavedBrands] = useState<any[]>(() => readStoredArray('choosify_saved_brands'));
+  const [lovedBrands, setLovedBrands] = useState<any[]>(() => readStoredArray('choosify_loved_brands'));
+  const [followedBrands, setFollowedBrands] = useState<any[]>(() => readStoredArray('choosify_followed_brands'));
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>(() => readStoredArray('choosify_recently_viewed'));
+  const [customerAddresses, setCustomerAddresses] = useState<CustomerAddress[]>(() =>
+    normalizeDefaultAddress(readStoredArray(ADDRESS_STORAGE_KEY) as CustomerAddress[]),
+  );
 
   const [savedGuides, setSavedGuides] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('choosify_saved_guides');
-      return saved ? JSON.parse(saved) : [
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((guide) => guide && guide.id != null);
+        }
+      }
+      return [
         { id: 1, title: 'Best Budget Smartwatches 2026', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', category: 'Tech' },
         { id: 2, title: 'Top 5 Sustainable Fashion Brands', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=300&fit=crop', category: 'Fashion' }
       ];
@@ -160,20 +161,25 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  const [comparedProducts, setComparedProducts] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_compared_products');
-      return saved ? JSON.parse(saved) : [PRODUCTS[0], PRODUCTS[1]];
-    } catch { return [PRODUCTS[0], PRODUCTS[1]]; }
-  });
+  const [comparedProducts, setComparedProducts] = useState<any[]>(() => readStoredArray('choosify_compared_products'));
 
   // Threaded Messaging States with Localstorage persistence
   const [threads, setThreads] = useState<MessageThread[]>(() => {
     const saved = localStorage.getItem('choosify_threads');
     if (saved) return JSON.parse(saved);
+    const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return [
+      {
+        id: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        title: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+        lastMessage: CHOOSIFY_ANNOUNCEMENTS_WELCOME,
+        time: welcomeTime,
+        type: 'announcement',
+        unread: false,
+        readOnly: true,
+      },
       { id: 'thread-general', title: 'Farhan Rafiq (Admin)', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png', lastMessage: 'Absolutely! We can ship the S24 Ultra...', time: '10:30 AM', type: 'general', unread: true },
-      { id: 'seller-samsung', title: 'Samsung Bangladesh Ltd.', avatar: 'https://i.pravatar.cc/150?u=samsung', lastMessage: 'Let us know your wholesale quantity requirements.', time: 'Yesterday', type: 'wholesale', unread: false },
       { id: 'seller-apple', title: 'Apple Retail BD', avatar: 'https://i.pravatar.cc/150?u=apple', lastMessage: 'Welcome to Apple Retail! Feel free to ask queries.', time: '2 days ago', type: 'retail', unread: false }
     ];
   });
@@ -181,13 +187,20 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [threadMessages, setThreadMessages] = useState<ThreadMessage[]>(() => {
     const saved = localStorage.getItem('choosify_thread_messages');
     if (saved) return JSON.parse(saved);
+    const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return [
+      {
+        id: 100,
+        threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        text: CHOOSIFY_ANNOUNCEMENTS_WELCOME,
+        sender: 'admin',
+        senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        time: welcomeTime,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+      },
       { id: 1, threadId: 'thread-general', text: 'Hello! I am interested in the Samsung S24 Ultra you posted. Is it still available?', sender: 'other', senderName: 'Rahat Hossain', time: '10:30 AM', avatar: 'https://i.pravatar.cc/150?u=1' },
       { id: 2, threadId: 'thread-general', text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', senderName: 'Me', time: '10:35 AM' },
       { id: 3, threadId: 'thread-general', text: 'Absolutely! We can ship the S24 Ultra to Banani with standard COD coverage.', sender: 'other', senderName: 'Farhan Rafiq', time: '11:00 AM', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png' },
-      
-      { id: 4, threadId: 'seller-samsung', text: 'Hello! Do you offer wholesale volume pricing for bulk S24 units?', sender: 'user', senderName: 'Me', time: 'Yesterday' },
-      { id: 5, threadId: 'seller-samsung', text: 'Yes, we do! Let us know your wholesale quantity requirements.', sender: 'seller', senderName: 'Samsung Sales', time: 'Yesterday', avatar: 'https://i.pravatar.cc/150?u=samsung' }
     ];
   });
 
@@ -217,17 +230,29 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [reviews, setReviews] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('choosify_reviews');
-      return saved ? JSON.parse(saved) : [
-        { id: 1, product: PRODUCTS[0].title, rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
-        { id: 2, product: PRODUCTS[5].title, rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
+      if (saved) return JSON.parse(saved);
+      return [
+        { id: 1, product: 'Samsung Galaxy S24 Ultra', rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
+        { id: 2, product: 'LG C3 55" OLED EVO TV', rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
       ];
     } catch {
       return [
-        { id: 1, product: PRODUCTS[0].title, rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
-        { id: 2, product: PRODUCTS[5].title, rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
+        { id: 1, product: 'Samsung Galaxy S24 Ultra', rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
+        { id: 2, product: 'LG C3 55" OLED EVO TV', rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
       ];
     }
   });
+
+  useEffect(() => {
+    loadMockCatalog().then(({ products, brands }) => {
+      setSavedProducts((prev) => (prev.length ? prev : [products[0], products[3], products[5]]));
+      setSavedBrands((prev) => (prev.length ? prev : [brands[0], brands[2], brands[9]]));
+      setLovedBrands((prev) => (prev.length ? prev : [brands[1], brands[3], brands[4]]));
+      setFollowedBrands((prev) => (prev.length ? prev : [brands[2], brands[5], brands[6], brands[10]]));
+      setRecentlyViewed((prev) => (prev.length ? prev : [products[1], products[2], products[4]]));
+      setComparedProducts((prev) => (prev.length ? prev : [products[0], products[1]]));
+    });
+  }, []);
 
   const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
     const saved = localStorage.getItem('choosify_campaigns');
@@ -293,24 +318,46 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
 
 
-  const addCampaign = (campaign: Omit<Campaign, 'id'>) => {
-    const newCampaign: Campaign = {
-      ...campaign,
-      id: 'camp-' + Date.now()
-    };
-    setCampaigns(prev => [newCampaign, ...prev]);
-    toast.success('Campaign created successfully!');
-  };
+  const appendAnnouncementMessage = useCallback((text: string, markUnread = true) => {
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const preview = text.split('\n')[0].slice(0, 120);
 
-  const updateCampaign = (target: Campaign) => {
-    setCampaigns(prev => prev.map(c => c.id === target.id ? target : c));
-    toast.success('Campaign updated successfully!');
-  };
+    setThreadMessages(prev => [
+      ...prev,
+      {
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        text,
+        sender: 'admin',
+        senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        time: timeStr,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+      },
+    ]);
 
-  const deleteCampaign = (id: string) => {
-    setCampaigns(prev => prev.filter(c => c.id !== id));
-    toast.success('Campaign deleted successfully.');
-  };
+    setThreads(prev => {
+      const existing = prev.find(t => t.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID);
+      const announcementThread: MessageThread = {
+        id: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        title: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+        lastMessage: preview,
+        time: timeStr,
+        type: 'announcement',
+        unread: markUnread,
+        readOnly: true,
+      };
+
+      if (!existing) {
+        return [announcementThread, ...prev];
+      }
+
+      return [
+        { ...existing, ...announcementThread, unread: markUnread || existing.unread },
+        ...prev.filter(t => t.id !== CHOOSIFY_ANNOUNCEMENTS_THREAD_ID),
+      ];
+    });
+  }, []);
 
   const [customOverviews, setCustomOverviews] = useState<CustomOverview[]>(() => {
     const saved = localStorage.getItem('choosify_custom_overviews');
@@ -343,20 +390,6 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem('choosify_custom_overviews', JSON.stringify(customOverviews));
   }, [customOverviews]);
-
-  const addCustomOverview = (ov: Omit<CustomOverview, 'id'>) => {
-    const newOv: CustomOverview = {
-      ...ov,
-      id: 'co-' + Date.now()
-    };
-    setCustomOverviews(prev => [newOv, ...prev]);
-    toast.success('Dynamic overview section created successfully!');
-  };
-
-  const deleteCustomOverview = (id: string) => {
-    setCustomOverviews(prev => prev.filter(ov => ov.id !== id));
-    toast.success('Overview section removed.');
-  };
 
   const removeSavedProduct = (id: number) => {
     setSavedProducts(prev => prev.filter(p => p.id !== id));
@@ -441,6 +474,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   }, [recentlyViewed]);
 
   useEffect(() => {
+    localStorage.setItem(ADDRESS_STORAGE_KEY, JSON.stringify(customerAddresses));
+  }, [customerAddresses]);
+
+  useEffect(() => {
     localStorage.setItem('choosify_saved_guides', JSON.stringify(savedGuides));
   }, [savedGuides]);
 
@@ -463,19 +500,121 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const addNotification = (message: string, type: 'order' | 'message' | 'system' | 'deal') => {
-    const titleVal = type === 'deal' ? 'Special Deal Alert' : type.charAt(0).toUpperCase() + type.slice(1) + ' Notification';
-    const newNotification = {
-      id: Date.now().toString(),
-      message,
-      type,
-      read: false,
-      createdAt: new Date().toISOString(),
-      title: titleVal,
-      time: 'Just now'
-    };
-    setNotifications(prev => [newNotification, ...prev]);
-  };
+  const addNotification = useCallback((message: string, type: 'order' | 'message' | 'system' | 'deal') => {
+    const titleVal =
+      type === 'deal'
+        ? 'Special Deal Alert'
+        : type === 'order'
+          ? 'Order Update'
+          : type === 'message'
+            ? 'Message Update'
+            : 'Platform Update';
+    appendAnnouncementMessage(formatAnnouncementBody(message, titleVal));
+  }, [appendAnnouncementMessage]);
+
+  const addCustomerAddress = useCallback((address: CustomerAddress) => {
+    setCustomerAddresses((prev) => {
+      const nextAddress = { ...address, isDefault: address.isDefault || prev.length === 0 };
+      const next = nextAddress.isDefault
+        ? prev.map((item) => ({ ...item, isDefault: false })).concat(nextAddress)
+        : prev.concat(nextAddress);
+      return normalizeDefaultAddress(next);
+    });
+    toast.success('Address saved to your address book');
+  }, []);
+
+  const updateCustomerAddress = useCallback((address: CustomerAddress) => {
+    setCustomerAddresses((prev) => {
+      const next = prev.map((item) =>
+        item.id === address.id
+          ? { ...address, isDefault: address.isDefault || item.isDefault }
+          : address.isDefault
+            ? { ...item, isDefault: false }
+            : item,
+      );
+      return normalizeDefaultAddress(next);
+    });
+    toast.success('Address updated');
+  }, []);
+
+  const deleteCustomerAddress = useCallback((id: string) => {
+    setCustomerAddresses((prev) => normalizeDefaultAddress(prev.filter((item) => item.id !== id)));
+    toast.success('Address deleted');
+  }, []);
+
+  const setDefaultCustomerAddress = useCallback((id: string) => {
+    setCustomerAddresses((prev) => prev.map((item) => ({ ...item, isDefault: item.id === id })));
+    toast.success('Default address updated');
+  }, []);
+
+  const defaultCustomerAddress = getDefaultAddress(customerAddresses);
+
+  // Ensure announcements thread exists and migrate legacy notification records once
+  useEffect(() => {
+    setThreads(prev => {
+      if (prev.some(t => t.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID)) {
+        return prev.map(t =>
+          t.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID
+            ? { ...t, type: 'announcement', readOnly: true, title: CHOOSIFY_ANNOUNCEMENTS_TITLE }
+            : t
+        );
+      }
+
+      const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return [
+        {
+          id: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+          title: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+          avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+          lastMessage: CHOOSIFY_ANNOUNCEMENTS_WELCOME,
+          time: welcomeTime,
+          type: 'announcement',
+          unread: false,
+          readOnly: true,
+        },
+        ...prev,
+      ];
+    });
+
+    setThreadMessages(prev => {
+      if (prev.some(m => m.threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID)) return prev;
+      const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return [
+        ...prev,
+        {
+          id: Date.now(),
+          threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+          text: CHOOSIFY_ANNOUNCEMENTS_WELCOME,
+          sender: 'admin',
+          senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+          time: welcomeTime,
+          avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+        },
+      ];
+    });
+
+    if (localStorage.getItem('choosify_notifications_migrated')) return;
+
+    try {
+      const saved = localStorage.getItem('choosify_notifications');
+      const legacy = saved ? JSON.parse(saved) : [];
+      if (Array.isArray(legacy) && legacy.length > 0) {
+        legacy
+          .slice()
+          .reverse()
+          .forEach((n: { title?: string; message?: string }) => {
+            if (n.message) {
+              appendAnnouncementMessage(formatAnnouncementBody(n.message, n.title), false);
+            }
+          });
+      }
+      localStorage.setItem('choosify_notifications_migrated', '1');
+      setNotifications([]);
+      localStorage.removeItem('choosify_notifications');
+    } catch {
+      localStorage.setItem('choosify_notifications_migrated', '1');
+    }
+  }, [appendAnnouncementMessage]);
 
   // Expose to window to facilitate cross-context notifications without circular imports
   useEffect(() => {
@@ -483,7 +622,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       delete (window as any).choosifyAddNotification;
     };
-  }, [notifications]);
+  }, [addNotification]);
 
   useEffect(() => {
     const handleOrderPlaced = (e: CustomEvent) => {
@@ -499,7 +638,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       window.removeEventListener('choosify-order-placed', handleOrderPlaced as EventListener);
       window.removeEventListener('choosify-return-request', handleReturnRequest as EventListener);
     };
-  }, []);
+  }, [addNotification]);
 
   // Listen to order actions from GlobalStateContext
   useEffect(() => {
@@ -523,7 +662,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       window.removeEventListener('choosify-order-placed', handleOrderPlaced);
       window.removeEventListener('choosify-order-cancelled', handleOrderCancelled);
     };
-  }, []);
+  }, [addNotification]);
 
   // Persist threads and thread messages
   React.useEffect(() => {
@@ -543,7 +682,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       senderName: sender === 'user' ? 'Me' : 'Support',
       avatar: sender === 'user' ? undefined : 'https://i.pravatar.cc/150?u=support'
     };
-    setMessages(prev => [...prev, newMessage as any]);
+    setMessages(prev => [...prev, newMessage]);
     if (sender === 'user') {
       toast.success('Message sent to curator');
       // Sync into the active general thread too
@@ -558,6 +697,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     senderName?: string,
     productCard?: any
   ) => {
+    if (threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID && sender === 'user') {
+      return;
+    }
+
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const newMsg: ThreadMessage = {
       id: Date.now() + Math.floor(Math.random() * 100),
@@ -590,7 +733,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     id: string, 
     title: string, 
     avatar: string, 
-    type: 'retail' | 'wholesale' | 'general', 
+    type: 'retail' | 'general' | 'announcement', 
     lastMessage: string, 
     orderRef?: string
   ) => {
@@ -654,11 +797,13 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       reviews, setReviews,
       campaigns, setCampaigns,
       customOverviews, setCustomOverviews,
-      addCampaign,
-      updateCampaign,
-      deleteCampaign,
-      addCustomOverview,
-      deleteCustomOverview,
+      customerAddresses,
+      setCustomerAddresses,
+      defaultCustomerAddress,
+      addCustomerAddress,
+      updateCustomerAddress,
+      deleteCustomerAddress,
+      setDefaultCustomerAddress,
       removeSavedProduct,
       removeSavedBrand,
       toggleLoveBrand,

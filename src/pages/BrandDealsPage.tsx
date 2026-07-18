@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { PAGE_LISTING_SINGLE_SHELL, PRODUCT_CARD_GRID } from "../lib/pageLayout";
+import { StickySectionNav } from '../components/StickySectionNav';
+import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, ShieldCheck, Tag, Zap, Star, Search, Shirt, Sparkles, AlertCircle, ChevronRight, Filter, X } from 'lucide-react';
 import { BRANDS } from '../constants';
 import { cn } from '../lib/utils';
-import { QuickAccessCard } from '../components/QuickAccessCard';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { DcListingHero } from '../components/design/DcListingHero';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
@@ -88,19 +90,25 @@ export function BrandDealsPage() {
     { id: 'Ethnic', label: "Heritage & Ethnic", icon: <Star size={13} /> }
   ];
 
+  const sectionNavItems = useMemo(
+    () => [{ id: 'brand-deals-main', label: 'Deals', icon: <Tag size={13} /> }],
+    [],
+  );
+  const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(sectionNavItems);
+
   useRegisterPageFilters({
     pageName: 'Brand Deals',
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#FF5B00]" />
+          <Search size={13} className="text-[#E8500A]" />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search brand deals, promo codes or specific brands..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
         />
       </div>
     ),
@@ -205,7 +213,14 @@ export function BrandDealsPage() {
       setSearchQuery('');
       setActiveTab('All');
     },
-  }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter]);
+    sectionNav: {
+      items: sectionNavItems,
+      activeId: activeSectionId,
+      onNavigate: scrollToSection,
+      allLabel: 'Deals',
+      profileLabel: 'Brand deals',
+    },
+  }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
@@ -628,7 +643,7 @@ export function BrandDealsPage() {
                     setVerificationFilter('all');
                     setPopularityFilter('all');
                   }}
-                  className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#e8edf2] px-3.5 py-2 rounded-[5px] shadow-sm self-start sm:self-auto hover:text-[#EB4501]"
+                  className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#e8edf2] px-3.5 py-2 rounded-[5px] shadow-sm self-start sm:self-auto hover:text-[#CF4400]"
                 >
                   Reset All Filters
                 </button>
@@ -668,8 +683,8 @@ export function BrandDealsPage() {
                     </div>
 
                     {/* Standardized cards grid inside main layout */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-stretch">
-                      {[1, 2, 3].map((deal) => (
+                    <div className={PRODUCT_CARD_GRID}>
+                      {[1, 2, 3, 4, 5].map((deal) => (
                         <div 
                           key={deal} 
                           onClick={() => navigate(`/brands/${brand.id}/products`)}

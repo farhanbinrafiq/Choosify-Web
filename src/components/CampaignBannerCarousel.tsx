@@ -106,8 +106,8 @@ export function CampaignBannerCarousel() {
             <div className="w-full sm:w-[30%] md:w-[25%] lg:w-[20%] h-auto sm:h-full flex flex-col justify-between py-1 relative text-left shrink-0">
               <div className="flex flex-col items-start gap-1">
                 {currentCampaign.sponsorBadge && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[5px] bg-[#FF5B00]/10 text-[#FF5B00] text-[7.5px] sm:text-[8px] md:text-[9px] font-semibold tracking-wider uppercase border border-[#FF5B00]/20">
-                    <Sparkles className="w-2.5 h-2.5 text-[#FF5B00]" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[5px] bg-orange-primary/10 text-orange-primary text-[7.5px] sm:text-[8px] md:text-[9px] font-semibold tracking-wider uppercase border border-orange-primary/20">
+                    <Sparkles className="w-2.5 h-2.5 text-orange-primary" />
                     {currentCampaign.sponsorBadge}
                   </span>
                 )}
@@ -116,7 +116,7 @@ export function CampaignBannerCarousel() {
                 <h2 className="text-xs sm:text-[13px] md:text-sm font-bold uppercase text-[#1a1a2e] tracking-tight leading-snug line-clamp-2 mt-1.5">
                   {currentCampaign.title.split(' ').map((word, index) => {
                     if (index % 2 === 1) {
-                      return <span key={index} className="text-[#FF5B00] ml-1">{word}</span>;
+                      return <span key={index} className="text-orange-primary ml-1">{word}</span>;
                     }
                     return <span key={index} className={index > 0 ? "ml-1" : ""}>{word}</span>;
                   })}
@@ -136,7 +136,7 @@ export function CampaignBannerCarousel() {
 
                 <button
                   onClick={handleCTAClick}
-                  className="w-full py-2 bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[9.5px] font-semibold uppercase tracking-wider rounded-[5px] shadow-sm transition-all duration-300 cursor-pointer text-center"
+                  className="w-full py-2 bg-orange-primary hover:bg-orange-deep text-white text-[9.5px] font-semibold uppercase tracking-wider rounded-[5px] shadow-sm transition-all duration-300 cursor-pointer text-center"
                 >
                   {currentCampaign.ctaText || 'EXPLORE BRAND'}
                 </button>
@@ -151,7 +151,7 @@ export function CampaignBannerCarousel() {
             {/* Prev button */}
             <button
               onClick={handlePrev}
-              className="absolute left-1.5 sm:left-2.5 top-[60px] sm:top-1/2 -translate-y-1/2 w-8 h-8 rounded-[5px] bg-white/80 hover:bg-[#FF5B00] border border-gray-150 hover:border-[#FF5B00]/40 flex items-center justify-center text-gray-700 hover:text-white transition-all cursor-pointer backdrop-blur-sm z-20 hover:scale-105 active:scale-95 shadow-sm"
+              className="absolute left-1.5 sm:left-2.5 top-[60px] sm:top-1/2 -translate-y-1/2 w-8 h-8 rounded-[5px] bg-white/80 hover:bg-orange-primary border border-gray-150 hover:border-orange-primary/40 flex items-center justify-center text-gray-700 hover:text-white transition-all cursor-pointer backdrop-blur-sm z-20 hover:scale-105 active:scale-95 shadow-sm"
               aria-label="Previous Campaign"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -160,7 +160,7 @@ export function CampaignBannerCarousel() {
             {/* Next button */}
             <button
               onClick={handleNext}
-              className="absolute right-1.5 sm:right-2.5 top-[60px] sm:top-1/2 -translate-y-1/2 w-8 h-8 rounded-[5px] bg-white/80 hover:bg-[#FF5B00] border border-gray-150 hover:border-[#FF5B00]/40 flex items-center justify-center text-gray-700 hover:text-white transition-all cursor-pointer backdrop-blur-sm z-20 hover:scale-105 active:scale-95 shadow-sm"
+              className="absolute right-1.5 sm:right-2.5 top-[60px] sm:top-1/2 -translate-y-1/2 w-8 h-8 rounded-[5px] bg-white/80 hover:bg-orange-primary border border-gray-150 hover:border-orange-primary/40 flex items-center justify-center text-gray-700 hover:text-white transition-all cursor-pointer backdrop-blur-sm z-20 hover:scale-105 active:scale-95 shadow-sm"
               aria-label="Next Campaign"
             >
               <ChevronRight className="w-4 h-4" />
@@ -173,7 +173,7 @@ export function CampaignBannerCarousel() {
                   key={idx}
                   onClick={() => handleDotClick(idx)}
                   className={`h-1 rounded-[5px] transition-all duration-300 ${
-                    idx === currentIndex ? 'w-6 bg-[#FF5B00]' : 'w-2 bg-gray-300 hover:bg-gray-400'
+                    idx === currentIndex ? 'w-6 bg-orange-primary' : 'w-2 bg-gray-300 hover:bg-gray-400'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
@@ -227,9 +227,9 @@ function CampaignCountdown({ deadline }: { deadline: string }) {
 
   return (
     <span className="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-1 rounded-[5px] bg-gray-50 border border-gray-150 text-[8px] sm:text-[9.5px] font-black text-gray-500 w-full">
-      <Clock className="w-2.5 h-2.5 text-[#FF5B00]" />
+      <Clock className="w-2.5 h-2.5 text-orange-primary" />
       <span className="hidden xs:inline text-gray-450">ENDS:</span>
-      <span className="font-mono text-[#FF5B00] tracking-tight">
+      <span className="font-mono text-orange-primary tracking-tight">
         {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}
         {pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}
       </span>

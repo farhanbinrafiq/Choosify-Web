@@ -226,6 +226,7 @@ export const ProductCard = memo(function ProductCard({
   titleStyle?: React.CSSProperties;
   isGuideDetail?: boolean;
 }) {
+  const variant = variantProp === 'compact' ? 'grid' : variantProp;
   const navigate = useNavigate();
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
   const { allBrands, addToCart, siteConfig } = useGlobalState();
@@ -264,7 +265,7 @@ export const ProductCard = memo(function ProductCard({
     }
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleCompare = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     addToCompare(product);
@@ -546,62 +547,6 @@ export const ProductCard = memo(function ProductCard({
             ) : (
               <ShoppingCart size={13} strokeWidth={1.7} />
             )}
-          </button>
-        </div>
-      </div>
-
-      {/* Bottom Info Section */}
-      <div className="p-4 flex flex-col flex-grow bg-white relative justify-between">
-        <div>
-          {/* Official Store Badge near price row */}
-          {product.isOfficialStore && (
-            <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50/50 border border-emerald-100 px-2 py-0.5 rounded-full w-fit mb-1.5">
-              <Check size={10} strokeWidth={3.5} className="text-emerald-600" />
-              <span>Official Store</span>
-            </div>
-          )}
-
-          <h3 className="text-[13px] font-bold text-slate-900 line-clamp-2 leading-snug tracking-tight mb-2 min-h-[38px]">
-            {product.title}
-          </h3>
-          
-          <div className="mt-auto space-y-1">
-            {/* Pricing Row */}
-            <div className="flex items-baseline gap-2">
-              <span className="text-[16px] font-black text-[#FF5B00]">
-                {currency}{priceNum.toLocaleString()}
-              </span>
-              {originalPriceNum > 0 && originalPriceNum > priceNum && (
-                <span className="text-[12px] font-medium text-slate-400 line-through">
-                  {currency}{originalPriceNum.toLocaleString()}
-                </span>
-              )}
-            </div>
-
-            {/* Cashback text row */}
-            {product.cashback && (
-              <p className="text-[11px] font-extrabold text-emerald-600 tracking-tight leading-none pt-0.5 pb-1">
-                Get up to ৳{product.cashback.toLocaleString()} cashback
-              </p>
-            )}
-            
-            {/* Rating Row */}
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#FF5B00]">
-              <Star className="w-3.5 h-3.5 text-[#FF5B00] fill-[#FF5B00]" />
-              <span>{ratingString} ({reviewsCount})</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Buy Now Button */}
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            className="w-full btn-primary h-9 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md shadow-[#FF5B00]/15"
-          >
-            <Plus size={14} strokeWidth={2.5} />
-            <span>Buy Now</span>
           </button>
         </div>
       </div>

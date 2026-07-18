@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+﻿import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ShoppingCart, MessageCircle, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp, ArrowRight
@@ -7,99 +7,59 @@ import {
 import { EmiAiLogo } from './EmiAiLogo';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
-import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { cn } from '../lib/utils';
-import { toast } from 'react-hot-toast';
-import { useFloatingFilter } from './FilterEngine';
-import { Badge } from './ui/badges/Badge';
+import { useFloatingFilter, useFloatingFilters, scrollToFilterResultsTarget } from './FilterEngine';
+import { VideoLightbox } from './VideoLightbox';
+import {
+  CartPreviewPanel,
+  cartPreviewDesktopShellClass,
+  cartPreviewMobileShellClass,
+  cartPreviewShellClass,
+} from './CartPreviewPanel';
+import {
+  MessagesPreviewPanel,
+  messagesPreviewDesktopShellClass,
+  messagesPreviewMobileShellClass,
+  messagesPreviewShellClass,
+} from './MessagesPreviewPanel';
+import {
+  EmiChatPanel,
+  emiChatDesktopShellClass,
+  emiChatMobileShellClass,
+  emiChatShellClass,
+} from './EmiChatPanel';
+import { AlphabetFilterStrip } from './AlphabetFilterStrip';
+import { getFloatingPanelClassName } from './FloatingPanelShell';
 
 export function FloatingOverlays() {
-  const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+  const onMessagesPage = currentPath.startsWith('/messages');
 
-  const { mode, retailCart, wholesaleCart, removeFromCart, updateCartQuantity, activeVideo, closeVideo } = useGlobalState();
-  const { threads, threadMessages, addThreadMessage, markAllAsRead, setThreads } = useDashboard();
+  const onEmiPage = currentPath.startsWith('/emi');
 
-  // Active floating panel state: null | 'cart' | 'inbox' | 'emi'
-  const [activePanel, setActivePanel] = useState<'cart' | 'inbox' | 'emi' | null>(null);
-  const { config: filterConfig, isOpen: filterOpen, setIsOpen: setFilterOpen } = useFloatingFilter();
+  const { retailCart, activeVideo, closeVideo, isLoggedIn, isFeatureEnabled } = useGlobalState();
+  const { threads } = useDashboard();
+
+  const showEmiFab = isFeatureEnabled('enable_emi_assistant') && !onEmiPage;
+
+  // Active floating panel state: cart preview, messages preview, or Emi
+  const [activePanel, setActivePanel] = useState<'cart' | 'messages' | 'emi' | null>(null);
+  const [emiSeedPrompt, setEmiSeedPrompt] = useState<string | undefined>();
+  const [filterOpen, setFilterOpen] = useState(false);
   const filterDrawerRef = useRef<HTMLDivElement>(null);
 
-  const hasFilters = filterConfig.renderFilters !== null || (filterConfig.quickFilters && filterConfig.quickFilters.length > 0);
-  
-  // Selected thread inside mini message board for real-time nested chatting
-  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
-  const [chatInput, setChatInput] = useState('');
-  
-  // EMI AI Chat Assistant State
-  const [emiInput, setEmiInput] = useState('');
-  const [isEmiTyping, setIsEmiTyping] = useState(false);
-  const [emiMessages, setEmiMessages] = useState<any[]>([
-    {
-      id: 1,
-      sender: 'emi',
-      text: 'Hi there! I am EMI, your AI discovery assistant on Choosify. Ask me anything about premium products, comparative reviews, or find top guides in Bangladesh! 🚀',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-  ]);
-
-  const emiSuggestions = [
-    "Find best value phones",
-    "Active campaigns & deals",
-    "What are Buying Guides?",
-    "Compare premium brands"
-  ];
-
-  const handleSendEmiMessage = (text: string) => {
-    if (!text.trim()) return;
-
-    const userMsg = {
-      id: Date.now(),
-      sender: 'user',
-      text: text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setEmiMessages((prev) => [...prev, userMsg]);
-    setEmiInput('');
-    setIsEmiTyping(true);
-
-    // Dynamic responses based on keywords!
-    setTimeout(() => {
-      let replyText = "That's a great question! On Choosify, we filter the best products, direct merchant deals, and curated creator guides to find you the absolute best value. Try checking our /discover page!";
-      const cleanText = text.toLowerCase();
-      
-      if (cleanText.includes('phone') || cleanText.includes('smartphone') || cleanText.includes('mobile')) {
-        replyText = "Smartphones are our speciality! We highly recommend the Pixel 8 Pro or iPhone 15 Pro for peak photography, and the Samsung Galaxy A35 for absolute budget-friendly elegance. Check out the Products catalog for verified listings! 📱";
-      } else if (cleanText.includes('deal') || cleanText.includes('active') || cleanText.includes('campaign') || cleanText.includes('discount')) {
-        replyText = "We have major merchant campaigns active today with up to 25% off on selected flagship accessories and sneakers. Direct your browser to our Hot Deals page! 🎁";
-      } else if (cleanText.includes('guide') || cleanText.includes('buying') || cleanText.includes('discover')) {
-        replyText = "Buying Guides (now found under our premium 'Discover' page) are written by top tech creators to help you source products with ultimate clarity. They cover detailed breakdowns, video reviews, and wholesale pricing tips! 🌟";
-      } else if (cleanText.includes('compare') || cleanText.includes('vs')) {
-        replyText = "Choosify's live Compare Tool lets you drag-and-drop up to 3 products to compare full specs side-by-side. It is fully server-grounded and extremely fast! ⚖️";
-      } else if (cleanText.includes('brand') || cleanText.includes('apex') || cleanText.includes('apple')) {
-        replyText = "We feature standard authentic brand stores including Apple, Apex, Samsung, Sony, and Xiaomi with fully certified warranties. Check out our /brands section for details! 🏅";
-      }
-
-      const botMsg = {
-        id: Date.now() + 1,
-        sender: 'emi',
-        text: replyText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setEmiMessages((prev) => [...prev, botMsg]);
-      setIsEmiTyping(false);
-    }, 1000);
-  };
-
-  // Profile sliding panel active accordion group
-  const [activeAccordion, setActiveAccordion] = useState<string | null>('account');
+  const { config: filterConfig } = useFloatingFilter();
+  const { activeFiltersData: drawerFiltersData, setIsOpen: setDrawerFilterOpen, isOpen: drawerFilterOpen } = useFloatingFilters();
+  const hasFilters =
+    !drawerFiltersData &&
+    (filterConfig.renderFilters !== null || (filterConfig.quickFilters && filterConfig.quickFilters.length > 0));
+  const showFiltersAction = !!drawerFiltersData || hasFilters;
 
   // Tracking responsive media
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     const mobileMedia = window.matchMedia("(max-width: 640px)");
@@ -116,24 +76,81 @@ export function FloatingOverlays() {
     };
   }, []);
 
-  // Close active panel upon route transition
   useEffect(() => {
+    const onScroll = () => setShowScrollTop(window.scrollY > 360);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onOpenEmi = (e: Event) => {
+      const detail = (e as CustomEvent<{ prompt?: string }>).detail;
+      setEmiSeedPrompt(detail?.prompt);
+      setActivePanel('emi');
+    };
+    window.addEventListener('choosify:open-emi', onOpenEmi);
+    return () => window.removeEventListener('choosify:open-emi', onOpenEmi);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const closeFilterPanel = () => {
+    const targetId = filterConfig.scrollTargetId;
+    setFilterOpen(false);
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => scrollToFilterResultsTarget(targetId), 80);
+    });
+  };
+
+  const closeAllOverlays = () => {
     setActivePanel(null);
     setFilterOpen(false);
+    setDrawerFilterOpen(false);
+  };
+
+  const openMobileFilters = () => {
+    setActivePanel(null);
+    if (drawerFiltersData) setDrawerFilterOpen(true);
+    else setFilterOpen(true);
+  };
+
+  // Close active panel upon route transition
+  useEffect(() => {
+    closeAllOverlays();
   }, [currentPath]);
 
+  // Sticky nav "Filter" shortcut opens the legacy floating filter panel
+  useEffect(() => {
+    const handleOpenFilters = () => {
+      setFilterOpen(true);
+      setActivePanel(null);
+      setDrawerFilterOpen(false);
+    };
+    window.addEventListener('choosify:open-filters', handleOpenFilters);
+    return () => window.removeEventListener('choosify:open-filters', handleOpenFilters);
+  }, [setDrawerFilterOpen]);
+
+  // Close auth-only panels when user logs out
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setActivePanel((panel) => (panel === 'cart' ? panel : null));
+    }
+  }, [isLoggedIn]);
+
   // Cart tracking details
-  const activeCart = mode === 'retail' ? retailCart : wholesaleCart;
-  const totalCartItems = activeCart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalCartItems = retailCart.reduce((sum, item) => sum + item.quantity, 0);
   const [lastCartCount, setLastCartCount] = useState(totalCartItems);
   const [cartBadgeBounce, setCartBadgeBounce] = useState(false);
 
-  // Unread messages tracking
-  const unreadCount = threads.filter(t => t.unread).length;
+  // Unread messages — hide floating pill when inbox empty or fully read
+  const unreadCount = isLoggedIn ? threads.filter((t) => t.unread).length : 0;
+  const showMessagesFab = isLoggedIn && !onMessagesPage && threads.length > 0 && unreadCount > 0;
   const [lastUnreadCount, setLastUnreadCount] = useState(unreadCount);
   const [inboxBadgeBounce, setInboxBadgeBounce] = useState(false);
 
-  const miniChatBottomRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -147,7 +164,6 @@ export function FloatingOverlays() {
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
       ) {
-        // Only close if we are not clicking a route transition
         setActivePanel(null);
       }
 
@@ -156,7 +172,7 @@ export function FloatingOverlays() {
         filterDrawerRef.current &&
         !filterDrawerRef.current.contains(event.target as Node)
       ) {
-        setFilterOpen(false);
+        closeFilterPanel();
       }
     };
 
@@ -168,13 +184,22 @@ export function FloatingOverlays() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setActivePanel(null);
-        setFilterOpen(false);
+        if (activePanel) {
+          setActivePanel(null);
+          return;
+        }
+        if (filterOpen) {
+          closeFilterPanel();
+          return;
+        }
+        if (drawerFilterOpen) {
+          setDrawerFilterOpen(false);
+        }
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [activePanel, filterOpen, drawerFilterOpen, setDrawerFilterOpen]);
 
   // Trigger bounce on cart changes
   useEffect(() => {
@@ -196,14 +221,7 @@ export function FloatingOverlays() {
     setLastUnreadCount(unreadCount);
   }, [unreadCount, lastUnreadCount]);
 
-  // Scroll to bottom of mini chat
-  useEffect(() => {
-    if (miniChatBottomRef.current) {
-      miniChatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [threadMessages, activeThreadId]);
-
-  // Auto-close drawers if records drop to zero
+  // Auto-close cart drawer if empty
   useEffect(() => {
     if (activePanel === 'cart' && totalCartItems === 0) {
       setActivePanel(null);
@@ -220,440 +238,91 @@ export function FloatingOverlays() {
     (triggerHeights.length > 1 ? (triggerHeights.length - 1) * 12 : 0);
 
   // Custom motion transitions matching standard Choosify velocity
-  const standardTransition = { type: "spring" as const, damping: 25, stiffness: 350 };
+  const desktopDrawerTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
+  const mobileDrawerTransition = { type: 'tween' as const, ease: [0.32, 0.72, 0, 1] as const, duration: 0.28 };
+  const panelTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
 
   return (
     <>
+      <VideoLightbox video={activeVideo} onClose={closeVideo} />
+
       <div 
         ref={containerRef}
         className={cn(
-          "fixed z-[220] flex flex-col items-end text-[#1A1D4E] font-sans",
-          isMobile ? "bottom-4 left-4 right-4 gap-3" : "bottom-6 right-6 lg:bottom-8 lg:right-8 gap-3 sm:gap-3.5"
+          "fixed z-[220] text-[#1A1D4E] font-sans",
+          isMobile
+            ? "inset-0 pointer-events-none"
+            : "bottom-6 right-6 lg:bottom-8 lg:right-8 flex flex-col items-end gap-3 sm:gap-3.5",
         )}
       >
       
       {/* GLOBAL PERSISTENT FLOATING PANEL POPUPS */}
       <AnimatePresence>
         
-        {/* PANEL 1: MINI FLOATING CART */}
+        {/* PANEL 1: MINI FLOATING CART — matches navbar cart dropdown */}
         {activePanel === 'cart' && (
           <motion.div 
             ref={panelRef}
-            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
             animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
-            transition={standardTransition}
+            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
+            transition={panelTransition}
             style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
             className={cn(
-              "bg-[#0A0B1E]/95 backdrop-blur-xl border border-white/10 overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] text-white flex flex-col",
+              cartPreviewShellClass,
               isMobile
-                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                ? cn('fixed z-[250] pointer-events-auto', cartPreviewMobileShellClass, 'h-[82vh]')
                 : isTablet
-                  ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
-                  : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
+                  ? cn('fixed bottom-4 left-1/2 -translate-x-1/2 z-[250]', cartPreviewDesktopShellClass, 'w-[min(24rem,calc(100vw-1.5rem))]')
+                  : cn('absolute right-0 z-[250]', cartPreviewDesktopShellClass),
             )}
             id="floating-mini-cart-drawer"
           >
-            {/* Header */}
-            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02] shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-orange-primary/10 flex items-center justify-center text-orange-primary">
-                  <ShoppingCart size={16} />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-widest text-[#FF5B00] font-extrabold text-left">Instant Checklist</div>
-                  <h3 className="text-sm font-black uppercase italic tracking-wider text-left">My Quick Cart</h3>
-                </div>
-              </div>
-              <button 
-                onClick={() => setActivePanel(null)}
-                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* List Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
-              {activeCart.length === 0 ? (
-                <div className="py-12 text-center text-gray-500 flex flex-col items-center justify-center gap-3">
-                  <div className="w-12 h-12 rounded-full border border-white/5 bg-white/[0.01] flex items-center justify-center text-gray-600">
-                    <ShoppingBag size={20} />
-                  </div>
-                  <p className="text-[11px] font-black uppercase tracking-wider">Your transaction cart is empty</p>
-                  <p className="text-[9px] lowercase italic text-gray-600 max-w-[200px] leading-relaxed">
-                    discover top Bangladesh products and click add with custom volume metrics
-                  </p>
-                </div>
-              ) : (
-                activeCart.map((item) => {
-                  const itemPrice = item.selectedVariant?.price || item.product.price;
-                  const itemImage = item.selectedVariant?.image || item.product.image || PLACEHOLDER_IMAGE;
-                  const itemTitle = item.product.title;
-                  const redirectPath = mode === 'retail' ? `/products/${item.product.id}` : `/b2b/product/${item.product.id}`;
-
-                  return (
-                    <div key={item.id} className="flex gap-4 items-center bg-white/[0.02] border border-white/5 hover:border-white/10 p-3.5 rounded-2xl transition-all group text-left">
-                      <Link 
-                        to={redirectPath} 
-                        onClick={() => setActivePanel(null)}
-                        className="w-14 h-14 rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0 relative flex items-center justify-center"
-                      >
-                        <img src={itemImage} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" referrerPolicy="no-referrer" />
-                      </Link>
-                      <div className="flex-1 min-w-0">
-                        <Link 
-                          to={redirectPath}
-                          onClick={() => setActivePanel(null)}
-                          className="text-[11px] font-bold text-white uppercase italic truncate block hover:text-orange-primary transition-colors mb-0.5"
-                        >
-                          {itemTitle}
-                        </Link>
-                        {item.selectedVariant?.attributes && (
-                          <div className="text-[9px] text-[#A0A5C0] flex gap-2 mb-1">
-                            {Object.entries(item.selectedVariant.attributes).map(([key, val]: any) => (
-                              <span key={key} className="bg-white/5 px-1.5 py-0.5 rounded text-[8px] uppercase">{key}: {val}</span>
-                            ))}
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-mono font-black text-orange-primary">
-                            ৳{formatPrice(itemPrice)}
-                          </span>
-                          
-                          {/* Compact Qty Stepper */}
-                          <div className="flex items-center gap-2 bg-black/20 px-2 py-0.5 rounded-lg border border-white/5">
-                            <button 
-                              onClick={() => item.quantity > 1 && updateCartQuantity(item.id, item.quantity - 1)}
-                              className="text-[10px] text-gray-400 hover:text-white px-1 font-mono focus:outline-none"
-                            >
-                              -
-                            </button>
-                            <span className="text-[9px] font-bold font-mono px-0.5">{item.quantity}</span>
-                            <button 
-                              onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
-                              className="text-[10px] text-gray-400 hover:text-white px-1 font-mono focus:outline-none"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Delete */}
-                      <button 
-                        onClick={() => removeFromCart(item.id)}
-                        className="p-2 rounded-xl text-gray-500 hover:text-red-400 hover:bg-white/[0.04] transition-all shrink-0 cursor-pointer"
-                        title="Remove product"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            {/* Bottom Actions if cart is populated */}
-            {activeCart.length > 0 && (
-              <div className="p-6 border-t border-white/5 bg-white/[0.01] space-y-4 shrink-0">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[#A0A5C0]">Estimated Subtotal</span>
-                  <span className="text-lg font-mono font-black text-white">৳{formatPrice(subtotal)}</span>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <button 
-                    onClick={() => {
-                      setActivePanel(null);
-                      navigate(mode === 'retail' ? '/cart/retail' : '/cart/b2b');
-                    }}
-                    className="py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-white transition-all text-center flex items-center justify-center gap-1 cursor-pointer"
-                  >
-                    View Full Cart
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setActivePanel(null);
-                      navigate('/checkout');
-                    }}
-                    className="py-3 px-4 bg-orange-primary hover:bg-[#FF5B00] rounded-2xl text-[10px] font-bold uppercase tracking-widest text-white transition-all text-center flex items-center justify-center gap-1 shadow-[0_4px_20px_rgba(249,101,0,0.3)] font-black italic cursor-pointer animate-pulse-subtle"
-                  >
-                    Checkout <ChevronRight size={12} />
-                  </button>
-                </div>
-              </div>
-            )}
+            <CartPreviewPanel onClose={() => setActivePanel(null)} />
           </motion.div>
         )}
 
-        {/* PANEL 2: MINI FLOATING INBOX */}
-        {activePanel === 'inbox' && (
+        {activePanel === 'messages' && (
           <motion.div
             ref={panelRef}
-            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
             animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
-            transition={standardTransition}
+            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
+            transition={panelTransition}
             style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
-            drag={isMobile ? "y" : false}
-            dragConstraints={{ top: 0, bottom: 250 }}
-            dragElastic={{ top: 0.1, bottom: 0.8 }}
-            onDragEnd={(e, info) => {
-              if (info.offset.y > 120) {
-                setActivePanel(null);
-              }
-            }}
             className={cn(
-              "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
+              messagesPreviewShellClass,
               isMobile
-                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                ? cn('fixed z-[250] pointer-events-auto', messagesPreviewMobileShellClass, 'h-[82vh]')
                 : isTablet
-                  ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
-                  : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
+                  ? cn('fixed bottom-4 left-1/2 -translate-x-1/2 z-[250]', messagesPreviewDesktopShellClass, 'w-[min(28rem,calc(100vw-1.5rem))]')
+                  : cn('absolute right-0 z-[250]', messagesPreviewDesktopShellClass, 'w-[min(28rem,calc(100vw-2rem))]'),
             )}
-            id="floating-mini-inbox-drawer"
+            id="floating-messages-drawer"
           >
-            {/* Drawer Drag Indicator on Mobile */}
-            {isMobile && (
-              <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
-            )}
-
-            {/* Inbox Header Block */}
-            <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3.5 text-left">
-                <div className="w-9 h-9 rounded-full bg-orange-primary/10 flex items-center justify-center text-orange-primary shrink-0">
-                  <MessageSquare size={16} />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-widest text-[#FF5B00] font-extrabold text-left">Quick Connect</div>
-                  <h3 className="text-xs md:text-sm font-black text-[#1A1A2E] leading-tight uppercase">
-                    Merchant Inbox
-                  </h3>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => { setActivePanel(null); navigate('/messages'); }}
-                  className="text-[9px] font-black text-[#FF5B00] uppercase tracking-wider hover:underline cursor-pointer border-0 bg-transparent"
-                >
-                  Open Full ↗
-                </button>
-                <button 
-                  onClick={() => setActivePanel(null)}
-                  className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#1A1A2E] transition-all border border-[#e8edf2] cursor-pointer"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            </div>
-
-            {/* Panel Body */}
-            {activeThreadId === null ? (
-              <div className="flex-1 overflow-y-auto no-scrollbar divide-y divide-[#e8edf2]">
-                {threads.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                    <MessageSquare size={28} className="text-gray-300 mb-3" />
-                    <p className="text-[11px] font-bold text-gray-400">No conversations yet</p>
-                  </div>
-                ) : threads.map(thread => {
-                  const displayName = thread.title;
-                  return (
-                    <button
-                      key={thread.id}
-                      onClick={() => setActiveThreadId(thread.id)}
-                      className="w-full flex items-start gap-3 p-4 hover:bg-gray-50 transition-colors text-left font-sans"
-                    >
-                      <div className="w-9 h-9 rounded-full bg-orange-primary/10 flex items-center justify-center shrink-0 text-[10px] font-black text-orange-primary">
-                        {displayName?.substring(0, 2) || '??'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-[11px] font-black text-[#1A1A2E] truncate uppercase">{displayName}</span>
-                          {thread.unread && <span className="w-2 h-2 rounded-full bg-orange-primary shrink-0 ml-2" />}
-                        </div>
-                        <p className="text-[10px] text-gray-400 truncate font-medium">{thread.lastMessage}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Chat view */
-              <div className="flex flex-col flex-1 overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-[#e8edf2] shrink-0 bg-gray-50">
-                  <button onClick={() => setActiveThreadId(null)} className="text-gray-400 hover:text-[#1A1A2E] p-1 cursor-pointer bg-transparent border-0 text-[12px] font-bold">
-                    ←
-                  </button>
-                  <span className="text-[11px] font-black text-[#1A1A2E] uppercase">
-                    {threads.find(t => t.id === activeThreadId)?.title}
-                  </span>
-                </div>
-                <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-3">
-                  {(activeMessages || []).map((msg: any, i: number) => {
-                    const isOutgoing = msg.sender === 'user';
-                    return (
-                      <div key={i} className={`flex ${isOutgoing ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[75%] px-3 py-2 rounded-2xl text-[11px] font-medium ${isOutgoing ? 'bg-orange-primary text-white rounded-br-sm' : 'bg-gray-100 text-[#1A1A2E] rounded-bl-sm'}`}>
-                          {msg.text || msg.content || msg.message}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div ref={miniChatBottomRef} />
-                </div>
-                <div className="p-3 border-t border-[#e8edf2] flex gap-2 shrink-0">
-                  <input
-                    value={chatInput}
-                    onChange={e => setChatInput(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' && chatInput.trim()) {
-                        addThreadMessage(activeThreadId, chatInput.trim(), 'user', 'Me');
-                        setChatInput('');
-                      }
-                    }}
-                    placeholder="Type a message..."
-                    className="flex-1 px-3 py-2 bg-gray-50 border border-[#e8edf2] rounded-full text-[11px] font-medium outline-none focus:border-orange-primary text-[#1A1A2E]"
-                  />
-                  <button
-                    onClick={() => {
-                      if (chatInput.trim()) {
-                        addThreadMessage(activeThreadId, chatInput.trim(), 'user', 'Me');
-                        setChatInput('');
-                      }
-                    }}
-                    className="w-9 h-9 rounded-full bg-orange-primary text-white flex items-center justify-center shrink-0 cursor-pointer border-0 hover:bg-[#EB4501] transition-colors"
-                  >
-                    <Send size={13} />
-                  </button>
-                </div>
-              </div>
-            )}
+            <MessagesPreviewPanel onClose={() => setActivePanel(null)} />
           </motion.div>
         )}
 
-        {/* PANEL 3: EMI AI DRAWER (Slide Up bottom->top dock system) */}
         {activePanel === 'emi' && (
           <motion.div
             ref={panelRef}
-            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
+            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
             animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.95 }}
-            transition={standardTransition}
+            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
+            transition={panelTransition}
             style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
-            drag={isMobile ? "y" : false}
-            dragConstraints={{ top: 0, bottom: 250 }}
-            dragElastic={{ top: 0.1, bottom: 0.8 }}
-            onDragEnd={(e, info) => {
-              if (info.offset.y > 120) {
-                setActivePanel(null);
-              }
-            }}
             className={cn(
-              "bg-white shadow-[0_24px_55px_rgba(0,0,0,0.18)] border border-[#e8edf2] text-[#1A1A2E] flex flex-col font-sans overflow-hidden",
+              emiChatShellClass,
               isMobile
-                ? "fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-[24px] z-[250] w-full"
+                ? cn('fixed z-[250] pointer-events-auto', emiChatMobileShellClass, 'h-[85vh]')
                 : isTablet
-                  ? "fixed bottom-4 left-1/2 -translate-x-1/2 w-[480px] max-h-[70vh] rounded-[24px] z-[250]"
-                  : "absolute right-0 w-[380px] rounded-[24px] max-h-[75vh]"
+                  ? cn('fixed bottom-4 left-1/2 -translate-x-1/2 z-[250]', emiChatDesktopShellClass)
+                  : cn('absolute right-0 z-[250]', emiChatDesktopShellClass, 'max-h-[min(36rem,calc(100vh-10rem))]'),
             )}
-            id="floating-emi-dock-drawer"
+            id="floating-emi-drawer"
           >
-            {/* Drawer Drag Indicator on Mobile */}
-            {isMobile && (
-              <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
-            )}
-
-            {/* EMI AI Header Block */}
-            <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3 text-left">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF5B00] to-[#FF8C39] flex items-center justify-center shadow-md shrink-0 border-none">
-                  <span className="text-white font-black text-xs uppercase tracking-widest leading-none">EMI</span>
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-[#1E2035] leading-none flex items-center gap-1.5">
-                    EMI AI Assistant <Badge variant="live" className="text-[7.5px] px-1 py-0.5 shadow-xs scale-90 select-none">LIVE</Badge>
-                  </h3>
-                  <p className="text-[10px] text-gray-400 font-semibold mt-1">Sourcing & discovery support</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActivePanel(null)}
-                className="w-8 h-8 rounded-full bg-white/60 hover:bg-white border border-[#e8edf2] flex items-center justify-center cursor-pointer hover:text-[#FF5B00] transition-colors"
-                aria-label="Close Assistant"
-              >
-                <X size={14} />
-              </button>
-            </div>
-
-            {/* Chat message stream */}
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 max-h-[40vh] sm:max-h-[45vh] select-text">
-              {emiMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={cn(
-                    "flex flex-col max-w-[85%] text-left",
-                    msg.sender === 'user' ? "self-end items-end" : "self-start items-start"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "px-3.5 py-2.5 rounded-2xl text-xs font-semibold leading-relaxed",
-                      msg.sender === 'user'
-                        ? "bg-[#FF5B00] text-white rounded-tr-none shadow-sm"
-                        : "bg-gray-100 text-[#1E2035] rounded-tl-none border border-gray-150/50"
-                    )}
-                  >
-                    {msg.text}
-                  </div>
-                  <span className="text-[9px] text-gray-400 font-bold mt-1 px-1">{msg.timestamp}</span>
-                </div>
-              ))}
-
-              {isEmiTyping && (
-                <div className="flex flex-col items-start self-start max-w-[85%] text-left">
-                  <div className="px-3.5 py-2.5 rounded-2xl rounded-tl-none bg-gray-100 text-[#1E2035] text-xs font-bold border border-gray-150/50 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Quick Suggestions block */}
-            <div className="px-4 pb-2 pt-1 border-t border-gray-50 flex flex-wrap gap-1.5 justify-start bg-white shrink-0 select-none">
-              {emiSuggestions.map((sug, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSendEmiMessage(sug)}
-                  className="px-3 py-1.5 bg-gray-50 hover:bg-[#FFF0E8] border border-gray-150/60 hover:border-[#FF5B00]/30 text-gray-500 hover:text-[#FF5B00] rounded-full text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap"
-                >
-                  {sug}
-                </button>
-              ))}
-            </div>
-
-            {/* Message input bar */}
-            <div className="p-4 border-t border-[#e8edf2] bg-gray-50 flex gap-2 shrink-0">
-              <input
-                type="text"
-                value={emiInput}
-                onChange={(e) => setEmiInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSendEmiMessage(emiInput);
-                }}
-                placeholder="Ask EMI anything..."
-                className="flex-1 px-4 py-2.5 bg-white border border-[#e8edf2] rounded-full text-xs font-medium outline-none focus:border-[#FF5B00] text-[#1E2035]"
-              />
-              <button
-                onClick={() => handleSendEmiMessage(emiInput)}
-                className="w-10 h-10 rounded-full bg-[#FF5B00] text-white flex items-center justify-center shrink-0 cursor-pointer border-0 hover:bg-[#E04E00] transition-colors"
-              >
-                <Send size={14} />
-              </button>
-            </div>
+            <EmiChatPanel onClose={() => setActivePanel(null)} seedPrompt={emiSeedPrompt} />
           </motion.div>
         )}
 
@@ -684,24 +353,7 @@ export function FloatingOverlays() {
               <EmiAiLogo size={44} className="w-11 h-11" />
             </motion.button>
           )}
-          title="EMI AI Assistant Quick Dock"
-        >
-          <div className="flex items-center gap-2 max-w-[130px]">
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-[#FF5B00]/10 flex items-center justify-center border border-[#e8edf2]/30 shrink-0">
-              <span className="text-[#FF5B00] font-black text-[9px] uppercase tracking-wider">EMI</span>
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-wider truncate">
-              EMI AI CHAT
-            </span>
-          </div>
-          <ArrowRight 
-            size={14} 
-            className={cn(
-              "transition-transform duration-300",
-              activePanel === 'emi' ? "text-[#FF5B00]" : "text-[#8a9bb0] group-hover:text-[#FF5B00] group-hover:translate-x-1"
-            )} 
-          />
-        </motion.button>
+        </AnimatePresence>
 
         {/* CART FAB (visible when cart has items) */}
         <AnimatePresence>
@@ -735,14 +387,14 @@ export function FloatingOverlays() {
 
         {/* MESSAGES FAB — only when unread conversations exist */}
         <AnimatePresence>
-          {unreadCount > 0 && (
+          {showMessagesFab && (
             <motion.button
               key="dock-messages-trigger"
               initial={{ scale: 0, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0, opacity: 0, y: 15 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              onClick={() => setActivePanel(activePanel === 'inbox' ? null : 'inbox')}
+              onClick={() => setActivePanel(activePanel === 'messages' ? null : 'messages')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
@@ -764,9 +416,10 @@ export function FloatingOverlays() {
         </AnimatePresence>
 
       </div>
+      </div>
 
 
-      {/* CINEMATIC VIDEO PLAYER OVERLAY FOR EMBEDDED-ONLY CONTENT */}
+      {/* Scroll to top — desktop sits left of cart stack; mobile above filter FAB */}
       <AnimatePresence>
         {showScrollTop && !activeVideo && (
           <motion.button
@@ -799,92 +452,43 @@ export function FloatingOverlays() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4 md:p-8"
-            onClick={closeVideo}
-          >
-            {/* Modal Box */}
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 350 }}
-              className={cn(
-                "w-full bg-slate-950 rounded-2xl md:rounded-3xl border border-white/10 shadow-[0_24px_50px_rgba(0,0,0,0.8)] overflow-hidden relative flex flex-col mb-16 lg:mb-0",
-                activeVideo.isVertical ? "max-w-[360px] aspect-[9/16]" : "max-w-4xl aspect-video"
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header Info */}
-              <div className="absolute top-0 inset-x-0 p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-20 flex items-center justify-between text-white">
-                <div className="flex flex-col text-left pr-6">
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#FF5B00] mb-0.5">
-                    {activeVideo.isVertical ? "Short / Reel Playback" : "YouTube Video Playback"}
-                  </span>
-                  <h3 className="text-xs md:text-sm font-extrabold tracking-tight truncate max-w-[240px] md:max-w-[600px] italic">
-                    {activeVideo.title}
-                  </h3>
-                </div>
-                
-                <button
-                  onClick={closeVideo}
-                  className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/15 hover:border-white/20 transition-all text-white shrink-0 cursor-pointer"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {/* Video Element */}
-              <div className="w-full h-full relative group flex items-center justify-center bg-[#050615]">
-                <video
-                  src={activeVideo.url && activeVideo.url !== '#' ? activeVideo.url : "https://assets.mixkit.co/videos/preview/mixkit-young-man-wearing-virtual-reality-glasses-4384-large.mp4"}
-                  className="w-full h-full object-contain"
-                  autoPlay
-                  controls
-                  playsInline
-                />
-              </div>
-            </motion.div>
-          </motion.div>
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
+            aria-label="Close filters"
+            onClick={closeFilterPanel}
+          />
         )}
-      </AnimatePresence>
 
-    </div>
-
-    {/* NEW GLOBAL FILTER SYSTEM LAUNCHER & DRAWER */}
-    {hasFilters && (
-      <>
-        {/* Backdrop blur overlay */}
-        <AnimatePresence>
-          {filterOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setFilterOpen(false)}
-              className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-[240] transition-opacity"
-            />
+        <div
+          className={cn(
+            'fixed z-[219] flex flex-col-reverse items-start gap-3',
+            isMobile ? 'pointer-events-none' : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
           )}
-        </AnimatePresence>
-
-        {/* Left sliding drawer */}
+        >
         <AnimatePresence>
           {filterOpen && (
             <motion.div
               ref={filterDrawerRef}
-              initial={isMobile ? { y: '100%' } : { x: '-100%' }}
-              animate={isMobile ? { y: 0 } : { x: 0 }}
-              exit={isMobile ? { y: '100%' } : { x: '-100%' }}
-              transition={{ type: 'spring', damping: 26, stiffness: 210 }}
-              className={cn(
-                "bg-white shadow-[12px_0_45px_rgba(15,23,42,0.15)] text-[#1A1A2E] flex flex-col font-sans overflow-hidden z-[250] fixed",
-                isMobile
-                  ? "bottom-0 left-0 right-0 h-[85vh] rounded-t-[24px] w-full"
-                  : "left-0 top-0 bottom-0 w-[400px] h-screen rounded-r-[24px]"
-              )}
+              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
+              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
+              transition={isMobile ? mobileDrawerTransition : desktopDrawerTransition}
+              style={{ willChange: 'transform' }}
+              drag={isMobile ? 'y' : false}
+              dragConstraints={{ top: 0, bottom: 250 }}
+              dragElastic={{ top: 0.1, bottom: 0.8 }}
+              onDragEnd={(_e: any, info: any) => {
+                if (info.offset.y > 120) closeFilterPanel();
+              }}
+              className={getFloatingPanelClassName({
+                isMobile,
+                isTablet,
+                textClass: 'text-[#1A1A2E]',
+              })}
             >
-              {/* Mobile drag handle indicator */}
+              {/* Mobile drag indicator */}
               {isMobile && (
-                <div className="w-12 h-1.5 rounded-full bg-slate-200 mx-auto mt-3.5 shrink-0" />
+                <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
               )}
 
               {/* Header */}
@@ -897,13 +501,13 @@ export function FloatingOverlays() {
                     <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#FF5B00]">
                       {filterConfig.pageName || 'Page Filters'}
                     </div>
-                    <h3 className="text-xs font-black text-[#1A1A2E] leading-tight uppercase tracking-tight">
-                      Filters & Specs
+                    <h3 className="text-xs font-black text-[#1A1A2E] leading-tight uppercase">
+                      Filters & Search
                     </h3>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {filterConfig.onClearAll && (filterConfig?.activeFilterCount || 0) > 0 && (
+                  {filterConfig.onClearAll && filterConfig.activeFilterCount > 0 && (
                     <button
                       onClick={filterConfig.onClearAll}
                       className="text-[9px] font-black uppercase tracking-wider text-[#FF5B00] bg-[#FF5B00]/8 hover:bg-[#FF5B00]/15 px-3 py-1.5 rounded-full transition-colors border-0 cursor-pointer flex items-center gap-1"
@@ -912,10 +516,10 @@ export function FloatingOverlays() {
                     </button>
                   )}
                   <button
-                    onClick={() => setFilterOpen(false)}
+                    onClick={closeFilterPanel}
                     className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#1A1A2E] transition-all border border-[#e8edf2] cursor-pointer"
                   >
-                    <X size={14} />
+                    <XIcon size={14} />
                   </button>
                 </div>
               </div>
@@ -924,22 +528,32 @@ export function FloatingOverlays() {
               <div className="flex-1 overflow-y-auto no-scrollbar">
 
                 {filterConfig.renderSearch && (
-                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2] text-left">
-                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2">Search Input</div>
+                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2">Page Search</div>
                     {filterConfig.renderSearch()}
                   </div>
                 )}
 
+                {filterConfig.alphabetFilter && (
+                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
+                    <AlphabetFilterStrip
+                      activeLetter={filterConfig.alphabetFilter.activeLetter}
+                      onLetterChange={filterConfig.alphabetFilter.onLetterChange}
+                      compact
+                    />
+                  </div>
+                )}
+
                 {filterConfig.quickFilters && filterConfig.quickFilters.length > 0 && (
-                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2] text-left">
-                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2.5">Quick Options</div>
+                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-2.5">Quick Filters</div>
                     <div className="flex flex-wrap gap-2">
                       {filterConfig.quickFilters.map((qf: any) => (
                         <button
                           key={qf.id}
                           onClick={qf.onClick}
                           className={cn(
-                            "px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all cursor-pointer flex items-center gap-1.5 border font-sans",
+                            "px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all cursor-pointer flex items-center gap-1.5 border",
                             qf.active
                               ? "bg-[#FF5B00] text-white border-transparent shadow-sm font-black italic"
                               : "bg-white border-[#e8edf2] text-gray-500 hover:border-[#1A1D4E]/25 hover:text-[#1A1D4E]"
@@ -954,8 +568,8 @@ export function FloatingOverlays() {
                 )}
 
                 {filterConfig.renderFilters && (
-                  <div className="px-5 pt-4 pb-6 text-left">
-                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-3">Specification Filters</div>
+                  <div className="px-5 pt-4 pb-6">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] mb-3">All Filters</div>
                     {filterConfig.renderFilters()}
                   </div>
                 )}
@@ -963,8 +577,8 @@ export function FloatingOverlays() {
                 {/* Empty state */}
                 {!filterConfig.renderFilters && !filterConfig.renderSearch && (!filterConfig.quickFilters || filterConfig.quickFilters.length === 0) && (
                   <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                    <SlidersHorizontal size={24} className="text-gray-300 mb-3" />
-                    <p className="text-[11px] font-bold text-gray-400">No active page-level filters registered</p>
+                    <SlidersHorizontal size={28} className="text-gray-300 mb-3" />
+                    <p className="text-[11px] font-bold text-gray-400">No filters available on this page</p>
                   </div>
                 )}
 
@@ -986,11 +600,15 @@ export function FloatingOverlays() {
           )}
         </AnimatePresence>
 
-        {/* FLOATING ACTION BUTTON / TAB */}
+        {!isMobile && (
         <motion.button
-          onClick={() => setFilterOpen(!filterOpen)}
-          whileHover={{ x: filterOpen ? 0 : isMobile ? 0 : 5, scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          type="button"
+          onClick={() => {
+            setFilterOpen(!filterOpen);
+            if (!filterOpen) setActivePanel(null);
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           className={cn(
             "h-[52px] rounded-[26px] bg-white border border-[#e8edf2] flex items-center gap-2.5 px-5 shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto",
             filterOpen && "ring-2 ring-[#FF5B00]/30",
@@ -1019,6 +637,8 @@ export function FloatingOverlays() {
             )}
           />
         </motion.button>
+        )}
+        </div>
       </>
     )}
 
