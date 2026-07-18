@@ -68,7 +68,7 @@ export function SearchableSelectField({
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
         className={cn(
-          'w-full min-h-[48px] bg-white border border-gray-200 rounded-lg px-4 text-left text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm flex items-center justify-between gap-2',
+          'w-full min-h-[48px] bg-slate-50 border border-slate-200/60 rounded-2xl px-4 text-left text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all flex items-center justify-between gap-2',
           disabled && 'bg-gray-50 text-gray-400 cursor-not-allowed',
         )}
         aria-haspopup="listbox"

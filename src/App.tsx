@@ -33,7 +33,6 @@ const GuideDetailPage = lazy(() => import('./pages/GuideDetailPage').then(m => (
 const GuideProductsPage = lazy(() => import('./pages/GuideProductsPage').then(m => ({ default: m.GuideProductsPage })));
 const LoginSignUpPage = lazy(() => import('./pages/LoginSignUpPage').then(m => ({ default: m.LoginSignUpPage })));
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
-const WhatsOnPage = lazy(() => import('./pages/WhatsOnPage').then(m => ({ default: m.WhatsOnPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
 const CreatorsPage = lazy(() => import('./pages/CreatorsPage').then(m => ({ default: m.CreatorsPage })));
 const CreatorProfilePage = lazy(() => import('./pages/CreatorProfilePage').then(m => ({ default: m.CreatorProfilePage })));
@@ -207,9 +206,9 @@ function AppContent() {
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
             <Route path="/login" element={<LoginSignUpPage />} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/whats-on" element={<PageWrapper><WhatsOnPage /></PageWrapper>} />
+            <Route path="/whats-on" element={<Navigate to="/products" replace />} />
             <Route path="/whats-on/:slug" element={<PageWrapper><LegacyWhatsOnContentRedirect /></PageWrapper>} />
-            <Route path="/customer-favorite" element={<Navigate to="/whats-on" replace />} />
+            <Route path="/customer-favorite" element={<Navigate to="/products" replace />} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
             <Route path="/emi" element={<FeatureFlagRoute flag="enable_emi_assistant"><PageWrapper><EmiPage /></PageWrapper></FeatureFlagRoute>} />
             <Route path="/creators" element={<FeatureFlagRoute flag="creator_hub"><PageWrapper><CreatorsPage /></PageWrapper></FeatureFlagRoute>} />

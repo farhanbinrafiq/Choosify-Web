@@ -1810,7 +1810,7 @@ export function BrandDetailPage() {
                 showSponsoredBadge={false}
                 title="Events"
                 subtitle="Official brand events, launches, and festival announcements."
-                viewAllHref="/whats-on"
+                viewAllHref="/products"
                 viewAllLabel="Explore all events"
               />
             </div>

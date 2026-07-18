@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "generate:og": "node scripts/generate-og-assets.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
@@ -16,6 +17,8 @@
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vercel/edge": "^1.3.1",
+    "@vercel/og": "^0.11.1",
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.5.2",
     "clsx": "^2.1.1",

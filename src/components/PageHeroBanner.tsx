@@ -104,10 +104,10 @@ const PAGE_DEFAULT_SLIDES: Record<PageHeroBannerKey, HeroBannerSlide[]> = {
   'whats-on': [
     {
       id: 'whats-on-default',
-      title: 'Events on Choosify',
-      subtitle: 'Launches, festivals, and brand events happening now.',
-      ctaText: 'See Events',
-      ctaLink: '/whats-on',
+      title: 'Services & products',
+      subtitle: 'Hotels, travel, beauty, and more — browse as product cards.',
+      ctaText: 'Browse Products',
+      ctaLink: '/products',
       image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1920&q=80',
     },
   ],
@@ -196,7 +196,7 @@ const PAGE_KEY_TO_PATH: Record<PageHeroBannerKey, string> = {
   brands: '/brands',
   guides: '/guides',
   deals: '/deals',
-  'whats-on': '/whats-on',
+  'whats-on': '/products',
   creators: '/creators',
   search: '/search',
   'brand-deals': '/brand-deals',

@@ -7,7 +7,6 @@ export { FeaturedBrandsSection } from './FeaturedBrandsSection';
 export { SpotlightSection } from './SpotlightSection';
 export { BuyingGuidesSection } from './BuyingGuidesSection';
 export { RecentlyViewedSection } from './RecentlyViewedSection';
-export { CreatorHighlightsSection } from './CreatorHighlightsSection';
 export { CommunityReviewsSection } from './CommunityReviewsSection';
 export { TrustSection } from './TrustSection';
 export { CategoriesSection } from './CategoriesSection';

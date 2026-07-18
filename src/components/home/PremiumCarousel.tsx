@@ -155,13 +155,18 @@ export function PremiumCarousel({
         <motion.div
           animate={{ x: translateX }}
           transition={{ type: "spring", stiffness: 120, damping: 20 }}
-          className="flex gap-4 items-start w-max h-full py-2"
+          className="flex gap-4 items-stretch w-max h-full py-2"
         >
           {items.map((item, idx) => (
             <div
-              key={(item as { guide?: { id?: string | number }; id?: string | number })?.guide?.id ?? (item as { id?: string | number })?.id ?? idx}
+              key={
+                (item as { key?: string })?.key ??
+                (item as { guide?: { id?: string | number }; id?: string | number })?.guide?.id ??
+                (item as { id?: string | number })?.id ??
+                idx
+              }
               style={{ width: `${itemWidth}px` }}
-              className="shrink-0 flex"
+              className="shrink-0 flex self-stretch"
             >
               {renderCard(item, idx, idx === currentIndex)}
             </div>

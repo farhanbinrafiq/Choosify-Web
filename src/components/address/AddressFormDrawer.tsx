@@ -48,7 +48,7 @@ function TextField({
         value={value ?? ''}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full h-12 bg-white border border-gray-200 rounded-lg px-4 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+        className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
       />
     </div>
   );
@@ -108,14 +108,14 @@ export function AddressFormDrawer({
             <h2 id="address-form-title" className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">
               {editing ? 'Edit Address' : 'Add New Address'}
             </h2>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+            <p className="text-[12px] font-medium text-[#9AA0AC]">
               Bangladesh location selector
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 rounded-full border border-[#e8edf2] flex items-center justify-center text-gray-500 hover:text-[#1a1a2e]"
+            className="w-10 h-10 rounded-xl border border-[#E8EDF2] flex items-center justify-center text-gray-500 hover:text-[#1a1a2e]"
             aria-label="Close"
           >
             <X size={18} />
@@ -136,7 +136,7 @@ export function AddressFormDrawer({
               <select
                 value={draft.type}
                 onChange={(event) => onDraftChange({ type: event.target.value as AddressType })}
-                className="w-full h-12 bg-white border border-gray-200 rounded-lg px-4 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+                className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
               >
                 {ADDRESS_TYPES.map((type) => (
                   <option key={type.id} value={type.id}>
@@ -289,24 +289,24 @@ export function AddressFormDrawer({
           </div>
 
           {Object.keys(errors).length > 0 && (
-            <div className="rounded-[5px] border border-rose-100 bg-rose-50 p-3 text-[10px] font-bold text-rose-700">
+            <div className="rounded-xl border border-rose-100 bg-rose-50 p-3 text-[12px] font-semibold text-rose-700">
               {Object.values(errors)[0]}
             </div>
           )}
         </div>
 
-        <div className="border-t border-[#e8edf2] px-5 py-4 flex flex-col sm:flex-row sm:justify-end gap-2 shrink-0">
+        <div className="border-t border-[#E8EDF2] px-5 py-4 flex flex-col sm:flex-row sm:justify-end gap-2 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="min-h-[44px] px-5 rounded-lg border border-[#e8edf2] text-[10px] font-black uppercase tracking-wider text-[#1a1a2e]"
+            className="min-h-[44px] px-5 rounded-xl border border-[#E8EDF2] text-[13px] font-bold text-[#1a1a2e]"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onSubmit}
-            className="min-h-[44px] px-5 rounded-lg bg-[#E8500A] text-white text-[10px] font-black uppercase tracking-wider hover:bg-[#CF4400]"
+            className="min-h-[44px] px-5 rounded-xl bg-[#FF5B00] text-white text-[13px] font-bold hover:brightness-110"
           >
             Save Address
           </button>

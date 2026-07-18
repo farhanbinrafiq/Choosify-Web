@@ -16,7 +16,7 @@ export const DASHBOARD_NAV_REGISTRY: DashboardNavItem[] = [
   { id: 'loved-brands', label: 'Loved Brands', icon: 'Heart', group: 'platform', roles: ['buyer'] },
   { id: 'followed-brands', label: 'Following', icon: 'CheckCircle2', group: 'platform', roles: ['buyer'] },
   { id: 'recently-viewed', label: 'Browsing History', icon: 'Clock', group: 'platform', roles: ['buyer'] },
-  { id: 'saved-recommendations', label: 'Saved Spotlight', icon: 'Bookmark', group: 'platform', roles: ['buyer'] },
+  { id: 'saved-recommendations', label: 'Saved Contents', icon: 'Bookmark', group: 'platform', roles: ['buyer'] },
   { id: 'orders', label: 'Orders', icon: 'ShoppingBag', group: 'platform', roles: ['buyer'], href: '/profile/orders' },
   { id: 'seller-products', label: 'My Products', icon: 'Package', group: 'workspace', roles: ['seller'] },
   { id: 'seller-orders', label: 'Orders', icon: 'ShoppingBag', group: 'workspace', roles: ['seller'] },

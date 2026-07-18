@@ -224,7 +224,6 @@ export function CategoriesPage() {
                   { value: 'brands', label: 'Has Brands' },
                   { value: 'creators', label: 'Has Creators' },
                   { value: 'recs', label: 'Has Recommendations' },
-                  { value: 'whats-on', label: 'Has Events' }
                 ].map(opt => (
                   <button
                     key={opt.value}
@@ -387,9 +386,6 @@ export function CategoriesPage() {
         if (norm === 'recs') {
           return cat.count > 200;
         }
-        if (norm === 'whats-on') {
-          return cat.count > 500;
-        }
         return true;
       });
     }
@@ -497,7 +493,6 @@ export function CategoriesPage() {
               { value: 'brands', label: 'Has Brands' },
               { value: 'creators', label: 'Has Creators' },
               { value: 'recs', label: 'Has Recommendations' },
-              { value: 'whats-on', label: 'Has Events' }
             ].map(opt => (
               <button
                 key={opt.value}

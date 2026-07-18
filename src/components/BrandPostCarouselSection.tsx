@@ -21,7 +21,7 @@ export function BrandPostCarouselSection({
   posts,
   title = 'Events',
   subtitle = 'Upcoming launches, festivals, and brand events from verified shops.',
-  viewAllHref = '/whats-on',
+  viewAllHref = '/products',
   viewAllLabel = 'View All Events',
   className,
   id,

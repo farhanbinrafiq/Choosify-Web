@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AdvertiseHereCard } from '../../commerce/AdvertiseHereCard';
 import { ProductCard } from '../../ProductCard';
+import { PremiumCarousel } from '../PremiumCarousel';
 import { DcHomePanel } from '../DcHomePanel';
 import { ViewAllLink } from '../../design/ViewAllLink';
 import type { SponsoredInjectedEntry } from '../../../utils/injectSponsoredIntoFeed';
@@ -9,11 +10,31 @@ interface HomeFeaturedProductsSectionProps {
   feed: SponsoredInjectedEntry<any>[];
 }
 
-/** Choosify.dc.html — Featured Products 6-col grid inside white panel */
-export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectionProps) {
-  if (!feed.length) return null;
+/** Match All Products grid track width (~5 cols @ 1280 / gap 16). */
+const FEATURED_CARD_WIDTH = 220;
+const FEATURED_CARD_GAP = 16;
 
-  const items = feed.filter((e) => e.kind !== 'sponsored').slice(0, 6);
+type FeaturedSlide =
+  | { key: string; kind: 'product'; product: any }
+  | { key: string; kind: 'ad' };
+
+/** Featured Products — product-list-sized cards in a horizontal carousel */
+export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectionProps) {
+  const slides = useMemo<FeaturedSlide[]>(() => {
+    const products = feed
+      .filter((e): e is Extract<SponsoredInjectedEntry<any>, { kind: 'item' }> => e.kind === 'item')
+      .slice(0, 12)
+      .map((entry) => ({
+        key: entry.key,
+        kind: 'product' as const,
+        product: entry.item,
+      }));
+
+    if (!products.length) return [];
+    return [...products, { key: 'featured-advertise', kind: 'ad' as const }];
+  }, [feed]);
+
+  if (!slides.length) return null;
 
   return (
     <DcHomePanel id="section-featured-products">
@@ -27,13 +48,21 @@ export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectio
         <ViewAllLink href="/products" label="VIEW ALL PRODUCTS ›" />
       </div>
       <p className="text-[12.5px] text-[#9AA0AC] m-0 mb-4">Handpicked deals you&apos;ll love</p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-[14px] mb-8">
-        {items.map((entry) =>
-          entry.kind === 'item' ? (
-            <ProductCard key={entry.key} product={entry.item} variant="grid" />
-          ) : null,
-        )}
-        <AdvertiseHereCard variant="product-tile" />
+      <div className="mb-6">
+        <PremiumCarousel
+          items={slides}
+          itemWidth={FEATURED_CARD_WIDTH}
+          gap={FEATURED_CARD_GAP}
+          renderCard={(slide) => (
+            <div className="w-full h-full min-h-[320px] flex">
+              {slide.kind === 'product' ? (
+                <ProductCard product={slide.product} variant="grid" />
+              ) : (
+                <AdvertiseHereCard variant="product-tile" className="w-full h-full" />
+              )}
+            </div>
+          )}
+        />
       </div>
     </DcHomePanel>
   );

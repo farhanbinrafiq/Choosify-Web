@@ -101,8 +101,8 @@ export function BrandPostDetailPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-4">
         <p className="text-sm font-bold text-[#1A1D4E]">This post could not be found.</p>
-        <Link to="/whats-on" className="text-[#E8500A] text-xs font-black uppercase hover:underline">
-          Back to What&apos;s On
+        <Link to="/products" className="text-[#E8500A] text-xs font-black uppercase hover:underline">
+          Browse products
         </Link>
       </div>
     );
@@ -348,10 +348,10 @@ export function BrandPostDetailPage() {
                     </p>
                   </div>
                   <Link
-                    to="/whats-on"
+                    to="/products"
                     className="text-[10px] font-black uppercase text-[#E8500A] hover:underline inline-flex items-center gap-1 shrink-0"
                   >
-                    All What&apos;s On <ChevronRight size={12} />
+                    Browse products <ChevronRight size={12} />
                   </Link>
                 </div>
                 <div className={WHATS_ON_CARD_GRID}>

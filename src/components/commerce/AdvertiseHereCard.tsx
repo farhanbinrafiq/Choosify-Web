@@ -53,7 +53,7 @@ export function AdvertiseHereCard({
       <div
         className={cn(
           'bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center',
-          variant === 'product-tile' ? 'h-[110px]' : 'h-[100px] items-end pb-2.5',
+          variant === 'product-tile' ? 'h-[170px]' : 'h-[100px] items-end pb-2.5',
         )}
       >
         {copy.bannerLabel ? (

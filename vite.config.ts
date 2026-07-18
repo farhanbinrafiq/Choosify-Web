@@ -16,8 +16,11 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: [
           'favicon.ico',
+          'favicon-16x16.png',
+          'favicon-32x32.png',
           'apple-touch-icon.png',
-          'masked-icon.svg'
+          'masked-icon.svg',
+          'og/default.png',
         ],
         manifest: {
           name: 'Choosify.bd — Verified Brand Discovery',

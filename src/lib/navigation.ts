@@ -23,24 +23,24 @@ export const PRIMARY_NAV_ITEMS: PrimaryNavItem[] = [
   { id: 'compare', path: '/compare', label: 'Compare', heroTitle: 'Compare' },
 ];
 
-const NAV_PATH_LABEL_OVERRIDES: Record<string, string> = {
-  '/whats-on': 'Events',
-};
+const NAV_PATH_LABEL_OVERRIDES: Record<string, string> = {};
 
-/** Normalize nav labels (e.g. CMS "What's On" → Events). */
+/** Normalize nav labels from CMS. */
 export function getNavigationLabel(path: string, fallback: string): string {
   return NAV_PATH_LABEL_OVERRIDES[path] ?? fallback;
 }
 
 /**
  * Merge CMS navigation with canonical primary items so production never drops
- * routes (e.g. /whats-on) when the dashboard nav list is incomplete.
+ * primary routes when the dashboard nav list is incomplete.
+ * Drops retired /whats-on entries (services live on /products).
  */
 export function resolveSiteNavigation(cmsNav?: SiteNavItem[]): SiteNavItem[] | null {
   if (!cmsNav?.length) return null;
 
   const byPath = new Map<string, SiteNavItem>();
   cmsNav.forEach((item) => {
+    if (item.path === '/whats-on' || item.path.startsWith('/whats-on/')) return;
     byPath.set(item.path, {
       ...item,
       label: getNavigationLabel(item.path, item.label),

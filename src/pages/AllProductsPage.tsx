@@ -17,6 +17,7 @@ import { AdSenseSlot } from '../components/AdSenseSlot';
 import { ProductsSponsoredBanner } from '../components/commerce/AdvertiseHereCard';
 import { useSponsoredFeedEntries } from '../hooks/useSponsoredFeedEntries';
 import { PLACEMENT_KEYS } from '../lib/placements';
+import { resolveServiceKeywords } from '../lib/home/popularServices';
 
 const SPONSORED_RECOMMENDATIONS = [
   {
@@ -438,9 +439,17 @@ export function AllProductsPage() {
       result = result.filter(p => (p.stock || 0) > 0);
     }
 
-    // 1. Text Search across Title, Description, Brand, and Category
+    // 1. Text / service search — services & products share the same product cards
     const textQuery = (searchParams.get('q') || '').toLowerCase().trim();
-    if (textQuery) {
+    const serviceKeywords = resolveServiceKeywords(searchParams.get('service'));
+    if (serviceKeywords?.length) {
+      result = result.filter((p) => {
+        const brandObj = allBrands.find(b => String(b.id) === String(p.brandId) || b.name === p.brandName);
+        const bName = brandObj ? brandObj.name : p.brandName;
+        const haystack = `${p.title} ${p.description || ''} ${bName || ''} ${p.categoryName || ''} ${(p as any).tagline || ''}`.toLowerCase();
+        return serviceKeywords.some((keyword) => haystack.includes(keyword));
+      });
+    } else if (textQuery) {
       result = result.filter(p => {
         const brandObj = allBrands.find(b => String(b.id) === String(p.brandId) || b.name === p.brandName);
         const bName = brandObj ? brandObj.name : p.brandName;

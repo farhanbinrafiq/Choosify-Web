@@ -20,7 +20,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
 }) => {
   const storageKey = `choosify_followed_${id}`;
   const { followedBrands, setFollowedBrands } = useDashboard();
-  const { allBrands } = useGlobalState();
+  const { allBrands, allCreators } = useGlobalState();
 
   const isFollowed = followedBrands.some((b: any) => 
     String(b.id) === String(id) || 
@@ -60,17 +60,32 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
         (b.name ? b.name.toLowerCase().trim() !== String(id).toLowerCase().trim() : true)
       ));
     } else {
-      const allBrands_normalized = allBrands.map(b => ({
-        ...b,
-        _normName: b.name.toLowerCase().trim()
-      }));
-      const brandObj = allBrands_normalized.find(b => 
-        String(b.id) === String(id) || 
-        b._normName === String(id).toLowerCase().trim()
-      ) || { id, name: String(id) };
+      const normId = String(id).toLowerCase().trim();
+      let entityObj: Record<string, unknown>;
+
+      if (type === 'creator') {
+        const creator = allCreators.find(
+          (c) =>
+            String(c.id) === String(id) ||
+            c.name?.toLowerCase().trim() === normId,
+        );
+        entityObj = creator
+          ? { ...creator, _entityType: 'creator' as const }
+          : { id, name: String(name || id), _entityType: 'creator' as const };
+      } else {
+        const brand = allBrands.find(
+          (b) =>
+            String(b.id) === String(id) ||
+            b.name?.toLowerCase().trim() === normId,
+        );
+        entityObj = brand
+          ? { ...brand, _entityType: 'brand' as const }
+          : { id, name: String(name || id), _entityType: 'brand' as const };
+      }
+
       setFollowedBrands((prev: any[]) => {
         const exists = prev.some((b: any) => String(b.id) === String(id));
-        return exists ? prev : [brandObj, ...prev];
+        return exists ? prev : [entityObj, ...prev];
       });
     }
 

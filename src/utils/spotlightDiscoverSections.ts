@@ -199,7 +199,7 @@ export function buildSpotlightDiscoverSections(
     brand_stories: [brandStories],
     recommendations: [recommendations],
     buying_guides: [buyingGuides, '/spotlight?tab=guides'],
-    whats_on: [whatsOn, '/whats-on'],
+    whats_on: [whatsOn, '/products'],
     events: [events],
     announcements: [announcements],
     latest_reviews: [latestReviews],

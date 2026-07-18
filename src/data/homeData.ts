@@ -1,9 +1,3 @@
-import { 
-  Headphones, Shirt, Smartphone, Home, Dumbbell, Car, Utensils, 
-  Building2, Compass, Award, Sparkles, MoreHorizontal, 
-  ShieldCheck as VerifiedIcon, Star, Flame, CreditCard, Ticket, ShoppingBag 
-} from 'lucide-react';
-
 // Categories matching reference image
 export const CATEGORY_ITEMS = [
   { id: 'cat-elect', name: 'Electronics', emoji: '🎧', bg: 'bg-[#F2F3F8]' },
@@ -192,18 +186,6 @@ export const BRAND_LOGOS = [
   { id: 'brand-logo-bata', name: 'Bata', image: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/Bata_logo.svg' },
   { id: 'brand-logo-pickaboo', name: 'PICKABOO', text: 'PICKABOO', image: null, color: 'text-[#FF5B00] font-black tracking-wide' },
   { id: 'brand-logo-lereve', name: 'Le Reve', text: 'Le Reve', image: null, color: 'text-purple-950 font-serif italic font-bold' }
-];
-
-// Popular services matching reference image
-export const POPULAR_SERVICES = [
-  { id: 'srv-hotel', name: 'Hotels', icon: Building2, subtitle: 'Book now', color: 'text-blue-600', bg: 'bg-blue-50' },
-  { id: 'srv-rest', name: 'Restaurants', icon: Utensils, subtitle: 'Find & Reserve', color: 'text-amber-600', bg: 'bg-amber-50' },
-  { id: 'srv-trav', name: 'Travel & Tours', icon: Compass, subtitle: 'Plan your trip', color: 'text-teal-600', bg: 'bg-teal-50' },
-  { id: 'srv-doc', name: 'Doctors', icon: VerifiedIcon, subtitle: 'Book appointment', color: 'text-purple-600', bg: 'bg-purple-50' },
-  { id: 'srv-edu', name: 'Education', icon: Award, subtitle: 'Find courses', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  { id: 'srv-beau', name: 'Beauty & Salon', icon: Sparkles, subtitle: 'Look your best', color: 'text-pink-600', bg: 'bg-pink-50' },
-  { id: 'srv-real', name: 'Real Estate', icon: Home, subtitle: 'Buy or Rent', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-  { id: 'srv-more', name: 'More Services', icon: MoreHorizontal, subtitle: 'Explore all', color: 'text-gray-600', bg: 'bg-gray-100' }
 ];
 
 // Recently viewed matching reference image with unique IDs

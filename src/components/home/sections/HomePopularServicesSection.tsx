@@ -1,40 +1,30 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Utensils,
-  Plane,
-  Stethoscope,
-  GraduationCap,
-  Sparkles,
-  Building2,
-  Car,
-  Hotel,
-} from 'lucide-react';
 import { DcHomeBlock } from '../DcHomePanel';
-
-const DEFAULT_SERVICES = [
-  { id: 'hotels', label: 'Hotels', letter: 'H', href: '/whats-on?type=hotel', bg: '#E8F0FF', fg: '#2323FF', icon: Hotel },
-  { id: 'restaurants', label: 'Restaurants', letter: 'R', href: '/whats-on?type=restaurant', bg: '#FFE8DC', fg: '#FF5B00', icon: Utensils },
-  { id: 'travel', label: 'Travel', letter: 'T', href: '/whats-on?type=travel', bg: '#F0E8FF', fg: '#7C3AED', icon: Plane },
-  { id: 'doctors', label: 'Doctors', letter: 'D', href: '/whats-on?type=health', bg: '#E8FFF0', fg: '#07A828', icon: Stethoscope },
-  { id: 'education', label: 'Education', letter: 'E', href: '/whats-on?type=education', bg: '#E8F8FF', fg: '#0EA5E9', icon: GraduationCap },
-  { id: 'beauty', label: 'Beauty', letter: 'B', href: '/whats-on?type=beauty', bg: '#FFE8F0', fg: '#EC4899', icon: Sparkles },
-  { id: 'real-estate', label: 'Real Estate', letter: 'R', href: '/whats-on?type=property', bg: '#FFF8E8', fg: '#D97706', icon: Building2 },
-  { id: 'transport', label: 'Transport', letter: 'T', href: '/whats-on?type=transport', bg: '#EDE8FF', fg: '#4F46E5', icon: Car },
-];
+import {
+  POPULAR_SERVICE_TILES,
+  type PopularServiceId,
+  productsHrefForService,
+} from '../../../lib/home/popularServices';
 
 interface HomePopularServicesSectionProps {
-  services?: { id: string; label: string; href: string }[];
+  services?: { id: string; label: string; href?: string }[];
 }
 
-/** Choosify.dc.html — 8-col service tiles with letter chips */
+/** Choosify.dc.html — service tiles open the products list (products + services as cards) */
 export function HomePopularServicesSection({ services }: HomePopularServicesSectionProps) {
   const items = services?.length
     ? services.map((s) => {
-        const def = DEFAULT_SERVICES.find((d) => d.id === s.id) ?? DEFAULT_SERVICES[0]!;
-        return { ...def, ...s };
+        const def =
+          POPULAR_SERVICE_TILES.find((d) => d.id === s.id) ?? POPULAR_SERVICE_TILES[0]!;
+        const id = (s.id as PopularServiceId) || def.id;
+        return {
+          ...def,
+          ...s,
+          href: s.href || productsHrefForService(id, s.label || def.label),
+        };
       })
-    : DEFAULT_SERVICES;
+    : POPULAR_SERVICE_TILES;
 
   return (
     <DcHomeBlock id="section-services">

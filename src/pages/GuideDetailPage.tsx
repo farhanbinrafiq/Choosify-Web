@@ -51,6 +51,7 @@ import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
 import toast from "react-hot-toast";
 import { FollowButton } from "../components/FollowButton";
+import { CreatorCardDesign } from "../components/CreatorCardDesign";
 import { useRegisterPageFilters, UniversalFilterRenderer } from "../components/FilterEngine";
 import type { CatalogGuide } from "../types/catalog";
 import type { SpotlightContent } from "../types/spotlight/experience/content";
@@ -223,15 +224,16 @@ export function GuideDetailPage({
       .slice(0, 4);
   }, [spotlightContent, spotlightAllContent]);
 
-  const showBrandCard =
-    spotlightContent &&
-    showSection('brand_profile_card') &&
-    shouldShowBrandProfileCard(spotlightContent);
   const showCreatorCard =
-    spotlightContent &&
+    Boolean(creator) &&
     showSection('creator_profile_card') &&
-    shouldShowCreatorProfileCard(spotlightContent) &&
-    !(showBrandCard && spotlightContent.publisher.publisherType === 'brand');
+    (!spotlightContent || shouldShowCreatorProfileCard(spotlightContent));
+  // Prefer the new creator author card — don't also show the brand mini on the same page.
+  const showBrandCard =
+    Boolean(spotlightContent) &&
+    showSection('brand_profile_card') &&
+    shouldShowBrandProfileCard(spotlightContent) &&
+    !showCreatorCard;
 
   const { activeId: activeSectionId, scrollToSection } =
     useSectionScrollSpy(guideSectionNavItems);
@@ -1337,58 +1339,34 @@ export function GuideDetailPage({
                   </div>
                 )}
 
-                {/* ABOUT THE AUTHOR | IN THIS GUIDE — Choosify.dc.html */}
+                {/* ABOUT THE AUTHOR | IN THIS GUIDE — CreatorCardDesign (new) only */}
                 {showCreatorCard && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-9">
-                  <div
-                    id="reviewer-profile"
-                    className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 text-center scroll-mt-36"
-                  >
-                    <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide text-left mb-3.5">
+                  <div id="reviewer-profile" className="scroll-mt-36 text-left">
+                    <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5">
                       ABOUT THE AUTHOR
                     </div>
-                    <div className="relative w-[72px] h-[72px] mx-auto mb-3">
-                      <img
-                        src={creator.avatar}
-                        className="w-full h-full object-cover rounded-full"
-                        alt={creator.name}
-                      />
-                      <div className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-full bg-[#6C4CFF] border-2 border-white flex items-center justify-center text-white text-[11px]">
-                        ✓
-                      </div>
-                    </div>
-                    <div className="text-[14px] font-extrabold text-[#1A1A2E] mb-0.5">{creator.name}</div>
-                    <div className="text-[11.5px] text-[#9AA0AC] mb-3.5">
-                      {creator.verifiedStatus || 'Choosify Editor'}
-                    </div>
-                    <div className="flex items-center justify-center border-y border-[#F1F1F3] py-3 mb-3.5">
-                      <div className="flex-1">
-                        <div className="text-[14px] font-extrabold text-[#1A1A2E]">24</div>
-                        <div className="text-[9.5px] text-[#9AA0AC]">Reviews</div>
-                      </div>
-                      <div className="w-px h-[26px] bg-[#F1F1F3]" />
-                      <div className="flex-1">
-                        <div className="text-[14px] font-extrabold text-[#1A1A2E]">12.4K</div>
-                        <div className="text-[9.5px] text-[#9AA0AC]">Followers</div>
-                      </div>
-                      <div className="w-px h-[26px] bg-[#F1F1F3]" />
-                      <div className="flex-1">
-                        <div className="text-[14px] font-extrabold text-[#1A1A2E]">4.9</div>
-                        <div className="text-[9.5px] text-[#9AA0AC]">Rating</div>
-                      </div>
-                    </div>
+                    <CreatorCardDesign
+                      creator={{
+                        id: creator.id || 'creator-farhan',
+                        name: creator.name,
+                        handle: creator.handle || creator.name,
+                        avatar: creator.avatar,
+                        score: creator.score ?? 92,
+                        bestFor: creator.verifiedStatus || creator.bestFor || 'Choosify Editor',
+                        platforms: creator.platforms || [],
+                        rating: creator.rating ?? 4.9,
+                        reviews: creator.reviews ?? 24,
+                        followers: creator.followersCount ?? creator.followers,
+                        niche: creator.verifiedStatus || creator.bestFor || 'Choosify Editor',
+                      }}
+                    />
                     <FollowButton
-                      id={`creator-${creator.name}`}
+                      id={`creator-${creator.id || creator.name}`}
                       name={creator.name}
                       type="creator"
-                      className="w-full mb-2 h-9 rounded-lg text-[11.5px] font-bold"
+                      className="w-full mt-2.5 h-9 rounded-lg text-[11.5px] font-bold"
                     />
-                    <Link
-                      to={`/creators/${creator.id || 'creator-farhan'}`}
-                      className="block w-full bg-[#000435] hover:bg-[#FF5B00] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors"
-                    >
-                      View Profile
-                    </Link>
                   </div>
 
                   <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 text-left">

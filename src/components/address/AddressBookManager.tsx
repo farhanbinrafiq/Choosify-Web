@@ -61,10 +61,10 @@ function AddressCard({
   const area = address.isCustomLocation && address.customArea ? address.customArea : address.area;
 
   return (
-    <article className="bg-white border border-[#e8edf2] rounded-[5px] p-5 shadow-sm hover:border-[#E8500A]/30 transition-all text-left h-full flex flex-col">
+    <article className="bg-white border border-[#E8EDF2] rounded-[14px] p-5 hover:border-[#FF5B00]/30 transition-all text-left h-full flex flex-col">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-xl bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center shrink-0">
             <TypeIcon size={18} />
           </div>
           <div className="min-w-0">
@@ -73,19 +73,19 @@ function AddressCard({
                 {address.label}
               </h4>
               {address.isDefault && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E8500A] text-white text-[8px] font-black uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FF5B00] text-white text-[10px] font-bold">
                   <Star size={9} className="fill-current" /> Default
                 </span>
               )}
             </div>
-            <span className="inline-flex mt-1 px-2 py-0.5 rounded border border-[#e8edf2] text-[8px] font-black uppercase tracking-wider text-gray-500">
+            <span className="inline-flex mt-1 px-2 py-0.5 rounded-lg border border-[#E8EDF2] text-[10px] font-semibold text-[#9AA0AC]">
               {type.label}
             </span>
           </div>
         </div>
         <span
           className={cn(
-            'inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[8px] font-black uppercase tracking-wider shrink-0',
+            'inline-flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-bold shrink-0',
             status.className,
           )}
         >
@@ -104,7 +104,7 @@ function AddressCard({
         <p className="text-xs font-bold text-[#1a1a2e] leading-relaxed">
           {[address.houseOrBuilding, address.floorOrUnit, area].filter(Boolean).join(', ')}
         </p>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] font-semibold text-[#9AA0AC]">
           <p>
             <span className="text-gray-400">Division:</span>{' '}
             {findLocationName(address.location.divisionId) || '—'}
@@ -125,7 +125,7 @@ function AddressCard({
           <p className="text-[11px] text-gray-500">Landmark: {address.landmark}</p>
         )}
         {address.isCustomLocation && (
-          <p className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-1">
+          <p className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
             <AlertTriangle size={10} /> Custom area
           </p>
         )}
@@ -136,7 +136,7 @@ function AddressCard({
           <button
             type="button"
             onClick={onSetDefault}
-            className="min-h-[44px] px-3 rounded-lg border border-[#e8edf2] text-[9px] font-black uppercase tracking-wider text-[#1a1a2e] hover:border-[#E8500A]/40"
+            className="min-h-[40px] px-3 rounded-xl border border-[#E8EDF2] text-[12px] font-bold text-[#1a1a2e] hover:border-[#FF5B00]/40"
           >
             Set as Default
           </button>
@@ -144,14 +144,14 @@ function AddressCard({
         <button
           type="button"
           onClick={onEdit}
-          className="min-h-[44px] px-3 rounded-lg border border-[#e8edf2] text-[9px] font-black uppercase tracking-wider text-[#1a1a2e] hover:border-[#E8500A]/40 flex items-center justify-center gap-1"
+          className="min-h-[40px] px-3 rounded-xl border border-[#E8EDF2] text-[12px] font-bold text-[#1a1a2e] hover:border-[#FF5B00]/40 flex items-center justify-center gap-1"
         >
           <Edit3 size={12} /> Edit
         </button>
         <button
           type="button"
           onClick={onDelete}
-          className="min-h-[44px] px-3 rounded-lg border border-rose-100 bg-rose-50 text-[9px] font-black uppercase tracking-wider text-rose-600 hover:bg-rose-100 flex items-center justify-center gap-1"
+          className="min-h-[40px] px-3 rounded-xl border border-rose-100 bg-rose-50 text-[12px] font-bold text-rose-600 hover:bg-rose-100 flex items-center justify-center gap-1"
         >
           <Trash2 size={12} /> Delete
         </button>
@@ -164,24 +164,24 @@ function CheckoutPreviewCard({ address }: { address: CustomerAddress }) {
   const type = ADDRESS_TYPES.find((item) => item.id === address.type)?.label ?? 'Address';
 
   return (
-    <div className="rounded-[5px] border border-[#e8edf2] bg-white p-5 shadow-sm text-left">
+    <div className="rounded-[14px] border border-[#E8EDF2] bg-white p-5 text-left">
       <div className="flex items-center gap-2 mb-3">
-        <Truck size={16} className="text-[#E8500A]" />
-        <h4 className="text-xs font-bold tracking-tight text-[#1A1A2E]">
+        <Truck size={16} className="text-[#FF5B00]" />
+        <h4 className="text-[13px] font-bold tracking-tight text-[#1A1A2E]">
           Default Delivery Address
         </h4>
       </div>
-      <div className="rounded-[5px] bg-[#fafbfc] border border-[#e8edf2] p-4 space-y-1">
-        <p className="text-[10px] font-black uppercase tracking-wider text-[#E8500A]">{type}</p>
+      <div className="rounded-xl bg-[#F4F7F9] border border-[#E8EDF2] p-4 space-y-1">
+        <p className="text-[11px] font-bold text-[#FF5B00]">{type}</p>
         {address.recipientName && (
           <p className="text-sm font-bold text-[#1a1a2e]">{address.recipientName}</p>
         )}
         <p className="text-xs text-gray-600 leading-relaxed">{formatAddressLine(address)}</p>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+        <p className="text-[11px] font-semibold text-[#9AA0AC]">
           {findLocationName(address.location.cityId)} · {address.location.postalCode}
         </p>
       </div>
-      <p className="mt-3 text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+      <p className="mt-3 text-[11px] font-medium text-[#9AA0AC]">
         Preview — checkout will use this address automatically.
       </p>
     </div>
@@ -274,7 +274,7 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
           <button
             type="button"
             onClick={openCreate}
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight hover:brightness-110"
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight hover:brightness-110"
           >
             <Plus size={14} /> Add new address
           </button>
@@ -292,7 +292,7 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
           <button
             type="button"
             onClick={openCreate}
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight hover:brightness-110"
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight hover:brightness-110"
           >
             <Plus size={14} /> Add new address
           </button>
@@ -300,18 +300,18 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
       )}
 
       {customerAddresses.length === 0 ? (
-        <div className="py-16 border border-dashed border-[#e8edf2] rounded-[5px] bg-white text-center">
-          <MapPin size={40} className="mx-auto text-[#E8500A] mb-4" />
+        <div className="py-16 border border-dashed border-[#E8EDF2] rounded-[14px] bg-white text-center">
+          <MapPin size={40} className="mx-auto text-[#FF5B00] mb-4" />
           <h4 className="text-base font-extrabold tracking-tight text-[#1A1A2E]">
             No saved addresses yet
           </h4>
-          <p className="text-[11px] font-bold text-gray-500 mt-2 max-w-sm mx-auto">
+          <p className="text-[12.5px] font-medium text-[#9AA0AC] mt-2 max-w-sm mx-auto">
             Add your first delivery address.
           </p>
           <button
             type="button"
             onClick={openCreate}
-            className="mt-6 inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#E8500A] text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-[#CF4400]"
+            className="mt-6 inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight hover:brightness-110"
           >
             <Plus size={14} /> Add Address
           </button>

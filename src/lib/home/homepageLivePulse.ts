@@ -29,7 +29,7 @@ const DEFAULT_PULSE: HomeLivePulseItem[] = [
   { id: 'pulse-guide', label: 'New Buying Guide', href: '/guides', tone: 'guide' },
   { id: 'pulse-review', label: 'Creator Review Published', href: '/spotlight?tab=reviews', tone: 'review' },
   { id: 'pulse-campaign', label: 'Trending Brand Campaign', href: '/spotlight?tab=campaigns', tone: 'campaign' },
-  { id: 'pulse-offer', label: 'Hotel Weekend Offer', href: '/whats-on', tone: 'offer' },
+  { id: 'pulse-offer', label: 'Hotel Weekend Offer', href: '/products?service=hotels&q=Hotels', tone: 'offer' },
 ];
 
 /** CMS-first live pulse — falls back to editorial defaults */

@@ -44,7 +44,7 @@ export function matchesRouteParam(record: RoutableRecord, routeParam: string): b
 
 export function buildCanonicalPath(pathname: string, search: string): string {
   const params = new URLSearchParams(search);
-  const allowedQueryKeys = ['category', 'q', 'brand'];
+  const allowedQueryKeys = ['category', 'q', 'brand', 'service'];
   const filtered = new URLSearchParams();
 
   for (const key of allowedQueryKeys) {
@@ -70,11 +70,17 @@ export function resolveOgType(pathname: string): OgPageType {
     pathname.startsWith('/guides/') ||
     pathname.startsWith('/reviews/') ||
     pathname.startsWith('/blogs/') ||
-    pathname.startsWith('/recommendations/')
+    pathname.startsWith('/recommendations/') ||
+    pathname.startsWith('/spotlight/')
   ) {
     return 'article';
   }
-  if (pathname === '/guides' || pathname === '/blogs' || pathname === '/recommendations') {
+  if (
+    pathname === '/guides' ||
+    pathname === '/blogs' ||
+    pathname === '/recommendations' ||
+    pathname === '/spotlight'
+  ) {
     return 'article';
   }
   return 'website';

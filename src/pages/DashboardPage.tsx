@@ -34,8 +34,20 @@ import {
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ProductCard } from '../components/ProductCard';
-import { PRODUCT_CARD_GRID, GUIDE_MEDIA_GRID } from '../lib/pageLayout';
-import { renderGuideMediaCard } from './GuidesPage';
+import { BrandCardDesign, mapBrandToCardDesign } from '../components/BrandCardDesign';
+import { CreatorCardDesign } from '../components/CreatorCardDesign';
+import {
+  PRODUCT_CARD_GRID,
+  GUIDE_MEDIA_GRID,
+  BRAND_CARD_GRID,
+  CREATOR_CARD_GRID,
+} from '../lib/pageLayout';
+import {
+  UniversalCommerceCard,
+  guideToContentCardModel,
+  spotlightToContentCardModel,
+  resolveCommerceCardVariant,
+} from '../components/content';
 import { PRODUCTS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { CHOOSIFY_ANNOUNCEMENTS_THREAD_ID } from '../lib/announcements';
@@ -48,6 +60,43 @@ import { toPlatformRole } from '../lib/platform/roles';
 import { getDashboardNavForRole, isDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
 
+function mapFollowedToCreatorCard(item: any) {
+  return {
+    id: item.id ?? item.name,
+    name: item.name || 'Creator',
+    handle: item.handle || `@${String(item.name || 'creator').toLowerCase().replace(/\s+/g, '')}`,
+    avatar: item.avatar || item.image || item.logo || '',
+    score: item.score ?? 85,
+    bestFor: item.bestFor || item.niche || 'Lifestyle',
+    platforms: item.platforms || ['Instagram'],
+    rating: item.rating || 4.7,
+    reviews: item.reviews ?? item.reviewCount ?? 85,
+    followers: item.followers,
+    niche: item.niche || item.bestFor,
+    bio: item.bio,
+    coverImage: item.coverImage,
+    isHot: item.isHot,
+    isFeatured: item.isFeatured,
+  };
+}
+
+function isFollowedCreatorEntity(item: any, allCreators: any[]) {
+  if (item?._entityType === 'creator') return true;
+  if (item?._entityType === 'brand') return false;
+  if (item?.handle || Array.isArray(item?.platforms)) return true;
+  return allCreators.some(
+    (c) =>
+      String(c.id) === String(item?.id) ||
+      (c.name && item?.name && c.name.toLowerCase().trim() === String(item.name).toLowerCase().trim()),
+  );
+}
+
+function savedItemToCommerceModel(item: any) {
+  if (item?.contentId && item?.publisher) {
+    return spotlightToContentCardModel(item);
+  }
+  return guideToContentCardModel(item);
+}
 const COLLECTION_TAB_IDS = new Set([
   'saved-products',
   'saved-brands',
@@ -285,37 +334,44 @@ const SavedGuidesSection = () => {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="text-left">
         <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
-          Saved Guides <span className="text-[#9AA0AC] text-lg font-bold">({savedGuides.length})</span>
+          Saved Contents <span className="text-[#9AA0AC] text-lg font-bold">({savedGuides.length})</span>
         </h2>
         <p className="text-[#9AA0AC] text-[12.5px]">
-          Knowledge bookmarks for your next big buy
+          Guides, spotlights, and editorial you bookmarked
         </p>
       </div>
 
       {savedGuides.length > 0 ? (
         <div className={GUIDE_MEDIA_GRID}>
-          {savedGuides.map((guide) => (
-            <div key={guide.id} className="relative group min-w-0 w-full">
-              {renderGuideMediaCard(guide)}
-            </div>
-          ))}
+          {savedGuides.map((item) => {
+            const model = savedItemToCommerceModel(item);
+            return (
+              <div key={model.id || item.id} className="relative group min-w-0 w-full">
+                <UniversalCommerceCard
+                  mode="editorial"
+                  variant={resolveCommerceCardVariant(model.layoutVariant, model.aspectRatio)}
+                  model={model}
+                />
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="py-32 flex flex-col items-center text-center">
-          <div className="w-24 h-24 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center text-gray-300 mb-8 scale-110 shadow-sm">
+          <div className="w-24 h-24 rounded-full bg-white border border-[#E8EDF2] flex items-center justify-center text-gray-300 mb-8 shadow-sm">
             <BookOpen size={40} />
           </div>
           <h3 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-4">
-            No saved guides yet
+            No saved contents yet
           </h3>
-          <p className="text-gray-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-12 italic max-w-sm">
-            Bookmark guides from the recommendations page to find them here later.
+          <p className="text-[#9AA0AC] text-[12.5px] mb-10 max-w-sm">
+            Bookmark guides and spotlights from Discover to find them here later.
           </p>
           <Link
-            to="/guides"
-            className="px-8 py-3 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all"
+            to="/spotlight"
+            className="px-8 py-3 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all"
           >
-            Browse Guides
+            Browse Spotlight
           </Link>
         </div>
       )}
@@ -324,8 +380,7 @@ const SavedGuidesSection = () => {
 };
 
 const SavedBrandsSection = () => {
-  const { savedBrands, removeSavedBrand } = useDashboard();
-  const navigate = useNavigate();
+  const { savedBrands } = useDashboard();
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
@@ -339,50 +394,16 @@ const SavedBrandsSection = () => {
       </div>
 
       {savedBrands.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className={BRAND_CARD_GRID}>
           {savedBrands.map((brand) => (
-            <div 
-              key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
-            >
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeSavedBrand(brand.id);
-                }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-              
-              <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
-                  {brand.logo && brand.logo.length > 2 ? (
-                    <img src={brand.logo} className="w-full h-full object-contain" alt="" />
-                  ) : (
-                    brand.logo || brand.name[0]
-                  )}
-                </div>
-                <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
-                <div className="flex items-center justify-center gap-1.5 mb-6">
-                  {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
-                  ))}
-                  <span className="text-[10px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
-                </div>
-              </div>
-
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center">
-                Visit Brand Hub
-              </Link>
-            </div>
+            <BrandCardDesign key={brand.id} brand={mapBrandToCardDesign(brand)} />
           ))}
         </div>
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Store size={64} className="mb-8 text-gray-300" />
           <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No Saved Brands yet</p>
-          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse all brands</Link>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse all brands</Link>
         </div>
       )}
     </div>
@@ -391,7 +412,6 @@ const SavedBrandsSection = () => {
 
 const LovedBrandsSection = () => {
   const { lovedBrands, toggleLoveBrand } = useDashboard();
-  const navigate = useNavigate();
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
@@ -405,42 +425,17 @@ const LovedBrandsSection = () => {
       </div>
 
       {lovedBrands.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className={BRAND_CARD_GRID}>
           {lovedBrands.map((brand) => (
-            <div 
-              key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
-            >
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleLoveBrand(brand);
-                }}
-                className="absolute top-4 right-4 text-rose-550 hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer"
+            <div key={brand.id} className="flex flex-col gap-2 min-w-0">
+              <BrandCardDesign brand={mapBrandToCardDesign(brand)} />
+              <button
+                type="button"
+                onClick={() => toggleLoveBrand(brand)}
+                className="text-[12px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer self-center"
               >
-                <Heart size={16} className="fill-current text-rose-500" />
+                Remove from Loved
               </button>
-              
-              <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
-                  {brand.logo && brand.logo.length > 2 ? (
-                    <img src={brand.logo} className="w-full h-full object-contain" alt="" />
-                  ) : (
-                    brand.logo || brand.name[0]
-                  )}
-                </div>
-                <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
-                <div className="flex items-center justify-center gap-1.5 mb-6">
-                  {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
-                  ))}
-                  <span className="text-[10px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
-                </div>
-              </div>
-
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/50 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center">
-                Visit Brand Hub
-              </Link>
             </div>
           ))}
         </div>
@@ -448,7 +443,7 @@ const LovedBrandsSection = () => {
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Heart size={64} className="mb-8 text-rose-500" />
           <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No Loved Brands yet</p>
-          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
         </div>
       )}
     </div>
@@ -457,7 +452,10 @@ const LovedBrandsSection = () => {
 
 const FollowedBrandsSection = () => {
   const { followedBrands, toggleFollowBrand } = useDashboard();
-  const navigate = useNavigate();
+  const { allCreators } = useGlobalState();
+
+  const followedCreators = followedBrands.filter((item) => isFollowedCreatorEntity(item, allCreators));
+  const followedBrandOnly = followedBrands.filter((item) => !isFollowedCreatorEntity(item, allCreators));
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
@@ -466,56 +464,72 @@ const FollowedBrandsSection = () => {
           <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
             Following <span className="text-[#9AA0AC] text-lg font-bold">({followedBrands.length})</span>
           </h2>
-          <p className="text-[#9AA0AC] text-[12.5px]">Subscribed to receive updates and deals</p>
+          <p className="text-[#9AA0AC] text-[12.5px]">Brands and creators you follow for updates</p>
         </div>
       </div>
 
       {followedBrands.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {followedBrands.map((brand) => (
-            <div 
-              key={brand.id} 
-              className="relative group bg-white border border-[#e8edf2] rounded-[5px] p-8 hover:border-[#E8500A]/30 transition-all text-center flex flex-col justify-between shadow-sm"
-            >
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFollowBrand(brand);
-                }}
-                className="absolute top-4 right-4 text-orange-500 hover:text-gray-400 transition-colors bg-transparent border-none cursor-pointer font-black text-[10px] tracking-wider uppercase"
-              >
-                Unfollow
-              </button>
-              
-              <div className="cursor-pointer" onClick={() => navigate(`/brands/${brand.id || brand.name.toLowerCase()}`)}>
-                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-navy font-black text-2xl mx-auto mb-6 shadow-sm overflow-hidden">
-                  {brand.logo && brand.logo.length > 2 ? (
-                    <img src={brand.logo} className="w-full h-full object-contain" alt="" />
-                  ) : (
-                    brand.logo || brand.name[0]
-                  )}
-                </div>
-                <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-2 truncate group-hover:text-[#E8500A] transition-colors">{brand.name}</h4>
-                <div className="flex items-center justify-center gap-1.5 mb-6">
-                  {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} size={10} className={s <= Math.floor(brand.rating || 4.5) ? "font-black text-[#E8500A] fill-current text-current" : "text-gray-150"} />
-                  ))}
-                  <span className="text-[10px] font-bold text-gray-400">({brand.rating || '4.5'})</span>
-                </div>
+        <div className="space-y-10">
+          {followedBrandOnly.length > 0 && (
+            <div className="space-y-4">
+              {followedCreators.length > 0 && (
+                <h3 className="text-[13px] font-bold text-[#9AA0AC]">Brands</h3>
+              )}
+              <div className={BRAND_CARD_GRID}>
+                {followedBrandOnly.map((brand) => (
+                  <div key={brand.id} className="flex flex-col gap-2 min-w-0">
+                    <BrandCardDesign brand={mapBrandToCardDesign(brand)} />
+                    <button
+                      type="button"
+                      onClick={() => toggleFollowBrand(brand)}
+                      className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#FF5B00] bg-transparent border-none cursor-pointer self-center"
+                    >
+                      Unfollow
+                    </button>
+                  </div>
+                ))}
               </div>
-
-              <Link to={`/brands/${brand.id || brand.name.toLowerCase()}`} className="w-full py-3 bg-gray-50 border border-gray-150 hover:border-[#E8500A]/30 hover:bg-[#E8500A]/5 rounded-xl text-[9px] font-black text-navy uppercase tracking-widest transition-all text-center justify-between flex items-center px-4">
-                <span>View Updates</span>
-                <span className="bg-[#059669] text-[7px] text-white font-black px-1.5 py-0.5 rounded-full uppercase scale-90">Live</span>
-              </Link>
             </div>
-          ))}
+          )}
+
+          {followedCreators.length > 0 && (
+            <div className="space-y-4">
+              {followedBrandOnly.length > 0 && (
+                <h3 className="text-[13px] font-bold text-[#9AA0AC]">Creators</h3>
+              )}
+              <div className={CREATOR_CARD_GRID}>
+                {followedCreators.map((creator) => {
+                  const catalog =
+                    allCreators.find(
+                      (c) =>
+                        String(c.id) === String(creator.id) ||
+                        c.name?.toLowerCase().trim() === String(creator.name || '').toLowerCase().trim(),
+                    ) || creator;
+                  return (
+                    <div key={creator.id} className="flex flex-col gap-2 min-w-0">
+                      <CreatorCardDesign creator={mapFollowedToCreatorCard(catalog)} />
+                      <button
+                        type="button"
+                        onClick={() => toggleFollowBrand(creator)}
+                        className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#FF5B00] bg-transparent border-none cursor-pointer self-center"
+                      >
+                        Unfollow
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Store size={64} className="mb-8 text-gray-300" />
-          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed mb-4">No Followed Brands yet</p>
-          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore and follow brands</Link>
+          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed mb-4">Nothing followed yet</p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link to="/brands" className="px-6 py-2.5 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
+            <Link to="/creators" className="px-6 py-2.5 bg-white border border-[#E8EDF2] text-[#1A1A2E] rounded-xl text-[13px] font-bold tracking-tight hover:border-[#FF5B00]/40">Explore creators</Link>
+          </div>
         </div>
       )}
     </div>
@@ -787,24 +801,24 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
         {settingsSubTab === 'personal' && (
           <button
             onClick={handleSave}
-            className="px-5 py-2.5 bg-[#FF5B00] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-lg transition-all cursor-pointer border-0 shadow-sm flex items-center gap-2"
+            className="px-5 py-2.5 bg-[#FF5B00] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-xl transition-all cursor-pointer border-0 shadow-sm flex items-center gap-2"
           >
             Save Changes
           </button>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-[#e8edf2] pb-1">
+      <div className="flex flex-wrap gap-2 p-1 bg-[#F4F7F9] rounded-2xl w-fit">
         {SETTINGS_TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setSettingsSubTab(tab.id)}
             className={cn(
-              'min-h-[44px] px-4 py-2 text-[10px] font-black uppercase tracking-wider rounded-t-lg border-b-2 transition-colors',
+              'min-h-[40px] px-4 py-2 text-[12.5px] font-bold rounded-xl transition-all border-0 cursor-pointer',
               settingsSubTab === tab.id
-                ? 'border-[#E8500A] text-[#E8500A] bg-[#FFF0E8]/40'
-                : 'border-transparent text-gray-400 hover:text-[#1a1a2e]',
+                ? 'bg-white text-[#FF5B00] shadow-sm'
+                : 'bg-transparent text-[#6B7280] hover:text-[#1A1A2E]',
             )}
           >
             {tab.label}
@@ -813,55 +827,55 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       </div>
 
       {settingsSubTab === 'personal' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="space-y-8">
-            <div className="flex flex-col items-center p-8 bg-white border border-[#e8edf2] rounded-[5px] relative overflow-hidden group shadow-sm">
-              <div className="absolute inset-0 bg-gradient-to-b from-[#E8500A]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative w-32 h-32 mb-6 cursor-pointer group/avatar">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <div className="flex flex-col items-center p-8 bg-white border border-[#E8EDF2] rounded-[14px] relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-b from-[#FF5B00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative w-28 h-28 mb-5 cursor-pointer group/avatar">
                 <img
                   src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png"
-                  className="w-full h-full rounded-full object-cover border-4 border-[#E8500A]/30 transition-all group-hover/avatar:border-navy"
+                  className="w-full h-full rounded-full object-cover border-4 border-[#FF5B00]/25 transition-all group-hover/avatar:border-[#FF5B00]/60"
                   alt="Profile"
                 />
                 <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
-                  <Plus className="text-white" size={32} />
+                  <Plus className="text-white" size={28} />
                 </div>
               </div>
               <h4 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">{name}</h4>
-              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Premium Curator</p>
+              <p className="text-[#9AA0AC] text-[12px] font-semibold">Premium Member</p>
             </div>
 
-            <div className="space-y-6">
-              <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">Profile</h3>
+            <div className="space-y-5 bg-white border border-[#E8EDF2] rounded-[14px] p-6">
+              <h3 className="text-[13px] font-bold text-[#1A1A2E]">Profile</h3>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-4">
+                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-1">
                     Full Display Name
                   </label>
                   <input
-                    className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your full name"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-4">
+                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-1">
                     Email Address
                   </label>
                   <input
-                    className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-4">
+                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-1">
                     Phone Number
                   </label>
                   <input
-                    className="w-full h-12 bg-white border border-gray-200 rounded-lg px-6 text-[11px] font-bold text-[#1a1a2e] focus:outline-none focus:border-[#E8500A]/50 shadow-sm"
+                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+880 1XXX-XXXXXX"
@@ -871,16 +885,19 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
             </div>
           </div>
 
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">
-                Quick links
-              </h3>
-              <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 space-y-3 shadow-sm">
-                <p className="text-[13px] font-medium text-[#9AA0AC]">
-                  Manage delivery locations from the Addresses tab or sidebar menu.
-                </p>
-              </div>
+          <div className="space-y-6">
+            <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-6 space-y-3 text-left">
+              <h3 className="text-[13px] font-bold text-[#1A1A2E]">Quick links</h3>
+              <p className="text-[13px] font-medium text-[#9AA0AC] leading-relaxed">
+                Manage delivery locations from the Addresses tab or sidebar menu.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSettingsSubTab('addresses')}
+                className="text-[12.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0"
+              >
+                Go to Addresses →
+              </button>
             </div>
           </div>
         </div>
@@ -889,21 +906,21 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       {settingsSubTab === 'addresses' && <AddressBookManager embedded />}
 
       {settingsSubTab === 'security' && (
-        <div className="space-y-6 max-w-xl">
-          <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">Security</h3>
-          <button className="w-full py-4 bg-white border border-gray-200 rounded-lg text-[10px] font-black text-navy uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-3 cursor-pointer shadow-sm min-h-[44px]">
-            <ShieldCheck size={16} className="text-[#E8500A]" /> Reset Multi-Factor Auth
+        <div className="space-y-4 max-w-xl">
+          <h3 className="text-[13px] font-bold text-[#1A1A2E]">Security</h3>
+          <button className="w-full py-4 bg-white border border-[#E8EDF2] rounded-xl text-[13px] font-bold text-[#1A1A2E] hover:bg-[#F4F7F9] flex items-center justify-center gap-3 cursor-pointer min-h-[44px]">
+            <ShieldCheck size={16} className="text-[#FF5B00]" /> Reset Multi-Factor Auth
           </button>
-          <button className="w-full py-4 bg-red-50 border border-red-100 rounded-lg text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all cursor-pointer min-h-[44px]">
-            Deactivate Curator Account
+          <button className="w-full py-4 bg-rose-50 border border-rose-100 rounded-xl text-[13px] font-bold text-rose-600 hover:bg-rose-500 hover:text-white transition-all cursor-pointer min-h-[44px]">
+            Deactivate Account
           </button>
         </div>
       )}
 
       {settingsSubTab === 'notifications' && (
-        <div className="space-y-6 max-w-2xl">
-          <h3 className="text-[12px] font-bold text-[#9AA0AC] tracking-tight px-2">Notifications</h3>
-          <div className="bg-white border border-[#e8edf2] rounded-[5px] p-8 space-y-6 shadow-sm">
+        <div className="space-y-4 max-w-2xl">
+          <h3 className="text-[13px] font-bold text-[#1A1A2E]">Notifications</h3>
+          <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-6 space-y-5">
             {[
               { label: 'Sale Alerts', desc: 'When your saved product goes on flash sale', checked: true },
               { label: 'Expert Tips', desc: 'Weekly curated guides for your categories', checked: true },
@@ -912,10 +929,10 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between gap-6 group">
                 <div className="flex-1 text-left">
-                  <h5 className="text-[13px] font-bold text-[#1A1A2E] tracking-tight mb-1">
+                  <h5 className="text-[13px] font-bold text-[#1A1A2E] tracking-tight mb-0.5">
                     {item.label}
                   </h5>
-                  <p className="text-[9px] font-bold text-gray-500 italic uppercase">{item.desc}</p>
+                  <p className="text-[12px] font-medium text-[#9AA0AC]">{item.desc}</p>
                 </div>
                 <button
                   type="button"
@@ -938,9 +955,9 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       )}
 
       {settingsSubTab === 'privacy' && (
-        <div className="max-w-2xl bg-white border border-[#e8edf2] rounded-[5px] p-8 shadow-sm text-left">
-          <h3 className="text-sm font-extrabold tracking-tight text-[#1A1A2E] mb-2">Privacy</h3>
-          <p className="text-[11px] text-gray-500 leading-relaxed">
+        <div className="max-w-2xl bg-white border border-[#E8EDF2] rounded-[14px] p-6 text-left">
+          <h3 className="text-[13px] font-extrabold tracking-tight text-[#1A1A2E] mb-2">Privacy</h3>
+          <p className="text-[12.5px] text-[#9AA0AC] leading-relaxed">
             Control how your browsing activity and profile data are used across Choosify. Privacy controls
             will expand in a future release.
           </p>
@@ -1093,10 +1110,6 @@ export function DashboardPage() {
     }
   }, [location.search, activeTab, navigate]);
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    e.currentTarget.src = PLACEHOLDER_IMAGE;
-  };
-
   const renderContent = () => {
     if (!isDashboardTabAllowed(activeTab, platformRole)) {
       return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
@@ -1152,33 +1165,29 @@ export function DashboardPage() {
                <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">My Reviews</h2>
                <p className="text-[#9AA0AC] text-[12.5px]">Your community contributions and feedback</p>
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4 max-w-3xl">
                {reviews && reviews.length > 0 ? (
                  reviews.map((r, idx) => {
                    const productImage = PRODUCTS.find(p => p.title === r.product)?.image || PLACEHOLDER_IMAGE;
                    return (
-                     <div key={r.id || idx} className="bg-white border border-[#e8edf2] rounded-xl p-6 flex flex-col sm:flex-row gap-6 hover:border-[#E8500A]/20 transition-all shadow-sm">
-                       <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 flex items-center justify-center shrink-0">
-                         <img src={productImage} alt={r.product} className="w-full h-full object-contain" onError={handleImageError} />
-                       </div>
-                       <div className="flex-grow text-left">
-                         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                           <h4 className="font-sans font-bold text-[#1A1A2E] text-sm tracking-tight">{r.product}</h4>
-                           <span className="text-[10px] font-mono text-gray-400 font-extrabold uppercase">{r.date || r.createdAt || 'Just now'}</span>
-                         </div>
-                         <div className="flex items-center gap-1.5 mb-3">
-                           {[1, 2, 3, 4, 5].map(s => (
-                             <Star key={s} size={12} className={s <= Math.floor(r.rating || 5) ? "text-[#E8500A] fill-[#E8500A]" : "text-gray-250"} />
-                           ))}
-                           <span className="text-[10px] font-bold text-gray-400">({r.rating || '5'}.0)</span>
-                         </div>
-                         <p className="text-gray-600 text-xs font-medium italic leading-relaxed">{r.comment}</p>
-                       </div>
-                     </div>
+                     <PublicReviewCard
+                       key={r.id || idx}
+                       review={{
+                         name: currentUser.name || 'You',
+                         avatar: undefined,
+                         rating: r.rating || 5,
+                         comment: r.comment,
+                         date: r.date || r.createdAt || 'Just now',
+                         productName: r.product,
+                         productImage,
+                         verified: true,
+                       }}
+                       showActions
+                     />
                    );
                  })
                ) : (
-                 <div className="py-20 border border-dashed border-gray-200 rounded-[5px] flex flex-col items-center justify-center text-center bg-white shadow-sm w-full">
+                 <div className="py-20 border border-dashed border-[#E8EDF2] rounded-[14px] flex flex-col items-center justify-center text-center bg-white w-full">
                     <p className="text-[13px] font-medium text-[#9AA0AC] tracking-tight">No review records found</p>
                  </div>
                )}
