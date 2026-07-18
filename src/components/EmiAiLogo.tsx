@@ -5,27 +5,16 @@ type EmiAiLogoProps = {
   className?: string;
   size?: number;
   title?: string;
-  /**
-   * `mark` — full character + EMI wordmark (default).
-   * `fab` — square face crop that fills circular FABs without letterboxing/cropping.
-   */
-  variant?: 'mark' | 'fab';
 };
 
 /**
  * Official Emi AI mascot (blue→pink gradient character + EMI wordmark).
+ * Uses object-contain so the full mark fits inside FABs and chips.
  */
-export function EmiAiLogo({
-  className,
-  size = 28,
-  title = 'Emi AI',
-  variant = 'mark',
-}: EmiAiLogoProps) {
-  const src = variant === 'fab' ? '/emi-ai-logo-fab.svg' : '/emi-ai-logo.svg';
-
+export function EmiAiLogo({ className, size = 28, title = 'Emi AI' }: EmiAiLogoProps) {
   return (
     <img
-      src={src}
+      src="/emi-ai-logo.svg"
       width={size}
       height={size}
       alt={title}
