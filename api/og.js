@@ -11,6 +11,20 @@ const SITE_URL = 'https://www.choosify.bd';
 const OG_IMAGE_WIDTH = 1200;
 const OG_IMAGE_HEIGHT = 630;
 
+/** Minimal element factory — Vercel Edge /api routes do not transform JSX outside Next.js. */
+function h(type, props, ...children) {
+  const flat = children
+    .flat(Infinity)
+    .filter((child) => child !== null && child !== undefined && child !== false);
+  return {
+    type,
+    props: {
+      ...(props || {}),
+      children: flat.length <= 1 ? flat[0] ?? undefined : flat,
+    },
+  };
+}
+
 function truncate(value, max) {
   const trimmed = String(value || '').trim();
   if (trimmed.length <= max) return trimmed;
@@ -52,9 +66,10 @@ export default async function handler(request) {
     const showMedia = Boolean(image) && (type === 'product' || type === 'brand' || type === 'creator');
 
     return new ImageResponse(
-      (
-        <div
-          style={{
+      h(
+        'div',
+        {
+          style: {
             width: '100%',
             height: '100%',
             display: 'flex',
@@ -64,46 +79,51 @@ export default async function handler(request) {
             fontFamily: 'Inter, system-ui, sans-serif',
             position: 'relative',
             overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              right: -120,
-              top: -80,
-              width: 420,
-              height: 420,
-              borderRadius: 999,
-              background: SITE_BRAND_ORANGE,
-              opacity: 0.18,
-              display: 'flex',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              left: -100,
-              bottom: -140,
-              width: 380,
-              height: 380,
-              borderRadius: 999,
-              background: '#2323FF',
-              opacity: 0.16,
-              display: 'flex',
-            }}
-          />
-
-          <div
-            style={{
+          },
+        },
+        h('div', {
+          style: {
+            position: 'absolute',
+            right: -120,
+            top: -80,
+            width: 420,
+            height: 420,
+            borderRadius: 999,
+            background: SITE_BRAND_ORANGE,
+            opacity: 0.18,
+            display: 'flex',
+          },
+        }),
+        h('div', {
+          style: {
+            position: 'absolute',
+            left: -100,
+            bottom: -140,
+            width: 380,
+            height: 380,
+            borderRadius: 999,
+            background: '#2323FF',
+            opacity: 0.16,
+            display: 'flex',
+          },
+        }),
+        h(
+          'div',
+          {
+            style: {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '42px 56px 0',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div
-                style={{
+            },
+          },
+          h(
+            'div',
+            { style: { display: 'flex', alignItems: 'center', gap: 14 } },
+            h(
+              'div',
+              {
+                style: {
                   width: 48,
                   height: 48,
                   borderRadius: 12,
@@ -113,19 +133,25 @@ export default async function handler(request) {
                   justifyContent: 'center',
                   fontSize: 26,
                   fontWeight: 800,
-                }}
-              >
-                C
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5 }}>{SITE_NAME}</div>
-                <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>
-                  buy ORIGINAL
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
+                },
+              },
+              'C',
+            ),
+            h(
+              'div',
+              { style: { display: 'flex', flexDirection: 'column' } },
+              h('div', { style: { fontSize: 28, fontWeight: 800, letterSpacing: -0.5 } }, SITE_NAME),
+              h(
+                'div',
+                { style: { fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 600 } },
+                'buy ORIGINAL',
+              ),
+            ),
+          ),
+          h(
+            'div',
+            {
+              style: {
                 display: 'flex',
                 alignItems: 'center',
                 padding: '10px 18px',
@@ -137,130 +163,144 @@ export default async function handler(request) {
                 color: SITE_BRAND_ORANGE,
                 textTransform: 'uppercase',
                 letterSpacing: 1,
-              }}
-            >
-              {label}
-            </div>
-          </div>
-
-          <div
-            style={{
+              },
+            },
+            label,
+          ),
+        ),
+        h(
+          'div',
+          {
+            style: {
               display: 'flex',
               flex: 1,
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '28px 56px 36px',
               gap: 40,
-            }}
-          >
-            <div
-              style={{
+            },
+          },
+          h(
+            'div',
+            {
+              style: {
                 display: 'flex',
                 flexDirection: 'column',
                 flex: 1,
                 maxWidth: showMedia ? 680 : 1080,
-              }}
-            >
-              {brand ? (
-                <div
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 700,
-                    color: 'rgba(255,255,255,0.65)',
-                    marginBottom: 12,
-                    display: 'flex',
-                  }}
-                >
-                  {brand}
-                </div>
-              ) : null}
-              <div
-                style={{
+              },
+            },
+            brand
+              ? h(
+                  'div',
+                  {
+                    style: {
+                      fontSize: 20,
+                      fontWeight: 700,
+                      color: 'rgba(255,255,255,0.65)',
+                      marginBottom: 12,
+                      display: 'flex',
+                    },
+                  },
+                  brand,
+                )
+              : null,
+            h(
+              'div',
+              {
+                style: {
                   fontSize: showMedia ? 52 : 58,
                   fontWeight: 800,
                   lineHeight: 1.12,
                   letterSpacing: -1.2,
                   display: 'flex',
-                }}
-              >
-                {title}
-              </div>
-              <div
-                style={{
+                },
+              },
+              title,
+            ),
+            h(
+              'div',
+              {
+                style: {
                   marginTop: 18,
                   fontSize: 24,
                   lineHeight: 1.35,
                   color: 'rgba(255,255,255,0.72)',
                   fontWeight: 500,
                   display: 'flex',
-                }}
-              >
-                {description}
-              </div>
-            </div>
-
-            {showMedia ? (
-              <div
-                style={{
+                },
+              },
+              description,
+            ),
+          ),
+          showMedia
+            ? h(
+                'div',
+                {
+                  style: {
+                    width: 280,
+                    height: 280,
+                    borderRadius: 28,
+                    background: '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    boxShadow: '0 24px 60px rgba(0,0,0,0.35)',
+                    flexShrink: 0,
+                  },
+                },
+                h('img', {
+                  src: image,
+                  alt: '',
                   width: 280,
                   height: 280,
-                  borderRadius: 28,
-                  background: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                  border: '1px solid rgba(255,255,255,0.18)',
-                  boxShadow: '0 24px 60px rgba(0,0,0,0.35)',
-                  flexShrink: 0,
-                }}
-              >
-                <img
-                  src={image}
-                  alt=""
-                  width={280}
-                  height={280}
-                  style={{
+                  style: {
                     width: '100%',
                     height: '100%',
                     objectFit: type === 'brand' || type === 'creator' ? 'contain' : 'cover',
                     padding: type === 'brand' || type === 'creator' ? 28 : 0,
-                  }}
-                />
-              </div>
-            ) : null}
-          </div>
-
-          <div
-            style={{
+                  },
+                }),
+              )
+            : null,
+        ),
+        h(
+          'div',
+          {
+            style: {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '0 56px 40px',
-            }}
-          >
-            <div
-              style={{
+            },
+          },
+          h(
+            'div',
+            {
+              style: {
                 fontSize: 20,
                 fontWeight: 700,
                 color: 'rgba(255,255,255,0.55)',
                 display: 'flex',
-              }}
-            >
-              {SITE_URL.replace(/^https?:\/\//, '')}
-            </div>
-            <div
-              style={{
+              },
+            },
+            SITE_URL.replace(/^https?:\/\//, ''),
+          ),
+          h(
+            'div',
+            {
+              style: {
                 fontSize: 18,
                 fontWeight: 600,
                 color: 'rgba(255,255,255,0.45)',
                 display: 'flex',
-              }}
-            >
-              Verified discovery for Bangladesh
-            </div>
-          </div>
-        </div>
+              },
+            },
+            'Verified discovery for Bangladesh',
+          ),
+        ),
       ),
       {
         width: OG_IMAGE_WIDTH,

@@ -6,7 +6,7 @@ Choosify is a **Vite + React SPA**, not Next.js. The Next.js App Router Metadata
 
 1. **`index.html`** — Global default `<title>`, description, Open Graph, Twitter Card, theme-color, icons, and canonical. Used for first paint and as a fallback.
 2. **`src/components/PageSeo.tsx`** — Client-side per-route metadata (title, OG, Twitter, canonical, robots, JSON-LD) for in-app navigation.
-3. **`api/og.jsx`** — Vercel Edge function using `@vercel/og` `ImageResponse` to generate **1200×630** branded cards (products, brands, categories, deals, articles, creators).
+3. **`api/og.js`** — Vercel Edge function using `@vercel/og` `ImageResponse` to generate **1200×630** branded cards (products, brands, categories, deals, articles, creators). Uses element objects (not JSX) so Vite/non-Next Edge routes pick it up.
 4. **`api/share.js`** — Server-rendered HTML with complete social meta for crawlers that do not execute SPA JavaScript.
 5. **`middleware.js`** — Detects Facebook, LinkedIn, X/Twitter, WhatsApp, Slack, Discord, Telegram, etc., and rewrites them to `/api/share`.
 6. **`lib/seoShared.ts`** — Shared constants (`SITE_URL`, theme color, OG size, `buildOgImageUrl`, crawler UA pattern).
