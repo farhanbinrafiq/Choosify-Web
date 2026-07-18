@@ -1,7 +1,8 @@
 import React from 'react';
-import { LayoutGrid, Bot, Sparkles } from 'lucide-react';
+import { LayoutGrid, Sparkles } from 'lucide-react';
 import { Button } from '../buttons/Button';
 import { FilterChip } from '../navigation/FilterChip';
+import { EmiAiLogo } from '../../EmiAiLogo';
 
 export interface FilterItem {
   id: string;
@@ -67,7 +68,7 @@ export function DiscoverFilterBar({
             onClick={aiDiscoverButton.onClick}
             variant="outline"
             size="sm"
-            leftIcon={<Bot size={13} className="text-indigo-500 animate-bounce" />}
+            leftIcon={<EmiAiLogo size={14} className="w-3.5 h-3.5" />}
             rightIcon={<Sparkles size={11} className="text-pink-500" />}
             className="bg-white hover:bg-indigo-50/50 border-indigo-200 text-indigo-700 text-[10px] uppercase tracking-wider rounded-full h-8.5"
           >

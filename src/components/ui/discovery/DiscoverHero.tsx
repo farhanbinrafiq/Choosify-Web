@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Share2, Sparkles, ArrowRight, Bot } from 'lucide-react';
+import { ChevronRight, Share2, Sparkles, ArrowRight } from 'lucide-react';
 import { SearchInput } from '../forms/Input';
 import { Button } from '../buttons/Button';
 import { FilterChip } from '../navigation/FilterChip';
+import { EmiAiLogo } from '../../EmiAiLogo';
 
 export interface DiscoverHeroProps {
   breadcrumbs?: Array<{ label: string; path?: string }>;
@@ -116,7 +117,7 @@ export function DiscoverHero({
                   onClick={aiDiscoverCta.onClick}
                   variant="outline"
                   size="sm"
-                  leftIcon={<Bot size={13} className="text-indigo-400 animate-bounce" />}
+                  leftIcon={<EmiAiLogo size={14} className="w-3.5 h-3.5" />}
                   rightIcon={<Sparkles size={11} className="text-pink-400" />}
                   className="bg-white/5 hover:bg-white/10 border-white/10 hover:border-white/20 text-indigo-200 text-[10px] uppercase tracking-wider rounded-full h-9.5 px-5"
                 >
