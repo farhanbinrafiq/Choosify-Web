@@ -305,8 +305,7 @@ export function SearchPage() {
       {/* DC dark hero — constrained to feed silhouette */}
       <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <header
-          className="max-w-[1280px] mx-auto px-6 sm:px-10 py-8 text-white rounded-[14px] overflow-hidden"
-          style={{ background: 'linear-gradient(120deg,#000435,#1a1030)' }}
+          className="max-w-[1280px] mx-auto px-6 sm:px-10 py-8 text-white rounded-[14px] overflow-hidden choosify-dark-surface"
         >
           <nav className="text-xs text-[#9AA0AC] mb-2.5" aria-label="Breadcrumb">
             <Link to="/" className="hover:text-white/80 transition-colors">

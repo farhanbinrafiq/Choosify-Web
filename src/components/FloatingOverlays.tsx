@@ -438,7 +438,9 @@ export function FloatingOverlays() {
             whileTap={{ scale: 0.95 }}
             className={cn(
               'fixed z-[218] w-11 h-11 rounded-full border border-[#e8edf2] bg-white text-[#1A1D4E] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#FF5B00]/40 hover:text-[#FF5B00] flex items-center justify-center cursor-pointer pointer-events-auto transition-colors',
-              isMobile ? 'bottom-20 right-4' : 'bottom-6 right-20 lg:bottom-8 lg:right-24',
+              isMobile
+                ? 'bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] right-4'
+                : 'bottom-6 right-20 lg:bottom-8 lg:right-24',
             )}
             aria-label="Scroll to top"
             title="Back to top"
@@ -657,10 +659,13 @@ export function FloatingOverlays() {
         onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[219] left-4 w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-2.5 bg-white',
+          'fixed z-[219] w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-2.5 bg-white',
           activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
         )}
-        style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
+        style={{
+          bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
+          right: 'max(1rem, env(safe-area-inset-right, 0px))',
+        }}
         aria-label="Ask Emi"
         title="Ask Emi"
       >
@@ -674,15 +679,21 @@ export function FloatingOverlays() {
         onClick={openMobileFilters}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[220] bottom-4 right-4 w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden relative',
-          filterOpen || drawerFilterOpen
-            ? 'bg-[#000435] text-white ring-2 ring-[#FF5B00]/40'
-            : 'bg-[#000435] text-white',
+          'fixed z-[220] relative w-14 h-14 rounded-full border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center justify-center transition-all pointer-events-auto sm:hidden',
+          (filterOpen || drawerFilterOpen) && 'ring-2 ring-[#FF5B00]/30',
         )}
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        style={{
+          bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
+          left: 'max(1rem, env(safe-area-inset-left, 0px))',
+        }}
         aria-label="Open filters"
       >
-        <SlidersHorizontal size={22} />
+        <SlidersHorizontal
+          size={22}
+          className={cn(
+            filterOpen || drawerFilterOpen ? 'text-[#FF5B00]' : 'text-[#8a9bb0]',
+          )}
+        />
         {filterConfig.activeFilterCount > 0 && (
           <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center">
             {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}

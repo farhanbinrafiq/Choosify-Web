@@ -80,10 +80,10 @@ export function ShoppableOverlay({ event, products, activeChapter, heroProductId
                 addToCompare(hero);
                 trackInteractiveEvent('compare_click', event.eventId, { productId: hero.id });
               }}
-              className="p-2 border rounded text-gray-500 hover:text-navy"
+              className="p-2 rounded border-0 bg-transparent text-gray-500 hover:opacity-90 inline-flex items-center justify-center"
               aria-label="Compare"
             >
-              <GitCompare size={14} />
+              <GitCompare size={14} stroke="url(#choosify-emi-icon-grad)" />
             </button>
           </div>
         </div>

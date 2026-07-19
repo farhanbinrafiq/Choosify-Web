@@ -80,7 +80,7 @@ Thank you for shopping with Choosify.bd
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9] text-[#1A1A2E] font-sans">
       <div className="w-full px-5 sm:px-8 pt-4">
-        <header className="max-w-7xl mx-auto bg-[#000435] text-white border border-white/5 rounded-[14px] overflow-hidden">
+        <header className="max-w-7xl mx-auto choosify-dark-surface text-white border border-white/5 rounded-[14px] overflow-hidden">
           <div className="w-full px-5 sm:px-8 py-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <Link

@@ -25,6 +25,7 @@ const SIGNIN_FEATURES = [
   'Track your reviews & comparisons',
   'Personalised price drop alerts',
   'Verified-buyer badge on reviews',
+  'AI-powered shopping assistant',
 ];
 
 const TRUST_POINTS = [
@@ -64,15 +65,6 @@ const BACKDROP_TILES = [
   { name: 'Laptop Stand', price: '৳1,299', hue: 'from-[#0F2840] to-[#000435]' },
   { name: 'Denim Jacket', price: '৳3,750', hue: 'from-[#1A254E] to-[#3A1E22]' },
 ];
-
-function ChoosifyLogoMark({ size = 26 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 30 30" aria-hidden>
-      <circle cx="15" cy="15" r="12.5" fill="none" stroke={PRIMARY} strokeWidth="4" />
-      <circle cx="15" cy="15" r="4" fill={PRIMARY} />
-    </svg>
-  );
-}
 
 function GoogleLogo() {
   return (
@@ -229,12 +221,8 @@ export function LoginSignUpPage() {
       />
 
       <div className="relative z-[2] flex flex-col min-h-screen">
-        {/* Top bar */}
-        <div className="flex justify-between items-center px-6 sm:px-10 py-6">
-          <Link to="/" className="flex items-center gap-2.5" aria-label="Choosify Home">
-            <ChoosifyLogoMark />
-            <span className="text-[19px] font-extrabold text-white tracking-tight">choosify</span>
-          </Link>
+        {/* Top bar — logo lives in Navbar only; keep help + Ask EMI here */}
+        <div className="flex justify-end items-center px-6 sm:px-10 py-6">
           <div className="flex items-center gap-4">
             <Link
               to="/contact"
@@ -244,7 +232,7 @@ export function LoginSignUpPage() {
             </Link>
             <Link
               to="/emi"
-              className="flex items-center gap-1.5 bg-white/[0.08] rounded-full py-1.5 pl-1.5 pr-3.5 hover:bg-white/[0.12] transition-colors"
+              className="flex items-center gap-1.5 choosify-emi-gradient rounded-full py-1.5 pl-1.5 pr-3.5 hover:brightness-110 transition-all border-0"
             >
               <span className="w-[22px] h-[22px] rounded-full bg-white flex items-center justify-center overflow-hidden p-px">
                 <EmiAiLogo size={18} className="w-[18px] h-[18px]" />
@@ -266,7 +254,7 @@ export function LoginSignUpPage() {
               <br />
               Compare Easily.
               <br />
-              Choose With <span className="text-[#FF5B00]">Confidence</span>
+              Choose With <span className="choosify-emi-gradient-text">Confidence</span>
             </h1>
             <p className="text-[13.5px] text-white/55 leading-[1.7] m-0 mb-6">
               Bookmark products, track your reviews, and get personalized picks from Bangladesh&apos;s
@@ -278,8 +266,8 @@ export function LoginSignUpPage() {
                   key={feature}
                   className="flex items-center gap-2.5 text-[13px] text-white/85"
                 >
-                  <span className="w-5 h-5 rounded-[5px] bg-[#FF5B00] text-white flex items-center justify-center shrink-0">
-                    <Check size={12} strokeWidth={3} />
+                  <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                    <Check size={14} strokeWidth={3} stroke="url(#choosify-emi-icon-grad)" />
                   </span>
                   {feature}
                 </li>
@@ -386,10 +374,19 @@ export function LoginSignUpPage() {
 
               <button
                 type="submit"
-                className="w-full bg-[#FF5B00] text-white border-none py-3.5 rounded-lg text-[13px] font-bold cursor-pointer hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className={cn(
+                  'w-full py-3.5 rounded-lg text-[13px] font-bold cursor-pointer active:scale-[0.99] transition-all flex items-center justify-center gap-2',
+                  isSignUp
+                    ? 'choosify-emi-gradient text-white border-none hover:brightness-105'
+                    : 'bg-white border border-[#E5E7EB] choosify-emi-gradient-text hover:border-[#D1D5DB]',
+                )}
               >
                 {isSignUp ? 'Create account' : 'Sign in to Choosify'}
-                <ArrowRight size={16} strokeWidth={2.4} />
+                <ArrowRight
+                  size={16}
+                  strokeWidth={2.4}
+                  stroke={isSignUp ? 'currentColor' : 'url(#choosify-emi-icon-grad)'}
+                />
               </button>
             </form>
 

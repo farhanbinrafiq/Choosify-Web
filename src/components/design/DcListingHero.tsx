@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { DC_LISTING_HERO_BG } from '../../lib/design/dcListingTokens';
+import { DC_LISTING_HERO_BG, EMI_GRADIENT_CLASS, LISTING_PAGE_MAX_WIDTH } from '../../lib/design/dcListingTokens';
 
 interface DcListingHeroProps {
   /** Plain text before the gradient pill, e.g. "Explore Every" */
@@ -31,7 +31,7 @@ export function DcListingHero({
   quickChips = [],
   onSearch,
   onChipClick,
-  maxWidthClass = 'max-w-[1280px]',
+  maxWidthClass = LISTING_PAGE_MAX_WIDTH,
   className,
 }: DcListingHeroProps) {
   const [query, setQuery] = useState('');
@@ -46,7 +46,7 @@ export function DcListingHero({
       <div
         className={cn(
           maxWidthClass,
-          'mx-auto relative px-5 sm:px-10 pt-14 pb-14 text-center text-white overflow-hidden rounded-[14px]',
+          'mx-auto relative px-5 sm:px-10 pt-14 pb-14 text-center text-white overflow-hidden rounded-[14px] choosify-dark-surface',
         )}
         style={{ background: DC_LISTING_HERO_BG }}
       >
@@ -57,7 +57,12 @@ export function DcListingHero({
         )}
         <h1 className="relative z-[1] text-3xl md:text-[36px] font-extrabold leading-tight mb-7">
           {titleBefore}{' '}
-          <span className="inline-block bg-gradient-to-br from-[#2323FF] to-[#FF5B00] px-4 py-1 rounded-lg">
+          <span
+            className={cn(
+              'inline-block px-4 py-1 rounded-lg text-white',
+              EMI_GRADIENT_CLASS,
+            )}
+          >
             {titleHighlight}
           </span>
         </h1>

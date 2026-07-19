@@ -472,7 +472,7 @@ export function GuideDetailPage({
       {/* Media gallery — navy band only (no title on dark chrome) */}
       <section
         ref={heroRef}
-        className="relative w-full bg-[#000435] py-7 mb-6 border-b border-white/5"
+        className="relative w-full choosify-dark-surface py-7 mb-6 border-b border-white/5"
       >
         <div className="w-full relative">
           {spotlightHeroVariant ? (

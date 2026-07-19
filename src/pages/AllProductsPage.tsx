@@ -9,6 +9,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { DcListingHero } from '../components/design/DcListingHero';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { PaginationBar } from '../components/PaginationBar';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -567,12 +568,12 @@ export function AllProductsPage() {
         quickChips={['Smartphones', 'Laptops', 'AC', 'TV', 'Fashion', 'Beauty']}
         onSearch={(q) => executeSearch(q)}
         onChipClick={(q) => executeSearch(q)}
-        maxWidthClass="max-w-[1440px]"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
       />
 
       <DcListingStickyFilters
         overlapHero
-        maxWidthClass="max-w-[1440px]"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         items={[
           {
             id: 'verified',
@@ -639,7 +640,7 @@ export function AllProductsPage() {
         onClearAll={handleResetFilters}
       />
 
-      <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-6 md:py-10 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+      <div className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-4 sm:px-5 lg:px-6 py-6 md:py-10 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 min-w-0 w-full max-w-full animate-fade-in text-left">

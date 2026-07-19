@@ -7,6 +7,7 @@ import { createSpotlightImpressionLogger } from '../hooks/useSpotlightImpression
 import { useSpotlightHistory } from '../hooks/useSpotlightHistory';
 import { SpotlightEmptyState } from '../components/spotlight/homepage/SpotlightEmptyState';
 import { DiscoverHero } from '../components/spotlight/discovery/DiscoverHero';
+import { DiscoverStickyFormatNav } from '../components/spotlight/discovery/DiscoverStickyFormatNav';
 import { DiscoverStructuredFeed } from '../components/spotlight/discovery/DiscoverStructuredFeed';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { contentTypesForTab } from '../lib/spotlight/content/contentTypeRegistry';
@@ -14,6 +15,7 @@ import type { SpotlightContentTabId } from '../types/spotlight/discovery/navigat
 import { listFollows, listSaves } from '../utils/spotlightUserSignals';
 import { useSpotlightFloatingFilters } from '../hooks/useSpotlightFloatingFilters';
 import { filterSpotlightFeedItems, SPOTLIGHT_FEED_VISIBLE_KEY } from '../utils/spotlightMixedFeed';
+import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 
 export function SpotlightDiscoverPage() {
   const { allContent, filters, setFilters, hasContent } = useSpotlightExperience();
@@ -116,7 +118,17 @@ export function SpotlightDiscoverPage() {
         onQuerySubmit={(q) => setFilters({ ...filters, query: q })}
       />
 
-      <main className={`max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 pb-[60px] w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+      {hasContent && (
+        <DiscoverStickyFormatNav
+          quickFilters={quickFilters}
+          filters={filters}
+          activeTab={activeTab}
+        />
+      )}
+
+      <main
+        className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-5 sm:px-8 lg:px-10 pb-[60px] w-full ${PAGE_LISTING_SINGLE_SHELL}`}
+      >
         <div className={`${PAGE_MIDDLE_FEED} choosify-listing-single-feed`}>
           {!hasContent ? (
             <div className="pt-10">

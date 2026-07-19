@@ -39,80 +39,80 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-left">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 mb-8 text-left">
         {/* 1. Address & Links */}
-        <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 flex flex-col justify-between group hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-[10px] p-[18px] border border-[#E8EDF2] flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                <CheckCircle2 size={16} fill="currentColor" className="text-[#E8500A] stroke-white" />
+              <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center">
+                <CheckCircle2 size={16} fill="currentColor" className="text-[#FF5B00] stroke-white" />
               </div>
-              <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">Shop Address & Links</h4>
+              <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wider">Shop Address & Links</h4>
             </div>
-            <div className="text-xs text-gray-500 font-bold leading-relaxed space-y-2">
-              <p className="uppercase">{overviewData.address}</p>
+            <div className="text-[11.5px] text-[#6B7280] font-semibold leading-relaxed space-y-2">
+              <p className="uppercase text-[#1A1A2E]">{overviewData.address}</p>
               <div>
-                <span className="text-[#E8500A] font-black">WEBSITE:</span>{' '}
-                <a href={`https://${overviewData.website}`} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#1A1D4E]">
+                <span className="text-[#FF5B00] font-extrabold">WEBSITE:</span>{' '}
+                <a href={`https://${overviewData.website}`} target="_blank" rel="noopener noreferrer" className="hover:underline text-[#1A1A2E]">
                   {overviewData.website}
                 </a>
               </div>
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-gray-200/50">
-            <a href={overviewData.map} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black text-[#E8500A] uppercase tracking-wider hover:underline flex items-center gap-1">
+          <div className="mt-4 pt-4 border-t border-[#F1F1F3]">
+            <a href={overviewData.map} target="_blank" rel="noopener noreferrer" className="text-[10.5px] font-extrabold text-[#FF5B00] uppercase tracking-wider hover:underline flex items-center gap-1">
               Open on Maps <span>➜</span>
             </a>
           </div>
         </div>
 
         {/* 2. Contact Information */}
-        <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-[10px] p-[18px] border border-[#E8EDF2] flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                <CheckCircle2 size={16} fill="currentColor" className="text-[#E8500A] stroke-white" />
+              <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center">
+                <CheckCircle2 size={16} fill="currentColor" className="text-[#FF5B00] stroke-white" />
               </div>
-              <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">Contact Informations</h4>
+              <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wider">Contact Informations</h4>
             </div>
-            <div className="text-xs text-gray-500 font-bold leading-relaxed space-y-3">
-              <p className="flex items-center gap-2 truncate"><span className="text-[#1A1D4E] font-black">EMAIL:</span> {overviewData.email}</p>
-              <p className="flex items-center gap-2"><span className="text-[#1A1D4E] font-black">PHONE:</span> {overviewData.phone}</p>
+            <div className="text-[11.5px] text-[#6B7280] font-semibold leading-relaxed space-y-3">
+              <p className="flex items-center gap-2 truncate"><span className="text-[#1A1A2E] font-extrabold">EMAIL:</span> {overviewData.email}</p>
+              <p className="flex items-center gap-2"><span className="text-[#1A1A2E] font-extrabold">PHONE:</span> {overviewData.phone}</p>
             </div>
           </div>
         </div>
 
         {/* 3. Price Range & Audience */}
-        <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-[10px] p-[18px] border border-[#E8EDF2] flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                <CheckCircle2 size={16} fill="currentColor" className="text-[#E8500A] stroke-white" />
+              <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center">
+                <CheckCircle2 size={16} fill="currentColor" className="text-[#FF5B00] stroke-white" />
               </div>
-              <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">Price & Audience</h4>
+              <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wider">Price & Audience</h4>
             </div>
-            <div className="text-xs text-gray-500 font-bold leading-relaxed space-y-2">
-              <p><span className="text-[#1A1D4E] font-black">BDT</span> - {overviewData.priceRange.replace('BDT - ', '')}</p>
-              <p className="uppercase">{overviewData.ageRange}</p>
-              <p className="uppercase text-[#E8500A]">{overviewData.audience}</p>
+            <div className="text-[11.5px] text-[#6B7280] font-semibold leading-relaxed space-y-2">
+              <p><span className="text-[#1A1A2E] font-extrabold">BDT</span> - {overviewData.priceRange.replace('BDT - ', '')}</p>
+              <p className="uppercase text-[#1A1A2E]">{overviewData.ageRange}</p>
+              <p className="uppercase text-[#FF5B00]">{overviewData.audience}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-left">
         {/* 4. Services & Specialties */}
-        <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-2.5 mb-4 border-b border-gray-200/50 pb-3">
-            <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-              <CheckCircle2 size={16} fill="currentColor" className="text-[#E8500A] stroke-white" />
+        <div className="bg-white rounded-[10px] p-[18px] border border-[#E8EDF2]">
+          <div className="flex items-center gap-2.5 mb-4 border-b border-[#F1F1F3] pb-3">
+            <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center">
+              <CheckCircle2 size={16} fill="currentColor" className="text-[#FF5B00] stroke-white" />
             </div>
-            <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">Services & Specialties</h4>
+            <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wider">Services & Specialties</h4>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {overviewData.services.map((srv, idx) => (
-              <div key={idx} className="text-[10px] text-gray-600 font-bold uppercase tracking-wide flex items-start gap-2">
-                <span className="text-[#E8500A] text-xs leading-none">•</span>
+              <div key={idx} className="text-[10.5px] text-[#6B7280] font-semibold uppercase tracking-wide flex items-start gap-2">
+                <span className="text-[#FF5B00] text-xs leading-none">•</span>
                 <span>{srv}</span>
               </div>
             ))}
@@ -120,16 +120,16 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
         </div>
 
         {/* 5. Best For #Tags */}
-        <div className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-2.5 mb-4 border-b border-gray-200/50 pb-3">
-            <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-              <CheckCircle2 size={16} fill="currentColor" className="text-[#E8500A] stroke-white" />
+        <div className="bg-white rounded-[10px] p-[18px] border border-[#E8EDF2]">
+          <div className="flex items-center gap-2.5 mb-4 border-b border-[#F1F1F3] pb-3">
+            <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center">
+              <CheckCircle2 size={16} fill="currentColor" className="text-[#FF5B00] stroke-white" />
             </div>
-            <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">Best For #Tags</h4>
+            <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wider">Best For #Tags</h4>
           </div>
           <div className="flex flex-wrap gap-2">
             {overviewData.tags.map((tag, idx) => (
-              <span key={idx} className="text-[9px] font-black text-[#E8500A] bg-[#FFF0E8] px-3 py-1.5 rounded-full uppercase tracking-wider border border-[#E8500A]/5 select-none hover:scale-105 transition-transform duration-100">
+              <span key={idx} className="text-[9px] font-extrabold text-[#FF5B00] bg-[#FFF3EA] px-3 py-1.5 rounded-md uppercase tracking-wider border border-[#FFD8B8] select-none">
                 {tag}
               </span>
             ))}
@@ -139,19 +139,19 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
 
       {/* 6. Dynamic Custom Overviews */}
       {brandCustoms.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-left mt-3.5">
           {brandCustoms.map((co, idx) => (
-            <div key={idx} className="bg-gray-50 rounded-[5px] p-6 border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-2.5 mb-4 border-b border-gray-200/50 pb-3">
-                <div className="w-8 h-8 rounded-xl bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
-                  <CheckCircle2 size={16} fill="currentColor" className="text-[#E8500A] stroke-white" />
+            <div key={idx} className="bg-white rounded-[10px] p-[18px] border border-[#E8EDF2]">
+              <div className="flex items-center gap-2.5 mb-4 border-b border-[#F1F1F3] pb-3">
+                <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center">
+                  <CheckCircle2 size={16} fill="currentColor" className="text-[#FF5B00] stroke-white" />
                 </div>
-                <h4 className="text-xs font-black text-[#1A1D4E] uppercase tracking-wider">{co.sectionName}</h4>
+                <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wider">{co.sectionName}</h4>
               </div>
               <div className="space-y-2.5">
                 {co.content.map((bullet, bIdx) => (
-                  <div key={bIdx} className="text-[10px] text-gray-600 font-bold uppercase tracking-wide flex items-start gap-2">
-                    <span className="text-[#E8500A] text-xs leading-none">•</span>
+                  <div key={bIdx} className="text-[10.5px] text-[#6B7280] font-semibold uppercase tracking-wide flex items-start gap-2">
+                    <span className="text-[#FF5B00] text-xs leading-none">•</span>
                     <span>{bullet}</span>
                   </div>
                 ))}
@@ -163,12 +163,12 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
 
       {/* BRAND PROFILE CLAIMING EXPERIENCE BLOCKS */}
       {claimStatus === 'community' && (
-        <div className="mt-8 bg-gray-50 border border-dashed border-gray-200 rounded-[5px] p-6 text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 bg-[#FFF0E8]/80 px-3 py-1 rounded-full border border-[#E8500A]/10">
-            <span className="text-[#E8500A] text-xs font-bold font-mono">ℹ</span>
-            <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-wider">Community Profile State</span>
+        <div className="mt-8 bg-white border border-dashed border-[#E8EDF2] rounded-[10px] p-6 text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
+          <div className="flex items-center gap-2 bg-[#FFF3EA] px-3 py-1 rounded-md border border-[#FFD8B8]">
+            <span className="text-[#FF5B00] text-xs font-bold font-mono">ℹ</span>
+            <span className="text-[10px] font-extrabold text-[#FF5B00] uppercase tracking-wider">Community Profile State</span>
           </div>
-          <p className="text-xs font-bold text-gray-500 leading-relaxed italic max-w-lg">
+          <p className="text-xs font-semibold text-[#6B7280] leading-relaxed italic max-w-lg">
             This brand profile contains publicly available information curated by Choosify. This profile has not yet been claimed by an authorized brand representative.
           </p>
           
@@ -177,33 +177,33 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
             onClick={() => {
               toast.success("Ownership claim application received for " + brandName + "! Our merchant onboarding team will perform necessary verifications relative to this brand representative request and notify you shortly.", { duration: 5000 });
             }}
-            className="bg-[#E8500A] hover:bg-[#ff5d14] text-white py-3.5 px-8 rounded-full uppercase italic text-[11px] font-black tracking-widest transition-all transform hover:scale-[1.03] active:scale-95 shadow-md shadow-orange-primary/10 select-none border border-transparent cursor-pointer"
+            className="bg-[#FF5B00] hover:bg-[#EB4501] text-white py-3 px-8 rounded-lg uppercase text-[11px] font-extrabold tracking-widest transition-all active:scale-95 select-none border-0 cursor-pointer"
           >
             Claim Brand Ownership
           </button>
           
-          <div className="bg-white border border-[#e8edf2] rounded-[5px] p-5 text-left w-full mt-2 shadow-sm">
-            <h4 className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest mb-3.5 border-b border-gray-100 pb-2 flex items-center gap-1.5">
-              <span className="text-[#E8500A]">✦</span> Claim ownership to:
+          <div className="bg-[#F4F7F9] border border-[#E8EDF2] rounded-[10px] p-5 text-left w-full mt-2">
+            <h4 className="text-[10px] font-extrabold text-[#1A1A2E] uppercase tracking-widest mb-3.5 border-b border-[#E8EDF2] pb-2 flex items-center gap-1.5">
+              <span className="text-[#FF5B00]">✦</span> Claim ownership to:
             </h4>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[10px] text-gray-600 font-bold uppercase tracking-wider">
-              <li className="flex items-center gap-2"><span className="text-green-500 text-sm font-black">✓</span> Add products</li>
-              <li className="flex items-center gap-2"><span className="text-green-500 text-sm font-black">✓</span> Launch promotions</li>
-              <li className="flex items-center gap-2"><span className="text-green-500 text-sm font-black">✓</span> Manage coupons</li>
-              <li className="flex items-center gap-2"><span className="text-green-500 text-sm font-black">✓</span> Collaborate with creators</li>
-              <li className="flex items-center gap-2 sm:col-span-2"><span className="text-green-500 text-sm font-black">✓</span> Access business insights</li>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[10px] text-[#6B7280] font-semibold uppercase tracking-wider">
+              <li className="flex items-center gap-2"><span className="text-[#07DD05] text-sm font-black">✓</span> Add products</li>
+              <li className="flex items-center gap-2"><span className="text-[#07DD05] text-sm font-black">✓</span> Launch promotions</li>
+              <li className="flex items-center gap-2"><span className="text-[#07DD05] text-sm font-black">✓</span> Manage coupons</li>
+              <li className="flex items-center gap-2"><span className="text-[#07DD05] text-sm font-black">✓</span> Collaborate with creators</li>
+              <li className="flex items-center gap-2 sm:col-span-2"><span className="text-[#07DD05] text-sm font-black">✓</span> Access business insights</li>
             </ul>
           </div>
         </div>
       )}
 
       {claimStatus === 'pending' && (
-        <div className="mt-8 bg-gray-50 border border-dashed border-gray-200 rounded-[5px] p-6 text-center max-w-2xl mx-auto flex flex-col items-center gap-3">
-          <div className="flex items-center gap-2 bg-amber-50 px-3 py-1 rounded-full border border-amber-300">
+        <div className="mt-8 bg-white border border-dashed border-[#E8EDF2] rounded-[10px] p-6 text-center max-w-2xl mx-auto flex flex-col items-center gap-3">
+          <div className="flex items-center gap-2 bg-amber-50 px-3 py-1 rounded-md border border-amber-200">
             <span className="text-amber-500 text-xs animate-pulse">●</span>
-            <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Ownership Verification Pending</span>
+            <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest">Ownership Verification Pending</span>
           </div>
-          <p className="text-xs font-bold text-gray-500 leading-relaxed italic max-w-lg">
+          <p className="text-xs font-semibold text-[#6B7280] leading-relaxed italic max-w-lg">
             A brand ownership claim application has been received for {brandName} and is currently undergoing premium administrative review. No public actions are pending.
           </p>
         </div>

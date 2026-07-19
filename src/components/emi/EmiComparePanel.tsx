@@ -30,9 +30,14 @@ export function EmiComparePanel({ compareLabels, compareMode, className }: EmiCo
       <button
         type="button"
         onClick={() => openEmiPanel('Help me decide between these compared items')}
-        className="w-full text-[10px] font-bold uppercase tracking-wider text-[#FF5B00] hover:underline flex items-center justify-center gap-1.5 py-2"
+        className="w-full text-[10px] font-bold uppercase tracking-wider choosify-emi-gradient-text hover:brightness-110 flex items-center justify-center gap-1.5 py-2"
       >
-        <EmiAiLogo size={14} className="w-3.5 h-3.5" /> Ask Emi to compare
+        <span className="w-4 h-4 rounded-full choosify-emi-gradient flex items-center justify-center shrink-0 overflow-hidden p-px">
+          <span className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+            <EmiAiLogo size={14} className="w-3.5 h-3.5" />
+          </span>
+        </span>
+        Ask Emi to compare
       </button>
     </div>
   );

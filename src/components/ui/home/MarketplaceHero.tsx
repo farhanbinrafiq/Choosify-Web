@@ -31,9 +31,9 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
   };
 
   return (
-    <section className="relative w-full h-[760px] bg-[#000435] overflow-hidden flex items-center">
+    <section className="relative w-full h-[760px] choosify-dark-surface overflow-hidden flex items-center">
       {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#000435] via-[#000435]/90 to-transparent z-10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[rgba(10,10,31,0.96)] via-[rgba(10,10,31,0.85)] to-transparent z-10" />
       
       {/* Navigation Arrows */}
       <Button 

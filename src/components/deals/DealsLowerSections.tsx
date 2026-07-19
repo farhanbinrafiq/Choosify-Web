@@ -190,7 +190,7 @@ export function DealsSubscribeBanner({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'bg-[#000435] rounded-xl px-7 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white',
+        'choosify-dark-surface rounded-xl px-7 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white',
         className,
       )}
     >

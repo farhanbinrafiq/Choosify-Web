@@ -152,7 +152,7 @@ export function DealOfTheDayCard({
   const to = href ?? `/products/${id}`;
 
   return (
-    <div className="bg-[#000435] rounded-xl p-5 text-white h-full flex flex-col">
+    <div className="choosify-dark-surface rounded-xl p-5 text-white h-full flex flex-col">
       <div className="flex justify-between items-center mb-3.5">
         <div className="text-[12px] font-extrabold text-[#FF5B00] flex items-center gap-1">
           🏅 DEAL OF THE DAY

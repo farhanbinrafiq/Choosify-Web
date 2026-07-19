@@ -12,7 +12,7 @@ export const HOME_SECTION_TONE_CLASS: Record<HomeSectionTone, string> = {
   'soft-gray': 'bg-[#F4F7F9]',
   'soft-blue': 'bg-[#F4F8FC]',
   'soft-orange': 'bg-gradient-to-b from-[#FFF9F5] via-[#FFFCFA] to-white',
-  'dark-band': 'bg-[#000435] text-white',
+  'dark-band': 'choosify-dark-surface text-white',
 };
 
 /** Page canvas from Choosify.dc.html */

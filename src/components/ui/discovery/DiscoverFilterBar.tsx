@@ -70,7 +70,7 @@ export function DiscoverFilterBar({
             size="sm"
             leftIcon={<EmiAiLogo size={14} className="w-3.5 h-3.5" />}
             rightIcon={<Sparkles size={11} className="text-pink-500" />}
-            className="bg-white hover:bg-indigo-50/50 border-indigo-200 text-indigo-700 text-[10px] uppercase tracking-wider rounded-full h-8.5"
+            className="choosify-emi-gradient hover:brightness-110 text-white border-0 text-[10px] uppercase tracking-wider rounded-full h-8.5"
           >
             {aiDiscoverButton.text}
           </Button>

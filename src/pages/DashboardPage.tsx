@@ -1327,7 +1327,7 @@ export function DashboardPage() {
   );
 
   const premiumCard = (
-    <div className="bg-[#000435] rounded-[14px] p-5 text-white mb-3.5">
+    <div className="choosify-dark-surface rounded-[14px] p-5 text-white mb-3.5">
       <div className="text-[13px] font-extrabold mb-1">Premium Member</div>
       <div className="text-[11px] text-white/55 mb-3.5">Enjoy exclusive benefits</div>
       {['Early access to deals', 'Premium support', 'Exclusive rewards'].map((perk) => (

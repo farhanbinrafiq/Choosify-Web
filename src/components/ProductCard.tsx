@@ -395,12 +395,16 @@ export const ProductCard = memo(function ProductCard({
                 type="button"
                 onClick={handleCompare}
                 className={cn(
-                  'p-0 bg-transparent border-0 cursor-pointer',
-                  isInCompare ? 'text-[#07A828]' : 'text-[#4B5563]',
+                  'w-7 h-7 rounded-full border-0 cursor-pointer inline-flex items-center justify-center bg-transparent',
+                  isInCompare && 'bg-[#07A828] text-white',
                 )}
                 aria-label="Compare"
               >
-                <ArrowLeftRight size={13} strokeWidth={1.7} />
+                <ArrowLeftRight
+                  size={13}
+                  strokeWidth={1.7}
+                  stroke={isInCompare ? 'currentColor' : 'url(#choosify-emi-icon-grad)'}
+                />
               </button>
             </div>
             <button
@@ -527,11 +531,15 @@ export const ProductCard = memo(function ProductCard({
               title="Add to Compare"
               aria-label="Add to Compare"
               className={cn(
-                'p-0 bg-transparent border-0 cursor-pointer inline-flex',
-                isInCompare ? 'text-[#07A828]' : 'text-[#4B5563] hover:text-[#FF5B00]',
+                'w-7 h-7 rounded-full border-0 cursor-pointer inline-flex items-center justify-center bg-transparent',
+                isInCompare && 'bg-[#07A828] text-white',
               )}
             >
-              <ArrowLeftRight size={13} strokeWidth={1.7} />
+              <ArrowLeftRight
+                size={13}
+                strokeWidth={1.7}
+                stroke={isInCompare ? 'currentColor' : 'url(#choosify-emi-icon-grad)'}
+              />
             </button>
           </div>
 

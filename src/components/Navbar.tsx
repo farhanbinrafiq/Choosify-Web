@@ -97,14 +97,29 @@ export function Navbar() {
         .filter((item) => isNavPathEnabled(item.path, featureFlags))
         .map((item) => (
         <Link key={item.id} to={item.path} className={linkClass(item.path)}>
-          {item.label}
+          {item.path === '/spotlight' ? (
+            <span className="choosify-discover-pill-label">{item.label}</span>
+          ) : (
+            item.label
+          )}
         </Link>
       ))
     ) : (
       <>
         {PRIMARY_NAV_ITEMS.filter((item) => isNavPathEnabled(item.path, featureFlags)).map((item) => (
           <Link key={item.id} to={item.path} className={linkClass(item.path)}>
-            {item.labelWide ? (
+            {item.path === '/spotlight' ? (
+              <span className="choosify-discover-pill-label">
+                {item.labelWide ? (
+                  <>
+                    <span className="2xl:hidden">{item.label}</span>
+                    <span className="hidden 2xl:inline">{item.labelWide}</span>
+                  </>
+                ) : (
+                  item.label
+                )}
+              </span>
+            ) : item.labelWide ? (
               <>
                 <span className="2xl:hidden">{item.label}</span>
                 <span className="hidden 2xl:inline">{item.labelWide}</span>
@@ -175,7 +190,7 @@ export function Navbar() {
     if (isDiscover) {
       return cn(
         'choosify-discover-pill whitespace-nowrap text-[11.5px] transition-opacity hover:opacity-90',
-        !isActive && 'opacity-95',
+        isActive ? 'font-bold' : 'font-medium',
       );
     }
     return cn(
@@ -371,14 +386,14 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => goToLogin('sign-in')}
-                className="h-8 xl:h-9 px-2.5 xl:px-4 text-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic border border-white/15 bg-white/5 hover:bg-white/10 whitespace-nowrap"
+                className="h-8 xl:h-9 px-2.5 xl:px-4 bg-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic choosify-emi-gradient-text hover:brightness-110 whitespace-nowrap border-0"
               >
                 Sign In
               </button>
               <button
                 type="button"
                 onClick={() => goToLogin('sign-up')}
-                className="h-8 xl:h-9 px-2.5 xl:px-4 text-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic bg-[#FF6B00] hover:bg-orange-deep whitespace-nowrap"
+                className="h-8 xl:h-9 px-2.5 xl:px-4 text-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic choosify-emi-gradient hover:brightness-110 whitespace-nowrap border-0"
               >
                 Sign Up <LogIn size={12} className="xl:w-[13px] xl:h-[13px]" />
               </button>
@@ -490,9 +505,9 @@ export function Navbar() {
                     <button
                       type="button"
                       onClick={() => goToLogin('sign-in')}
-                      className="w-full py-3.5 bg-[#FF5B00] hover:brightness-110 text-white text-[13px] font-bold rounded-xl transition-colors cursor-pointer border-0 flex items-center justify-center gap-2"
+                      className="w-full py-3.5 bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] text-[13px] font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 choosify-emi-gradient-text"
                     >
-                      <LogIn size={14} />
+                      <LogIn size={14} stroke="url(#choosify-emi-icon-grad)" />
                       <span>Sign In / Register</span>
                     </button>
                   </>

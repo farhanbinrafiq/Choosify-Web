@@ -51,7 +51,7 @@ export function CompareHero({ className }: CompareHeroProps) {
             onChange={(e) => setQueryA(e.target.value)}
             className="flex-1 h-11 rounded-lg border border-[#E5E7EB] px-4 text-[13px] outline-none focus:border-[#FF5B00]"
           />
-          <div className="w-[34px] h-[34px] rounded-full bg-[#000435] text-white text-[11px] font-extrabold flex items-center justify-center shrink-0 self-center">
+          <div className="w-[34px] h-[34px] rounded-full choosify-emi-gradient text-white text-[11px] font-extrabold flex items-center justify-center shrink-0 self-center">
             VS
           </div>
           <input
@@ -63,7 +63,7 @@ export function CompareHero({ className }: CompareHeroProps) {
           <button
             type="button"
             onClick={handleCompare}
-            className="bg-[#000435] text-white border-none px-7 h-11 rounded-lg text-xs font-bold cursor-pointer shrink-0 hover:bg-[#1A1D4E] transition-colors"
+            className="choosify-emi-gradient text-white border-none px-7 h-11 rounded-lg text-xs font-bold cursor-pointer shrink-0 hover:brightness-110 transition-all"
           >
             COMPARE
           </button>

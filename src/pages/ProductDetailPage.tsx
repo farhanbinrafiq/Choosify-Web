@@ -52,6 +52,7 @@ import { useRegisterPageFilters } from "../components/FilterEngine";
 import { getBrandOfficialWebsite, normalizeExternalUrl } from "../utils/overviewRegistry";
 import { SizeGuideModal } from "../components/SizeGuideModal";
 import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
+import { DC_CONTENT_MAX } from "../lib/design/dcListingTokens";
 import { ProductSpecsOverview } from "../components/ProductSpecsOverview";
 import { DcUnderlineTabs } from "../components/design/DcUnderlineTabs";
 import { CardEngagementStrip } from "../components/CardEngagementStrip";
@@ -62,8 +63,8 @@ import { StudioWrap } from "../components/studio/StudioWrap";
 import { useStudioEdit } from "../context/StudioEditContext";
 import { useHasRole } from "../components/auth/RequireRole";
 import { CreateSpotlightCampaignButton } from "../components/spotlight/cms/CreateSpotlightCampaignButton";
-import { EmiProductAssistant } from "../components/emi/EmiProductAssistant";
 import type { CatalogProductSizeGuide } from "../types/catalog";
+import { openEmiPanel } from "../lib/emi";
 
 function hasActiveSizeGuide(sizeGuide?: CatalogProductSizeGuide | null): boolean {
   if (!sizeGuide?.enabled) return false;
@@ -810,7 +811,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
         </div>
       )}
 
-      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 pt-7 pb-0 w-full">
+      <div className={cn(DC_CONTENT_MAX, 'pt-7 pb-0 w-full')}>
         <div className="text-xs text-[#9AA0AC] mb-3.5">
           <Link to="/" className="hover:text-[#FF5B00]">Home</Link>
           {' '}&nbsp;›&nbsp;{' '}
@@ -831,7 +832,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
         </div>
       </div>
 
-      <div ref={productHeroRef} className="w-full relative bg-[#000435] py-7 mb-6">
+      <div ref={productHeroRef} className="w-full relative choosify-dark-surface py-7 mb-6">
         <div className="w-full relative">
           <ProductMediaGallery
             product={product}
@@ -840,6 +841,8 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
         </div>
       </div>
 
+      {/* One content column: stats/CTA + tabs + feed (same max-width + gutters) */}
+      <div className={cn(DC_CONTENT_MAX, 'w-full')}>
       <ProductDetailBuyBox
         product={product}
         brandName={brandName}
@@ -888,7 +891,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
         onCompare={handleAddToCompare}
         onMessageSeller={handleMessageOrder}
         onAskEmi={() => {
-          document.getElementById('all-section')?.scrollIntoView({ behavior: 'smooth' });
+          openEmiPanel(`Tell me more about ${product.title} and alternatives`);
         }}
         addonsSlot={
           hasAddons ? (
@@ -904,6 +907,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
       />
 
       <DcUnderlineTabs
+        flush
         tabs={[
           { id: 'product-specs-section', label: 'Product Specifications', icon: '⚏' },
           { id: 'influencer-reviews-section', label: 'Creator Reviews', icon: '📖' },
@@ -914,13 +918,9 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
         onNavigate={scrollToSection}
       />
 
-      <main id="all-section" className="bg-[#F4F7F9] py-6 md:py-8">
-        <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 w-full">
+      <main id="all-section" className="py-6 md:py-8">
           <div className={`${DETAIL_SINGLE_FEED}`}>
             <StudioWrap sectionId="product-specs">
-            <div className="mb-6">
-              <EmiProductAssistant product={product} inStock={!isOutOfStock} />
-            </div>
             <ProductSpecsOverview
               productTitle={product.title}
               specs={[
@@ -1044,7 +1044,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     <button
                       type="button"
                       onClick={() => navigate('/login', { state: { from: location.pathname } })}
-                      className="h-10 px-6 bg-[#FF5B00] text-white text-[13px] font-bold rounded-lg hover:brightness-110 cursor-pointer border-none"
+                      className="h-10 px-6 bg-white border border-[#E5E7EB] text-[13px] font-bold rounded-lg hover:border-[#D1D5DB] cursor-pointer choosify-emi-gradient-text"
                     >
                       Sign in
                     </button>
@@ -1089,38 +1089,6 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 )}
               </div>
             </StudioWrap>
-
-            {/* Choosify.dc.html — EXPLAIN THIS PRODUCT */}
-            <div className="bg-[#FFF3EC] border border-[#FFD9C2] rounded-xl px-[22px] py-[18px] text-left">
-              <div className="text-[12.5px] font-extrabold text-[#EB4501] flex items-center gap-1.5 mb-3.5">
-                🔦 EXPLAIN THIS PRODUCT
-              </div>
-              <div className="mb-3">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="text-[12px] font-bold text-[#1A1A2E]">Product at a glance</span>
-                  <span className="bg-[#FEF3C7] text-[#92400E] text-[9px] font-extrabold px-2 py-0.5 rounded">
-                    VERIFIED CHOOSIFY EXPLAINER
-                  </span>
-                </div>
-                <p className="text-[12.5px] text-[#4B5563] leading-relaxed m-0">
-                  {product.title} is a {product.category || 'featured'} pick from {brandName}
-                  {product.rating ? ` with a ${product.rating}/5 shopper rating` : ''}. Compare specs,
-                  creator reviews, and store prices before you buy.
-                </p>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="text-[12px] font-bold text-[#1A1A2E]">Buying tip</span>
-                  <span className="bg-[#DCFCE7] text-[#16A34A] text-[9px] font-extrabold px-2 py-0.5 rounded">
-                    WHAT CHOOSIFY RECOMMENDS
-                  </span>
-                </div>
-                <p className="text-[12.5px] text-[#4B5563] leading-relaxed m-0">
-                  Best for shoppers who want verified options, transparent pricing, and honest creator
-                  feedback before committing.
-                </p>
-              </div>
-            </div>
 
             {/* PRODUCT OVERVIEW (ID: 'product-overview-section') */}
             <StudioWrap
@@ -1358,7 +1326,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
             </div>
 
             {/* Sponsored Advertisement */}
-            <div className="bg-[#000435] text-white rounded-xl p-6 relative overflow-hidden text-left w-full">
+            <div className="choosify-dark-surface text-white rounded-xl p-6 relative overflow-hidden text-left w-full">
               <span className="text-[11px] font-bold text-[#FF5B00] tracking-tight block mb-1.5">
                 SPONSORED AD
               </span>
@@ -1377,8 +1345,8 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               </button>
             </div>
           </div>
-        </div>
       </main>
+      </div>
 
       {/* Trust Section */}
       <section className="w-full bg-[#F4F9FF] border-t border-blue-50 py-12">

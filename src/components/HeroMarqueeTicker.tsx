@@ -78,7 +78,7 @@ export function HeroMarqueeTicker({ pageKey, siteConfig, className }: HeroMarque
   return (
     <div
       className={cn(
-        'w-full overflow-hidden py-2.5 border-b border-white/5 bg-[#000435] relative z-20',
+        'w-full overflow-hidden py-2.5 border-b border-white/5 choosify-dark-surface relative z-20',
         className,
       )}
       aria-hidden

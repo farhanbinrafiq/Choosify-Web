@@ -42,7 +42,7 @@ export const VideoEmbedCard: React.FC<VideoEmbedCardProps> = ({
   };
 
   return (
-    <div className={cn("bg-[#000435] rounded-3xl overflow-hidden border border-slate-100 shadow-md relative w-full group", className)}>
+    <div className={cn("choosify-dark-surface rounded-3xl overflow-hidden border border-slate-100 shadow-md relative w-full group", className)}>
       <div className={cn("relative w-full overflow-hidden", aspectRatioClasses[aspectRatio])}>
         {!isPlaying && thumbnail ? (
           <div className="absolute inset-0 w-full h-full cursor-pointer" onClick={() => setIsPlaying(true)}>

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { CommerceMediaItem } from './commerceMediaTypes';
@@ -66,9 +66,53 @@ function SliverMedia({
   );
 }
 
+type PeekSlot = {
+  offset: number;
+  /** Relative size within the side strip (near = larger) */
+  size: 'near' | 'mid' | 'far';
+};
+
+/** Build left peeks far→near (fills toward the center) */
+function leftPeekSlots(count: number): PeekSlot[] {
+  const slots: PeekSlot[] = [];
+  for (let i = count; i >= 1; i -= 1) {
+    const size: PeekSlot['size'] = i === 1 ? 'near' : i === 2 ? 'mid' : 'far';
+    slots.push({ offset: -i, size });
+  }
+  return slots;
+}
+
+/** Build right peeks near→far (fills toward the edge) */
+function rightPeekSlots(count: number): PeekSlot[] {
+  const slots: PeekSlot[] = [];
+  for (let i = 1; i <= count; i += 1) {
+    const size: PeekSlot['size'] = i === 1 ? 'near' : i === 2 ? 'mid' : 'far';
+    slots.push({ offset: i, size });
+  }
+  return slots;
+}
+
+const PEEK_HEIGHT: Record<PeekSlot['size'], string> = {
+  near: 'h-[220px] sm:h-[300px] md:h-[380px] lg:h-[510px]',
+  mid: 'h-[200px] sm:h-[270px] md:h-[340px] lg:h-[430px]',
+  far: 'h-[180px] sm:h-[240px] md:h-[300px] lg:h-[460px]',
+};
+
+const PEEK_OPACITY: Record<PeekSlot['size'], string> = {
+  near: 'opacity-85 hover:opacity-95',
+  mid: 'opacity-45 hover:opacity-60',
+  far: 'opacity-40 hover:opacity-55',
+};
+
+const PEEK_FLEX: Record<PeekSlot['size'], string> = {
+  near: 'flex-[1.4_1_0%]',
+  mid: 'flex-[1_1_0%]',
+  far: 'flex-[0.75_1_0%]',
+};
+
 /**
- * Detail hero gallery — centered primary frame with balanced side peeks
- * on both mobile and desktop (no left-heavy / sideways layout).
+ * Detail hero gallery — full-bleed center-focused strip with repeating side peeks
+ * (shared by Product Detail + Guide Detail via ProductMediaGallery / RecommendationMediaGallery).
  */
 export function DetailSliverMediaGallery({
   items,
@@ -105,41 +149,60 @@ export function DetailSliverMediaGallery({
     return () => window.removeEventListener('keydown', onKey);
   }, [goNext, goPrev, zoomOpen]);
 
+  const multi = total > 1;
+  /** Enough peeks to fill each side of a full-bleed hero without empty navy gaps */
+  const peeksPerSide = useMemo(() => {
+    if (total <= 1) return 0;
+    if (total === 2) return 2;
+    return Math.min(3, total);
+  }, [total]);
+
+  const leftSlots = useMemo(() => leftPeekSlots(peeksPerSide), [peeksPerSide]);
+  const rightSlots = useMemo(() => rightPeekSlots(peeksPerSide), [peeksPerSide]);
+
   if (!safeItems.length) return null;
 
   const current = slideAt(safeItems, activeIndex, 0)!;
-  const prev = slideAt(safeItems, activeIndex, -1);
-  const next = slideAt(safeItems, activeIndex, 1);
-  const multi = total > 1;
 
   return (
     <section className={cn('relative w-full overflow-x-clip', className)} aria-label={ariaLabel}>
-      {/* Symmetric 3-column grid keeps the primary slide dead-center on all breakpoints */}
       <div
         className={cn(
-          'mx-auto w-full max-w-[1100px] px-3 sm:px-5 grid items-center gap-2 sm:gap-3.5',
-          multi
-            ? 'grid-cols-[minmax(0,1fr)_minmax(0,2.6fr)_minmax(0,1fr)]'
-            : 'grid-cols-1 justify-items-center',
+          'flex w-full items-center gap-2 sm:gap-3 md:gap-3.5',
+          multi ? 'justify-stretch' : 'justify-center px-4',
         )}
       >
         {multi ? (
-          <button
-            type="button"
-            onClick={goPrev}
-            className="relative justify-self-stretch h-[200px] sm:h-[280px] md:h-[340px] lg:h-[460px] overflow-hidden opacity-45 hover:opacity-60 cursor-pointer border-0 p-0 bg-transparent min-w-0 rounded-xl"
-            aria-label="Previous media"
-          >
-            {prev ? <SliverMedia item={prev} playSize={28} /> : null}
-          </button>
+          <div className="flex flex-1 min-w-0 items-center justify-end gap-2 sm:gap-3 md:gap-3.5 overflow-hidden">
+            {leftSlots.map((slot) => {
+              const item = slideAt(safeItems, activeIndex, slot.offset);
+              if (!item) return null;
+              return (
+                <button
+                  key={`L${slot.offset}`}
+                  type="button"
+                  onClick={goPrev}
+                  className={cn(
+                    'relative min-w-0 overflow-hidden cursor-pointer border-0 p-0 bg-transparent rounded-xl',
+                    PEEK_FLEX[slot.size],
+                    PEEK_HEIGHT[slot.size],
+                    PEEK_OPACITY[slot.size],
+                  )}
+                  aria-label="Previous media"
+                >
+                  <SliverMedia item={item} playSize={slot.size === 'near' ? 36 : 28} />
+                </button>
+              );
+            })}
+          </div>
         ) : null}
 
         <div
           className={cn(
-            'relative overflow-hidden min-w-0 w-full rounded-2xl md:rounded-[14px]',
+            'relative overflow-hidden shrink-0 rounded-2xl md:rounded-[14px]',
             multi
-              ? 'h-[280px] sm:h-[360px] md:h-[420px] lg:h-[580px]'
-              : 'h-[280px] sm:h-[360px] md:h-[420px] lg:h-[580px] max-w-[640px]',
+              ? 'w-[min(52vw,760px)] sm:w-[min(50vw,720px)] md:w-[min(48vw,780px)] lg:w-[min(46vw,860px)] h-[280px] sm:h-[360px] md:h-[460px] lg:h-[580px]'
+              : 'w-full max-w-[640px] h-[280px] sm:h-[360px] md:h-[420px] lg:h-[580px]',
           )}
         >
           <SliverMedia item={current} playSize={48} />
@@ -154,14 +217,28 @@ export function DetailSliverMediaGallery({
         </div>
 
         {multi ? (
-          <button
-            type="button"
-            onClick={goNext}
-            className="relative justify-self-stretch h-[200px] sm:h-[280px] md:h-[340px] lg:h-[460px] overflow-hidden opacity-45 hover:opacity-60 cursor-pointer border-0 p-0 bg-transparent min-w-0 rounded-xl"
-            aria-label="Next media"
-          >
-            {next ? <SliverMedia item={next} playSize={28} /> : null}
-          </button>
+          <div className="flex flex-1 min-w-0 items-center justify-start gap-2 sm:gap-3 md:gap-3.5 overflow-hidden">
+            {rightSlots.map((slot) => {
+              const item = slideAt(safeItems, activeIndex, slot.offset);
+              if (!item) return null;
+              return (
+                <button
+                  key={`R${slot.offset}`}
+                  type="button"
+                  onClick={goNext}
+                  className={cn(
+                    'relative min-w-0 overflow-hidden cursor-pointer border-0 p-0 bg-transparent rounded-xl',
+                    PEEK_FLEX[slot.size],
+                    PEEK_HEIGHT[slot.size],
+                    PEEK_OPACITY[slot.size],
+                  )}
+                  aria-label="Next media"
+                >
+                  <SliverMedia item={item} playSize={slot.size === 'near' ? 40 : 28} />
+                </button>
+              );
+            })}
+          </div>
         ) : null}
       </div>
 

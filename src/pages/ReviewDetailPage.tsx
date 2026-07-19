@@ -95,7 +95,7 @@ export function ReviewDetailPage() {
   return (
     <div className="min-h-screen bg-[#F4F7F9]">
       <div className="w-full px-5 sm:px-10 pt-4">
-        <div className="max-w-5xl mx-auto bg-[#000435] text-white px-5 sm:px-10 py-7 rounded-[14px] overflow-hidden">
+        <div className="max-w-5xl mx-auto choosify-dark-surface text-white px-5 sm:px-10 py-7 rounded-[14px] overflow-hidden">
           <nav className="text-xs text-white/45 mb-3" aria-label="Breadcrumb">
             <Link to="/" className="hover:text-white/80">Home</Link>
             <span className="mx-1.5">›</span>
@@ -208,7 +208,7 @@ export function ReviewDetailPage() {
           </Link>
           <Link
             to="/compare"
-            className="inline-flex items-center gap-1.5 bg-white border border-[#E8EDF2] text-[#1A1A2E] px-4 py-2.5 rounded-lg text-xs font-bold"
+            className="inline-flex items-center gap-1.5 choosify-emi-gradient text-white px-4 py-2.5 rounded-lg text-xs font-bold hover:brightness-110 transition-all"
           >
             <Scale size={14} /> Compare
           </Link>

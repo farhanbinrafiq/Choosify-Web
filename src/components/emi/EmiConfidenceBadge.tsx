@@ -5,8 +5,8 @@ import { cn } from '../../lib/utils';
 
 const COLORS: Record<EmiConfidenceLevel, string> = {
   high: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  medium: 'bg-amber-50 text-amber-700 border-amber-200',
-  low: 'bg-gray-50 text-gray-600 border-gray-200',
+  medium: 'choosify-emi-gradient text-white border-transparent',
+  low: 'choosify-emi-gradient text-white border-transparent',
   placeholder: 'bg-[#FFF0E8] text-[#E8500A]/80 border-[#E8500A]/20',
 };
 

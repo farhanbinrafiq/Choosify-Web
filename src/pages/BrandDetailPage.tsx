@@ -11,7 +11,7 @@ import { BRANDS, PRODUCTS } from "../constants";
 import { ProductCard } from "../components/ProductCard";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
-import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
+import { DETAIL_SINGLE_FEED, PRODUCT_CARD_GRID } from "../lib/pageLayout";
 import { DcUnderlineTabs } from "../components/design/DcUnderlineTabs";
 import { CardEngagementStrip } from "../components/CardEngagementStrip";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
@@ -43,8 +43,7 @@ import { BrandCouponsSection, buildBrandCoupons } from "../components/brand/Bran
 import { BrandWhereToBuySection } from "../components/brand/BrandWhereToBuySection";
 import { BrandFaqSection } from "../components/brand/BrandFaqSection";
 
-const BRAND_FEED_GRID =
-  "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3.5 w-full";
+const BRAND_FEED_GRID = PRODUCT_CARD_GRID;
 
 export function BrandDetailPage() {
   const brandHeroRef = useRef<HTMLDivElement>(null);
@@ -145,7 +144,8 @@ export function BrandDetailPage() {
   >(() => getBrandClaimStatus(brand.id));
 
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 10;
+  // 5 rows × up to 5 columns (PRODUCT_CARD_GRID) before pagination
+  const productsPerPage = 25;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -188,25 +188,17 @@ export function BrandDetailPage() {
 
   const previewShowProductCatalogSection =
     localClaimStatus !== "verified" || brandProducts.length > 0;
-  const previewShowDealsSection =
-    localClaimStatus !== "verified" ||
-    brandProducts.some((p: any) => p.discount || p.tag === "SALE" || p.tag === "HOT");
 
   const sectionNavItems = useMemo(
     () => [
       {
-        id: "brand-overview-section",
-        label: "Overview",
+        id: "deals-section",
+        label: "Deals & Coupons",
       },
       {
         id: "products-section",
         label: "Products",
         hidden: !previewShowProductCatalogSection,
-      },
-      {
-        id: "deals-section",
-        label: "Deals",
-        hidden: !previewShowDealsSection,
       },
       {
         id: "creator-reviews-section",
@@ -217,15 +209,19 @@ export function BrandDetailPage() {
         label: "Public Review",
       },
       {
+        id: "brand-overview-section",
+        label: "Overview",
+      },
+      {
         id: "store-location-section",
-        label: "Store Location",
+        label: "Where to Buy",
       },
       {
         id: "faq-section",
         label: "FAQ",
       },
     ],
-    [previewShowDealsSection, previewShowProductCatalogSection],
+    [previewShowProductCatalogSection],
   );
 
   const { activeId: activeSectionId, scrollToSection } =
@@ -1461,7 +1457,7 @@ export function BrandDetailPage() {
           .map((s) => ({ id: s.id, label: s.label }))}
         activeId={
           activeSectionId === "all"
-            ? sectionNavItems.find((s) => !s.hidden)?.id || "brand-overview-section"
+            ? sectionNavItems.find((s) => !s.hidden)?.id || "deals-section"
             : activeSectionId
         }
         onNavigate={scrollToSection}
@@ -1469,7 +1465,7 @@ export function BrandDetailPage() {
       />
 
       {/* 4. Unified Scrollable Body Wrapper */}
-      <div className="max-w-[1440px] mx-auto px-4 py-10 md:py-12 w-full flex flex-col gap-8">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 py-10 md:py-12 w-full flex flex-col gap-8">
         <div className={`${DETAIL_SINGLE_FEED}`}>
             {/* Brand Claim Acquisition Card (Part 6) */}
             {(localClaimStatus === "community" ||
@@ -1560,13 +1556,132 @@ export function BrandDetailPage() {
               </div>
             )}
 
-            <BrandOverviewSection
-              brandName={brand.name}
-              overviewData={overviewData}
-              claimStatus={'claimStatus' in brand ? brand.claimStatus : undefined}
-            />
+            {/* B. DEALS + COUPONS */}
+            {showDealsSection && (
+              <StudioWrap sectionId="brand-deals" className="scroll-mt-36">
+                <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
+                  <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
+                    TOP DEALS & COUPONS ON {brand.name.toUpperCase()}
+                  </h2>
+                  <Link
+                    to="/deals"
+                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#FF5B00] shrink-0"
+                  >
+                    VIEW ALL DEALS ›
+                  </Link>
+                </div>
+                <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
+                  Limited-time offers on {brand.name} products
+                </p>
 
-            {/* A. PRODUCTS SECTION (DC: before deals) */}
+                {localClaimStatus !== "verified" ? (
+                  <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-10">
+                    <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                      <Lock className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
+                      Active Exclusive Deals Locked
+                    </h3>
+                    <p className="text-xs text-gray-500 font-medium max-w-sm">
+                      Merchant-published coupons, flash discounts, and
+                      promotional banners are locked until ownership is
+                      verified.
+                    </p>
+                    {localClaimStatus === "community" && (
+                      <button
+                        onClick={() => {
+                          toast.loading(
+                            "Initiating secure brand verification link...",
+                            { duration: 1500 },
+                          );
+                          setTimeout(() => {
+                            updateBrandClaimStatus(brand.id, "pending");
+                            toast.success(
+                              "Verification submission parsed! Your status is now Pending Review.",
+                            );
+                          }, 1500);
+                        }}
+                        className="bg-[#FF5B00] hover:brightness-110 text-white py-2 px-5 rounded-lg text-[12px] font-bold tracking-tight mt-2 cursor-pointer transition-all border-none"
+                      >
+                        Claim Brand Ownership
+                      </button>
+                    )}
+                    {localClaimStatus === "pending" && (
+                      <div className="text-[12px] font-semibold text-amber-600 tracking-tight mt-2">
+                        Ownership Verification Under Review
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <DragScrollContainer className="flex gap-3.5 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory items-stretch">
+                    {finalDeals.map((product: any, i: number) => (
+                      <div
+                        key={product.id || i}
+                        className="w-[200px] sm:w-[220px] shrink-0 snap-start h-full"
+                      >
+                        <ProductCard
+                          product={product}
+                          variant="grid"
+                        />
+                      </div>
+                    ))}
+                    {brandPromos.map((promo, idx) => (
+                      <div
+                        key={`promo-${idx}`}
+                        className="w-[200px] sm:w-[220px] shrink-0 snap-start bg-white border border-[#E8EDF2] p-3.5 rounded-[10px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#FF5B00]/30 transition-all h-full min-h-[220px]"
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center mb-2 shadow-sm shrink-0">
+                          <Gift size={14} />
+                        </div>
+                        <h4 className="text-xs font-semibold text-[#1A1A2E] mb-0.5">
+                          {promo.title}
+                        </h4>
+                        <div className="text-sm font-semibold text-[#FF5B00] mb-3 leading-none">
+                          {promo.discount}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(promo.code);
+                            toast.success(
+                              `Promo Code "${promo.code}" copied to clipboard!`,
+                            );
+                          }}
+                          className="w-full mt-auto py-2 bg-white rounded-lg border border-dashed border-[#E8EDF2] hover:border-[#FF5B00] font-mono text-xs font-semibold text-[#1A1A2E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer"
+                        >
+                          <span className="text-[8px] text-gray-400 font-sans tracking-wide uppercase font-semibold">
+                            PROMO CODE
+                          </span>
+                          <span>{promo.code}</span>
+                        </button>
+                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2 block">
+                          {promo.expiry}
+                        </span>
+                      </div>
+                    ))}
+                  </DragScrollContainer>
+                )}
+
+                <div className="mt-9">
+                  <BrandCouponsSection
+                    brandName={brand.name}
+                    coupons={brandCoupons}
+                  />
+                </div>
+              </StudioWrap>
+            )}
+
+            {/* Coupons fallback when deals section is hidden — keep deals-section anchor for sticky nav */}
+            {!showDealsSection && (
+              <div id="deals-section" className="scroll-mt-36 w-full">
+                <BrandCouponsSection
+                  brandName={brand.name}
+                  coupons={brandCoupons}
+                />
+              </div>
+            )}
+
+          {/* A. PRODUCTS SECTION */}
             {showProductCatalogSection && (
               <StudioWrap sectionId="brand-catalog" className="scroll-mt-36">
                 <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
@@ -1656,128 +1771,7 @@ export function BrandDetailPage() {
               </StudioWrap>
             )}
 
-            {/* B. DEALS + COUPONS */}
-            {showDealsSection && (
-              <StudioWrap sectionId="brand-deals" className="scroll-mt-36">
-                <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
-                  <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
-                    TOP DEALS ON {brand.name.toUpperCase()}
-                  </h2>
-                  <Link
-                    to="/deals"
-                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#FF5B00] shrink-0"
-                  >
-                    VIEW ALL DEALS ›
-                  </Link>
-                </div>
-                <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
-                  Limited-time offers on {brand.name} products
-                </p>
-
-                {localClaimStatus !== "verified" ? (
-                  <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-10">
-                    <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
-                      <Lock className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
-                      Active Exclusive Deals Locked
-                    </h3>
-                    <p className="text-xs text-gray-500 font-medium max-w-sm">
-                      Merchant-published coupons, flash discounts, and
-                      promotional banners are locked until ownership is
-                      verified.
-                    </p>
-                    {localClaimStatus === "community" && (
-                      <button
-                        onClick={() => {
-                          toast.loading(
-                            "Initiating secure brand verification link...",
-                            { duration: 1500 },
-                          );
-                          setTimeout(() => {
-                            updateBrandClaimStatus(brand.id, "pending");
-                            toast.success(
-                              "Verification submission parsed! Your status is now Pending Review.",
-                            );
-                          }, 1500);
-                        }}
-                        className="bg-[#FF5B00] hover:brightness-110 text-white py-2 px-5 rounded-lg text-[12px] font-bold tracking-tight mt-2 cursor-pointer transition-all border-none"
-                      >
-                        Claim Brand Ownership
-                      </button>
-                    )}
-                    {localClaimStatus === "pending" && (
-                      <div className="text-[12px] font-semibold text-amber-600 tracking-tight mt-2">
-                        Ownership Verification Under Review
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className={BRAND_FEED_GRID}>
-                    {finalDeals.map((product: any, i: number) => (
-                      <ProductCard
-                        key={product.id || i}
-                        product={product}
-                        variant="grid"
-                      />
-                    ))}
-                    {brandPromos.map((promo, idx) => (
-                      <div
-                        key={`promo-${idx}`}
-                        className="bg-white border border-[#E8EDF2] p-3.5 rounded-[10px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#E8500A]/30 transition-all shadow-sm h-full"
-                      >
-                        <div className="w-7 h-7 rounded-lg bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center mb-2 shadow-sm shrink-0">
-                          <Gift size={14} />
-                        </div>
-                        <h4 className="text-xs font-semibold text-[#1A1A2E] mb-0.5">
-                          {promo.title}
-                        </h4>
-                        <div className="text-sm font-semibold text-[#E8500A] mb-3 leading-none">
-                          {promo.discount}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(promo.code);
-                            toast.success(
-                              `Promo Code "${promo.code}" copied to clipboard!`,
-                            );
-                          }}
-                          className="w-full py-2 bg-white rounded-lg border border-dashed border-[#E8EDF2] hover:border-[#E8500A] font-mono text-xs font-semibold text-[#1A1A2E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer shadow-xs"
-                        >
-                          <span className="text-[8px] text-gray-400 font-sans tracking-wide uppercase font-semibold">
-                            PROMO CODE
-                          </span>
-                          <span>{promo.code}</span>
-                        </button>
-                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2 block">
-                          {promo.expiry}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-9">
-                  <BrandCouponsSection
-                    brandName={brand.name}
-                    coupons={brandCoupons}
-                  />
-                </div>
-              </StudioWrap>
-            )}
-
-            {/* Coupons fallback when deals section is hidden */}
-            {!showDealsSection && (
-              <div className="w-full">
-                <BrandCouponsSection
-                  brandName={brand.name}
-                  coupons={brandCoupons}
-                />
-              </div>
-            )}
-
-          {/* Creator reviews */}
+            {/* Creator reviews */}
           <div id="creator-reviews-section" className="scroll-mt-36 w-full">
             {localClaimStatus !== "verified" ? (
               <div className="bg-white rounded-[10px] p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-sm border border-[#E8EDF2] py-12">
@@ -1873,9 +1867,15 @@ export function BrandDetailPage() {
             </div>
           </div>
 
-          <BrandWhereToBuySection brandName={brand.name} />
+            <BrandOverviewSection
+              brandName={brand.name}
+              overviewData={overviewData}
+              claimStatus={'claimStatus' in brand ? brand.claimStatus : undefined}
+            />
 
-          <BrandFaqSection brandName={brand.name} />
+            <BrandWhereToBuySection brandName={brand.name} />
+
+            <BrandFaqSection brandName={brand.name} />
 
           {/* Compare — softened DC-style */}
           <div className="w-full">
@@ -1948,13 +1948,13 @@ export function BrandDetailPage() {
                       {row.name}
                     </span>
                   </div>
-                  <div className="text-[11.5px] text-[#1A1A2E]">
+                  <div className="text-[11.5px] text-[#1A1A2E] whitespace-nowrap">
                     {row.overall}{" "}
                     <span className="text-[#FBBF24]">★★★★</span>
                   </div>
-                  <div className="text-[11.5px] text-[#4B5563]">{row.quality}</div>
-                  <div className="text-[11.5px] text-[#4B5563]">{row.value}</div>
-                  <div className="text-[11.5px] text-[#4B5563]">{row.support}</div>
+                  <div className="text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.quality}</div>
+                  <div className="text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.value}</div>
+                  <div className="text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.support}</div>
                   <div className="text-[11px] text-[#9AA0AC]">{row.products}</div>
                 </div>
               ))}
@@ -1963,7 +1963,7 @@ export function BrandDetailPage() {
               <button
                 type="button"
                 onClick={() => navigate("/compare")}
-                className="bg-[#14161f] text-white border-0 px-5 py-2.5 rounded-lg text-[12px] font-bold cursor-pointer hover:brightness-110"
+                className="choosify-emi-gradient text-white border-0 px-5 py-2.5 rounded-lg text-[12px] font-bold cursor-pointer hover:brightness-110 transition-all"
               >
                 COMPARE MORE BRANDS
               </button>

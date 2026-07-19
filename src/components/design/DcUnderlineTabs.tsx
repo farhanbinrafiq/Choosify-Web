@@ -13,6 +13,11 @@ interface DcUnderlineTabsProps {
   onNavigate: (id: string) => void;
   className?: string;
   maxWidthClass?: string;
+  /**
+   * When true, skip own max-width + side gutters — parent already provides
+   * the page content shell (e.g. Product Detail DC_CONTENT_MAX column).
+   */
+  flush?: boolean;
 }
 
 /** Choosify.dc.html Product Detail sticky underline tabs */
@@ -22,15 +27,23 @@ export function DcUnderlineTabs({
   onNavigate,
   className,
   maxWidthClass = 'max-w-[1280px]',
+  flush = false,
 }: DcUnderlineTabsProps) {
   if (!tabs.length) return null;
 
   return (
-    <div className={cn('choosify-sticky-section-nav sticky z-40 w-full px-5 sm:px-8 lg:px-10 mb-4', className)}>
+    <div
+      className={cn(
+        'choosify-sticky-section-nav sticky z-40 w-full mb-4',
+        // Padding outside max-width made the tab bar wider than feed cards;
+        // keep gutters on the same box as max-width so edges match page content.
+        !flush && cn(maxWidthClass, 'mx-auto px-5 sm:px-8 lg:px-10'),
+        className,
+      )}
+    >
       <div
         className={cn(
-          maxWidthClass,
-          'mx-auto flex border border-[#E8EDF2] border-b-[#E8EDF2] rounded-t-xl bg-white overflow-x-auto',
+          'w-full flex border border-[#E8EDF2] border-b-[#E8EDF2] rounded-t-xl bg-white overflow-x-auto',
         )}
       >
         {tabs.map((tab) => {

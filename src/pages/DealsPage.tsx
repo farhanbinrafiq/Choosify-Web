@@ -9,6 +9,7 @@ import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFil
 import { useGlobalState } from '../context/GlobalStateContext';
 import { DcListingHero } from '../components/design/DcListingHero';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { PaginationBar } from '../components/PaginationBar';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -357,12 +358,12 @@ export function DealsPage() {
         quickChips={['Flash Sale', 'Bank Offer', 'Cashback', 'Coupons', 'Weekend', 'Clearance']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
-        maxWidthClass="max-w-[1440px]"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
       />
 
       <DcListingStickyFilters
         overlapHero
-        maxWidthClass="max-w-[1440px]"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         items={[
           {
             id: 'flash',
@@ -459,7 +460,7 @@ export function DealsPage() {
         />
 
         {/* Master Flex Column Structure below sticky bar */}
-        <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-10 md:py-12 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+        <div className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-4 sm:px-5 lg:px-6 py-10 md:py-12 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
           
           {/* Left Sidebar */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">

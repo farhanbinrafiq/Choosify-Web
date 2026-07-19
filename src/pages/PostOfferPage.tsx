@@ -200,7 +200,7 @@ export function PostOfferPage() {
       <div className="w-full px-5 sm:px-8 pt-4">
         <section
           ref={heroRef}
-          className="relative max-w-4xl mx-auto w-full bg-[#000435] px-5 sm:px-8 pt-8 pb-7 rounded-[14px] overflow-hidden"
+          className="relative max-w-4xl mx-auto w-full choosify-dark-surface px-5 sm:px-8 pt-8 pb-7 rounded-[14px] overflow-hidden"
         >
           <h1 className="text-2xl sm:text-[28px] font-extrabold text-white tracking-tight mb-4">
             Post your offer

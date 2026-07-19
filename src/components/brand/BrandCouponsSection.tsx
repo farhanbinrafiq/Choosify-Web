@@ -1,4 +1,5 @@
 import React from 'react';
+import { DragScrollContainer } from '../FilterEngine';
 
 export type BrandCoupon = {
   pct: string;
@@ -30,11 +31,11 @@ export function BrandCouponsSection({
       <h3 className="text-[15px] font-extrabold text-[#1A1A2E] mb-3.5">
         {brandName.toUpperCase()} COUPONS
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <DragScrollContainer className="flex gap-3.5 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory">
         {items.map((cp) => (
           <div
             key={cp.code}
-            className="flex items-center gap-3 bg-white border border-dashed border-[#E5E7EB] rounded-[10px] px-4 py-3.5"
+            className="w-[220px] sm:w-[240px] shrink-0 snap-start flex items-center gap-3 bg-white border border-dashed border-[#E8EDF2] rounded-[10px] px-4 py-3.5"
           >
             <div className="text-[16px] font-extrabold text-[#FF5B00] w-11 shrink-0">
               {cp.pct}
@@ -47,7 +48,7 @@ export function BrandCouponsSection({
             </div>
           </div>
         ))}
-      </div>
+      </DragScrollContainer>
     </div>
   );
 }

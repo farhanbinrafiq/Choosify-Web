@@ -18,7 +18,7 @@ export function SpotlightBrandMiniCard({
 
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-[#E8EDF2] text-left h-full flex flex-col">
-      <div className="p-5 flex flex-col items-center text-center bg-[#000435] text-white flex-1">
+      <div className="p-5 flex flex-col items-center text-center choosify-dark-surface text-white flex-1">
         <div className="w-14 h-14 rounded-xl bg-black flex items-center justify-center p-2 shadow-lg mb-3 overflow-hidden">
           {publisher.logoUrl ? (
             <img src={publisher.logoUrl} alt="" className="w-full h-full object-cover rounded-lg" />

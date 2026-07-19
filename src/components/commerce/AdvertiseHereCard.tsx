@@ -126,7 +126,7 @@ export function ProductsSponsoredBanner({
   return (
     <div
       className={cn(
-        'relative h-[190px] rounded-[14px] overflow-hidden mb-6 bg-gradient-to-br from-[#1A1A2E] via-[#2323FF]/80 to-[#FF5B00]',
+        'relative h-[190px] rounded-[14px] overflow-hidden mb-6 choosify-dark-surface',
         className,
       )}
     >

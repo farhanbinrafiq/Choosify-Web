@@ -1,6 +1,11 @@
 /** Categories page DS-V2.1 layout tokens */
 
-export const CATEGORY_CONTENT_MAX = 'max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10';
+import { LISTING_PAGE_MAX_WIDTH } from './dcListingTokens';
+
+/** Alias — Categories hero + sticky quick-nav share the Deals listing silhouette */
+export const CATEGORY_LISTING_MAX_WIDTH = LISTING_PAGE_MAX_WIDTH;
+
+export const CATEGORY_CONTENT_MAX = `${LISTING_PAGE_MAX_WIDTH} mx-auto px-5 sm:px-8 lg:px-10`;
 
 export const CATEGORY_CARD_RADIUS = 'rounded-[20px]';
 

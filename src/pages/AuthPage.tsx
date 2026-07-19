@@ -9,6 +9,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { EmiAiLogo } from '../components/EmiAiLogo';
+import { cn } from '../lib/utils';
 
 // Inline TikTok icon component
 function TikTokIcon({ size = 18 }: { size?: number }) {
@@ -412,11 +413,13 @@ export const AuthPage: React.FC = () => {
           <button 
             type="button"
             onClick={() => setIsEmiChatOpen(true)}
-            className="bg-white/10 backdrop-blur-md px-5 py-2.5 rounded-full text-xs font-black flex items-center gap-2 border border-white/10 hover:bg-white/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-lg shadow-black/25"
+            className="choosify-emi-gradient px-5 py-2.5 rounded-full text-xs font-black flex items-center gap-2 border-0 text-white hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-lg shadow-black/25"
           >
             {/* Mascot Avatar with little hat */}
             <div className="relative w-5 h-5 flex items-center justify-center shrink-0">
-              <EmiAiLogo size={18} className="w-[18px] h-[18px]" />
+              <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center overflow-hidden p-px">
+                <EmiAiLogo size={18} className="w-[18px] h-[18px]" />
+              </span>
               <span className="absolute -top-1 -right-1 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -727,7 +730,15 @@ export const AuthPage: React.FC = () => {
                     {/* CTA Primary Submit Button */}
                     <button
                       type="submit"
-                      className="btn-primary w-full mt-5 h-13 text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                      className={cn(
+                        'w-full mt-5 h-13 text-xs uppercase tracking-wider flex items-center justify-center gap-2 rounded-xl font-black',
+                        authMode === 'register' && 'choosify-emi-gradient text-white',
+                        authMode === 'login' &&
+                          'bg-white border border-[#E5E7EB] choosify-emi-gradient-text',
+                        authMode !== 'login' &&
+                          authMode !== 'register' &&
+                          'btn-primary text-white',
+                      )}
                     >
                       <span>
                         {authMode === 'login' && 'Sign in to Choosify'}
@@ -738,7 +749,10 @@ export const AuthPage: React.FC = () => {
                         {authMode === 'verify-email' && 'Verify & Continue'}
                         {authMode === 'two-factor' && 'Verify and Login'}
                       </span>
-                      <ArrowRight size={16} />
+                      <ArrowRight
+                        size={16}
+                        stroke={authMode === 'login' ? 'url(#choosify-emi-icon-grad)' : 'currentColor'}
+                      />
                     </button>
                   </form>
 

@@ -67,7 +67,7 @@ export const CompareSection: React.FC<CompareSectionProps> = ({ onCompare }) => 
             />
           </div>
           
-          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-black text-slate-400 shrink-0 uppercase text-xs">
+          <div className="w-10 h-10 rounded-full choosify-emi-gradient flex items-center justify-center font-black text-white shrink-0 uppercase text-xs">
             VS
           </div>
           
@@ -83,7 +83,7 @@ export const CompareSection: React.FC<CompareSectionProps> = ({ onCompare }) => 
           <Button 
             type="submit" 
             variant="primary"
-            className="h-14 px-10 rounded-2xl bg-[#000435] text-white font-black uppercase tracking-wider text-sm hover:bg-[#FF5B00] transition-colors w-full md:w-auto shrink-0 shadow-md border-transparent"
+            className="h-14 px-10 rounded-2xl choosify-emi-gradient text-white font-black uppercase tracking-wider text-sm hover:brightness-110 transition-all w-full md:w-auto shrink-0 shadow-md border-transparent"
           >
             Compare
           </Button>

@@ -45,7 +45,7 @@ export const ContentHeroCard: React.FC<ContentHeroCardProps> = ({
   className
 }) => {
   return (
-    <section className={cn("w-full bg-[#000435] text-white pt-8 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden", className)}>
+    <section className={cn("w-full choosify-dark-surface text-white pt-8 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden", className)}>
       <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-30%] left-[-10%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
       

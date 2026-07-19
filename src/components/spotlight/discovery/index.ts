@@ -1,4 +1,5 @@
 export { DiscoverHero } from './DiscoverHero';
+export { DiscoverStickyFormatNav } from './DiscoverStickyFormatNav';
 export { DiscoverStructuredFeed } from './DiscoverStructuredFeed';
 export type { DiscoverQuickFilter } from './DiscoverStructuredFeed';
 export { DiscoverLowerSections } from './DiscoverLowerSections';

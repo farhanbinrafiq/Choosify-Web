@@ -30,7 +30,7 @@ export function GuideProductsPage() {
   return (
     <div className="bg-[#F4F7F9] min-h-screen pb-20">
       <div className="w-full px-5 sm:px-10 pt-4">
-        <header className="max-w-[1280px] mx-auto bg-[#000435] text-white px-5 sm:px-10 py-7 rounded-[14px] overflow-hidden">
+        <header className="max-w-[1280px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 py-7 rounded-[14px] overflow-hidden">
           <Link
             to={catalogGuideHref({ id: id ?? guide.id, slug: (guide as { slug?: string }).slug })}
             className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white transition-colors mb-3"

@@ -153,8 +153,15 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
           <Button variant="outline" onClick={onWishlist} leftIcon={<Heart className="w-4 h-4" />}>
             Add to Wishlist
           </Button>
-          <Button variant="outline" onClick={onCompare} leftIcon={<Repeat className="w-4 h-4" />}>
-            Compare
+          <Button
+            variant="outline"
+            onClick={onCompare}
+            leftIcon={
+              <Repeat className="w-4 h-4" stroke="url(#choosify-emi-icon-grad)" />
+            }
+            className="bg-white border-slate-200"
+          >
+            <span className="choosify-emi-gradient-text">Compare</span>
           </Button>
           <Button variant="cta" className="flex-1 min-w-[150px]" onClick={onBuyNow}>
             Buy Now

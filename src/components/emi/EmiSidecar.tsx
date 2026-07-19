@@ -33,7 +33,7 @@ export function EmiSidecar() {
     <div
       className={cn(
         'fixed z-[200] pointer-events-none',
-        'bottom-20 left-4 md:bottom-6 md:left-6',
+        'bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] left-4 md:bottom-6 md:left-6',
         'max-w-[280px] w-[calc(100vw-2rem)]',
       )}
     >

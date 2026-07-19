@@ -9,6 +9,7 @@ import { cn } from '../lib/utils';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { DcListingHero } from '../components/design/DcListingHero';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 
 export function BrandDealsPage() {
   const navigate = useNavigate();
@@ -231,12 +232,12 @@ export function BrandDealsPage() {
         quickChips={['Flash', 'Verified', 'Fashion', 'Electronics', 'Beauty', 'Home']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
-        maxWidthClass="max-w-[1440px]"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
       />
 
       <DcListingStickyFilters
         overlapHero
-        maxWidthClass="max-w-[1440px]"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         items={[
           {
             id: 'verified',
@@ -315,7 +316,7 @@ export function BrandDealsPage() {
 
       {/* CORE THREE-COLUMN SYSTEM LAYOUT INTEGRATION */}
       <div className="w-full bg-[#F4F7F9] min-h-screen py-8">
-        <div id="brand-deals-main" className={`scroll-mt-36 max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+        <div id="brand-deals-main" className={`scroll-mt-36 ${LISTING_PAGE_MAX_WIDTH} mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
           
           {/* Left Sidebar */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
@@ -465,7 +466,7 @@ export function BrandDealsPage() {
             </div>
 
             {/* Promo spotlight card */}
-            <div className="bg-[#000435] text-white rounded-xl border border-[#E8EDF2]/10 p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
+            <div className="choosify-dark-surface text-white rounded-xl border border-[#E8EDF2]/10 p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
               <div className="absolute top-0 right-0 w-28 h-28 bg-[#FF5B00]/10 rounded-full blur-2xl pointer-events-none" />
               
               <div>
@@ -767,7 +768,7 @@ export function BrandDealsPage() {
         </div>
       </div>
 
-      <section className="py-16 bg-[#000435] px-5 sm:px-8 relative overflow-hidden">
+      <section className="py-16 choosify-dark-surface px-5 sm:px-8 relative overflow-hidden">
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-3 leading-tight">
             Not finding your favorite brand?

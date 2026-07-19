@@ -1,6 +1,9 @@
 import React from 'react';
 import { DcListingStickyFilters } from '../design/DcListingStickyFilters';
-import { CATEGORY_QUICK_NAV_ITEMS } from '../../lib/design/categoryTokens';
+import {
+  CATEGORY_LISTING_MAX_WIDTH,
+  CATEGORY_QUICK_NAV_ITEMS,
+} from '../../lib/design/categoryTokens';
 
 interface CategoriesQuickNavProps {
   activeId: string;
@@ -18,6 +21,7 @@ export function CategoriesQuickNav({ activeId, onSelect, className }: Categories
     <DcListingStickyFilters
       className={className}
       overlapHero
+      maxWidthClass={CATEGORY_LISTING_MAX_WIDTH}
       items={CATEGORY_QUICK_NAV_ITEMS.map((item) => ({
         id: item.id,
         icon: item.letter,

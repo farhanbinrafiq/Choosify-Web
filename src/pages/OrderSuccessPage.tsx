@@ -120,7 +120,7 @@ export function OrderSuccessPage() {
       <div className="w-full px-5 sm:px-10 pt-4">
         <div
           ref={heroRef}
-          className="max-w-[1100px] mx-auto bg-[#000435] text-white px-5 sm:px-10 pt-6 pb-10 text-center rounded-[14px] overflow-hidden"
+          className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 pt-6 pb-10 text-center rounded-[14px] overflow-hidden"
         >
           <nav className="text-xs text-white/45 text-left mb-5" aria-label="Breadcrumb">
             <Link to="/" className="hover:text-[#FF5B00] transition-colors">
@@ -379,7 +379,7 @@ export function OrderSuccessPage() {
               </div>
             </div>
 
-            <div className="bg-[#000435] rounded-xl p-[18px] sm:px-5 text-white">
+            <div className="choosify-dark-surface rounded-xl p-[18px] sm:px-5 text-white">
               <div className="text-xs font-extrabold mb-1.5">LOVE CHOOSIFY?</div>
               <div className="text-[11px] text-white/50 mb-3.5">Rate your experience and earn 20 points!</div>
               <button

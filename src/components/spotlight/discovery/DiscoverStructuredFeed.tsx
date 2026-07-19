@@ -38,25 +38,6 @@ interface DiscoverStructuredFeedProps {
   className?: string;
 }
 
-const DISCOVER_FORMAT_TABS: Array<{
-  id: string;
-  label: string;
-  /** quickFilters id to click when available */
-  filterId: string;
-}> = [
-  { id: 'all', label: 'All', filterId: 'all' },
-  { id: 'guides', label: 'Buying Guides', filterId: 'guides' },
-  { id: 'videos', label: 'Videos', filterId: 'videos' },
-  { id: 'reviews', label: 'Creator Reviews', filterId: 'reviews' },
-  { id: 'collections', label: 'Collections', filterId: 'collections' },
-  { id: 'brands', label: 'Brand Stories', filterId: 'brands' },
-  { id: 'campaigns', label: 'Campaigns', filterId: 'campaigns' },
-  { id: 'blogs', label: 'Blogs', filterId: 'blogs' },
-  { id: 'offers', label: 'Deals', filterId: 'offers' },
-  { id: 'reels', label: 'Reels', filterId: 'reels' },
-  { id: 'live', label: 'Live', filterId: 'live' },
-];
-
 const LANE_LIMITS = {
   youtube: 4,
   reels: 6,
@@ -153,17 +134,6 @@ export function DiscoverStructuredFeed({
     return map;
   }, [quickFilters]);
 
-  const activeFormatId = useMemo(() => {
-    for (const tab of DISCOVER_FORMAT_TABS) {
-      if (tab.id === 'all') continue;
-      const qf = filterById.get(tab.filterId);
-      if (qf?.active) return tab.id;
-    }
-    if (activeTab === 'featured' && !filters.contentTypes.length) return 'all';
-    const byTab = DISCOVER_FORMAT_TABS.find((t) => t.id === activeTab);
-    return byTab?.id ?? 'all';
-  }, [filterById, activeTab, filters.contentTypes.length]);
-
   const triggerFilter = useCallback(
     (filterId: string) => {
       const qf = filterById.get(filterId);
@@ -174,14 +144,6 @@ export function DiscoverStructuredFeed({
       navigate(`/spotlight?tab=${filterId === 'all' ? 'featured' : filterId}`);
     },
     [filterById, navigate],
-  );
-
-  const onFormatNavigate = useCallback(
-    (id: string) => {
-      const tab = DISCOVER_FORMAT_TABS.find((t) => t.id === id);
-      triggerFilter(tab?.filterId ?? id);
-    },
-    [triggerFilter],
   );
 
   const activeSortPill = useMemo((): DiscoverSortPillId => {
@@ -266,30 +228,6 @@ export function DiscoverStructuredFeed({
 
   return (
     <div className={cn('w-full', className)}>
-      {/* Format tabs — Choosify.dc.html sticky underline bar, overlaps hero */}
-      <div className="choosify-sticky-section-nav sticky top-[104px] z-40 -mt-[16px] sm:-mt-[24px] md:-mt-[30px] mb-0 relative">
-        <div className="flex items-end gap-6 bg-white border border-[#E8EDF2] rounded-[14px] h-[88px] px-[18px] sm:px-[26px] overflow-x-auto shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
-          {DISCOVER_FORMAT_TABS.map((tab) => {
-            const active = tab.id === activeFormatId;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => onFormatNavigate(tab.id)}
-                className={cn(
-                  'shrink-0 py-3.5 text-[12.5px] font-bold cursor-pointer whitespace-nowrap border-0 border-b-2 bg-transparent transition-colors',
-                  active
-                    ? 'text-[#FF5B00] border-[#FF5B00]'
-                    : 'text-[#6B7280] border-transparent hover:text-[#1A1A2E]',
-                )}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Filter pills + AI Discover */}
       <div className="flex justify-between items-center py-4 pb-6 flex-wrap gap-2.5">
         <div className="flex gap-2.5 flex-wrap">
@@ -315,7 +253,7 @@ export function DiscoverStructuredFeed({
         <button
           type="button"
           onClick={onAiDiscover}
-          className="bg-gradient-to-r from-[#FF5B00] to-[#2323FF] text-white text-[11.5px] font-bold px-4 py-2 rounded-[20px] cursor-pointer border-0 min-h-[36px] shrink-0"
+          className="choosify-emi-gradient text-white text-[11.5px] font-bold px-4 py-2 rounded-[20px] cursor-pointer border-0 min-h-[36px] shrink-0 hover:brightness-110 transition-all"
         >
           ✦ AI Discover
         </button>

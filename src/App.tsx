@@ -6,7 +6,6 @@ import { PageSeo } from './components/PageSeo';
 import { GoogleAnalyticsRouteTracker } from './components/GoogleAnalyticsRouteTracker';
 import { ScrollToTop } from './components/ScrollToTop';
 import { FloatingOverlays } from './components/FloatingOverlays';
-import { MobileBottomNav } from './components/MobileBottomNav';
 import { PageBreadcrumbsBar } from './components/PageBreadcrumbs';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
 import { DashboardProvider } from './context/DashboardContext';
@@ -278,7 +277,6 @@ function AppContent() {
       </AnimatePresence>
       </MaintenanceGate>
       {!isCompactShell && <FloatingOverlays />}
-      {!isCompactShell && !isMessagesShell && <MobileBottomNav />}
       {!isCompactShell && !isMessagesShell && <Footer />}
     </div>
   );
@@ -336,7 +334,7 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="pb-14 lg:pb-0 mobile-fab-safe sm:pb-0"
+      className="pb-[calc(5rem+env(safe-area-inset-bottom,0px))] sm:pb-0"
     >
       <PageBreadcrumbsBar />
       {children}
@@ -401,7 +399,7 @@ function PWAInstallPrompt() {
   if (!showPrompt) return null;
 
   return (
-    <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] left-3 right-3 
+    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-3 right-3 
                     sm:bottom-[120px]
                     lg:left-auto lg:right-6 lg:bottom-[200px] 
                     lg:w-80 z-[150] 

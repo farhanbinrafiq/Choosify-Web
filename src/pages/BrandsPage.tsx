@@ -9,6 +9,7 @@ import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFil
 import { BrandCardDesign } from '../components/BrandCardDesign';
 import { DcListingHero } from '../components/design/DcListingHero';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
@@ -545,12 +546,12 @@ export function BrandsPage() {
         quickChips={['Fashion', 'Electronics', 'Beauty', 'Home', 'Sports', 'Food']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
-        maxWidthClass="max-w-[1680px]"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
       />
 
       <DcListingStickyFilters
         overlapHero
-        maxWidthClass="max-w-[1680px]"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         items={[
           {
             id: 'top-rated',
@@ -627,7 +628,7 @@ export function BrandsPage() {
         }}
       />
 
-      <div className={`max-w-[1680px] mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-10 md:py-12 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+      <div className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-10 md:py-12 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Left Sidebar */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
@@ -965,7 +966,7 @@ export function BrandsPage() {
             </>
           ) : null}
 
-          <div className="bg-[#000435] rounded-xl px-7 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white mb-8">
+          <div className="choosify-dark-surface rounded-xl px-7 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white mb-8">
             <div>
               <div className="text-[15px] font-bold mb-1">Want exclusive brand deals?</div>
               <div className="text-[12px] text-white/55">

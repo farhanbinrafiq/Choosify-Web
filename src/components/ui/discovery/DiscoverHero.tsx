@@ -46,7 +46,7 @@ export function DiscoverHero({
   aiDiscoverCta,
 }: DiscoverHeroProps) {
   return (
-    <section className="bg-[#000435] text-white relative pt-8 pb-14 px-6 md:px-10 lg:px-12 overflow-hidden animate-fade-in" id="discover-hero-component">
+    <section className="choosify-dark-surface text-white relative pt-8 pb-14 px-6 md:px-10 lg:px-12 overflow-hidden animate-fade-in" id="discover-hero-component">
       {/* Soft grid lines or glow circles */}
       <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-[#FF5B00]/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />

@@ -98,7 +98,7 @@ export function RetailCartPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
       <div className="w-full px-5 sm:px-10 pt-4">
-        <header className="max-w-[1100px] mx-auto bg-[#000435] text-white px-5 sm:px-10 py-7 rounded-[14px] overflow-hidden">
+        <header className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 py-7 rounded-[14px] overflow-hidden">
           <nav className="text-xs text-white/45 mb-3" aria-label="Breadcrumb">
             <Link to="/" className="hover:text-white/80">
               Home
@@ -401,7 +401,7 @@ export function RetailCartPage() {
                 </p>
               </div>
 
-              <div className="bg-[#000435] p-5 rounded-xl text-white flex gap-3.5 items-center">
+              <div className="choosify-dark-surface p-5 rounded-xl text-white flex gap-3.5 items-center">
                 <ShieldCheck size={28} className="text-[#FF5B00] shrink-0" />
                 <div>
                   <h4 className="text-[12.5px] font-extrabold leading-none mb-1.5">

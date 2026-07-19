@@ -12,6 +12,7 @@ import { RecommendationCardSkeleton } from '../components/Skeleton';
 import { DragScrollContainer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { DcListingHero } from '../components/design/DcListingHero';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { PaginationBar } from '../components/PaginationBar';
 import { AdSenseSlot } from '../components/AdSenseSlot';
 import { ListingAdRail } from '../components/ListingAdRail';
@@ -1250,12 +1251,12 @@ export function GuidesPage() {
         quickChips={['Phones', 'Laptops', 'AC', 'Fashion', 'Beauty', 'Home']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
-        maxWidthClass="max-w-[1440px]"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
       />
 
       <DcListingStickyFilters
         overlapHero
-        maxWidthClass="max-w-[1440px]"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         items={[
           {
             id: 'featured',
@@ -1357,7 +1358,7 @@ export function GuidesPage() {
         profileLabel="Buying guides"
       />
 
-      <main className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
+      <main className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
          {/* Left Sidebar Navigation - migrated to Full Filter Panel */}
          <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 flex-shrink-0 animate-fade-in text-left">
             {/* LEFT COLUMN SEARCH BAR */}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { DcListingHero } from '../../design/DcListingHero';
+import { LISTING_PAGE_MAX_WIDTH } from '../../../lib/design/dcListingTokens';
 
 interface DiscoverHeroProps {
   className?: string;
@@ -15,7 +16,7 @@ const DISCOVER_CHIPS = [
   'Creator Reviews',
 ];
 
-/** Choosify.dc.html Discover hero */
+/** Choosify.dc.html Discover hero — same listing silhouette as Deals */
 export function DiscoverHero({ className, onQuerySubmit }: DiscoverHeroProps) {
   return (
     <DcListingHero
@@ -27,6 +28,7 @@ export function DiscoverHero({ className, onQuerySubmit }: DiscoverHeroProps) {
       quickChips={DISCOVER_CHIPS}
       onSearch={(q) => onQuerySubmit?.(q)}
       onChipClick={(chip) => onQuerySubmit?.(chip)}
+      maxWidthClass={LISTING_PAGE_MAX_WIDTH}
     />
   );
 }

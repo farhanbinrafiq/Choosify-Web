@@ -90,6 +90,15 @@
     </style>
   </head>
   <body class="bg-[#EEF1F8] text-[#1A1D4E] min-h-screen flex flex-col antialiased">
+    <!-- Shared Emi gradient paint for Lucide / SVG icon strokes -->
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+      <defs>
+        <radialGradient id="choosify-emi-icon-grad" cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stop-color="#3a7bd5" />
+          <stop offset="99%" stop-color="#ff0188" />
+        </radialGradient>
+      </defs>
+    </svg>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

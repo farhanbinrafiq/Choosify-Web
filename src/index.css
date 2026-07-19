@@ -3,6 +3,28 @@
 
 :root {
   --choosify-navbar-height: 6.5rem;
+  /*
+   * Emi brand gradient — from public/emi-ai-logo.svg primary radialGradient
+   * stops: #3a7bd5 @ 0 → #ff0188 @ 0.99 (SVG radial; no linear angle).
+   */
+  --emi-gradient-from: #3a7bd5;
+  --emi-gradient-to: #ff0188;
+  --gradient-emi: radial-gradient(
+    circle at 35% 30%,
+    var(--emi-gradient-from) 0%,
+    var(--emi-gradient-to) 99%
+  );
+  /*
+   * Dark surface gradient — sourced from footer (.footer-brand-gradient):
+   * layered radials over near-opaque navy (no single linear angle).
+   *   1) radial 1200×500 at 15% 0% — orange hsla(22,100%,50%,0.18) → transparent 65%
+   *   2) radial 900×500 at 90% 20% — deep orange hsla(12,92%,45%,0.14) → transparent 65%
+   *   3) base rgba(10, 10, 31, 0.96)
+   */
+  --gradient-dark-surface:
+    radial-gradient(1200px 500px at 15% 0%, hsla(22, 100%, 50%, 0.18), transparent 65%),
+    radial-gradient(900px 500px at 90% 20%, hsla(12, 92%, 45%, 0.14), transparent 65%),
+    rgba(10, 10, 31, 0.96);
 }
 
 @theme {
@@ -214,10 +236,12 @@
 }
 
 .footer-brand-gradient {
-  background:
-    radial-gradient(1200px 500px at 15% 0%, hsla(22, 100%, 50%, 0.18), transparent 65%),
-    radial-gradient(900px 500px at 90% 20%, hsla(12, 92%, 45%, 0.14), transparent 65%),
-    rgba(10, 10, 31, 0.96) !important;
+  background: var(--gradient-dark-surface) !important;
+}
+
+/** Shared dark-surface cards / heroes / banners (footer-sourced) */
+.choosify-dark-surface {
+  background: var(--gradient-dark-surface);
 }
 
 .choosify-chrome-header {
@@ -230,11 +254,33 @@
 }
 
 .choosify-discover-pill {
-  background: linear-gradient(90deg, #6C4CFF, #FF5B00);
-  color: #fff !important;
-  font-weight: 800 !important;
-  padding: 5px 14px;
-  border-radius: 9999px;
+  /* Light badge behind Discover; gradient lives on the inner label */
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+.choosify-discover-pill-label {
+  background: var(--gradient-emi);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/** Shared Emi logo gradient fill (hero highlight pills, CTAs, etc.) */
+.choosify-emi-gradient {
+  background: var(--gradient-emi);
+}
+
+/** Emi gradient as text fill (navbar Discover, etc.) */
+.choosify-emi-gradient-text {
+  background: var(--gradient-emi);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .shadow-soft {
@@ -906,10 +952,10 @@
   }
 }
 
-/* Mobile FAB clearance for single action hub */
+/* Mobile FAB clearance (filter + Emi floating actions) */
 @media (max-width: 640px) {
   .mobile-fab-safe {
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 

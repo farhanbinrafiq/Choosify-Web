@@ -117,7 +117,7 @@ export function BrandPostDetailPage() {
       <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <section
           ref={heroRef}
-          className="relative max-w-[1440px] mx-auto w-full bg-[#000435] border border-white/5 rounded-[14px] overflow-hidden"
+          className="relative max-w-[1440px] mx-auto w-full choosify-dark-surface border border-white/5 rounded-[14px] overflow-hidden"
         >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,91,0,0.18),transparent_42%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />

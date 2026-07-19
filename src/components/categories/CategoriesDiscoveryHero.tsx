@@ -1,5 +1,6 @@
 import React from 'react';
 import { DcListingHero } from '../design/DcListingHero';
+import { CATEGORY_LISTING_MAX_WIDTH } from '../../lib/design/categoryTokens';
 import type { CategoriesPageStats } from '../../utils/categoryStats';
 
 interface CategoriesDiscoveryHeroProps {
@@ -24,7 +25,7 @@ export function CategoriesDiscoveryHero({
       quickChips={quickChips}
       onSearch={onSearch}
       onChipClick={onSearch}
-      maxWidthClass="max-w-[1440px]"
+      maxWidthClass={CATEGORY_LISTING_MAX_WIDTH}
     />
   );
 }

@@ -21,7 +21,7 @@ export const HeroSection = ({ content, isSaved, isFollowing, handleSave, setIsFo
   };
 
   return (
-    <section className="w-full bg-[#000435] text-white pt-10 pb-20 px-6 relative overflow-hidden">
+    <section className="w-full choosify-dark-surface text-white pt-10 pb-20 px-6 relative overflow-hidden">
       {/* Abstract Background Elements */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-900/20 to-transparent pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-gradient-to-tr from-purple-900/20 to-transparent pointer-events-none" />

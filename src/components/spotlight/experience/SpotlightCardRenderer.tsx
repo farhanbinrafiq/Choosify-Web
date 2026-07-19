@@ -285,10 +285,10 @@ export function SpotlightCardRenderer({
                 if (product) addToCompare(product);
                 trackClick();
               }}
-              className="p-2 rounded-full border border-gray-100 text-gray-400 hover:text-navy min-h-[44px] min-w-[44px]"
+              className="p-2 rounded-full border-0 bg-transparent min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
               aria-label="Compare"
             >
-              <GitCompare size={14} />
+              <GitCompare size={14} stroke="url(#choosify-emi-icon-grad)" />
             </button>
             <button
               type="button"

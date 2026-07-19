@@ -33,6 +33,8 @@ interface ProductDetailBuyBoxProps {
   onAskEmi?: () => void;
   /** Optional add-ons panel (rendered in right column) */
   addonsSlot?: React.ReactNode;
+  /** Outer shell is owned by the page — keep this flush when nested in DC_CONTENT_MAX */
+  className?: string;
 }
 
 /** Choosify.dc.html Product Detail — stats strip + 1.6fr / 1fr buy box */
@@ -65,6 +67,7 @@ export function ProductDetailBuyBox({
   onMessageSeller,
   onAskEmi,
   addonsSlot,
+  className,
 }: ProductDetailBuyBoxProps) {
   const priceNum = typeof product.price === 'number' ? product.price : Number(String(product.price).replace(/[^\d.]/g, '')) || 0;
   const origNum = product.originalPrice || product.mrp || Math.round(priceNum * 1.1);
@@ -74,7 +77,7 @@ export function ProductDetailBuyBox({
     uniqueSizes.length > 0 ? uniqueSizes : uniqueRams.length > 0 ? uniqueRams : ['8GB/128GB', '12GB/256GB', '12GB/512GB', '16GB/1TB'];
 
   return (
-    <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 pb-10 -mt-0">
+    <div className={cn('w-full pb-10', className)}>
       {/* Stats strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[repeat(4,1fr)_auto] gap-3.5 bg-white rounded-xl border border-[#E8EDF2] px-6 py-[18px] mb-4 items-center">
         <div className="text-center">
@@ -226,11 +229,7 @@ export function ProductDetailBuyBox({
             <button
               type="button"
               onClick={onAskEmi}
-              className="mt-1 inline-flex items-center gap-2 text-white border-none px-5 py-3 rounded-lg text-[12.5px] font-bold cursor-pointer"
-              style={{
-                background:
-                  'radial-gradient(1200px 500px at 15% 0%, hsla(22,100%,50%,0.5), transparent 65%), radial-gradient(900px 500px at 90% 20%, hsla(12,92%,45%,0.4), transparent 65%), #000435',
-              }}
+              className="mt-1 inline-flex items-center gap-2 text-white border-none px-5 py-3 rounded-lg text-[12.5px] font-bold cursor-pointer choosify-emi-gradient"
             >
               <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
                 <EmiAiLogo size={16} className="w-4 h-4" />
@@ -285,7 +284,7 @@ export function ProductDetailBuyBox({
             <button
               type="button"
               onClick={onCompare}
-              className="w-full bg-white text-[#1A1A2E] border border-[#E5E7EB] py-3 rounded-lg text-[12.5px] font-semibold"
+              className="w-full bg-white border border-[#E5E7EB] py-3 rounded-lg text-[12.5px] font-semibold choosify-emi-gradient-text hover:brightness-110 transition-all"
             >
               ⇄ Compare
             </button>

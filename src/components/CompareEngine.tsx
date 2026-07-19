@@ -492,7 +492,7 @@ export function CompareEngine() {
   const toggleSwitch = (on: boolean) =>
     cn(
       'relative w-[34px] h-[19px] rounded-[10px] shrink-0 transition-colors cursor-pointer',
-      on ? 'bg-[#2323FF]' : 'bg-[#D1D5DB]',
+      on ? 'bg-[#FF5B00]' : 'bg-[#D1D5DB]',
     );
 
   useRegisterPageFilters(
@@ -530,7 +530,7 @@ export function CompareEngine() {
           <button
             type="button"
             onClick={() => setIsProductSearchOpen(true)}
-            className="px-8 py-3 bg-[#2323FF] hover:bg-[#1a1acc] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer border-none"
+            className="px-8 py-3 bg-[#FF5B00] hover:brightness-110 text-white text-xs font-bold rounded-lg transition-all cursor-pointer border-none"
           >
             Add Products
           </button>
@@ -565,7 +565,7 @@ export function CompareEngine() {
                     'px-4 py-3 flex flex-col items-center justify-center text-center relative transition-all duration-300 min-h-[72px]',
                     p.matchesCriteria
                       ? productWinner?.id === p.id
-                        ? 'bg-[#2323FF]/5'
+                        ? 'bg-[#FF5B00]/5'
                         : 'bg-white'
                       : 'opacity-35 grayscale',
                   )}
@@ -598,7 +598,7 @@ export function CompareEngine() {
                   className="w-full px-[18px] py-3.5 flex items-center justify-between group hover:bg-[#FAFAFB] transition-colors border-b border-[#F1F1F3] bg-[#FAFAFB]"
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="text-[#2323FF] shrink-0 text-[17px]">{section.icon}</span>
+                    <span className="text-[#FF5B00] shrink-0 text-[17px]">{section.icon}</span>
                     <div className="text-left">
                       <h4 className="text-[12.5px] font-extrabold text-[#1A1A2E] tracking-tight leading-none">
                         {section.title}
@@ -668,7 +668,7 @@ export function CompareEngine() {
                                         <div className="text-[12.5px] font-bold text-[#1A1A2E]">{val}</div>
                                         <div className="w-full max-w-[100px] h-1 bg-[#F1F1F3] rounded-full overflow-hidden mt-1.5">
                                           <div
-                                            className="h-full bg-[#2323FF]"
+                                            className="h-full bg-[#FF5B00]"
                                             style={{ width: `${parseInt(val, 10) || 85}%` }}
                                           />
                                         </div>
@@ -692,14 +692,14 @@ export function CompareEngine() {
                                         {val}
                                       </span>
                                     ) : metric.type === 'tag' ? (
-                                      <span className="text-[12px] font-bold text-[#2323FF] underline underline-offset-2">
+                                      <span className="text-[12px] font-bold text-[#FF5B00] underline underline-offset-2">
                                         {val}
                                       </span>
                                     ) : (
                                       <span
                                         className={cn(
                                           'text-[12.5px] font-semibold text-[#1A1A2E]',
-                                          metric.highlight && 'font-extrabold text-[#2323FF]',
+                                          metric.highlight && 'font-extrabold text-[#1A1A2E]',
                                         )}
                                       >
                                         {val}
@@ -722,7 +722,7 @@ export function CompareEngine() {
 
         {includeInlineVerdict && (
           <div className="bg-[#FAFAFB] p-6 md:p-8 text-center md:text-left flex flex-col md:flex-row items-center gap-6 md:gap-8 border-t border-[#E8EDF2]">
-            <div className="w-12 h-12 rounded-full bg-[#2323FF]/10 flex items-center justify-center text-[#2323FF] shrink-0 border border-[#2323FF]/15">
+            <div className="w-12 h-12 rounded-full bg-[#FFF3EA] flex items-center justify-center text-[#FF5B00] shrink-0 border border-[#FFD8B8]">
               <Trophy size={20} />
             </div>
             <div className="flex-1">
@@ -748,7 +748,7 @@ export function CompareEngine() {
               <span className="text-[8px] font-extrabold text-[#9AA0AC] uppercase tracking-widest mb-1">
                 Recommended
               </span>
-              <span className="text-base font-extrabold text-[#2323FF] leading-none uppercase">
+              <span className="text-base font-extrabold text-[#FF5B00] leading-none uppercase">
                 {compareMode === 'product' && (productWinner?.name || '—')}
                 {compareMode === 'brand' && 'AARONG'}
                 {compareMode === 'creator' && 'NAFIS ANJUM'}
@@ -990,7 +990,7 @@ export function CompareEngine() {
                     setSelectedBudget(Number(e.target.value));
                     triggerSoftLoading();
                   }}
-                  className="w-full accent-[#2323FF] cursor-pointer mb-2"
+                  className="w-full accent-[#FF5B00] cursor-pointer mb-2"
                 />
                 <div className="flex justify-between text-[10.5px] text-[#9AA0AC] mb-5">
                   <span>৳ 1,500</span>
@@ -1046,7 +1046,7 @@ export function CompareEngine() {
               {isLoading && (
                 <div className="absolute inset-0 bg-white/70 z-50 flex items-center justify-center rounded-xl min-h-[200px]">
                   <div className="flex flex-col items-center gap-2">
-                    <div className="w-8 h-8 rounded-full border-2 border-[#2323FF] border-t-transparent animate-spin" />
+                    <div className="w-8 h-8 rounded-full border-2 border-[#FF5B00] border-t-transparent animate-spin" />
                     <span className="text-[13px] font-semibold text-[#1A1A2E]">Recalculating…</span>
                   </div>
                 </div>
@@ -1072,7 +1072,7 @@ export function CompareEngine() {
                         className={cn(
                           'text-[10px] font-extrabold px-2.5 py-1 rounded-full',
                           productWinner?.id === p.id
-                            ? 'bg-[#EEF0FF] text-[#2323FF]'
+                            ? 'bg-[#FFF3EA] text-[#FF5B00]'
                             : 'bg-[#F4F7F9] text-[#4B5563]',
                         )}
                       >
@@ -1095,7 +1095,7 @@ export function CompareEngine() {
                     <div className="text-[14.5px] font-extrabold text-[#1A1A2E] mb-0.5 line-clamp-2">{p.name}</div>
                     <div className="text-[11.5px] text-[#9AA0AC] mb-2.5">{p.brand}</div>
                     <div className="flex items-center gap-2 mb-3.5">
-                      <div className="text-base font-extrabold text-[#2323FF]">
+                      <div className="text-base font-extrabold text-[#1A1A2E]">
                         ৳ {(p.price || 0).toLocaleString()}
                       </div>
                       {p.specs?.officialStore === 'Yes' && (
@@ -1106,7 +1106,7 @@ export function CompareEngine() {
                     </div>
                     <Link
                       to={`/products/${p.id}`}
-                      className="block w-full text-center bg-[#2323FF] hover:bg-[#1a1acc] text-white py-2.5 rounded-lg text-xs font-bold no-underline"
+                      className="block w-full text-center bg-[#FF5B00] hover:brightness-110 text-white py-2.5 rounded-lg text-xs font-bold no-underline transition-all"
                     >
                       View on Store
                     </Link>
@@ -1116,7 +1116,7 @@ export function CompareEngine() {
                   <button
                     type="button"
                     onClick={() => setIsProductSearchOpen(true)}
-                    className="border-[1.5px] border-dashed border-[#D1D5DB] rounded-xl flex flex-col items-center justify-center gap-3 p-4 min-h-[290px] cursor-pointer bg-transparent hover:border-[#2323FF]/40 transition-colors"
+                    className="border-[1.5px] border-dashed border-[#D1D5DB] rounded-xl flex flex-col items-center justify-center gap-3 p-4 min-h-[290px] cursor-pointer bg-transparent hover:border-[#FF5B00]/40 transition-colors"
                   >
                     <div className="w-[54px] h-[54px] rounded-full border-[1.5px] border-dashed border-[#D1D5DB] flex items-center justify-center text-[22px] text-[#9AA0AC]">
                       +
@@ -1139,7 +1139,7 @@ export function CompareEngine() {
                 </div>
                 {productWinner ? (
                   <>
-                    <div className="text-[15px] font-extrabold text-[#2323FF] mb-1">{productWinner.name}</div>
+                    <div className="text-[15px] font-extrabold text-[#1A1A2E] mb-1">{productWinner.name}</div>
                     <div className="text-[11.5px] text-[#9AA0AC] mb-3.5">is the best overall choice</div>
                     <div className="flex flex-col gap-2 mb-4">
                       {winnerSummaryPoints.map((sp) => (
@@ -1151,7 +1151,7 @@ export function CompareEngine() {
                     </div>
                     <Link
                       to={`/products/${productWinner.id}`}
-                      className="block w-full text-center bg-[#2323FF] hover:bg-[#1a1acc] text-white py-2.5 rounded-lg text-xs font-bold no-underline"
+                      className="block w-full text-center bg-[#FF5B00] hover:brightness-110 text-white py-2.5 rounded-lg text-xs font-bold no-underline transition-all"
                     >
                       View Full Review
                     </Link>
@@ -1182,7 +1182,7 @@ export function CompareEngine() {
                         </div>
                         <div className="h-[5px] rounded-[3px] bg-[#F1F1F3]">
                           <div
-                            className="h-full rounded-[3px] bg-[#2323FF]"
+                            className="h-full rounded-[3px] choosify-emi-gradient"
                             style={{ width: `${sc.pct}%` }}
                           />
                         </div>
@@ -1200,9 +1200,9 @@ export function CompareEngine() {
                 <button
                   type="button"
                   onClick={handleAskEmi}
-                  className="w-full bg-[#000435] hover:bg-[#0a0a5c] text-white py-2.5 rounded-lg text-xs font-bold cursor-pointer border-none flex items-center justify-center gap-2"
+                  className="w-full text-white py-2.5 rounded-lg text-xs font-bold cursor-pointer border-none flex items-center justify-center gap-2 choosify-emi-gradient hover:brightness-110 transition-all"
                 >
-                  <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center overflow-hidden p-px">
+                  <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center overflow-hidden p-px shrink-0">
                     <EmiAiLogo size={16} className="w-4 h-4" />
                   </span>
                   Ask Emi AI
@@ -1257,7 +1257,7 @@ export function CompareEngine() {
             </div>
           </div>
 
-          <div className="bg-[#000435] rounded-xl px-7 py-6 mt-4 text-white flex flex-wrap justify-between items-center gap-6">
+          <div className="choosify-dark-surface rounded-xl px-7 py-6 mt-4 text-white flex flex-wrap justify-between items-center gap-6">
             <div className="flex-1 min-w-[280px]">
               <div className="text-[13px] font-extrabold mb-2">Choosify Verdict</div>
               <p className="text-xs text-white/70 leading-relaxed m-0">
@@ -1768,7 +1768,7 @@ export function CompareEngine() {
                                   setIsProductSearchOpen(false);
                                 }
                               }}
-                              className="flex-1 py-2 rounded-[5px] bg-[#E8500A] hover:bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest cursor-pointer"
+                              className="flex-1 py-2 rounded-[5px] bg-[#FF5B00] hover:brightness-110 text-white text-[10px] font-black uppercase tracking-widest cursor-pointer border-0 transition-all"
                             >
                               Add to compare
                             </button>
