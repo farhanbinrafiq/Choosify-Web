@@ -93,6 +93,8 @@ export interface GlobalStateContextType {
   updateCreatorClaimStatus: (creatorIdOrName: string, status: 'verified' | 'pending' | 'community') => void;
   featureFlags: Record<string, boolean>;
   isFeatureEnabled: (key: string) => boolean;
+  /** True when catalog hydrate failed and static mock data is in use. */
+  isUsingFallbackData: boolean;
 }
 
 const DEFAULT_USER: User = {
@@ -410,6 +412,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const [mockMappedProducts, setMockMappedProducts] = useState<CommerceProduct[]>([]);
   const [mockFallbackBrands, setMockFallbackBrands] = useState<Brand[]>([]);
   const [mockGuideFallback, setMockGuideFallback] = useState<ReturnType<typeof mapCatalogGuide>[]>([]);
+  const [isUsingFallbackData, setIsUsingFallbackData] = useState(false);
   const mockBrandsRef = useRef<Array<{ id: number; name: string }>>([]);
   const lastCatalogFetchAt = useRef(0);
 
@@ -476,8 +479,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
           if (entry) detailsMap[entry[0]] = entry[1];
         });
         setProductDetailsById(detailsMap);
+        setIsUsingFallbackData(false);
       } catch (error) {
         console.warn('[GlobalStateContext] Catalog API unavailable, using static fallback.', error);
+        setIsUsingFallbackData(true);
       }
     }
 
@@ -856,6 +861,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       updateCreatorClaimStatus,
       featureFlags,
       isFeatureEnabled: (key: string) => isFlagEnabled(featureFlags, key),
+      isUsingFallbackData,
     }}>
       {children}
     </GlobalStateContext.Provider>
