@@ -25,7 +25,7 @@ const DEFAULT_SCORE_ROWS = [
   { label: 'Value', pct: '90%', value: '4.6' },
 ];
 
-/** Choosify.dc.html Creator Profile hero — cover + circular avatar + trust/info cards */
+/** Choosify.dc.html Creator Profile hero — cover constrained to feed silhouette + circular avatar + trust/info cards */
 export function CreatorProfileHero({
   creator,
   claimStatus,
@@ -67,9 +67,10 @@ export function CreatorProfileHero({
 
   return (
     <div className="bg-[#F4F7F9]">
-      <div className="px-5 sm:px-8 lg:px-10">
+      {/* Cover — feed silhouette (not viewport edge-to-edge); matches Creator Profile max-w-[1180px] */}
+      <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <div className="max-w-[1180px] mx-auto relative">
-          <div className="h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden bg-[#000435] rounded-[14px]">
+          <div className="relative h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden bg-[#000435] rounded-[14px]">
             <img src={cover} alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-[14px]" />
           </div>

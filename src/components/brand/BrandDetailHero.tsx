@@ -31,7 +31,8 @@ const DEFAULT_SCORE_ROWS = [
 
 /**
  * Choosify.dc.html Brand Detail hero —
- * cover banner, circular logo overlap, light identity row, score/facts, info bar.
+ * cover banner constrained to feed silhouette (max-w-[1440px], rounded, top padding),
+ * circular logo overlap, light identity row, score/facts, info bar.
  */
 export function BrandDetailHero({
   brand,
@@ -82,9 +83,10 @@ export function BrandDetailHero({
 
   return (
     <div className="bg-[#F4F7F9]">
-      <div className="px-5 sm:px-8 lg:px-10">
-        <div className="max-w-[1180px] mx-auto relative">
-          <div className="h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden bg-[#000435] rounded-[14px]">
+      {/* Cover — feed silhouette (not viewport edge-to-edge); matches Brand Detail max-w-[1440px] */}
+      <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
+        <div className="max-w-[1440px] mx-auto relative">
+          <div className="relative h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden bg-[#000435] rounded-[14px]">
             <img src={cover} alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-[14px]" />
           </div>
@@ -96,7 +98,7 @@ export function BrandDetailHero({
         </div>
       </div>
 
-      <div className="max-w-[1180px] mx-auto px-5 sm:px-8 lg:px-10 pb-6">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 pb-6">
         <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mt-[74px] mb-5">
           <div className="flex-1 min-w-0 text-center lg:text-left w-full">
             <div className="text-[22px] font-extrabold text-[#1A1A2E] flex items-center justify-center lg:justify-start gap-2 flex-wrap">

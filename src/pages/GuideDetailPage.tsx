@@ -47,6 +47,7 @@ import { SpotlightContentHero, type SpotlightHeroVariant } from "../components/s
 import { DYNAMIC_GUIDES, DEFAULT_DYNAMIC_GUIDE } from "../data/mockGuides";
 import { CATEGORY_SPEC_CONFIGS } from "../data/guideSpecConfigs";
 import { ProductCard } from "../components/ProductCard";
+import { GuideOverallWinnerCard } from "../components/guide/GuideOverallWinnerCard";
 import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
 import toast from "react-hot-toast";
@@ -693,244 +694,55 @@ export function GuideDetailPage({
                 <SpotlightDetailsServicesSection content={spotlightContent} />
               )}
 
-              {/* SECTION 1: #1 OVERALL WINNER PRODUCT */}
-              {showSection('winner') && (
+              {/* SECTION 1: Overall Winner — Choosify.dc.html compact strip */}
+              {showSection('winner') && displayProducts.length > 0 && (
               <div id="winner" className="scroll-mt-36">
-                <div className="mb-4 text-left">
-                  <h2 className="text-2xl font-extrabold text-[#1A1A2E] mb-0.5">
-                    #1 Overall winner product
-                  </h2>
-                  <p className="text-[13px] font-bold text-[#9AA0AC]">
-                    The highest performing option matching overall premium
-                    metrics
-                  </p>
-                </div>
-
-                {displayProducts.length > 0 && (
-                  <div
-                    id="prod-sec-0"
-                    className="group relative w-full rounded-xl overflow-hidden shadow-sm flex flex-col bg-[#000435] text-white p-6 md:p-8 mb-8 mt-2 scroll-mt-36 border border-white/5"
-                  >
-                    {/* 1. CARD HEADER */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-extrabold text-[#FBBF24] tracking-wide">
-                            Editorial champion
-                          </span>
-                          <span className="px-1.5 py-0.5 text-[9px] font-bold text-[#F97316]/90 border border-[#F97316]/30 bg-[#F97316]/10 rounded-full">
-                            Approved
-                          </span>
-                        </div>
-                        <h3 className="text-xl md:text-2xl font-extrabold text-white mt-1">
-                          Overall winner
-                        </h3>
-                        <p className="text-xs text-gray-400 mt-1">
-                          First-place gold standard with peak scoring across all
-                          category tests.
-                        </p>
-                      </div>
-                      <div>
-                        <span className="rounded-full px-2.5 py-1 text-[10px] font-bold bg-white/5 text-gray-300 border border-white/10">
-                          ★ #1 ranked
-                        </span>
-                      </div>
-                    </div>
-
-                    <div
-                      className="h-[1px] my-5"
-                      style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+                {(() => {
+                  const winner = displayProducts[0] as any;
+                  const ratingNum = Number(winner?.rating ?? winner?.ratings ?? 4.8);
+                  const scoreNum = Math.min(10, Math.round((Number.isFinite(ratingNum) ? ratingNum : 4.8) * 2 * 10) / 10);
+                  const checksFromProduct = Array.isArray(winner?.highlights)
+                    ? winner.highlights
+                    : Array.isArray(winner?.tags)
+                      ? winner.tags
+                      : Array.isArray(winner?.pros)
+                        ? winner.pros
+                        : null;
+                  const reviewsRaw = winner?.reviewsCount ?? winner?.reviews ?? winner?.reviewCount ?? '13.4K';
+                  const reviewsLabel =
+                    typeof reviewsRaw === 'number'
+                      ? reviewsRaw >= 1000
+                        ? `${(reviewsRaw / 1000).toFixed(1).replace(/\.0$/, '')}K`
+                        : String(reviewsRaw)
+                      : String(reviewsRaw);
+                  return (
+                    <GuideOverallWinnerCard
+                      name={
+                        winner?.title
+                          ? `${winner.brand ? `${winner.brand} ` : ''}${winner.title}`.trim()
+                          : winner?.name || 'Overall winner'
+                      }
+                      image={winner?.image || PLACEHOLDER_IMAGE}
+                      badge={
+                        String(winner?.badge || winner?.category || guide?.category || 'BEST PICK')
+                          .toUpperCase()
+                      }
+                      rating={Number.isFinite(ratingNum) ? ratingNum.toFixed(1) : '4.8'}
+                      reviews={reviewsLabel}
+                      score={scoreNum.toFixed(1)}
+                      scoreLabel={scoreNum >= 9 ? 'EXCELLENT' : scoreNum >= 8 ? 'GREAT' : 'GOOD'}
+                      checks={
+                        checksFromProduct?.map(String).filter(Boolean).slice(0, 4) || [
+                          'Best Display Quality',
+                          'Top Tier Performance',
+                          'Excellent Camera System',
+                          'Long-term Software Support',
+                        ]
+                      }
+                      shopHref={`/products/${winner?.id ?? ''}`}
                     />
-
-                    {/* 2. BRAND & PRODUCT IDENTITY ROW */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-white/5 rounded-[5px] p-5 border border-white/5 mb-6">
-                      {/* Zone A: Logo / Stamp block */}
-                      <div
-                        className="flex items-center gap-4 cursor-pointer"
-                        onClick={() => navigate(`/products/${displayProducts[0]?.id}`)}
-                      >
-                        <div className="relative w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md border-2 border-[#F97316]/50 transition-transform hover:scale-105 shrink-0">
-                          <span className="text-[#000435] font-extrabold text-xl tracking-tight">
-                            {displayProducts[0]?.brand?.charAt(0) || "W"}
-                          </span>
-                          <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm">
-                            <svg
-                              className="w-3.5 h-3.5 text-[#22C55E]"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </span>
-                        </div>
-                        <div className="text-left">
-                          <span className="text-[11px] font-extrabold text-[#F97316] block mb-0.5">
-                            Established champion
-                          </span>
-                          <span className="text-[11px] font-bold text-gray-400 hover:text-white transition-colors">
-                            Best critic score ➔
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Zone B: Identity Info */}
-                      <div className="text-left md:border-l md:border-white/10 md:pl-6">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="text-base font-bold text-white">
-                            {displayProducts[0]?.brand}
-                          </h4>
-                          <span className="bg-[#22C55E]/15 text-[#22C55E] text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#22C55E]/20">
-                            Top pick
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-400 capitalize">
-                          Category:{" "}
-                          {displayProducts[0]?.category || "Premium Pick"}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2 text-[11px] font-bold text-gray-300">
-                          <span className="text-amber-400">4.9 ★★★★★</span>
-                          <span className="text-white/40">•</span>
-                          <span>Premium Sourcing</span>
-                        </div>
-                      </div>
-
-                      {/* Zone C: Metrics highlights */}
-                      <div className="flex flex-wrap gap-2 justify-start md:justify-end md:border-l md:border-white/10 md:pl-6 w-full">
-                        <span
-                          className="px-2.5 py-1 text-[10px] text-white/95 rounded-[5px] font-bold transition-all hover:bg-white/10 text-center"
-                          style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
-                        >
-                          🏆 Best Specs
-                        </span>
-                        <span
-                          className="px-2.5 py-1 text-[10px] text-white/95 rounded-[5px] font-bold transition-all hover:bg-white/10 text-center"
-                          style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
-                        >
-                          ⚡ Top Power
-                        </span>
-                        <span
-                          className="px-2.5 py-1 text-[10px] text-white/95 rounded-[5px] font-bold transition-all hover:bg-white/10 text-center"
-                          style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
-                        >
-                          🛡️ Highly Durable
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* 3. PRODUCT SPECIFIC PANEL */}
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                      {/* Left: Aspect Square Image Container */}
-                      <div
-                        className="md:col-span-4 relative aspect-square rounded-[5px] overflow-hidden flex items-center justify-center bg-white border border-white/5 shadow-inner p-6 cursor-pointer group shrink-0"
-                        onClick={() => navigate(`/products/${displayProducts[0]?.id}`)}
-                      >
-                        <img
-                          src={displayProducts[0]?.image}
-                          className="max-h-[90%] max-w-[90%] object-contain transition-transform duration-500 group-hover:scale-105"
-                          alt={displayProducts[0]?.title}
-                        />
-                        <div className="absolute top-2 left-2 bg-black/70 text-white text-[9px] font-bold px-2 py-0.5 rounded-full z-10">
-                          Verified source
-                        </div>
-                      </div>
-
-                      {/* Right: Expert Summary, Price & Primary Action */}
-                      <div className="md:col-span-8 flex flex-col justify-between text-left h-full">
-                        <div className="pt-1">
-                          <span className="text-[11px] font-extrabold text-[#F97316] block mb-1">
-                            Expert lab winner details
-                          </span>
-                          <h4 className="text-lg font-bold text-white mb-2">
-                            {displayProducts[0]?.brand}{" "}
-                            {displayProducts[0]?.title}
-                          </h4>
-                          <p className="text-xs text-gray-300 leading-relaxed font-medium mb-4">
-                            During our exhaustive evaluation cycles, this
-                            premier{" "}
-                            {displayProducts[0]?.category?.toLowerCase() ||
-                              "offering"}{" "}
-                            showed absolute superiority. Engineering tests
-                            confirmed outstanding thermal and structural
-                            resilience, high performance efficiency, and flawless
-                            build quality. It is the absolute highest recommended
-                            selection for demanding use cases.
-                          </p>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-white/10">
-                          <div className="text-left font-mono">
-                            <span className="text-[9px] text-gray-400 block -mb-0.5">
-                              ESTIMATED PRICE
-                            </span>
-                            <span className="text-xl font-black text-[#F97316] leading-none">
-                              ৳{displayProducts[0]?.price?.toLocaleString()}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2.5">
-                            <button
-                              onClick={() => {
-                                navigate(`/products/${displayProducts[0]?.id}`);
-                              }}
-                              className="bg-[#F97316] hover:bg-[#E8500A] text-white px-5 py-2.5 rounded-full text-[12px] font-bold transition-all shadow-lg active:scale-95 cursor-pointer border-0"
-                            >
-                              Shop now
-                            </button>
-                            <Link
-                              to={`/products/${displayProducts[0]?.id}`}
-                              className="bg-white/15 hover:bg-white/25 text-white px-5 py-2.5 rounded-full text-[12px] font-bold transition-all border border-white/10 cursor-pointer"
-                            >
-                              See best price
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 4. OUR SCORE MATRIX FOOTER */}
-                    <div className="mt-8 border-t border-white/10 pt-6">
-                      <h4 className="text-[11px] font-bold text-white/50 mb-4 text-left">
-                        Our score matrix
-                      </h4>
-                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                        {[
-                          { label: "Value For Money", val: 9.0 },
-                          { label: "Performance", val: 9.8 },
-                          { label: "Camera", val: 9.5 },
-                          { label: "Battery", val: 9.2 },
-                          { label: "Display", val: 9.6 },
-                        ].map((item, i) => (
-                          <div
-                            key={i}
-                            className="bg-white/5 rounded-[5px] p-3 border border-white/5 flex flex-col justify-between text-left"
-                          >
-                            <span className="text-[10px] font-bold text-white/50 leading-tight mb-2 line-clamp-1">
-                              {item.label}
-                            </span>
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-lg font-black text-[#F97316] leading-none font-mono">
-                                {item.val}
-                              </span>
-                              <span className="text-[8px] text-white/20 font-mono">
-                                /10
-                              </span>
-                            </div>
-                            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-2">
-                              <div
-                                className="h-full bg-[#F97316]"
-                                style={{ width: `${item.val * 10}%` }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
               )}
 
