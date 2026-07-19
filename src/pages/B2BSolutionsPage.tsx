@@ -75,10 +75,11 @@ export function B2BSolutionsPage() {
 
   return (
     <div className="min-h-screen bg-[#F0F8FF] font-sans">
-      {/* 1. HERO SECTION */}
-      <section className="relative h-[303px] flex items-center choosify-dark-gradient text-white overflow-hidden border-b border-white/5">
+      {/* 1. HERO SECTION — constrained to feed silhouette */}
+      <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
+        <section className="relative max-w-[1440px] mx-auto min-h-[220px] sm:min-h-[260px] flex items-center choosify-dark-gradient text-white overflow-hidden border border-white/5 rounded-[14px]">
         <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
-        <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full py-10">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-black uppercase tracking-widest mb-6">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
@@ -121,6 +122,7 @@ export function B2BSolutionsPage() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* 2. BODY CONTENT SECTION */}
       <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] py-16">

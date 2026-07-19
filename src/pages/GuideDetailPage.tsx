@@ -51,8 +51,7 @@ import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
 import toast from "react-hot-toast";
 import { FollowButton } from "../components/FollowButton";
-import { CreatorCardDesign } from "../components/CreatorCardDesign";
-import { useRegisterPageFilters, UniversalFilterRenderer } from "../components/FilterEngine";
+import { useRegisterPageFilters } from "../components/FilterEngine";
 import type { CatalogGuide } from "../types/catalog";
 import type { SpotlightContent } from "../types/spotlight/experience/content";
 import type { SpotlightPageSectionId } from "../types/spotlight/experience/pageSections";
@@ -200,7 +199,42 @@ export function GuideDetailPage({
         : "mobile",
   };
 
-  const creator = dynamicData.creator as any;
+  const creator = useMemo(() => {
+    const fromDynamic = dynamicData.creator as any;
+    if (fromDynamic?.name) return fromDynamic;
+    const pub = spotlightContent?.publisher;
+    if (pub && (pub.publisherType === 'creator' || pub.publisherType === 'influencer' || pub.publisherType === 'editorial_team')) {
+      return {
+        id: pub.publisherId || 'creator-editorial',
+        name: pub.name || guide?.author || 'Choosify Editorial',
+        avatar: pub.logoUrl || (guide as any)?.authorAvatar,
+        handle: pub.name,
+        verifiedStatus: pub.isVerified ? 'Verified creator' : 'Choosify Editor',
+        bestFor: 'Choosify Editor',
+        rating: 4.9,
+        reviews: 24,
+        followers: 1200,
+        platforms: [],
+        score: 92,
+      };
+    }
+    if (guide?.author) {
+      return {
+        id: (guide as any).creatorId || 'creator-editorial',
+        name: guide.author,
+        avatar: (guide as any).authorAvatar,
+        handle: guide.author,
+        verifiedStatus: 'Choosify Editor',
+        bestFor: 'Choosify Editor',
+        rating: 4.9,
+        reviews: 24,
+        followers: 1200,
+        platforms: [],
+        score: 92,
+      };
+    }
+    return fromDynamic;
+  }, [dynamicData.creator, spotlightContent?.publisher, guide]);
   const specConfig =
     CATEGORY_SPEC_CONFIGS[dynamicData.categorySpecType] ||
     CATEGORY_SPEC_CONFIGS.mobile;
@@ -258,56 +292,11 @@ export function GuideDetailPage({
   useRegisterPageFilters({
     pageName: guide ? guide.title : 'Guide Details',
     renderSearch: null,
-    quickFilters: [
-      { id: 'article', label: '📖 Editorial Guide', active: true, onClick: () => {} },
-      { id: 'products', label: '🛒 Recommended Products', active: false, onClick: () => document.getElementById('top-3')?.scrollIntoView({ behavior: 'smooth' }) },
-      { id: 'specs', label: '📊 Spec Breakdown', active: false, onClick: () => document.getElementById('specs')?.scrollIntoView({ behavior: 'smooth' }) },
-    ],
-    renderFilters: () => (
-      <UniversalFilterRenderer
-        profile={{
-          entity: 'guides',
-          filters: [
-            {
-              id: 'platform',
-              name: 'Platform',
-              type: 'single_select',
-              options: [
-                { value: 'all', label: 'All platforms' },
-                { value: 'youtube', label: 'YouTube' },
-                { value: 'reels', label: 'Reels / Shorts' },
-                { value: 'blog', label: 'Blog / Article' },
-              ],
-            },
-            {
-              id: 'topic',
-              name: 'Topic',
-              type: 'single_select',
-              options: [
-                { value: 'all', label: 'All topics' },
-                { value: 'mobile', label: 'Mobile & Tech' },
-                { value: 'fashion', label: 'Fashion' },
-                { value: 'home', label: 'Home & Living' },
-              ],
-            },
-          ],
-        }}
-        activeFilters={{
-          platform: relatedPlatformFilter,
-          topic: relatedTopicFilter,
-        }}
-        onFilterChange={(filterId, value) => {
-          if (filterId === 'platform') setRelatedPlatformFilter(value || 'all');
-          if (filterId === 'topic') setRelatedTopicFilter(value || 'all');
-        }}
-      />
-    ),
-    activeFilterCount:
-      (relatedPlatformFilter !== 'all' ? 1 : 0) + (relatedTopicFilter !== 'all' ? 1 : 0),
-    onClearAll: () => {
-      setRelatedPlatformFilter('all');
-      setRelatedTopicFilter('all');
-    },
+    // Section jumps live in StickySectionNav — avoid duplicate left FILTERS launcher
+    quickFilters: [],
+    renderFilters: null,
+    activeFilterCount: 0,
+    onClearAll: null,
     sectionNav: {
       items: guideSectionNavItems,
       activeId: activeSectionId,
@@ -315,7 +304,7 @@ export function GuideDetailPage({
       allLabel: 'Guide',
       profileLabel: 'Guide detail',
     },
-  }, [guide, relatedPlatformFilter, relatedTopicFilter, guideSectionNavItems, activeSectionId, scrollToSection]);
+  }, [guide, guideSectionNavItems, activeSectionId, scrollToSection]);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
@@ -434,11 +423,15 @@ export function GuideDetailPage({
   const guideLastUpdated = "Updated June 2026";
   const guideViewCount = 12_480;
   const guideKindLabel = useMemo(() => {
+    const guideType = String((guide as any)?.type || '').toLowerCase();
+    if (guideType === 'video') return 'VIDEO GUIDE';
+    if (guideType === 'reels' || guideType === 'shorts') return 'REELS GUIDE';
+    if (guideType === 'article' || guideType === 'blog') return 'BUYING GUIDE';
     if (spotlightContent?.contentType) {
-      return String(spotlightContent.contentType).replace(/_/g, " ").toUpperCase();
+      return String(spotlightContent.contentType).replace(/_/g, ' ').toUpperCase();
     }
-    return String(guide.category || "Buying Guide").toUpperCase();
-  }, [spotlightContent?.contentType, guide.category]);
+    return String(guide.category || 'BUYING GUIDE').toUpperCase();
+  }, [spotlightContent?.contentType, guide]);
   const authorInitial = (creator?.name || "C").charAt(0).toUpperCase();
 
   const descriptionTitle = useMemo(() => {
@@ -598,8 +591,8 @@ export function GuideDetailPage({
               }
               className="inline-flex items-center gap-1.5 bg-[linear-gradient(90deg,#6C4CFF,#FF5B00)] text-white border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 transition-all"
             >
-              <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center overflow-hidden p-px shrink-0">
-                <EmiAiLogo size={16} className="w-4 h-4" />
+              <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
+                <EmiAiLogo size={14} className="w-3.5 h-3.5" />
               </span>
               Ask Emi about this Discovery
             </button>
@@ -1106,7 +1099,8 @@ export function GuideDetailPage({
                   </div>
                 </div>
 
-              {/* GENERAL SCORING DETAILS BLOCK */}
+              {/* GENERAL SCORING DETAILS — only when CMS enables specifications */}
+              {showSection('specifications') && (
               <div className="bg-white border border-gray-100 rounded-[5px] p-6 shadow-sm text-left">
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 last:border-0 text-left">
                   <h3 className="text-xl font-extrabold text-[#1A1A2E] leading-none">
@@ -1166,6 +1160,7 @@ export function GuideDetailPage({
                   )}
                 </div>
               </div>
+              )}
               </div>
               )}
 
@@ -1339,34 +1334,75 @@ export function GuideDetailPage({
                   </div>
                 )}
 
-                {/* ABOUT THE AUTHOR | IN THIS GUIDE — CreatorCardDesign (new) only */}
+                {/* ABOUT THE AUTHOR | IN THIS GUIDE — Choosify.dc.html */}
                 {showCreatorCard && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-9">
                   <div id="reviewer-profile" className="scroll-mt-36 text-left">
                     <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5">
                       ABOUT THE AUTHOR
                     </div>
-                    <CreatorCardDesign
-                      creator={{
-                        id: creator.id || 'creator-farhan',
-                        name: creator.name,
-                        handle: creator.handle || creator.name,
-                        avatar: creator.avatar,
-                        score: creator.score ?? 92,
-                        bestFor: creator.verifiedStatus || creator.bestFor || 'Choosify Editor',
-                        platforms: creator.platforms || [],
-                        rating: creator.rating ?? 4.9,
-                        reviews: creator.reviews ?? 24,
-                        followers: creator.followersCount ?? creator.followers,
-                        niche: creator.verifiedStatus || creator.bestFor || 'Choosify Editor',
-                      }}
-                    />
-                    <FollowButton
-                      id={`creator-${creator.id || creator.name}`}
-                      name={creator.name}
-                      type="creator"
-                      className="w-full mt-2.5 h-9 rounded-lg text-[11.5px] font-bold"
-                    />
+                    <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 text-center">
+                      <div className="relative w-[72px] h-[72px] mx-auto mb-3">
+                        {creator?.avatar ? (
+                          <img
+                            src={creator.avatar}
+                            alt=""
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full rounded-full bg-[#FF5B00] flex items-center justify-center text-white text-[20px] font-extrabold">
+                            {authorInitial}
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-full bg-[#6C4CFF] border-2 border-white flex items-center justify-center text-white text-[11px] font-extrabold">
+                          ✓
+                        </div>
+                      </div>
+                      <div className="text-[14px] font-extrabold text-[#1A1A2E] mb-0.5">
+                        {creator.name}
+                      </div>
+                      <div className="text-[11.5px] text-[#9AA0AC] mb-3.5">
+                        {creator.verifiedStatus || creator.bestFor || 'Choosify Editor'}
+                      </div>
+                      <div className="flex items-center justify-center border-y border-[#F1F1F3] py-3 mb-3.5">
+                        <div className="flex-1">
+                          <div className="text-[14px] font-extrabold text-[#1A1A2E]">
+                            {creator.reviews ?? 24}
+                          </div>
+                          <div className="text-[9.5px] text-[#9AA0AC]">Reviews</div>
+                        </div>
+                        <div className="w-px h-[26px] bg-[#F1F1F3]" />
+                        <div className="flex-1">
+                          <div className="text-[14px] font-extrabold text-[#1A1A2E]">
+                            {typeof creator.followers === 'number'
+                              ? creator.followers >= 1000
+                                ? `${(creator.followers / 1000).toFixed(1)}K`
+                                : creator.followers
+                              : '1.2K'}
+                          </div>
+                          <div className="text-[9.5px] text-[#9AA0AC]">Followers</div>
+                        </div>
+                        <div className="w-px h-[26px] bg-[#F1F1F3]" />
+                        <div className="flex-1">
+                          <div className="text-[14px] font-extrabold text-[#1A1A2E]">
+                            {(creator.rating ?? 4.9).toFixed(1)}
+                          </div>
+                          <div className="text-[9.5px] text-[#9AA0AC]">Rating</div>
+                        </div>
+                      </div>
+                      <FollowButton
+                        id={`creator-${creator.id || creator.name}`}
+                        name={creator.name}
+                        type="creator"
+                        className="w-full h-9 rounded-lg text-[11.5px] font-bold mb-2"
+                      />
+                      <Link
+                        to={`/creators/${creator.id || creator.name}`}
+                        className="block w-full bg-[#000435] hover:bg-[#FF5B00] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors"
+                      >
+                        View Profile
+                      </Link>
+                    </div>
                   </div>
 
                   <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 text-left">
@@ -1419,6 +1455,29 @@ export function GuideDetailPage({
             >
               View All Guides ›
             </Link>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-4">
+            {[
+              { id: 'all', label: 'All platforms' },
+              { id: 'youtube', label: 'YouTube' },
+              { id: 'reels', label: 'Reels / Shorts' },
+              { id: 'blog', label: 'Blog / Article' },
+            ].map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setRelatedPlatformFilter(opt.id)}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-colors',
+                  relatedPlatformFilter === opt.id
+                    ? 'bg-[#FF5B00] text-white border-transparent'
+                    : 'bg-white text-[#4B5563] border-[#E8EDF2] hover:border-[#FF5B00]/40',
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-8">

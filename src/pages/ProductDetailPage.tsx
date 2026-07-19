@@ -258,14 +258,9 @@ export function ProductDetailPage() {
       allLabel: 'Product',
       profileLabel: 'Product profile',
     },
-    quickFilters: [
-      { id: 'pd-specs', label: '📊 Specs', active: false, onClick: () => jumpToProductSection('product-specs-section') },
-      { id: 'pd-creators', label: '🎥 Creator Reviews', active: false, onClick: () => jumpToProductSection('influencer-reviews-section') },
-      { id: 'pd-reviews', label: '⭐ Public Reviews', active: false, onClick: () => jumpToProductSection('public-reviews-section') },
-      { id: 'pd-overview', label: 'ℹ️ Product Overview', active: false, onClick: () => jumpToProductSection('product-overview-section') },
-      { id: 'pd-stores', label: '📖 Buying Guide', active: false, onClick: () => jumpToProductSection('product-utility-section') },
-    ],
-    renderFilters: null, // product detail has no sidebar filters
+    // Section jumps live in StickySectionNav — do not register as floating filters
+    quickFilters: [],
+    renderFilters: null,
     activeFilterCount: 0,
     onClearAll: null,
   });

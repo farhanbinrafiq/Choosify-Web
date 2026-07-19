@@ -567,10 +567,12 @@ export function AllProductsPage() {
         quickChips={['Smartphones', 'Laptops', 'AC', 'TV', 'Fashion', 'Beauty']}
         onSearch={(q) => executeSearch(q)}
         onChipClick={(q) => executeSearch(q)}
+        maxWidthClass="max-w-[1440px]"
       />
 
       <DcListingStickyFilters
         overlapHero
+        maxWidthClass="max-w-[1440px]"
         items={[
           {
             id: 'verified',

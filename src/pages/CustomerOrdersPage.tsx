@@ -79,32 +79,34 @@ Thank you for shopping with Choosify.bd
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9] text-[#1A1A2E] font-sans">
-      <header className="bg-[#000435] text-white border-b border-white/5">
-        <div className="max-w-7xl mx-auto w-full px-5 sm:px-8 py-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <Link
-              to="/dashboard"
-              className="text-[11px] font-semibold text-white/55 hover:text-white transition-colors flex items-center gap-1.5 mb-2"
-            >
-              <ArrowLeft size={12} /> Back to dashboard
-            </Link>
-            <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-white">
-              My orders
-            </h1>
-            <p className="mt-1.5 text-[13px] font-medium text-white/55">
-              Active and past purchases across Choosify sellers
-            </p>
-          </div>
+      <div className="w-full px-5 sm:px-8 pt-4">
+        <header className="max-w-7xl mx-auto bg-[#000435] text-white border border-white/5 rounded-[14px] overflow-hidden">
+          <div className="w-full px-5 sm:px-8 py-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <Link
+                to="/dashboard"
+                className="text-[11px] font-semibold text-white/55 hover:text-white transition-colors flex items-center gap-1.5 mb-2"
+              >
+                <ArrowLeft size={12} /> Back to dashboard
+              </Link>
+              <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-white">
+                My orders
+              </h1>
+              <p className="mt-1.5 text-[13px] font-medium text-white/55">
+                Active and past purchases across Choosify sellers
+              </p>
+            </div>
 
-          <Link
-            to="/messages"
-            className="inline-flex items-center gap-1.5 self-start sm:self-auto bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-[12px] px-4 py-2.5 rounded-lg transition-all"
-          >
-            <MessageSquare size={14} className="text-[#FF5B00]" />
-            Chat support
-          </Link>
-        </div>
-      </header>
+            <Link
+              to="/messages"
+              className="inline-flex items-center gap-1.5 self-start sm:self-auto bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-[12px] px-4 py-2.5 rounded-lg transition-all"
+            >
+              <MessageSquare size={14} className="text-[#FF5B00]" />
+              Chat support
+            </Link>
+          </div>
+        </header>
+      </div>
 
       <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-10 flex-1">
         {orders.length === 0 ? (

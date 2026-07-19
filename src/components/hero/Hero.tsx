@@ -19,7 +19,7 @@ const VIDEO_AUTOPLAY_MS = 10000;
 /**
  * Homepage hero — hybrid sliding banner:
  * full-bleed photo and/or muted looping video per slide,
- * diagonal clip-path, arrows + dots.
+ * straight bottom edge, arrows + dots.
  */
 export function Hero({ variant, className }: HeroProps) {
   const slides = useHomepageHeroSlides();
@@ -85,7 +85,6 @@ export function Hero({ variant, className }: HeroProps) {
         'relative w-full h-[320px] sm:h-[400px] md:h-[460px] overflow-hidden select-none',
         className,
       )}
-      style={{ clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 36px), 0 100%)' }}
       aria-label="Homepage hero"
       aria-roledescription="carousel"
       onMouseEnter={() => setAutoplay(false)}

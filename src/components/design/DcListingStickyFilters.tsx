@@ -32,7 +32,7 @@ export function DcListingStickyFilters({
     <div
       className={cn(
         'choosify-sticky-section-nav sticky z-40 w-full px-5 sm:px-8 lg:px-10',
-        overlapHero ? '-mt-[30px] mb-5' : 'mb-5 mt-0',
+        overlapHero ? '-mt-[16px] sm:-mt-[24px] md:-mt-[30px] mb-5' : 'mb-5 mt-0',
         className,
       )}
     >

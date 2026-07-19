@@ -338,10 +338,12 @@ export function CreatorsPage() {
         quickChips={['Tech', 'Fashion', 'Beauty', 'Food', 'Lifestyle', 'Gaming']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
+        maxWidthClass="max-w-[1680px]"
       />
 
       <DcListingStickyFilters
         overlapHero
+        maxWidthClass="max-w-[1680px]"
         items={[
           {
             id: 'tech',

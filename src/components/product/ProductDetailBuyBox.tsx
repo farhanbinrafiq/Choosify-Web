@@ -232,7 +232,7 @@ export function ProductDetailBuyBox({
                   'radial-gradient(1200px 500px at 15% 0%, hsla(22,100%,50%,0.5), transparent 65%), radial-gradient(900px 500px at 90% 20%, hsla(12,92%,45%,0.4), transparent 65%), #000435',
               }}
             >
-              <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center overflow-hidden p-px shrink-0">
+              <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
                 <EmiAiLogo size={16} className="w-4 h-4" />
               </span>
               Ask EMI about this product

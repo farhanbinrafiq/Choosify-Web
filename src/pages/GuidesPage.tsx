@@ -1250,10 +1250,12 @@ export function GuidesPage() {
         quickChips={['Phones', 'Laptops', 'AC', 'Fashion', 'Beauty', 'Home']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
+        maxWidthClass="max-w-[1440px]"
       />
 
       <DcListingStickyFilters
         overlapHero
+        maxWidthClass="max-w-[1440px]"
         items={[
           {
             id: 'featured',

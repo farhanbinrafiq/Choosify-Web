@@ -197,11 +197,11 @@ export function PostOfferPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
-      <section
-        ref={heroRef}
-        className="relative bg-[#000435] px-5 sm:px-8 pt-8 pb-7 border-b border-white/5"
-      >
-        <div className="max-w-4xl mx-auto w-full">
+      <div className="w-full px-5 sm:px-8 pt-4">
+        <section
+          ref={heroRef}
+          className="relative max-w-4xl mx-auto w-full bg-[#000435] px-5 sm:px-8 pt-8 pb-7 rounded-[14px] overflow-hidden"
+        >
           <h1 className="text-2xl sm:text-[28px] font-extrabold text-white tracking-tight mb-4">
             Post your offer
           </h1>
@@ -216,8 +216,8 @@ export function PostOfferPage() {
               Step {step} of 4 — {['Basic Info', 'Media Upload', 'Pricing & Details', 'Seller Info'][step - 1]}
             </span>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <div id="post-offer-form" className="px-5 sm:px-8 py-10">
         <div className="max-w-4xl mx-auto w-full">

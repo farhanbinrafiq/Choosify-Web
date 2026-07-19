@@ -1054,6 +1054,9 @@ interface DrawerFilterContextType {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   closeDrawer: () => void;
+  /** StickySectionNav already exposes Filter — hide duplicate left floating launchers */
+  stickyFilterChromeCount: number;
+  registerStickyFilterChrome: () => () => void;
 }
 
 const DrawerFilterContext = createContext<DrawerFilterContextType | undefined>(undefined);
@@ -1065,8 +1068,14 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [stickyFilterChromeCount, setStickyFilterChromeCount] = useState(0);
   const filterDrawerRef = useRef<HTMLDivElement>(null);
   const filterContainerRef = useRef<HTMLDivElement>(null);
+
+  const registerStickyFilterChrome = useCallback(() => {
+    setStickyFilterChromeCount((n) => n + 1);
+    return () => setStickyFilterChromeCount((n) => Math.max(0, n - 1));
+  }, []);
 
   const desktopDrawerTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
   const mobileDrawerTransition = { type: 'tween' as const, ease: [0.32, 0.72, 0, 1] as const, duration: 0.28 };
@@ -1143,6 +1152,8 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
         isOpen,
         setIsOpen,
         closeDrawer,
+        stickyFilterChromeCount,
+        registerStickyFilterChrome,
       }}
     >
       {children}
@@ -1165,7 +1176,11 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
           ref={filterContainerRef}
           className={cn(
             'fixed z-[219] flex flex-col-reverse items-start gap-3',
-            isMobile ? 'pointer-events-none' : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
+            isMobile
+              ? 'inset-x-0 bottom-0 pointer-events-none'
+              : stickyFilterChromeCount > 0
+                ? 'bottom-6 left-6 lg:bottom-8 lg:left-8 pointer-events-none'
+                : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
           )}
         >
           <AnimatePresence>
@@ -1351,7 +1366,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
             )}
           </AnimatePresence>
 
-          {!isMobile && (
+          {!isMobile && stickyFilterChromeCount === 0 && (
           <motion.button
             id="floating-filters-launcher"
             type="button"
@@ -1407,12 +1422,7 @@ export function useOpenPageFilters() {
 
   const hasDrawerFilters = !!activeFiltersData;
   const hasLegacyFilters =
-    !hasDrawerFilters &&
-    Boolean(
-      config.renderFilters ||
-        config.renderSearch ||
-        (config.quickFilters && config.quickFilters.length > 0),
-    );
+    !hasDrawerFilters && typeof config.renderFilters === 'function';
 
   const canOpenFilters = hasDrawerFilters || hasLegacyFilters;
   const activeFilterCount = config.activeFilterCount ?? 0;

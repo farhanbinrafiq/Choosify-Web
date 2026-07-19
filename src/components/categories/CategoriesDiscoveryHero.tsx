@@ -24,6 +24,7 @@ export function CategoriesDiscoveryHero({
       quickChips={quickChips}
       onSearch={onSearch}
       onChipClick={onSearch}
+      maxWidthClass="max-w-[1440px]"
     />
   );
 }

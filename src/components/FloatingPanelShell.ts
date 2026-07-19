@@ -26,6 +26,7 @@ export function getFloatingPanelClassName(options: {
   return cn(
     floatingPanelShellClass,
     textClass,
+    'pointer-events-auto',
     isMobile
       ? floatingPanelMobileClass
       : isTablet

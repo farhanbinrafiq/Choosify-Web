@@ -285,70 +285,72 @@ ORDER STATUS: PENDING_CONFIRMATION
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
-      {/* Checkout Header — Choosify.dc.html dark band */}
-      <header className="bg-[#000435] text-white px-5 sm:px-10 py-6">
-        <nav className="text-xs text-white/45 mb-3" aria-label="Breadcrumb">
-          <Link to="/" className="hover:text-[#FF5B00] transition-colors">
-            Home
-          </Link>
-          <span className="mx-1.5">›</span>
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="hover:text-[#FF5B00] transition-colors bg-transparent border-0 text-white/45 cursor-pointer p-0 text-xs"
-          >
-            Cart
-          </button>
-          <span className="mx-1.5">›</span>
-          <span className="text-white">Checkout</span>
-        </nav>
+      {/* Checkout Header — constrained to feed silhouette */}
+      <div className="w-full px-5 sm:px-10 pt-4">
+        <header className="max-w-[1280px] mx-auto bg-[#000435] text-white px-5 sm:px-10 py-6 rounded-[14px] overflow-hidden">
+          <nav className="text-xs text-white/45 mb-3" aria-label="Breadcrumb">
+            <Link to="/" className="hover:text-[#FF5B00] transition-colors">
+              Home
+            </Link>
+            <span className="mx-1.5">›</span>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="hover:text-[#FF5B00] transition-colors bg-transparent border-0 text-white/45 cursor-pointer p-0 text-xs"
+            >
+              Cart
+            </button>
+            <span className="mx-1.5">›</span>
+            <span className="text-white">Checkout</span>
+          </nav>
 
-        <div className="flex flex-wrap items-center justify-between gap-5">
-          <div>
-            <h1 className="text-2xl font-extrabold leading-tight">
-              SECURE <span className="text-[#FF5B00]">CHECKOUT</span>
-            </h1>
-            <p className="text-[12.5px] text-white/50 mt-1">
-              Almost there! Review and place your order
-            </p>
-          </div>
+          <div className="flex flex-wrap items-center justify-between gap-5">
+            <div>
+              <h1 className="text-2xl font-extrabold leading-tight">
+                SECURE <span className="text-[#FF5B00]">CHECKOUT</span>
+              </h1>
+              <p className="text-[12.5px] text-white/50 mt-1">
+                Almost there! Review and place your order
+              </p>
+            </div>
 
-          <div className="flex items-center gap-2.5" aria-label="Checkout steps">
-            {[
-              { num: 1, label: 'Cart', done: true },
-              { num: 2, label: 'Delivery', done: true },
-              { num: 3, label: 'Payment', done: false },
-              { num: 4, label: 'Confirm', done: false },
-            ].map((step, i, arr) => (
-              <div key={step.label} className="flex items-center gap-2.5">
-                <div className="flex flex-col items-center gap-1.5">
-                  <div
-                    className={cn(
-                      'w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-extrabold',
-                      step.done || step.num === 3
-                        ? 'bg-[#FF5B00] text-white'
-                        : 'bg-white/10 text-white/50 border border-white/15',
-                    )}
-                  >
-                    {step.num}
+            <div className="flex items-center gap-2.5" aria-label="Checkout steps">
+              {[
+                { num: 1, label: 'Cart', done: true },
+                { num: 2, label: 'Delivery', done: true },
+                { num: 3, label: 'Payment', done: false },
+                { num: 4, label: 'Confirm', done: false },
+              ].map((step, i, arr) => (
+                <div key={step.label} className="flex items-center gap-2.5">
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div
+                      className={cn(
+                        'w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-extrabold',
+                        step.done || step.num === 3
+                          ? 'bg-[#FF5B00] text-white'
+                          : 'bg-white/10 text-white/50 border border-white/15',
+                      )}
+                    >
+                      {step.num}
+                    </div>
+                    <div
+                      className={cn(
+                        'text-[10px] font-bold whitespace-nowrap',
+                        step.done || step.num === 3 ? 'text-white' : 'text-white/45',
+                      )}
+                    >
+                      {step.label}
+                    </div>
                   </div>
-                  <div
-                    className={cn(
-                      'text-[10px] font-bold whitespace-nowrap',
-                      step.done || step.num === 3 ? 'text-white' : 'text-white/45',
-                    )}
-                  >
-                    {step.label}
-                  </div>
+                  {i < arr.length - 1 && (
+                    <div className="w-10 h-0.5 bg-white/15 mb-5 hidden sm:block" />
+                  )}
                 </div>
-                {i < arr.length - 1 && (
-                  <div className="w-10 h-0.5 bg-white/15 mb-5 hidden sm:block" />
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
       <div className="max-w-[1280px] mx-auto w-full px-5 sm:px-10 py-7 pb-[60px] grid grid-cols-1 lg:grid-cols-3 gap-5 flex-1">
         {/* Input Forms */}

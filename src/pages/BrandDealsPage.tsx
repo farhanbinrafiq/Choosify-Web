@@ -231,10 +231,12 @@ export function BrandDealsPage() {
         quickChips={['Flash', 'Verified', 'Fashion', 'Electronics', 'Beauty', 'Home']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
+        maxWidthClass="max-w-[1440px]"
       />
 
       <DcListingStickyFilters
         overlapHero
+        maxWidthClass="max-w-[1440px]"
         items={[
           {
             id: 'verified',

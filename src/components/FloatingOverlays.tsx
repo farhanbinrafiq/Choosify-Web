@@ -50,11 +50,16 @@ export function FloatingOverlays() {
   const filterDrawerRef = useRef<HTMLDivElement>(null);
 
   const { config: filterConfig } = useFloatingFilter();
-  const { activeFiltersData: drawerFiltersData, setIsOpen: setDrawerFilterOpen, isOpen: drawerFilterOpen } = useFloatingFilters();
+  const {
+    activeFiltersData: drawerFiltersData,
+    setIsOpen: setDrawerFilterOpen,
+    isOpen: drawerFilterOpen,
+    stickyFilterChromeCount,
+  } = useFloatingFilters();
   const hasFilters =
-    !drawerFiltersData &&
-    (filterConfig.renderFilters !== null || (filterConfig.quickFilters && filterConfig.quickFilters.length > 0));
+    !drawerFiltersData && typeof filterConfig.renderFilters === 'function';
   const showFiltersAction = !!drawerFiltersData || hasFilters;
+  const showDesktopLegacyFilterLauncher = hasFilters && stickyFilterChromeCount === 0;
 
   // Tracking responsive media
   const [isMobile, setIsMobile] = useState(false);
@@ -344,13 +349,13 @@ export function FloatingOverlays() {
               onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={cn(
-                'w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none p-1.5 overflow-hidden',
+                className={cn(
+                'w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none p-2.5',
                 activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
               )}
               title="Ask Emi — Choosify Assistant"
             >
-              <EmiAiLogo size={40} className="w-full h-full object-contain" />
+              <EmiAiLogo size={32} className="w-8 h-8" />
             </motion.button>
           )}
         </AnimatePresence>
@@ -462,7 +467,11 @@ export function FloatingOverlays() {
         <div
           className={cn(
             'fixed z-[219] flex flex-col-reverse items-start gap-3',
-            isMobile ? 'pointer-events-none' : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
+            isMobile
+              ? 'inset-x-0 bottom-0 pointer-events-none'
+              : showDesktopLegacyFilterLauncher
+                ? 'bottom-6 left-6 lg:bottom-8 lg:left-8'
+                : 'bottom-6 left-6 lg:bottom-8 lg:left-8 pointer-events-none',
           )}
         >
         <AnimatePresence>
@@ -600,7 +609,7 @@ export function FloatingOverlays() {
           )}
         </AnimatePresence>
 
-        {!isMobile && (
+        {!isMobile && showDesktopLegacyFilterLauncher && (
         <motion.button
           type="button"
           onClick={() => {
@@ -648,14 +657,14 @@ export function FloatingOverlays() {
         onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[219] left-4 w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-1.5 overflow-hidden bg-white',
+          'fixed z-[219] left-4 w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-2.5 bg-white',
           activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
         )}
         style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
         aria-label="Ask Emi"
         title="Ask Emi"
       >
-        <EmiAiLogo size={44} className="w-full h-full object-contain" />
+        <EmiAiLogo size={36} className="w-9 h-9" />
       </motion.button>
     )}
 

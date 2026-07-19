@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { useOpenPageFilters, useDragScroll } from './FilterEngine';
+import { useOpenPageFilters, useDragScroll, useFloatingFilters } from './FilterEngine';
 import type { SectionNavItem } from '../hooks/useSectionScrollSpy';
 
 interface StickySectionNavProps {
@@ -73,9 +73,15 @@ export function StickySectionNav({
 }: StickySectionNavProps) {
   const items = sections.filter((s) => !s.hidden);
   const { canOpenFilters, openFilters, isFiltersOpen, activeFilterCount } = useOpenPageFilters();
+  const { registerStickyFilterChrome } = useFloatingFilters();
   const filterVisible = showFilter ?? canOpenFilters;
   const { ref: scrollTrackRef, props: scrollTrackProps } = useDragScroll({ grabCursor: false });
   const userScrollUntilRef = useRef(0);
+
+  useEffect(() => {
+    if (!filterVisible) return;
+    return registerStickyFilterChrome();
+  }, [filterVisible, registerStickyFilterChrome]);
 
   useEffect(() => {
     const track = scrollTrackRef.current;

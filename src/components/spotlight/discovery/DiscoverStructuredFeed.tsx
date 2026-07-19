@@ -267,7 +267,7 @@ export function DiscoverStructuredFeed({
   return (
     <div className={cn('w-full', className)}>
       {/* Format tabs — Choosify.dc.html sticky underline bar, overlaps hero */}
-      <div className="choosify-sticky-section-nav sticky top-[104px] z-40 -mt-[30px] mb-0 relative">
+      <div className="choosify-sticky-section-nav sticky top-[104px] z-40 -mt-[16px] sm:-mt-[24px] md:-mt-[30px] mb-0 relative">
         <div className="flex items-end gap-6 bg-white border border-[#E8EDF2] rounded-[14px] h-[88px] px-[18px] sm:px-[26px] overflow-x-auto shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
           {DISCOVER_FORMAT_TABS.map((tab) => {
             const active = tab.id === activeFormatId;

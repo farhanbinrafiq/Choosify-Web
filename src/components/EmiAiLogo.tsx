@@ -9,7 +9,7 @@ type EmiAiLogoProps = {
 
 /**
  * Official Emi AI mascot (blue→pink gradient character + EMI wordmark).
- * Uses object-contain so the full mark fits inside FABs and chips.
+ * Portrait asset — always object-contain inside padded square parents so sides aren't cropped.
  */
 export function EmiAiLogo({ className, size = 28, title = 'Emi AI' }: EmiAiLogoProps) {
   return (
@@ -20,7 +20,11 @@ export function EmiAiLogo({ className, size = 28, title = 'Emi AI' }: EmiAiLogoP
       alt={title}
       title={title}
       draggable={false}
-      className={cn('shrink-0 block object-contain', className)}
+      className={cn(
+        'shrink-0 block object-contain object-center max-w-full max-h-full',
+        className,
+      )}
+      style={{ aspectRatio: '1 / 1' }}
     />
   );
 }

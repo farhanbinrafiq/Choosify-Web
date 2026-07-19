@@ -26,7 +26,7 @@ export function DcHomePanel({
       className={cn(
         HOME_CONTENT_MAX,
         'relative z-[3]',
-        overlapHero ? 'mt-[-70px]' : spaced ? HOME_PANEL_GAP : undefined,
+        overlapHero ? 'mt-0 sm:mt-[-24px] md:mt-[-40px] lg:mt-[-56px]' : spaced ? HOME_PANEL_GAP : undefined,
         className,
       )}
     >

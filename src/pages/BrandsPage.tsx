@@ -545,10 +545,12 @@ export function BrandsPage() {
         quickChips={['Fashion', 'Electronics', 'Beauty', 'Home', 'Sports', 'Food']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
+        maxWidthClass="max-w-[1680px]"
       />
 
       <DcListingStickyFilters
         overlapHero
+        maxWidthClass="max-w-[1680px]"
         items={[
           {
             id: 'top-rated',

@@ -92,17 +92,19 @@ function mapGuideTypeToContent(guide: CatalogGuide): SpotlightContentType {
   if (tags.some((t) => t.includes('comparison')) || cat.includes('comparison')) return 'comparison';
   if (tags.some((t) => t.includes('tutorial')) || cat.includes('tutorial')) return 'tutorial';
   if (tags.some((t) => t.includes('tip')) || cat.includes('tip')) return 'tips';
-  if (guide.type === 'reels' || guide.type === 'shorts') return 'recommendation';
-  if (guide.type === 'video') {
-    if (tags.some((t) => t.includes('review'))) return 'product_review';
-    return 'product_review';
+  // Video / reels / shorts / articles all share the Guide Detail shell (buying_guide sections).
+  // Keep contentType as buying_guide so badges + manifests stay consistent with blog guides.
+  if (
+    guide.type === 'video' ||
+    guide.type === 'reels' ||
+    guide.type === 'shorts' ||
+    guide.type === 'article' ||
+    cat.includes('buying') ||
+    tags.some((t) => t.includes('buying') || t.includes('guide'))
+  ) {
+    return 'buying_guide';
   }
-  if (guide.type === 'article') {
-    if (cat.includes('buying') || tags.some((t) => t.includes('buying'))) return 'buying_guide';
-    return 'editorial';
-  }
-  if (cat.includes('buying') || tags.some((t) => t.includes('buying'))) return 'buying_guide';
-  return 'editorial';
+  return 'buying_guide';
 }
 
 function mapBrandPostKind(post: BrandPost): SpotlightContentType {

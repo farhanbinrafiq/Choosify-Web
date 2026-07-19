@@ -254,8 +254,9 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
 
   return (
     <div className="flex flex-col bg-[#F4F7F9] text-[#1A1A2E] h-[calc(100dvh-var(--choosify-navbar-height,4rem))] max-h-[calc(100dvh-var(--choosify-navbar-height,4rem))] overflow-hidden">
-      {/* Messages Header bar — Choosify.dc.html */}
-      <div className="w-full bg-[#000435] text-white shrink-0 px-5 sm:px-10 py-5 flex items-center justify-between gap-3.5 flex-wrap">
+      {/* Messages Header bar — constrained to feed silhouette */}
+      <div className="w-full px-5 sm:px-10 pt-3 shrink-0">
+        <div className="max-w-[1400px] mx-auto w-full bg-[#000435] text-white px-5 sm:px-10 py-5 flex items-center justify-between gap-3.5 flex-wrap rounded-[14px] overflow-hidden">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
@@ -316,6 +317,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
             <Package size={12} />
             My Orders
           </Link>
+        </div>
         </div>
       </div>
 

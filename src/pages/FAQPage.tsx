@@ -13,7 +13,7 @@ export function FAQPage() {
 
   return (
     <div className="min-h-screen bg-[#F4F7F9] font-sans text-left">
-      <StaticPageHero>
+      <StaticPageHero maxWidthClass="max-w-[1440px]">
         <div className="relative z-10 mx-auto w-full max-w-[1280px] px-5 sm:px-10 py-8">
           <div className="mb-3 flex items-center gap-1.5 text-xs text-white/45">
             <Link to="/" className="transition-colors hover:text-white/80">

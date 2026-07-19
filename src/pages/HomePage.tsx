@@ -25,7 +25,7 @@ export function HomePage() {
     {
       pageName: 'Home',
       renderSearch: null,
-      renderFilters: () => null,
+      renderFilters: null,
       activeFilterCount: 0,
       onClearAll: () => {},
       quickFilters: [],

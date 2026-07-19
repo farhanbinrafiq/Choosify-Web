@@ -67,9 +67,8 @@ function SliverMedia({
 }
 
 /**
- * Choosify.dc.html detail hero — full-bleed 6/14/46/32 sliver carousel.
- * Edge-to-edge on both sides; equal 14px gaps only between frames.
- * Used on Product Detail and Guide Detail (and Spotlight content heroes).
+ * Detail hero gallery — centered primary frame with balanced side peeks
+ * on both mobile and desktop (no left-heavy / sideways layout).
  */
 export function DetailSliverMediaGallery({
   items,
@@ -111,98 +110,67 @@ export function DetailSliverMediaGallery({
   const current = slideAt(safeItems, activeIndex, 0)!;
   const prev = slideAt(safeItems, activeIndex, -1);
   const next = slideAt(safeItems, activeIndex, 1);
-  const next2 = slideAt(safeItems, activeIndex, 2);
+  const multi = total > 1;
 
   return (
     <section className={cn('relative w-full overflow-x-clip', className)} aria-label={ariaLabel}>
-      {/* Desktop / tablet — full-bleed edge-to-edge; 14px gaps only between frames */}
+      {/* Symmetric 3-column grid keeps the primary slide dead-center on all breakpoints */}
       <div
         className={cn(
-          'hidden md:grid w-full items-center gap-3.5',
-          total > 1
-            ? 'grid-cols-[minmax(0,6fr)_minmax(0,14fr)_minmax(0,46fr)_minmax(0,32fr)]'
-            : 'grid-cols-1',
+          'mx-auto w-full max-w-[1100px] px-3 sm:px-5 grid items-center gap-2 sm:gap-3.5',
+          multi
+            ? 'grid-cols-[minmax(0,1fr)_minmax(0,2.6fr)_minmax(0,1fr)]'
+            : 'grid-cols-1 justify-items-center',
         )}
       >
-        {total > 1 && (
-          <div className="relative h-[340px] lg:h-[460px] overflow-hidden opacity-45 min-w-0 rounded-none">
-            {prev ? <SliverMedia item={prev} playSize={36} /> : null}
-          </div>
-        )}
-        {total > 1 && (
+        {multi ? (
           <button
             type="button"
-            onClick={goNext}
-            className="relative h-[320px] lg:h-[430px] overflow-hidden opacity-40 cursor-pointer border-0 p-0 bg-transparent min-w-0 rounded-none"
-            aria-label="Skip ahead"
+            onClick={goPrev}
+            className="relative justify-self-stretch h-[200px] sm:h-[280px] md:h-[340px] lg:h-[460px] overflow-hidden opacity-45 hover:opacity-60 cursor-pointer border-0 p-0 bg-transparent min-w-0 rounded-xl"
+            aria-label="Previous media"
           >
-            {next2 ? <SliverMedia item={next2} playSize={40} /> : null}
+            {prev ? <SliverMedia item={prev} playSize={28} /> : null}
           </button>
-        )}
-        <div
-          className={cn(
-            'relative h-[420px] lg:h-[580px] overflow-hidden min-w-0',
-            total > 1 ? 'rounded-[14px]' : 'rounded-none w-full',
-          )}
-        >
-          <SliverMedia item={current} playSize={56} />
-          <button
-            type="button"
-            onClick={() => setZoomOpen(true)}
-            className="absolute top-3.5 right-3.5 w-[34px] h-[34px] rounded-full bg-black/50 border-0 text-white text-sm cursor-pointer flex items-center justify-center z-10"
-            aria-label="Zoom media"
-          >
-            🔍
-          </button>
-        </div>
-        {total > 1 && (
-          <button
-            type="button"
-            onClick={goNext}
-            className="relative h-[380px] lg:h-[510px] overflow-hidden opacity-85 cursor-pointer border-0 p-0 bg-transparent min-w-0 rounded-none"
-            aria-label="Next media"
-          >
-            {next ? <SliverMedia item={next} playSize={52} /> : null}
-          </button>
-        )}
-      </div>
+        ) : null}
 
-      {/* Mobile: edge-to-edge current + peek */}
-      <div className="flex md:hidden gap-2.5 items-center w-full">
         <div
           className={cn(
-            'relative h-[320px] overflow-hidden min-w-0',
-            total > 1 ? 'flex-[1_1_70%] rounded-r-[14px] rounded-l-none' : 'flex-1 rounded-none',
+            'relative overflow-hidden min-w-0 w-full rounded-2xl md:rounded-[14px]',
+            multi
+              ? 'h-[280px] sm:h-[360px] md:h-[420px] lg:h-[580px]'
+              : 'h-[280px] sm:h-[360px] md:h-[420px] lg:h-[580px] max-w-[640px]',
           )}
         >
           <SliverMedia item={current} playSize={48} />
           <button
             type="button"
             onClick={() => setZoomOpen(true)}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 border-0 text-white text-xs cursor-pointer flex items-center justify-center z-10"
+            className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 w-8 h-8 sm:w-[34px] sm:h-[34px] rounded-full bg-black/50 border-0 text-white text-xs sm:text-sm cursor-pointer flex items-center justify-center z-10"
             aria-label="Zoom media"
           >
             🔍
           </button>
         </div>
-        {next && total > 1 && (
+
+        {multi ? (
           <button
             type="button"
             onClick={goNext}
-            className="relative flex-[0_0_28%] h-[280px] overflow-hidden opacity-85 cursor-pointer border-0 p-0 bg-transparent rounded-l-[14px] rounded-r-none"
+            className="relative justify-self-stretch h-[200px] sm:h-[280px] md:h-[340px] lg:h-[460px] overflow-hidden opacity-45 hover:opacity-60 cursor-pointer border-0 p-0 bg-transparent min-w-0 rounded-xl"
             aria-label="Next media"
           >
-            <SliverMedia item={next} playSize={36} />
+            {next ? <SliverMedia item={next} playSize={28} /> : null}
           </button>
-        )}
+        ) : null}
       </div>
 
-      {total > 1 && (
+      {multi && (
         <>
           <button
             type="button"
             onClick={goPrev}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 border-0 cursor-pointer text-[15px] shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center justify-center z-20 text-[#1A1A2E]"
+            className="absolute left-2 sm:left-4 top-[calc(50%-12px)] -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 border-0 cursor-pointer text-[15px] shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center justify-center z-20 text-[#1A1A2E]"
             aria-label="Previous media"
           >
             <ChevronLeft size={18} />
@@ -210,7 +178,7 @@ export function DetailSliverMediaGallery({
           <button
             type="button"
             onClick={goNext}
-            className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 border-0 cursor-pointer text-[15px] shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center justify-center z-20 text-[#1A1A2E]"
+            className="absolute right-2 sm:right-4 top-[calc(50%-12px)] -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 border-0 cursor-pointer text-[15px] shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center justify-center z-20 text-[#1A1A2E]"
             aria-label="Next media"
           >
             <ChevronRight size={18} />

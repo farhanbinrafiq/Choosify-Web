@@ -116,36 +116,41 @@ export function OrderSuccessPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9] pb-16">
-      {/* Confirmation hero — Choosify.dc.html Order Success */}
-      <div ref={heroRef} className="w-full bg-[#000435] text-white px-5 sm:px-10 pt-6 pb-10 text-center">
-        <nav className="text-xs text-white/45 text-left mb-5" aria-label="Breadcrumb">
-          <Link to="/" className="hover:text-[#FF5B00] transition-colors">
-            Home
-          </Link>
-          <span className="mx-1.5">›</span>
-          <span>Order Success</span>
-          <span className="mx-1.5">›</span>
-          <span className="text-[#FF5B00]">{order.orderId}</span>
-        </nav>
+      {/* Confirmation hero — constrained to feed silhouette */}
+      <div className="w-full px-5 sm:px-10 pt-4">
+        <div
+          ref={heroRef}
+          className="max-w-[1100px] mx-auto bg-[#000435] text-white px-5 sm:px-10 pt-6 pb-10 text-center rounded-[14px] overflow-hidden"
+        >
+          <nav className="text-xs text-white/45 text-left mb-5" aria-label="Breadcrumb">
+            <Link to="/" className="hover:text-[#FF5B00] transition-colors">
+              Home
+            </Link>
+            <span className="mx-1.5">›</span>
+            <span>Order Success</span>
+            <span className="mx-1.5">›</span>
+            <span className="text-[#FF5B00]">{order.orderId}</span>
+          </nav>
 
-        <div className="w-16 h-16 rounded-full bg-[rgba(7,208,80,0.15)] border-2 border-[#07DD05] flex items-center justify-center text-[#07DD05] mx-auto mb-[18px]">
-          <CheckCircle2 size={32} />
+          <div className="w-16 h-16 rounded-full bg-[rgba(7,208,80,0.15)] border-2 border-[#07DD05] flex items-center justify-center text-[#07DD05] mx-auto mb-[18px]">
+            <CheckCircle2 size={32} />
+          </div>
+          <h1 className="text-2xl font-extrabold mb-2.5 leading-tight">
+            THANK YOU — YOUR ORDER IS <span className="text-[#07DD05]">CONFIRMED!</span>
+          </h1>
+          <p className="text-[13px] text-white/55 max-w-[520px] mx-auto">
+            Order <strong className="text-white font-mono">{order.orderId}</strong> has been recorded.
+            Sellers have been notified and your items will be on the way soon.
+          </p>
+          <p className="text-[11.5px] text-white/45 mt-3.5">
+            {formatDateTime(order.createdAt)}
+          </p>
         </div>
-        <h1 className="text-2xl font-extrabold mb-2.5 leading-tight">
-          THANK YOU — YOUR ORDER IS <span className="text-[#07DD05]">CONFIRMED!</span>
-        </h1>
-        <p className="text-[13px] text-white/55 max-w-[520px] mx-auto">
-          Order <strong className="text-white font-mono">{order.orderId}</strong> has been recorded.
-          Sellers have been notified and your items will be on the way soon.
-        </p>
-        <p className="text-[11.5px] text-white/45 mt-3.5">
-          {formatDateTime(order.createdAt)}
-        </p>
       </div>
 
       <div
         id="order-success-details"
-        className="max-w-[1100px] mx-auto w-full px-5 sm:px-10 -mt-[30px] relative z-[2] space-y-5"
+        className="max-w-[1100px] mx-auto w-full px-5 sm:px-10 -mt-[16px] sm:-mt-[24px] md:-mt-[30px] relative z-[2] space-y-5"
       >
         {/* Overlapping summary card */}
         <div className="bg-white rounded-xl border border-[#E8EDF2] p-[22px] sm:px-[26px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] gap-5 items-center shadow-[0_12px_30px_rgba(0,0,0,0.08)]">

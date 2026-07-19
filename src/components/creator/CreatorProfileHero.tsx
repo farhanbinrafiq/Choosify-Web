@@ -67,23 +67,25 @@ export function CreatorProfileHero({
 
   return (
     <div className="bg-[#F4F7F9]">
-      <div className="relative">
-        <div className="h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden bg-[#000435]">
-          <img src={cover} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        </div>
-        <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[60px] w-[100px] h-[100px] md:w-[120px] md:h-[120px] z-[5]">
-          <div className="w-full h-full rounded-full bg-[#1A1A2E] border-[5px] border-white shadow-[0_16px_36px_rgba(0,0,0,0.28),0_0_0_4px_rgba(7,208,80,0.18)] overflow-hidden flex items-center justify-center text-white text-[30px] font-extrabold">
-            {creator.avatar ? (
-              <img
-                src={creator.avatar}
-                alt={creator.name}
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              initial
-            )}
+      <div className="px-5 sm:px-8 lg:px-10">
+        <div className="max-w-[1180px] mx-auto relative">
+          <div className="h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden bg-[#000435] rounded-[14px]">
+            <img src={cover} alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-[14px]" />
+          </div>
+          <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[60px] w-[100px] h-[100px] md:w-[120px] md:h-[120px] z-[5]">
+            <div className="w-full h-full rounded-full bg-[#1A1A2E] border-[5px] border-white shadow-[0_16px_36px_rgba(0,0,0,0.28),0_0_0_4px_rgba(7,208,80,0.18)] overflow-hidden flex items-center justify-center text-white text-[30px] font-extrabold">
+              {creator.avatar ? (
+                <img
+                  src={creator.avatar}
+                  alt={creator.name}
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                initial
+              )}
+            </div>
           </div>
         </div>
       </div>

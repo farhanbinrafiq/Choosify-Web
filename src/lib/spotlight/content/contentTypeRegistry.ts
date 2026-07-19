@@ -64,14 +64,23 @@ export function resolveLegacyGuideContentType(
   tags: string[],
 ): SpotlightContentType {
   const t = (guideType ?? '').toLowerCase();
-  if (t === 'reels' || t === 'shorts') return 'recommendation';
-  if (t === 'video') return 'product_review';
-  if (t === 'blog' || t === 'article') return 'editorial';
   const cat = category.toLowerCase();
-  if (tags.some((x) => x.includes('review'))) return 'product_review';
-  if (cat.includes('buying')) return 'buying_guide';
-  if (cat.includes('recommend')) return 'recommendation';
-  return 'editorial';
+  if (tags.some((x) => x.includes('comparison')) || cat.includes('comparison')) return 'comparison';
+  if (tags.some((x) => x.includes('tutorial')) || cat.includes('tutorial')) return 'tutorial';
+  if (tags.some((x) => x.includes('tip')) || cat.includes('tip')) return 'tips';
+  // All catalog guide formats use the Guide Detail (buying_guide) shell
+  if (
+    t === 'video' ||
+    t === 'reels' ||
+    t === 'shorts' ||
+    t === 'blog' ||
+    t === 'article' ||
+    cat.includes('buying') ||
+    tags.some((x) => x.includes('buying') || x.includes('guide') || x.includes('review'))
+  ) {
+    return 'buying_guide';
+  }
+  return 'buying_guide';
 }
 
 export function contentTypesForTab(tabId: string): SpotlightContentType[] {

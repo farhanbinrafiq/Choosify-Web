@@ -64,25 +64,30 @@ const CONTENT_TYPE_SECTION_TEMPLATES: Partial<
     cfg('hero_media'),
     cfg('content_summary'),
     cfg('media_gallery'),
-    cfg('description'),
+    cfg('winner'),
+    cfg('why_it_won'),
     cfg('pros'),
     cfg('cons'),
     cfg('verdict'),
-    cfg('specifications'),
+    cfg('takeaways'),
+    cfg('top_picks'),
+    cfg('top_3'),
     cfg('products_reviewed'),
-    cfg('associated_products'),
-    cfg('brand_profile_card'),
     cfg('creator_profile_card'),
+    cfg('associated_products'),
     cfg('related_spotlight'),
-    cfg('related_products'),
   ],
   creator_review: [
     cfg('hero_media'),
     cfg('content_summary'),
     cfg('media_gallery'),
+    cfg('winner'),
+    cfg('why_it_won'),
     cfg('pros'),
     cfg('cons'),
     cfg('verdict'),
+    cfg('takeaways'),
+    cfg('top_3'),
     cfg('products_reviewed'),
     cfg('associated_products'),
     cfg('creator_profile_card'),
@@ -92,9 +97,15 @@ const CONTENT_TYPE_SECTION_TEMPLATES: Partial<
     cfg('hero_media'),
     cfg('content_summary'),
     cfg('media_gallery'),
-    cfg('description'),
+    cfg('winner'),
+    cfg('why_it_won'),
+    cfg('pros'),
+    cfg('cons'),
+    cfg('verdict'),
+    cfg('takeaways'),
+    cfg('top_3'),
+    cfg('products_reviewed'),
     cfg('associated_products'),
-    cfg('brand_profile_card'),
     cfg('creator_profile_card'),
     cfg('related_spotlight'),
   ],
@@ -102,12 +113,17 @@ const CONTENT_TYPE_SECTION_TEMPLATES: Partial<
     cfg('hero_media'),
     cfg('content_summary'),
     cfg('media_gallery'),
-    cfg('description'),
+    cfg('winner'),
+    cfg('why_it_won'),
+    cfg('pros'),
+    cfg('cons'),
+    cfg('verdict'),
+    cfg('takeaways'),
+    cfg('top_3'),
+    cfg('products_reviewed'),
     cfg('associated_products'),
     cfg('creator_profile_card'),
-    cfg('brand_profile_card'),
     cfg('related_spotlight'),
-    cfg('related_products'),
   ],
   comparison: [
     cfg('hero_media'),
@@ -338,8 +354,11 @@ export function sectionHasData(content: SpotlightContent, sectionId: SpotlightPa
     case 'pros':
     case 'cons':
     case 'specifications':
-      return ['buying_guide', 'comparison', 'product_review', 'creator_review', 'tutorial', 'tips'].includes(
-        content.contentType,
+      return (
+        content.sourceKind === 'guide' ||
+        ['buying_guide', 'comparison', 'product_review', 'creator_review', 'tutorial', 'tips', 'recommendation', 'editorial'].includes(
+          content.contentType,
+        )
       );
     case 'pricing':
       return (
@@ -358,9 +377,13 @@ export function sectionHasData(content: SpotlightContent, sectionId: SpotlightPa
 
 /** Resolve ordered visible section IDs for rendering */
 export function resolvePageSectionManifest(content: SpotlightContent): SpotlightPageSectionId[] {
+  // Catalog guides (blog, video, reels, shorts) always use the Guide Detail shell
+  // from Choosify.dc.html — same cards for every guide format.
   const source = content.pageSections?.length
     ? content.pageSections
-    : defaultSectionsForContentType(content.contentType);
+    : content.sourceKind === 'guide'
+      ? defaultSectionsForContentType('buying_guide')
+      : defaultSectionsForContentType(content.contentType);
 
   const visible = source.filter((entry) => entry.visible && sectionHasData(content, entry.id));
 
