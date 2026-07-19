@@ -404,8 +404,10 @@ export function ProductDetailPage() {
     setComparedProducts((prev: any[]) => [product, ...prev]);
     toast.success('Added to comparison!');
   };
-  const brandObj = brandList.find((b: any) => b.id === product.brandId) ||
-    brandList.find((b: any) => b.name?.toLowerCase() === product.brand?.toLowerCase());
+  const brandObj = product
+    ? brandList.find((b: any) => b.id === product.brandId) ||
+      brandList.find((b: any) => b.name?.toLowerCase() === product.brand?.toLowerCase())
+    : undefined;
   const brandId = brandObj ? brandObj.id : 1;
   const brandName = brandObj ? brandObj.name : "Apex";
   const brandOfficialWebsite = useMemo(() => {
@@ -454,13 +456,13 @@ export function ProductDetailPage() {
       const firstAvailable =
         product.variants.find((v: any) => v.stock > 0) || product.variants[0];
       if (firstAvailable) {
-        if (firstAvailable.attributes.color !== undefined)
+        if (firstAvailable.attributes?.color !== undefined)
           setSelectedColor(firstAvailable.attributes.color);
-        if (firstAvailable.attributes.size !== undefined)
+        if (firstAvailable.attributes?.size !== undefined)
           setSelectedSize(firstAvailable.attributes.size);
-        if (firstAvailable.attributes.ram !== undefined)
+        if (firstAvailable.attributes?.ram !== undefined)
           setSelectedRam(firstAvailable.attributes.ram);
-        if (firstAvailable.attributes.storage !== undefined)
+        if (firstAvailable.attributes?.storage !== undefined)
           setSelectedStorage(firstAvailable.attributes.storage);
       }
     } else {
@@ -475,15 +477,16 @@ export function ProductDetailPage() {
     if (!product || !product.variants || product.variants.length === 0)
       return null;
     return product.variants.find((v: any) => {
-      const hasColor = v.attributes.color !== undefined;
-      const hasSize = v.attributes.size !== undefined;
-      const hasRam = v.attributes.ram !== undefined;
-      const hasStorage = v.attributes.storage !== undefined;
+      const attrs = v.attributes ?? {};
+      const hasColor = attrs.color !== undefined;
+      const hasSize = attrs.size !== undefined;
+      const hasRam = attrs.ram !== undefined;
+      const hasStorage = attrs.storage !== undefined;
 
-      if (hasColor && v.attributes.color !== selectedColor) return false;
-      if (hasSize && v.attributes.size !== selectedSize) return false;
-      if (hasRam && v.attributes.ram !== selectedRam) return false;
-      if (hasStorage && v.attributes.storage !== selectedStorage) return false;
+      if (hasColor && attrs.color !== selectedColor) return false;
+      if (hasSize && attrs.size !== selectedSize) return false;
+      if (hasRam && attrs.ram !== selectedRam) return false;
+      if (hasStorage && attrs.storage !== selectedStorage) return false;
       return true;
     });
   };
@@ -578,35 +581,35 @@ export function ProductDetailPage() {
   }, [selectedVariant?.image]);
 
   // Unique attribute variants computation
-  const uniqueColors = product.variants
+  const uniqueColors = product?.variants
     ? (Array.from(
         new Set(
-          product.variants.map((v: any) => v.attributes.color).filter(Boolean),
+          product.variants.map((v: any) => v.attributes?.color).filter(Boolean),
         ),
       ) as string[])
     : [];
 
-  const uniqueSizes = product.variants
+  const uniqueSizes = product?.variants
     ? (Array.from(
         new Set(
-          product.variants.map((v: any) => v.attributes.size).filter(Boolean),
+          product.variants.map((v: any) => v.attributes?.size).filter(Boolean),
         ),
       ) as string[])
     : [];
 
-  const uniqueRams = product.variants
+  const uniqueRams = product?.variants
     ? (Array.from(
         new Set(
-          product.variants.map((v: any) => v.attributes.ram).filter(Boolean),
+          product.variants.map((v: any) => v.attributes?.ram).filter(Boolean),
         ),
       ) as string[])
     : [];
 
-  const uniqueStorages = product.variants
+  const uniqueStorages = product?.variants
     ? (Array.from(
         new Set(
           product.variants
-            .map((v: any) => v.attributes.storage)
+            .map((v: any) => v.attributes?.storage)
             .filter(Boolean),
         ),
       ) as string[])
@@ -614,41 +617,41 @@ export function ProductDetailPage() {
 
   // Availability lookup helpers for disabled states
   const isSizeOptionAvailable = (size: string) => {
-    if (!product.variants) return true;
+    if (!product?.variants) return true;
     return product.variants.some(
       (v: any) =>
-        v.attributes.size === size &&
-        (!selectedColor || v.attributes.color === selectedColor) &&
+        v.attributes?.size === size &&
+        (!selectedColor || v.attributes?.color === selectedColor) &&
         v.stock > 0,
     );
   };
 
   const isColorOptionAvailable = (color: string) => {
-    if (!product.variants) return true;
+    if (!product?.variants) return true;
     return product.variants.some(
       (v: any) =>
-        v.attributes.color === color &&
-        (!selectedSize || v.attributes.size === selectedSize) &&
+        v.attributes?.color === color &&
+        (!selectedSize || v.attributes?.size === selectedSize) &&
         v.stock > 0,
     );
   };
 
   const isRamOptionAvailable = (ram: string) => {
-    if (!product.variants) return true;
+    if (!product?.variants) return true;
     return product.variants.some(
       (v: any) =>
-        v.attributes.ram === ram &&
-        (!selectedStorage || v.attributes.storage === selectedStorage) &&
+        v.attributes?.ram === ram &&
+        (!selectedStorage || v.attributes?.storage === selectedStorage) &&
         v.stock > 0,
     );
   };
 
   const isStorageOptionAvailable = (storage: string) => {
-    if (!product.variants) return true;
+    if (!product?.variants) return true;
     return product.variants.some(
       (v: any) =>
-        v.attributes.storage === storage &&
-        (!selectedRam || v.attributes.ram === selectedRam) &&
+        v.attributes?.storage === storage &&
+        (!selectedRam || v.attributes?.ram === selectedRam) &&
         v.stock > 0,
     );
   };
@@ -689,13 +692,13 @@ export function ProductDetailPage() {
 
   // Stock calculations
   const isOutOfStock =
-    product.variants && product.variants.length > 0
+    product?.variants && product.variants.length > 0
       ? selectedVariant
         ? selectedVariant.stock === 0
         : true
-      : product.id === 3 ||
-        product.title.includes("MacBook") ||
-        product.stock === 0;
+      : product?.id === 3 ||
+        Boolean(product?.title?.includes("MacBook")) ||
+        product?.stock === 0;
 
   const stockQuantity =
     product.variants && product.variants.length > 0
@@ -778,6 +781,23 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
     // Redirect to Messages thread
     navigate(`/messages/${threadId}`);
   };
+
+  if (!product) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#F4F7F9] items-center justify-center px-6 text-center">
+        <h1 className="text-lg font-extrabold text-[#1A1A2E]">Product not found</h1>
+        <p className="mt-2 text-sm text-[#6B7280]">
+          This product is unavailable right now. Try browsing the catalog again.
+        </p>
+        <Link
+          to="/products"
+          className="mt-5 inline-flex rounded-xl bg-[#FF5B00] px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white"
+        >
+          Back to products
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
@@ -950,7 +970,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
-                  ...reviews
+                  ...(Array.isArray(reviews) ? reviews : [])
                     .filter((r: any) => r.productId === product.id)
                     .map((r: any) => ({
                       name: r.authorName,
@@ -1196,7 +1216,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                           {co.sectionName}
                         </div>
                         <div className="space-y-2 text-[11.5px] text-[#4B5563] leading-relaxed">
-                          {co.content.map((bullet, bIdx) => (
+                          {(Array.isArray(co.content) ? co.content : []).map((bullet, bIdx) => (
                             <div key={bIdx}>• {bullet}</div>
                           ))}
                         </div>

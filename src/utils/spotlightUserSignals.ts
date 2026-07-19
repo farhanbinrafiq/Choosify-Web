@@ -8,7 +8,10 @@ import { SPOTLIGHT_HISTORY_KEY, SPOTLIGHT_HISTORY_MAX } from '../types/spotlight
 function readJson<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(fallback) && !Array.isArray(parsed)) return fallback;
+    return (parsed as T) ?? fallback;
   } catch {
     return fallback;
   }

@@ -165,9 +165,10 @@ export function buildHomepageSpotlightCard(
   catalog: CatalogProduct[],
   brandLogos: Record<string, string>,
 ): HomepageSpotlightCardModel {
-  const primaryId = campaign.primaryProductId ?? campaign.linkedProductIds[0];
+  const linkedProductIds = campaign.linkedProductIds ?? [];
+  const primaryId = campaign.primaryProductId ?? linkedProductIds[0];
   const primaryProduct = primaryId ? catalog.find((p) => p.id === primaryId) : undefined;
-  const extra = Math.max(0, campaign.linkedProductIds.length - 1);
+  const extra = Math.max(0, linkedProductIds.length - 1);
   const brandName = campaign.brandName ?? primaryProduct?.brandName;
 
   return {

@@ -188,6 +188,23 @@ export function GuideDetailPage({
     BLOGS.find((b) => b.id === Number(id)) ||
     BLOGS[0];
 
+  const guideId = guide?.id;
+  const dynamicData = DYNAMIC_GUIDES[Number(guideId)] || {
+    ...DEFAULT_DYNAMIC_GUIDE,
+    id: guide?.id,
+    title: guide?.title,
+    excerpt: guide?.excerpt,
+    categorySpecType:
+      ((guide as any)?.category || "MOBILE").toLowerCase() === "fashion"
+        ? "fashion"
+        : "mobile",
+  };
+
+  const creator = dynamicData.creator as any;
+  const specConfig =
+    CATEGORY_SPEC_CONFIGS[dynamicData.categorySpecType] ||
+    CATEGORY_SPEC_CONFIGS.mobile;
+
   const guideSectionNavItems = useMemo(
     () =>
       [
@@ -299,23 +316,6 @@ export function GuideDetailPage({
       profileLabel: 'Guide detail',
     },
   }, [guide, relatedPlatformFilter, relatedTopicFilter, guideSectionNavItems, activeSectionId, scrollToSection]);
-
-  const guideId = guide?.id;
-  const dynamicData = DYNAMIC_GUIDES[Number(guideId)] || {
-    ...DEFAULT_DYNAMIC_GUIDE,
-    id: guide.id,
-    title: guide.title,
-    excerpt: guide.excerpt,
-    categorySpecType:
-      (guide.category || "MOBILE").toLowerCase() === "fashion"
-        ? "fashion"
-        : "mobile",
-  };
-
-  const creator = dynamicData.creator;
-  const specConfig =
-    CATEGORY_SPEC_CONFIGS[dynamicData.categorySpecType] ||
-    CATEGORY_SPEC_CONFIGS.mobile;
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);

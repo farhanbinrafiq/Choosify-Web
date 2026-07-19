@@ -124,7 +124,9 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 function readStoredArray(key: string): any[] {
   try {
     const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -230,7 +232,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [reviews, setReviews] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('choosify_reviews');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
       return [
         { id: 1, product: 'Samsung Galaxy S24 Ultra', rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
         { id: 2, product: 'LG C3 55" OLED EVO TV', rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
@@ -361,7 +366,18 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
   const [customOverviews, setCustomOverviews] = useState<CustomOverview[]>(() => {
     const saved = localStorage.getItem('choosify_custom_overviews');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(
+            (co) => co && Array.isArray(co.content),
+          ) as CustomOverview[];
+        }
+      } catch {
+        /* fall through to defaults */
+      }
+    }
     return [
       {
         id: 'co-sample-1',

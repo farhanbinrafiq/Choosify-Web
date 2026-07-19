@@ -83,12 +83,12 @@ export function SpotlightDiscoverPage() {
     if (linkedProductId) {
       base = base.filter(
         (item) =>
-          item.connections.productIds.some((id) => String(id) === linkedProductId) ||
-          item.commerce.featuredProductIds.some((id) => String(id) === linkedProductId),
+          item.connections?.productIds?.some((id) => String(id) === linkedProductId) ||
+          item.commerce?.featuredProductIds?.some((id) => String(id) === linkedProductId),
       );
     }
     if (linkedBrandId) {
-      base = base.filter((item) => item.connections.brandIds.some((id) => String(id) === linkedBrandId));
+      base = base.filter((item) => item.connections?.brandIds?.some((id) => String(id) === linkedBrandId));
     }
     return base;
   }, [allContent, filters, activeTab, followedIds, savedIds, replayOnly, upcomingOnly, linkedProductId, linkedBrandId]);

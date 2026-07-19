@@ -87,8 +87,8 @@ const CAMPAIGN_TYPE_TO_CONTENT: Partial<Record<SpotlightCampaignType, SpotlightC
 };
 
 function mapGuideTypeToContent(guide: CatalogGuide): SpotlightContentType {
-  const cat = guide.category.toLowerCase();
-  const tags = guide.tags.map((t) => t.toLowerCase());
+  const cat = (guide.category ?? '').toLowerCase();
+  const tags = (guide.tags ?? []).map((t) => t.toLowerCase());
   if (tags.some((t) => t.includes('comparison')) || cat.includes('comparison')) return 'comparison';
   if (tags.some((t) => t.includes('tutorial')) || cat.includes('tutorial')) return 'tutorial';
   if (tags.some((t) => t.includes('tip')) || cat.includes('tip')) return 'tips';
@@ -121,14 +121,15 @@ function buildLiveFromGuide(guide: CatalogGuide): SpotlightLiveConfig | undefine
   if (!guide.videoUrl) return undefined;
   const platform = detectEmbedPlatform(guide.videoUrl);
   if (!platform) return undefined;
+  const productIds = (guide.productIds ?? []).map(String);
   return {
     status: 'replay',
     platform,
     embedUrl: toEmbedUrl(guide.videoUrl, platform),
     replayUrl: guide.videoUrl,
-    productIds: guide.productIds.map(String),
+    productIds,
     serviceIds: [],
-    pinnedProductIds: guide.productIds.slice(0, 3).map(String),
+    pinnedProductIds: productIds.slice(0, 3),
     pinnedOfferIds: [],
     timelinePlaceholder: true,
   };
@@ -141,7 +142,10 @@ export function campaignToSpotlightContent(
 ): SpotlightContent {
   const card = buildHomepageSpotlightCard(campaign, catalog, brandLogos);
   const contentType = CAMPAIGN_TYPE_TO_CONTENT[campaign.campaignType] ?? 'campaign';
-  const primaryId = campaign.primaryProductId ?? campaign.linkedProductIds[0];
+  const linkedProductIds = campaign.linkedProductIds ?? [];
+  const linkedBrandIds = campaign.linkedBrandIds ?? [];
+  const linkedCategoryIds = campaign.linkedCategoryIds ?? [];
+  const primaryId = campaign.primaryProductId ?? linkedProductIds[0];
   const product = primaryId ? catalog.find((p) => p.id === primaryId) : undefined;
   const collabGraph = buildCampaignCollaborationGraph(campaign, catalog, brandLogos);
   const members = contributionsToMembers(collabGraph.contributions);
@@ -153,9 +157,9 @@ export function campaignToSpotlightContent(
       ? {
           status: 'upcoming',
           platform: 'youtube',
-          productIds: campaign.linkedProductIds,
+          productIds: linkedProductIds,
           serviceIds: [],
-          pinnedProductIds: campaign.linkedProductIds.slice(0, 3),
+          pinnedProductIds: linkedProductIds.slice(0, 3),
           pinnedOfferIds: [],
           notifyMeEnabled: true,
           timelinePlaceholder: true,
@@ -174,9 +178,9 @@ export function campaignToSpotlightContent(
     description: campaign.shortDescription,
     media: card.media,
     connections: buildConnections({
-      productIds: campaign.linkedProductIds,
-      brandIds: campaign.linkedBrandIds,
-      categoryIds: campaign.linkedCategoryIds,
+      productIds: linkedProductIds,
+      brandIds: linkedBrandIds,
+      categoryIds: linkedCategoryIds,
       creatorIds: campaign.linkedCreatorIds ?? [],
       guideIds: campaign.linkedGuideIds ?? [],
       campaignIds: [campaign.campaignId],
@@ -185,14 +189,14 @@ export function campaignToSpotlightContent(
     graph: {
       ...EMPTY_SPOTLIGHT_GRAPH,
       relatedCampaignIds: campaign.relationships?.relatedCampaignIds ?? [],
-      relatedProductIds: campaign.linkedProductIds,
-      relatedBrandIds: campaign.linkedBrandIds,
+      relatedProductIds: linkedProductIds,
+      relatedBrandIds: linkedBrandIds,
       relatedGuideIds: campaign.linkedGuideIds ?? [],
       relatedCreatorIds: campaign.linkedCreatorIds ?? [],
     },
     commerce: enrichCommerceOverlay({
       ...EMPTY_SPOTLIGHT_COMMERCE,
-      featuredProductIds: campaign.linkedProductIds,
+      featuredProductIds: linkedProductIds,
       bundleIds: campaign.merchandising?.bundles?.map((b) => b.bundleId) ?? [],
       primaryCta: campaign.cta
         ? { label: campaign.cta.label, href: campaign.cta.url ?? `/spotlight/${campaign.campaignSlug}` }
@@ -207,7 +211,7 @@ export function campaignToSpotlightContent(
     ctaLabel: campaign.campaignType === 'livestream' ? 'Watch Live' : (card.ctaLabel || getSpotlightContentCtaLabel(contentType)),
     href: spotlightContentHref(campaign.campaignSlug),
     publishedAt: campaign.createdAt,
-    endsAt: campaign.schedule.endAt,
+    endsAt: campaign.schedule?.endAt,
     popularityScore: campaign.campaignHealthScore ?? campaign.priority,
     aiScore: campaign.aiMetadata?.optimizationScore,
     extraProductCount: card.extraProductCount,
@@ -221,12 +225,14 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
     ? publisherFromCreator(guide.creatorId, guide.author, guide.authorAvatar, 85)
     : publisherFromEditorial(guide.author);
 
-  const products = guide.productIds
+  const productIds = (guide.productIds ?? []).map(String);
+  const products = productIds
     .map((id) => catalog.find((p) => p.id === String(id) || p.id === id))
     .filter(Boolean) as CatalogProduct[];
 
   const slug = guide.slug || guide.id;
   const href = resolveContentHref(contentType, String(slug));
+  const viewsRaw = String(guide.views ?? '0');
 
   return {
     contentId: `guide-${guide.id}`,
@@ -235,11 +241,11 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
     sourceKind: 'guide',
     sourceId: guide.id,
     publisher,
-    headline: guide.title,
-    description: guide.excerpt,
+    headline: guide.title ?? '',
+    description: guide.excerpt ?? '',
     media: guideToUniversalMedia(guide),
     connections: buildConnections({
-      productIds: guide.productIds.map(String),
+      productIds,
       guideIds: [guide.id],
       creatorIds: guide.creatorId ? [guide.creatorId] : [],
       recommendationIds: contentType === 'recommendation' ? [guide.id] : [],
@@ -247,12 +253,12 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
     graph: {
       ...EMPTY_SPOTLIGHT_GRAPH,
       relatedGuideIds: [guide.id],
-      relatedProductIds: guide.productIds.map(String),
+      relatedProductIds: productIds,
       relatedCreatorIds: guide.creatorId ? [guide.creatorId] : [],
     },
     commerce: {
       ...EMPTY_SPOTLIGHT_COMMERCE,
-      featuredProductIds: guide.productIds.map(String),
+      featuredProductIds: productIds,
       primaryCta: { label: getSpotlightContentCtaLabel(contentType), href },
     },
     live: buildLiveFromGuide(guide),
@@ -263,7 +269,7 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
     ctaLabel: getSpotlightContentCtaLabel(contentType),
     href,
     publishedAt: guide.publishedAt,
-    popularityScore: Number.parseInt(guide.views.replace(/\D/g, ''), 10) || 0,
+    popularityScore: Number.parseInt(viewsRaw.replace(/\D/g, ''), 10) || 0,
     extraProductCount: Math.max(0, products.length - 1),
   };
 }
@@ -369,14 +375,33 @@ export function resolveSpotlightExperience(sources: SpotlightExperienceSources):
   const demoFeed = buildDemoSpotlightFeed();
 
   const campaigns = listHomepageSpotlightCampaigns();
-  const campaignContent = campaigns.map((c) =>
-    campaignToSpotlightContent(c, sources.catalog, sources.brandLogos),
-  );
+  const campaignContent = campaigns.flatMap((c) => {
+    try {
+      return [campaignToSpotlightContent(c, sources.catalog, sources.brandLogos)];
+    } catch (error) {
+      console.warn('[spotlight] Skipping broken campaign', c?.campaignId, error);
+      return [];
+    }
+  });
 
-  const liveGuides = sources.guides.filter((g) => g.status !== 'draft' && g.status !== 'archived');
-  const guideContent = liveGuides.map((g) => guideToSpotlightContent(g, sources.catalog));
+  const liveGuides = (sources.guides ?? []).filter((g) => g && g.status !== 'draft' && g.status !== 'archived');
+  const guideContent = liveGuides.flatMap((g) => {
+    try {
+      return [guideToSpotlightContent(g, sources.catalog)];
+    } catch (error) {
+      console.warn('[spotlight] Skipping broken guide', g?.id, error);
+      return [];
+    }
+  });
 
-  const postContent = sources.brandPosts.map(brandPostToSpotlightContent);
+  const postContent = (sources.brandPosts ?? []).flatMap((post) => {
+    try {
+      return [brandPostToSpotlightContent(post)];
+    } catch (error) {
+      console.warn('[spotlight] Skipping broken brand post', post?.id, error);
+      return [];
+    }
+  });
 
   const byId = new Map<string, SpotlightContent>();
   [...demoFeed, ...campaignContent, ...guideContent, ...postContent].forEach((item) => {

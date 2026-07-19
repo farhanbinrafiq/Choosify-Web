@@ -57,10 +57,12 @@ export function publisherFromCampaign(
   catalog: CatalogProduct[],
 ): SpotlightPublisher {
   const brandName = campaign.brandName;
-  const primaryId = campaign.primaryProductId ?? campaign.linkedProductIds[0];
+  const linkedProductIds = campaign.linkedProductIds ?? [];
+  const linkedBrandIds = campaign.linkedBrandIds ?? [];
+  const primaryId = campaign.primaryProductId ?? linkedProductIds[0];
   const product = primaryId ? catalog.find((p) => p.id === primaryId) : undefined;
   const name = brandName ?? product?.brandName ?? campaign.sellerName ?? 'Choosify Partner';
-  const brandId = campaign.linkedBrandIds[0] ?? product?.brandId ?? name;
+  const brandId = linkedBrandIds[0] ?? product?.brandId ?? name;
   const logo = brandLogos[name] ?? brandLogos[product?.brandName ?? ''];
 
   if (campaign.campaignType === 'creator_review' || campaign.campaignType === 'creator_campaign') {

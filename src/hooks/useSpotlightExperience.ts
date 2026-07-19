@@ -21,7 +21,22 @@ const BRAND_LOGOS: Record<string, string> = {
 function loadFilters(): SpotlightDiscoverFilters {
   try {
     const raw = sessionStorage.getItem(SPOTLIGHT_DISCOVER_FILTER_KEY);
-    return raw ? { ...DEFAULT_SPOTLIGHT_DISCOVER_FILTERS, ...JSON.parse(raw) } : DEFAULT_SPOTLIGHT_DISCOVER_FILTERS;
+    if (!raw) return DEFAULT_SPOTLIGHT_DISCOVER_FILTERS;
+    const parsed = JSON.parse(raw) as Partial<SpotlightDiscoverFilters>;
+    const merged = { ...DEFAULT_SPOTLIGHT_DISCOVER_FILTERS, ...parsed };
+    const asArray = <T,>(value: unknown, fallback: T[]): T[] =>
+      Array.isArray(value) ? (value as T[]) : fallback;
+    return {
+      ...merged,
+      contentTypes: asArray(merged.contentTypes, []),
+      brandIds: asArray(merged.brandIds, []),
+      publisherIds: asArray(merged.publisherIds, []),
+      publisherTypes: asArray(merged.publisherTypes, []),
+      categoryIds: asArray(merged.categoryIds, []),
+      serviceIds: asArray(merged.serviceIds, []),
+      campaignIds: asArray(merged.campaignIds, []),
+      creatorIds: asArray(merged.creatorIds, []),
+    };
   } catch {
     return DEFAULT_SPOTLIGHT_DISCOVER_FILTERS;
   }
