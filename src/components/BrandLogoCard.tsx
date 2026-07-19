@@ -49,7 +49,7 @@ export const BrandLogoCard = memo(function BrandLogoCard({ brand, onClick, class
 
       {/* Brand Wordmark Style Name & Rating Info */}
       <div className="flex flex-col items-center min-w-0">
-        <h3 className="text-sm font-black text-[#000435] uppercase line-clamp-1 mb-1 tracking-tight group-hover:text-[#FF5B00] transition-colors">
+        <h3 className="text-sm font-black text-[#000435] uppercase line-clamp-1 mb-1 tracking-tight group-hover:text-[#CF4400] transition-colors">
           {brand.name}
         </h3>
         
@@ -63,7 +63,7 @@ export const BrandLogoCard = memo(function BrandLogoCard({ brand, onClick, class
                 className={cn(
                   "shrink-0",
                   star <= Math.round(brand.rating) 
-                    ? "fill-[#FF5B00] text-[#FF5B00]" 
+                    ? "fill-[#EB4501] text-[#EB4501]" 
                     : "text-slate-200"
                 )}
               />

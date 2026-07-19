@@ -79,7 +79,7 @@ export function DcListingStickyFilters({
                   <div
                     className={cn(
                       'w-[34px] h-[34px] rounded-full flex items-center justify-center text-sm shrink-0',
-                      active ? 'font-extrabold text-[#FF5B00]' : 'font-extrabold text-[#1A1A2E]',
+                      active ? 'font-extrabold text-[#EB4501]' : 'font-extrabold text-[#1A1A2E]',
                     )}
                     style={{ background: item.bg || (active ? '#FFF3EA' : '#F4F7F9') }}
                   >
@@ -89,7 +89,7 @@ export function DcListingStickyFilters({
                     <div
                       className={cn(
                         'text-[12.5px] font-bold leading-tight',
-                        active ? 'text-[#FF5B00]' : 'text-[#1A1A2E]',
+                        active ? 'text-[#EB4501]' : 'text-[#1A1A2E]',
                       )}
                     >
                       {item.name}

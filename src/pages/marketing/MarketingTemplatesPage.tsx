@@ -39,7 +39,7 @@ export function MarketingTemplatesPage() {
             <button
               type="button"
               onClick={() => startFromTemplate(t.id)}
-              className="mt-4 px-4 py-2 text-xs font-bold uppercase bg-[#E8500A] text-white rounded w-fit"
+              className="mt-4 px-4 py-2 text-xs font-bold uppercase bg-[#EB4501] text-white rounded w-fit"
             >
               Use Template
             </button>
@@ -49,7 +49,7 @@ export function MarketingTemplatesPage() {
 
       <p className="text-xs text-gray-400">
         Templates pre-configure sections. Edit freely in the{' '}
-        <Link to="/marketing/content" className="text-[#E8500A] hover:underline">Spotlight Content</Link> editor.
+        <Link to="/marketing/content" className="text-[#EB4501] hover:underline">Spotlight Content</Link> editor.
       </p>
     </div>
   );

@@ -48,7 +48,7 @@ export function MarketingPreviewPage() {
         <div className="space-y-3">
           {contentItems.length === 0 ? (
             <p className="text-sm text-gray-500">
-              No content to preview. <Link to="/marketing/content/new" className="text-[#E8500A] hover:underline">Create content</Link>
+              No content to preview. <Link to="/marketing/content/new" className="text-[#EB4501] hover:underline">Create content</Link>
             </p>
           ) : (
             <>
@@ -69,7 +69,7 @@ export function MarketingPreviewPage() {
         <div className="space-y-3">
           {sponsoredItems.length === 0 ? (
             <p className="text-sm text-gray-500">
-              No campaigns to preview. <Link to="/marketing/sponsored/new" className="text-[#E8500A] hover:underline">Create campaign</Link>
+              No campaigns to preview. <Link to="/marketing/sponsored/new" className="text-[#EB4501] hover:underline">Create campaign</Link>
             </p>
           ) : (
             <>

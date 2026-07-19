@@ -43,7 +43,7 @@ export const RecommendationsVerdict = ({ verdict }: { verdict: any }) => {
       <div>
         <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-6">WHY THIS WON</h2>
         <div className="choosify-dark-surface text-white rounded-[32px] p-8 md:p-10 shadow-xl ">
-          <h3 className="text-[#FF5B00] font-extrabold uppercase tracking-widest mb-4">THE VERDICT</h3>
+          <h3 className="text-[#EB4501] font-extrabold uppercase tracking-widest mb-4">THE VERDICT</h3>
           <p className="text-xl md:text-2xl font-medium leading-relaxed mb-10 text-white/90">
             {verdict.summary}
           </p>

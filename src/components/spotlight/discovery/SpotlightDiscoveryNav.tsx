@@ -20,10 +20,10 @@ export function SpotlightDiscoveryNav() {
               key={item.id}
               to={item.href}
               className={cn(
-                'shrink-0 px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-full text-[10px] font-black uppercase tracking-wider border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]',
+                'shrink-0 px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-full text-[10px] font-black uppercase tracking-wider border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]',
                 active
-                  ? 'bg-[#E8500A] text-white border-[#E8500A]'
-                  : 'bg-white text-gray-500 border-[#e8edf2] hover:border-[#E8500A]/40',
+                  ? 'bg-[#EB4501] text-white border-[#EB4501]'
+                  : 'bg-white text-gray-500 border-[#e8edf2] hover:border-[#EB4501]/40',
               )}
               aria-current={active ? 'page' : undefined}
             >

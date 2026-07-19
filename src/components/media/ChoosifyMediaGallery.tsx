@@ -271,7 +271,7 @@ export function ChoosifyMediaGallery({
           />
           {scale <= 1 && (
             <div className="absolute bottom-4 right-4 bg-black/80 text-white border border-white/10 px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 hidden md:flex">
-              <ZoomIn size={12} className="text-[#E8500A]" /> Hover to magnify
+              <ZoomIn size={12} className="text-[#EB4501]" /> Hover to magnify
             </div>
           )}
           {scale <= 1 && (
@@ -394,7 +394,7 @@ export function ChoosifyMediaGallery({
                     'relative shrink-0 rounded-2xl overflow-hidden border-2 bg-black/40 transition-all flex items-center justify-center p-1 cursor-pointer',
                     thumbPortrait ? 'w-14 h-24' : 'w-20 h-20',
                     isActive
-                      ? 'border-[#E8500A] scale-105 shadow-md shadow-[#E8500A]/10'
+                      ? 'border-[#EB4501] scale-105 shadow-md shadow-[#EB4501]/10'
                       : 'border-white/10 hover:border-white/40 opacity-70 hover:opacity-100',
                   )}
                   aria-label={`View media ${i + 1}`}
@@ -420,7 +420,7 @@ export function ChoosifyMediaGallery({
                   onClick={() => setActiveIndex(i)}
                   className={cn(
                     'h-1.5 transition-all duration-300 rounded-full border-none p-0',
-                    activeIndex === i ? 'w-10 bg-[#E8500A]' : 'w-2 bg-white/20 hover:bg-white/40',
+                    activeIndex === i ? 'w-10 bg-[#EB4501]' : 'w-2 bg-white/20 hover:bg-white/40',
                   )}
                   aria-label={`Go to slide ${i + 1}`}
                 />

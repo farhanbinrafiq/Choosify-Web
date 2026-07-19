@@ -31,10 +31,10 @@ export function SpotlightScoreCard({ kind, value, href, onDrillDown, className }
           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{def.title}</p>
           <p className="text-xl font-black text-navy">{Math.round(value)}</p>
         </div>
-        {(href || onDrillDown) && <ChevronRight size={16} className="text-gray-300 group-hover:text-[#E8500A]" />}
+        {(href || onDrillDown) && <ChevronRight size={16} className="text-gray-300 group-hover:text-[#CF4400]" />}
       </div>
       <div className="h-2 bg-gray-100 rounded-full overflow-hidden" role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={def.maxValue}>
-        <div className="h-full bg-[#E8500A] rounded-full transition-all" style={{ width: `${pct}%` }} />
+        <div className="h-full bg-[#EB4501] rounded-full transition-all" style={{ width: `${pct}%` }} />
       </div>
       <p className="text-[10px] text-gray-400 mt-2 line-clamp-2">{def.description}</p>
     </div>

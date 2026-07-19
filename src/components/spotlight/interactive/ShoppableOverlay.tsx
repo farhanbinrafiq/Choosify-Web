@@ -48,18 +48,18 @@ export function ShoppableOverlay({ event, products, activeChapter, heroProductId
   return (
     <aside className="space-y-4 text-left" aria-label="Shoppable products">
       {activeChapter && (
-        <div className="p-3 rounded-[5px] bg-[#FFF8F4] border border-[#E8500A]/20">
-          <p className="text-[10px] font-black uppercase text-[#E8500A]">{activeChapter.timestampLabel}</p>
+        <div className="p-3 rounded-[5px] bg-[#FFF8F4] border border-[#EB4501]/20">
+          <p className="text-[10px] font-black uppercase text-[#EB4501]">{activeChapter.timestampLabel}</p>
           <p className="text-sm font-bold text-[#1a1a2e]">{activeChapter.title}</p>
         </div>
       )}
 
       {hero && (
-        <div className="p-4 border border-[#E8500A]/30 rounded-[5px] bg-white shadow-sm">
-          <p className="text-[9px] font-black uppercase tracking-widest text-[#E8500A] mb-2">Hero Product</p>
+        <div className="p-4 border border-[#EB4501]/30 rounded-[5px] bg-white shadow-sm">
+          <p className="text-[9px] font-black uppercase tracking-widest text-[#EB4501] mb-2">Hero Product</p>
           <img src={hero.image} alt="" className="w-full aspect-square object-cover rounded mb-3" />
           <p className="text-sm font-bold text-[#1a1a2e] line-clamp-2">{hero.title}</p>
-          <p className="text-lg font-black text-[#E8500A] mt-1">৳{hero.price.toLocaleString()}</p>
+          <p className="text-lg font-black text-[#EB4501] mt-1">৳{hero.price.toLocaleString()}</p>
           <div className="grid grid-cols-2 gap-2 mt-3">
             <button
               type="button"
@@ -67,11 +67,11 @@ export function ShoppableOverlay({ event, products, activeChapter, heroProductId
                 trackInteractiveEvent('buy_click', event.eventId, { productId: hero.id });
                 navigate(`/products/${hero.slug || hero.id}#buy`);
               }}
-              className="col-span-2 inline-flex items-center justify-center gap-1 py-2 bg-[#E8500A] text-white text-[10px] font-black uppercase rounded"
+              className="col-span-2 inline-flex items-center justify-center gap-1 py-2 bg-[#EB4501] text-white text-[10px] font-black uppercase rounded"
             >
               <ShoppingBag size={12} /> Buy
             </button>
-            <button type="button" onClick={() => toggleWishlist(hero)} className="p-2 border rounded text-gray-500 hover:text-[#E8500A]" aria-label="Wishlist">
+            <button type="button" onClick={() => toggleWishlist(hero)} className="p-2 border rounded text-gray-500 hover:text-[#CF4400]" aria-label="Wishlist">
               <Heart size={14} />
             </button>
             <button
@@ -98,12 +98,12 @@ export function ShoppableOverlay({ event, products, activeChapter, heroProductId
                 <Link
                   to={`/products/${product.slug || product.id}`}
                   onClick={() => trackInteractiveEvent('pinned_product_click', event.eventId, { productId: product.id })}
-                  className="flex gap-3 p-2 border border-[#e8edf2] rounded-[5px] hover:border-[#E8500A]/40"
+                  className="flex gap-3 p-2 border border-[#e8edf2] rounded-[5px] hover:border-[#EB4501]/40"
                 >
                   <img src={product.image} alt="" className="w-14 h-14 object-cover rounded shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs font-semibold line-clamp-2">{product.title}</p>
-                    <p className="text-sm font-black text-[#E8500A]">৳{product.price.toLocaleString()}</p>
+                    <p className="text-sm font-black text-[#EB4501]">৳{product.price.toLocaleString()}</p>
                   </div>
                 </Link>
               </li>
@@ -115,7 +115,7 @@ export function ShoppableOverlay({ event, products, activeChapter, heroProductId
       <div className="flex gap-2">
         <Link
           to={`/publisher/${event.publisher.profileHref?.split('/').pop() ?? event.publisher.name}`}
-          className="flex-1 text-center py-2 border border-[#e8edf2] text-[10px] font-bold uppercase rounded hover:border-[#E8500A]/40"
+          className="flex-1 text-center py-2 border border-[#e8edf2] text-[10px] font-bold uppercase rounded hover:border-[#EB4501]/40"
         >
           View Brand
         </Link>

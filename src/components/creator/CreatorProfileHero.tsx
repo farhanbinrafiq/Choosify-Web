@@ -66,7 +66,7 @@ export function CreatorProfileHero({
   const title = creator.title || creator.role || 'Creator & Product Researcher';
 
   return (
-    <div className="bg-[#F4F7F9]">
+    <div className="bg-choosify-feed">
       {/* Cover — feed silhouette (not viewport edge-to-edge); matches Creator Profile max-w-[1180px] */}
       <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <div className="max-w-[1180px] mx-auto relative">
@@ -97,22 +97,24 @@ export function CreatorProfileHero({
             <div className="text-[22px] font-extrabold text-[#1A1A2E] flex items-center justify-center lg:justify-start gap-2 flex-wrap">
               {creator.name}
               {claimStatus === 'verified' && (
-                <span className="inline-flex text-[#07DD05]" title="Verified">
+                <span className="inline-flex text-[#2323FF]" title="Verified">
                   <Check size={18} strokeWidth={3} />
                 </span>
               )}
             </div>
-            <div className="text-[13px] text-[#07DD05] font-semibold">{title}</div>
+            <div className="text-[13px] text-[#2323FF] font-semibold">{title}</div>
             <div className="text-[12.5px] text-[#9AA0AC] mb-2.5">
               {handle} · {creator.location || 'Dhaka, Bangladesh'}
             </div>
             {claimStatus === 'verified' && (
-              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#07A828] mb-2">
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#2323FF] mb-2">
                 <ShieldCheck size={12} /> Verified Creator
               </div>
             )}
             {claimStatus === 'pending' && (
-              <div className="text-[10px] font-bold text-amber-600 mb-2">Verification pending</div>
+              <div className="inline-flex items-center gap-1.5 bg-[#FF000D] text-white text-[10px] font-bold px-2.5 py-1 rounded-lg mb-2">
+                Ownership verification pending
+              </div>
             )}
             {claimStatus === 'community' && (
               <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">Community creator profile</div>
@@ -130,7 +132,7 @@ export function CreatorProfileHero({
               id={String(creator.id || creator.name)}
               name={creator.name}
               type="creator"
-              className="!bg-[#07DD05] !text-white !border-[#07DD05] px-[18px] py-2.5 rounded-lg text-xs font-bold hover:!brightness-110"
+              className="!bg-[#2323FF] !text-white !border-[#2323FF] px-[18px] py-2.5 rounded-lg text-xs font-bold hover:!brightness-110"
             />
             {onMessage && (
               <button
@@ -152,7 +154,7 @@ export function CreatorProfileHero({
               <button
                 type="button"
                 onClick={onClaim}
-                className="bg-[#FFF3EA] text-[#FF5B00] border border-[#FFD8B8] px-[18px] py-2.5 rounded-lg text-xs font-bold"
+                className="bg-[#FF000D] text-white border border-[#FF000D] px-[18px] py-2.5 rounded-lg text-xs font-bold hover:brightness-110"
               >
                 🏷 Claim This Profile
               </button>
@@ -172,7 +174,7 @@ export function CreatorProfileHero({
               <div key={r.label} className="flex items-center gap-2.5 mb-2">
                 <div className="text-[11px] text-[#4B5563] font-semibold w-[74px]">{r.label}</div>
                 <div className="flex-1 h-1.5 bg-[#F1F1F3] rounded-sm overflow-hidden">
-                  <div className="h-full bg-[#07DD05] rounded-sm" style={{ width: r.pct }} />
+                  <div className="h-full bg-[#2323FF] rounded-sm" style={{ width: r.pct }} />
                 </div>
                 <div className="text-[11px] font-extrabold text-[#1A1A2E] w-5 text-right">{r.value}</div>
               </div>

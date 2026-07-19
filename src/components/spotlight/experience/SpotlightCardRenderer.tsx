@@ -168,7 +168,7 @@ export function SpotlightCardRenderer({
           naturalOrientation={cardDef.naturalMedia}
         />
         <div className="absolute top-2 left-2 right-2 flex flex-wrap gap-1.5 pointer-events-none">
-          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#E8500A] text-white">
+          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#EB4501] text-white">
             {typeLabel}
           </span>
           {product && (
@@ -211,7 +211,7 @@ export function SpotlightCardRenderer({
               <Link
                 to={`${productUrl}#buy`}
                 onClick={trackClick}
-                className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#E8500A] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] transition-colors min-h-[44px]"
+                className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] transition-colors min-h-[44px]"
               >
                 <ShoppingBag size={12} aria-hidden />
                 {shopLabel}
@@ -220,14 +220,14 @@ export function SpotlightCardRenderer({
                 <Link
                   to={productUrl}
                   onClick={trackClick}
-                  className="inline-flex items-center justify-center gap-1 px-2 py-1.5 border border-[#e8edf2] text-[9px] font-bold uppercase tracking-wide text-[#1a1a2e] rounded hover:border-[#E8500A]/40 min-h-[44px]"
+                  className="inline-flex items-center justify-center gap-1 px-2 py-1.5 border border-[#e8edf2] text-[9px] font-bold uppercase tracking-wide text-[#1a1a2e] rounded hover:border-[#EB4501]/40 min-h-[44px]"
                 >
                   Product Details
                 </Link>
                 <Link
                   to={content.href}
                   onClick={trackClick}
-                  className="inline-flex items-center justify-center gap-1 px-2 py-1.5 border border-[#E8500A]/20 text-[9px] font-bold uppercase tracking-wide text-[#E8500A] rounded hover:bg-[#E8500A]/5 min-h-[44px]"
+                  className="inline-flex items-center justify-center gap-1 px-2 py-1.5 border border-[#EB4501]/20 text-[9px] font-bold uppercase tracking-wide text-[#EB4501] rounded hover:bg-[#CF4400]/5 min-h-[44px]"
                 >
                   {contentActionLabel}
                   <ChevronRight size={11} />
@@ -238,7 +238,7 @@ export function SpotlightCardRenderer({
             <Link
               to={content.href}
               onClick={trackClick}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#E8500A] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] transition-colors min-h-[44px]"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] transition-colors min-h-[44px]"
             >
               {contentActionLabel}
               <ChevronRight size={12} />
@@ -247,7 +247,7 @@ export function SpotlightCardRenderer({
         </div>
 
         <div>
-          <Link to={content.href} onClick={trackClick} className="hover:text-[#E8500A] transition-colors">
+          <Link to={content.href} onClick={trackClick} className="hover:text-[#CF4400] transition-colors">
             <h3
               className={cn(
                 'font-bold text-[#1a1a2e] leading-snug',
@@ -272,7 +272,7 @@ export function SpotlightCardRenderer({
             <button
               type="button"
               onClick={toggleWishlist}
-              className={cn('p-2 rounded-full border min-h-[44px] min-w-[44px]', isSaved ? 'border-[#E8500A] text-[#E8500A]' : 'border-gray-100 text-gray-400')}
+              className={cn('p-2 rounded-full border min-h-[44px] min-w-[44px] bg-white', isSaved ? 'border-[#FF000D] text-[#FF000D]' : 'border-[#E5E7EB] text-[#CBD5E1]')}
               aria-pressed={isSaved}
               aria-label="Wishlist"
             >
@@ -293,7 +293,7 @@ export function SpotlightCardRenderer({
             <button
               type="button"
               onClick={handleShare}
-              className="p-2 rounded-full border border-gray-100 text-gray-400 hover:text-[#E8500A] min-h-[44px] min-w-[44px]"
+              className="p-2 rounded-full border border-gray-100 text-gray-400 hover:text-[#CF4400] min-h-[44px] min-w-[44px]"
               aria-label="Share"
             >
               <Share2 size={14} />

@@ -26,14 +26,14 @@ export function PublisherProfileHeader({ profile, trust }: PublisherProfileHeade
               className="w-20 h-20 rounded-full border-4 border-white object-cover shadow-md bg-white"
             />
           ) : (
-            <span className="w-20 h-20 rounded-full border-4 border-white bg-[#E8500A]/10 text-[#E8500A] text-2xl font-black flex items-center justify-center shadow-md">
+            <span className="w-20 h-20 rounded-full border-4 border-white bg-[#EB4501]/10 text-[#EB4501] text-2xl font-black flex items-center justify-center shadow-md">
               {profile.name.slice(0, 1)}
             </span>
           )}
           <div className="flex-1 min-w-0 text-left">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-bold text-[#1a1a2e]">{profile.name}</h1>
-              {profile.isVerified && <BadgeCheck size={18} className="text-[#E8500A]" aria-label="Verified" />}
+              {profile.isVerified && <BadgeCheck size={18} className="text-[#EB4501]" aria-label="Verified" />}
             </div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">
               {SPOTLIGHT_PUBLISHER_PROFILE_TYPE_LABELS[profile.publisherType]}

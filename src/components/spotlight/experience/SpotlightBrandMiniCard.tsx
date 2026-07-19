@@ -31,7 +31,7 @@ export function SpotlightBrandMiniCard({
         <h4 className="text-sm font-extrabold text-white tracking-tight mb-2">{publisher.name}</h4>
         <div className="flex gap-0.5 mb-4" aria-hidden>
           {[1, 2, 3, 4, 5].map((i) => (
-            <Star key={i} size={10} className="fill-[#FF5B00] text-[#FF5B00]" />
+            <Star key={i} size={10} className="fill-[#EB4501] text-[#EB4501]" />
           ))}
         </div>
         <div className="space-y-2 w-full mt-auto">
@@ -44,7 +44,7 @@ export function SpotlightBrandMiniCard({
           {profileHref && (
             <Link
               to={profileHref}
-              className="w-full py-2.5 rounded-lg bg-[#FF5B00] hover:brightness-110 text-white text-[12px] font-bold tracking-tight inline-block text-center transition-all"
+              className="w-full py-2.5 rounded-lg bg-[#EB4501] hover:brightness-110 text-white text-[12px] font-bold tracking-tight inline-block text-center transition-all"
             >
               View brand profile
             </Link>

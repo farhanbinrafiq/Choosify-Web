@@ -31,7 +31,7 @@ export const SearchTabs: React.FC<SearchTabsProps> = ({ tabs, activeTab, onTabCh
               }`}
               rightIcon={
                 <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-full flex items-center justify-center ${
-                  isActive ? 'bg-[#FF5B00] text-white' : 'bg-gray-250 text-gray-500'
+                  isActive ? 'bg-[#EB4501] text-white' : 'bg-gray-250 text-gray-500'
                 }`}>
                   {tab.count}
                 </span>

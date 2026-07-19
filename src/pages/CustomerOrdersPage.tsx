@@ -78,7 +78,7 @@ Thank you for shopping with Choosify.bd
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9] text-[#1A1A2E] font-sans">
+    <div className="flex flex-col min-h-screen bg-choosify-feed text-[#1A1A2E] font-sans">
       <div className="w-full px-5 sm:px-8 pt-4">
         <header className="max-w-7xl mx-auto choosify-dark-surface text-white border border-white/5 rounded-[14px] overflow-hidden">
           <div className="w-full px-5 sm:px-8 py-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -101,7 +101,7 @@ Thank you for shopping with Choosify.bd
               to="/messages"
               className="inline-flex items-center gap-1.5 self-start sm:self-auto bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-[12px] px-4 py-2.5 rounded-lg transition-all"
             >
-              <MessageSquare size={14} className="text-[#FF5B00]" />
+              <MessageSquare size={14} className="text-[#EB4501]" />
               Chat support
             </Link>
           </div>
@@ -124,7 +124,7 @@ Thank you for shopping with Choosify.bd
             </div>
             <Link
               to="/products"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF5B00] hover:brightness-110 rounded-lg text-sm font-bold text-white transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#EB4501] hover:brightness-110 rounded-lg text-sm font-bold text-white transition-all"
             >
               Browse products <ArrowRight size={14} />
             </Link>
@@ -162,7 +162,7 @@ Thank you for shopping with Choosify.bd
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#E8EDF2] pb-4 gap-4">
                       <div>
                         <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <span className="text-[11px] font-bold bg-[#FF5B00]/10 border border-[#FF5B00]/20 text-[#FF5B00] px-2.5 py-0.5 rounded-md">
+                          <span className="text-[11px] font-bold bg-[#EB4501]/10 border border-[#EB4501]/20 text-[#EB4501] px-2.5 py-0.5 rounded-md">
                             {order.orderId}
                           </span>
                           {isCancelled && (
@@ -210,7 +210,7 @@ Thank you for shopping with Choosify.bd
                                 <span className="text-[10px] font-bold bg-white border border-[#E8EDF2] text-[#1A1A2E] px-2 py-0.5 rounded font-mono">
                                   {sub.invoiceId}
                                 </span>
-                                <span className="text-sm font-bold text-[#FF5B00] tracking-tight">
+                                <span className="text-sm font-bold text-[#EB4501] tracking-tight">
                                   {sub.sellerBusinessName}
                                 </span>
                               </div>
@@ -226,7 +226,7 @@ Thank you for shopping with Choosify.bd
                                       />
                                     </div>
                                     <div>
-                                      <h4 className="text-sm font-bold text-[#1A1A2E] hover:text-[#FF5B00] transition-colors tracking-tight leading-snug truncate max-w-sm">
+                                      <h4 className="text-sm font-bold text-[#1A1A2E] hover:text-[#CF4400] transition-colors tracking-tight leading-snug truncate max-w-sm">
                                         {it.productTitle}
                                       </h4>
                                       <span className="text-[12px] text-[#9AA0AC] font-medium block mt-0.5">
@@ -244,7 +244,7 @@ Thank you for shopping with Choosify.bd
                                 <span className="text-[11px] font-semibold text-[#9AA0AC] block mb-1">
                                   Lot total
                                 </span>
-                                <p className="text-base font-extrabold text-[#FF5B00] tracking-tight leading-none mb-2">
+                                <p className="text-base font-extrabold text-[#EB4501] tracking-tight leading-none mb-2">
                                   ৳
                                   {(
                                     (subTotal ?? 0) + (sub.deliveryFee ?? 0)
@@ -300,7 +300,7 @@ Thank you for shopping with Choosify.bd
                                         setReturnDesc('');
                                         setCancellingOrderId(null);
                                       }}
-                                      className="text-[12px] font-bold text-[#FF5B00] hover:brightness-110 transition-colors cursor-pointer bg-transparent border-none"
+                                      className="text-[12px] font-bold text-[#EB4501] hover:brightness-110 transition-colors cursor-pointer bg-transparent border-none"
                                     >
                                       Request return
                                     </button>
@@ -311,7 +311,7 @@ Thank you for shopping with Choosify.bd
                                   onClick={() =>
                                     handleOpenConversation(sub, order.orderId)
                                   }
-                                  className="flex-1 sm:flex-none h-10 px-3.5 rounded-lg bg-white hover:bg-[#FF5B00] hover:text-white text-[#1A1A2E] border border-[#E8EDF2] text-[12px] font-bold transition-all flex items-center justify-center gap-1.5"
+                                  className="flex-1 sm:flex-none h-10 px-3.5 rounded-lg bg-white hover:bg-[#CF4400] hover:text-white text-[#1A1A2E] border border-[#E8EDF2] text-[12px] font-bold transition-all flex items-center justify-center gap-1.5"
                                   title="Message seller about this order"
                                 >
                                   <MessageSquare size={13} />
@@ -323,7 +323,7 @@ Thank you for shopping with Choosify.bd
                                   onClick={() =>
                                     navigate('/order-tracking', { state: { order } })
                                   }
-                                  className="flex-1 sm:flex-none h-10 px-3.5 rounded-lg bg-[#FF5B00] hover:brightness-110 text-white text-[12px] font-bold transition-all flex items-center justify-center gap-1.5"
+                                  className="flex-1 sm:flex-none h-10 px-3.5 rounded-lg bg-[#EB4501] hover:brightness-110 text-white text-[12px] font-bold transition-all flex items-center justify-center gap-1.5"
                                   title="Track this order"
                                 >
                                   <Truck size={13} />
@@ -374,7 +374,7 @@ Thank you for shopping with Choosify.bd
                               setCancelReason('');
                               toast.success('Order cancelled successfully.');
                             }}
-                            className="px-5 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[12px] font-bold rounded-lg transition-all cursor-pointer border-0"
+                            className="px-5 py-2.5 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[12px] font-bold rounded-lg transition-all cursor-pointer border-0"
                           >
                             Confirm cancel
                           </button>
@@ -394,7 +394,7 @@ Thank you for shopping with Choosify.bd
 
                     {returningOrderId === order.orderId && (
                       <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 space-y-4 animate-fade-in text-left">
-                        <span className="text-sm font-bold text-[#FF5B00] tracking-tight">
+                        <span className="text-sm font-bold text-[#EB4501] tracking-tight">
                           Request return
                         </span>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -405,7 +405,7 @@ Thank you for shopping with Choosify.bd
                             <select
                               value={returnReason}
                               onChange={(e) => setReturnReason(e.target.value)}
-                              className="w-full h-10 bg-white border border-[#E8EDF2] rounded-lg px-3 text-sm font-medium text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]"
+                              className="w-full h-10 bg-white border border-[#E8EDF2] rounded-lg px-3 text-sm font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
                             >
                               <option value="Wrong Item">Wrong Item</option>
                               <option value="Damaged">Damaged</option>
@@ -421,7 +421,7 @@ Thank you for shopping with Choosify.bd
                               value={returnDesc}
                               onChange={(e) => setReturnDesc(e.target.value)}
                               placeholder="Describe the issue..."
-                              className="w-full h-20 bg-white border border-[#E8EDF2] rounded-lg p-3 text-sm text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00] font-sans"
+                              className="w-full h-20 bg-white border border-[#E8EDF2] rounded-lg p-3 text-sm text-[#1A1A2E] focus:outline-none focus:border-[#EB4501] font-sans"
                             />
                           </div>
                         </div>
@@ -454,7 +454,7 @@ Thank you for shopping with Choosify.bd
                               setReturnReason('Wrong Item');
                               setReturnDesc('');
                             }}
-                            className="px-5 py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white text-[12px] font-bold rounded-lg transition-all cursor-pointer border-0"
+                            className="px-5 py-2.5 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[12px] font-bold rounded-lg transition-all cursor-pointer border-0"
                           >
                             Submit return request
                           </button>

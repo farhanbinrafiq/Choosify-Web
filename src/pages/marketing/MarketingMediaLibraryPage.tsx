@@ -119,7 +119,7 @@ export function MarketingMediaLibraryPage() {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#E8500A] text-white text-xs font-bold uppercase rounded"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#EB4501] text-white text-xs font-bold uppercase rounded"
           >
             <Plus size={14} /> Upload
           </button>

@@ -20,7 +20,7 @@ export function SpotlightHealthCard({ title, overallScore, factors, href, classN
     <div className={cn('bg-white border border-[#e8edf2] rounded-xl p-4', className)}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-black text-navy uppercase">{title}</h3>
-        <span className="text-2xl font-black text-[#E8500A]">{Math.round(overallScore)}</span>
+        <span className="text-2xl font-black text-[#EB4501]">{Math.round(overallScore)}</span>
       </div>
       <div className="space-y-2">
         {factors.map((f) => (

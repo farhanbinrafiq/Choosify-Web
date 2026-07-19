@@ -127,7 +127,7 @@ export const DYNAMIC_CONTENT_DB: Record<string, EditorialContent> = {
   '1': {
     id: '1',
     type: 'BUYING GUIDE',
-    badgeBg: 'bg-[#FF5B00]',
+    badgeBg: 'bg-[#EB4501]',
     title: 'Top 10 Smartphones to Buy in 2026',
     subtitle: 'Find the absolute best value-for-money and powerhouse smartphones currently available in the Bangladeshi market, from high-end titanium giants to midrange budget-friendly kings.',
     coverImage: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=1200&h=800&fit=crop',
@@ -184,8 +184,8 @@ export const DYNAMIC_CONTENT_DB: Record<string, EditorialContent> = {
     ],
     relatedProducts: PRODUCTS.slice(0, 3),
     relatedGuides: [
-      { id: '3', cover: 'https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=1200&h=675&fit=crop', title: 'Is the S24 Ultra Still Worth It in Late 2026?', category: 'MOBILE', readTime: '12 MIN VIDEO', views: '540K', badgeClass: 'bg-[#FF5B00]' },
-      { id: '6', cover: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=800&h=450&fit=crop', title: 'Playstation 5 Pro Review: Worth the upgrade?', category: 'GAMING', readTime: '15 MIN VIDEO', views: '1.2M', badgeClass: 'bg-[#FF5B00]' }
+      { id: '3', cover: 'https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=1200&h=675&fit=crop', title: 'Is the S24 Ultra Still Worth It in Late 2026?', category: 'MOBILE', readTime: '12 MIN VIDEO', views: '540K', badgeClass: 'bg-[#EB4501]' },
+      { id: '6', cover: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=800&h=450&fit=crop', title: 'Playstation 5 Pro Review: Worth the upgrade?', category: 'GAMING', readTime: '15 MIN VIDEO', views: '1.2M', badgeClass: 'bg-[#EB4501]' }
     ],
     tags: ['Best flagships BD', 'S24 Ultra local price', 'Top smartphones 2026', 'Samsung vs iPhone Dhaka'],
     priceStores: [
@@ -257,8 +257,8 @@ export const DYNAMIC_CONTENT_DB: Record<string, EditorialContent> = {
     ],
     relatedProducts: PRODUCTS.slice(6, 10),
     relatedGuides: [
-      { id: '1', cover: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=1200&h=800&fit=crop', title: 'Top 10 Smartphones to Buy in 2026', category: 'MOBILE', readTime: '15 MIN READ', views: '125K', badgeClass: 'bg-[#FF5B00]' },
-      { id: '3', cover: 'https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=1200&h=675&fit=crop', title: 'Is the S24 Ultra Still Worth It in Late 2026?', category: 'MOBILE', readTime: '12 MIN VIDEO', views: '540K', badgeClass: 'bg-[#FF5B00]' }
+      { id: '1', cover: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=1200&h=800&fit=crop', title: 'Top 10 Smartphones to Buy in 2026', category: 'MOBILE', readTime: '15 MIN READ', views: '125K', badgeClass: 'bg-[#EB4501]' },
+      { id: '3', cover: 'https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=1200&h=675&fit=crop', title: 'Is the S24 Ultra Still Worth It in Late 2026?', category: 'MOBILE', readTime: '12 MIN VIDEO', views: '540K', badgeClass: 'bg-[#EB4501]' }
     ],
     tags: ['Smartphones 2026', 'Dhaka mobile reviews', 'Reels tech', 'S24 Ultra vs Redmi'],
     priceStores: [
@@ -329,7 +329,7 @@ export const DYNAMIC_CONTENT_DB: Record<string, EditorialContent> = {
     ],
     relatedProducts: PRODUCTS.slice(0, 3),
     relatedGuides: [
-      { id: '1', cover: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=1200&h=800&fit=crop', title: 'Top 10 Smartphones to Buy in 2026', category: 'MOBILE', readTime: '15 MIN READ', views: '125K', badgeClass: 'bg-[#FF5B00]' }
+      { id: '1', cover: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=1200&h=800&fit=crop', title: 'Top 10 Smartphones to Buy in 2026', category: 'MOBILE', readTime: '15 MIN READ', views: '125K', badgeClass: 'bg-[#EB4501]' }
     ],
     tags: ['S24 Ultra 6 months review', 'Samsung Galaxy S24 Ultra BD', 'Is S24 Ultra worth it', 'Tech reviews Bangladesh'],
     priceStores: [
@@ -692,7 +692,7 @@ export const DYNAMIC_CONTENT_DB: Record<string, EditorialContent> = {
   'live-1': {
     id: 'live-1',
     type: 'LIVE SHOPPING',
-    badgeBg: 'bg-[#FF5B00]',
+    badgeBg: 'bg-[#EB4501]',
     title: 'Samsung Galaxy S26 Ultra Launch: Exclusive Live Unboxing & Price Drops',
     subtitle: 'We are live at the official Samsung Experience Store in Dhaka, unboxing the brand new Galaxy S26 Ultra. Join live to grab BDT 15,000 cash discount vouchers!',
     coverImage: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=1200&q=80',
@@ -743,7 +743,7 @@ export const DYNAMIC_CONTENT_DB: Record<string, EditorialContent> = {
     ],
     tags: ['Samsung S26 live stream', 'S26 Bangladesh price', 'Dhaka pre-order deals', 'Galaxy S26 camera test'],
     relatedGuides: [
-      { id: '1', cover: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=600&h=800', title: 'Top 10 Smartphones to Buy in 2026', category: 'MOBILE', readTime: '15 MIN READ', views: '125K', badgeClass: 'bg-[#FF5B00]' }
+      { id: '1', cover: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=600&h=800', title: 'Top 10 Smartphones to Buy in 2026', category: 'MOBILE', readTime: '15 MIN READ', views: '125K', badgeClass: 'bg-[#EB4501]' }
     ]
   },
   'live-2': {
@@ -797,7 +797,7 @@ export const DYNAMIC_CONTENT_DB: Record<string, EditorialContent> = {
     ],
     tags: ['DJI Mini 4 pro drone test', 'Dhaka Hatirjheel flight', 'CAAB drone rules Bangladesh', 'Drone price in BD'],
     relatedGuides: [
-      { id: '8', cover: 'https://images.unsplash.com/photo-1510972527921-ce03766a1cf1?w=800&h=1000', title: 'Best Tech for Outdoor Creators', category: 'TECH', readTime: '12 MIN READ', views: '15K', badgeClass: 'bg-[#FF5B00]' }
+      { id: '8', cover: 'https://images.unsplash.com/photo-1510972527921-ce03766a1cf1?w=800&h=1000', title: 'Best Tech for Outdoor Creators', category: 'TECH', readTime: '12 MIN READ', views: '15K', badgeClass: 'bg-[#EB4501]' }
     ]
   },
   'live-3': {
@@ -859,7 +859,7 @@ export const DYNAMIC_CONTENT_DB: Record<string, EditorialContent> = {
     ],
     tags: ['Sony WH-1000XM5 Dhaka reviews', 'XM5 vs XM4 price BD', 'Best noise canceling headphones', 'Sony audio store Bangladesh'],
     relatedGuides: [
-      { id: '1', cover: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=600&h=800', title: 'Best Headphones for Travel 2026', category: 'AUDIO', readTime: '8 MIN READ', views: '32K', badgeClass: 'bg-[#FF5B00]' }
+      { id: '1', cover: 'https://images.unsplash.com/photo-1556656793-062ff9f1b74b?w=600&h=800', title: 'Best Headphones for Travel 2026', category: 'AUDIO', readTime: '8 MIN READ', views: '32K', badgeClass: 'bg-[#EB4501]' }
     ]
   }
 };

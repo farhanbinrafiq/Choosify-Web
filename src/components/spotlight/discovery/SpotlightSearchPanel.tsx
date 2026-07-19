@@ -33,7 +33,7 @@ export function SpotlightSearchPanel({
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="Discover campaigns, creators, guides, live..."
-            className="w-full pl-10 pr-4 py-3 min-h-[48px] text-sm border border-[#e8edf2] rounded-[5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]"
+            className="w-full pl-10 pr-4 py-3 min-h-[48px] text-sm border border-[#e8edf2] rounded-[5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]"
             aria-label="Discover Spotlight"
           />
         </div>
@@ -53,7 +53,7 @@ export function SpotlightSearchPanel({
                       key={`${kind}-${s.query}`}
                       type="button"
                       onClick={() => onSubmit(s.query)}
-                      className="px-3 py-2 min-h-[44px] text-xs font-bold border border-[#e8edf2] rounded-full hover:border-[#E8500A]/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]"
+                      className="px-3 py-2 min-h-[44px] text-xs font-bold border border-[#e8edf2] rounded-full hover:border-[#EB4501]/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]"
                     >
                       {s.label}
                     </button>
@@ -78,10 +78,10 @@ export function SpotlightSearchPanel({
                 <li key={`${r.kind}-${r.entityId}`}>
                   <Link
                     to={r.href}
-                    className="flex items-center justify-between gap-3 p-4 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#E8500A]"
+                    className="flex items-center justify-between gap-3 p-4 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#EB4501]"
                   >
                     <div className="text-left min-w-0">
-                      <span className="text-[9px] font-black uppercase text-[#E8500A]">{r.kind}</span>
+                      <span className="text-[9px] font-black uppercase text-[#EB4501]">{r.kind}</span>
                       <p className="text-sm font-semibold text-[#1a1a2e] truncate">{r.title}</p>
                       {r.subtitle && <p className="text-[11px] text-gray-500">{r.subtitle}</p>}
                     </div>

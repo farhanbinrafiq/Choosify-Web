@@ -82,10 +82,10 @@ export function ReviewDetailPage() {
 
   if (!review) {
     return (
-      <div className="min-h-screen bg-[#F4F7F9] flex flex-col items-center justify-center p-8 text-center">
+      <div className="min-h-screen bg-choosify-feed flex flex-col items-center justify-center p-8 text-center">
         <h1 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">Review not found</h1>
         <p className="text-sm text-[#9AA0AC] mb-6">This review may have moved or is no longer available.</p>
-        <Link to="/guides" className="text-[#FF5B00] text-[12.5px] font-bold hover:underline">
+        <Link to="/guides" className="text-[#EB4501] text-[12.5px] font-bold hover:underline">
           Back to buying guides
         </Link>
       </div>
@@ -93,7 +93,7 @@ export function ReviewDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F7F9]">
+    <div className="min-h-screen bg-choosify-feed">
       <div className="w-full px-5 sm:px-10 pt-4">
         <div className="max-w-5xl mx-auto choosify-dark-surface text-white px-5 sm:px-10 py-7 rounded-[14px] overflow-hidden">
           <nav className="text-xs text-white/45 mb-3" aria-label="Breadcrumb">
@@ -101,9 +101,9 @@ export function ReviewDetailPage() {
             <span className="mx-1.5">›</span>
             <Link to="/guides" className="hover:text-white/80">Guides</Link>
             <span className="mx-1.5">›</span>
-            <span className="text-[#FF5B00]">Review</span>
+            <span className="text-[#EB4501]">Review</span>
           </nav>
-          <div className="text-[11px] font-bold text-[#FF5B00] tracking-wide mb-1.5">REVIEW DETAILS</div>
+          <div className="text-[11px] font-bold text-[#EB4501] tracking-wide mb-1.5">REVIEW DETAILS</div>
           <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight leading-tight max-w-3xl">
             {review.title}
           </h1>
@@ -114,7 +114,7 @@ export function ReviewDetailPage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-[12px] font-semibold text-[#9AA0AC] hover:text-[#FF5B00] mb-5 bg-transparent border-none cursor-pointer"
+          className="inline-flex items-center gap-2 text-[12px] font-semibold text-[#9AA0AC] hover:text-[#CF4400] mb-5 bg-transparent border-none cursor-pointer"
         >
           <ArrowLeft size={14} /> Back
         </button>
@@ -122,9 +122,9 @@ export function ReviewDetailPage() {
         <header className="bg-white rounded-xl border border-[#E8EDF2] p-6 md:p-8 shadow-sm text-left mb-6">
           <p className="text-[12.5px] text-[#4B5563] leading-relaxed mb-4">{review.excerpt}</p>
           <div className="flex flex-wrap items-center gap-3 text-[11.5px] font-semibold text-[#9AA0AC]">
-            <span className="inline-flex items-center gap-1"><Star size={12} className="text-[#FF5B00]" /> Verified review</span>
+            <span className="inline-flex items-center gap-1"><Star size={12} className="text-[#EB4501]" /> Verified review</span>
             {review.creatorId && (
-              <Link to={`/creators/${review.creatorId}`} className="inline-flex items-center gap-1 text-[#FF5B00] hover:underline">
+              <Link to={`/creators/${review.creatorId}`} className="inline-flex items-center gap-1 text-[#EB4501] hover:underline">
                 <User size={12} /> {review.author}
               </Link>
             )}
@@ -146,7 +146,7 @@ export function ReviewDetailPage() {
                 rel="noopener noreferrer"
                 className="absolute inset-0 flex items-center justify-center bg-black/25 hover:bg-black/35 transition-colors"
               >
-                <span className="w-14 h-14 rounded-full bg-[#FF5B00] text-white flex items-center justify-center shadow-lg">
+                <span className="w-14 h-14 rounded-full bg-[#EB4501] text-white flex items-center justify-center shadow-lg">
                   <Play size={22} fill="currentColor" />
                 </span>
               </a>
@@ -174,7 +174,7 @@ export function ReviewDetailPage() {
         <section className="mb-10">
           <div className="flex items-center justify-between gap-3 mb-4">
             <h2 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight">Related reviews</h2>
-            <Link to="/guides" className="text-[12.5px] font-bold text-[#FF5B00] inline-flex items-center gap-1 hover:underline">
+            <Link to="/guides" className="text-[12.5px] font-bold text-[#EB4501] inline-flex items-center gap-1 hover:underline">
               View all <ChevronRight size={14} />
             </Link>
           </div>
@@ -183,7 +183,7 @@ export function ReviewDetailPage() {
               <Link
                 key={String(g.id || g.slug)}
                 to={catalogGuideHref(g)}
-                className="bg-white border border-[#E8EDF2] rounded-xl overflow-hidden hover:border-[#FF5B00]/40 transition-colors"
+                className="bg-white border border-[#E8EDF2] rounded-xl overflow-hidden hover:border-[#EB4501]/40 transition-colors"
               >
                 <div className="aspect-[16/10] bg-[#F4F7F9]">
                   {(g.thumbnail || g.image) && (
@@ -202,7 +202,7 @@ export function ReviewDetailPage() {
         <div className="flex flex-wrap gap-2.5">
           <Link
             to="/products"
-            className="inline-flex items-center gap-1.5 bg-[#FF5B00] text-white px-4 py-2.5 rounded-lg text-xs font-bold"
+            className="inline-flex items-center gap-1.5 bg-[#EB4501] text-white px-4 py-2.5 rounded-lg text-xs font-bold"
           >
             <ShoppingBag size={14} /> Browse products
           </Link>

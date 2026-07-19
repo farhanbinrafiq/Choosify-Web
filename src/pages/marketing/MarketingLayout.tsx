@@ -35,13 +35,13 @@ export function MarketingLayout() {
       <header className="bg-white border-b border-[#e8edf2] px-6 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-2 text-sm">
-            <Link to="/dashboard" className="text-gray-400 hover:text-[#E8500A]">Dashboard</Link>
+            <Link to="/dashboard" className="text-gray-400 hover:text-[#CF4400]">Dashboard</Link>
             <ChevronRight size={14} className="text-gray-300" />
-            <Link to="/marketing/content" className="font-bold text-navy hover:text-[#E8500A]">Marketing</Link>
+            <Link to="/marketing/content" className="font-bold text-navy hover:text-[#CF4400]">Marketing</Link>
             {moduleLabel && moduleLabel !== 'Marketing' && (
               <>
                 <ChevronRight size={14} className="text-gray-300" />
-                <span className="font-semibold text-[#E8500A]">{moduleLabel}</span>
+                <span className="font-semibold text-[#EB4501]">{moduleLabel}</span>
               </>
             )}
           </div>

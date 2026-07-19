@@ -32,7 +32,7 @@ interface BrandCardDesignProps {
 
 const BRAND_COLORS = [
   '#000435',
-  '#FF5B00',
+  '#EB4501',
   '#2323FF',
   '#07A828',
   '#EB4501',
@@ -148,13 +148,15 @@ export const BrandCardDesign = memo(function BrandCardDesign({
         <button
           type="button"
           onClick={toggleWish}
-          className="absolute top-2 right-2 w-[26px] h-[26px] rounded-full bg-white/92 flex items-center justify-center border-0 cursor-pointer z-10"
+          className="absolute top-2 right-2 w-[26px] h-[26px] rounded-full bg-white flex items-center justify-center border-0 cursor-pointer z-10 shadow-sm"
           aria-label={isSaved ? 'Unsave brand' : 'Save brand'}
         >
           <Heart
             size={12}
             strokeWidth={1.6}
-            className={cn('text-[#FF5B00]', isSaved && 'fill-[#FF5B00]')}
+            className={cn(
+              isSaved ? 'text-[#FF000D] fill-[#FF000D]' : 'text-[#CBD5E1]',
+            )}
           />
         </button>
       </div>
@@ -162,11 +164,11 @@ export const BrandCardDesign = memo(function BrandCardDesign({
       <div className="p-4 text-center flex flex-col flex-1">
         <div className="flex items-center justify-center gap-1 mb-0.5">
           <h3 className="text-[14px] font-extrabold text-[#1A1A2E] truncate">{brand.name}</h3>
-          <span className="text-[#6C4CFF] text-[12px] font-extrabold" aria-label="Verified">
+          <span className="text-[#2323FF] text-[12px] font-extrabold" aria-label="Verified">
             ✓
           </span>
         </div>
-        <p className="text-[11px] text-[#9AA0AC] mb-3">✓ Verified Brand</p>
+        <p className="text-[11px] text-[#2323FF] mb-3">✓ Verified Brand</p>
 
         {/* Stats — dc Brands List: Best For | Price Range | Success ring */}
         <div className="flex items-center justify-between gap-1 px-1 py-3.5 mb-3.5">
@@ -204,7 +206,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
           </div>
         </div>
 
-        <span className="mt-auto block w-full bg-[#000435] hover:bg-[#FF5B00] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors">
+        <span className="mt-auto block w-full bg-[#000435] hover:bg-[#CF4400] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors">
           View Brand
         </span>
       </div>

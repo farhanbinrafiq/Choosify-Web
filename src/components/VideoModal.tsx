@@ -54,7 +54,7 @@ export function VideoModal({ review, onClose }: Props) {
               </div>
             </div>
             
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-[#FF5B00] rounded-full flex items-center justify-center border-4 border-white/20 group-hover:scale-110 transition-transform shadow-2xl">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-[#EB4501] rounded-full flex items-center justify-center border-4 border-white/20 group-hover:scale-110 transition-transform shadow-2xl">
               <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-white border-b-[12px] border-b-transparent ml-2" />
             </div>
           </div>

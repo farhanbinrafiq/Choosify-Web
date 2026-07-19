@@ -40,7 +40,7 @@ export function SpotlightPreview({ draft, mode, onModeChange }: SpotlightPreview
           </div>
         ) : mode === 'carousel' ? (
           <div className="aspect-[21/9] bg-navy/90 text-white p-6 flex flex-col justify-end">
-            <span className="text-[10px] font-bold uppercase text-[#E8500A]">Spotlight</span>
+            <span className="text-[10px] font-bold uppercase text-[#EB4501]">Spotlight</span>
             <h3 className="text-xl font-extrabold tracking-tight">{draft.headline || draft.title}</h3>
           </div>
         ) : (

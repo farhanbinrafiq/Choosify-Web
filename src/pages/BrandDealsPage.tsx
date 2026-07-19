@@ -102,14 +102,14 @@ export function BrandDealsPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#E8500A]" />
+          <Search size={13} className="text-[#EB4501]" />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search brand deals, promo codes or specific brands..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
         />
       </div>
     ),
@@ -224,7 +224,7 @@ export function BrandDealsPage() {
   }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       <DcListingHero
         titleBefore="Brand"
         titleHighlight="Deals"
@@ -315,7 +315,7 @@ export function BrandDealsPage() {
       />
 
       {/* CORE THREE-COLUMN SYSTEM LAYOUT INTEGRATION */}
-      <div className="w-full bg-[#F4F7F9] min-h-screen py-8">
+      <div className="w-full bg-choosify-feed min-h-screen py-8">
         <div id="brand-deals-main" className={`scroll-mt-36 ${LISTING_PAGE_MAX_WIDTH} mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
           
           {/* Left Sidebar */}
@@ -323,14 +323,14 @@ export function BrandDealsPage() {
             {/* LEFT COLUMN SEARCH BAR */}
             <div className="relative">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <Search size={13} className="text-[#E8500A]" />
+                <Search size={13} className="text-[#EB4501]" />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search brand deals, promo codes or specific brands..."
-                className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+                className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors shadow-sm"
               />
             </div>
 
@@ -467,14 +467,14 @@ export function BrandDealsPage() {
 
             {/* Promo spotlight card */}
             <div className="choosify-dark-surface text-white rounded-xl border border-[#E8EDF2]/10 p-5 shadow-sm relative overflow-hidden flex flex-col justify-between text-left shrink-0 w-full" style={{ height: '320px' }}>
-              <div className="absolute top-0 right-0 w-28 h-28 bg-[#FF5B00]/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-28 h-28 bg-[#EB4501]/10 rounded-full blur-2xl pointer-events-none" />
               
               <div>
-                <span className="px-2.5 py-1 rounded-md bg-[#FF5B00] text-white text-[11px] font-bold tracking-tight leading-none">
+                <span className="px-2.5 py-1 rounded-md bg-[#EB4501] text-white text-[11px] font-bold tracking-tight leading-none">
                   Spotlight deal
                 </span>
                 <h3 className="font-sans text-lg font-extrabold tracking-tight text-white text-left leading-snug mt-4">
-                  Exclusive S26 <span className="text-[#FF5B00]">bundle packs</span>
+                  Exclusive S26 <span className="text-[#EB4501]">bundle packs</span>
                 </h3>
                 <p className="text-[13px] text-white/55 font-medium mt-2 leading-relaxed">
                   Unlock dynamic distributor pricing on Samsung Mobile and premium accessories.
@@ -483,7 +483,7 @@ export function BrandDealsPage() {
               
               <button 
                 onClick={() => navigate('/brands/1/products')}
-                className="w-full py-3 bg-[#FF5B00] hover:brightness-110 text-white font-bold rounded-lg text-[13px] tracking-tight flex items-center justify-center gap-2 transition-all mt-4 shadow-sm cursor-pointer border-0"
+                className="w-full py-3 bg-[#EB4501] hover:brightness-110 text-white font-bold rounded-lg text-[13px] tracking-tight flex items-center justify-center gap-2 transition-all mt-4 shadow-sm cursor-pointer border-0"
               >
                 Explore S26 Deals <ArrowRight size={13} />
               </button>
@@ -512,14 +512,14 @@ export function BrandDealsPage() {
               >
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5 leading-none">
-                    <Filter size={11} className="text-[#E8500A]" />
+                    <Filter size={11} className="text-[#EB4501]" />
                     ADVANCED FILTER PANEL:
                   </span>
-                  <span className="px-2 py-0.5 bg-[#E8500A]/10 text-[#E8500A] text-[9px] font-black uppercase rounded-[3px] leading-none">
+                  <span className="px-2 py-0.5 bg-[#EB4501]/10 text-[#EB4501] text-[9px] font-black uppercase rounded-[3px] leading-none">
                     {selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all' || selectedLetter ? 'Active Filters' : 'None'}
                   </span>
                 </div>
-                <span className="text-[9.5px] font-black text-[#E8500A] uppercase tracking-widest">
+                <span className="text-[9.5px] font-black text-[#EB4501] uppercase tracking-widest">
                   {isMobileFilterOpen ? 'Hide Filters ▲' : 'Show Filters ▼'}
                 </span>
               </div>
@@ -714,7 +714,7 @@ export function BrandDealsPage() {
 
                           <div className="w-full h-px bg-gray-50 relative z-10" />
 
-                          <div className="flex items-center gap-2 text-[13px] font-bold text-[#1A1A2E] tracking-tight group-hover:text-[#FF5B00] transition-colors relative z-10">
+                          <div className="flex items-center gap-2 text-[13px] font-bold text-[#1A1A2E] tracking-tight group-hover:text-[#CF4400] transition-colors relative z-10">
                             Grab This Offer <ArrowRight size={13} className="-rotate-45 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                           </div>
                         </div>
@@ -729,7 +729,7 @@ export function BrandDealsPage() {
                   <p className="text-xs text-gray-400 font-semibold max-w-sm">No partners match your selected criteria. Try resetting the search input or alphabet letter filter.</p>
                   <button 
                     onClick={() => {setSelectedLetter(null); setSearchQuery(''); setActiveTab('All');}}
-                    className="px-5 py-2.5 bg-[#FF5B00] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-lg transition-all shadow-sm"
+                    className="px-5 py-2.5 bg-[#EB4501] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-lg transition-all shadow-sm"
                   >
                     Clear All Filters
                   </button>
@@ -780,7 +780,7 @@ export function BrandDealsPage() {
             <button
               type="button"
               onClick={() => navigate('/about#suggest-brand')}
-              className="w-full sm:w-auto px-7 py-3 bg-white text-[#1A1A2E] font-bold text-[12.5px] rounded-lg hover:bg-[#FF5B00] hover:text-white transition-colors cursor-pointer border-0"
+              className="w-full sm:w-auto px-7 py-3 bg-white text-[#1A1A2E] font-bold text-[12.5px] rounded-lg hover:bg-[#CF4400] hover:text-white transition-colors cursor-pointer border-0"
             >
               Request a brand
             </button>

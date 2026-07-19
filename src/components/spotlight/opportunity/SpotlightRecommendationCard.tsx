@@ -20,7 +20,7 @@ export function SpotlightRecommendationCard({ opportunity, estimatedTotalImpact,
   if (opportunity) {
     return (
       <div className="bg-[#050514] text-white rounded-xl p-5 space-y-3">
-        <p className="text-[10px] font-bold uppercase text-[#E8500A]">Recommended next step</p>
+        <p className="text-[10px] font-bold uppercase text-[#EB4501]">Recommended next step</p>
         <h3 className="text-lg font-black">{opportunity.title}</h3>
         <p className="text-sm text-gray-300 leading-relaxed">{opportunity.coachingMessage}</p>
         <p className="text-xs font-bold text-emerald-400">Estimated improvement: +{opportunity.estimatedImpactPercent}% engagement</p>
@@ -30,7 +30,7 @@ export function SpotlightRecommendationCard({ opportunity, estimatedTotalImpact,
 
   return (
     <div className="bg-gradient-to-br from-[#050514] to-navy text-white rounded-xl p-5 space-y-4">
-      <p className="text-[10px] font-bold uppercase text-[#E8500A] tracking-widest">Publisher Success Coach</p>
+      <p className="text-[10px] font-bold uppercase text-[#EB4501] tracking-widest">Publisher Success Coach</p>
       <h3 className="text-xl font-extrabold tracking-tight">What should you improve next?</h3>
       {missingCount != null && missingCount > 0 ? (
         <>
@@ -50,7 +50,7 @@ export function SpotlightRecommendationCard({ opportunity, estimatedTotalImpact,
             onRun={runAction}
             loading={loading && activeId === action.id}
             compact
-            className="bg-white/10 border-white/20 text-white hover:text-[#E8500A]"
+            className="bg-white/10 border-white/20 text-white hover:text-[#CF4400]"
           />
         ))}
       </div>

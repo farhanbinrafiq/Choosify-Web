@@ -228,7 +228,7 @@ export function SpotlightCampaignEditorPage() {
         <button type="button" onClick={() => navigate('/marketing/spotlight')} className="text-sm text-gray-500 flex items-center gap-1">
           <ChevronLeft size={16} /> Back to campaigns
         </button>
-        <button type="button" onClick={saveDraft} className="flex items-center gap-1 text-sm font-bold text-[#E8500A]">
+        <button type="button" onClick={saveDraft} className="flex items-center gap-1 text-sm font-bold text-[#EB4501]">
           <Save size={14} /> Save Draft
         </button>
       </div>
@@ -243,7 +243,7 @@ export function SpotlightCampaignEditorPage() {
             key={label}
             className={cn(
               'px-3 py-1 rounded-full text-[10px] font-bold uppercase',
-              draft.step === i + 1 ? 'bg-[#E8500A] text-white' : 'bg-white border border-[#e8edf2] text-gray-400',
+              draft.step === i + 1 ? 'bg-[#EB4501] text-white' : 'bg-white border border-[#e8edf2] text-gray-400',
             )}
           >
             {i + 1}. {label}
@@ -390,7 +390,7 @@ export function SpotlightCampaignEditorPage() {
               <button type="button" onClick={saveDraft} className="px-4 py-2 border rounded text-sm font-bold">
                 Save Draft
               </button>
-              <button type="button" onClick={submitForReview} className="px-4 py-2 bg-[#E8500A] text-white rounded text-sm font-bold">
+              <button type="button" onClick={submitForReview} className="px-4 py-2 bg-[#EB4501] text-white rounded text-sm font-bold">
                 Submit for Review
               </button>
               {canModerate(actor) && (

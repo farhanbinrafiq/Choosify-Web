@@ -78,7 +78,7 @@ function LaneHeader({
       <button
         type="button"
         onClick={onViewAll}
-        className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
+        className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#CF4400] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
       >
         View All ›
       </button>
@@ -241,8 +241,8 @@ export function DiscoverStructuredFeed({
                 className={cn(
                   'px-3.5 py-2 rounded-[18px] text-[11.5px] font-bold cursor-pointer border transition-colors min-h-[36px]',
                   active
-                    ? 'bg-[#FF5B00] text-white border-[#FF5B00]'
-                    : 'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#FF5B00]/40',
+                    ? 'bg-[#EB4501] text-white border-[#EB4501]'
+                    : 'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#EB4501]/40',
                 )}
               >
                 {pill.label}
@@ -266,7 +266,7 @@ export function DiscoverStructuredFeed({
             <button
               type="button"
               onClick={onClearFilters}
-              className="mt-4 text-xs font-bold uppercase text-[#FF5B00] hover:underline min-h-[44px] px-4 cursor-pointer bg-transparent border-0"
+              className="mt-4 text-xs font-bold uppercase text-[#EB4501] hover:underline min-h-[44px] px-4 cursor-pointer bg-transparent border-0"
             >
               Clear filters
             </button>
@@ -351,7 +351,7 @@ export function DiscoverStructuredFeed({
               <button
                 type="button"
                 onClick={() => triggerFilter('blogs')}
-                className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
+                className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#CF4400] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
               >
                 View All ›
               </button>

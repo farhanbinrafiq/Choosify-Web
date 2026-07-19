@@ -18,7 +18,7 @@ import { EmiAiLogo } from '../components/EmiAiLogo';
 type AuthTab = 'sign-in' | 'sign-up';
 
 const PAGE_BG = '#000435';
-const PRIMARY = '#FF5B00';
+const PRIMARY = '#EB4501';
 
 const SIGNIN_FEATURES = [
   'Save unlimited products & brands',
@@ -33,7 +33,7 @@ const TRUST_POINTS = [
     icon: Shield,
     title: 'Trust You Can Rely On',
     sub: 'We verify brands and sellers so you can shop with complete confidence.',
-    bg: 'rgba(255,91,0,0.18)',
+    bg: 'rgba(235, 69, 1,0.18)',
     iconColor: PRIMARY,
   },
   {
@@ -131,7 +131,7 @@ function AuthField({
           placeholder={placeholder}
           className={cn(
             'w-full h-[42px] rounded-lg border border-[#E5E7EB] bg-white text-[13px] font-medium text-[#1A1A2E] outline-none transition-colors box-border',
-            'placeholder:text-[#9AA0AC] focus:border-[#FF5B00] focus:ring-2 focus:ring-[#FF5B00]/15',
+            'placeholder:text-[#9AA0AC] focus:border-[#EB4501] focus:ring-2 focus:ring-[#EB4501]/15',
             Icon ? 'pl-10 pr-3.5' : 'px-3.5',
           )}
         />
@@ -207,7 +207,7 @@ export function LoginSignUpPage() {
             <div className={cn('absolute inset-0 bg-gradient-to-br', tile.hue)} />
             <div className="absolute bottom-2 left-2 right-2 text-[10px] text-white font-bold [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
               {tile.name}
-              <div className="text-[9px] font-extrabold text-[#FF5B00]">{tile.price}</div>
+              <div className="text-[9px] font-extrabold text-[#EB4501]">{tile.price}</div>
             </div>
           </div>
         ))}
@@ -246,7 +246,7 @@ export function LoginSignUpPage() {
         <div className="flex-1 flex items-center justify-center gap-10 lg:gap-[60px] px-6 sm:px-10 py-5 flex-wrap">
           {/* Left marketing copy */}
           <div className="max-w-[400px] w-full">
-            <div className="inline-block bg-[rgba(255,90,44,0.15)] text-[#FF5B00] text-[11px] font-bold px-3.5 py-1.5 rounded-full mb-5">
+            <div className="inline-block bg-[rgba(255,90,44,0.15)] text-[#EB4501] text-[11px] font-bold px-3.5 py-1.5 rounded-full mb-5">
               ✦ Join 100,000+ SHOPPERS
             </div>
             <h1 className="text-[28px] sm:text-[34px] font-extrabold text-white leading-[1.2] mb-[18px]">
@@ -358,14 +358,14 @@ export function LoginSignUpPage() {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="h-3.5 w-3.5 rounded accent-[#FF5B00]"
+                      className="h-3.5 w-3.5 rounded accent-[#EB4501]"
                     />
                     Remember me
                   </label>
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    className="text-xs font-bold text-[#FF5B00] hover:underline"
+                    className="text-xs font-bold text-[#EB4501] hover:underline"
                   >
                     Forgot password?
                   </button>
@@ -431,7 +431,7 @@ export function LoginSignUpPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab(isSignUp ? 'sign-in' : 'sign-up')}
-                className="text-[#FF5B00] font-bold hover:underline"
+                className="text-[#EB4501] font-bold hover:underline"
               >
                 {isSignUp ? 'Sign in' : 'Sign up'}
               </button>

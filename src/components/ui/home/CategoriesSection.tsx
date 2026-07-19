@@ -12,7 +12,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({ categories
     <section>
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-black text-slate-900 tracking-tight">Top Categories</h2>
-        <Link to="/categories" className="text-xs font-bold text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 hover:text-[#EB4501]">
+        <Link to="/categories" className="text-xs font-bold text-[#EB4501] uppercase tracking-wider flex items-center gap-1 hover:text-[#CF4400]">
           VIEW ALL CATEGORIES <ChevronRight size={14} />
         </Link>
       </div>

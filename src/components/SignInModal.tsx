@@ -68,7 +68,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
 
             <div className="relative z-10 p-8 pt-12 sm:p-10 sm:pt-14">
               <div className="mb-8 text-center">
-                <div className="w-14 h-14 bg-[#FF5B00]/15 rounded-xl flex items-center justify-center text-[#FF5B00] mx-auto mb-5 border border-[#FF5B00]/20">
+                <div className="w-14 h-14 bg-[#EB4501]/15 rounded-xl flex items-center justify-center text-[#EB4501] mx-auto mb-5 border border-[#EB4501]/20">
                   <LogIn size={26} />
                 </div>
                 <h2 className="text-2xl sm:text-[28px] font-extrabold text-white tracking-tight mb-2">
@@ -89,7 +89,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@email.com"
-                      className="w-full h-12 bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 text-white text-sm font-medium placeholder:text-white/25 focus:outline-none focus:border-[#FF5B00]/50 transition-all"
+                      className="w-full h-12 bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 text-white text-sm font-medium placeholder:text-white/25 focus:outline-none focus:border-[#EB4501]/50 transition-all"
                     />
                   </div>
                 </div>
@@ -103,7 +103,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full h-12 bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 text-white text-sm font-medium placeholder:text-white/25 focus:outline-none focus:border-[#FF5B00]/50 transition-all"
+                      className="w-full h-12 bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 text-white text-sm font-medium placeholder:text-white/25 focus:outline-none focus:border-[#EB4501]/50 transition-all"
                     />
                   </div>
                 </div>

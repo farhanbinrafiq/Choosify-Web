@@ -36,7 +36,7 @@ export function HomePopularServicesSection({ services }: HomePopularServicesSect
           <Link
             key={id}
             to={href}
-            className="bg-white border border-[#E8EDF2] rounded-[10px] px-2 py-[18px] flex flex-col items-center gap-2 hover:border-[#FF5B00]/35 transition-colors"
+            className="bg-white border border-[#E8EDF2] rounded-[10px] px-2 py-[18px] flex flex-col items-center gap-2 hover:border-[#EB4501]/35 transition-colors"
           >
             <div
               className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-xs font-extrabold"

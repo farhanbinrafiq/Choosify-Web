@@ -98,7 +98,7 @@ export function VideoLightbox({ video, onClose }: VideoLightboxProps) {
           >
             <div className="absolute top-0 inset-x-0 p-4 bg-gradient-to-b from-black/85 via-black/45 to-transparent z-20 flex items-start justify-between gap-3 text-white">
               <div className="flex flex-col text-left min-w-0 pr-2">
-                <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#E8500A] mb-0.5">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#EB4501] mb-0.5">
                   {video.isVertical ? 'Short / Reel Playback' : 'Video Playback'}
                 </span>
                 <h3 className="text-xs md:text-sm font-extrabold tracking-tight truncate italic">

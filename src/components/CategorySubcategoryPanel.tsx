@@ -57,7 +57,7 @@ export function CategorySubcategoryPanel({
       <div className="mt-4 mb-2 rounded-[20px] bg-white border border-[#eef2f6] shadow-lg p-5 md:p-8 text-left">
         <div className="flex items-start justify-between gap-4 pb-5 mb-6 border-b border-[#eef2f6]">
           <div className="flex items-center gap-4 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-[#F7F8FA] flex items-center justify-center shrink-0 ring-2 ring-[#E8500A]/10">
+            <div className="w-12 h-12 rounded-2xl bg-[#F7F8FA] flex items-center justify-center shrink-0 ring-2 ring-[#EB4501]/10">
               {getCategoryIconComponent(category.name, category.icon)}
             </div>
             <div className="min-w-0">
@@ -75,7 +75,7 @@ export function CategorySubcategoryPanel({
               e.stopPropagation();
               onClose();
             }}
-            className="w-9 h-9 rounded-full border border-[#eef2f6] hover:border-[#E8500A]/30 flex items-center justify-center text-[#8a9bb0] hover:text-[#E8500A] transition-colors bg-white shrink-0"
+            className="w-9 h-9 rounded-full border border-[#eef2f6] hover:border-[#EB4501]/30 flex items-center justify-center text-[#8a9bb0] hover:text-[#CF4400] transition-colors bg-white shrink-0"
             aria-label="Collapse category"
           >
             <X size={16} />
@@ -95,7 +95,7 @@ export function CategorySubcategoryPanel({
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.15, delay: index * 0.02 }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#F7F8FA] hover:bg-[#FFF8F4] border border-transparent hover:border-[#E8500A]/20 text-sm font-medium text-[#1A1D4E] hover:text-[#E8500A] transition-all duration-200 min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#F7F8FA] hover:bg-[#FFF8F4] border border-transparent hover:border-[#EB4501]/20 text-sm font-medium text-[#1A1D4E] hover:text-[#CF4400] transition-all duration-200 min-h-[44px]"
                   onClick={() => {
                     document.getElementById('categories-main-display')?.scrollIntoView({ behavior: 'smooth' });
                   }}
@@ -117,7 +117,7 @@ export function CategorySubcategoryPanel({
               <Link
                 key={brand}
                 to={`/search?q=${encodeURIComponent(brand)}`}
-                className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-white border border-[#eef2f6] shadow-sm hover:shadow-md hover:border-[#E8500A]/20 hover:-translate-y-0.5 transition-all duration-200 min-h-[48px] text-sm font-semibold text-[#1A1D4E] hover:text-[#E8500A]"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-white border border-[#eef2f6] shadow-sm hover:shadow-md hover:border-[#EB4501]/20 hover:-translate-y-0.5 transition-all duration-200 min-h-[48px] text-sm font-semibold text-[#1A1D4E] hover:text-[#CF4400]"
               >
                 {brand}
               </Link>
@@ -133,7 +133,7 @@ export function CategorySubcategoryPanel({
               </h3>
               <Link
                 to={`/products?category=${encodeURIComponent(category.name)}`}
-                className="text-[11px] font-bold uppercase tracking-wider text-[#E8500A] hover:underline inline-flex items-center gap-1"
+                className="text-[11px] font-bold uppercase tracking-wider text-[#EB4501] hover:underline inline-flex items-center gap-1"
               >
                 View all <ChevronRight size={12} />
               </Link>
@@ -169,8 +169,8 @@ export function CategorySubcategoryPanel({
                     />
                   </div>
                   <div className="min-w-0 py-0.5">
-                    <span className="text-[9px] font-black uppercase tracking-wider text-[#E8500A]">Guide</span>
-                    <p className="text-sm font-semibold text-[#1A1D4E] line-clamp-2 group-hover:text-[#E8500A] transition-colors">
+                    <span className="text-[9px] font-black uppercase tracking-wider text-[#EB4501]">Guide</span>
+                    <p className="text-sm font-semibold text-[#1A1D4E] line-clamp-2 group-hover:text-[#CF4400] transition-colors">
                       {guide.title}
                     </p>
                   </div>
@@ -190,9 +190,9 @@ export function CategorySubcategoryPanel({
                 <Link
                   key={creator.id}
                   to={`/creators/${creator.id}`}
-                  className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#F7F8FA] hover:bg-white border border-[#eef2f6] hover:border-[#E8500A]/20 transition-all duration-200"
+                  className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#F7F8FA] hover:bg-white border border-[#eef2f6] hover:border-[#EB4501]/20 transition-all duration-200"
                 >
-                  <div className="w-8 h-8 rounded-full bg-[#E8500A]/10 overflow-hidden flex items-center justify-center text-[10px] font-bold text-[#E8500A]">
+                  <div className="w-8 h-8 rounded-full bg-[#EB4501]/10 overflow-hidden flex items-center justify-center text-[10px] font-bold text-[#EB4501]">
                     {creator.avatar ? (
                       <img src={creator.avatar} alt="" className="w-full h-full object-cover" />
                     ) : (

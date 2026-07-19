@@ -44,7 +44,7 @@ export default function NotFoundPage() {
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="w-full sm:w-auto px-6 py-3 bg-[#FF5B00] text-white rounded-lg text-[12.5px] font-bold flex items-center justify-center gap-2 hover:bg-[#E8500A] transition-colors cursor-pointer border-0"
+              className="w-full sm:w-auto px-6 py-3 bg-[#EB4501] text-white rounded-lg text-[12.5px] font-bold flex items-center justify-center gap-2 hover:bg-[#CF4400] transition-colors cursor-pointer border-0"
             >
               <Home size={16} /> Return home
             </button>
@@ -60,12 +60,12 @@ export default function NotFoundPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search products, brands, or deals..."
-              className="w-full h-12 bg-white/8 border border-white/15 rounded-xl pl-12 pr-5 text-white text-[13px] font-semibold placeholder:text-white/30 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
+              className="w-full h-12 bg-white/8 border border-white/15 rounded-xl pl-12 pr-5 text-white text-[13px] font-semibold placeholder:text-white/30 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
             />
           </form>
           <p className="mt-4 text-[12px] text-white/35">
             Or browse{' '}
-            <Link to="/products" className="text-[#FF5B00] font-semibold hover:underline">
+            <Link to="/products" className="text-[#EB4501] font-semibold hover:underline">
               products
             </Link>
           </p>

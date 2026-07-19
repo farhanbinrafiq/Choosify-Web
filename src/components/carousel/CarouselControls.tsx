@@ -26,7 +26,7 @@ export function CarouselControls({
           type="button"
           onClick={onPrev}
           className={cn(
-            'absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-[#E8500A]/80 border border-white/20 flex items-center justify-center text-white transition-all backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+            'absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-[#CF4400]/80 border border-white/20 flex items-center justify-center text-white transition-all backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
             className,
           )}
           aria-label="Previous slide"
@@ -37,7 +37,7 @@ export function CarouselControls({
           type="button"
           onClick={onNext}
           className={cn(
-            'absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-[#E8500A]/80 border border-white/20 flex items-center justify-center text-white transition-all backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+            'absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-[#CF4400]/80 border border-white/20 flex items-center justify-center text-white transition-all backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
             className,
           )}
           aria-label="Next slide"
@@ -55,7 +55,7 @@ export function CarouselControls({
         onClick={onPrev}
         disabled={!canScrollLeft}
         className={cn(
-          'w-8 h-8 rounded-full border border-[#eef2f6] bg-white flex items-center justify-center hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A]/30 transition-all active:scale-90 shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]/40',
+          'w-8 h-8 rounded-full border border-[#eef2f6] bg-white flex items-center justify-center hover:bg-[#CF4400] hover:text-white hover:border-[#EB4501]/30 transition-all active:scale-90 shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]/40',
           !canScrollLeft && 'opacity-40 pointer-events-none',
         )}
         aria-label="Previous"
@@ -67,7 +67,7 @@ export function CarouselControls({
         onClick={onNext}
         disabled={!canScrollRight}
         className={cn(
-          'w-8 h-8 rounded-full border border-[#eef2f6] bg-white flex items-center justify-center hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A]/30 transition-all active:scale-90 shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]/40',
+          'w-8 h-8 rounded-full border border-[#eef2f6] bg-white flex items-center justify-center hover:bg-[#CF4400] hover:text-white hover:border-[#EB4501]/30 transition-all active:scale-90 shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]/40',
           !canScrollRight && 'opacity-40 pointer-events-none',
         )}
         aria-label="Next"

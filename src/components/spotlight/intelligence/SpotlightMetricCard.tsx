@@ -53,7 +53,7 @@ export function SpotlightMetricCard({
           {subtitle && <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>}
         </div>
         {(href || onDrillDown) && (
-          <ChevronRight size={16} className="text-gray-300 group-hover:text-[#E8500A] shrink-0 mt-1" />
+          <ChevronRight size={16} className="text-gray-300 group-hover:text-[#CF4400] shrink-0 mt-1" />
         )}
       </div>
 
@@ -74,7 +74,7 @@ export function SpotlightMetricCard({
           <svg viewBox="0 0 120 32" className="w-full h-full">
             <polyline
               fill="none"
-              stroke="#E8500A"
+              stroke="#EB4501"
               strokeWidth="1.5"
               points={trendData
                 .map((v, i) => {
@@ -90,7 +90,7 @@ export function SpotlightMetricCard({
       )}
 
       {(href || onDrillDown) && (
-        <span className="text-[10px] font-bold uppercase text-[#E8500A] opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-[10px] font-bold uppercase text-[#EB4501] opacity-0 group-hover:opacity-100 transition-opacity">
           View Details
         </span>
       )}

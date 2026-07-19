@@ -184,7 +184,7 @@ export const BRAND_LOGOS = [
   { id: 'brand-logo-walton', name: 'WALTON', text: 'WALTON', image: null, color: 'text-blue-800 font-extrabold tracking-tighter' },
   { id: 'brand-logo-aarong', name: 'AARONG', text: 'AARONG', image: null, color: 'text-[#5C3A21] font-serif font-black tracking-widest' },
   { id: 'brand-logo-bata', name: 'Bata', image: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/Bata_logo.svg' },
-  { id: 'brand-logo-pickaboo', name: 'PICKABOO', text: 'PICKABOO', image: null, color: 'text-[#FF5B00] font-black tracking-wide' },
+  { id: 'brand-logo-pickaboo', name: 'PICKABOO', text: 'PICKABOO', image: null, color: 'text-[#EB4501] font-black tracking-wide' },
   { id: 'brand-logo-lereve', name: 'Le Reve', text: 'Le Reve', image: null, color: 'text-purple-950 font-serif italic font-bold' }
 ];
 

@@ -46,7 +46,7 @@ export function SpotlightDiscoverSectionBlock({
         {section.viewAllHref && (
           <Link
             to={section.viewAllHref}
-            className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#E8500A] hover:underline shrink-0"
+            className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#EB4501] hover:underline shrink-0"
           >
             View More <ChevronRight size={14} />
           </Link>

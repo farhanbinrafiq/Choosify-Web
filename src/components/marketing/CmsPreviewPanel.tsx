@@ -89,7 +89,7 @@ export function CmsPreviewPanel({ mode, onModeChange, content, sponsored }: CmsP
                 <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">
                   <img src={thumb} alt="" className="w-full h-full object-cover" />
                 </div>
-                <span className="text-[10px] font-bold uppercase text-[#E8500A]">
+                <span className="text-[10px] font-bold uppercase text-[#EB4501]">
                   {content.contentType.replace(/_/g, ' ')}
                 </span>
                 <h2 className="text-xl font-black text-navy mt-1">{content.headline || content.title}</h2>

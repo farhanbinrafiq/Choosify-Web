@@ -30,7 +30,7 @@ export function MerchantGuidancePanel({ guidance, qualityScore }: MerchantGuidan
             {g.severity === 'warning' ? (
               <AlertTriangle size={14} className="text-amber-500 mt-0.5 shrink-0" />
             ) : g.severity === 'suggestion' ? (
-              <Lightbulb size={14} className="text-[#E8500A] mt-0.5 shrink-0" />
+              <Lightbulb size={14} className="text-[#EB4501] mt-0.5 shrink-0" />
             ) : (
               <Info size={14} className="text-blue-500 mt-0.5 shrink-0" />
             )}

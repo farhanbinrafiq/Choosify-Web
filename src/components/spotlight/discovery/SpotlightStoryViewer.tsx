@@ -107,7 +107,7 @@ export function SpotlightStoryViewer({ groups, initialGroupIndex = 0, onClose }:
           {slide.href && slide.ctaLabel && (
             <Link
               to={slide.href}
-              className="inline-flex px-6 py-3 min-h-[44px] bg-[#E8500A] text-white text-xs font-black uppercase rounded"
+              className="inline-flex px-6 py-3 min-h-[44px] bg-[#EB4501] text-white text-xs font-black uppercase rounded"
             >
               {slide.ctaLabel}
             </Link>
@@ -140,10 +140,10 @@ export function SpotlightStoryRail({ groups, onOpen }: SpotlightStoryRailProps) 
           key={g.storyGroupId}
           type="button"
           onClick={() => onOpen(i)}
-          className="shrink-0 flex flex-col items-center gap-1 min-w-[72px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A] rounded-lg p-1"
+          className="shrink-0 flex flex-col items-center gap-1 min-w-[72px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501] rounded-lg p-1"
           aria-label={`Open story from ${g.publisherName}`}
         >
-          <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-[#E8500A] to-amber-400">
+          <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-[#EB4501] to-amber-400">
             {g.publisherAvatar ? (
               <img src={g.publisherAvatar} alt="" className="w-full h-full rounded-full object-cover border-2 border-white" />
             ) : (

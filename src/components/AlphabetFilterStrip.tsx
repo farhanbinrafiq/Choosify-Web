@@ -33,7 +33,7 @@ export function AlphabetFilterStrip({
           className={cn(
             'col-span-full py-1.5 rounded-[3px] text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer',
             activeLetter === null
-              ? 'bg-[#E8500A] text-white shadow-sm'
+              ? 'bg-[#EB4501] text-white shadow-sm'
               : 'bg-gray-50 text-gray-400 hover:bg-gray-100',
           )}
         >
@@ -47,7 +47,7 @@ export function AlphabetFilterStrip({
             className={cn(
               'h-7 rounded-[3px] text-[10px] font-black transition-all flex items-center justify-center uppercase cursor-pointer',
               activeLetter === letter
-                ? 'bg-[#E8500A] text-white shadow-xs'
+                ? 'bg-[#EB4501] text-white shadow-xs'
                 : 'bg-gray-50 text-gray-400 hover:text-[#1A1D4E] hover:bg-gray-100/70',
             )}
           >

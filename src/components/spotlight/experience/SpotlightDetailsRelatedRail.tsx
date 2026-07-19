@@ -49,7 +49,7 @@ export function SpotlightDetailsRelatedRail({
         </div>
         <Link
           to={viewAllHref}
-          className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] shrink-0"
+          className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#CF4400] shrink-0"
         >
           {viewAllLabel}
         </Link>

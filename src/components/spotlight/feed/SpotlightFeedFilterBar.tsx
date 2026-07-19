@@ -45,7 +45,7 @@ export function SpotlightFeedFilterBar({
             className={cn(
               'shrink-0 px-3.5 py-1.5 rounded-lg text-[12px] font-bold tracking-tight border transition-colors min-h-[32px]',
               chip.active
-                ? 'bg-[#FF5B00] text-white border-[#FF5B00]'
+                ? 'bg-[#EB4501] text-white border-[#EB4501]'
                 : 'bg-white text-[#9AA0AC] border-[#E8EDF2] hover:border-[#d5dce5] hover:text-[#1A1A2E]',
             )}
           >

@@ -16,7 +16,7 @@ export function EmiPublisherPanel({ context }: EmiPublisherPanelProps) {
   return (
     <div className="p-6 space-y-4 max-w-xl">
       <h2 className="text-sm font-black text-navy uppercase flex items-center gap-2">
-        <Sparkles size={16} className="text-[#E8500A]" aria-hidden /> Emi Publisher Assistant
+        <Sparkles size={16} className="text-[#EB4501]" aria-hidden /> Emi Publisher Assistant
       </h2>
       <p className="text-xs text-gray-500">
         Suggest improvements — review and apply manually. No automatic generation in Phase 5.6.

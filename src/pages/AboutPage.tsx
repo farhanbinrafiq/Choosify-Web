@@ -66,7 +66,7 @@ export function AboutPage() {
   const navLinkClass = (id: string) =>
     cn(
       'flex items-center gap-2 px-3 py-2 rounded-lg text-[12.5px] font-semibold transition-colors',
-      activeHash === id ? 'bg-[#FFF3EA] text-[#FF5B00]' : 'text-[#4B5563] hover:bg-[#F4F7F9]',
+      activeHash === id ? 'bg-[#FFF3EA] text-[#EB4501]' : 'text-[#4B5563] hover:bg-[#F4F7F9]',
     );
 
   return (

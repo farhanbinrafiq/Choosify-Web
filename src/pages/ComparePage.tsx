@@ -38,10 +38,10 @@ export function ComparePage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       <main className="w-full max-w-[1400px] mx-auto px-5 sm:px-10 py-6 pb-[60px]">
         <nav className="text-xs text-[#9AA0AC] mb-3.5" aria-label="Breadcrumb">
-          <Link to="/" className="hover:text-[#FF5B00] transition-colors">
+          <Link to="/" className="hover:text-[#CF4400] transition-colors">
             Home
           </Link>
           <span className="mx-1.5">›</span>

@@ -23,7 +23,7 @@ function TickerSegment({
   if (emphasis) {
     return (
       <span className="inline-flex items-center mx-1">
-        <span className="bg-[#E8500A] text-white px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-wider">
+        <span className="bg-[#EB4501] text-white px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-wider">
           {text}
         </span>
       </span>

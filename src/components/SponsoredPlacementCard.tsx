@@ -27,7 +27,7 @@ function PlacementCta({
   className?: string;
 }) {
   const classes = cn(
-    'w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0',
+    'w-full py-2.5 bg-[#EB4501] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0',
     className,
   );
 
@@ -60,7 +60,7 @@ export function SponsoredPlacementCard({
   return (
     <div
       className={cn(
-        'bg-white rounded-[5px] border border-dashed border-[#E8500A]/25 p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full flex flex-col items-center',
+        'bg-white rounded-[5px] border border-dashed border-[#EB4501]/25 p-4.5 shadow-sm text-[#1a1a2e] text-center relative overflow-hidden w-full flex flex-col items-center',
         variant === 'infeed' && 'h-full justify-between text-left items-stretch',
         className,
       )}
@@ -73,7 +73,7 @@ export function SponsoredPlacementCard({
             </h3>
           </div>
         ) : (
-          <span className="text-[8px] font-black uppercase tracking-widest text-[#E8500A] mb-2">
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#EB4501] mb-2">
             Sponsored
           </span>
         )}

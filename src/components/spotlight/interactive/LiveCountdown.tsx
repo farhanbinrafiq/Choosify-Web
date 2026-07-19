@@ -26,7 +26,7 @@ export function LiveCountdown({ targetDate, timezone, className }: LiveCountdown
   }, [target]);
 
   if (remaining.done) {
-    return <p className={cn('text-sm font-bold text-[#E8500A]', className)}>Starting soon</p>;
+    return <p className={cn('text-sm font-bold text-[#EB4501]', className)}>Starting soon</p>;
   }
 
   return (

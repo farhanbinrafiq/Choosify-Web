@@ -43,7 +43,7 @@ export function SpotlightHomeSection({ catalog, brandLogos }: SpotlightHomeSecti
         </div>
         <Link
           to="/spotlight"
-          className="inline-flex items-center gap-1.5 text-[#E8500A] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider transition-all shrink-0"
+          className="inline-flex items-center gap-1.5 text-[#EB4501] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider transition-all shrink-0"
         >
           Explore Spotlight
           <ChevronRight size={14} />

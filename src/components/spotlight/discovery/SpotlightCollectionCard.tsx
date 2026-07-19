@@ -11,10 +11,10 @@ export function SpotlightCollectionCard({ collection, compact }: SpotlightCollec
   return (
     <Link
       to={`/spotlight/collections/${collection.slug}`}
-      className="group flex flex-col h-full min-h-[120px] p-4 bg-white border border-[#e8edf2] rounded-[5px] hover:border-[#E8500A]/40 hover:shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]"
+      className="group flex flex-col h-full min-h-[120px] p-4 bg-white border border-[#e8edf2] rounded-[5px] hover:border-[#EB4501]/40 hover:shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]"
       aria-label={`Collection: ${collection.name}`}
     >
-      <span className="text-[9px] font-black uppercase tracking-widest text-[#E8500A]">{collection.kind}</span>
+      <span className="text-[9px] font-black uppercase tracking-widest text-[#EB4501]">{collection.kind}</span>
       <h3 className={cnTitle(compact)}>{collection.name}</h3>
       {!compact && collection.description && (
         <p className="text-[11px] text-gray-500 mt-1 line-clamp-2">{collection.description}</p>

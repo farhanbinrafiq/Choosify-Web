@@ -28,7 +28,7 @@ export function SpotlightLiveStatusSection({
           <span
             className={cn(
               'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-tight',
-              isLive ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-[#FFF0E8] text-[#E8500A] border border-[#E8500A]/20',
+              isLive ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-[#FFF0E8] text-[#EB4501] border border-[#EB4501]/20',
             )}
           >
             <Radio size={12} className={isLive ? 'animate-pulse' : undefined} />
@@ -43,7 +43,7 @@ export function SpotlightLiveStatusSection({
         {content.live?.embedUrl && (
           <a
             href="#spotlight-content-hero"
-            className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 bg-[#E8500A] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] no-underline"
+            className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] no-underline"
           >
             {isLive ? 'Watch Live' : isUpcoming ? 'Notify Me' : 'Watch Replay'}
           </a>

@@ -773,7 +773,7 @@ export function GuidesPage() {
         {(selectedPlatform === 'youtube' || selectedContentType === 'video') && (
           <div className="space-y-4">
             <div className="py-2 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-              <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">📺 YouTube specs</span>
+              <span className="text-[12px] font-bold tracking-tight text-[#EB4501] block">📺 YouTube specs</span>
             </div>
 
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
@@ -821,7 +821,7 @@ export function GuidesPage() {
         {(selectedPlatform === 'instagram' || selectedContentType === 'reels' || selectedContentType === 'shorts') && (
           <div className="space-y-4">
             <div className="py-2 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-              <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">📱 Reels specs</span>
+              <span className="text-[12px] font-bold tracking-tight text-[#EB4501] block">📱 Reels specs</span>
             </div>
 
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
@@ -869,7 +869,7 @@ export function GuidesPage() {
         {(selectedPlatform === 'blog' || selectedContentType === 'article') && (
           <div className="space-y-4">
             <div className="py-2 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-              <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">✍️ Blog specs</span>
+              <span className="text-[12px] font-bold tracking-tight text-[#EB4501] block">✍️ Blog specs</span>
             </div>
 
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left">
@@ -1027,14 +1027,14 @@ export function GuidesPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#E8500A]" />
+          <Search size={13} className="text-[#EB4501]" />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search guides, topics..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
         />
       </div>
     ),
@@ -1243,7 +1243,7 @@ export function GuidesPage() {
   ]);
 
   return (
-    <div id="guides-root" className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div id="guides-root" className="flex flex-col min-h-screen bg-choosify-feed">
       <DcListingHero
         titleBefore="Top Buying"
         titleHighlight="Guides"
@@ -1364,14 +1364,14 @@ export function GuidesPage() {
             {/* LEFT COLUMN SEARCH BAR */}
             <div className="relative mb-2">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <Search size={13} className="text-[#E8500A]" />
+                <Search size={13} className="text-[#EB4501]" />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search guides, topics..."
-                className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+                className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors shadow-sm"
               />
             </div>
             <div id="guides-sidebar-filters" className="transition-all duration-300 rounded-[5px] w-full">

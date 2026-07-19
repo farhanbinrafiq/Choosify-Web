@@ -25,8 +25,8 @@ export function CategoryPhotoCard({
   const cardClass = cn(
     'choosify-category-photo-card choosify-category-card bg-white border rounded-[5px] flex flex-col overflow-hidden transition-[border-color,box-shadow,transform] duration-200 cursor-pointer group relative text-left p-0',
     isExpanded
-      ? 'border-[#E8500A] ring-4 ring-[#E8500A]/5 z-20 shadow-md'
-      : 'border-[#e8edf2] hover:border-[#E8500A]/25 hover:shadow-sm',
+      ? 'border-[#EB4501] ring-4 ring-[#EB4501]/5 z-20 shadow-md'
+      : 'border-[#e8edf2] hover:border-[#EB4501]/25 hover:shadow-sm',
     className,
   );
 
@@ -40,15 +40,15 @@ export function CategoryPhotoCard({
           loading="lazy"
         />
         {isExpanded && (
-          <div className="absolute inset-0 bg-[#E8500A]/10 border-2 border-[#E8500A]/40 pointer-events-none" />
+          <div className="absolute inset-0 bg-[#EB4501]/10 border-2 border-[#EB4501]/40 pointer-events-none" />
         )}
       </div>
 
       <div className="w-full px-3 py-3 sm:px-3.5 sm:py-3.5 border-t border-[#e8edf2] bg-white">
-        <h4 className="font-semibold text-[11px] sm:text-xs text-[#1a1a2e] group-hover:text-[#E8500A] transition-colors leading-snug uppercase tracking-tight line-clamp-2">
+        <h4 className="font-semibold text-[11px] sm:text-xs text-[#1a1a2e] group-hover:text-[#CF4400] transition-colors leading-snug uppercase tracking-tight line-clamp-2">
           {name}
         </h4>
-        <p className="text-[10px] text-[#E8500A] font-semibold leading-none uppercase font-mono mt-1.5">
+        <p className="text-[10px] text-[#EB4501] font-semibold leading-none uppercase font-mono mt-1.5">
           {productCount.toLocaleString()} Products
         </p>
       </div>
@@ -58,7 +58,7 @@ export function CategoryPhotoCard({
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.15, ease: 'easeOut' }}
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-r border-b border-[#E8500A]/30 z-10"
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-r border-b border-[#EB4501]/30 z-10"
         />
       )}
     </>

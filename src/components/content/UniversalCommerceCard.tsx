@@ -33,7 +33,7 @@ const MEDIA_ASPECT: Record<CommerceCardVariant, string> = {
   square: 'aspect-square',
 };
 
-const AVATAR_COLORS = ['#FF5B00', '#2323FF', '#07A828', '#EB4501', '#000435', '#6C4CFF'];
+const AVATAR_COLORS = ['#EB4501', '#2323FF', '#07A828', '#EB4501', '#000435', '#6C4CFF'];
 
 function avatarColor(seed: string): string {
   let h = 0;

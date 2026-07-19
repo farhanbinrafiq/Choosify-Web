@@ -25,7 +25,7 @@ export function LiveCollaboratorsStrip({ collaborators }: LiveCollaboratorsStrip
               <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center font-bold">{c.name.slice(0, 1)}</span>
             )}
             <span className="font-bold text-[#1a1a2e]">{c.name}</span>
-            {c.isVerified && <BadgeCheck size={10} className="text-[#E8500A]" />}
+            {c.isVerified && <BadgeCheck size={10} className="text-[#EB4501]" />}
             <span className="text-gray-400 uppercase">{COLLABORATION_ROLE_LABELS[c.role]}</span>
           </div>
         ))}

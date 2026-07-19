@@ -38,10 +38,10 @@ export function SpotlightToolbar({ title, status, onSave, onPreview, onSubmit, o
         )}>
           <Clock size={10} /> {STATUS_LABELS[status]}
         </span>
-        <button type="button" onClick={onPreview} className="inline-flex items-center gap-1 px-3 py-1.5 text-[10px] font-bold uppercase border border-[#e8edf2] rounded hover:border-[#E8500A]/40">
+        <button type="button" onClick={onPreview} className="inline-flex items-center gap-1 px-3 py-1.5 text-[10px] font-bold uppercase border border-[#e8edf2] rounded hover:border-[#EB4501]/40">
           <Eye size={12} /> Preview
         </button>
-        <button type="button" onClick={onSave} className="inline-flex items-center gap-1 px-3 py-1.5 text-[10px] font-bold uppercase border border-[#e8edf2] rounded hover:border-[#E8500A]/40">
+        <button type="button" onClick={onSave} className="inline-flex items-center gap-1 px-3 py-1.5 text-[10px] font-bold uppercase border border-[#e8edf2] rounded hover:border-[#EB4501]/40">
           <Save size={12} /> Save
         </button>
         {onSubmit && (
@@ -50,7 +50,7 @@ export function SpotlightToolbar({ title, status, onSave, onPreview, onSubmit, o
           </button>
         )}
         {onPublish && (
-          <button type="button" onClick={onPublish} className="inline-flex items-center gap-1 px-3 py-1.5 text-[10px] font-bold uppercase bg-[#E8500A] text-white rounded">
+          <button type="button" onClick={onPublish} className="inline-flex items-center gap-1 px-3 py-1.5 text-[10px] font-bold uppercase bg-[#EB4501] text-white rounded">
             Publish <ChevronDown size={12} />
           </button>
         )}

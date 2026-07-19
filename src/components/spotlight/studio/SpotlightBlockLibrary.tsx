@@ -30,7 +30,7 @@ export function SpotlightBlockLibrary({ onAdd, filterCategory }: SpotlightBlockL
                 key={block.type}
                 type="button"
                 onClick={() => onAdd(block.type)}
-                className="text-left p-2 rounded border border-[#e8edf2] hover:border-[#E8500A]/40 hover:bg-[#F8FBFD] transition-colors"
+                className="text-left p-2 rounded border border-[#e8edf2] hover:border-[#EB4501]/40 hover:bg-[#F8FBFD] transition-colors"
               >
                 <span className="text-xs font-bold text-navy">{block.label}</span>
                 <span className="block text-[9px] text-gray-400 mt-0.5 line-clamp-2">{block.description}</span>

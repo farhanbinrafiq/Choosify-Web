@@ -129,7 +129,7 @@ export function Hero({ variant, className }: HeroProps) {
                 style={{
                   background:
                     slide.gradient ||
-                    'linear-gradient(135deg, #000435 0%, #1A1D4E 50%, #FF5B00 160%)',
+                    'linear-gradient(135deg, #000435 0%, #1A1D4E 50%, #EB4501 160%)',
                 }}
               />
             )}

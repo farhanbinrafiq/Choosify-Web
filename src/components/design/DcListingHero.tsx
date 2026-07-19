@@ -51,7 +51,7 @@ export function DcListingHero({
         style={{ background: DC_LISTING_HERO_BG }}
       >
         {eyebrow && (
-          <div className="relative z-[1] text-[11px] font-extrabold text-[#FF5B00] tracking-widest mb-3.5">
+          <div className="relative z-[1] text-[11px] font-extrabold text-[#EB4501] tracking-widest mb-3.5">
             {eyebrow}
           </div>
         )}

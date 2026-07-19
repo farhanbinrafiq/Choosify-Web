@@ -40,7 +40,7 @@ function NavButton({
       className={cn(
         'shrink-0 px-4 py-2.5 sm:py-2 rounded-lg text-[12px] font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap relative touch-manipulation min-h-[40px] sm:min-h-0 border-0',
         active
-          ? 'bg-[#FFF3EA] text-[#FF5B00]'
+          ? 'bg-[#FFF3EA] text-[#EB4501]'
           : 'bg-transparent text-[#4B5563] hover:bg-[#F4F7F9] hover:text-[#1A1A2E]',
       )}
     >
@@ -50,7 +50,7 @@ function NavButton({
         <span
           className={cn(
             'min-w-[16px] h-4 px-1 rounded-full text-[8px] font-bold flex items-center justify-center leading-none',
-            active ? 'bg-[#FF5B00] text-white' : 'bg-[#FF5B00] text-white',
+            active ? 'bg-[#EB4501] text-white' : 'bg-[#EB4501] text-white',
           )}
         >
           {badge > 9 ? '9+' : badge}

@@ -49,7 +49,7 @@ export function CompareHero({ className }: CompareHeroProps) {
             placeholder="Search for first product"
             value={queryA}
             onChange={(e) => setQueryA(e.target.value)}
-            className="flex-1 h-11 rounded-lg border border-[#E5E7EB] px-4 text-[13px] outline-none focus:border-[#FF5B00]"
+            className="flex-1 h-11 rounded-lg border border-[#E5E7EB] px-4 text-[13px] outline-none focus:border-[#EB4501]"
           />
           <div className="w-[34px] h-[34px] rounded-full choosify-emi-gradient text-white text-[11px] font-extrabold flex items-center justify-center shrink-0 self-center">
             VS
@@ -58,7 +58,7 @@ export function CompareHero({ className }: CompareHeroProps) {
             placeholder="Search for second product"
             value={queryB}
             onChange={(e) => setQueryB(e.target.value)}
-            className="flex-1 h-11 rounded-lg border border-[#E5E7EB] px-4 text-[13px] outline-none focus:border-[#FF5B00]"
+            className="flex-1 h-11 rounded-lg border border-[#E5E7EB] px-4 text-[13px] outline-none focus:border-[#EB4501]"
           />
           <button
             type="button"

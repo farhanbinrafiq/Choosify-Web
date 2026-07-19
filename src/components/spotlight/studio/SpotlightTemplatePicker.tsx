@@ -18,7 +18,7 @@ export function SpotlightTemplatePicker({ onSelectTemplate, onSelectBlueprint }:
               key={t.templateId}
               type="button"
               onClick={() => onSelectTemplate(t.templateId)}
-              className="px-3 py-1.5 text-[10px] font-bold uppercase bg-white border border-[#e8edf2] rounded hover:border-[#E8500A]/40"
+              className="px-3 py-1.5 text-[10px] font-bold uppercase bg-white border border-[#e8edf2] rounded hover:border-[#EB4501]/40"
             >
               {t.title}
             </button>

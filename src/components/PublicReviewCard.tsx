@@ -87,7 +87,7 @@ export function PublicReviewCard({
               <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
             </div>
           ) : (
-            <div className="w-10 h-10 rounded-full bg-[#FF5B00] text-white flex items-center justify-center text-[13px] font-extrabold shrink-0">
+            <div className="w-10 h-10 rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[13px] font-extrabold shrink-0">
               {initial}
             </div>
           )}
@@ -101,8 +101,8 @@ export function PublicReviewCard({
               {review.name}
             </div>
             {isVerified && (
-              <div className="flex items-center gap-1 text-[11px] text-[#16A34A] font-bold">
-                <svg width="12" height="12" viewBox="0 0 20 20" fill="#16A34A" aria-hidden>
+              <div className="flex items-center gap-1 text-[11px] text-[#2323FF] font-bold">
+                <svg width="12" height="12" viewBox="0 0 20 20" fill="#2323FF" aria-hidden>
                   <circle cx="10" cy="10" r="9" />
                   <path d="M6 10l3 3 5-6" stroke="#fff" strokeWidth="1.8" fill="none" />
                 </svg>
@@ -171,7 +171,7 @@ export function PublicReviewCard({
               <button
                 type="button"
                 onClick={onEditClick}
-                className="text-[12px] font-bold text-[#FF5B00] bg-transparent border-0 cursor-pointer p-0"
+                className="text-[12px] font-bold text-[#EB4501] bg-transparent border-0 cursor-pointer p-0"
               >
                 Edit Review
               </button>

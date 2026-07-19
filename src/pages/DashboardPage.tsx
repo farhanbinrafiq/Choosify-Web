@@ -139,16 +139,16 @@ const SidebarItem = ({
     className={cn(
       'w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-[12.5px] font-semibold transition-colors border-none text-left cursor-pointer',
       active
-        ? 'bg-[#FFF3EA] text-[#FF5B00]'
+        ? 'bg-[#FFF3EA] text-[#EB4501]'
         : 'bg-transparent text-[#4B5563] hover:bg-[#F4F7F9]',
     )}
   >
     <span className="flex items-center gap-2.5 min-w-0">
-      <Icon size={15} className={cn('shrink-0', active ? 'text-[#FF5B00]' : 'text-[#9AA0AC]')} />
+      <Icon size={15} className={cn('shrink-0', active ? 'text-[#EB4501]' : 'text-[#9AA0AC]')} />
       <span className="truncate">{label}</span>
     </span>
     {badge != null && badge !== '' ? (
-      <span className="shrink-0 bg-[#FF5B00] text-white text-[10px] font-extrabold rounded-lg px-1.5 py-0.5 leading-none">
+      <span className="shrink-0 bg-[#EB4501] text-white text-[10px] font-extrabold rounded-lg px-1.5 py-0.5 leading-none">
         {badge}
       </span>
     ) : count != null && count !== '' ? (
@@ -197,12 +197,12 @@ const OverviewSection = ({
         <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2">
-              <Clock className="text-[#FF5B00]" size={16} /> Recently Viewed
+              <Clock className="text-[#EB4501]" size={16} /> Recently Viewed
             </h3>
             <button
               type="button"
               onClick={() => onTabChange?.('recently-viewed')}
-              className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer"
+              className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer"
             >
               View all history →
             </button>
@@ -222,7 +222,7 @@ const OverviewSection = ({
               <button
                 type="button"
                 onClick={() => onTabChange?.('recently-viewed')}
-                className="mt-3 text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer"
+                className="mt-3 text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer"
               >
                 Browse products →
               </button>
@@ -255,7 +255,7 @@ const OverviewSection = ({
             <button
               type="button"
               onClick={() => onTabChange?.('saved-recommendations')}
-              className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer text-left"
+              className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer text-left"
             >
               Discover Now →
             </button>
@@ -298,7 +298,7 @@ const SavedProductsSection = () => {
                   addToCart(p, 1);
                   toast.success('Added to cart!');
                 }}
-                className="absolute top-6 right-18 z-30 w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-[#E8500A]/20 hover:bg-[#E8500A] hover:text-white cursor-pointer"
+                className="absolute top-6 right-18 z-30 w-10 h-10 rounded-full bg-[#EB4501]/10 text-[#EB4501] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-[#EB4501]/20 hover:bg-[#CF4400] hover:text-white cursor-pointer"
                 title="Add to Cart"
               >
                 <ShoppingBag size={18} />
@@ -320,7 +320,7 @@ const SavedProductsSection = () => {
           </div>
           <h3 className="text-lg font-extrabold text-[#1A1A2E] mb-2">No saved products yet</h3>
           <p className="text-[#9AA0AC] text-[12.5px] mb-8 max-w-sm">Start exploring Choosify.bd and save products you love.</p>
-          <Link to="/products" className="px-8 py-3 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all">Start browsing</Link>
+          <Link to="/products" className="px-8 py-3 bg-[#EB4501] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all">Start browsing</Link>
         </div>
       )}
     </div>
@@ -369,7 +369,7 @@ const SavedGuidesSection = () => {
           </p>
           <Link
             to="/spotlight"
-            className="px-8 py-3 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all"
+            className="px-8 py-3 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all"
           >
             Browse Spotlight
           </Link>
@@ -403,7 +403,7 @@ const SavedBrandsSection = () => {
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Store size={64} className="mb-8 text-gray-300" />
           <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No Saved Brands yet</p>
-          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse all brands</Link>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse all brands</Link>
         </div>
       )}
     </div>
@@ -432,7 +432,7 @@ const LovedBrandsSection = () => {
               <button
                 type="button"
                 onClick={() => toggleLoveBrand(brand)}
-                className="text-[12px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer self-center"
+                className="text-[12px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer self-center"
               >
                 Remove from Loved
               </button>
@@ -443,7 +443,7 @@ const LovedBrandsSection = () => {
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Heart size={64} className="mb-8 text-rose-500" />
           <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No Loved Brands yet</p>
-          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
         </div>
       )}
     </div>
@@ -482,7 +482,7 @@ const FollowedBrandsSection = () => {
                     <button
                       type="button"
                       onClick={() => toggleFollowBrand(brand)}
-                      className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#FF5B00] bg-transparent border-none cursor-pointer self-center"
+                      className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#CF4400] bg-transparent border-none cursor-pointer self-center"
                     >
                       Unfollow
                     </button>
@@ -511,7 +511,7 @@ const FollowedBrandsSection = () => {
                       <button
                         type="button"
                         onClick={() => toggleFollowBrand(creator)}
-                        className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#FF5B00] bg-transparent border-none cursor-pointer self-center"
+                        className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#CF4400] bg-transparent border-none cursor-pointer self-center"
                       >
                         Unfollow
                       </button>
@@ -527,8 +527,8 @@ const FollowedBrandsSection = () => {
           <Store size={64} className="mb-8 text-gray-300" />
           <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed mb-4">Nothing followed yet</p>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link to="/brands" className="px-6 py-2.5 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
-            <Link to="/creators" className="px-6 py-2.5 bg-white border border-[#E8EDF2] text-[#1A1A2E] rounded-xl text-[13px] font-bold tracking-tight hover:border-[#FF5B00]/40">Explore creators</Link>
+            <Link to="/brands" className="px-6 py-2.5 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
+            <Link to="/creators" className="px-6 py-2.5 bg-white border border-[#E8EDF2] text-[#1A1A2E] rounded-xl text-[13px] font-bold tracking-tight hover:border-[#EB4501]/40">Explore creators</Link>
           </div>
         </div>
       )}
@@ -573,10 +573,10 @@ const RecentlyViewedSection = () => {
         </div>
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
-          <Clock size={64} className="mb-8 text-[#E8500A]" />
+          <Clock size={64} className="mb-8 text-[#EB4501]" />
           <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No recently viewed products</p>
           <p className="text-[10px] font-bold text-gray-405 uppercase mt-2 italic">Product views will automatically populate this section.</p>
-          <Link to="/products" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Go to directory</Link>
+          <Link to="/products" className="mt-6 px-6 py-2.5 bg-[#EB4501] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Go to directory</Link>
         </div>
       )}
     </div>
@@ -607,7 +607,7 @@ const MessagesSection = () => {
             <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-4">Inbox</h2>
             <div className="relative">
                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-               <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/30 transition-all" placeholder="Search chats..." />
+               <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#EB4501]/30 transition-all" placeholder="Search chats..." />
             </div>
          </div>
          <div className="flex-1 overflow-y-auto no-scrollbar">
@@ -615,7 +615,7 @@ const MessagesSection = () => {
               <button 
                 key={i} 
                 onClick={() => setActiveChat(i)}
-                className={cn("w-full p-6 flex gap-4 text-left border-b border-gray-100 transition-all hover:bg-gray-50 bg-transparent border-none cursor-pointer", i === 1 && "bg-gray-50/50 border-r-2 border-[#E8500A]")}
+                className={cn("w-full p-6 flex gap-4 text-left border-b border-gray-100 transition-all hover:bg-gray-50 bg-transparent border-none cursor-pointer", i === 1 && "bg-gray-50/50 border-r-2 border-[#EB4501]")}
               >
                  <div className="relative">
                     <img src={`https://i.pravatar.cc/150?u=${i + 20}`} className="w-12 h-12 rounded-full object-cover" alt="" />
@@ -660,7 +660,7 @@ const MessagesSection = () => {
               <div key={m.id} className={cn("flex flex-col max-w-[90%] md:max-w-[80%]", m.sender === 'user' ? "ml-auto items-end" : "mr-auto items-start")}>
                  <div className={cn(
                    "px-5 py-3 md:px-6 md:py-4 rounded-[16px] md:rounded-[20px] mb-2 text-[11px] md:text-xs font-bold leading-relaxed",
-                   m.sender === 'user' ? "bg-[#E8500A] text-white rounded-tr-none shadow-md shadow-[#E8500A]/10 italic" : "bg-white text-navy rounded-tl-none border border-gray-200"
+                   m.sender === 'user' ? "bg-[#EB4501] text-white rounded-tr-none shadow-md shadow-[#EB4501]/10 italic" : "bg-white text-navy rounded-tl-none border border-gray-200"
                  )}>
                     {m.text}
                  </div>
@@ -675,12 +675,12 @@ const MessagesSection = () => {
                  value={inputText}
                  onChange={(e) => setInputText(e.target.value)}
                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                 className="w-full h-12 md:h-14 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/30 transition-all" 
+                 className="w-full h-12 md:h-14 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#EB4501]/30 transition-all" 
                  placeholder="Type message..." 
                />
                <button 
                  onClick={handleSend}
-                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#E8500A] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#E8500A]/10 border-none cursor-pointer"
+                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#EB4501] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#EB4501]/10 border-none cursor-pointer"
                >
                   <Send size={16} />
                </button>
@@ -707,7 +707,7 @@ const NotificationsSection = () => {
         </div>
         <button 
           onClick={markAllAsRead}
-            className="text-[12px] font-bold text-[#FF5B00] tracking-tight hover:underline border-none bg-transparent cursor-pointer"
+            className="text-[12px] font-bold text-[#EB4501] tracking-tight hover:underline border-none bg-transparent cursor-pointer"
         >
           Mark all as read
         </button>
@@ -720,15 +720,15 @@ const NotificationsSection = () => {
               key={n.id} 
               className={cn(
                 "p-8 bg-white border border-[#e8edf2] rounded-[5px] flex items-start gap-6 transition-all hover:bg-gray-50 relative overflow-hidden group shadow-sm",
-                !n.read && "border-[#E8500A]/30 bg-[#E8500A]/5"
+                !n.read && "border-[#EB4501]/30 bg-[#EB4501]/5"
               )}
             >
-              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#E8500A]" />}
+              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#EB4501]" />}
               <div className={cn(
                 "w-12 h-12 rounded-lg flex items-center justify-center shrink-0 shadow-sm",
                 n.type === 'price' ? "bg-[#059669]/10 text-[#059669]" : 
-                n.type === 'reply' ? "bg-[#E8500A]/10 text-[#E8500A]" : 
-                "bg-[#E8500A]/15 text-[#E8500A]"
+                n.type === 'reply' ? "bg-[#EB4501]/10 text-[#EB4501]" : 
+                "bg-[#EB4501]/15 text-[#EB4501]"
               )}>
                 {n.type === 'price' ? <TrendingUp size={24} /> : n.type === 'reply' ? <MessageSquare size={24} /> : <Bell size={24} />}
               </div>
@@ -801,7 +801,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
         {settingsSubTab === 'personal' && (
           <button
             onClick={handleSave}
-            className="px-5 py-2.5 bg-[#FF5B00] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-xl transition-all cursor-pointer border-0 shadow-sm flex items-center gap-2"
+            className="px-5 py-2.5 bg-[#EB4501] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-xl transition-all cursor-pointer border-0 shadow-sm flex items-center gap-2"
           >
             Save Changes
           </button>
@@ -817,7 +817,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
             className={cn(
               'min-h-[40px] px-4 py-2 text-[12.5px] font-bold rounded-xl transition-all border-0 cursor-pointer',
               settingsSubTab === tab.id
-                ? 'bg-white text-[#FF5B00] shadow-sm'
+                ? 'bg-white text-[#EB4501] shadow-sm'
                 : 'bg-transparent text-[#6B7280] hover:text-[#1A1A2E]',
             )}
           >
@@ -830,11 +830,11 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
             <div className="flex flex-col items-center p-8 bg-white border border-[#E8EDF2] rounded-[14px] relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-b from-[#FF5B00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-b from-[#EB4501]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative w-28 h-28 mb-5 cursor-pointer group/avatar">
                 <img
                   src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png"
-                  className="w-full h-full rounded-full object-cover border-4 border-[#FF5B00]/25 transition-all group-hover/avatar:border-[#FF5B00]/60"
+                  className="w-full h-full rounded-full object-cover border-4 border-[#EB4501]/25 transition-all group-hover/avatar:border-[#EB4501]/60"
                   alt="Profile"
                 />
                 <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
@@ -853,7 +853,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                     Full Display Name
                   </label>
                   <input
-                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
+                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#EB4501]/10 focus:border-[#EB4501]/40 focus:bg-white transition-all"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your full name"
@@ -864,7 +864,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                     Email Address
                   </label>
                   <input
-                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
+                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#EB4501]/10 focus:border-[#EB4501]/40 focus:bg-white transition-all"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
@@ -875,7 +875,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                     Phone Number
                   </label>
                   <input
-                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
+                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#EB4501]/10 focus:border-[#EB4501]/40 focus:bg-white transition-all"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+880 1XXX-XXXXXX"
@@ -894,7 +894,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
               <button
                 type="button"
                 onClick={() => setSettingsSubTab('addresses')}
-                className="text-[12.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0"
+                className="text-[12.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0"
               >
                 Go to Addresses →
               </button>
@@ -909,7 +909,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
         <div className="space-y-4 max-w-xl">
           <h3 className="text-[13px] font-bold text-[#1A1A2E]">Security</h3>
           <button className="w-full py-4 bg-white border border-[#E8EDF2] rounded-xl text-[13px] font-bold text-[#1A1A2E] hover:bg-[#F4F7F9] flex items-center justify-center gap-3 cursor-pointer min-h-[44px]">
-            <ShieldCheck size={16} className="text-[#FF5B00]" /> Reset Multi-Factor Auth
+            <ShieldCheck size={16} className="text-[#EB4501]" /> Reset Multi-Factor Auth
           </button>
           <button className="w-full py-4 bg-rose-50 border border-rose-100 rounded-xl text-[13px] font-bold text-rose-600 hover:bg-rose-500 hover:text-white transition-all cursor-pointer min-h-[44px]">
             Deactivate Account
@@ -1135,7 +1135,7 @@ export function DashboardPage() {
           </p>
           <Link 
             to="/messages" 
-            className="px-6 py-3 bg-[#FF5B00] text-white text-[13px] font-bold tracking-tight rounded-lg hover:brightness-110 transition-all leading-none"
+            className="px-6 py-3 bg-[#EB4501] text-white text-[13px] font-bold tracking-tight rounded-lg hover:brightness-110 transition-all leading-none"
           >
             Go to Messenger
           </Link>
@@ -1332,13 +1332,13 @@ export function DashboardPage() {
       <div className="text-[11px] text-white/55 mb-3.5">Enjoy exclusive benefits</div>
       {['Early access to deals', 'Premium support', 'Exclusive rewards'].map((perk) => (
         <div key={perk} className="flex items-center gap-2 text-[11.5px] text-white/85 mb-2.5">
-          <span className="text-[#FF5B00]">●</span>
+          <span className="text-[#EB4501]">●</span>
           {perk}
         </div>
       ))}
       <button
         type="button"
-        className="w-full bg-[#FF5B00] text-white border-none py-2.5 rounded-lg text-[12px] font-extrabold cursor-pointer mt-1.5 hover:brightness-105"
+        className="w-full bg-[#EB4501] text-white border-none py-2.5 rounded-lg text-[12px] font-extrabold cursor-pointer mt-1.5 hover:brightness-105"
       >
         View Benefits
       </button>
@@ -1346,7 +1346,7 @@ export function DashboardPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9] text-[#1A1A2E]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed text-[#1A1A2E]">
       {/* Mobile Top Header */}
       <div className="lg:hidden p-4 border-b border-[#E8EDF2] flex items-center justify-between sticky top-0 bg-white z-50">
         <button

@@ -41,12 +41,12 @@ export function BrandPostCarouselSection({
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-4 mb-4 gap-3">
         <div className="text-left">
           <div className="flex items-center gap-2 flex-wrap">
-            <Sparkles size={14} className="text-[#E8500A]" />
-            <span className="text-[10px] font-black text-[#E8500A] uppercase tracking-[0.2em]">
+            <Sparkles size={14} className="text-[#EB4501]" />
+            <span className="text-[10px] font-black text-[#EB4501] uppercase tracking-[0.2em]">
               {badgeLabel}
             </span>
             {showSponsoredBadge && (
-              <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-[#E8500A]/90 border border-[#E8500A]/30 uppercase bg-[#E8500A]/10 rounded-full">
+              <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-[#EB4501]/90 border border-[#EB4501]/30 uppercase bg-[#EB4501]/10 rounded-full">
                 Sponsored
               </span>
             )}
@@ -55,10 +55,10 @@ export function BrandPostCarouselSection({
             {title.includes(' ') ? (
               <>
                 {title.split(' ').slice(0, -1).join(' ')}{' '}
-                <span className="text-[#E8500A]">{title.split(' ').slice(-1)}</span>
+                <span className="text-[#EB4501]">{title.split(' ').slice(-1)}</span>
               </>
             ) : (
-              <span className="text-[#E8500A]">{title}</span>
+              <span className="text-[#EB4501]">{title}</span>
             )}
           </h2>
           <p className="text-[11px] text-[#8a9bb0] mt-1 text-left max-w-xl">{subtitle}</p>
@@ -66,7 +66,7 @@ export function BrandPostCarouselSection({
         {viewAllHref && (
           <Link
             to={viewAllHref}
-            className="inline-flex items-center gap-1.5 hover:bg-gray-50 text-[#E8500A] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider rounded-lg transition-all shrink-0"
+            className="inline-flex items-center gap-1.5 hover:bg-gray-50 text-[#EB4501] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider rounded-lg transition-all shrink-0"
           >
             {viewAllLabel} <ChevronRight size={14} />
           </Link>

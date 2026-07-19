@@ -50,7 +50,7 @@ export function SectionHeader({
             <span
               className={cn(
                 'inline-flex w-9 h-9 rounded-xl items-center justify-center shrink-0',
-                light ? 'bg-white/15 text-[#FF8A50]' : 'bg-[#FFF0E8] text-[#E8500A]',
+                light ? 'bg-white/15 text-[#FF8A50]' : 'bg-[#FFF0E8] text-[#EB4501]',
               )}
             >
               <Icon size={18} aria-hidden />

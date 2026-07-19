@@ -39,7 +39,7 @@ export function MerchandisingPreviewPanel({
         <div className="p-3 border rounded bg-white">
           <p className="text-[10px] font-bold uppercase text-gray-400 mb-1">Hero Product</p>
           <p className="text-sm font-semibold">{heroProduct.title}</p>
-          <p className="text-xs text-[#E8500A]">৳{heroProduct.price}</p>
+          <p className="text-xs text-[#EB4501]">৳{heroProduct.price}</p>
         </div>
       )}
       {!media ? (

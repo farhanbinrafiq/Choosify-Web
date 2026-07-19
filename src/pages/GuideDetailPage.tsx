@@ -447,23 +447,23 @@ export function GuideDetailPage({
   }, [spotlightContent]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Breadcrumbs — above media (Choosify.dc Guide Detail) */}
       <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 pt-7 pb-0 w-full">
         {backHref && (
           <Link
             to={backHref}
-            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#9AA0AC] hover:text-[#FF5B00] mb-2"
+            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#9AA0AC] hover:text-[#CF4400] mb-2"
           >
             <ArrowLeft size={14} /> {backLabel}
           </Link>
         )}
         <nav className="text-xs text-[#9AA0AC] mb-3.5" aria-label="Breadcrumb">
-          <Link to="/" className="hover:text-[#FF5B00]">Home</Link>
+          <Link to="/" className="hover:text-[#CF4400]">Home</Link>
           {' '}&nbsp;›&nbsp;{' '}
-          <Link to="/spotlight" className="hover:text-[#FF5B00]">Discover</Link>
+          <Link to="/spotlight" className="hover:text-[#CF4400]">Discover</Link>
           {' '}&nbsp;›&nbsp;{' '}
-          <Link to="/guides" className="hover:text-[#FF5B00]">Buying Guides</Link>
+          <Link to="/guides" className="hover:text-[#CF4400]">Buying Guides</Link>
           {' '}&nbsp;›&nbsp;{' '}
           <span className="text-[#1A1A2E]">{guide.title}</span>
         </nav>
@@ -509,8 +509,10 @@ export function GuideDetailPage({
               type="button"
               onClick={() => toggleInteraction("isLoved")}
               className={cn(
-                "mt-1 bg-[#F4F7F9] border-0 text-[9.5px] font-bold px-2.5 py-0.5 rounded-[10px] cursor-pointer inline-flex items-center gap-1",
-                interactions.isLoved ? "text-[#FF5B00]" : "text-[#4B5563]",
+                "mt-1 bg-white border text-[9.5px] font-bold px-2.5 py-0.5 rounded-[10px] cursor-pointer inline-flex items-center gap-1",
+                interactions.isLoved
+                  ? "border-[#FF000D] text-[#FF000D]"
+                  : "border-[#E5E7EB] text-[#4B5563]",
               )}
             >
               <Heart size={11} className={cn(interactions.isLoved && "fill-current")} />
@@ -534,7 +536,7 @@ export function GuideDetailPage({
             </button>
           </div>
           <div>
-            <div className="text-[15px] font-extrabold text-[#FF5B00] tabular-nums">
+            <div className="text-[15px] font-extrabold text-[#EB4501] tabular-nums">
               {interactions.purchases.toLocaleString()}
             </div>
             <button
@@ -542,7 +544,7 @@ export function GuideDetailPage({
               onClick={() => toggleInteraction("isPurchased")}
               className={cn(
                 "mt-1 bg-[#F4F7F9] border-0 text-[9.5px] font-bold px-2.5 py-0.5 rounded-[10px] cursor-pointer inline-flex items-center gap-1",
-                interactions.isPurchased ? "text-[#FF5B00]" : "text-[#4B5563]",
+                interactions.isPurchased ? "text-[#EB4501]" : "text-[#4B5563]",
               )}
             >
               <ShoppingBag size={11} />
@@ -570,7 +572,7 @@ export function GuideDetailPage({
                 className="w-[34px] h-[34px] rounded-full object-cover shrink-0"
               />
             ) : (
-              <div className="w-[34px] h-[34px] rounded-full bg-[#FF5B00] flex items-center justify-center text-white text-xs font-extrabold shrink-0">
+              <div className="w-[34px] h-[34px] rounded-full bg-[#EB4501] flex items-center justify-center text-white text-xs font-extrabold shrink-0">
                 {authorInitial}
               </div>
             )}
@@ -590,7 +592,7 @@ export function GuideDetailPage({
               onClick={() =>
                 openEmiPanel(`Tell me about this buying guide: ${guide.title}`)
               }
-              className="inline-flex items-center gap-1.5 bg-[linear-gradient(90deg,#6C4CFF,#FF5B00)] text-white border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 transition-all"
+              className="inline-flex items-center gap-1.5 bg-[linear-gradient(90deg,#6C4CFF,#EB4501)] text-white border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 transition-all"
             >
               <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
                 <EmiAiLogo size={14} className="w-3.5 h-3.5" />
@@ -601,8 +603,10 @@ export function GuideDetailPage({
               type="button"
               onClick={() => toggleInteraction("isLoved")}
               className={cn(
-                "inline-flex items-center gap-1.5 bg-[#F4F7F9] border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer transition-colors",
-                interactions.isLoved ? "text-[#FF5B00]" : "text-[#1A1A2E]",
+                "inline-flex items-center gap-1.5 border px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer transition-colors",
+                interactions.isLoved
+                  ? "bg-[#FF000D] border-[#FF000D] text-white"
+                  : "bg-white border-[#E5E7EB] text-[#1A1A2E]",
               )}
             >
               <Heart size={14} className={cn(interactions.isLoved && "fill-current")} />
@@ -670,7 +674,7 @@ export function GuideDetailPage({
                   </div>
                   <div className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm text-left flex flex-wrap items-center justify-between gap-4">
                     <div>
-                      <p className="text-[11px] font-bold text-[#FF5B00] mb-1">Limited offer</p>
+                      <p className="text-[11px] font-bold text-[#EB4501] mb-1">Limited offer</p>
                       <p className="text-sm font-bold text-[#1a1a2e]">{spotlightContent.headline}</p>
                       {spotlightContent.endsAt && (
                         <p className="text-[11px] text-[#9AA0AC] mt-1">
@@ -774,7 +778,7 @@ export function GuideDetailPage({
                       text: "Double-Inspected Sourcing Trust",
                       icon: "🛡️",
                       color:
-                        "bg-[#E8500A]/10 border-[#E8500A]/20 text-[#E8500A]",
+                        "bg-[#EB4501]/10 border-[#EB4501]/20 text-[#EB4501]",
                     },
                     {
                       text: "Zero Interest Monthly EMI Approved",
@@ -889,8 +893,8 @@ export function GuideDetailPage({
 
                   {/* What to consider */}
                   <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
-                    <span className="text-[11px] font-extrabold text-[#E8500A] flex items-center gap-1.5 mb-2">
-                      <Info size={12} className="text-[#E8500A]" /> What to
+                    <span className="text-[11px] font-extrabold text-[#EB4501] flex items-center gap-1.5 mb-2">
+                      <Info size={12} className="text-[#EB4501]" /> What to
                       consider
                     </span>
                     <ul className="space-y-1.5 pl-1.5 list-none">
@@ -903,7 +907,7 @@ export function GuideDetailPage({
                           key={i}
                           className="text-[12px] font-bold text-[#1A1A2E]/70 flex items-center gap-1.5"
                         >
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#E8500A]/50 shrink-0" />{" "}
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]/50 shrink-0" />{" "}
                           {item}
                         </li>
                       ))}
@@ -985,7 +989,7 @@ export function GuideDetailPage({
                   </h2>
                 </div>
                 <div className="bg-white text-[#1A1A2E] rounded-[10px] p-6 text-left border border-[#E8EDF2]">
-                  <p className="text-[13px] font-extrabold text-[#FF5B00] mb-2 leading-none">
+                  <p className="text-[13px] font-extrabold text-[#EB4501] mb-2 leading-none">
                     The verdict
                   </p>
                   <p className="text-[13px] font-bold text-[#4B5563] leading-relaxed max-w-2xl text-left">
@@ -1069,7 +1073,7 @@ export function GuideDetailPage({
                 >
                   <div className="bg-white rounded-[10px] p-5 border border-[#E8EDF2] text-center">
                     <div className="text-[13px] font-extrabold text-[#1A1A2E] mb-4">
-                      HOW <span className="text-[#FF5B00]">THIS REVIEW</span> WAS MADE
+                      HOW <span className="text-[#EB4501]">THIS REVIEW</span> WAS MADE
                     </div>
                     <div className="h-px bg-[#F1F1F3] mb-4" />
                     <div className="flex flex-col gap-3.5 text-left">
@@ -1080,7 +1084,7 @@ export function GuideDetailPage({
                         'No sponsored placement',
                       ].map((label) => (
                         <div key={label} className="flex items-center gap-2.5">
-                          <span className="text-[#FF5B00] text-base shrink-0">●</span>
+                          <span className="text-[#EB4501] text-base shrink-0">●</span>
                           <span className="text-[13px] font-bold italic text-[#1A1A2E]">{label}</span>
                         </div>
                       ))}
@@ -1089,7 +1093,7 @@ export function GuideDetailPage({
 
                   <div className="bg-white rounded-[10px] p-5 border border-[#E8EDF2]">
                     <div className="text-[13px] font-extrabold text-[#1A1A2E] text-center mb-4">
-                      WHAT IS <span className="text-[#FF5B00]">DISCUSSED?</span>
+                      WHAT IS <span className="text-[#EB4501]">DISCUSSED?</span>
                     </div>
                     <div className="h-px bg-[#F1F1F3] mb-2.5" />
                     <div className="flex flex-col max-h-[360px] overflow-y-auto no-scrollbar">
@@ -1117,7 +1121,7 @@ export function GuideDetailPage({
                               className={cn(
                                 "w-[22px] h-[22px] rounded-full shrink-0 flex items-center justify-center text-[11px] font-extrabold",
                                 idx === 0
-                                  ? "bg-[#FF5B00] text-white"
+                                  ? "bg-[#EB4501] text-white"
                                   : "bg-[#F4F7F9] text-[#9AA0AC]",
                               )}
                             >
@@ -1162,7 +1166,7 @@ export function GuideDetailPage({
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full rounded-full bg-[#FF5B00] flex items-center justify-center text-white text-[20px] font-extrabold">
+                          <div className="w-full h-full rounded-full bg-[#EB4501] flex items-center justify-center text-white text-[20px] font-extrabold">
                             {authorInitial}
                           </div>
                         )}
@@ -1210,7 +1214,7 @@ export function GuideDetailPage({
                       />
                       <Link
                         to={`/creators/${creator.id || creator.name}`}
-                        className="block w-full bg-[#000435] hover:bg-[#FF5B00] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors"
+                        className="block w-full bg-[#2323FF] hover:brightness-110 text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-[filter]"
                       >
                         View Profile
                       </Link>
@@ -1263,7 +1267,7 @@ export function GuideDetailPage({
             </h3>
             <Link
               to="/guides"
-              className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] shrink-0"
+              className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#CF4400] shrink-0"
             >
               View All Guides ›
             </Link>
@@ -1283,8 +1287,8 @@ export function GuideDetailPage({
                 className={cn(
                   'px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-colors',
                   relatedPlatformFilter === opt.id
-                    ? 'bg-[#FF5B00] text-white border-transparent'
-                    : 'bg-white text-[#4B5563] border-[#E8EDF2] hover:border-[#FF5B00]/40',
+                    ? 'bg-[#EB4501] text-white border-transparent'
+                    : 'bg-white text-[#4B5563] border-[#E8EDF2] hover:border-[#EB4501]/40',
                 )}
               >
                 {opt.label}
@@ -1302,7 +1306,7 @@ export function GuideDetailPage({
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                     loading="lazy"
                   />
-                  <span className="absolute top-1.5 left-1.5 bg-[#FF5B00] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-sm pointer-events-none">
+                  <span className="absolute top-1.5 left-1.5 bg-[#EB4501] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-sm pointer-events-none">
                     {g.type === 'video'
                       ? 'VIDEO'
                       : g.type === 'reels' || g.type === 'shorts'

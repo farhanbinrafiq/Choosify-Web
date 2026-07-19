@@ -7,10 +7,10 @@ export const colors = {
   brand: {
     orange: {
       /** Choosify 3.0 primary */
-      primary: '#FF5B00',
+      primary: '#EB4501',
       deep: '#EB4501',
       /** Legacy alias used widely in JSX */
-      legacy: '#E8500A',
+      legacy: '#EB4501',
       hover: '#CF4400',
       tint: '#FFF0E8',
       surface: '#FFF8F4',
@@ -26,7 +26,7 @@ export const colors = {
       royalBlue: '#2323FF',
       alertRed: '#FF000D',
       playRed: '#E02424',
-      discoverGradient: 'linear-gradient(90deg,#6C4CFF,#FF5B00)',
+      discoverGradient: 'linear-gradient(90deg,#6C4CFF,#EB4501)',
     },
   },
   chrome: {

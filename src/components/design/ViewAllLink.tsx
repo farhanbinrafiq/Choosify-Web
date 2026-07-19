@@ -17,7 +17,7 @@ export function ViewAllLink({ href, label = 'View All', className, light = false
       to={href}
       className={cn(
         'inline-flex items-center gap-1 text-[12px] font-bold shrink-0 min-h-[44px] sm:min-h-0 transition-colors',
-        light ? 'text-white/90 hover:text-white' : 'text-[#FF5B00] hover:text-[#EB4501]',
+        light ? 'text-white/90 hover:text-white' : 'text-[#EB4501] hover:text-[#CF4400]',
         className,
       )}
     >

@@ -79,7 +79,7 @@ export function FlashDealCard({
         </div>
         <div className="h-1 rounded bg-[#F1F1F3] overflow-hidden mb-2.5">
           <div
-            className="h-full bg-[#FF5B00] rounded"
+            className="h-full bg-[#EB4501] rounded"
             style={{ width: `${Math.min(100, Math.max(8, claimedPct))}%` }}
           />
         </div>
@@ -95,7 +95,9 @@ export function FlashDealCard({
             <Heart
               size={12}
               strokeWidth={1.6}
-              className={cn('text-[#FF5B00]', wished && 'fill-[#FF5B00]')}
+              className={cn(
+                wished ? 'text-[#FF000D] fill-[#FF000D]' : 'text-[#CBD5E1]',
+              )}
             />
             {likes}
           </button>
@@ -154,7 +156,7 @@ export function DealOfTheDayCard({
   return (
     <div className="choosify-dark-surface rounded-xl p-5 text-white h-full flex flex-col">
       <div className="flex justify-between items-center mb-3.5">
-        <div className="text-[12px] font-extrabold text-[#FF5B00] flex items-center gap-1">
+        <div className="text-[12px] font-extrabold text-[#EB4501] flex items-center gap-1">
           🏅 DEAL OF THE DAY
         </div>
         <div className="text-[9.5px] text-white/50">New deal in {refreshLabel}</div>
@@ -172,7 +174,7 @@ export function DealOfTheDayCard({
       </Link>
       <div className="text-[12.5px] font-bold text-white mb-1.5 line-clamp-2">{name}</div>
       <div className="flex items-baseline gap-2 mb-2">
-        <div className="text-base font-extrabold text-[#FF5B00]">৳{price.toLocaleString()}</div>
+        <div className="text-base font-extrabold text-[#EB4501]">৳{price.toLocaleString()}</div>
         {originalPrice != null && originalPrice > price && (
           <div className="text-[11px] text-white/50 line-through">
             ৳{originalPrice.toLocaleString()}
@@ -184,13 +186,13 @@ export function DealOfTheDayCard({
       </div>
       <div className="h-[5px] rounded bg-white/12 overflow-hidden mb-3.5">
         <div
-          className="h-full bg-[#FF5B00] rounded"
+          className="h-full bg-[#EB4501] rounded"
           style={{ width: `${Math.min(100, Math.max(8, claimedPct))}%` }}
         />
       </div>
       <Link
         to={to}
-        className="mt-auto block w-full text-center bg-[#FF5B00] text-white py-[11px] rounded-lg text-[12px] font-bold no-underline hover:brightness-110"
+        className="mt-auto block w-full text-center bg-[#EB4501] text-white py-[11px] rounded-lg text-[12px] font-bold no-underline hover:brightness-110"
       >
         VIEW DEAL
       </Link>

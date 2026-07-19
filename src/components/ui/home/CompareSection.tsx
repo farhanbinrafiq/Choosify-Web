@@ -50,7 +50,7 @@ export const CompareSection: React.FC<CompareSectionProps> = ({ onCompare }) => 
         </div>
         <Link 
           to="/compare" 
-          className="text-xs font-bold text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 hover:text-[#EB4501]"
+          className="text-xs font-bold text-[#EB4501] uppercase tracking-wider flex items-center gap-1 hover:text-[#CF4400]"
         >
           VIEW ALL COMPARISONS <ChevronRight size={14} />
         </Link>
@@ -63,7 +63,7 @@ export const CompareSection: React.FC<CompareSectionProps> = ({ onCompare }) => 
               value={compareFirst}
               onChange={(e) => setCompareFirst(e.target.value)}
               placeholder="Search for first product" 
-              className="w-full h-14 pl-12 pr-4 rounded-2xl bg-slate-50 text-sm font-bold text-slate-900 border-none focus:ring-2 focus:ring-[#FF5B00] outline-none"
+              className="w-full h-14 pl-12 pr-4 rounded-2xl bg-slate-50 text-sm font-bold text-slate-900 border-none focus:ring-2 focus:ring-[#EB4501] outline-none"
             />
           </div>
           
@@ -76,7 +76,7 @@ export const CompareSection: React.FC<CompareSectionProps> = ({ onCompare }) => 
               value={compareSecond}
               onChange={(e) => setCompareSecond(e.target.value)}
               placeholder="Search for second product" 
-              className="w-full h-14 pl-12 pr-4 rounded-2xl bg-slate-50 text-sm font-bold text-slate-900 border-none focus:ring-2 focus:ring-[#FF5B00] outline-none"
+              className="w-full h-14 pl-12 pr-4 rounded-2xl bg-slate-50 text-sm font-bold text-slate-900 border-none focus:ring-2 focus:ring-[#EB4501] outline-none"
             />
           </div>
           
@@ -99,7 +99,7 @@ export const CompareSection: React.FC<CompareSectionProps> = ({ onCompare }) => 
                 className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 border border-slate-100/50"
               >
                 <span>{comp.p1}</span>
-                <span className="text-[#FF5B00] mx-1">vs</span>
+                <span className="text-[#EB4501] mx-1">vs</span>
                 <span>{comp.p2}</span>
               </FilterChip>
             ))}

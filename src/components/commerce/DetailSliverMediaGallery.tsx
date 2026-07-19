@@ -271,7 +271,7 @@ export function DetailSliverMediaGallery({
             onClick={() => setActiveIndex(i)}
             className={cn(
               'rounded-full border-0 p-0 cursor-pointer transition-all',
-              i === activeIndex ? 'w-5 h-2 bg-[#FF5B00]' : 'w-2 h-2 bg-white/35 hover:bg-white/55',
+              i === activeIndex ? 'w-5 h-2 bg-[#EB4501]' : 'w-2 h-2 bg-white/35 hover:bg-white/55',
             )}
             aria-label={`Go to slide ${i + 1}`}
             aria-current={i === activeIndex}

@@ -28,13 +28,13 @@ export function CarouselIndicators({
           aria-selected={idx === activeIndex}
           onClick={() => onSelect(idx)}
           className={cn(
-            'h-1 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]/40',
+            'h-1 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]/40',
             variant === 'hero'
               ? idx === activeIndex
                 ? 'w-8 bg-[#FF6B00]'
                 : 'w-2 bg-white/40 hover:bg-white/70'
               : idx === activeIndex
-                ? 'w-5 bg-[#E8500A]'
+                ? 'w-5 bg-[#EB4501]'
                 : 'w-1.5 bg-gray-200 hover:bg-gray-300',
           )}
           aria-label={`Go to slide ${idx + 1}`}

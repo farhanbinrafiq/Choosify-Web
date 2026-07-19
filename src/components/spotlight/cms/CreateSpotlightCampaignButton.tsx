@@ -22,7 +22,7 @@ export function CreateSpotlightCampaignButton({
   return (
     <Link
       to={`/marketing/studio/new${qs ? `?${qs}` : ''}`}
-      className={`inline-flex items-center gap-2 px-4 py-2 bg-[#E8500A] text-white text-xs font-bold uppercase tracking-wide rounded hover:bg-[#d64809] ${className}`}
+      className={`inline-flex items-center gap-2 px-4 py-2 bg-[#EB4501] text-white text-xs font-bold uppercase tracking-wide rounded hover:bg-[#d64809] ${className}`}
     >
       <Megaphone size={14} />
       Create Spotlight Campaign

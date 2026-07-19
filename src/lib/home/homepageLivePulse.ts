@@ -12,7 +12,7 @@ export interface HomeLivePulseItem {
 
 const TONE_DOT: Record<LivePulseTone, string> = {
   live: 'bg-red-500',
-  sale: 'bg-[#E8500A]',
+  sale: 'bg-[#EB4501]',
   guide: 'bg-emerald-500',
   review: 'bg-blue-500',
   campaign: 'bg-violet-500',

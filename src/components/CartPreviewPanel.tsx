@@ -78,7 +78,7 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
     <div className={cn('flex flex-col min-h-0 h-full', className)}>
       <div className="px-4 sm:px-5 py-4 border-b border-[#e8edf2] flex items-center justify-between shrink-0 bg-white">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-full bg-[#FF5B00]/10 flex items-center justify-center text-[#FF5B00] shrink-0">
+          <div className="w-9 h-9 rounded-full bg-[#EB4501]/10 flex items-center justify-center text-[#EB4501] shrink-0">
             <ShoppingBag size={16} />
           </div>
           <div className="min-w-0 text-left">
@@ -95,7 +95,7 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
         <button
           type="button"
           onClick={onClose}
-          className="w-8 h-8 rounded-full border border-[#e8edf2] hover:border-[#FF5B00]/30 flex items-center justify-center text-[#8a9bb0] hover:text-[#FF5B00] transition-colors cursor-pointer shrink-0"
+          className="w-8 h-8 rounded-full border border-[#e8edf2] hover:border-[#EB4501]/30 flex items-center justify-center text-[#8a9bb0] hover:text-[#CF4400] transition-colors cursor-pointer shrink-0"
           aria-label="Close cart"
         >
           <X size={16} />
@@ -117,7 +117,7 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
                 onClose();
                 navigate('/products');
               }}
-              className="text-[10px] font-bold uppercase tracking-widest text-[#FF5B00] hover:underline cursor-pointer"
+              className="text-[10px] font-bold uppercase tracking-widest text-[#EB4501] hover:underline cursor-pointer"
             >
               Browse products
             </button>
@@ -131,7 +131,7 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
             return (
               <div
                 key={item.id}
-                className="flex gap-3 items-start bg-[#F8FAFC] border border-[#e8edf2] hover:border-[#FF5B00]/20 rounded-lg p-3 transition-colors group"
+                className="flex gap-3 items-start bg-[#F8FAFC] border border-[#e8edf2] hover:border-[#EB4501]/20 rounded-lg p-3 transition-colors group"
               >
                 <button
                   type="button"
@@ -151,7 +151,7 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
                   <button
                     type="button"
                     onClick={() => openProduct(item)}
-                    className="text-[11px] font-bold text-[#1A1D4E] uppercase tracking-tight line-clamp-2 text-left hover:text-[#FF5B00] transition-colors w-full"
+                    className="text-[11px] font-bold text-[#1A1D4E] uppercase tracking-tight line-clamp-2 text-left hover:text-[#CF4400] transition-colors w-full"
                   >
                     {product.title}
                   </button>
@@ -170,7 +170,7 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
                   )}
 
                   <div className="flex items-center justify-between gap-2 mt-2">
-                    <span className="text-[11px] font-black text-[#FF5B00] font-mono">
+                    <span className="text-[11px] font-black text-[#EB4501] font-mono">
                       ৳{itemPrice.toLocaleString()}
                     </span>
 
@@ -246,7 +246,7 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
           <button
             type="button"
             onClick={handleCheckout}
-            className="w-full h-11 rounded-lg bg-[#FF5B00] hover:bg-[#E04E00] text-white text-[11px] font-black uppercase tracking-[0.16em] flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
+            className="w-full h-11 rounded-lg bg-[#EB4501] hover:bg-[#E04E00] text-white text-[11px] font-black uppercase tracking-[0.16em] flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
           >
             Checkout
             <ArrowRight size={14} />

@@ -96,8 +96,8 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
             )}
           </div>
           {cashbackText && (
-            <p className="text-xs font-bold text-[#FF5B00] mt-2 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00]"></span>
+            <p className="text-xs font-bold text-[#EB4501] mt-2 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]"></span>
               {cashbackText}
             </p>
           )}
@@ -114,7 +114,7 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
                   onClick={() => setSelectedColor(color.value)}
                   className={cn(
                     "w-8 h-8 rounded-full border-2 transition-all duration-200 shadow-sm",
-                    selectedColor === color.value ? "border-[#FF5B00] scale-110" : "border-transparent hover:scale-105"
+                    selectedColor === color.value ? "border-[#EB4501] scale-110" : "border-transparent hover:scale-105"
                   )}
                   style={{ backgroundColor: color.colorHex }}
                   title={color.label}

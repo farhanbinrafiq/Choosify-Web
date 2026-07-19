@@ -33,7 +33,7 @@ export function EmiOpportunityInsight({ opportunity }: EmiOpportunityInsightProp
   return (
     <div className="mt-2 pt-2 border-t border-[#e8edf2] space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[9px] font-black uppercase text-[#E8500A] flex items-center gap-1">
+        <span className="text-[9px] font-black uppercase text-[#EB4501] flex items-center gap-1">
           <Sparkles size={10} aria-hidden /> Emi explains
         </span>
         <EmiConfidenceBadge level="high" score={Math.min(95, 60 + opportunity.estimatedImpactPercent)} />

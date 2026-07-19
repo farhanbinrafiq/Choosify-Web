@@ -46,9 +46,9 @@ export function SpotlightExploreGrid({ sections, collections = [], series = [], 
               <Link
                 key={`${tile.dimension}-${tile.label}`}
                 to={tile.href}
-                className="flex flex-col items-center justify-center min-h-[100px] p-4 border border-[#e8edf2] rounded-[5px] hover:border-[#E8500A]/40 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]"
+                className="flex flex-col items-center justify-center min-h-[100px] p-4 border border-[#e8edf2] rounded-[5px] hover:border-[#EB4501]/40 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]"
               >
-                <span className="text-[10px] font-black uppercase text-[#E8500A]">{tile.dimension}</span>
+                <span className="text-[10px] font-black uppercase text-[#EB4501]">{tile.dimension}</span>
                 <span className="text-sm font-bold text-[#1a1a2e] mt-1">{tile.label}</span>
                 {tile.count != null && (
                   <span className="text-[10px] text-gray-400 mt-0.5">{tile.count}</span>

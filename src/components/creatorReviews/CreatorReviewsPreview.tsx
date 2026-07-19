@@ -52,7 +52,7 @@ function creatorBadge(content: SpotlightContent): { label: string; bg: string } 
   if (content.contentType === 'creator_review' || content.contentType === 'product_review') {
     return { label: 'YOUTUBE', bg: '#FF000D' };
   }
-  return { label: 'CREATOR', bg: '#FF5B00' };
+  return { label: 'CREATOR', bg: '#EB4501' };
 }
 
 function CreatorReviewTile({
@@ -260,7 +260,7 @@ export function CreatorReviewsPreview({
         <p className="text-sm font-semibold text-[#9AA0AC]">Creator reviews coming soon</p>
         <Link
           to={preview.viewAllHref}
-          className="mt-3 inline-block text-[11.5px] font-extrabold text-[#FF5B00] hover:underline"
+          className="mt-3 inline-block text-[11.5px] font-extrabold text-[#EB4501] hover:underline"
         >
           Browse Spotlight Reviews →
         </Link>
@@ -298,7 +298,7 @@ export function CreatorReviewsPreview({
           {showViewAll && (
             <Link
               to={preview.viewAllHref}
-              className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] shrink-0"
+              className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#CF4400] shrink-0"
             >
               VIEW ALL ›
             </Link>

@@ -15,7 +15,7 @@ export function SpotlightAuditCard({ title, description, opportunities, icon = '
       <div className="flex items-center gap-2 mb-2">
         <span aria-hidden>{icon}</span>
         <h3 className="text-sm font-black text-navy uppercase">{title}</h3>
-        <span className="ml-auto text-xs font-bold text-[#E8500A]">{open.length} gaps</span>
+        <span className="ml-auto text-xs font-bold text-[#EB4501]">{open.length} gaps</span>
       </div>
       <p className="text-[10px] text-gray-400 mb-3">{description}</p>
       <ul className="space-y-1.5">

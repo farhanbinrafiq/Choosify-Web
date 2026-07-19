@@ -23,7 +23,7 @@ function FieldLabel({ children, required = false }: { children: React.ReactNode;
   return (
     <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-1">
       {children}
-      {required && <span className="text-[#E8500A] ml-1">*</span>}
+      {required && <span className="text-[#EB4501] ml-1">*</span>}
     </label>
   );
 }
@@ -48,7 +48,7 @@ function TextField({
         value={value ?? ''}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
+        className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#EB4501]/10 focus:border-[#EB4501]/40 focus:bg-white transition-all"
       />
     </div>
   );
@@ -136,7 +136,7 @@ export function AddressFormDrawer({
               <select
                 value={draft.type}
                 onChange={(event) => onDraftChange({ type: event.target.value as AddressType })}
-                className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
+                className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#EB4501]/10 focus:border-[#EB4501]/40 focus:bg-white transition-all"
               >
                 {ADDRESS_TYPES.map((type) => (
                   <option key={type.id} value={type.id}>
@@ -275,7 +275,7 @@ export function AddressFormDrawer({
               className={cn(
                 'min-h-[44px] px-4 rounded-full text-[10px] font-black uppercase tracking-wider border',
                 draft.isCustomLocation
-                  ? 'bg-[#E8500A] text-white border-[#E8500A]'
+                  ? 'bg-[#EB4501] text-white border-[#EB4501]'
                   : 'bg-white text-[#1a1a2e] border-[#e8edf2]',
               )}
             >
@@ -306,7 +306,7 @@ export function AddressFormDrawer({
           <button
             type="button"
             onClick={onSubmit}
-            className="min-h-[44px] px-5 rounded-xl bg-[#FF5B00] text-white text-[13px] font-bold hover:brightness-110"
+            className="min-h-[44px] px-5 rounded-xl bg-[#EB4501] text-white text-[13px] font-bold hover:brightness-110"
           >
             Save Address
           </button>

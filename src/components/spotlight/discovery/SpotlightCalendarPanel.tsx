@@ -51,7 +51,7 @@ export function SpotlightCalendarPanel({
             aria-selected={view === v.value}
             onClick={() => onViewChange(v.value)}
             className={cn(
-              'px-3 py-2 min-h-[44px] text-[10px] font-bold uppercase rounded border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]',
+              'px-3 py-2 min-h-[44px] text-[10px] font-bold uppercase rounded border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]',
               view === v.value ? 'bg-navy text-white border-navy' : 'bg-white text-gray-500 border-[#e8edf2]',
             )}
           >
@@ -68,7 +68,7 @@ export function SpotlightCalendarPanel({
             onClick={() => toggleKind(k.value)}
             className={cn(
               'px-3 py-1.5 text-[10px] font-bold uppercase rounded-full border',
-              kinds.includes(k.value) ? 'bg-[#E8500A]/10 text-[#E8500A] border-[#E8500A]/30' : 'text-gray-400 border-[#e8edf2]',
+              kinds.includes(k.value) ? 'bg-[#EB4501]/10 text-[#EB4501] border-[#EB4501]/30' : 'text-gray-400 border-[#e8edf2]',
             )}
           >
             {k.label}
@@ -91,7 +91,7 @@ export function SpotlightCalendarPanel({
                     {e.href ? (
                       <Link
                         to={e.href}
-                        className="flex items-start gap-3 p-3 border border-[#e8edf2] rounded-[5px] hover:border-[#E8500A]/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]"
+                        className="flex items-start gap-3 p-3 border border-[#e8edf2] rounded-[5px] hover:border-[#EB4501]/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]"
                       >
                         <EventTime startsAt={e.startsAt} />
                         <EventBody kind={e.kind} title={e.title} description={e.description} />
@@ -115,7 +115,7 @@ export function SpotlightCalendarPanel({
 
 function EventTime({ startsAt }: { startsAt: string }) {
   return (
-    <time dateTime={startsAt} className="shrink-0 text-[10px] font-bold text-[#E8500A] w-14">
+    <time dateTime={startsAt} className="shrink-0 text-[10px] font-bold text-[#EB4501] w-14">
       {new Date(startsAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
     </time>
   );

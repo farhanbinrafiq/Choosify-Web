@@ -48,7 +48,7 @@ export function DiscoverHero({
   return (
     <section className="choosify-dark-surface text-white relative pt-8 pb-14 px-6 md:px-10 lg:px-12 overflow-hidden animate-fade-in" id="discover-hero-component">
       {/* Soft grid lines or glow circles */}
-      <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-[#FF5B00]/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-[#EB4501]/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto w-full relative z-10 flex flex-col">
@@ -79,7 +79,7 @@ export function DiscoverHero({
           
           {/* Left Column: Headline, Subtitle, Search and CTA */}
           <div className="lg:col-span-7 flex flex-col text-left space-y-5">
-            <span className="text-xs font-black text-[#FF5B00] uppercase tracking-[0.2em]">DISCOVER.</span>
+            <span className="text-xs font-black text-[#EB4501] uppercase tracking-[0.2em]">DISCOVER.</span>
             
             {title && (
               <h2 className="text-3xl sm:text-[46px] lg:text-[52px] font-black tracking-tight leading-none text-white uppercase font-sans">
@@ -99,7 +99,7 @@ export function DiscoverHero({
                 value={searchQuery}
                 onChange={onSearchChange}
                 placeholder="Search Discover..."
-                className="w-full bg-white/10 backdrop-blur-md h-13 pr-28 rounded-2xl text-white placeholder-white/50 font-bold text-xs outline-none focus:ring-2 focus:ring-[#FF5B00]/30 transition-all border border-white/10 focus:bg-white/15"
+                className="w-full bg-white/10 backdrop-blur-md h-13 pr-28 rounded-2xl text-white placeholder-white/50 font-bold text-xs outline-none focus:ring-2 focus:ring-[#EB4501]/30 transition-all border border-white/10 focus:bg-white/15"
               />
               <Button 
                 onClick={() => onSearchSubmit(searchQuery)}
@@ -178,11 +178,11 @@ export function DiscoverHero({
               {/* Editor's Pick / Featured Statistic Floating Widget */}
               {featuredStatistic && (
                 <div className="absolute bottom-4 left-4 right-4 bg-slate-950/80 backdrop-blur-md border border-white/10 p-3.5 rounded-2xl text-left flex items-center gap-3 shadow-xl hover:scale-[1.01] transition-transform">
-                  <div className="w-10 h-10 rounded-xl bg-[#FF5B00]/15 flex items-center justify-center text-[#FF5B00] shrink-0 border border-[#FF5B00]/25">
+                  <div className="w-10 h-10 rounded-xl bg-[#EB4501]/15 flex items-center justify-center text-[#EB4501] shrink-0 border border-[#EB4501]/25">
                     <Sparkles size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="text-[8px] font-black text-[#FF5B00] tracking-widest uppercase block leading-none mb-1">
+                    <span className="text-[8px] font-black text-[#EB4501] tracking-widest uppercase block leading-none mb-1">
                       {featuredStatistic.tag}
                     </span>
                     <h4 className="text-xs font-black text-white leading-tight truncate">

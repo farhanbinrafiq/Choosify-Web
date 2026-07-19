@@ -36,7 +36,7 @@ export function PageBreadcrumbsBar({ className }: { className?: string }) {
                 )}
                 {isLast ? (
                   <span
-                    className="text-[#E8500A] truncate max-w-[min(100%,28rem)]"
+                    className="text-[#EB4501] truncate max-w-[min(100%,28rem)]"
                     aria-current="page"
                   >
                     {crumb.name}
@@ -44,7 +44,7 @@ export function PageBreadcrumbsBar({ className }: { className?: string }) {
                 ) : (
                   <Link
                     to={crumb.path}
-                    className="hover:text-[#E8500A] transition-colors truncate max-w-[min(100%,16rem)] text-gray-400"
+                    className="hover:text-[#CF4400] transition-colors truncate max-w-[min(100%,16rem)] text-gray-400"
                   >
                     {crumb.name}
                   </Link>

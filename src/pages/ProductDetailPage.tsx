@@ -780,14 +780,14 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
 
   if (!product) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#F4F7F9] items-center justify-center px-6 text-center">
+      <div className="flex flex-col min-h-screen bg-choosify-feed items-center justify-center px-6 text-center">
         <h1 className="text-lg font-extrabold text-[#1A1A2E]">Product not found</h1>
         <p className="mt-2 text-sm text-[#6B7280]">
           This product is unavailable right now. Try browsing the catalog again.
         </p>
         <Link
           to="/products"
-          className="mt-5 inline-flex rounded-xl bg-[#FF5B00] px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white"
+          className="mt-5 inline-flex rounded-xl bg-[#EB4501] px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white"
         >
           Back to products
         </Link>
@@ -796,7 +796,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       {studioEditMode && isLoggedIn && canUseProductStudio && (
         <div className="sticky top-0 z-[110] bg-[#1A1D4E] border-b border-white/10 px-4 py-3">
           <div className="max-w-[1080px] mx-auto flex flex-wrap items-center justify-between gap-3">
@@ -813,15 +813,15 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
 
       <div className={cn(DC_CONTENT_MAX, 'pt-7 pb-0 w-full')}>
         <div className="text-xs text-[#9AA0AC] mb-3.5">
-          <Link to="/" className="hover:text-[#FF5B00]">Home</Link>
+          <Link to="/" className="hover:text-[#CF4400]">Home</Link>
           {' '}&nbsp;›&nbsp;{' '}
-          <Link to="/products" className="hover:text-[#FF5B00]">Products</Link>
+          <Link to="/products" className="hover:text-[#CF4400]">Products</Link>
           {product.category && (
             <>
               {' '}&nbsp;›&nbsp;{' '}
               <Link
                 to={`/products?category=${encodeURIComponent(product.category)}`}
-                className="hover:text-[#FF5B00]"
+                className="hover:text-[#CF4400]"
               >
                 {product.category}
               </Link>
@@ -1022,7 +1022,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 <button
                   type="button"
                   onClick={() => toast.success('All customer reviews are fully loaded.')}
-                  className="text-[11.5px] font-extrabold text-[#FF5B00] bg-transparent border-0 cursor-pointer hover:underline"
+                  className="text-[11.5px] font-extrabold text-[#EB4501] bg-transparent border-0 cursor-pointer hover:underline"
                 >
                   LOAD MORE REVIEWS
                 </button>
@@ -1079,7 +1079,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                         </div>
                         <button
                           type="submit"
-                          className="bg-[#FF5B00] text-white border-0 px-5 py-2 rounded-lg text-[11.5px] font-extrabold cursor-pointer"
+                          className="bg-[#EB4501] text-white border-0 px-5 py-2 rounded-lg text-[11.5px] font-extrabold cursor-pointer"
                         >
                           SUBMIT REVIEW
                         </button>
@@ -1097,7 +1097,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
             >
               <div>
                 <h3 className="text-[14px] font-extrabold text-[#1A1A2E] tracking-tight">
-                  Product <span className="text-[#FF5B00]">Overview</span>
+                  Product <span className="text-[#EB4501]">Overview</span>
                 </h3>
                 <p className="text-[10px] font-bold text-[#9AA0AC] tracking-wide mt-1 uppercase">
                   Benefits, quality structure & trust
@@ -1149,7 +1149,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 ].map((col) => (
                   <div key={col.title} className="bg-[#F4F7F9] rounded-[10px] px-5 py-[18px] flex flex-col gap-3">
                     <div className="flex items-center gap-2 text-[12px] font-extrabold text-[#1A1A2E]">
-                      <span className="text-[#FF5B00]">{col.icon}</span>
+                      <span className="text-[#EB4501]">{col.icon}</span>
                       {col.title}
                     </div>
                     <div className="space-y-2 text-[11.5px] text-[#4B5563] leading-relaxed">
@@ -1173,7 +1173,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                         className="bg-[#F4F7F9] rounded-[10px] px-5 py-[18px] flex flex-col gap-3"
                       >
                         <div className="flex items-center gap-2 text-[12px] font-extrabold text-[#1A1A2E]">
-                          <span className="text-[#FF5B00]">
+                          <span className="text-[#EB4501]">
                             <Award size={14} />
                           </span>
                           {co.sectionName}
@@ -1188,7 +1188,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               </div>
 
               <div className="pt-1 space-y-2.5">
-                <div className="text-[11px] font-extrabold text-[#FF5B00]"># BEST FOR TAGS</div>
+                <div className="text-[11px] font-extrabold text-[#2323FF]"># BEST FOR TAGS</div>
                 <div className="flex flex-wrap gap-2">
                   {[
                     'premium lifestyle',
@@ -1201,7 +1201,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   ].map((tag) => (
                     <span
                       key={tag}
-                      className="bg-[#FFF3EA] text-[#FF5B00] text-[11px] font-bold px-3.5 py-1.5 rounded-[14px]"
+                      className="choosify-best-for-tag text-[11px] font-bold px-3.5 py-1.5 rounded-[14px]"
                     >
                       #{tag}
                     </span>
@@ -1250,10 +1250,10 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 </div>
                 <div className="p-4 text-center">
                   <div className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center justify-center gap-1 mb-0.5">
-                    {brandName} <span className="text-[#6C4CFF]">✓</span>
+                    {brandName} <span className="text-[#2323FF]">✓</span>
                   </div>
                   <div className="text-[11px] text-[#9AA0AC] mb-3.5 flex items-center justify-center gap-1">
-                    <span className="text-[#6C4CFF]">✓</span> Verified Brand
+                    <span className="text-[#2323FF]">✓</span> Verified Brand
                   </div>
                   <div className="flex items-center justify-between px-1 py-3 mb-3.5">
                     <div className="text-left">
@@ -1281,7 +1281,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   />
                   <Link
                     to={`/brands/${brandId}`}
-                    className="block w-full bg-[#000435] hover:bg-[#FF5B00] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors"
+                    className="block w-full bg-[#000435] hover:bg-[#CF4400] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors"
                   >
                     View Brand
                   </Link>
@@ -1313,13 +1313,13 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     <button
                       type="button"
                       onClick={() => toast.success(`Opening ${store.name}…`)}
-                      className="bg-[#FF5B00] text-white border-0 px-3.5 py-1.5 rounded-2xl text-[10.5px] font-bold cursor-pointer shrink-0 whitespace-nowrap"
+                      className="bg-[#EB4501] text-white border-0 px-3.5 py-1.5 rounded-2xl text-[10.5px] font-bold cursor-pointer shrink-0 whitespace-nowrap"
                     >
                       Shop Now
                     </button>
                   </div>
                 ))}
-                <Link to="/deals" className="text-[11px] font-bold text-[#FF5B00] hover:underline">
+                <Link to="/deals" className="text-[11px] font-bold text-[#EB4501] hover:underline">
                   View more stores →
                 </Link>
               </div>
@@ -1327,7 +1327,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
 
             {/* Sponsored Advertisement */}
             <div className="choosify-dark-surface text-white rounded-xl p-6 relative overflow-hidden text-left w-full">
-              <span className="text-[11px] font-bold text-[#FF5B00] tracking-tight block mb-1.5">
+              <span className="text-[11px] font-bold text-[#EB4501] tracking-tight block mb-1.5">
                 SPONSORED AD
               </span>
               <h4 className="text-sm font-extrabold tracking-tight mb-2 text-white">
@@ -1339,7 +1339,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               <button
                 type="button"
                 onClick={() => toast.success('Choosify Premium Club VIP services requested!')}
-                className="bg-[#FF5B00] hover:brightness-110 text-white px-4 py-2.5 rounded-lg text-[12px] font-bold transition-all cursor-pointer border-none"
+                className="bg-[#EB4501] hover:brightness-110 text-white px-4 py-2.5 rounded-lg text-[12px] font-bold transition-all cursor-pointer border-none"
               >
                 Learn More
               </button>
@@ -1409,7 +1409,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     <h4 className="text-xs font-bold text-white leading-tight truncate max-w-[220px]">
                       {product.title}
                     </h4>
-                    <p className="text-[10px] text-[#E8500A] font-bold mt-0.5 font-mono">
+                    <p className="text-[10px] text-[#EB4501] font-bold mt-0.5 font-mono">
                       BDT {product.price.toLocaleString()}
                     </p>
                   </div>
@@ -1430,7 +1430,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                           className={cn(
                             "px-3.5 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all",
                             orderColor === color
-                              ? "bg-[#E8500A] text-white italic shadow-md shadow-orange-500/10 border-none"
+                              ? "bg-[#EB4501] text-white italic shadow-md shadow-orange-500/10 border-none"
                               : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 cursor-pointer"
                           )}
                         >
@@ -1456,7 +1456,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                           className={cn(
                             "px-3.5 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all",
                             orderSize === size
-                              ? "bg-[#E8500A] text-white italic shadow-md shadow-orange-500/10 border-none"
+                              ? "bg-[#EB4501] text-white italic shadow-md shadow-orange-500/10 border-none"
                               : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 cursor-pointer"
                           )}
                         >
@@ -1520,7 +1520,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                       setShowOrderConfig(false);
                       setShowOrderConfirm(true);
                     }}
-                    className="flex-1 py-3 bg-[#FF5B00] text-white rounded-lg hover:brightness-110 transition-all text-[13px] font-bold tracking-tight shadow-sm cursor-pointer border-none"
+                    className="flex-1 py-3 bg-[#EB4501] text-white rounded-lg hover:brightness-110 transition-all text-[13px] font-bold tracking-tight shadow-sm cursor-pointer border-none"
                   >
                     Confirm Params
                   </button>
@@ -1563,7 +1563,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               <div className="space-y-4">
                 {/* Structured Overview Block */}
                 <div className="bg-[#050514] border border-white/5 rounded-xl p-4 text-left">
-                  <span className="text-[11px] font-bold text-[#FF5B00] tracking-tight block mb-2">
+                  <span className="text-[11px] font-bold text-[#EB4501] tracking-tight block mb-2">
                     CONFIRM LIVE MESSAGE SUMMARY
                   </span>
                   

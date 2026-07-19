@@ -220,7 +220,7 @@ export function useSpotlightFloatingFilters({
       renderSearch: () => (
         <div className="relative">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <Search size={13} className="text-[#E8500A]" />
+            <Search size={13} className="text-[#EB4501]" />
           </div>
           <input
             type="text"
@@ -232,7 +232,7 @@ export function useSpotlightFloatingFilters({
               })
             }
             placeholder="Search Spotlight, brands, creators..."
-            className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+            className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
           />
         </div>
       ),
@@ -258,8 +258,8 @@ export function useSpotlightFloatingFilters({
                     className={cn(
                       'px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wide border transition-colors cursor-pointer',
                       active
-                        ? 'bg-[#E8500A] text-white border-transparent'
-                        : 'bg-white border-[#e8edf2] text-gray-500 hover:border-[#E8500A]/30',
+                        ? 'bg-[#EB4501] text-white border-transparent'
+                        : 'bg-white border-[#e8edf2] text-gray-500 hover:border-[#EB4501]/30',
                     )}
                   >
                     {SPOTLIGHT_CONTENT_TYPE_META[type].label}
@@ -287,8 +287,8 @@ export function useSpotlightFloatingFilters({
                   className={cn(
                     'px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wide border transition-colors cursor-pointer',
                     chip.active
-                      ? 'bg-[#E8500A] text-white border-transparent'
-                      : 'bg-white border-[#e8edf2] text-gray-500 hover:border-[#E8500A]/30',
+                      ? 'bg-[#EB4501] text-white border-transparent'
+                      : 'bg-white border-[#e8edf2] text-gray-500 hover:border-[#EB4501]/30',
                   )}
                 >
                   {chip.label}

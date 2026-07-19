@@ -70,7 +70,7 @@ export function SpotlightIntegrationRail({
           <h2 id="spotlight-integration-rail" className="text-base font-semibold text-[#1a1a2e]">{title}</h2>
           {subtitle && <p className="text-[12px] text-[#8a9bb0] mt-1">{subtitle}</p>}
         </div>
-        <Link to={viewAllHref} className="text-xs font-bold uppercase text-[#E8500A] hover:underline shrink-0 inline-flex items-center gap-1">
+        <Link to={viewAllHref} className="text-xs font-bold uppercase text-[#EB4501] hover:underline shrink-0 inline-flex items-center gap-1">
           Explore <ChevronRight size={14} />
         </Link>
       </div>

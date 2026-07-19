@@ -58,7 +58,7 @@ export function MarketingSidebar() {
             className={cn(
               'flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-semibold transition-colors',
               isActive(pathname, match)
-                ? 'bg-[#E8500A]/10 text-[#E8500A]'
+                ? 'bg-[#EB4501]/10 text-[#EB4501]'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-navy',
             )}
           >

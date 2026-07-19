@@ -60,7 +60,7 @@ export const CategoryCard = memo(function CategoryCard({
         
         {/* Discount Badge */}
         {discount && (
-          <div className="absolute top-4 left-4 z-10 bg-[#FFF0F0] text-[#FF5B00] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full tracking-wide shadow-xs border border-[#FF5B00]/10 uppercase">
+          <div className="absolute top-4 left-4 z-10 bg-[#FFF0F0] text-[#EB4501] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full tracking-wide shadow-xs border border-[#EB4501]/10 uppercase">
             {discount}
           </div>
         )}
@@ -68,13 +68,13 @@ export const CategoryCard = memo(function CategoryCard({
         {/* Favorite Heart Button */}
         <button
           onClick={handleLikeClick}
-          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center bg-white shadow-sm hover:scale-105 active:scale-95 transition-all text-gray-400 hover:text-red-500 cursor-pointer border border-slate-100"
+          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center bg-white shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer border border-slate-100"
           title="Save category"
         >
           <Heart 
             className={cn(
               "w-3.5 h-3.5 transition-colors",
-              activeLiked ? "fill-red-500 text-red-500" : "text-gray-800"
+              activeLiked ? "fill-[#FF000D] text-[#FF000D]" : "text-[#CBD5E1]"
             )} 
           />
         </button>
@@ -92,7 +92,7 @@ export const CategoryCard = memo(function CategoryCard({
       <div className="p-5 flex-grow flex flex-col justify-between">
         <div className="mb-4">
           {/* Main Title */}
-          <h3 className="text-base font-bold text-[#000435] tracking-tight mb-1 hover:text-[#FF5B00] transition-colors leading-tight">
+          <h3 className="text-base font-bold text-[#000435] tracking-tight mb-1 hover:text-[#CF4400] transition-colors leading-tight">
             {title}
           </h3>
           

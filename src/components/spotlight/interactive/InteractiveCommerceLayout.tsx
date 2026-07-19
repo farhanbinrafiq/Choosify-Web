@@ -50,12 +50,12 @@ export function InteractiveCommerceLayout({
       <LiveCollaboratorsStrip collaborators={collaborators} />
 
       {isUpcoming && event.scheduledAt && (
-        <div className="mb-6 p-6 border border-dashed border-[#E8500A]/30 rounded-[5px] bg-[#FFF8F4] text-center">
+        <div className="mb-6 p-6 border border-dashed border-[#EB4501]/30 rounded-[5px] bg-[#FFF8F4] text-center">
           <LiveCountdown targetDate={event.scheduledAt} timezone={event.timezone} className="justify-center" />
           <button
             type="button"
             onClick={() => trackInteractiveEvent('notify_me_click', event.eventId)}
-            className="mt-4 px-4 py-2 bg-[#E8500A] text-white text-xs font-black uppercase rounded"
+            className="mt-4 px-4 py-2 bg-[#EB4501] text-white text-xs font-black uppercase rounded"
           >
             Notify Me
           </button>

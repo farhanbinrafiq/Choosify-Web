@@ -67,7 +67,7 @@ export function SpotlightContentRenderer({
                 className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors rounded-[5px]"
                 aria-label={`Play ${content.headline}`}
               >
-                <span className="w-14 h-14 rounded-full bg-[#E8500A] text-white flex items-center justify-center shadow-lg">
+                <span className="w-14 h-14 rounded-full bg-[#EB4501] text-white flex items-center justify-center shadow-lg">
                   <Play size={24} fill="currentColor" />
                 </span>
               </a>
@@ -94,7 +94,7 @@ export function SpotlightContentRenderer({
           {profileHref && (
             <Link
               to={profileHref}
-              className="text-[10px] font-black uppercase tracking-widest text-[#E8500A] hover:underline shrink-0"
+              className="text-[10px] font-black uppercase tracking-widest text-[#EB4501] hover:underline shrink-0"
             >
               View Brand
             </Link>
@@ -105,7 +105,7 @@ export function SpotlightContentRenderer({
       {/* Featured product / service — commerce first */}
       {(primary || hasService) && (
         <section className="text-left bg-[#fafbfc] border border-[#e8edf2] rounded-[5px] p-4">
-          <p className="text-[10px] font-black uppercase tracking-widest text-[#E8500A] mb-3">
+          <p className="text-[10px] font-black uppercase tracking-widest text-[#EB4501] mb-3">
             {primary ? 'Featured Product' : 'Featured Service'}
           </p>
           {primary ? (
@@ -126,13 +126,13 @@ export function SpotlightContentRenderer({
           <>
             <Link
               to={`${primaryUrl}#buy`}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#E8500A] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] min-h-[44px]"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] min-h-[44px]"
             >
               <ShoppingBag size={12} /> Shop Now
             </Link>
             <Link
               to={primaryUrl}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-[#e8edf2] text-[10px] font-bold uppercase tracking-wide text-[#1a1a2e] rounded hover:border-[#E8500A]/40 min-h-[44px]"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-[#e8edf2] text-[10px] font-bold uppercase tracking-wide text-[#1a1a2e] rounded hover:border-[#EB4501]/40 min-h-[44px]"
             >
               Product Details
             </Link>
@@ -140,7 +140,7 @@ export function SpotlightContentRenderer({
         )}
         <Link
           to="/compare"
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-[#e8edf2] text-[10px] font-bold uppercase tracking-wide text-[#1a1a2e] rounded hover:border-[#E8500A]/40 min-h-[44px]"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-[#e8edf2] text-[10px] font-bold uppercase tracking-wide text-[#1a1a2e] rounded hover:border-[#EB4501]/40 min-h-[44px]"
         >
           <Scale size={12} /> Compare
         </Link>
@@ -148,7 +148,7 @@ export function SpotlightContentRenderer({
           <button
             type="button"
             onClick={onWishlist}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#e8edf2] bg-white hover:border-[#E8500A]/30 cursor-pointer min-h-[44px]"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#e8edf2] bg-white hover:border-[#EB4501]/30 cursor-pointer min-h-[44px]"
           >
             <Heart size={12} /> Wishlist
           </button>
@@ -171,7 +171,7 @@ export function SpotlightContentRenderer({
       {profileHref && content.publisher.publisherType === 'creator' && (
         <Link
           to={profileHref}
-          className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#E8500A]"
+          className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#CF4400]"
         >
           <User size={12} /> Creator profile (secondary)
           <ChevronRight size={12} />

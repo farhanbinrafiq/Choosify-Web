@@ -52,7 +52,7 @@ export function DetailHeroSummaryBar({
                 <Icon
                   size={14}
                   strokeWidth={2.5}
-                  className="text-[#FF5B00] shrink-0 mt-[3px]"
+                  className="text-[#EB4501] shrink-0 mt-[3px]"
                   aria-hidden
                 />
                 <span className="text-[12px] sm:text-[13px] font-semibold tracking-tight leading-snug text-[#1A1A2E]/90 break-words whitespace-normal">
@@ -91,5 +91,5 @@ export const detailHeroSummaryActionSecondaryClass = cn(
 
 export const detailHeroSummaryActionPrimaryClass = cn(
   detailHeroSummaryActionClass,
-  'bg-[#FF5B00] hover:brightness-110 text-white border border-[#FF5B00]/30',
+  'bg-[#EB4501] hover:brightness-110 text-white border border-[#EB4501]/30',
 );

@@ -194,8 +194,8 @@ export function Navbar() {
       );
     }
     return cn(
-      'text-[11.5px] whitespace-nowrap transition-colors hover:text-[#FF5B00]',
-      isActive ? 'text-[#FF5B00] font-bold' : 'text-white/80 font-medium',
+      'text-[11.5px] whitespace-nowrap transition-colors hover:text-[#CF4400]',
+      isActive ? 'text-[#EB4501] font-bold' : 'text-white/80 font-medium',
     );
   };
 
@@ -206,7 +206,7 @@ export function Navbar() {
     return cn(
       'flex items-center gap-3 py-2.5 px-4 rounded-xl text-[12.5px] font-semibold transition-all border',
       isActive
-        ? 'text-[#FF5B00] bg-[#FFF3EA] border-[#FFD8B8]'
+        ? 'text-[#EB4501] bg-[#FFF3EA] border-[#FFD8B8]'
         : 'text-[#1A1A2E] hover:bg-[#F4F7F9] border-transparent',
     );
   };
@@ -214,7 +214,7 @@ export function Navbar() {
   return (
     <>
       {siteConfig?.announcementBarEnabled && siteConfig.announcementBarText?.trim() && (
-        <div className="w-full bg-[#E8500A] text-white text-center text-[11px] sm:text-xs py-1.5 px-4 font-semibold tracking-wide">
+        <div className="w-full bg-[#EB4501] text-white text-center text-[11px] sm:text-xs py-1.5 px-4 font-semibold tracking-wide">
           {siteConfig.announcementBarText}
         </div>
       )}
@@ -293,7 +293,7 @@ export function Navbar() {
             >
               <ShoppingBag size={19} className="transition-colors" />
               {activeCartCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#FF5B00] rounded-lg flex items-center justify-center leading-none">
+                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-lg flex items-center justify-center leading-none">
                   {activeCartCount > 99 ? '99+' : activeCartCount}
                 </span>
               )}
@@ -318,7 +318,7 @@ export function Navbar() {
                 aria-label="Open account menu"
                 aria-expanded={isUserMenuOpen}
               >
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
                   {(currentUser?.name || 'F').charAt(0).toUpperCase()}
                 </div>
                 <span className="text-[11.5px] font-semibold hidden lg:block text-white">
@@ -357,7 +357,7 @@ export function Navbar() {
                             <item.icon size={14} className="text-[#9AA0AC]" />
                             <span>{item.label}</span>
                             {item.icon === MessageSquare && unreadMsgCount > 0 && (
-                              <span className="ml-auto min-w-[16px] h-4 px-1 bg-[#FF5B00] text-white text-[9px] font-bold rounded-lg flex items-center justify-center">
+                              <span className="ml-auto min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-lg flex items-center justify-center">
                                 {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
                               </span>
                             )}
@@ -386,9 +386,9 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => goToLogin('sign-in')}
-                className="h-8 xl:h-9 px-2.5 xl:px-4 bg-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic choosify-emi-gradient-text hover:brightness-110 whitespace-nowrap border-0"
+                className="h-8 xl:h-9 px-2.5 xl:px-4 bg-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic hover:brightness-110 whitespace-nowrap border-0"
               >
-                Sign In
+                <span className="choosify-emi-gradient-text">Sign In</span>
               </button>
               <button
                 type="button"
@@ -491,7 +491,7 @@ export function Navbar() {
                     className="flex items-center gap-3 py-3 px-4 rounded-xl text-[12.5px] font-bold text-[#1A1A2E] bg-[#F4F7F9] hover:bg-[#FFF3EA] border border-[#E8EDF2] transition-all justify-center"
                   >
                     <span>Post Your Deal</span>
-                    <ChevronRight size={14} className="text-[#FF5B00]" />
+                    <ChevronRight size={14} className="text-[#EB4501]" />
                   </Link>
                 </div>
               </div>
@@ -505,10 +505,10 @@ export function Navbar() {
                     <button
                       type="button"
                       onClick={() => goToLogin('sign-in')}
-                      className="w-full py-3.5 bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] text-[13px] font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 choosify-emi-gradient-text"
+                      className="w-full py-3.5 bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] text-[13px] font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
                     >
                       <LogIn size={14} stroke="url(#choosify-emi-icon-grad)" />
-                      <span>Sign In / Register</span>
+                      <span className="choosify-emi-gradient-text">Sign In / Register</span>
                     </button>
                   </>
                 )}
@@ -555,7 +555,7 @@ export function Navbar() {
                 </div>
 
                 <div className="px-5 py-4 bg-[#F4F7F9] border-b border-[#E8EDF2] flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center text-white text-[15px] font-bold shrink-0 overflow-hidden">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center text-white text-[15px] font-bold shrink-0 overflow-hidden">
                     {currentUser?.avatar ? (
                       <img
                         src={currentUser.avatar}
@@ -588,7 +588,7 @@ export function Navbar() {
                       <item.icon size={14} className="text-[#9AA0AC] shrink-0" />
                       <span className="flex-1">{item.label}</span>
                       {item.icon === MessageSquare && unreadMsgCount > 0 && (
-                        <span className="min-w-[16px] h-4 px-1 bg-[#FF5B00] text-white text-[9px] font-bold rounded-lg flex items-center justify-center">
+                        <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-lg flex items-center justify-center">
                           {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
                         </span>
                       )}

@@ -41,7 +41,7 @@ export function SpotlightCommerceStrip({
               {product.title}
             </p>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className={cn('font-black text-[#E8500A]', compact ? 'text-xs' : 'text-sm')}>
+              <span className={cn('font-black text-[#EB4501]', compact ? 'text-xs' : 'text-sm')}>
                 ৳{product.price.toLocaleString()}
               </span>
               {extraProductCount > 0 && (
@@ -55,7 +55,7 @@ export function SpotlightCommerceStrip({
           {productUrl && (
             <Link
               to={productUrl}
-              className="shrink-0 inline-flex items-center gap-1 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-white bg-[#E8500A] rounded hover:bg-[#CF4400]"
+              className="shrink-0 inline-flex items-center gap-1 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-white bg-[#EB4501] rounded hover:bg-[#CF4400]"
               onClick={(e) => e.stopPropagation()}
             >
               <ShoppingBag size={10} aria-hidden />

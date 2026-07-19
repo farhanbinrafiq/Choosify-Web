@@ -42,7 +42,7 @@ export function SpotlightChartCard({
           <h3 className="text-sm font-black text-navy uppercase">{title}</h3>
           {description && <p className="text-xs text-gray-500 mt-0.5">{description}</p>}
         </div>
-        {(href || onDrillDown) && <ChevronRight size={16} className="text-gray-300 group-hover:text-[#E8500A]" />}
+        {(href || onDrillDown) && <ChevronRight size={16} className="text-gray-300 group-hover:text-[#CF4400]" />}
       </div>
       <SpotlightMiniChart kind={chartKind} data={values} height={80} className="w-full" />
     </div>

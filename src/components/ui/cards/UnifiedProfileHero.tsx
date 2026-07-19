@@ -97,7 +97,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
   websiteUrl,
   bannerImage,
   bannerClass = "from-[#050C24] via-[#0D1530] to-[#170C35]",
-  accentColor = "#FF5B00",
+  accentColor = "#EB4501",
   socials,
   score,
   isFollowed,
@@ -276,7 +276,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
                     {name}
                   </h1>
                   {verified && (
-                    <div className="inline-flex items-center gap-1 bg-[#FF5B00]/10 text-[#FF5B00] border border-[#FF5B00]/20 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                    <div className="inline-flex items-center gap-1 bg-[#EB4501]/10 text-[#EB4501] border border-[#EB4501]/20 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
                       <CheckCircle2 size={10} className="fill-current" />
                       <span>VERIFIED {type === 'brand' ? "BRAND" : "CREATOR"}</span>
                     </div>
@@ -296,7 +296,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
                     <>
                       <span className="text-slate-300">•</span>
                       <span className="inline-flex items-center gap-1 text-slate-500">
-                        <MapPin size={12} className="text-[#FF5B00]" />
+                        <MapPin size={12} className="text-[#EB4501]" />
                         {country}
                       </span>
                     </>
@@ -305,7 +305,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
                     <>
                       <span className="text-slate-300">•</span>
                       <span className="inline-flex items-center gap-1 text-slate-500">
-                        <Calendar size={12} className="text-[#FF5B00]" />
+                        <Calendar size={12} className="text-[#EB4501]" />
                         Founded {founded}
                       </span>
                     </>
@@ -326,7 +326,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
                       href={websiteUrl} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF5B00] hover:underline"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#EB4501] hover:underline"
                     >
                       <Globe size={13} />
                       <span>{websiteUrl.replace('https://', '').replace('http://', '')}</span>
@@ -355,7 +355,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         title={label.toUpperCase()}
-                        className="w-9 h-9 rounded-full bg-slate-100 hover:bg-[#FF5B00] text-[#000435] hover:text-white flex items-center justify-center transition-all shadow-xs border border-slate-200/50"
+                        className="w-9 h-9 rounded-full bg-slate-100 hover:bg-[#CF4400] text-[#000435] hover:text-white flex items-center justify-center transition-all shadow-xs border border-slate-200/50"
                       >
                         {platform === 'tiktok' ? (
                           <TikTokIcon className="w-4 h-4" />
@@ -381,7 +381,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
                 variant={isFollowed ? "outline" : "primary"}
                 className={cn(
                   "px-5 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-xs shrink-0 flex items-center gap-1.5",
-                  !isFollowed ? "bg-[#FF5B00] text-white hover:bg-[#FF5B00]/95 border-[#FF5B00]" : "border-slate-200 text-[#000435] hover:bg-slate-50"
+                  !isFollowed ? "bg-[#EB4501] text-white hover:bg-[#CF4400]/95 border-[#EB4501]" : "border-slate-200 text-[#000435] hover:bg-slate-50"
                 )}
               >
                 <Heart size={14} className={cn("transition-colors", isFollowed ? "fill-red-500 text-red-500" : "text-white")} />
@@ -451,7 +451,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
                       className={cn(
                         "flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer",
                         isTabActive
-                          ? "text-[#FF5B00] bg-[#FF5B00]/10 shadow-xs"
+                          ? "text-[#EB4501] bg-[#EB4501]/10 shadow-xs"
                           : "text-slate-500 hover:text-[#000435] hover:bg-slate-50"
                       )}
                     >
@@ -459,7 +459,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
                       {item.count !== undefined && item.count !== "" && (
                         <span className={cn(
                           "text-[9px] px-1.5 py-0.5 rounded-md font-mono font-bold ml-1",
-                          isTabActive ? "bg-[#FF5B00] text-white" : "bg-slate-100 text-slate-400"
+                          isTabActive ? "bg-[#EB4501] text-white" : "bg-slate-100 text-slate-400"
                         )}>
                           {item.count}
                         </span>

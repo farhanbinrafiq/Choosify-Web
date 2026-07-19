@@ -28,7 +28,7 @@ export function CategoriesTrustStrip({ className }: CategoriesTrustStripProps) {
               key={id}
               className="flex flex-col items-center text-center gap-2.5 p-4 md:p-5 rounded-2xl bg-white border border-[#eef2f6] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
             >
-              <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-[#EB4501]/10 text-[#EB4501] flex items-center justify-center">
                 <Icon size={18} aria-hidden />
               </div>
               <span className="text-xs font-semibold text-[#1A1D4E]">{label}</span>

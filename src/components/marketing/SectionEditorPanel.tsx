@@ -98,7 +98,7 @@ export function SectionEditorPanel({ sections, onChange }: SectionEditorPanelPro
             <button
               type="button"
               onClick={() => toggleVisible(section.id)}
-              className="p-1.5 rounded text-gray-400 hover:text-[#E8500A]"
+              className="p-1.5 rounded text-gray-400 hover:text-[#CF4400]"
               title={section.visible ? 'Hide section' : 'Show section'}
             >
               {section.visible ? <Eye size={16} /> : <EyeOff size={16} />}
@@ -116,7 +116,7 @@ export function SectionEditorPanel({ sections, onChange }: SectionEditorPanelPro
                 key={id}
                 type="button"
                 onClick={() => addSection(id)}
-                className="px-2 py-1 text-[10px] font-bold uppercase border border-[#e8edf2] rounded hover:border-[#E8500A]/40"
+                className="px-2 py-1 text-[10px] font-bold uppercase border border-[#e8edf2] rounded hover:border-[#EB4501]/40"
               >
                 + {SECTION_LABELS[id] ?? id}
               </button>

@@ -41,7 +41,7 @@ export function CampaignFolderSidebar({
           className={cn(
             'w-full text-left px-3 py-2 rounded text-xs font-semibold transition-colors',
             activeFolderId === f.folderId
-              ? 'bg-[#E8500A]/10 text-[#E8500A]'
+              ? 'bg-[#EB4501]/10 text-[#EB4501]'
               : 'text-gray-600 hover:bg-gray-50',
           )}
         >
@@ -52,7 +52,7 @@ export function CampaignFolderSidebar({
         <button
           type="button"
           onClick={handleCreate}
-          className="w-full mt-4 px-3 py-2 text-xs font-bold text-[#E8500A] border border-dashed border-[#E8500A]/30 rounded hover:bg-[#E8500A]/5"
+          className="w-full mt-4 px-3 py-2 text-xs font-bold text-[#EB4501] border border-dashed border-[#EB4501]/30 rounded hover:bg-[#CF4400]/5"
         >
           + New Folder
         </button>

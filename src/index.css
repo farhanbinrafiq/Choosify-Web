@@ -37,7 +37,7 @@
   --color-ink: #0A0A1F;
   --color-heading: #1A1D4E;
   --color-green-accent: #07DD05;
-  --color-orange-primary: #FF5B00;
+  --color-orange-primary: #EB4501;
   --color-orange-deep: #EB4501;
   --color-blue-grey: #D6E1EC;
   --color-ice-blue: #F0F8FF;
@@ -281,6 +281,13 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+}
+
+/** Best For #tag chips — solid royal blue sitewide */
+.choosify-best-for-tag {
+  background: #2323FF;
+  color: #ffffff;
+  border-color: transparent;
 }
 
 .shadow-soft {

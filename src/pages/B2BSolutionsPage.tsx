@@ -78,7 +78,7 @@ export function B2BSolutionsPage() {
       {/* 1. HERO SECTION — constrained to feed silhouette */}
       <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <section className="relative max-w-[1440px] mx-auto min-h-[220px] sm:min-h-[260px] flex items-center choosify-dark-gradient text-white overflow-hidden border border-white/5 rounded-[14px]">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#EB4501]/10 via-transparent to-black/30 pointer-events-none" />
         <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full py-10">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-1.5 text-white/40 text-[10px] font-black uppercase tracking-widest mb-6">
@@ -90,7 +90,7 @@ export function B2BSolutionsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column */}
             <div className="lg:col-span-7 space-y-4 text-left">
-              <span className="inline-block bg-[#FF5B00]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
+              <span className="inline-block bg-[#EB4501]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
                 Enterprise Commerce Hub
               </span>
               <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
@@ -178,7 +178,7 @@ export function B2BSolutionsPage() {
           {/* Book Consultation Form (Right) */}
           <div className="lg:col-span-5">
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 md:p-8 shadow-xs text-left relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF5B00] to-[#FF5B00]" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#EB4501] to-[#CF4400]" />
               
               <AnimatePresence mode="wait">
                 {!submitted ? (

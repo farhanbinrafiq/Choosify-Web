@@ -41,14 +41,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center font-bold rounded-xl transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variants: Record<ButtonVariant, string> = {
-      primary: 'bg-[#000435] text-white hover:bg-[#FF5B00]',
+      primary: 'bg-[#000435] text-white hover:bg-[#CF4400]',
       secondary: 'bg-slate-100 text-[#000435] hover:bg-slate-200',
       ghost: 'bg-transparent text-slate-600 hover:bg-slate-50',
       outline: 'border-2 border-slate-200 bg-transparent text-[#000435] hover:border-[#000435]',
       danger: 'bg-[#EB4501] text-white hover:bg-red-700',
-      icon: 'bg-transparent text-slate-500 hover:text-[#FF5B00] hover:bg-orange-50',
+      icon: 'bg-transparent text-slate-500 hover:text-[#CF4400] hover:bg-orange-50',
       authentication: 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm',
-      cta: 'bg-[#FF5B00] text-white hover:bg-[#000435]',
+      cta: 'bg-[#EB4501] text-white hover:bg-[#000435]',
       navigation: 'bg-white text-slate-600 hover:text-[#000435] border-b-2 border-transparent hover:border-[#000435] rounded-none',
     };
 

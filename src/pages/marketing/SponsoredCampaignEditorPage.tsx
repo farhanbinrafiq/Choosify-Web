@@ -59,13 +59,13 @@ export function SponsoredCampaignEditorPage() {
   return (
     <div className="flex-grow p-6 max-w-4xl mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link to="/marketing/sponsored" className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#E8500A]">
+        <Link to="/marketing/sponsored" className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#CF4400]">
           <ArrowLeft size={14} /> Sponsored Campaigns
         </Link>
         <button
           type="button"
           onClick={handleSave}
-          className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#E8500A] text-white text-xs font-bold uppercase rounded"
+          className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#EB4501] text-white text-xs font-bold uppercase rounded"
         >
           <Save size={14} /> Save
         </button>

@@ -372,7 +372,7 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
 
             <div className="relative z-10 h-full max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 flex flex-col justify-center items-start text-left pointer-events-none">
               {current.sponsorBadge && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E8500A]/20 text-[#FF8A50] text-[9px] font-bold uppercase tracking-wider border border-[#E8500A]/30 mb-2">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EB4501]/20 text-[#FF8A50] text-[9px] font-bold uppercase tracking-wider border border-[#EB4501]/30 mb-2">
                   <Sparkles className="w-3 h-3" />
                   {current.sponsorBadge}
                 </span>

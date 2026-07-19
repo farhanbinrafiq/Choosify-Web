@@ -36,7 +36,7 @@ export function StudioEditPanel() {
       <aside className="relative w-full max-w-md h-full bg-white border-l border-[#E8EDF2] shadow-2xl flex flex-col">
         <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-[#E8EDF2]">
           <div>
-            <p className="text-[11px] font-bold tracking-tight text-[#FF5B00]">
+            <p className="text-[11px] font-bold tracking-tight text-[#EB4501]">
               CMS Studio
             </p>
             <h2 className="text-lg font-extrabold text-[#1A1A2E] tracking-tight">
@@ -72,14 +72,14 @@ export function StudioEditPanel() {
                     rows={5}
                     value={getFieldValue(section.id, field.id)}
                     onChange={(e) => setFieldValue(section.id, field.id, e.target.value)}
-                    className="w-full rounded-lg border border-[#E8EDF2] bg-white px-3 py-2 text-[13px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]/40"
+                    className="w-full rounded-lg border border-[#E8EDF2] bg-white px-3 py-2 text-[13px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]/40"
                     placeholder={`Draft ${field.label.toLowerCase()}`}
                   />
                 ) : field.type === 'toggle' ? (
                   <select
                     value={getFieldValue(section.id, field.id, 'true')}
                     onChange={(e) => setFieldValue(section.id, field.id, e.target.value)}
-                    className="w-full rounded-lg border border-[#E8EDF2] bg-white px-3 py-2 text-[13px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]/40"
+                    className="w-full rounded-lg border border-[#E8EDF2] bg-white px-3 py-2 text-[13px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]/40"
                   >
                     <option value="true">Enabled</option>
                     <option value="false">Disabled</option>
@@ -89,7 +89,7 @@ export function StudioEditPanel() {
                     type="text"
                     value={getFieldValue(section.id, field.id)}
                     onChange={(e) => setFieldValue(section.id, field.id, e.target.value)}
-                    className="w-full rounded-lg border border-[#E8EDF2] bg-white px-3 py-2 text-[13px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]/40"
+                    className="w-full rounded-lg border border-[#E8EDF2] bg-white px-3 py-2 text-[13px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]/40"
                     placeholder={`Draft ${field.label.toLowerCase()}`}
                   />
                 )}
@@ -105,7 +105,7 @@ export function StudioEditPanel() {
           <button
             type="button"
             onClick={() => saveSectionDraft(section.id)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#000435] text-white text-[13px] font-bold tracking-tight hover:bg-[#FF5B00] transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#000435] text-white text-[13px] font-bold tracking-tight hover:bg-[#CF4400] transition-colors"
           >
             <Save size={13} />
             Save draft
@@ -113,7 +113,7 @@ export function StudioEditPanel() {
           <button
             type="button"
             onClick={() => clearSectionDraft(section.id)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#E8EDF2] text-[13px] font-bold tracking-tight text-[#9AA0AC] hover:text-[#FF5B00] hover:border-[#FF5B00]/30 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#E8EDF2] text-[13px] font-bold tracking-tight text-[#9AA0AC] hover:text-[#CF4400] hover:border-[#EB4501]/30 transition-colors"
           >
             <Trash2 size={13} />
             Clear

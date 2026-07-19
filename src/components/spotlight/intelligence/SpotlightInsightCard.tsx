@@ -38,7 +38,7 @@ export function SpotlightInsightCard({
           <p className="text-sm font-black text-navy mt-1">{value}</p>
           <p className="text-[10px] text-gray-500 mt-1 line-clamp-2">{description}</p>
         </div>
-        <Icon size={16} className={cn('shrink-0 mt-1', variant === 'alert' ? 'text-amber-500' : 'text-gray-300 group-hover:text-[#E8500A]')} />
+        <Icon size={16} className={cn('shrink-0 mt-1', variant === 'alert' ? 'text-amber-500' : 'text-gray-300 group-hover:text-[#CF4400]')} />
       </div>
       {metricHint !== undefined && (
         <p className="text-[10px] text-gray-400 mt-2">Score hint: {metricHint}</p>

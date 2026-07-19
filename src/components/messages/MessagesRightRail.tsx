@@ -111,7 +111,7 @@ export function MessagesRightRail({
       {/* Transaction details */}
       <div>
         <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#1A1A2E] mb-3">
-          <Package size={12} className="text-[#FF5B00]" />
+          <Package size={12} className="text-[#EB4501]" />
           Transaction details
         </div>
         <div className="flex flex-col gap-3 text-[11px]">
@@ -168,7 +168,7 @@ export function MessagesRightRail({
       {!isAnnouncementsThread && (
         <div>
           <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#1A1A2E] mb-3">
-            <User size={12} className="text-[#FF5B00]" />
+            <User size={12} className="text-[#EB4501]" />
             Seller profile
           </div>
           <div className="flex items-center gap-2.5 mb-3">
@@ -220,7 +220,7 @@ export function MessagesRightRail({
           </div>
           <Link
             to="/brands"
-            className="block w-full mt-3 bg-white border border-[#E5E7EB] text-[#1A1A2E] text-center py-2 rounded-lg text-[11px] font-bold hover:border-[#FF5B00] hover:text-[#FF5B00] transition-colors"
+            className="block w-full mt-3 bg-white border border-[#E5E7EB] text-[#1A1A2E] text-center py-2 rounded-lg text-[11px] font-bold hover:border-[#EB4501] hover:text-[#CF4400] transition-colors"
           >
             Browse brands →
           </Link>
@@ -230,7 +230,7 @@ export function MessagesRightRail({
       {/* Support shortcuts */}
       <div>
         <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#1A1A2E] mb-3">
-          <Link2 size={12} className="text-[#FF5B00]" />
+          <Link2 size={12} className="text-[#EB4501]" />
           Support shortcuts
         </div>
         <div className="flex flex-col gap-2">
@@ -238,7 +238,7 @@ export function MessagesRightRail({
             <Link
               key={s.to}
               to={s.to}
-              className="flex justify-between items-center text-[11.5px] text-[#4B5563] hover:text-[#FF5B00] transition-colors"
+              className="flex justify-between items-center text-[11.5px] text-[#4B5563] hover:text-[#CF4400] transition-colors"
             >
               {s.label}
               <span className="text-[#9AA0AC]">›</span>
@@ -270,7 +270,7 @@ function DetailRow({
           <button
             type="button"
             onClick={onCopy}
-            className="shrink-0 p-0.5 text-[#9AA0AC] hover:text-[#FF5B00] border-none bg-transparent cursor-pointer"
+            className="shrink-0 p-0.5 text-[#9AA0AC] hover:text-[#CF4400] border-none bg-transparent cursor-pointer"
             title={`Copy ${label}`}
           >
             <Copy size={11} />

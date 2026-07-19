@@ -31,7 +31,7 @@ const POPULAR_DEAL_CATS = [
 const BRAND_DEALS_ROW = [
   { name: 'SAMSUNG', off: 'Up to 20% Off', color: '#1428A0' },
   { name: 'Apple', off: 'Up to 15% Off', color: '#1A1A2E' },
-  { name: 'mi', off: 'Up to 18% Off', color: '#FF5B00' },
+  { name: 'mi', off: 'Up to 18% Off', color: '#EB4501' },
   { name: 'SONY', off: 'Up to 25% Off', color: '#1A1A2E' },
   { name: 'DELL', off: 'Up to 20% Off', color: '#2323FF' },
   { name: 'ASUS', off: 'Up to 20% Off', color: '#1A1A2E' },
@@ -51,7 +51,7 @@ export function DealsTopCouponsCard({ className }: { className?: string }) {
         <div className="text-[13px] font-extrabold text-[#1A1A2E]">TOP COUPONS</div>
         <Link
           to="/deals?tab=promo"
-          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#FF5B00]"
+          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400]"
         >
           VIEW ALL COUPONS ›
         </Link>
@@ -62,7 +62,7 @@ export function DealsTopCouponsCard({ className }: { className?: string }) {
             key={cp.code}
             className="flex items-center gap-3 border border-dashed border-[#E5E7EB] rounded-lg px-3 py-2.5"
           >
-            <div className="text-sm font-extrabold text-[#FF5B00] w-[38px] shrink-0">{cp.pct}</div>
+            <div className="text-sm font-extrabold text-[#EB4501] w-[38px] shrink-0">{cp.pct}</div>
             <div className="flex-1 min-w-0">
               <div className="text-[11px] font-bold text-[#1A1A2E]">Use Code: {cp.code}</div>
               <div className="text-[9.5px] text-[#9AA0AC]">{cp.min}</div>
@@ -83,7 +83,7 @@ export function DealsTopCouponsCard({ className }: { className?: string }) {
       </div>
       <Link
         to="/deals?tab=promo"
-        className="text-[11.5px] font-bold text-center block text-[#1A1A2E] no-underline hover:text-[#FF5B00]"
+        className="text-[11.5px] font-bold text-center block text-[#1A1A2E] no-underline hover:text-[#CF4400]"
       >
         MORE COUPONS ›
       </Link>
@@ -133,7 +133,7 @@ export function DealsPopularCategoriesCard({
         <div className="text-[13px] font-extrabold text-[#1A1A2E]">POPULAR DEAL CATEGORIES</div>
         <Link
           to="/categories"
-          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#FF5B00]"
+          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400]"
         >
           VIEW ALL ›
         </Link>
@@ -161,7 +161,7 @@ export function DealsBrandDealsCard({ className }: { className?: string }) {
         <div className="text-[13px] font-extrabold text-[#1A1A2E]">BRAND DEALS</div>
         <Link
           to="/brands"
-          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#FF5B00]"
+          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400]"
         >
           VIEW ALL BRANDS ›
         </Link>
@@ -171,7 +171,7 @@ export function DealsBrandDealsCard({ className }: { className?: string }) {
           <Link
             key={bd.name}
             to="/brands"
-            className="border border-[#E8EDF2] rounded-lg px-2 py-3 text-center no-underline hover:border-[#FF5B00]/40 transition-colors"
+            className="border border-[#E8EDF2] rounded-lg px-2 py-3 text-center no-underline hover:border-[#EB4501]/40 transition-colors"
           >
             <div className="text-xs font-extrabold mb-2" style={{ color: bd.color }}>
               {bd.name}
@@ -216,7 +216,7 @@ export function DealsSubscribeBanner({ className }: { className?: string }) {
         />
         <button
           type="submit"
-          className="bg-[#FF5B00] text-white border-0 px-[22px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 shrink-0"
+          className="bg-[#EB4501] text-white border-0 px-[22px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 shrink-0"
         >
           SUBSCRIBE
         </button>
@@ -230,14 +230,14 @@ export function DealsVerticalSponsoredCard({ className }: { className?: string }
   return (
     <div
       className={cn(
-        'bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#FF5B00] relative flex flex-col min-h-[320px]',
+        'bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#EB4501] relative flex flex-col min-h-[320px]',
         className,
       )}
     >
       <div className="absolute top-2 left-2 bg-[#1A1A2E] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-sm z-[1]">
         SPONSORED
       </div>
-      <div className="h-[160px] bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-end justify-center pb-3">
+      <div className="h-[160px] bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-end justify-center pb-3">
         <span className="text-white text-[12px] font-extrabold text-center px-3">
           PROMOTE YOUR DEAL
         </span>
@@ -249,7 +249,7 @@ export function DealsVerticalSponsoredCard({ className }: { className?: string }
         </div>
         <Link
           to="/advertise"
-          className="mt-auto w-full bg-[#FF5B00] text-white text-center border-none py-2.5 rounded-md text-[11.5px] font-extrabold hover:brightness-110 no-underline"
+          className="mt-auto w-full bg-[#EB4501] text-white text-center border-none py-2.5 rounded-md text-[11.5px] font-extrabold hover:brightness-110 no-underline"
         >
           ADVERTISE HERE →
         </Link>

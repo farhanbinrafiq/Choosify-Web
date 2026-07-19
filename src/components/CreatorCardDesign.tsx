@@ -26,7 +26,7 @@ interface CreatorCardDesignProps {
 }
 
 const AVATAR_COLORS = [
-  '#FF5B00',
+  '#EB4501',
   '#2323FF',
   '#07A828',
   '#6C4CFF',
@@ -90,13 +90,15 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({
       <button
         type="button"
         onClick={toggleWish}
-        className="absolute top-3.5 right-3.5 w-6 h-6 rounded-full bg-[#F4F7F9] flex items-center justify-center border-0 cursor-pointer z-10"
+        className="absolute top-3.5 right-3.5 w-6 h-6 rounded-full bg-white flex items-center justify-center border border-[#E8EDF2] cursor-pointer z-10 shadow-sm"
         aria-label={isSaved ? 'Unsave creator' : 'Save creator'}
       >
         <Heart
           size={11}
           strokeWidth={1.6}
-          className={cn('text-[#FF5B00]', isSaved && 'fill-[#FF5B00]')}
+          className={cn(
+            isSaved ? 'text-[#FF000D] fill-[#FF000D]' : 'text-[#CBD5E1]',
+          )}
         />
       </button>
 
@@ -117,7 +119,7 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({
             initial
           )}
         </div>
-        <div className="absolute -bottom-0.5 -right-0.5 w-[22px] h-[22px] rounded-full bg-[#6C4CFF] border-2 border-white flex items-center justify-center text-white text-[10px] font-extrabold">
+        <div className="absolute -bottom-0.5 -right-0.5 w-[22px] h-[22px] rounded-full bg-[#2323FF] border-2 border-white flex items-center justify-center text-white text-[10px] font-extrabold">
           ✓
         </div>
       </div>
@@ -149,7 +151,7 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({
         </div>
       </div>
 
-      <span className="block w-full bg-[#000435] hover:bg-[#FF5B00] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors">
+      <span className="block w-full bg-[#2323FF] hover:brightness-110 text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-[filter]">
         View Profile
       </span>
     </Link>

@@ -31,7 +31,7 @@ export function DiscoverCategoryNav({
                 isActive={isSelected}
                 variant="pill"
                 onClick={() => onCategoryChange(cat.label)}
-                leftIcon={<Icon size={12} className={isSelected ? 'text-[#FF5B00]' : 'text-slate-400'} />}
+                leftIcon={<Icon size={12} className={isSelected ? 'text-[#EB4501]' : 'text-slate-400'} />}
                 className="shrink-0"
               >
                 {cat.label}

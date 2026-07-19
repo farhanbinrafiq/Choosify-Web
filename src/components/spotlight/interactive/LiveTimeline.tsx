@@ -24,11 +24,11 @@ export function LiveTimeline({ chapters, activeChapterId, onSelect }: LiveTimeli
               className={cn(
                 'w-full flex items-start gap-3 p-3 rounded-[5px] border text-left transition-colors',
                 activeChapterId === chapter.chapterId
-                  ? 'border-[#E8500A] bg-[#FFF8F4]'
-                  : 'border-[#e8edf2] bg-white hover:border-[#E8500A]/30',
+                  ? 'border-[#EB4501] bg-[#FFF8F4]'
+                  : 'border-[#e8edf2] bg-white hover:border-[#EB4501]/30',
               )}
             >
-              <span className="text-[11px] font-black tabular-nums text-[#E8500A] shrink-0 w-12">
+              <span className="text-[11px] font-black tabular-nums text-[#EB4501] shrink-0 w-12">
                 {chapter.timestampLabel}
               </span>
               <div className="min-w-0">

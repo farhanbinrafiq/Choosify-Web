@@ -48,7 +48,7 @@ export function MarketingContentListShell({
         </div>
         <Link
           to={createPath}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#E8500A] text-white text-xs font-bold uppercase rounded"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#EB4501] text-white text-xs font-bold uppercase rounded"
         >
           <Plus size={14} /> Create
         </Link>
@@ -84,7 +84,7 @@ export function MarketingContentListShell({
       {items.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-[#e8edf2] rounded-lg">
           <p className="text-sm text-gray-500">No content yet. Create your first item.</p>
-          <Link to={createPath} className="mt-4 inline-block text-xs font-bold uppercase text-[#E8500A] hover:underline">
+          <Link to={createPath} className="mt-4 inline-block text-xs font-bold uppercase text-[#EB4501] hover:underline">
             Create content
           </Link>
         </div>
@@ -136,7 +136,7 @@ function ContentCard({ item, onClick }: { item: MarketingContentRecord; onClick:
     <button
       type="button"
       onClick={onClick}
-      className="text-left bg-white border border-[#e8edf2] rounded-lg p-4 hover:border-[#E8500A]/30 transition-colors"
+      className="text-left bg-white border border-[#e8edf2] rounded-lg p-4 hover:border-[#EB4501]/30 transition-colors"
     >
       <span className="text-2xl" aria-hidden>{typeMeta?.icon ?? '📄'}</span>
       <h3 className="font-bold text-navy mt-2 line-clamp-1">{item.title}</h3>

@@ -9,14 +9,14 @@ export type HomeSectionTone =
 
 export const HOME_SECTION_TONE_CLASS: Record<HomeSectionTone, string> = {
   white: 'bg-white',
-  'soft-gray': 'bg-[#F4F7F9]',
+  'soft-gray': 'bg-choosify-feed',
   'soft-blue': 'bg-[#F4F8FC]',
   'soft-orange': 'bg-gradient-to-b from-[#FFF9F5] via-[#FFFCFA] to-white',
   'dark-band': 'choosify-dark-surface text-white',
 };
 
-/** Page canvas from Choosify.dc.html */
-export const HOME_PAGE_BG = '#F4F7F9';
+/** Page canvas — platform feed background */
+export const HOME_PAGE_BG = '#F0F8FF';
 
 /** max-width:1280px; padding:0 40px — Choosify.dc.html Home */
 export const HOME_CONTENT_MAX = 'max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10';

@@ -58,7 +58,7 @@ export function ProductLinkerPanel({
                 onClick={() => toggle(p.id)}
                 className={cn(
                   'w-full text-left px-2 py-2 rounded text-xs flex items-center gap-2',
-                  linkedProductIds.includes(p.id) ? 'bg-[#E8500A]/10' : 'hover:bg-gray-50',
+                  linkedProductIds.includes(p.id) ? 'bg-[#EB4501]/10' : 'hover:bg-gray-50',
                 )}
               >
                 <img src={p.image} alt="" className="w-8 h-8 object-cover rounded" />
@@ -81,7 +81,7 @@ export function ProductLinkerPanel({
                 <p className="text-[10px] text-gray-400">{p.brandName}</p>
               </div>
               <button type="button" onClick={() => onChange(linkedProductIds, p.id)} title="Primary">
-                <Star size={14} className={primaryProductId === p.id ? 'text-[#E8500A] fill-[#E8500A]' : 'text-gray-300'} />
+                <Star size={14} className={primaryProductId === p.id ? 'text-[#EB4501] fill-[#EB4501]' : 'text-gray-300'} />
               </button>
               <button type="button" onClick={() => toggle(p.id)}>
                 <X size={14} />

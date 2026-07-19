@@ -164,7 +164,7 @@ export function DiscoverLowerSections() {
           <Link
             key={gt.title}
             to={`/guides?q=${encodeURIComponent(gt.title.toLowerCase())}`}
-            className="bg-white border border-[#E8EDF2] rounded-[10px] p-[18px] flex gap-3.5 no-underline hover:border-[#FF5B00]/35 transition-colors"
+            className="bg-white border border-[#E8EDF2] rounded-[10px] p-[18px] flex gap-3.5 no-underline hover:border-[#EB4501]/35 transition-colors"
           >
             <div className="flex-1 min-w-0">
               <div className="text-xs font-extrabold text-[#1A1A2E] tracking-[0.3px] mb-2.5">
@@ -175,7 +175,7 @@ export function DiscoverLowerSections() {
                   · {lk}
                 </div>
               ))}
-              <div className="text-[11px] font-bold text-[#FF5B00] mt-2">
+              <div className="text-[11px] font-bold text-[#EB4501] mt-2">
                 VIEW ALL ({gt.count}) ›
               </div>
             </div>
@@ -228,11 +228,11 @@ export function DiscoverLowerSections() {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
               />
-              <div className="absolute top-2.5 left-2.5 bg-[#FF5B00] text-white text-[8.5px] font-extrabold px-2 py-0.5 rounded pointer-events-none">
+              <div className="absolute top-2.5 left-2.5 bg-[#EB4501] text-white text-[8.5px] font-extrabold px-2 py-0.5 rounded pointer-events-none">
                 EDITOR&apos;S PICK
               </div>
             </div>
-            <div className="text-[13px] font-bold text-[#1A1A2E] mb-1.5 group-hover:text-[#FF5B00] transition-colors">
+            <div className="text-[13px] font-bold text-[#1A1A2E] mb-1.5 group-hover:text-[#CF4400] transition-colors">
               Best Noise Cancelling Headphones in 2025
             </div>
             <div className="text-[11px] text-[#9AA0AC]">Headphone Zone · Official Review</div>
@@ -245,7 +245,7 @@ export function DiscoverLowerSections() {
         <div className="text-[13px] font-extrabold text-[#1A1A2E] tracking-[0.4px]">
           TOP CREATORS
         </div>
-        <Link to="/creators" className="text-xs font-bold text-[#1A1A2E] no-underline hover:text-[#FF5B00]">
+        <Link to="/creators" className="text-xs font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400]">
           VIEW ALL CREATORS ›
         </Link>
       </div>
@@ -271,7 +271,7 @@ export function DiscoverLowerSections() {
             </div>
             <Link
               to="/creators"
-              className="bg-white text-[#1A1A2E] border border-[#E5E7EB] px-4 py-1.5 rounded-md text-[11px] font-bold no-underline hover:border-[#FF5B00] hover:text-[#FF5B00] transition-colors"
+              className="bg-white text-[#1A1A2E] border border-[#E5E7EB] px-4 py-1.5 rounded-md text-[11px] font-bold no-underline hover:border-[#EB4501] hover:text-[#CF4400] transition-colors"
             >
               FOLLOW
             </Link>

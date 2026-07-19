@@ -43,7 +43,7 @@ export function AdvertiseHereCard({
   return (
     <div
       className={cn(
-        'bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#FF5B00] relative flex flex-col min-h-full',
+        'bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#EB4501] relative flex flex-col min-h-full',
         className,
       )}
     >
@@ -52,7 +52,7 @@ export function AdvertiseHereCard({
       </div>
       <div
         className={cn(
-          'bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center',
+          'bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center',
           variant === 'product-tile' ? 'h-[170px]' : 'h-[100px] items-end pb-2.5',
         )}
       >
@@ -89,7 +89,7 @@ export function AdvertiseHereCard({
         <Link
           to={href}
           className={cn(
-            'mt-auto w-full bg-[#FF5B00] text-white text-center border-none rounded-md font-extrabold hover:brightness-110 transition-[filter] no-underline',
+            'mt-auto w-full bg-[#EB4501] text-white text-center border-none rounded-md font-extrabold hover:brightness-110 transition-[filter] no-underline',
             variant === 'product-tile' ? 'py-2 text-[10px] rounded-md' : 'py-2.5 text-[11.5px] font-bold',
           )}
         >
@@ -121,7 +121,7 @@ export function ProductsSponsoredBanner({
   const isExternal = href.startsWith('http');
 
   const ctaClass =
-    'bg-[#FF5B00] text-white border-none px-[18px] py-2 rounded-[20px] text-[11.5px] font-bold shrink-0 whitespace-nowrap hover:brightness-110 no-underline inline-flex items-center';
+    'bg-[#EB4501] text-white border-none px-[18px] py-2 rounded-[20px] text-[11.5px] font-bold shrink-0 whitespace-nowrap hover:brightness-110 no-underline inline-flex items-center';
 
   return (
     <div
@@ -138,7 +138,7 @@ export function ProductsSponsoredBanner({
           loading="lazy"
         />
       ) : null}
-      <div className="absolute top-3.5 left-3.5 bg-[#FF5B00] text-white text-[9px] font-extrabold tracking-[0.4px] px-2.5 py-1 rounded z-[1]">
+      <div className="absolute top-3.5 left-3.5 bg-[#EB4501] text-white text-[9px] font-extrabold tracking-[0.4px] px-2.5 py-1 rounded z-[1]">
         SPONSORED AD
       </div>
       <div className="absolute inset-x-0 bottom-0 h-[22%] min-h-[60px] bg-gradient-to-t from-black/85 to-transparent flex items-center justify-between gap-4 px-5">

@@ -25,7 +25,7 @@ const DC = {
   ink: '#1A1A2E',
   muted: '#6B7280',
   mutedLight: '#9AA0AC',
-  orange: '#FF5B00',
+  orange: '#EB4501',
   ratingGreen: '#07A828',
   officialBlue: '#2323FF',
   footerBorder: '#F1F1F3',
@@ -312,12 +312,12 @@ export const ProductCard = memo(function ProductCard({
         <div className="relative z-10 flex-1 flex flex-col justify-center py-2 px-1">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-[12px] font-semibold text-[#9AA0AC]">{brandName}</span>
-            <span className="bg-[#FF5B00]/10 text-[#FF5B00] text-[11px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
+            <span className="bg-[#EB4501]/10 text-[#EB4501] text-[11px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
               <Star size={11} className="fill-current" /> Featured
             </span>
           </div>
           <h3
-            className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight leading-snug mb-4 group-hover:text-[#FF5B00] transition-colors line-clamp-2"
+            className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight leading-snug mb-4 group-hover:text-[#CF4400] transition-colors line-clamp-2"
             style={titleStyle}
           >
             {product.title}
@@ -327,7 +327,7 @@ export const ProductCard = memo(function ProductCard({
             <button
               type="button"
               onClick={handleAddToCart}
-              className="w-10 h-10 rounded-full text-white bg-[#FF5B00] cursor-pointer transition-all shrink-0 border-0 flex items-center justify-center hover:brightness-110"
+              className="w-10 h-10 rounded-full text-white bg-[#EB4501] cursor-pointer transition-all shrink-0 border-0 flex items-center justify-center hover:brightness-110"
               aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
             >
               {isGuideDetail ? <ArrowRight size={16} /> : <ShoppingCart size={16} />}
@@ -348,7 +348,7 @@ export const ProductCard = memo(function ProductCard({
   if (variant === 'list') {
     return (
       <div
-        className="bg-white rounded-[10px] border border-[#E8EDF2] hover:border-[#FF5B00]/30 transition-all flex gap-5 p-4 group cursor-pointer text-left"
+        className="bg-white rounded-[10px] border border-[#E8EDF2] hover:border-[#EB4501]/30 transition-all flex gap-5 p-4 group cursor-pointer text-left"
         onClick={openProduct}
       >
         <div className="w-36 md:w-40 h-[170px] flex-shrink-0 bg-[#F4F7F9] rounded-[10px] relative overflow-hidden">
@@ -372,7 +372,7 @@ export const ProductCard = memo(function ProductCard({
         </div>
         <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5">
           <div>
-            <h3 className="text-[12.5px] font-bold text-[#1A1A2E] leading-snug truncate mb-1 group-hover:text-[#FF5B00] transition-colors">
+            <h3 className="text-[12.5px] font-bold text-[#1A1A2E] leading-snug truncate mb-1 group-hover:text-[#CF4400] transition-colors">
               {product.title}
             </h3>
             <p className="text-[10px] text-[#6B7280] truncate mb-2">{variantLine}</p>
@@ -384,7 +384,7 @@ export const ProductCard = memo(function ProductCard({
             </div>
             {cashback && (
               <p className="text-[10px] text-[#6B7280]">
-                Up to <span className="text-[#FF5B00] font-bold">{cashback}</span> cashback
+                Up to <span className="text-[#EB4501] font-bold">{cashback}</span> cashback
               </p>
             )}
           </div>
@@ -410,7 +410,7 @@ export const ProductCard = memo(function ProductCard({
             <button
               type="button"
               onClick={handleAddToCart}
-              className="w-7 h-7 rounded-full bg-[#FF5B00] text-white border-0 flex items-center justify-center cursor-pointer hover:brightness-110"
+              className="w-7 h-7 rounded-full bg-[#EB4501] text-white border-0 flex items-center justify-center cursor-pointer hover:brightness-110"
               aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
             >
               {isGuideDetail ? <ArrowRight size={13} /> : <ShoppingCart size={13} />}
@@ -453,13 +453,15 @@ export const ProductCard = memo(function ProductCard({
         <button
           type="button"
           onClick={toggleSave}
-          className="absolute top-2 right-2 z-20 w-6 h-6 rounded-full bg-white/92 flex items-center justify-center cursor-pointer border-0 p-0"
+          className="absolute top-2 right-2 z-20 w-6 h-6 rounded-full bg-white flex items-center justify-center cursor-pointer border-0 p-0 shadow-sm"
           aria-label={isSaved ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <Heart
             size={12}
             strokeWidth={1.6}
-            className={cn('text-[#FF5B00]', isSaved && 'fill-[#FF5B00]')}
+            className={cn(
+              isSaved ? 'text-[#FF000D] fill-[#FF000D]' : 'text-[#CBD5E1]',
+            )}
           />
         </button>
 
@@ -473,7 +475,7 @@ export const ProductCard = memo(function ProductCard({
       {/* Body */}
       <div className="px-3 pt-[11px] pb-3 flex flex-col flex-1 min-h-0 text-left">
         <div
-          className="text-[12.5px] font-bold text-[#1A1A2E] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis group-hover:text-[#FF5B00] transition-colors"
+          className="text-[12.5px] font-bold text-[#1A1A2E] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis group-hover:text-[#CF4400] transition-colors"
           style={titleStyle}
         >
           {product.title}
@@ -494,7 +496,7 @@ export const ProductCard = memo(function ProductCard({
 
         {cashback && (
           <div className="text-[10px] text-[#6B7280] mb-2 whitespace-nowrap overflow-hidden text-ellipsis">
-            Up to <span className="text-[#FF5B00] font-bold">{cashback}</span> cashback
+            Up to <span className="text-[#EB4501] font-bold">{cashback}</span> cashback
           </div>
         )}
 
@@ -507,7 +509,7 @@ export const ProductCard = memo(function ProductCard({
                   {recData.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-1 py-0.5 text-[6.5px] font-bold bg-[#FF5B00]/5 text-[#FF5B00] rounded-full border border-[#FF5B00]/10"
+                      className="choosify-best-for-tag px-1 py-0.5 text-[6.5px] font-bold rounded-full border"
                     >
                       {tag}
                     </span>
@@ -546,7 +548,7 @@ export const ProductCard = memo(function ProductCard({
           <button
             type="button"
             onClick={handleAddToCart}
-            className="w-7 h-7 rounded-full bg-[#FF5B00] text-white border-0 flex items-center justify-center cursor-pointer shrink-0 hover:brightness-110 active:scale-95 transition-all"
+            className="w-7 h-7 rounded-full bg-[#EB4501] text-white border-0 flex items-center justify-center cursor-pointer shrink-0 hover:brightness-110 active:scale-95 transition-all"
             aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
             title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
           >

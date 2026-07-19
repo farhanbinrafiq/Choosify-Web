@@ -30,10 +30,10 @@ const ChoosifyLogo: React.FC<{ className?: string }> = ({ className = "h-8 w-aut
     >
       <g>
         <g>
-          <path fill="#FF5B00" d="M921.65,303.09c0-47.35-38.42-85.71-85.76-85.71s-85.76,38.36-85.76,85.71,38.42,85.76,85.76,85.76c8.22,0,16.14-1.17,23.65-3.3-3.3-5.38-5.23-11.77-5.23-18.57,0-19.74,15.99-35.73,35.68-35.73,8.93,0,17.1,3.3,23.34,8.68,5.33-11.16,8.32-23.65,8.32-36.84Z"/>
-          <path fill="#FF5B00" d="M356.15,303.09c0-47.35-38.42-85.71-85.76-85.71s-85.76,38.36-85.76,85.71c0,47.35,38.42,85.76,85.76,85.76,8.22,0,16.14-1.17,23.65-3.3-3.3-5.38-5.23-11.77-5.23-18.57,0-19.74,15.99-35.73,35.68-35.73,8.93,0,17.1,3.3,23.34,8.68,5.33-11.16,8.32-23.65,8.32-36.84Z"/>
-          <path fill="#FF5B00" d="M252.7,505.4C113.36,505.4,0,392.04,0,252.7S113.36,0,252.7,0s252.7,113.36,252.7,252.7-113.36,252.7-252.7,252.7ZM252.7,57.74c-107.5,0-194.96,87.46-194.96,194.96s87.46,194.96,194.96,194.96,194.96-87.46,194.96-194.96S360.2,57.74,252.7,57.74Z"/>
-          <path fill="#FF5B00" d="M779.18,505.4c-139.34,0-252.7-113.36-252.7-252.7S639.84,0,779.18,0s252.7,113.36,252.7,252.7-113.36,252.7-252.7,252.7ZM779.18,57.74c-107.5,0-194.96,87.46-194.96,194.96s87.46,194.96,194.96,194.96,194.96-87.46,194.96-194.96-87.46-194.96-194.96-194.96Z"/>
+          <path fill="#EB4501" d="M921.65,303.09c0-47.35-38.42-85.71-85.76-85.71s-85.76,38.36-85.76,85.71,38.42,85.76,85.76,85.76c8.22,0,16.14-1.17,23.65-3.3-3.3-5.38-5.23-11.77-5.23-18.57,0-19.74,15.99-35.73,35.68-35.73,8.93,0,17.1,3.3,23.34,8.68,5.33-11.16,8.32-23.65,8.32-36.84Z"/>
+          <path fill="#EB4501" d="M356.15,303.09c0-47.35-38.42-85.71-85.76-85.71s-85.76,38.36-85.76,85.71c0,47.35,38.42,85.76,85.76,85.76,8.22,0,16.14-1.17,23.65-3.3-3.3-5.38-5.23-11.77-5.23-18.57,0-19.74,15.99-35.73,35.68-35.73,8.93,0,17.1,3.3,23.34,8.68,5.33-11.16,8.32-23.65,8.32-36.84Z"/>
+          <path fill="#EB4501" d="M252.7,505.4C113.36,505.4,0,392.04,0,252.7S113.36,0,252.7,0s252.7,113.36,252.7,252.7-113.36,252.7-252.7,252.7ZM252.7,57.74c-107.5,0-194.96,87.46-194.96,194.96s87.46,194.96,194.96,194.96,194.96-87.46,194.96-194.96S360.2,57.74,252.7,57.74Z"/>
+          <path fill="#EB4501" d="M779.18,505.4c-139.34,0-252.7-113.36-252.7-252.7S639.84,0,779.18,0s252.7,113.36,252.7,252.7-113.36,252.7-252.7,252.7ZM779.18,57.74c-107.5,0-194.96,87.46-194.96,194.96s87.46,194.96,194.96,194.96,194.96-87.46,194.96-194.96-87.46-194.96-194.96-194.96Z"/>
         </g>
         <g>
           <path fill="#fff" d="M1094.27,260.83c0-54.18,36.9-95.48,93.45-95.48,48.09,0,77.9,27.43,84.31,66.7h-51.45c-3.72-16.59-14.55-27.09-32.15-27.09-26.77,0-40.3,22.01-40.3,55.88s13.53,55.19,40.3,55.19c19.62,0,31.48-11.85,33.85-32.51h51.13c-1.7,40.97-34.21,72.8-84.31,72.8-57.58,0-94.83-41.64-94.83-95.48Z"/>
@@ -44,7 +44,7 @@ const ChoosifyLogo: React.FC<{ className?: string }> = ({ className = "h-8 w-aut
           <rect fill="#fff" x="2102.94" y="170.41" width="53.18" height="180.15"/>
           <path fill="#fff" d="M2260.83,204.96v145.61h-53.18v-145.61h-27.09v-34.54h27.09v-15.23c0-19.3,4.74-32.84,15.26-42.33,11.83-10.5,30.46-14.55,53.47-14.22,7.12,0,14.59.34,22.02,1.35v37.92c-26.74-1.01-37.57.69-37.57,21v11.51h37.57v34.54h-37.57Z"/>
           <path fill="#fff" d="M2335.71,410.16v-41.64h2.72c.67.34,15.9.34,17.28.34,16.57,0,24.72-6.09,25.71-18.29,0-6.09-3.05-19.97-9.46-36.23l-55.88-143.92h55.88l23.02,69.09c8.11,24.38,14.91,62.64,14.91,62.64h.67s8.11-38.6,15.9-62.64l22.02-69.09h52.83l-64.34,184.56c-14.59,41.64-31.16,55.86-65.69,55.86-1.7,0-34.56-.34-35.58-.67Z"/>
-          <path fill="#FF5B00" d="M2129.7,152.15c15.9,0,28.78-12.9,28.78-28.8,0-15.9-12.88-28.8-28.78-28.8-15.9,0-28.8,12.9-28.8,28.8,0,2.76.39,5.42,1.11,7.94,1.81-1.11,3.95-1.76,6.24-1.76,6.63,0,12,5.37,12,11.98,0,3-1.11,5.74-2.91,7.84,3.75,1.79,7.94,2.79,12.37,2.79Z"/>
+          <path fill="#EB4501" d="M2129.7,152.15c15.9,0,28.78-12.9,28.78-28.8,0-15.9-12.88-28.8-28.78-28.8-15.9,0-28.8,12.9-28.8,28.8,0,2.76.39,5.42,1.11,7.94,1.81-1.11,3.95-1.76,6.24-1.76,6.63,0,12,5.37,12,11.98,0,3-1.11,5.74-2.91,7.84,3.75,1.79,7.94,2.79,12.37,2.79Z"/>
         </g>
       </g>
     </svg>
@@ -91,7 +91,7 @@ const BACKGROUND_PRODUCTS: BackgroundProduct[] = [
     brand: 'Samsung',
     price: '৳145,000',
     badge: 'HOT DEAL',
-    badgeBg: 'bg-[#FF5B00]/15 text-[#FF5B00] border-[#FF5B00]/20',
+    badgeBg: 'bg-[#EB4501]/15 text-[#EB4501] border-[#EB4501]/20',
     image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=300&h=300&fit=crop',
     installmentPrice: '৳8,660'
   },
@@ -151,7 +151,7 @@ const BACKGROUND_PRODUCTS: BackgroundProduct[] = [
     brand: 'Nomatic',
     price: '৳4,590',
     badge: 'HOT DEAL',
-    badgeBg: 'bg-[#FF5B00]/15 text-[#FF5B00] border-[#FF5B00]/20',
+    badgeBg: 'bg-[#EB4501]/15 text-[#EB4501] border-[#EB4501]/20',
     image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop',
     installmentPrice: '৳785'
   }
@@ -378,7 +378,7 @@ export const AuthPage: React.FC = () => {
                       <p className="text-[9px] text-white/40 font-bold">{product.brand}</p>
                       
                       <div className="flex items-baseline justify-between mt-1">
-                        <span className="text-xs font-black text-[#FF5B00]">{product.price}</span>
+                        <span className="text-xs font-black text-[#EB4501]">{product.price}</span>
                         <div className="text-right">
                           <p className="text-[7px] text-white/30 font-bold uppercase leading-none">0% EMI</p>
                           <p className="text-[9px] text-white/80 font-extrabold leading-none">{product.installmentPrice}</p>
@@ -399,7 +399,7 @@ export const AuthPage: React.FC = () => {
         <div className="absolute inset-0 z-15 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,4,53,0.85)_85%)]" />
         
         {/* Light Glow Highlights */}
-        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-[#FF5B00]/10 blur-[130px]" />
+        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-[#EB4501]/10 blur-[130px]" />
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-[130px]" />
       </div>
 
@@ -437,7 +437,7 @@ export const AuthPage: React.FC = () => {
           {/* LEFT COLUMN: BRAND STORYTELLING PANEL */}
           <section className="lg:col-span-5 flex flex-col text-left space-y-6 lg:pr-4" id="brand-prop-column">
             {/* Shoppers Badge */}
-            <div className="inline-flex self-start items-center gap-2 bg-gradient-to-r from-[#FF5B00] to-[#EB4501] text-white px-4.5 py-2 rounded-full text-[10px] font-black tracking-wider uppercase shadow-lg shadow-[#FF5B00]/25">
+            <div className="inline-flex self-start items-center gap-2 bg-gradient-to-r from-[#EB4501] to-[#CF4400] text-white px-4.5 py-2 rounded-full text-[10px] font-black tracking-wider uppercase shadow-lg shadow-[#EB4501]/25">
               <Sparkles size={12} className="animate-pulse text-white" />
               <span>Join 100,000+ SHOPPERS</span>
             </div>
@@ -446,7 +446,7 @@ export const AuthPage: React.FC = () => {
             <h1 className="text-4xl sm:text-[45px] lg:text-[48px] font-black tracking-tight leading-[1.1] text-white uppercase font-sans">
               Verify Brands.<br />
               Compare Easily.<br />
-              <span className="text-[#FF5B00]">Choose With Confidence</span>
+              <span className="text-[#EB4501]">Choose With Confidence</span>
             </h1>
 
             {/* Promise paragraph */}
@@ -463,7 +463,7 @@ export const AuthPage: React.FC = () => {
                 "Verified-buyer badge on reviews"
               ].map((bullet, idx) => (
                 <li key={idx} className="flex items-center gap-3 text-xs sm:text-sm font-bold text-white/90">
-                  <div className="w-5 h-5 rounded-full bg-[#FF5B00] flex items-center justify-center text-white shrink-0 shadow-md shadow-[#FF5B00]/20">
+                  <div className="w-5 h-5 rounded-full bg-[#EB4501] flex items-center justify-center text-white shrink-0 shadow-md shadow-[#EB4501]/20">
                     <Check size={11} strokeWidth={4} />
                   </div>
                   <span>{bullet}</span>
@@ -478,12 +478,12 @@ export const AuthPage: React.FC = () => {
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#000435]" />
               </div>
               <div className="text-xs leading-relaxed text-left flex-1">
-                <p className="font-extrabold text-[#FF5B00] text-[10px] uppercase tracking-wider mb-1">Hi! I'm EMI 👋</p>
+                <p className="font-extrabold text-[#EB4501] text-[10px] uppercase tracking-wider mb-1">Hi! I'm EMI 👋</p>
                 <p className="text-white/90 font-bold">Your AI Shopping Assistant.</p>
                 <p className="text-white/60 font-semibold mt-0.5">I can help you compare products, discover brands, and make smarter buying decisions.</p>
                 <button 
                   onClick={() => setIsEmiChatOpen(true)}
-                  className="text-[10px] font-black text-[#FF5B00] hover:text-[#EB4501] mt-2 flex items-center gap-1 uppercase tracking-wider transition-colors"
+                  className="text-[10px] font-black text-[#EB4501] hover:text-[#CF4400] mt-2 flex items-center gap-1 uppercase tracking-wider transition-colors"
                 >
                   Chat with EMI &rarr;
                 </button>
@@ -493,7 +493,7 @@ export const AuthPage: React.FC = () => {
 
           {/* VERTICAL DIVIDER */}
           <div className="hidden lg:block lg:col-span-1 h-80 w-px bg-white/10 justify-self-center relative">
-            <div className="absolute top-1/4 bottom-1/4 left-0 right-0 w-[2px] -ml-px rounded-full bg-gradient-to-b from-[#FF5B00] to-transparent opacity-40" />
+            <div className="absolute top-1/4 bottom-1/4 left-0 right-0 w-[2px] -ml-px rounded-full bg-gradient-to-b from-[#EB4501] to-transparent opacity-40" />
           </div>
 
           {/* RIGHT COLUMN: GLASSMORPHISM AUTH CARD */}
@@ -567,7 +567,7 @@ export const AuthPage: React.FC = () => {
                       
                       {/* High precision bottom accent line */}
                       <motion.div
-                        className="absolute bottom-1 h-[2px] bg-[#FF5B00] rounded-full z-15"
+                        className="absolute bottom-1 h-[2px] bg-[#EB4501] rounded-full z-15"
                         layoutId="activeAuthTabLine"
                         style={{
                           width: '40px',
@@ -589,7 +589,7 @@ export const AuthPage: React.FC = () => {
                           placeholder="Full Name"
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
-                          className="w-full bg-slate-50 h-13 pl-12 pr-4 rounded-2xl text-slate-950 placeholder-slate-400 focus:placeholder-slate-500 outline-none font-bold text-xs focus:ring-2 focus:ring-[#FF5B00]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#FF5B00]/40"
+                          className="w-full bg-slate-50 h-13 pl-12 pr-4 rounded-2xl text-slate-950 placeholder-slate-400 focus:placeholder-slate-500 outline-none font-bold text-xs focus:ring-2 focus:ring-[#EB4501]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#EB4501]/40"
                         />
                       </div>
                     )}
@@ -603,7 +603,7 @@ export const AuthPage: React.FC = () => {
                           placeholder="Email address"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full bg-slate-50 h-13 pl-12 pr-4 rounded-2xl text-slate-950 placeholder-slate-400 focus:placeholder-slate-500 outline-none font-bold text-xs focus:ring-2 focus:ring-[#FF5B00]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#FF5B00]/40"
+                          className="w-full bg-slate-50 h-13 pl-12 pr-4 rounded-2xl text-slate-950 placeholder-slate-400 focus:placeholder-slate-500 outline-none font-bold text-xs focus:ring-2 focus:ring-[#EB4501]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#EB4501]/40"
                         />
                       </div>
                     )}
@@ -617,7 +617,7 @@ export const AuthPage: React.FC = () => {
                           placeholder="Phone number"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          className="w-full bg-slate-50 h-13 pl-12 pr-4 rounded-2xl text-slate-950 placeholder-slate-400 focus:placeholder-slate-500 outline-none font-bold text-xs focus:ring-2 focus:ring-[#FF5B00]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#FF5B00]/40"
+                          className="w-full bg-slate-50 h-13 pl-12 pr-4 rounded-2xl text-slate-950 placeholder-slate-400 focus:placeholder-slate-500 outline-none font-bold text-xs focus:ring-2 focus:ring-[#EB4501]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#EB4501]/40"
                         />
                       </div>
                     )}
@@ -631,7 +631,7 @@ export const AuthPage: React.FC = () => {
                           placeholder={authMode === 'reset-password' ? 'New Password' : 'Password'}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full bg-slate-50 h-13 pl-12 pr-12 rounded-2xl text-slate-950 placeholder-slate-400 focus:placeholder-slate-500 outline-none font-bold text-xs focus:ring-2 focus:ring-[#FF5B00]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#FF5B00]/40"
+                          className="w-full bg-slate-50 h-13 pl-12 pr-12 rounded-2xl text-slate-950 placeholder-slate-400 focus:placeholder-slate-500 outline-none font-bold text-xs focus:ring-2 focus:ring-[#EB4501]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#EB4501]/40"
                         />
                         <button
                           type="button"
@@ -652,7 +652,7 @@ export const AuthPage: React.FC = () => {
                           placeholder="Confirm Password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full bg-slate-50 h-13 pl-12 pr-12 rounded-2xl text-slate-950 placeholder-slate-400 focus:placeholder-slate-500 outline-none font-bold text-xs focus:ring-2 focus:ring-[#FF5B00]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#FF5B00]/40"
+                          className="w-full bg-slate-50 h-13 pl-12 pr-12 rounded-2xl text-slate-950 placeholder-slate-400 focus:placeholder-slate-500 outline-none font-bold text-xs focus:ring-2 focus:ring-[#EB4501]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#EB4501]/40"
                         />
                         <button
                           type="button"
@@ -674,7 +674,7 @@ export const AuthPage: React.FC = () => {
                           placeholder="6-digit verification code"
                           value={verificationCode}
                           onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-full bg-slate-50 h-13 pl-12 pr-4 rounded-2xl text-slate-950 placeholder-slate-400 tracking-widest text-center outline-none font-black text-sm focus:ring-2 focus:ring-[#FF5B00]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#FF5B00]/40"
+                          className="w-full bg-slate-50 h-13 pl-12 pr-4 rounded-2xl text-slate-950 placeholder-slate-400 tracking-widest text-center outline-none font-black text-sm focus:ring-2 focus:ring-[#EB4501]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#EB4501]/40"
                         />
                       </div>
                     )}
@@ -689,14 +689,14 @@ export const AuthPage: React.FC = () => {
                           placeholder="2FA security code"
                           value={tfaCode}
                           onChange={(e) => setTfaCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-full bg-slate-50 h-13 pl-12 pr-4 rounded-2xl text-slate-950 placeholder-slate-400 tracking-widest text-center outline-none font-black text-sm focus:ring-2 focus:ring-[#FF5B00]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#FF5B00]/40"
+                          className="w-full bg-slate-50 h-13 pl-12 pr-4 rounded-2xl text-slate-950 placeholder-slate-400 tracking-widest text-center outline-none font-black text-sm focus:ring-2 focus:ring-[#EB4501]/10 transition-all border border-slate-200/50 focus:bg-white focus:border-[#EB4501]/40"
                         />
                       </div>
                     )}
 
                     {authMode === 'email-sent' && (
                       <div className="flex flex-col items-center justify-center py-4 text-center">
-                        <div className="w-14 h-14 bg-[#FF5B00]/10 text-[#FF5B00] rounded-full flex items-center justify-center mb-3">
+                        <div className="w-14 h-14 bg-[#EB4501]/10 text-[#EB4501] rounded-full flex items-center justify-center mb-3">
                           <CheckCircle size={30} />
                         </div>
                         <p className="text-xs font-bold text-slate-500 max-w-sm leading-relaxed">
@@ -713,14 +713,14 @@ export const AuthPage: React.FC = () => {
                             type="checkbox"
                             checked={rememberMe}
                             onChange={(e) => setRememberMe(e.target.checked)}
-                            className="accent-[#FF5B00] w-4.5 h-4.5 rounded border-slate-300"
+                            className="accent-[#EB4501] w-4.5 h-4.5 rounded border-slate-300"
                           />
                           Remember me
                         </label>
                         <button
                           type="button"
                           onClick={() => setAuthMode('forgot-password')}
-                          className="text-[#FF5B00] hover:text-[#EB4501] font-black transition-colors cursor-pointer"
+                          className="text-[#EB4501] hover:text-[#CF4400] font-black transition-colors cursor-pointer"
                         >
                           Forgot password?
                         </button>
@@ -816,7 +816,7 @@ export const AuthPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setAuthMode('register')}
-                          className="text-[#FF5B00] hover:text-[#EB4501] font-black cursor-pointer hover:underline"
+                          className="text-[#EB4501] hover:text-[#CF4400] font-black cursor-pointer hover:underline"
                         >
                           Sign up
                         </button>
@@ -829,7 +829,7 @@ export const AuthPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setAuthMode('login')}
-                          className="text-[#FF5B00] hover:text-[#EB4501] font-black cursor-pointer hover:underline"
+                          className="text-[#EB4501] hover:text-[#CF4400] font-black cursor-pointer hover:underline"
                         >
                           Sign in
                         </button>
@@ -840,7 +840,7 @@ export const AuthPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setAuthMode('login')}
-                        className="text-xs font-black text-[#FF5B00] hover:text-[#EB4501]"
+                        className="text-xs font-black text-[#EB4501] hover:text-[#CF4400]"
                       >
                         Back to Sign in
                       </button>
@@ -851,7 +851,7 @@ export const AuthPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setAuthMode('forgot-password')}
-                          className="text-xs font-black text-[#FF5B00] hover:text-[#EB4501] flex items-center gap-1.5"
+                          className="text-xs font-black text-[#EB4501] hover:text-[#CF4400] flex items-center gap-1.5"
                         >
                           <RefreshCw size={11} /> Resend verification email
                         </button>
@@ -869,7 +869,7 @@ export const AuthPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setAuthMode('login')}
-                        className="text-xs font-black text-[#FF5B00] hover:text-[#EB4501]"
+                        className="text-xs font-black text-[#EB4501] hover:text-[#CF4400]"
                       >
                         Back to Sign in
                       </button>
@@ -880,7 +880,7 @@ export const AuthPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => toast.success('A new 6-digit verification code has been sent!')}
-                          className="text-xs font-black text-[#FF5B00] hover:text-[#EB4501]"
+                          className="text-xs font-black text-[#EB4501] hover:text-[#CF4400]"
                         >
                           Resend verification code
                         </button>
@@ -898,7 +898,7 @@ export const AuthPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setAuthMode('login')}
-                        className="text-xs font-black text-[#FF5B00] hover:text-[#EB4501]"
+                        className="text-xs font-black text-[#EB4501] hover:text-[#CF4400]"
                       >
                         Back to Sign in
                       </button>
@@ -918,7 +918,7 @@ export const AuthPage: React.FC = () => {
               
               {/* Feature 1 */}
               <div className="flex items-start gap-4 text-left pb-6 md:pb-0 md:px-4">
-                <div className="w-11 h-11 rounded-2xl bg-[#FF5B00]/10 text-[#FF5B00] border border-[#FF5B00]/25 flex items-center justify-center shrink-0">
+                <div className="w-11 h-11 rounded-2xl bg-[#EB4501]/10 text-[#EB4501] border border-[#EB4501]/25 flex items-center justify-center shrink-0">
                   <ShieldCheck size={22} />
                 </div>
                 <div>
@@ -974,21 +974,21 @@ export const AuthPage: React.FC = () => {
 
           {/* Slogan */}
           <div className="text-center md:text-left text-xs font-bold">
-            Choose <span className="text-[#FF5B00] font-black">Easy</span>. Compare & Decide <span className="text-[#FF5B00] font-black">Wisely.</span>
+            Choose <span className="text-[#EB4501] font-black">Easy</span>. Compare & Decide <span className="text-[#EB4501] font-black">Wisely.</span>
           </div>
 
           {/* Social Row */}
           <div className="flex items-center gap-3">
-            <a href="https://facebook.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#FF5B00]/10 border border-white/10 hover:border-[#FF5B00] flex items-center justify-center text-white hover:text-[#FF5B00] transition-all">
+            <a href="https://facebook.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#CF4400]/10 border border-white/10 hover:border-[#EB4501] flex items-center justify-center text-white hover:text-[#CF4400] transition-all">
               <Facebook size={14} />
             </a>
-            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#FF5B00]/10 border border-white/10 hover:border-[#FF5B00] flex items-center justify-center text-white hover:text-[#FF5B00] transition-all">
+            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#CF4400]/10 border border-white/10 hover:border-[#EB4501] flex items-center justify-center text-white hover:text-[#CF4400] transition-all">
               <Instagram size={14} />
             </a>
-            <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#FF5B00]/10 border border-white/10 hover:border-[#FF5B00] flex items-center justify-center text-white hover:text-[#FF5B00] transition-all">
+            <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#CF4400]/10 border border-white/10 hover:border-[#EB4501] flex items-center justify-center text-white hover:text-[#CF4400] transition-all">
               <TikTokIcon size={14} />
             </a>
-            <a href="https://youtube.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#FF5B00]/10 border border-white/10 hover:border-[#FF5B00] flex items-center justify-center text-white hover:text-[#FF5B00] transition-all">
+            <a href="https://youtube.com" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#CF4400]/10 border border-white/10 hover:border-[#EB4501] flex items-center justify-center text-white hover:text-[#CF4400] transition-all">
               <Youtube size={14} />
             </a>
           </div>
@@ -1011,8 +1011,8 @@ export const AuthPage: React.FC = () => {
       </footer>
 
       {/* DEV FLOOR CONTROLLER (HIDDEN/SMALL AT BOTTOM FOR VERIFICATION) */}
-      <div className="fixed bottom-24 right-6 z-40 bg-slate-900/90 backdrop-blur-md rounded-2xl border border-[#FF5B00]/20 p-2 shadow-2xl flex flex-col gap-1" id="dev-flow-auditor">
-        <div className="text-[8px] font-black tracking-widest text-[#FF5B00] px-2 py-0.5 border-b border-white/10 uppercase mb-0.5">
+      <div className="fixed bottom-24 right-6 z-40 bg-slate-900/90 backdrop-blur-md rounded-2xl border border-[#EB4501]/20 p-2 shadow-2xl flex flex-col gap-1" id="dev-flow-auditor">
+        <div className="text-[8px] font-black tracking-widest text-[#EB4501] px-2 py-0.5 border-b border-white/10 uppercase mb-0.5">
           DEV PREVIEW
         </div>
         <div className="flex flex-wrap gap-1 max-w-[150px]">
@@ -1022,7 +1022,7 @@ export const AuthPage: React.FC = () => {
               onClick={() => setAuthMode(mode)}
               className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase transition-all ${
                 authMode === mode 
-                  ? 'bg-[#FF5B00] text-white' 
+                  ? 'bg-[#EB4501] text-white' 
                   : 'bg-white/5 text-white/60 hover:bg-white/10'
               }`}
             >
@@ -1052,9 +1052,9 @@ export const AuthPage: React.FC = () => {
               className="relative w-full max-w-[420px] h-full bg-[#000435] border-l border-white/10 shadow-2xl flex flex-col justify-between z-10 text-white"
             >
               {/* Header */}
-              <div className="p-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-[#000435] to-[#FF5B00]/10">
+              <div className="p-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-[#000435] to-[#EB4501]/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#FF5B00]/15 flex items-center justify-center border border-[#FF5B00]/20 overflow-hidden">
+                  <div className="w-10 h-10 rounded-full bg-[#EB4501]/15 flex items-center justify-center border border-[#EB4501]/20 overflow-hidden">
                     <EmiAiLogo size={28} className="w-7 h-7" />
                   </div>
                   <div>
@@ -1079,7 +1079,7 @@ export const AuthPage: React.FC = () => {
                   <div key={i} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
                     <div className={`p-4 rounded-2xl max-w-[85%] text-xs font-bold leading-relaxed shadow-md ${
                       msg.sender === 'user' 
-                        ? 'bg-[#FF5B00] text-white rounded-tr-none' 
+                        ? 'bg-[#EB4501] text-white rounded-tr-none' 
                         : 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none'
                     }`}>
                       {msg.text}
@@ -1103,7 +1103,7 @@ export const AuthPage: React.FC = () => {
                     <button
                       key={idx}
                       onClick={() => selectSuggestion(s)}
-                      className="text-left px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-[#FF5B00]/40 text-[11px] font-bold text-white/80 hover:text-white transition-all hover:bg-white/[0.07]"
+                      className="text-left px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-[#EB4501]/40 text-[11px] font-bold text-white/80 hover:text-white transition-all hover:bg-white/[0.07]"
                     >
                       {s}
                     </button>
@@ -1118,11 +1118,11 @@ export const AuthPage: React.FC = () => {
                   placeholder="Ask EMI anything..."
                   value={emiMessage}
                   onChange={(e) => setEmiMessage(e.target.value)}
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#FF5B00]/50 font-bold"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#EB4501]/50 font-bold"
                 />
                 <button
                   type="submit"
-                  className="w-11 h-11 rounded-xl bg-[#FF5B00] hover:bg-[#EB4501] text-white flex items-center justify-center transition-all cursor-pointer shadow-lg shadow-[#FF5B00]/15"
+                  className="w-11 h-11 rounded-xl bg-[#EB4501] hover:bg-[#CF4400] text-white flex items-center justify-center transition-all cursor-pointer shadow-lg shadow-[#EB4501]/15"
                 >
                   <Send size={16} />
                 </button>

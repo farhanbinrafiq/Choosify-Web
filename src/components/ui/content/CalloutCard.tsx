@@ -65,10 +65,10 @@ export const CalloutCard: React.FC<CalloutCardProps> = ({
       badgeVariant: 'gray'
     },
     sponsored: {
-      bg: 'bg-[#FF5B00]/10',
-      border: 'border-[#FF5B00]/20',
+      bg: 'bg-[#EB4501]/10',
+      border: 'border-[#EB4501]/20',
       text: 'text-slate-900',
-      iconText: 'text-[#FF5B00]',
+      iconText: 'text-[#EB4501]',
       icon: <Zap className="w-5 h-5" />,
       badgeLabel: 'Sponsored',
       badgeVariant: 'orange'

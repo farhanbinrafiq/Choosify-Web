@@ -70,7 +70,7 @@ export function HomeTopCategoriesSection({ categories }: HomeTopCategoriesSectio
               to={`/categories?category=${encodeURIComponent(cat.name)}`}
               className={cn(
                 'bg-white rounded-[10px] px-3 py-5 flex flex-col items-center gap-2.5 border border-[#E8EDF2]',
-                'hover:border-[#FF5B00]/35 hover:shadow-sm transition-all',
+                'hover:border-[#EB4501]/35 hover:shadow-sm transition-all',
               )}
             >
               <div

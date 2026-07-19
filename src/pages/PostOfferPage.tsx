@@ -196,7 +196,7 @@ export function PostOfferPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       <div className="w-full px-5 sm:px-8 pt-4">
         <section
           ref={heroRef}
@@ -208,11 +208,11 @@ export function PostOfferPage() {
           <div className="flex items-center gap-4">
             <div className="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#FF5B00] transition-all duration-300"
+                className="h-full bg-[#EB4501] transition-all duration-300"
                 style={{ width: `${(step / 4) * 100}%` }}
               />
             </div>
-            <span className="text-[#FF5B00] font-bold text-[11px] whitespace-nowrap">
+            <span className="text-[#EB4501] font-bold text-[11px] whitespace-nowrap">
               Step {step} of 4 — {['Basic Info', 'Media Upload', 'Pricing & Details', 'Seller Info'][step - 1]}
             </span>
           </div>
@@ -387,7 +387,7 @@ export function PostOfferPage() {
                            type="checkbox" 
                            checked={isDeal}
                            onChange={(e) => setIsDeal(e.target.checked)}
-                           className="w-5 h-5 rounded accent-[#E8500A]" 
+                           className="w-5 h-5 rounded accent-[#EB4501]" 
                          />
                          <span className="text-xs font-bold text-[#1A1A2E]">Is this a promotional deal?</span>
                       </label>
@@ -458,7 +458,7 @@ export function PostOfferPage() {
                            type="checkbox" 
                            checked={agreeToTerms}
                            onChange={(e) => setAgreeToTerms(e.target.checked)}
-                           className="w-5 h-5 rounded accent-[#E8500A]" 
+                           className="w-5 h-5 rounded accent-[#EB4501]" 
                          />
                          <span className="text-xs font-bold text-[#1A1A2E]">I agree to the terms of service and guarantee product authenticity.</span>
                       </label>
@@ -489,14 +489,14 @@ export function PostOfferPage() {
                   <button 
                      type="button"
                      onClick={saveDraft}
-                     className="flex-1 px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-sm font-bold rounded-lg transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                     className="flex-1 px-6 py-3 bg-[#EB4501] hover:bg-[#CF4400] text-white text-sm font-bold rounded-lg transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                      Save Draft
                   </button>
                   <button 
                      type="button"
                      onClick={handleContinue}
-                     className="flex-[2] px-6 py-3 bg-[#E8500A] hover:bg-[#CF4400] text-white text-sm font-bold rounded-lg transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                     className="flex-[2] px-6 py-3 bg-[#EB4501] hover:bg-[#CF4400] text-white text-sm font-bold rounded-lg transition-all duration-200 cursor-pointer border-0 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                     {step === 4 ? (
                       <>Submit Offer <CheckCircle2 size={18} /></>

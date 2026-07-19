@@ -197,7 +197,7 @@ export function AllProductsPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#E8500A]" />
+          <Search size={13} className="text-[#EB4501]" />
         </div>
         <input
           type="text"
@@ -205,7 +205,7 @@ export function AllProductsPage() {
           onChange={(e) => setSidebarSearch(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
           placeholder="Search products, brands or details..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
         />
       </div>
     ),
@@ -560,7 +560,7 @@ export function AllProductsPage() {
   }, [productFeed]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       <DcListingHero
         titleBefore="Explore Every"
         titleHighlight="Product"
@@ -647,7 +647,7 @@ export function AllProductsPage() {
           {/* LEFT COLUMN SEARCH BAR */}
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <Search size={13} className="text-[#E8500A]" />
+              <Search size={13} className="text-[#EB4501]" />
             </div>
             <input
               type="text"
@@ -655,7 +655,7 @@ export function AllProductsPage() {
               onChange={(e) => setSidebarSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
               placeholder="Search products, brands or details..."
-              className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+              className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors shadow-sm"
             />
           </div>
           
@@ -988,7 +988,7 @@ export function AllProductsPage() {
               <SlidersHorizontal size={40} className="stroke-1 text-gray-300" />
               <div className="text-sm font-semibold tracking-tight text-[#1A1A2E]">No products matched active filters.</div>
               <p className="text-[10px] max-w-sm leading-relaxed font-bold">Try lowering your minimum order quantity filter or clearing search queries to explore the full authorized selection.</p>
-              <button onClick={handleResetFilters} className="px-5 py-2.5 bg-[#FF5B00] text-white text-[13px] font-bold tracking-tight rounded-lg shadow-sm hover:brightness-110">Clear Filters</button>
+              <button onClick={handleResetFilters} className="px-5 py-2.5 bg-[#EB4501] text-white text-[13px] font-bold tracking-tight rounded-lg shadow-sm hover:brightness-110">Clear Filters</button>
             </div>
           ) : (
             <div className={cn(
@@ -1049,7 +1049,7 @@ export function AllProductsPage() {
                       <Link 
                          to={`/recommendations/${item.id}`}
                          key={item.id} 
-                         className="flex items-start gap-3 bg-white border border-[#eef2f6]/60 rounded-2xl p-2 hover:shadow-soft hover:border-[#E8500A]/10 transition-all duration-300 group cursor-pointer"
+                         className="flex items-start gap-3 bg-white border border-[#eef2f6]/60 rounded-2xl p-2 hover:shadow-soft hover:border-[#EB4501]/10 transition-all duration-300 group cursor-pointer"
                       >
                          <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-gray-100 bg-gray-50 flex items-center justify-center relative">
                             <img 
@@ -1058,11 +1058,11 @@ export function AllProductsPage() {
                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                referrerPolicy="no-referrer"
                             />
-                            <span className="absolute bottom-0 right-0 bg-[#E8500A]/90 text-white text-[6px] font-black px-1 py-0.5 rounded-tl-md tracking-wider">AD</span>
+                            <span className="absolute bottom-0 right-0 bg-[#EB4501]/90 text-white text-[6px] font-black px-1 py-0.5 rounded-tl-md tracking-wider">AD</span>
                          </div>
                          <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
-                            <span className="text-[7.5px] font-black text-[#E8500A] uppercase tracking-widest leading-none block mb-0.5">{item.category}</span>
-                            <h4 className="font-sans text-[11px] font-bold tracking-tight text-[#1A1D4E] group-hover:text-[#E8500A] transition-colors line-clamp-2 leading-tight">
+                            <span className="text-[7.5px] font-black text-[#EB4501] uppercase tracking-widest leading-none block mb-0.5">{item.category}</span>
+                            <h4 className="font-sans text-[11px] font-bold tracking-tight text-[#1A1D4E] group-hover:text-[#CF4400] transition-colors line-clamp-2 leading-tight">
                                {item.title}
                             </h4>
                             <p className="text-[8px] font-bold text-gray-450 truncate mt-0.5 uppercase tracking-wide">

@@ -23,7 +23,7 @@ export function SpotlightOpportunityCard({
   const inner = (
     <div className={cn(
       'bg-white border rounded-xl p-4 space-y-3 transition-shadow hover:shadow-md',
-      opportunity.status === 'pinned' ? 'border-[#E8500A] ring-1 ring-[#E8500A]/20' : 'border-[#e8edf2]',
+      opportunity.status === 'pinned' ? 'border-[#EB4501] ring-1 ring-[#EB4501]/20' : 'border-[#e8edf2]',
       opportunity.status === 'dismissed' && 'opacity-50',
     )}>
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -41,13 +41,13 @@ export function SpotlightOpportunityCard({
       </div>
 
       {showCoach && (
-        <p className="text-xs text-gray-600 leading-relaxed border-l-2 border-[#E8500A]/40 pl-3">
+        <p className="text-xs text-gray-600 leading-relaxed border-l-2 border-[#EB4501]/40 pl-3">
           {opportunity.coachingMessage}
         </p>
       )}
 
       <div className="flex flex-wrap items-center gap-2 pt-1">
-        <span className="text-[10px] font-bold text-[#E8500A] uppercase">{opportunity.suggestedAction}</span>
+        <span className="text-[10px] font-bold text-[#EB4501] uppercase">{opportunity.suggestedAction}</span>
         {opportunity.futureAiCapability && (
           <EmiOpportunityInsight opportunity={opportunity} />
         )}
@@ -56,7 +56,7 @@ export function SpotlightOpportunityCard({
       {opportunity.status === 'open' && (onDismiss || onResolve || onPin) && (
         <div className="flex flex-wrap gap-2 pt-2 border-t border-[#e8edf2]">
           {onResolve && (
-            <button type="button" onClick={(e) => { e.preventDefault(); onResolve(opportunity.opportunityId); }} className="text-[9px] font-bold uppercase px-2 py-1 bg-[#E8500A] text-white rounded">
+            <button type="button" onClick={(e) => { e.preventDefault(); onResolve(opportunity.opportunityId); }} className="text-[9px] font-bold uppercase px-2 py-1 bg-[#EB4501] text-white rounded">
               Resolve
             </button>
           )}

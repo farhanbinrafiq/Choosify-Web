@@ -183,7 +183,7 @@ export function PremiumCarousel({
               onClick={() => setCurrentIndex(i)}
               className={cn(
                 "h-1.5 rounded-full transition-all duration-300",
-                i === currentIndex ? "w-5 bg-[#E8500A]" : "w-1.5 bg-gray-200 hover:bg-gray-300"
+                i === currentIndex ? "w-5 bg-[#EB4501]" : "w-1.5 bg-gray-200 hover:bg-gray-300"
               )}
               title={`Go to slide ${i + 1}`}
             />
@@ -194,7 +194,7 @@ export function PremiumCarousel({
            <button 
              type="button"
              onClick={prev} 
-             className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A]/30 transition-all active:scale-90 shadow-xs cursor-pointer"
+             className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#CF4400] hover:text-white hover:border-[#EB4501]/30 transition-all active:scale-90 shadow-xs cursor-pointer"
              title="Previous Slide"
            >
               <ChevronLeft size={16} />
@@ -202,7 +202,7 @@ export function PremiumCarousel({
            <button 
              type="button"
              onClick={next} 
-             className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#E8500A] hover:text-white hover:border-[#E8500A]/30 transition-all active:scale-90 shadow-xs cursor-pointer"
+             className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#CF4400] hover:text-white hover:border-[#EB4501]/30 transition-all active:scale-90 shadow-xs cursor-pointer"
              title="Next Slide"
            >
               <ChevronRight size={16} />

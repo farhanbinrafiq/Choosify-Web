@@ -25,7 +25,7 @@ export function SpotlightSeriesPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <h1 className="text-xl font-bold">Series not found</h1>
-        <Link to="/spotlight/explore?tab=series" className="mt-4 inline-block text-[#E8500A] text-sm font-bold uppercase">
+        <Link to="/spotlight/explore?tab=series" className="mt-4 inline-block text-[#EB4501] text-sm font-bold uppercase">
           Browse series
         </Link>
       </div>
@@ -52,7 +52,7 @@ export function SpotlightSeriesPage() {
       <ol className="space-y-3 mb-10">
         {seriesItem.episodes.map((ep) => (
           <li key={ep.episodeId} className="flex items-center gap-3 p-3 border border-[#e8edf2] rounded-[5px]">
-            <span className="text-xs font-black text-[#E8500A] w-8">E{ep.episodeNumber}</span>
+            <span className="text-xs font-black text-[#EB4501] w-8">E{ep.episodeNumber}</span>
             <span className="text-sm font-semibold text-[#1a1a2e]">{ep.title}</span>
           </li>
         ))}

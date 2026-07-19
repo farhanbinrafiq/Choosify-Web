@@ -50,7 +50,7 @@ export function OptionalAddonsModule({
               <div
                 className={cn(
                   'w-[18px] h-[18px] rounded border-2 flex items-center justify-center shrink-0 text-white text-[11px]',
-                  isSelected ? 'border-[#FF5B00] bg-[#FF5B00]' : 'border-[#D1D5DB] bg-white',
+                  isSelected ? 'border-[#EB4501] bg-[#EB4501]' : 'border-[#D1D5DB] bg-white',
                 )}
               >
                 {isSelected ? '✓' : null}

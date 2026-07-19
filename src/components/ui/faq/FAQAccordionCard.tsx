@@ -23,13 +23,13 @@ export const FAQAccordionCard: React.FC<FAQAccordionCardProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full py-4 flex items-center justify-between text-left focus:outline-none group"
       >
-        <span className="text-sm font-bold text-[#000435] group-hover:text-[#FF5B00] transition-colors pr-4">
+        <span className="text-sm font-bold text-[#000435] group-hover:text-[#CF4400] transition-colors pr-4">
           {question}
         </span>
         <ChevronDown 
           className={cn(
             "w-5 h-5 text-slate-400 shrink-0 transition-transform duration-300", 
-            isOpen && "rotate-180 text-[#FF5B00]"
+            isOpen && "rotate-180 text-[#EB4501]"
           )} 
         />
       </button>

@@ -39,7 +39,7 @@ export function SpotlightSidebar({ activePanel, onPanelChange }: SpotlightSideba
           className={cn(
             'flex items-center gap-2 px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide transition-colors',
             activePanel === panel.id
-              ? 'bg-[#F8FBFD] text-[#E8500A] border-r-2 border-[#E8500A]'
+              ? 'bg-[#F8FBFD] text-[#EB4501] border-r-2 border-[#EB4501]'
               : 'text-gray-400 hover:text-navy hover:bg-[#F8FBFD]',
           )}
           aria-current={activePanel === panel.id ? 'page' : undefined}

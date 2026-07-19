@@ -18,7 +18,7 @@ export function CampaignSlotsPanel({ slots, productLinks, productTitles }: Campa
       {enabled.map((slot) => {
         const items = getProductsBySlot(productLinks, slot.slotId);
         return (
-          <div key={slot.slotId} className="border-l-2 border-[#E8500A]/40 pl-3">
+          <div key={slot.slotId} className="border-l-2 border-[#EB4501]/40 pl-3">
             <p className="text-xs font-bold text-navy">{slot.label}</p>
             <p className="text-[10px] text-gray-400 mb-1">
               {items.length}{slot.maxItems ? ` / ${slot.maxItems}` : ''} products

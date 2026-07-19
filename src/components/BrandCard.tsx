@@ -104,7 +104,7 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
       )}
 
       {/* COVER PHOTO SECTION */}
-      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#000435]/10 to-[#FF5B00]/10 overflow-hidden shrink-0">
+      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#000435]/10 to-[#EB4501]/10 overflow-hidden shrink-0">
         <img 
           src={coverUrl}
           alt={`${brand.name} cover`}
@@ -140,7 +140,7 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
         
         {/* Verified Brand Checkmark Badge under the name */}
         {brand.verified && (
-          <div className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100/55 px-2 py-0.5 rounded-full w-fit mb-1.5 flex items-center gap-1">
+          <div className="text-[10px] font-bold text-[#2323FF] bg-[#EEF0FF] border border-[#2323FF]/20 px-2 py-0.5 rounded-full w-fit mb-1.5 flex items-center gap-1">
             <Check size={10} strokeWidth={3.5} />
             <span>Verified Brand</span>
           </div>
@@ -190,7 +190,7 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
             <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 leading-none">
               Rating
             </div>
-            <div className="text-xs font-black text-[#FF5B00] truncate leading-tight flex items-center justify-center gap-0.5">
+            <div className="text-xs font-black text-[#EB4501] truncate leading-tight flex items-center justify-center gap-0.5">
               <span>{brand.rating.toFixed(1)}</span>
               <span className="text-[9px]">★</span>
             </div>

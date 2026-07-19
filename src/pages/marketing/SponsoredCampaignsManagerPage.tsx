@@ -49,7 +49,7 @@ export function SponsoredCampaignsManagerPage() {
         </div>
         <Link
           to="/marketing/sponsored/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#E8500A] text-white text-xs font-bold uppercase rounded"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#EB4501] text-white text-xs font-bold uppercase rounded"
         >
           <Plus size={14} /> New Campaign
         </Link>
@@ -65,7 +65,7 @@ export function SponsoredCampaignsManagerPage() {
       {campaigns.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-[#e8edf2] rounded-lg">
           <p className="text-sm text-gray-500">No sponsored campaigns yet.</p>
-          <Link to="/marketing/sponsored/new" className="mt-4 inline-block text-xs font-bold uppercase text-[#E8500A] hover:underline">
+          <Link to="/marketing/sponsored/new" className="mt-4 inline-block text-xs font-bold uppercase text-[#EB4501] hover:underline">
             Create campaign
           </Link>
         </div>
@@ -89,7 +89,7 @@ export function SponsoredCampaignsManagerPage() {
                     <button
                       type="button"
                       onClick={() => navigate(`/marketing/sponsored/${c.campaignId}`)}
-                      className="font-semibold text-left hover:text-[#E8500A]"
+                      className="font-semibold text-left hover:text-[#CF4400]"
                     >
                       {c.name}
                     </button>

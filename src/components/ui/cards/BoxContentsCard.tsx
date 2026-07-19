@@ -30,7 +30,7 @@ export const BoxContentsCard: React.FC<BoxContentsCardProps> = ({
           <li key={idx} className="flex items-center gap-4 group">
             <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 group-hover:bg-orange-50 group-hover:border-orange-100 transition-colors">
               {item.icon ? (
-                <item.icon className="w-5 h-5 text-slate-400 group-hover:text-[#FF5B00] transition-colors" />
+                <item.icon className="w-5 h-5 text-slate-400 group-hover:text-[#CF4400] transition-colors" />
               ) : (
                 <div className="w-5 h-5 bg-slate-200 rounded-sm" />
               )}

@@ -147,7 +147,7 @@ export function AssociationPanel({
                   onClick={() => toggle(item)}
                   className={cn(
                     'w-full text-left px-2 py-2 rounded text-xs flex items-center gap-2',
-                    active ? 'bg-[#E8500A]/10' : 'hover:bg-gray-50',
+                    active ? 'bg-[#EB4501]/10' : 'hover:bg-gray-50',
                   )}
                 >
                   {item.imageUrl && <img src={item.imageUrl} alt="" className="w-8 h-8 object-cover rounded" />}
@@ -179,7 +179,7 @@ export function AssociationPanel({
               <button
                 type="button"
                 onClick={() => setPrimary(a.id, a.kind)}
-                className={cn('p-1', a.isPrimary ? 'text-[#E8500A]' : 'text-gray-300')}
+                className={cn('p-1', a.isPrimary ? 'text-[#EB4501]' : 'text-gray-300')}
                 title="Set as primary"
               >
                 <Star size={14} fill={a.isPrimary ? 'currentColor' : 'none'} />

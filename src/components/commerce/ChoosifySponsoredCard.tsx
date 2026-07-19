@@ -39,7 +39,7 @@ function SponsoredPublisherStrip({
           loading="lazy"
         />
       ) : (
-        <span className="w-6 h-6 rounded-full bg-[#E8500A]/10 text-[#E8500A] text-[9px] font-black flex items-center justify-center shrink-0">
+        <span className="w-6 h-6 rounded-full bg-[#EB4501]/10 text-[#EB4501] text-[9px] font-black flex items-center justify-center shrink-0">
           {item.sponsorName.slice(0, 1)}
         </span>
       )}
@@ -47,7 +47,7 @@ function SponsoredPublisherStrip({
         <div className="flex items-center gap-1 min-w-0">
           <span className="text-[10px] font-bold text-[#1a1a2e] truncate">{item.sponsorName}</span>
           {item.isVerified && (
-            <BadgeCheck size={11} className="text-[#E8500A] shrink-0" aria-hidden />
+            <BadgeCheck size={11} className="text-[#EB4501] shrink-0" aria-hidden />
           )}
         </div>
         <p
@@ -86,10 +86,10 @@ function SponsoredCompactCard({ item }: { item: SponsoredPlacementItem }) {
           <p className="text-[10px] text-gray-400 line-clamp-1 mb-2">{item.subtitle}</p>
         )}
         <div className="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 group-hover:text-[#E8500A]">
+          <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 group-hover:text-[#CF4400]">
             {item.ctaLabel}
           </span>
-          <span className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 group-hover:bg-[#E8500A] group-hover:text-white transition-colors">
+          <span className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 group-hover:bg-[#CF4400] group-hover:text-white transition-colors">
             <ArrowRight size={11} />
           </span>
         </div>

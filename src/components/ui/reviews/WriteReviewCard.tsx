@@ -45,7 +45,7 @@ export const WriteReviewCard: React.FC<WriteReviewCardProps> = ({
                 key={star}
                 className={cn(
                   "w-8 h-8 cursor-pointer transition-colors",
-                  (hoverRating || rating) >= star ? "fill-[#FF5B00] text-[#FF5B00]" : "text-slate-200"
+                  (hoverRating || rating) >= star ? "fill-[#EB4501] text-[#EB4501]" : "text-slate-200"
                 )}
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(0)}
@@ -76,7 +76,7 @@ export const WriteReviewCard: React.FC<WriteReviewCardProps> = ({
                 <img src={URL.createObjectURL(photo)} alt="Upload preview" className="w-full h-full object-cover" />
               </div>
             ))}
-            <label className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-[#FF5B00] hover:bg-orange-50 transition-colors shrink-0">
+            <label className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-[#EB4501] hover:bg-orange-50 transition-colors shrink-0">
               <Plus className="w-6 h-6 text-slate-400" />
               <input 
                 type="file" 

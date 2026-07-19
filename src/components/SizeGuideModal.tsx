@@ -62,7 +62,7 @@ export function SizeGuideModal({ open, onClose, sizeGuide }: SizeGuideModalProps
             </button>
 
             <div className="flex items-center gap-2 mb-3 pr-10">
-              <div className="w-9 h-9 rounded-full bg-[#FFF0E8] text-[#E8500A] flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full bg-[#FFF0E8] text-[#EB4501] flex items-center justify-center shrink-0">
                 <Ruler size={16} />
               </div>
               <div>

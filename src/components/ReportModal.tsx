@@ -76,7 +76,7 @@ export function ReportModal({ isOpen, onClose, type, targetId, targetName }: Rep
               <div>
                 <h4 className="text-lg font-extrabold text-[#1A1A2E] tracking-tight">Report an issue</h4>
                 <p className="text-[13px] font-medium text-[#9AA0AC]">
-                  Flagging {type}: <span className="text-[#FF5B00]">{targetName}</span>
+                  Flagging {type}: <span className="text-[#EB4501]">{targetName}</span>
                 </p>
               </div>
             </div>
@@ -113,7 +113,7 @@ export function ReportModal({ isOpen, onClose, type, targetId, targetName }: Rep
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe the issue to help our review team…"
-                className="w-full bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl p-3.5 text-sm font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00]/40 focus:bg-white transition-all resize-none"
+                className="w-full bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl p-3.5 text-sm font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#EB4501]/40 focus:bg-white transition-all resize-none"
               />
             </div>
 
@@ -126,7 +126,7 @@ export function ReportModal({ isOpen, onClose, type, targetId, targetName }: Rep
                 value={evidence}
                 onChange={(e) => setEvidence(e.target.value)}
                 placeholder="https://…"
-                className="w-full bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl px-3.5 py-3 text-sm font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00]/40 focus:bg-white transition-all"
+                className="w-full bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl px-3.5 py-3 text-sm font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#EB4501]/40 focus:bg-white transition-all"
               />
             </div>
 

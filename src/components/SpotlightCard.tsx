@@ -86,7 +86,7 @@ export const SpotlightCard = memo(function SpotlightCard({
   const finalDesc = desc || excerpt || card?.desc || card?.excerpt || card?.subtitle || 'Explore this curated highlight on Choosify.';
   const finalImage = image || cover || thumbnail || card?.cover || card?.image || card?.thumbnail || 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=500&q=80';
   const finalBadge = badge || card?.badge || category || card?.category || 'SPOTLIGHT';
-  const finalBadgeBg = badgeBg || card?.badgeBg || 'bg-[#FF5B00]';
+  const finalBadgeBg = badgeBg || card?.badgeBg || 'bg-[#EB4501]';
   const finalDate = date || card?.date || 'Today';
   const finalReadTime = readTime || card?.readTime || '5 min read';
   const finalDuration = duration || card?.duration || '10:00';
@@ -161,14 +161,14 @@ export const SpotlightCard = memo(function SpotlightCard({
               </Badge>
               <button
                 onClick={handleBookmark}
-                className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#FF5B00] hover:bg-slate-100 transition-all border border-transparent"
+                className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#CF4400] hover:bg-slate-100 transition-all border border-transparent"
                 aria-label="Bookmark"
               >
-                <Bookmark size={15} className={cn("transition-colors", isSaved ? "fill-[#FF5B00] text-[#FF5B00]" : "")} />
+                <Bookmark size={15} className={cn("transition-colors", isSaved ? "fill-[#EB4501] text-[#EB4501]" : "")} />
               </button>
             </div>
 
-            <h3 className="text-xl md:text-2xl font-black text-[#050B2C] leading-tight tracking-tight group-hover:text-[#FF5B00] transition-colors mb-3 line-clamp-3">
+            <h3 className="text-xl md:text-2xl font-black text-[#050B2C] leading-tight tracking-tight group-hover:text-[#CF4400] transition-colors mb-3 line-clamp-3">
               {finalTitle}
             </h3>
             <p className="text-xs text-slate-400 font-medium leading-relaxed mb-6 line-clamp-3">
@@ -244,15 +244,15 @@ export const SpotlightCard = memo(function SpotlightCard({
           </div>
           <button
             onClick={handleBookmark}
-            className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-slate-500 hover:text-[#FF5B00] hover:bg-white transition-all shadow-sm border border-transparent"
+            className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-slate-500 hover:text-[#CF4400] hover:bg-white transition-all shadow-sm border border-transparent"
           >
-            <Bookmark size={13} className={cn("transition-colors", isSaved ? "fill-[#FF5B00] text-[#FF5B00]" : "")} />
+            <Bookmark size={13} className={cn("transition-colors", isSaved ? "fill-[#EB4501] text-[#EB4501]" : "")} />
           </button>
         </div>
 
         <div className="p-5 flex-1 flex flex-col justify-between">
           <div>
-            <h3 className="text-[14px] font-extrabold text-[#050B2C] leading-snug tracking-tight mb-2 group-hover:text-[#FF5B00] transition-colors line-clamp-2">
+            <h3 className="text-[14px] font-extrabold text-[#050B2C] leading-snug tracking-tight mb-2 group-hover:text-[#CF4400] transition-colors line-clamp-2">
               {finalTitle}
             </h3>
             <p className="text-[11px] text-slate-400 font-semibold line-clamp-2 leading-relaxed mb-4">
@@ -302,7 +302,7 @@ export const SpotlightCard = memo(function SpotlightCard({
           />
           {/* Play button overlay */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-[#FF5B00]/95 text-white flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-[#FF5B00] transition-all duration-300">
+            <div className="w-12 h-12 rounded-full bg-[#EB4501]/95 text-white flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-[#CF4400] transition-all duration-300">
               <Play size={18} fill="currentColor" className="ml-1" />
             </div>
           </div>
@@ -319,7 +319,7 @@ export const SpotlightCard = memo(function SpotlightCard({
 
         <div className="p-5 flex-1 flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-extrabold text-[#050B2C] leading-snug tracking-tight mb-2 line-clamp-2 group-hover:text-[#FF5B00] transition-colors">
+            <h3 className="text-sm font-extrabold text-[#050B2C] leading-snug tracking-tight mb-2 line-clamp-2 group-hover:text-[#CF4400] transition-colors">
               {finalTitle}
             </h3>
             <p className="text-[11px] text-slate-400 font-semibold line-clamp-1 truncate mb-3">
@@ -418,12 +418,12 @@ export const SpotlightCard = memo(function SpotlightCard({
         id={`spotlight-campaign-${finalId}`}
         onClick={handlePress}
         className={cn(
-          "bg-gradient-to-br from-[#FFF5F0] to-[#FFF0EB] rounded-[24px] p-6 border border-orange-100 shadow-[0_4px_20px_rgba(255,91,0,0.02)] hover:shadow-[0_8px_30px_rgba(255,91,0,0.06)] transition-all duration-300 flex flex-col justify-between text-left h-full cursor-pointer group relative overflow-hidden",
+          "bg-gradient-to-br from-[#FFF5F0] to-[#FFF0EB] rounded-[24px] p-6 border border-orange-100 shadow-[0_4px_20px_rgba(235, 69, 1,0.02)] hover:shadow-[0_8px_30px_rgba(235, 69, 1,0.06)] transition-all duration-300 flex flex-col justify-between text-left h-full cursor-pointer group relative overflow-hidden",
           className
         )}
       >
         {/* Abstract design elements */}
-        <div className="absolute -right-8 -bottom-8 w-24 h-24 bg-[#FF5B00]/5 rounded-full blur-xl pointer-events-none" />
+        <div className="absolute -right-8 -bottom-8 w-24 h-24 bg-[#EB4501]/5 rounded-full blur-xl pointer-events-none" />
 
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -460,7 +460,7 @@ export const SpotlightCard = memo(function SpotlightCard({
         )}
 
         <div className="mt-auto pt-3 border-t border-orange-100/50 flex items-center justify-between">
-          <span className="text-[10px] font-black text-[#FF5B00] uppercase tracking-wider group-hover:underline flex items-center gap-0.5">
+          <span className="text-[10px] font-black text-[#EB4501] uppercase tracking-wider group-hover:underline flex items-center gap-0.5">
             {ctaText || 'Learn More'} →
           </span>
           <span className="text-[8px] font-bold text-slate-400">Ends soon</span>
@@ -499,9 +499,9 @@ export const SpotlightCard = memo(function SpotlightCard({
           {isSaved !== undefined && (
             <button
               onClick={handleBookmark}
-              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center text-slate-500 hover:text-[#FF5B00] hover:bg-white transition-all shadow-sm border border-transparent"
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center text-slate-500 hover:text-[#CF4400] hover:bg-white transition-all shadow-sm border border-transparent"
             >
-              <Bookmark size={13} className={cn("transition-colors", isSaved ? "fill-[#FF5B00] text-[#FF5B00]" : "")} />
+              <Bookmark size={13} className={cn("transition-colors", isSaved ? "fill-[#EB4501] text-[#EB4501]" : "")} />
             </button>
           )}
         </div>
@@ -529,7 +529,7 @@ export const SpotlightCard = memo(function SpotlightCard({
 
         <div className="p-5 flex-1 flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-extrabold text-[#050B2C] leading-snug group-hover:text-[#FF5B00] transition-colors mb-2 line-clamp-2">
+            <h3 className="text-sm font-extrabold text-[#050B2C] leading-snug group-hover:text-[#CF4400] transition-colors mb-2 line-clamp-2">
               {finalTitle}
             </h3>
             <p className="text-xs text-slate-400 font-semibold mb-4 leading-relaxed line-clamp-2">
@@ -538,7 +538,7 @@ export const SpotlightCard = memo(function SpotlightCard({
           </div>
 
           <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 mt-auto pt-2 border-t border-slate-50">
-            <LayoutGrid size={11} className="text-[#FF5B00]" />
+            <LayoutGrid size={11} className="text-[#EB4501]" />
             <span>{productsList.length || 8} Products</span>
             <span>•</span>
             <span>{finalDate}</span>

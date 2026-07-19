@@ -9,7 +9,7 @@ export interface ReadingProgressBarProps {
 
 export const ReadingProgressBar: React.FC<ReadingProgressBarProps> = ({
   isSticky = true,
-  color = 'bg-[#FF5B00]',
+  color = 'bg-[#EB4501]',
   className
 }) => {
   const [progress, setProgress] = useState(0);

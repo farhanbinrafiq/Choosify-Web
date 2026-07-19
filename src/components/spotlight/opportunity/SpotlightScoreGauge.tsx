@@ -23,7 +23,7 @@ export function SpotlightScoreGauge({ label, value, max = 100, size = 'md' }: Sp
           cy={dim / 2}
           r={r}
           fill="none"
-          stroke="#E8500A"
+          stroke="#EB4501"
           strokeWidth={6}
           strokeDasharray={circ}
           strokeDashoffset={offset}

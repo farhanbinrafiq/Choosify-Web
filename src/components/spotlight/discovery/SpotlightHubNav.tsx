@@ -24,9 +24,9 @@ export function SpotlightHubNav({ items, sticky = true }: SpotlightHubNavProps) 
           key={item.id}
           to={item.href}
           className={cn(
-            'shrink-0 px-3 py-2 min-h-[44px] inline-flex items-center text-[10px] font-bold uppercase tracking-wide rounded border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]',
+            'shrink-0 px-3 py-2 min-h-[44px] inline-flex items-center text-[10px] font-bold uppercase tracking-wide rounded border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]',
             item.isActive
-              ? 'bg-[#E8500A] text-white border-[#E8500A]'
+              ? 'bg-[#EB4501] text-white border-[#EB4501]'
               : 'text-gray-500 border-transparent hover:border-[#e8edf2]',
           )}
           aria-current={item.isActive ? 'page' : undefined}

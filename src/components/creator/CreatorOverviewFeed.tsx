@@ -225,7 +225,7 @@ export function CreatorOverviewFeed({
           <button
             type="button"
             onClick={onViewAllContent}
-            className="text-[11.5px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] bg-transparent border-0 cursor-pointer"
+            className="text-[11.5px] font-bold text-[#1A1A2E] hover:text-[#CF4400] bg-transparent border-0 cursor-pointer"
           >
             VIEW ALL CONTENT →
           </button>
@@ -270,7 +270,7 @@ export function CreatorOverviewFeed({
             <button
               type="button"
               onClick={onViewAllReviews}
-              className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] bg-transparent border-0 cursor-pointer"
+              className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#CF4400] bg-transparent border-0 cursor-pointer"
             >
               VIEW ALL REVIEWS →
             </button>
@@ -298,7 +298,7 @@ export function CreatorOverviewFeed({
       </section>
 
       {/* Why Follow */}
-      <section className="bg-[#14161f] rounded-xl px-[30px] py-[26px] text-white">
+      <section className="choosify-dark-surface rounded-xl px-[30px] py-[26px] text-white overflow-hidden">
         <h3 className="text-sm font-extrabold mb-[18px]">Why Follow {firstName}?</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {WHY_FOLLOW.map((wf) => (
@@ -375,7 +375,7 @@ export function CreatorOverviewFeed({
           <button
             type="button"
             onClick={onViewAllReviews}
-            className="text-[11.5px] font-bold text-[#1A1A2E] hover:text-[#FF5B00] bg-transparent border-0 cursor-pointer"
+            className="text-[11.5px] font-bold text-[#1A1A2E] hover:text-[#CF4400] bg-transparent border-0 cursor-pointer"
           >
             VIEW ALL REVIEWS →
           </button>
@@ -385,13 +385,13 @@ export function CreatorOverviewFeed({
             <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-[14px] p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#FF5B00] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
                     {cs.initial}
                   </div>
                   <div>
                     <div className="text-xs font-bold text-[#1A1A2E] mb-px">{cs.name}</div>
-                    <div className="flex items-center gap-0.5 text-[10px] text-[#16A34A] font-bold">
-                      <svg width="10" height="10" viewBox="0 0 20 20" fill="#16A34A" aria-hidden>
+                    <div className="flex items-center gap-0.5 text-[10px] text-[#2323FF] font-bold">
+                      <svg width="10" height="10" viewBox="0 0 20 20" fill="#2323FF" aria-hidden>
                         <circle cx="10" cy="10" r="9" />
                         <path d="M6 10l3 3 5-6" stroke="#fff" strokeWidth="2" fill="none" />
                       </svg>

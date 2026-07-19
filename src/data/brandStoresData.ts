@@ -96,7 +96,7 @@ export const BRAND_STORES_DB: Record<string, BrandStorefrontData> = {
     website: 'https://apple.com',
     bannerClass: 'from-[#050C24] via-[#0D1530] to-[#170C35]',
     bgGradient: 'bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b]',
-    accentColor: '#FF5B00',
+    accentColor: '#EB4501',
     accentHoverColor: '#EB4501',
     textColor: 'text-white',
     score: '4.8',

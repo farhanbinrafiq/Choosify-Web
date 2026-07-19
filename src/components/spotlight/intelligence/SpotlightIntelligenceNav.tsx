@@ -19,7 +19,7 @@ export function SpotlightIntelligenceNav({ items, className }: SpotlightIntellig
           className={({ isActive }) =>
             cn(
               'px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide rounded-md transition-colors',
-              isActive ? 'bg-[#E8500A] text-white' : 'text-gray-500 hover:text-navy hover:bg-[#F8FBFD]',
+              isActive ? 'bg-[#EB4501] text-white' : 'text-gray-500 hover:text-navy hover:bg-[#F8FBFD]',
             )
           }
         >

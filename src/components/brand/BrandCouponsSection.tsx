@@ -37,7 +37,7 @@ export function BrandCouponsSection({
             key={cp.code}
             className="w-[220px] sm:w-[240px] shrink-0 snap-start flex items-center gap-3 bg-white border border-dashed border-[#E8EDF2] rounded-[10px] px-4 py-3.5"
           >
-            <div className="text-[16px] font-extrabold text-[#FF5B00] w-11 shrink-0">
+            <div className="text-[16px] font-extrabold text-[#EB4501] w-11 shrink-0">
               {cp.pct}
             </div>
             <div className="min-w-0">

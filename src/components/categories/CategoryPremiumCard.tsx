@@ -76,7 +76,7 @@ export function CategoryPremiumCard({
         <button
           type="button"
           onClick={openCategory}
-          className="text-left text-[14px] font-bold text-[#1A1A2E] mb-0.5 border-0 bg-transparent p-0 cursor-pointer hover:text-[#FF5B00]"
+          className="text-left text-[14px] font-bold text-[#1A1A2E] mb-0.5 border-0 bg-transparent p-0 cursor-pointer hover:text-[#CF4400]"
         >
           {name}
         </button>
@@ -92,7 +92,7 @@ export function CategoryPremiumCard({
             key={sub.name}
             type="button"
             onClick={(e) => openSub(sub.name, e)}
-            className="block w-full text-left text-[12px] text-[#4B5563] mb-2 border-0 bg-transparent p-0 cursor-pointer hover:text-[#FF5B00]"
+            className="block w-full text-left text-[12px] text-[#4B5563] mb-2 border-0 bg-transparent p-0 cursor-pointer hover:text-[#CF4400]"
           >
             {sub.name}
           </button>
@@ -106,7 +106,7 @@ export function CategoryPremiumCard({
               e.stopPropagation();
               setExpanded((v) => !v);
             }}
-            className="text-left text-[11.5px] font-bold text-[#FF5B00] mt-0.5 border-0 bg-transparent p-0 cursor-pointer hover:brightness-110"
+            className="text-left text-[11.5px] font-bold text-[#EB4501] mt-0.5 border-0 bg-transparent p-0 cursor-pointer hover:brightness-110"
           >
             {moreLabel}
           </button>

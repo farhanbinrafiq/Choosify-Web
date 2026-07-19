@@ -61,7 +61,7 @@ export function SpotlightCampaignsPage() {
           </div>
           <Link
             to="/marketing/studio/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#E8500A] text-white text-xs font-bold uppercase rounded"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#EB4501] text-white text-xs font-bold uppercase rounded"
           >
             <Plus size={14} /> Create Spotlight Content
           </Link>
@@ -131,13 +131,13 @@ export function SpotlightCampaignsPage() {
             {campaigns.map((c) => (
               <article
                 key={c.campaignId}
-                className="bg-white border border-[#e8edf2] rounded-lg p-4 hover:border-[#E8500A]/30 cursor-pointer"
+                className="bg-white border border-[#e8edf2] rounded-lg p-4 hover:border-[#EB4501]/30 cursor-pointer"
                 onClick={() => navigate(`/marketing/studio/${c.campaignId}`)}
               >
                 <div className="flex justify-between items-start mb-2">
                   <CampaignStatusBadge status={c.status} />
                   {c.isSponsored && (
-                    <span className="text-[10px] font-bold text-[#E8500A]">SPONSORED</span>
+                    <span className="text-[10px] font-bold text-[#EB4501]">SPONSORED</span>
                   )}
                 </div>
                 <h3 className="font-bold text-navy text-sm">{c.campaignName}</h3>
@@ -146,7 +146,7 @@ export function SpotlightCampaignsPage() {
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handleDuplicate(c.campaignId); }}
-                    className="text-xs text-gray-500 hover:text-[#E8500A] flex items-center gap-1"
+                    className="text-xs text-gray-500 hover:text-[#CF4400] flex items-center gap-1"
                   >
                     <Copy size={12} /> Duplicate
                   </button>
@@ -183,7 +183,7 @@ export function SpotlightCampaignsPage() {
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handleDuplicate(c.campaignId); }}
-                        className="text-xs text-[#E8500A]"
+                        className="text-xs text-[#EB4501]"
                       >
                         Duplicate
                       </button>
@@ -198,7 +198,7 @@ export function SpotlightCampaignsPage() {
         {campaigns.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <p>No campaigns yet.</p>
-            <Link to="/marketing/studio/new" className="text-[#E8500A] font-bold text-sm mt-2 inline-block">
+            <Link to="/marketing/studio/new" className="text-[#EB4501] font-bold text-sm mt-2 inline-block">
               Create your first campaign
             </Link>
           </div>
@@ -213,7 +213,7 @@ export function SpotlightCampaignsPage() {
                 onClick={() => setQuery((q) => ({ ...q, page: p }))}
                 className={cn(
                   'px-3 py-1 rounded text-sm',
-                  query.page === p ? 'bg-[#E8500A] text-white' : 'bg-white border',
+                  query.page === p ? 'bg-[#EB4501] text-white' : 'bg-white border',
                 )}
               >
                 {p}

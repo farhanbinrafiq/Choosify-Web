@@ -86,7 +86,7 @@ function ContentTypePicker({
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="text-center mb-8">
-        <Sparkles className="h-10 w-10 text-[#E8500A] mx-auto mb-3" aria-hidden />
+        <Sparkles className="h-10 w-10 text-[#EB4501] mx-auto mb-3" aria-hidden />
         <h1 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight">Create Spotlight Content</h1>
         <p className="text-muted-foreground mt-2 max-w-lg mx-auto text-sm">
           Choose a content type. One universal editor adapts to how your experience is rendered.
@@ -100,7 +100,7 @@ function ContentTypePicker({
             onClick={() => onSelect(t.id, (t.campaignType ?? 'brand_campaign') as SpotlightCampaignType)}
             className={cn(
               'flex flex-col items-start gap-1 rounded-xl border border-[#e8edf2] bg-white p-4 text-left',
-              'hover:border-[#E8500A]/40 hover:bg-[#E8500A]/5 transition-colors',
+              'hover:border-[#EB4501]/40 hover:bg-[#CF4400]/5 transition-colors',
             )}
           >
             <span className="text-2xl" aria-hidden>
@@ -336,7 +336,7 @@ export default function SpotlightPublisherStudioPage() {
         <div className="border-b border-[#e8edf2] bg-white px-4 py-3">
           <Link
             to="/marketing/studio"
-            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#E8500A]"
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#CF4400]"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Back to Publisher Studio
@@ -352,7 +352,7 @@ export default function SpotlightPublisherStudioPage() {
       <div className="border-b border-[#e8edf2] bg-white px-4 py-2">
         <Link
           to="/marketing/studio"
-          className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#E8500A]"
+          className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#CF4400]"
         >
           <ArrowLeft className="h-3 w-3" aria-hidden />
           Publisher Studio

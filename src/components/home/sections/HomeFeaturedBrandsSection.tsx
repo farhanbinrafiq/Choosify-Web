@@ -12,7 +12,7 @@ interface HomeFeaturedBrandsSectionProps {
 
 const BRAND_COLORS = [
   '#1A1A2E',
-  '#FF5B00',
+  '#EB4501',
   '#2323FF',
   '#07A828',
   '#EB4501',
@@ -49,7 +49,7 @@ export function HomeFeaturedBrandsSection({
             <Link
               key={b.id ?? name}
               to={href}
-              className="bg-white border border-[#E8EDF2] rounded-[10px] h-14 flex items-center justify-center px-2 hover:border-[#FF5B00]/40 transition-colors"
+              className="bg-white border border-[#E8EDF2] rounded-[10px] h-14 flex items-center justify-center px-2 hover:border-[#EB4501]/40 transition-colors"
               title={name}
             >
               {logo ? (

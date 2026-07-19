@@ -20,7 +20,7 @@ export function SpotlightMiniChart({
   data,
   height = 48,
   className = '',
-  color = '#E8500A',
+  color = '#EB4501',
 }: SpotlightMiniChartProps) {
   const values = normalize(data.length ? data : [0.2, 0.5, 0.3, 0.7, 0.4]);
   const w = 120;

@@ -23,7 +23,7 @@ function buildPageList(current: number, total: number): (number | '...')[] {
   return [1, '...', current, '...', total];
 }
 
-/** Choosify.dc.html `pageNums` — 32×32, radius 6px, active #FF5B00 */
+/** Choosify.dc.html `pageNums` — 32×32, radius 6px, active #EB4501 */
 export function PaginationBar({
   currentPage = 1,
   totalPages = 12,
@@ -51,7 +51,7 @@ export function PaginationBar({
             onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
             className={cn(
               pageBtn,
-              'bg-white border border-[#E5E7EB] text-[#1A1A2E] hover:border-[#FF5B00] hover:text-[#FF5B00] disabled:opacity-40 disabled:pointer-events-none',
+              'bg-white border border-[#E5E7EB] text-[#1A1A2E] hover:border-[#EB4501] hover:text-[#CF4400] disabled:opacity-40 disabled:pointer-events-none',
             )}
             aria-label="Previous page"
           >
@@ -75,8 +75,8 @@ export function PaginationBar({
               className={cn(
                 pageBtn,
                 page === currentPage
-                  ? 'bg-[#FF5B00] text-white border-0'
-                  : 'bg-white border border-[#E5E7EB] text-[#1A1A2E] hover:border-[#FF5B00] hover:text-[#FF5B00]',
+                  ? 'bg-[#EB4501] text-white border-0'
+                  : 'bg-white border border-[#E5E7EB] text-[#1A1A2E] hover:border-[#EB4501] hover:text-[#CF4400]',
               )}
               aria-label={`Page ${page}`}
               aria-current={page === currentPage ? 'page' : undefined}
@@ -93,7 +93,7 @@ export function PaginationBar({
             onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
             className={cn(
               pageBtn,
-              'bg-white border border-[#E5E7EB] text-[#1A1A2E] hover:border-[#FF5B00] hover:text-[#FF5B00] disabled:opacity-40 disabled:pointer-events-none',
+              'bg-white border border-[#E5E7EB] text-[#1A1A2E] hover:border-[#EB4501] hover:text-[#CF4400] disabled:opacity-40 disabled:pointer-events-none',
             )}
             aria-label="Next page"
           >

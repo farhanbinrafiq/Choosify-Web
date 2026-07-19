@@ -51,7 +51,7 @@ export const ComparisonGuideCard: React.FC<ComparisonGuideCardProps> = ({
             <h3 className="text-xl font-black text-[#000435] mb-2">{product.name}</h3>
             
             <div className="flex items-center gap-3 mb-6">
-              <span className="text-2xl font-black text-[#FF5B00]">{product.price}</span>
+              <span className="text-2xl font-black text-[#EB4501]">{product.price}</span>
               <span className="bg-slate-200/50 text-[#000435] text-xs font-black px-2.5 py-1 rounded-lg flex items-center gap-1">
                 ★ {product.score.toFixed(1)}
               </span>
@@ -92,7 +92,7 @@ export const ComparisonGuideCard: React.FC<ComparisonGuideCardProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {keyDifferences.map((diff, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#FF5B00] shrink-0 mt-1.5" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#EB4501] shrink-0 mt-1.5" />
                     <span className="text-xs font-bold text-slate-600">{diff}</span>
                   </div>
                 ))}

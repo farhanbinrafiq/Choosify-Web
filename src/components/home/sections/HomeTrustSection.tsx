@@ -10,7 +10,7 @@ export function HomeTrustSection() {
         id="section-trust-heading"
         title={
           <>
-            Why <span className="text-[#E8500A]">Choosify</span>
+            Why <span className="text-[#EB4501]">Choosify</span>
           </>
         }
         subtitle="Discovery, comparison, and commerce — built on trust"

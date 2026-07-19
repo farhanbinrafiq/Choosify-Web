@@ -37,8 +37,8 @@ interface EmiSummaryCardProps {
 
 export function EmiSummaryCard({ headline, summary, className }: EmiSummaryCardProps) {
   return (
-    <div className={cn('border-l-2 border-[#FF5B00] pl-3 space-y-1', className)}>
-      <p className="text-[10px] font-black uppercase text-[#FF5B00] flex items-center gap-1.5">
+    <div className={cn('border-l-2 border-[#EB4501] pl-3 space-y-1', className)}>
+      <p className="text-[10px] font-black uppercase text-[#EB4501] flex items-center gap-1.5">
         <EmiAiLogo size={14} className="w-3.5 h-3.5" /> Emi Summary
       </p>
       <h4 className="text-sm font-bold text-navy">{headline}</h4>

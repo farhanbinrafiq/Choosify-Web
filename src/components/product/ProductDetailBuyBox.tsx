@@ -96,7 +96,7 @@ export function ProductDetailBuyBox({
           <div className="text-lg font-extrabold text-[#1A1A2E]">{viewCount.toLocaleString()}</div>
           <div className="text-[11px] text-[#9AA0AC]">Views</div>
         </div>
-        <div className="bg-[#1A1A2E] text-white text-[10px] font-extrabold px-3 py-1.5 rounded justify-self-center lg:justify-self-end whitespace-nowrap">
+        <div className="choosify-emi-gradient text-white text-[10px] font-extrabold px-3 py-1.5 rounded justify-self-center lg:justify-self-end whitespace-nowrap">
           TRENDING
         </div>
       </div>
@@ -105,7 +105,7 @@ export function ProductDetailBuyBox({
         {/* Left — product info */}
         <div className="bg-white rounded-xl border border-[#E8EDF2] p-[26px]">
           <div className="flex gap-2 mb-3.5 flex-wrap">
-            <span className="bg-[#FF5B00] text-white text-[9px] font-extrabold px-2.5 py-1 rounded">FEATURED</span>
+            <span className="bg-[#EB4501] text-white text-[9px] font-extrabold px-2.5 py-1 rounded">FEATURED</span>
             {!isOutOfStock && (
               <span className="bg-[#07DD05] text-white text-[9px] font-extrabold px-2.5 py-1 rounded">
                 IN STOCK · {stockQuantity}
@@ -118,14 +118,14 @@ export function ProductDetailBuyBox({
             {selectedColor ? ` · ${selectedColor}` : ''}
           </div>
           <div className="text-[13px] text-[#1A1A2E] mb-[18px] flex items-center gap-1.5 flex-wrap">
-            <span className="inline-flex text-[#FF5B00] gap-0.5">
+            <span className="inline-flex text-[#EB4501] gap-0.5">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Star
                   key={i}
                   size={12}
                   className={cn(
                     'fill-current',
-                    i <= Math.floor(product.rating || 4) ? 'text-[#FF5B00]' : 'text-slate-300',
+                    i <= Math.floor(product.rating || 4) ? 'text-[#EB4501]' : 'text-slate-300',
                   )}
                 />
               ))}
@@ -151,7 +151,7 @@ export function ProductDetailBuyBox({
               </>
             )}
           </div>
-          <div className="text-xs text-[#FF5B00] mb-5">
+          <div className="text-xs text-[#EB4501] mb-5">
             Get up to ৳ cashback · EMI available on this product
           </div>
 
@@ -170,7 +170,7 @@ export function ProductDetailBuyBox({
                       onClick={() => setSelectedColor(color)}
                       className={cn(
                         'w-9 h-9 rounded-full border-2 flex items-center justify-center',
-                        isSelected ? 'border-[#FF5B00]' : 'border-transparent hover:border-slate-300',
+                        isSelected ? 'border-[#EB4501]' : 'border-transparent hover:border-slate-300',
                       )}
                       aria-label={color}
                     >
@@ -191,7 +191,7 @@ export function ProductDetailBuyBox({
               <button
                 type="button"
                 onClick={onOpenSizeChart}
-                className="text-[11px] font-bold text-[#FF5B00]"
+                className="text-[11px] font-bold text-[#EB4501]"
               >
                 📏 Size Chart
               </button>
@@ -215,7 +215,7 @@ export function ProductDetailBuyBox({
                   className={cn(
                     'h-9 px-4 rounded-lg text-[11px] font-bold border transition-colors',
                     isSelected
-                      ? 'border-[#FF5B00] text-[#1A1A2E] bg-[#FFF6EF]'
+                      ? 'border-[#EB4501] text-[#1A1A2E] bg-[#FFF6EF]'
                       : 'border-[#E5E7EB] text-[#1A1A2E] hover:border-slate-300',
                   )}
                 >
@@ -266,7 +266,7 @@ export function ProductDetailBuyBox({
               type="button"
               onClick={onAddToCart}
               disabled={isOutOfStock}
-              className="w-full bg-[#FF5B00] text-white border-none py-3.5 rounded-lg text-[13px] font-bold hover:bg-[#EB4501] disabled:opacity-50"
+              className="w-full bg-[#EB4501] text-white border-none py-3.5 rounded-lg text-[13px] font-bold hover:bg-[#CF4400] disabled:opacity-50"
             >
               ADD TO CART
             </button>
@@ -274,24 +274,29 @@ export function ProductDetailBuyBox({
               type="button"
               onClick={onToggleWishlist}
               className={cn(
-                'w-full bg-white border border-[#E5E7EB] py-3 rounded-lg text-[12.5px] font-semibold inline-flex items-center justify-center gap-2',
-                isWishlisted && 'border-[#FF5B00] text-[#FF5B00]',
+                'w-full bg-white border py-3 rounded-lg text-[12.5px] font-semibold inline-flex items-center justify-center gap-2 transition-colors',
+                isWishlisted
+                  ? 'border-[#FF000D] text-[#FF000D]'
+                  : 'border-[#E5E7EB] text-[#9AA0AC]',
               )}
             >
-              <Heart size={14} className={cn(isWishlisted && 'fill-current')} />
+              <Heart
+                size={14}
+                className={cn(isWishlisted && 'fill-[#FF000D] text-[#FF000D]')}
+              />
               {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
             </button>
             <button
               type="button"
               onClick={onCompare}
-              className="w-full bg-white border border-[#E5E7EB] py-3 rounded-lg text-[12.5px] font-semibold choosify-emi-gradient-text hover:brightness-110 transition-all"
+              className="w-full bg-white border border-[#E5E7EB] py-3 rounded-lg text-[12.5px] font-semibold hover:border-[#D1D5DB] transition-all"
             >
-              ⇄ Compare
+              <span className="choosify-emi-gradient-text">⇄ Compare</span>
             </button>
             <button
               type="button"
               onClick={onMessageSeller}
-              className="w-full bg-[#2323FF] text-white border-none py-3 rounded-lg text-[12.5px] font-bold inline-flex items-center justify-center gap-2 hover:bg-[#1a1acc]"
+              className="w-full bg-[#000435] text-white border-none py-3 rounded-lg text-[12.5px] font-bold inline-flex items-center justify-center gap-2 hover:brightness-110"
             >
               <MessageCircle size={14} />
               Message Seller to Buy

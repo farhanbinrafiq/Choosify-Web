@@ -160,8 +160,8 @@ export function ChoosifyCarousel<T>({
               onClick={prev}
               disabled={!canScrollLeft}
               className={cn(
-                'absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-[#e8edf2] shadow-md flex items-center justify-center text-[#1A1D4E] transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]/40',
-                canScrollLeft ? 'opacity-100 hover:border-[#E8500A]/40' : 'opacity-0 pointer-events-none',
+                'absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-[#e8edf2] shadow-md flex items-center justify-center text-[#1A1D4E] transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]/40',
+                canScrollLeft ? 'opacity-100 hover:border-[#EB4501]/40' : 'opacity-0 pointer-events-none',
               )}
               aria-label="Scroll left"
             >
@@ -172,8 +172,8 @@ export function ChoosifyCarousel<T>({
               onClick={next}
               disabled={!canScrollRight}
               className={cn(
-                'absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-[#e8edf2] shadow-md flex items-center justify-center text-[#1A1D4E] transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]/40',
-                canScrollRight ? 'opacity-100 hover:border-[#E8500A]/40' : 'opacity-0 pointer-events-none',
+                'absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-[#e8edf2] shadow-md flex items-center justify-center text-[#1A1D4E] transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]/40',
+                canScrollRight ? 'opacity-100 hover:border-[#EB4501]/40' : 'opacity-0 pointer-events-none',
               )}
               aria-label="Scroll right"
             >

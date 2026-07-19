@@ -97,7 +97,7 @@ export function MediaManagerPanel({ mediaIds, primaryMediaId, onChange }: MediaM
   return (
     <div className="space-y-4">
       <div
-        className="border-2 border-dashed border-[#e8edf2] rounded-lg p-8 text-center cursor-pointer hover:border-[#E8500A]/40"
+        className="border-2 border-dashed border-[#e8edf2] rounded-lg p-8 text-center cursor-pointer hover:border-[#EB4501]/40"
         onClick={() => fileRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
@@ -123,7 +123,7 @@ export function MediaManagerPanel({ mediaIds, primaryMediaId, onChange }: MediaM
             key={media.mediaId}
             className={cn(
               'flex items-center gap-3 p-3 border rounded-lg',
-              primaryMediaId === media.mediaId ? 'border-[#E8500A]' : 'border-[#e8edf2]',
+              primaryMediaId === media.mediaId ? 'border-[#EB4501]' : 'border-[#e8edf2]',
             )}
           >
             <div className="w-16 h-16 rounded overflow-hidden shrink-0">
@@ -135,7 +135,7 @@ export function MediaManagerPanel({ mediaIds, primaryMediaId, onChange }: MediaM
             </div>
             <div className="flex items-center gap-1">
               <button type="button" onClick={() => onChange(mediaIds, media.mediaId)} title="Set primary">
-                <Star size={16} className={primaryMediaId === media.mediaId ? 'text-[#E8500A] fill-[#E8500A]' : 'text-gray-300'} />
+                <Star size={16} className={primaryMediaId === media.mediaId ? 'text-[#EB4501] fill-[#EB4501]' : 'text-gray-300'} />
               </button>
               <button type="button" onClick={() => move(index, -1)} disabled={index === 0}>
                 <ChevronUp size={16} />

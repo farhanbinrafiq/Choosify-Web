@@ -61,10 +61,10 @@ function AddressCard({
   const area = address.isCustomLocation && address.customArea ? address.customArea : address.area;
 
   return (
-    <article className="bg-white border border-[#E8EDF2] rounded-[14px] p-5 hover:border-[#FF5B00]/30 transition-all text-left h-full flex flex-col">
+    <article className="bg-white border border-[#E8EDF2] rounded-[14px] p-5 hover:border-[#EB4501]/30 transition-all text-left h-full flex flex-col">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-xl bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-[#FFF3EA] text-[#EB4501] flex items-center justify-center shrink-0">
             <TypeIcon size={18} />
           </div>
           <div className="min-w-0">
@@ -73,7 +73,7 @@ function AddressCard({
                 {address.label}
               </h4>
               {address.isDefault && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FF5B00] text-white text-[10px] font-bold">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#EB4501] text-white text-[10px] font-bold">
                   <Star size={9} className="fill-current" /> Default
                 </span>
               )}
@@ -136,7 +136,7 @@ function AddressCard({
           <button
             type="button"
             onClick={onSetDefault}
-            className="min-h-[40px] px-3 rounded-xl border border-[#E8EDF2] text-[12px] font-bold text-[#1a1a2e] hover:border-[#FF5B00]/40"
+            className="min-h-[40px] px-3 rounded-xl border border-[#E8EDF2] text-[12px] font-bold text-[#1a1a2e] hover:border-[#EB4501]/40"
           >
             Set as Default
           </button>
@@ -144,7 +144,7 @@ function AddressCard({
         <button
           type="button"
           onClick={onEdit}
-          className="min-h-[40px] px-3 rounded-xl border border-[#E8EDF2] text-[12px] font-bold text-[#1a1a2e] hover:border-[#FF5B00]/40 flex items-center justify-center gap-1"
+          className="min-h-[40px] px-3 rounded-xl border border-[#E8EDF2] text-[12px] font-bold text-[#1a1a2e] hover:border-[#EB4501]/40 flex items-center justify-center gap-1"
         >
           <Edit3 size={12} /> Edit
         </button>
@@ -166,13 +166,13 @@ function CheckoutPreviewCard({ address }: { address: CustomerAddress }) {
   return (
     <div className="rounded-[14px] border border-[#E8EDF2] bg-white p-5 text-left">
       <div className="flex items-center gap-2 mb-3">
-        <Truck size={16} className="text-[#FF5B00]" />
+        <Truck size={16} className="text-[#EB4501]" />
         <h4 className="text-[13px] font-bold tracking-tight text-[#1A1A2E]">
           Default Delivery Address
         </h4>
       </div>
       <div className="rounded-xl bg-[#F4F7F9] border border-[#E8EDF2] p-4 space-y-1">
-        <p className="text-[11px] font-bold text-[#FF5B00]">{type}</p>
+        <p className="text-[11px] font-bold text-[#EB4501]">{type}</p>
         {address.recipientName && (
           <p className="text-sm font-bold text-[#1a1a2e]">{address.recipientName}</p>
         )}
@@ -274,7 +274,7 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
           <button
             type="button"
             onClick={openCreate}
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight hover:brightness-110"
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight hover:brightness-110"
           >
             <Plus size={14} /> Add new address
           </button>
@@ -292,7 +292,7 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
           <button
             type="button"
             onClick={openCreate}
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight hover:brightness-110"
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight hover:brightness-110"
           >
             <Plus size={14} /> Add new address
           </button>
@@ -301,7 +301,7 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
 
       {customerAddresses.length === 0 ? (
         <div className="py-16 border border-dashed border-[#E8EDF2] rounded-[14px] bg-white text-center">
-          <MapPin size={40} className="mx-auto text-[#FF5B00] mb-4" />
+          <MapPin size={40} className="mx-auto text-[#EB4501] mb-4" />
           <h4 className="text-base font-extrabold tracking-tight text-[#1A1A2E]">
             No saved addresses yet
           </h4>
@@ -311,7 +311,7 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
           <button
             type="button"
             onClick={openCreate}
-            className="mt-6 inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight hover:brightness-110"
+            className="mt-6 inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight hover:brightness-110"
           >
             <Plus size={14} /> Add Address
           </button>

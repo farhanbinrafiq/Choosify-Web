@@ -77,7 +77,7 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
                 href="https://www.google.com/maps"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 bg-[#FF5B00] text-white border-0 px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap no-underline"
+                className="shrink-0 bg-[#EB4501] text-white border-0 px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap no-underline"
               >
                 View Map
               </a>

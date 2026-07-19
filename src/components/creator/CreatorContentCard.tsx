@@ -32,7 +32,7 @@ export function CreatorContentCard({
         {image ? (
           <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover" />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#2323FF]/35 to-[#FF5B00]/25" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#2323FF]/35 to-[#EB4501]/25" />
         )}
         <span
           className="absolute top-2 left-2 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded pointer-events-none"

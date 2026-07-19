@@ -66,7 +66,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
             <div className="max-w-2xl">
               <h1 className="text-5xl md:text-7xl font-black text-white leading-[1.1] tracking-tight mb-6">
                 {HERO_SLIDES[currentSlide].title} <br/>
-                <span className="text-[#FF5B00]">{HERO_SLIDES[currentSlide].highlight}</span>
+                <span className="text-[#EB4501]">{HERO_SLIDES[currentSlide].highlight}</span>
               </h1>
               <p className="text-lg text-white/70 font-medium leading-relaxed mb-10 max-w-xl">
                 {HERO_SLIDES[currentSlide].subtitle}
@@ -74,7 +74,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
               <div className="flex flex-wrap items-center gap-4">
                 <Button 
                   onClick={() => onCta1Click?.(currentSlide)} 
-                  className="px-8 py-4 bg-[#FF5B00] hover:bg-[#EB4501] text-white rounded-xl font-bold uppercase tracking-wider text-sm transition-all shadow-[0_0_20px_rgba(255,91,0,0.3)] border-transparent"
+                  className="px-8 py-4 bg-[#EB4501] hover:bg-[#CF4400] text-white rounded-xl font-bold uppercase tracking-wider text-sm transition-all shadow-[0_0_20px_rgba(235, 69, 1,0.3)] border-transparent"
                 >
                   {HERO_SLIDES[currentSlide].cta1}
                 </Button>
@@ -116,7 +116,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
           <Button
             key={i}
             onClick={() => setCurrentSlide(i)}
-            className={`h-2 p-0 min-w-0 min-h-0 border-none rounded-full transition-all duration-300 ${i === currentSlide ? 'w-8 bg-[#FF5B00]' : 'w-2 bg-white/30 hover:bg-white/50'}`}
+            className={`h-2 p-0 min-w-0 min-h-0 border-none rounded-full transition-all duration-300 ${i === currentSlide ? 'w-8 bg-[#EB4501]' : 'w-2 bg-white/30 hover:bg-white/50'}`}
           />
         ))}
       </div>

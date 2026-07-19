@@ -16,7 +16,7 @@ export function CreatorVideosTab({ videos, reels, onOpenVideo }: CreatorVideosTa
       key: `v-${v.id}`,
       title: v.title,
       tag: v.associatedGuideId ? 'FULL GUIDE' : 'VIDEO',
-      tagBg: v.associatedGuideId ? '#FF5B00' : '#3B82F6',
+      tagBg: v.associatedGuideId ? '#EB4501' : '#3B82F6',
       meta: [v.views, v.duration].filter(Boolean).join(' · ') || 'Video',
       image: v.thumbnail,
       showPlay: true,
@@ -181,13 +181,13 @@ export function CreatorReviewsTab({ community, latestProducts }: CreatorReviewsT
             <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-[14px] p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#FF5B00] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
                     {cs.initial}
                   </div>
                   <div>
                     <div className="text-xs font-bold text-[#1A1A2E] mb-px">{cs.name}</div>
-                    <div className="flex items-center gap-0.5 text-[10px] text-[#16A34A] font-bold">
-                      <svg width="10" height="10" viewBox="0 0 20 20" fill="#16A34A" aria-hidden>
+                    <div className="flex items-center gap-0.5 text-[10px] text-[#2323FF] font-bold">
+                      <svg width="10" height="10" viewBox="0 0 20 20" fill="#2323FF" aria-hidden>
                         <circle cx="10" cy="10" r="9" />
                         <path d="M6 10l3 3 5-6" stroke="#fff" strokeWidth="2" fill="none" />
                       </svg>

@@ -82,7 +82,7 @@ export function BrandDetailHero({
   const slug = handle || `@${String(brand.name || 'brand').toLowerCase().replace(/\s+/g, '')}`;
 
   return (
-    <div className="bg-[#F4F7F9]">
+    <div className="bg-choosify-feed">
       {/* Cover — feed silhouette (not viewport edge-to-edge); matches Brand Detail max-w-[1440px] */}
       <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <div className="max-w-[1440px] mx-auto relative">
@@ -113,12 +113,14 @@ export function BrandDetailHero({
               {slug} · {categoryLabel} · {locationLabel}
             </div>
             {claimStatus === 'verified' && (
-              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#07A828] mb-2">
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#2323FF] mb-2">
                 <ShieldCheck size={12} /> Verified Brand Owner
               </div>
             )}
             {claimStatus === 'pending' && (
-              <div className="text-[10px] font-bold text-amber-600 mb-2">Ownership verification pending</div>
+              <div className="inline-flex items-center gap-1.5 bg-[#FF000D] text-white text-[10px] font-bold px-2.5 py-1 rounded-lg mb-2">
+                Ownership verification pending
+              </div>
             )}
             {claimStatus === 'community' && (
               <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">Community brand profile</div>
@@ -161,7 +163,7 @@ export function BrandDetailHero({
               <button
                 type="button"
                 onClick={onClaim}
-                className="bg-[#FFF3EA] text-[#FF5B00] border border-[#FFD8B8] px-[18px] py-2.5 rounded-lg text-xs font-bold"
+                className="bg-[#FF000D] text-white border border-[#FF000D] px-[18px] py-2.5 rounded-lg text-xs font-bold hover:brightness-110"
               >
                 🏷 Claim This Brand
               </button>
@@ -211,7 +213,7 @@ export function BrandDetailHero({
               <div className="text-[10px] text-[#9AA0AC]">{item.label}</div>
             </div>
           ))}
-          <div className="bg-[#1A1A2E] text-white text-[10px] font-extrabold px-4 py-2 rounded-lg ml-auto">
+          <div className="choosify-emi-gradient text-white text-[10px] font-extrabold px-4 py-2 rounded-lg ml-auto">
             TRENDING
           </div>
         </div>

@@ -47,7 +47,7 @@ export function EmiProductAssistant({ product, inStock }: EmiProductAssistantPro
       <button
         type="button"
         onClick={() => openEmiPanel(`Tell me more about ${product.title} and alternatives`)}
-        className="text-[10px] font-bold uppercase text-[#FF5B00] hover:underline inline-flex items-center gap-1.5"
+        className="text-[10px] font-bold uppercase text-[#EB4501] hover:underline inline-flex items-center gap-1.5"
       >
         <EmiAiLogo size={14} className="w-3.5 h-3.5" />
         Ask Emi in chat →

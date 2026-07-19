@@ -87,7 +87,7 @@ export function OrderSuccessPage() {
 
   if (!order) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#F4F7F9] items-center justify-center px-4 py-16">
+      <div className="flex flex-col min-h-screen bg-choosify-feed items-center justify-center px-4 py-16">
         <div className="max-w-md w-full bg-white border border-[#E8EDF2] rounded-xl p-8 text-center shadow-sm">
           <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <h1 className="text-lg font-extrabold text-[#1A1A2E] mb-2">No order to display</h1>
@@ -96,7 +96,7 @@ export function OrderSuccessPage() {
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-5 py-3 bg-[#FF5B00] hover:bg-[#E8500A] text-white text-[11px] font-bold uppercase tracking-wide rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11px] font-bold uppercase tracking-wide rounded-lg transition-colors"
           >
             <Home size={14} />
             Back to Home
@@ -115,7 +115,7 @@ export function OrderSuccessPage() {
   const pointsEarned = Math.max(10, Math.round(order.overallTotal / 100));
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9] pb-16">
+    <div className="flex flex-col min-h-screen bg-choosify-feed pb-16">
       {/* Confirmation hero — constrained to feed silhouette */}
       <div className="w-full px-5 sm:px-10 pt-4">
         <div
@@ -123,13 +123,13 @@ export function OrderSuccessPage() {
           className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 pt-6 pb-10 text-center rounded-[14px] overflow-hidden"
         >
           <nav className="text-xs text-white/45 text-left mb-5" aria-label="Breadcrumb">
-            <Link to="/" className="hover:text-[#FF5B00] transition-colors">
+            <Link to="/" className="hover:text-[#CF4400] transition-colors">
               Home
             </Link>
             <span className="mx-1.5">›</span>
             <span>Order Success</span>
             <span className="mx-1.5">›</span>
-            <span className="text-[#FF5B00]">{order.orderId}</span>
+            <span className="text-[#EB4501]">{order.orderId}</span>
           </nav>
 
           <div className="w-16 h-16 rounded-full bg-[rgba(7,208,80,0.15)] border-2 border-[#07DD05] flex items-center justify-center text-[#07DD05] mx-auto mb-[18px]">
@@ -170,7 +170,7 @@ export function OrderSuccessPage() {
           </div>
           <div className="bg-[#FFF6EF] rounded-lg px-4 py-2.5 text-center">
             <div className="text-[10px] text-[#9AA0AC]">You will earn</div>
-            <div className="text-[13px] font-extrabold text-[#FF5B00]">{pointsEarned} Choosify Points</div>
+            <div className="text-[13px] font-extrabold text-[#EB4501]">{pointsEarned} Choosify Points</div>
           </div>
         </div>
 
@@ -180,7 +180,7 @@ export function OrderSuccessPage() {
             {shipping && (
               <div className="bg-white border border-[#E8EDF2] rounded-xl p-5 sm:px-6">
                 <h2 className="text-xs font-extrabold text-[#1A1A2E] mb-3.5 flex items-center gap-1.5">
-                  <MapPin size={14} className="text-[#FF5B00]" />
+                  <MapPin size={14} className="text-[#EB4501]" />
                   DELIVERY DETAILS
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 md:gap-6 text-left">
@@ -225,13 +225,13 @@ export function OrderSuccessPage() {
             <div className="bg-white border border-[#E8EDF2] rounded-xl p-5 sm:px-6 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-xs font-extrabold text-[#1A1A2E] flex items-center gap-1.5">
-                  <Package size={14} className="text-[#FF5B00]" />
+                  <Package size={14} className="text-[#EB4501]" />
                   ITEMS &amp; INVOICES ({order.subOrders.length} SELLER{order.subOrders.length === 1 ? '' : 'S'})
                 </h2>
                 <button
                   type="button"
                   onClick={handleDownloadInvoice}
-                  className="text-[11px] font-bold text-[#FF5B00] bg-transparent border-0 cursor-pointer hover:underline"
+                  className="text-[11px] font-bold text-[#EB4501] bg-transparent border-0 cursor-pointer hover:underline"
                 >
                   Download Invoice
                 </button>
@@ -346,7 +346,7 @@ export function OrderSuccessPage() {
             {/* Payment totals */}
             <div className="bg-white border border-[#E8EDF2] rounded-xl p-5">
               <h2 className="text-xs font-extrabold text-[#1A1A2E] mb-3.5 flex items-center gap-1.5">
-                <CreditCard size={14} className="text-[#FF5B00]" />
+                <CreditCard size={14} className="text-[#EB4501]" />
                 ORDER &amp; PAYMENT SUMMARY
               </h2>
               <div className="space-y-2 text-xs text-[#4B5563] mb-3.5">
@@ -368,7 +368,7 @@ export function OrderSuccessPage() {
               </div>
               <div className="flex justify-between items-baseline pt-3.5 border-t border-[#F1F1F3] mb-3.5">
                 <span className="text-xs font-bold text-[#1A1A2E]">TOTAL PAID</span>
-                <span className="text-lg font-extrabold text-[#FF5B00]">{formatMoney(order.overallTotal)}</span>
+                <span className="text-lg font-extrabold text-[#EB4501]">{formatMoney(order.overallTotal)}</span>
               </div>
               <div className="bg-[#F0FDF4] rounded-lg px-3 py-2.5 flex items-center gap-2">
                 <div className="text-[#16A34A] text-sm">🛡</div>
@@ -385,7 +385,7 @@ export function OrderSuccessPage() {
               <button
                 type="button"
                 onClick={() => toast.success('Thanks! Rating will open in a future update.')}
-                className="bg-[#FF5B00] hover:bg-[#E8500A] text-white border-0 px-[18px] py-2.5 rounded-lg text-[11px] font-bold cursor-pointer"
+                className="bg-[#EB4501] hover:bg-[#CF4400] text-white border-0 px-[18px] py-2.5 rounded-lg text-[11px] font-bold cursor-pointer"
               >
                 RATE ORDER ★
               </button>
@@ -402,14 +402,14 @@ export function OrderSuccessPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link
               to="/"
-              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#FF5B00]/40 hover:text-[#FF5B00] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors"
+              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#EB4501]/40 hover:text-[#CF4400] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors"
             >
               <Home size={14} />
               Continue shopping
             </Link>
             <Link
               to="/profile/orders"
-              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#FF5B00]/40 hover:text-[#FF5B00] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors"
+              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#EB4501]/40 hover:text-[#CF4400] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors"
             >
               <ShoppingBag size={14} />
               View my orders
@@ -417,7 +417,7 @@ export function OrderSuccessPage() {
             <button
               type="button"
               onClick={() => navigate('/order-tracking', { state: { order } })}
-              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#FF5B00]/40 hover:text-[#FF5B00] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors cursor-pointer"
+              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#EB4501]/40 hover:text-[#CF4400] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors cursor-pointer"
             >
               <Truck size={14} />
               Track this order
@@ -425,7 +425,7 @@ export function OrderSuccessPage() {
             <button
               type="button"
               onClick={() => navigate('/messages')}
-              className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#FF5B00] hover:bg-[#E8500A] text-white text-[11px] font-bold uppercase tracking-wide transition-colors cursor-pointer border-0"
+              className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11px] font-bold uppercase tracking-wide transition-colors cursor-pointer border-0"
             >
               <MessageSquare size={14} />
               Message sellers

@@ -84,16 +84,16 @@ export function GuideOverallWinnerCard({
 
       <div className="bg-white/[0.06] rounded-[10px] px-[14px] py-[14px] sm:px-[22px] text-center min-w-[100px] w-full sm:w-auto">
         <div className="text-[10px] text-white/50 mb-1">CHOOSIFY RATING</div>
-        <div className="text-[26px] font-extrabold text-[#FF5B00] leading-none mb-1">
+        <div className="text-[26px] font-extrabold text-[#EB4501] leading-none mb-1">
           {scoreText}
         </div>
         <div className="text-[9.5px] text-white/40 mb-2">Out of 10</div>
-        <div className="bg-[#07DD05] text-white text-[9px] font-extrabold px-2.5 py-0.5 rounded inline-block mb-2.5">
+        <div className="bg-[#2323FF] text-white text-[9px] font-extrabold px-2.5 py-0.5 rounded inline-block mb-2.5">
           {scoreLabel}
         </div>
         <Link
           to={shopHref}
-          className="block w-full bg-[#FF5B00] hover:bg-[#EB4501] text-white border-0 py-2 rounded-md text-[11px] font-extrabold transition-colors"
+          className="block w-full bg-[#EB4501] hover:bg-[#CF4400] text-white border-0 py-2 rounded-md text-[11px] font-extrabold transition-colors"
         >
           SHOP NOW
         </Link>

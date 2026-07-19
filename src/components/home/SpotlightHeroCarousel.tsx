@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -106,7 +106,7 @@ export function SpotlightHeroCarousel({
         <div className="absolute top-4 left-4 z-10">
           <span
             className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-white"
-            style={{ background: '#E8500A' }}
+            style={{ background: '#EB4501' }}
           >
             {item.badge}
           </span>
@@ -211,7 +211,7 @@ export function SpotlightHeroCarousel({
               className={`transition-all duration-500 rounded-full border-0 cursor-pointer p-0 ${viewportSize === 'mobile' ? 'h-2' : 'h-1.5'}`}
               style={{
                 width: carouselIndex === i ? (viewportSize === 'mobile' ? '28px' : '36px') : viewportSize === 'mobile' ? '10px' : '8px',
-                background: carouselIndex === i ? '#E8500A' : 'rgba(255,255,255,0.22)',
+                background: carouselIndex === i ? '#EB4501' : 'rgba(255,255,255,0.22)',
               }}
               aria-label={`Go to slide ${i + 1}`}
             />

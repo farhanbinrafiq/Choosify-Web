@@ -253,7 +253,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
   ];
 
   return (
-    <div className="flex flex-col bg-[#F4F7F9] text-[#1A1A2E] h-[calc(100dvh-var(--choosify-navbar-height,4rem))] max-h-[calc(100dvh-var(--choosify-navbar-height,4rem))] overflow-hidden">
+    <div className="flex flex-col bg-choosify-feed text-[#1A1A2E] h-[calc(100dvh-var(--choosify-navbar-height,4rem))] max-h-[calc(100dvh-var(--choosify-navbar-height,4rem))] overflow-hidden">
       {/* Messages Header bar — constrained to feed silhouette */}
       <div className="w-full px-5 sm:px-10 pt-3 shrink-0">
         <div className="max-w-[1400px] mx-auto w-full choosify-dark-surface text-white px-5 sm:px-10 py-5 flex items-center justify-between gap-3.5 flex-wrap rounded-[14px] overflow-hidden">
@@ -272,11 +272,11 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
             <ArrowLeft size={16} />
           </button>
           <div className="min-w-0">
-            <div className="text-[10.5px] font-bold text-[#FF5B00] tracking-[0.4px] mb-1">
+            <div className="text-[10.5px] font-bold text-[#EB4501] tracking-[0.4px] mb-1">
               CUSTOMER SUPPORT CENTER
             </div>
             <h1 className="text-[19px] font-extrabold leading-tight flex items-center gap-2">
-              <MessageSquare size={18} className="text-[#FF5B00] shrink-0" />
+              <MessageSquare size={18} className="text-[#EB4501] shrink-0" />
               Real-time support
             </h1>
             <p className="text-[11.5px] text-white/50 mt-0.5">We&apos;re here to help, 24/7</p>
@@ -307,12 +307,12 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
             state={{ activeTab: 'overview' }}
             className="px-4 py-2.5 bg-white/8 hover:bg-white/12 rounded-lg text-[11px] font-bold text-white transition-all flex items-center gap-1.5"
           >
-            <LayoutDashboard size={12} className="text-[#FF5B00]" />
+            <LayoutDashboard size={12} className="text-[#EB4501]" />
             Dashboard
           </Link>
           <Link
             to="/profile/orders"
-            className="px-4 py-2.5 bg-[#FF5B00] hover:bg-[#EB4501] rounded-lg text-[11px] font-bold text-white transition-all flex items-center gap-1.5"
+            className="px-4 py-2.5 bg-[#EB4501] hover:bg-[#CF4400] rounded-lg text-[11px] font-bold text-white transition-all flex items-center gap-1.5"
           >
             <Package size={12} />
             My Orders
@@ -337,7 +337,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
               <button
                 type="button"
                 onClick={handleNewConversation}
-                className="w-[22px] h-[22px] rounded-full bg-[#FF5B00] text-white flex items-center justify-center text-[13px] border-none cursor-pointer hover:bg-[#EB4501] transition-colors"
+                className="w-[22px] h-[22px] rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[13px] border-none cursor-pointer hover:bg-[#CF4400] transition-colors"
                 title="New support conversation"
               >
                 <Plus size={12} strokeWidth={3} />
@@ -348,7 +348,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
               <input
                 onChange={(e) => setSearchQuery(e.target.value)}
                 value={searchQuery}
-                className="w-full h-9 pl-9 pr-3 bg-white border border-[#E5E7EB] rounded-lg text-[11.5px] font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00] transition-all"
+                className="w-full h-9 pl-9 pr-3 bg-white border border-[#E5E7EB] rounded-lg text-[11.5px] font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#EB4501] transition-all"
                 placeholder="Search transactions / order references..."
               />
             </div>
@@ -364,7 +364,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                     onClick={() => setConversationTab(tab.id)}
                     className={`shrink-0 pb-1.5 border-b-2 transition-colors border-none bg-transparent cursor-pointer ${
                       active
-                        ? 'text-[#FF5B00] border-[#FF5B00]'
+                        ? 'text-[#EB4501] border-[#EB4501]'
                         : 'border-transparent hover:text-[#1A1A2E]'
                     }`}
                   >
@@ -372,7 +372,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                     <span
                       className={
                         active
-                          ? 'bg-[#FF5B00] text-white rounded-lg px-1.5 py-px text-[9.5px]'
+                          ? 'bg-[#EB4501] text-white rounded-lg px-1.5 py-px text-[9.5px]'
                           : 'text-[#1A1A2E]'
                       }
                     >
@@ -413,7 +413,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                         alt=""
                       />
                       {t.unread && !isActive && (
-                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#FF5B00] border-2 border-white rounded-full" />
+                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#EB4501] border-2 border-white rounded-full" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -445,7 +445,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                       </div>
                     </div>
                     {t.unread && (
-                      <div className="w-4 h-4 rounded-full bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center shrink-0 self-center">
+                      <div className="w-4 h-4 rounded-full bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center shrink-0 self-center">
                         1
                       </div>
                     )}
@@ -460,7 +460,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
               <button
                 type="button"
                 onClick={() => setConversationTab('all')}
-                className="block w-full text-center text-[11.5px] font-bold text-[#FF5B00] border-none bg-transparent cursor-pointer hover:underline"
+                className="block w-full text-center text-[11.5px] font-bold text-[#EB4501] border-none bg-transparent cursor-pointer hover:underline"
               >
                 View all conversations →
               </button>
@@ -470,7 +470,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
 
         {/* Chat pane */}
         <main
-          className={`flex-1 flex flex-col bg-[#F4F7F9] min-h-0 min-w-0 ${
+          className={`flex-1 flex flex-col bg-choosify-feed min-h-0 min-w-0 ${
             threadId ? 'flex' : 'hidden md:flex'
           }`}
         >
@@ -501,7 +501,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                     </h2>
                     {isAnnouncementsThread ? (
                       <span className="text-[10.5px] font-medium text-[#4B5563] flex items-center gap-1">
-                        <Megaphone size={10} className="text-[#FF5B00]" />
+                        <Megaphone size={10} className="text-[#EB4501]" />
                         Read-only broadcast
                       </span>
                     ) : (
@@ -531,11 +531,11 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
               {/* Chat viewport */}
               <div
                 ref={chatViewportRef}
-                className="flex-1 p-5 overflow-y-auto space-y-4 no-scrollbar relative min-h-0 bg-[#F4F7F9]"
+                className="flex-1 p-5 overflow-y-auto space-y-4 no-scrollbar relative min-h-0 bg-choosify-feed"
               >
                 {isAnnouncementsThread && (
                   <div className="max-w-2xl mx-auto bg-white border border-[#E8EDF2] rounded-[10px] p-4 flex items-start gap-3">
-                    <Info size={16} className="text-[#FF5B00] shrink-0 mt-0.5" />
+                    <Info size={16} className="text-[#EB4501] shrink-0 mt-0.5" />
                     <p className="text-[11px] font-medium text-[#4B5563] leading-relaxed">
                       {CHOOSIFY_ANNOUNCEMENTS_TITLE} is a read-only channel. Order updates, platform news, and campaign alerts appear here. Replies are not supported.
                     </p>
@@ -582,7 +582,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <div className="text-[13px] font-extrabold text-[#FF5B00]">
+                            <div className="text-[13px] font-extrabold text-[#EB4501]">
                               ৳{((item.price ?? 0) * (item.quantity ?? 1)).toLocaleString()}
                             </div>
                             <div className="text-[9.5px] text-[#9AA0AC]">
@@ -608,7 +608,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                       <button
                         type="button"
                         onClick={() => navigate('/order-tracking', { state: { order: linkedOrder } })}
-                        className="px-4 py-2 bg-[#F4F7F9] hover:bg-[#FF5B00] hover:text-white border border-[#E5E7EB] hover:border-[#FF5B00] rounded-lg text-[11px] font-bold text-[#4B5563] transition-all flex items-center gap-2 cursor-pointer"
+                        className="px-4 py-2 bg-[#F4F7F9] hover:bg-[#CF4400] hover:text-white border border-[#E5E7EB] hover:border-[#EB4501] rounded-lg text-[11px] font-bold text-[#4B5563] transition-all flex items-center gap-2 cursor-pointer"
                       >
                         <Truck size={12} />
                         View live tracking
@@ -639,7 +639,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                           <div className="w-full max-w-sm rounded-[10px] overflow-hidden border border-[#E8EDF2] mb-2 text-left bg-white shadow-sm">
                             <div className="px-4 py-2 border-b border-[#E8EDF2] flex items-center justify-between bg-[#F4F7F9]">
                               <span className="text-[9px] font-bold uppercase text-[#9AA0AC] tracking-wider flex items-center gap-1.5">
-                                <Package size={11} className="text-[#FF5B00]" />
+                                <Package size={11} className="text-[#EB4501]" />
                                 Sourcing request
                               </span>
                               {(() => {
@@ -687,7 +687,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                                 <div className="text-[10px] text-[#9AA0AC] font-medium space-y-0.5">
                                   <p>Variant: <span className="text-[#1A1A2E] font-bold">{m.productCard.variant}</span></p>
                                   <p>Color: <span className="text-[#1A1A2E] font-bold">{m.productCard.color}</span></p>
-                                  <p>Qty: <span className="text-[#FF5B00] font-bold">{m.productCard.quantity}</span></p>
+                                  <p>Qty: <span className="text-[#EB4501] font-bold">{m.productCard.quantity}</span></p>
                                 </div>
                               </div>
                             </div>
@@ -707,7 +707,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                                       ৳{(m.productCard.price * m.productCard.quantity).toLocaleString()}
                                     </span>
                                   )}
-                                  <span className="text-xs font-extrabold text-[#FF5B00] block">
+                                  <span className="text-xs font-extrabold text-[#EB4501] block">
                                     ৳{((m.productCard.counterPrice || m.productCard.price) * m.productCard.quantity).toLocaleString()}
                                   </span>
                                 </div>
@@ -759,7 +759,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                               <div className="flex justify-end pt-1.5 border-t border-[#E8EDF2]">
                                 <Link
                                   to={m.productCard.link}
-                                  className="px-3 py-1.5 bg-white hover:bg-[#FFF3EC] text-[#4B5563] hover:text-[#FF5B00] border border-[#E5E7EB] text-[9px] font-bold rounded-lg transition-all flex items-center gap-1.5"
+                                  className="px-3 py-1.5 bg-white hover:bg-[#FFF3EC] text-[#4B5563] hover:text-[#CF4400] border border-[#E5E7EB] text-[9px] font-bold rounded-lg transition-all flex items-center gap-1.5"
                                 >
                                   View product <ExternalLink size={10} />
                                 </Link>
@@ -780,7 +780,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                           className={`px-4 py-3 rounded-[10px] text-[12.5px] font-medium leading-relaxed whitespace-pre-line border
                           ${
                             isOutgoing
-                              ? 'bg-white text-[#1A1A2E] border-[#FF5B00]/25 shadow-sm'
+                              ? 'bg-white text-[#1A1A2E] border-[#EB4501]/25 shadow-sm'
                               : isAnnouncementMessage
                                 ? 'bg-white text-[#1A1A2E] border-[#000435]/10'
                                 : 'bg-white text-[#1A1A2E] border-[#E8EDF2]'
@@ -810,7 +810,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                       }}
                       className="px-3.5 py-1.5 bg-white hover:bg-[#F4F7F9] border border-[#E5E7EB] rounded-2xl text-[11px] font-semibold text-[#4B5563] transition-all flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Plus size={12} className="text-[#FF5B00]" />
+                      <Plus size={12} className="text-[#EB4501]" />
                       Share sourcing card
                     </button>
                     <button
@@ -838,13 +838,13 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                      className="flex-1 h-[42px] bg-white border border-[#E5E7EB] rounded-lg px-3.5 text-[12.5px] font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00] transition-all"
+                      className="flex-1 h-[42px] bg-white border border-[#E5E7EB] rounded-lg px-3.5 text-[12.5px] font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#EB4501] transition-all"
                       placeholder="Type your message..."
                     />
                     <button
                       type="button"
                       onClick={handleSendMessage}
-                      className="w-[42px] h-[42px] rounded-lg bg-[#FF5B00] text-white flex items-center justify-center hover:bg-[#EB4501] transition-colors shrink-0 cursor-pointer border-none"
+                      className="w-[42px] h-[42px] rounded-lg bg-[#EB4501] text-white flex items-center justify-center hover:bg-[#CF4400] transition-colors shrink-0 cursor-pointer border-none"
                       title="Send message"
                     >
                       <Send size={15} />
@@ -890,7 +890,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
           <div className="relative bg-white w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-[#E8EDF2] p-6 md:p-8 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-[#E8EDF2] pb-4 mb-6">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#FFF3EC] flex items-center justify-center text-[#FF5B00]">
+                <div className="w-8 h-8 rounded-full bg-[#FFF3EC] flex items-center justify-center text-[#EB4501]">
                   <Sparkles size={16} />
                 </div>
                 <div>
@@ -913,7 +913,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 <select
                   value={modalProdIdx}
                   onChange={(e) => setModalProdIdx(Number(e.target.value))}
-                  className="w-full h-11 px-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]"
+                  className="w-full h-11 px-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
                 >
                   {PRODUCTS.map((prod, pIdx) => (
                     <option key={prod.id} value={pIdx}>
@@ -930,7 +930,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                     type="text"
                     value={modalVariant}
                     onChange={(e) => setModalVariant(e.target.value)}
-                    className="w-full h-11 px-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]"
+                    className="w-full h-11 px-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
                     placeholder="e.g. 256GB / 12GB RAM"
                   />
                 </div>
@@ -940,7 +940,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                     type="text"
                     value={modalColor}
                     onChange={(e) => setModalColor(e.target.value)}
-                    className="w-full h-11 px-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]"
+                    className="w-full h-11 px-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
                     placeholder="e.g. Space Gray"
                   />
                 </div>
@@ -972,14 +972,14 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 <textarea
                   value={modalNotes}
                   onChange={(e) => setModalNotes(e.target.value)}
-                  className="w-full p-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00] h-20 resize-none"
+                  className="w-full p-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#EB4501] h-20 resize-none"
                   placeholder="e.g. Request fast dispatch with protective packaging..."
                 />
               </div>
 
-              <div className="bg-[#FFF3EC] border border-[#FF5B00]/15 rounded-xl p-4 flex justify-between items-center text-[11px] font-bold">
+              <div className="bg-[#FFF3EC] border border-[#EB4501]/15 rounded-xl p-4 flex justify-between items-center text-[11px] font-bold">
                 <span className="text-[#EB4501]">Sourcing estimate</span>
-                <span className="text-sm font-extrabold text-[#FF5B00]">
+                <span className="text-sm font-extrabold text-[#EB4501]">
                   ৳{(parseFloat(String(PRODUCTS[modalProdIdx].price).replace(/,/g, '')) * modalQuantity).toLocaleString()}
                 </span>
               </div>
@@ -996,7 +996,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
               <button
                 type="button"
                 onClick={handleCreateSourcingRequest}
-                className="px-5 py-2.5 bg-[#FF5B00] hover:bg-[#EB4501] text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer border-none flex items-center gap-1"
+                className="px-5 py-2.5 bg-[#EB4501] hover:bg-[#CF4400] text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer border-none flex items-center gap-1"
               >
                 <Sparkles size={12} />
                 Confirm & share card

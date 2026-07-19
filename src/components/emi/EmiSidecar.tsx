@@ -41,16 +41,16 @@ export function EmiSidecar() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="pointer-events-auto flex items-center gap-2 px-3 py-2 bg-white border border-[#e8edf2] rounded-full shadow-md hover:border-[#E8500A]/40 text-left"
+          className="pointer-events-auto flex items-center gap-2 px-3 py-2 bg-white border border-[#e8edf2] rounded-full shadow-md hover:border-[#EB4501]/40 text-left"
           aria-label="Open Emi contextual assistant"
         >
-          <Sparkles size={14} className="text-[#E8500A] shrink-0" />
+          <Sparkles size={14} className="text-[#EB4501] shrink-0" />
           <span className="text-[10px] font-bold text-navy truncate">{tip.title}</span>
         </button>
       ) : (
         <div className="pointer-events-auto bg-white border border-[#e8edf2] rounded-[5px] shadow-lg overflow-hidden">
           <div className="flex items-center justify-between px-3 py-2 border-b border-[#e8edf2] bg-[#fafbfc]">
-            <span className="text-[10px] font-black uppercase text-[#E8500A] flex items-center gap-1">
+            <span className="text-[10px] font-black uppercase text-[#EB4501] flex items-center gap-1">
               <Sparkles size={12} aria-hidden /> Emi · {assistantId}
             </span>
             <div className="flex gap-1">

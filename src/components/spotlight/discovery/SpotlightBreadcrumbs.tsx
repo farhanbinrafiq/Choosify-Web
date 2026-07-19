@@ -16,7 +16,7 @@ export function SpotlightBreadcrumbs({ items, className }: SpotlightBreadcrumbsP
           <li key={`${item.label}-${i}`} className="inline-flex items-center gap-1">
             {i > 0 && <ChevronRight size={12} aria-hidden className="text-gray-300" />}
             {item.href ? (
-              <Link to={item.href} className="font-bold uppercase hover:text-[#E8500A] focus:outline-none focus-visible:underline">
+              <Link to={item.href} className="font-bold uppercase hover:text-[#CF4400] focus:outline-none focus-visible:underline">
                 {item.label}
               </Link>
             ) : (

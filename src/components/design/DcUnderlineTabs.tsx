@@ -56,7 +56,7 @@ export function DcUnderlineTabs({
               className={cn(
                 'shrink-0 px-4 sm:px-5 py-4 text-[12.5px] font-bold cursor-pointer whitespace-nowrap border-0 border-b-2 bg-transparent transition-colors',
                 active
-                  ? 'text-[#FF5B00] border-[#FF5B00]'
+                  ? 'text-[#EB4501] border-[#EB4501]'
                   : 'text-[#6B7280] border-transparent hover:text-[#1A1A2E]',
               )}
             >

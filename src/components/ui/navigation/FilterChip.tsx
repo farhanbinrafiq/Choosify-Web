@@ -24,17 +24,17 @@ export const FilterChip: React.FC<FilterChipProps> = ({
   const variants: Record<FilterChipVariant, string> = {
     // Standard block filter chips (used in Filter Bar etc.)
     default: isActive
-      ? 'bg-white border border-[#FF5B00]/30 text-[#FF5B00] shadow-sm font-black text-[10.5px] px-3 py-1.5 rounded-lg'
+      ? 'bg-white border border-[#EB4501]/30 text-[#EB4501] shadow-sm font-black text-[10.5px] px-3 py-1.5 rounded-lg'
       : 'bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 text-[10.5px] px-3 py-1.5 rounded-lg',
 
     // Full round pills (used in Category Navigation)
     pill: isActive
-      ? 'bg-[#FF5B00]/10 text-[#FF5B00] border border-[#FF5B00]/25 text-[11px] px-3 py-1.5 rounded-full'
+      ? 'bg-[#EB4501]/10 text-[#EB4501] border border-[#EB4501]/25 text-[11px] px-3 py-1.5 rounded-full'
       : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent text-[11px] px-3 py-1.5 rounded-full',
 
     // Dark variants used in Dark Hero backgrounds
     dark: isActive
-      ? 'bg-[#FF5B00] text-white border border-[#FF5B00] text-[10.5px] px-3 py-1.5 rounded-lg font-black'
+      ? 'bg-[#EB4501] text-white border border-[#EB4501] text-[10.5px] px-3 py-1.5 rounded-lg font-black'
       : 'bg-white/5 hover:bg-white/10 border border-white/10 text-white/85 hover:text-white text-[10.5px] px-3 py-1.5 rounded-lg',
 
     // Outline variant

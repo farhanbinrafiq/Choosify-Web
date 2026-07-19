@@ -110,7 +110,7 @@ export function ProductMerchandisingPanel({
             )}
             {selectedIds.size > 0 && (
               <>
-                <button type="button" onClick={bulkAttach} className="text-[10px] px-2 py-1 bg-[#E8500A] text-white rounded font-bold">
+                <button type="button" onClick={bulkAttach} className="text-[10px] px-2 py-1 bg-[#EB4501] text-white rounded font-bold">
                   Attach selected ({selectedIds.size})
                 </button>
                 <button type="button" onClick={bulkDetach} className="text-[10px] px-2 py-1 border border-red-200 text-red-600 rounded">
@@ -131,7 +131,7 @@ export function ProductMerchandisingPanel({
                     onDoubleClick={() => !isAttached && attach([p.id])}
                     className={cn(
                       'w-full text-left px-2 py-2 rounded text-xs flex items-center gap-2',
-                      isAttached ? 'bg-green-50 border border-green-200' : isSelected ? 'bg-[#E8500A]/10' : 'hover:bg-gray-50',
+                      isAttached ? 'bg-green-50 border border-green-200' : isSelected ? 'bg-[#EB4501]/10' : 'hover:bg-gray-50',
                     )}
                   >
                     <input
@@ -151,7 +151,7 @@ export function ProductMerchandisingPanel({
             })}
           </ul>
           {hasMore && (
-            <button type="button" onClick={loadMore} className="mt-2 text-xs text-[#E8500A] font-bold">
+            <button type="button" onClick={loadMore} className="mt-2 text-xs text-[#EB4501] font-bold">
               Load more…
             </button>
           )}

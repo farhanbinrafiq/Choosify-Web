@@ -437,12 +437,12 @@ export function GlobalSearchBar({
             type="button"
             aria-label="Close search"
             onClick={closeMobileSearch}
-            className="shrink-0 pl-2.5 pr-1 text-gray-400 hover:text-[#E8500A] transition-colors"
+            className="shrink-0 pl-2.5 pr-1 text-gray-400 hover:text-[#CF4400] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         )}
-        <div className="pl-2.5 sm:pl-4 text-[#E8500A] shrink-0">
+        <div className="pl-2.5 sm:pl-4 text-[#EB4501] shrink-0">
           <Search className="w-4 h-4" />
         </div>
         <input
@@ -474,7 +474,7 @@ export function GlobalSearchBar({
           type="submit"
           aria-label={submitLabel}
           className={cn(
-            'absolute right-1 sm:right-1.5 top-1 sm:top-1.5 bottom-1 sm:bottom-1.5 rounded-full bg-[#FF5B00] hover:bg-[#E8500A] text-white font-bold tracking-wide uppercase flex items-center justify-center gap-1 transition-all duration-200 cursor-pointer',
+            'absolute right-1 sm:right-1.5 top-1 sm:top-1.5 bottom-1 sm:bottom-1.5 rounded-full bg-[#EB4501] hover:bg-[#CF4400] text-white font-bold tracking-wide uppercase flex items-center justify-center gap-1 transition-all duration-200 cursor-pointer',
             mode === 'overlay'
               ? 'px-4 text-[9px]'
               : 'px-2 sm:px-2.5 md:px-4 lg:px-5 text-[8px] sm:text-[8px] md:text-[9px] min-w-[2rem] sm:min-w-[2.25rem] md:min-w-0',
@@ -574,7 +574,7 @@ export function GlobalSearchBar({
           className="relative w-full bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg focus-within:border-white/20 transition-all duration-300"
         >
           <div className="flex items-center bg-white rounded-full relative min-w-0">
-            <div className="pl-4 text-[#E8500A] shrink-0">
+            <div className="pl-4 text-[#EB4501] shrink-0">
               <Search className="w-4 h-4" />
             </div>
             <input
@@ -599,7 +599,7 @@ export function GlobalSearchBar({
             />
             <button
               type="submit"
-              className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-[#FF5B00] hover:bg-[#E8500A] text-white text-[11px] font-bold tracking-wide uppercase flex items-center gap-1.5 transition-all duration-200 cursor-pointer"
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-full bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11px] font-bold tracking-wide uppercase flex items-center gap-1.5 transition-all duration-200 cursor-pointer"
             >
               {submitLabel}
             </button>
@@ -637,7 +637,7 @@ export function GlobalSearchBar({
                           onClick={() => handleSelectSuggestion(item)}
                           onMouseEnter={() => setActiveIndex(flatIdx)}
                           className={`group flex items-center justify-between px-2.5 py-1.5 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors ${
-                            isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
+                            isActive ? 'bg-[#EB4501]/5 text-[#EB4501]' : 'text-[#1A1A2E] hover:bg-gray-50'
                           }`}
                         >
                           <span className="truncate">{item.title}</span>
@@ -658,7 +658,7 @@ export function GlobalSearchBar({
               {/* Popular Searches */}
               <div className="flex flex-col text-left space-y-2 pt-4 md:pt-0 md:pl-4">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                  <Sparkles size={12} className="text-[#FF5B00]" />
+                  <Sparkles size={12} className="text-[#EB4501]" />
                   Popular
                 </span>
                 <div className="flex flex-col space-y-1">
@@ -671,10 +671,10 @@ export function GlobalSearchBar({
                         onClick={() => handleSelectSuggestion(item)}
                         onMouseEnter={() => setActiveIndex(flatIdx)}
                         className={`px-2.5 py-1.5 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
-                          isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
+                          isActive ? 'bg-[#EB4501]/5 text-[#EB4501]' : 'text-[#1A1A2E] hover:bg-gray-50'
                         }`}
                       >
-                        <span className="text-[#FF5B00]">•</span>
+                        <span className="text-[#EB4501]">•</span>
                         <span className="truncate">{item.title}</span>
                       </div>
                     );
@@ -698,10 +698,10 @@ export function GlobalSearchBar({
                         onClick={() => handleSelectSuggestion(item)}
                         onMouseEnter={() => setActiveIndex(flatIdx)}
                         className={`px-2.5 py-1.5 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
-                          isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
+                          isActive ? 'bg-[#EB4501]/5 text-[#EB4501]' : 'text-[#1A1A2E] hover:bg-gray-50'
                         }`}
                       >
-                        <span className="text-[#E8500A] font-black">↑</span>
+                        <span className="text-[#EB4501] font-black">↑</span>
                         <span className="truncate">{item.title}</span>
                       </div>
                     );
@@ -740,8 +740,8 @@ export function GlobalSearchBar({
                               onMouseEnter={() => setActiveIndex(flatIdx)}
                               className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold border transition-colors ${
                                 isActive
-                                  ? 'bg-[#E8500A]/10 text-[#E8500A] border-[#E8500A]/30'
-                                  : 'bg-gray-50 text-[#1A1A2E] border-gray-100 hover:border-[#E8500A]/20'
+                                  ? 'bg-[#EB4501]/10 text-[#EB4501] border-[#EB4501]/30'
+                                  : 'bg-gray-50 text-[#1A1A2E] border-gray-100 hover:border-[#EB4501]/20'
                               }`}
                             >
                               {item.title}
@@ -755,13 +755,13 @@ export function GlobalSearchBar({
 
                 return (
                   <>
-                    {renderRail('⭐ Spotlight Campaigns', <Flame size={12} className="text-[#E8500A]" />, discoveryPanel.spotlightCampaigns)}
-                    {renderRail('🚀 New Launches', <Rocket size={12} className="text-[#E8500A]" />, discoveryPanel.newLaunches)}
-                    {renderRail('📚 Popular Guides', <BookOpen size={12} className="text-[#E8500A]" />, discoveryPanel.popularGuides)}
-                    {renderRail('👤 Featured Creators', <User size={12} className="text-[#E8500A]" />, discoveryPanel.featuredCreators)}
-                    {renderRail('🏷 Trending Brands', <Store size={12} className="text-[#E8500A]" />, discoveryPanel.trendingBrands)}
-                    {renderRail('🛍 Popular Products', <ShoppingBag size={12} className="text-[#E8500A]" />, discoveryPanel.popularProducts)}
-                    {renderRail('📂 Top Categories', <LayoutGrid size={12} className="text-[#E8500A]" />, discoveryPanel.topCategories)}
+                    {renderRail('⭐ Spotlight Campaigns', <Flame size={12} className="text-[#EB4501]" />, discoveryPanel.spotlightCampaigns)}
+                    {renderRail('🚀 New Launches', <Rocket size={12} className="text-[#EB4501]" />, discoveryPanel.newLaunches)}
+                    {renderRail('📚 Popular Guides', <BookOpen size={12} className="text-[#EB4501]" />, discoveryPanel.popularGuides)}
+                    {renderRail('👤 Featured Creators', <User size={12} className="text-[#EB4501]" />, discoveryPanel.featuredCreators)}
+                    {renderRail('🏷 Trending Brands', <Store size={12} className="text-[#EB4501]" />, discoveryPanel.trendingBrands)}
+                    {renderRail('🛍 Popular Products', <ShoppingBag size={12} className="text-[#EB4501]" />, discoveryPanel.popularProducts)}
+                    {renderRail('📂 Top Categories', <LayoutGrid size={12} className="text-[#EB4501]" />, discoveryPanel.topCategories)}
                   </>
                 );
               })()}
@@ -793,7 +793,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center gap-2.5 px-3 py-2 rounded-[5px] text-[11px] font-bold cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
+                              isActive ? 'bg-[#EB4501]/5 text-[#EB4501]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
                             <Search size={12} className="opacity-40" />
@@ -819,7 +819,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center gap-3 px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
+                              isActive ? 'bg-[#EB4501]/5 text-[#EB4501]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
                             {item.image ? (
@@ -859,7 +859,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center justify-between px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
+                              isActive ? 'bg-[#EB4501]/5 text-[#EB4501]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 text-left">
@@ -870,7 +870,7 @@ export function GlobalSearchBar({
                                 <h4 className="text-[11.5px] font-bold truncate leading-snug flex items-center gap-1">
                                   {item.title}
                                   {item.badge === 'Verified' && (
-                                    <span className="text-[#E8500A] text-[9px]" title="Verified Brand">🛡️</span>
+                                    <span className="text-[#EB4501] text-[9px]" title="Verified Brand">🛡️</span>
                                   )}
                                 </h4>
                                 <p className="text-[9.5px] text-gray-500 font-semibold truncate mt-0.5">{item.subtitle}</p>
@@ -900,7 +900,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center justify-between px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
+                              isActive ? 'bg-[#EB4501]/5 text-[#EB4501]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 text-left">
@@ -940,7 +940,7 @@ export function GlobalSearchBar({
                             onClick={() => handleSelectSuggestion(item)}
                             onMouseEnter={() => setActiveIndex(flatIdx)}
                             className={`flex items-center justify-between px-3 py-2 rounded-[5px] cursor-pointer transition-colors ${
-                              isActive ? 'bg-[#E8500A]/5 text-[#E8500A]' : 'text-[#1A1A2E] hover:bg-gray-50'
+                              isActive ? 'bg-[#EB4501]/5 text-[#EB4501]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex items-center gap-2.5 text-left min-w-0">

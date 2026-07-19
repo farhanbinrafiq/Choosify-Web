@@ -259,14 +259,14 @@ export function DealsPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#E8500A]" />
+          <Search size={13} className="text-[#EB4501]" />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search brand deals..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
         />
       </div>
     ),
@@ -350,7 +350,7 @@ export function DealsPage() {
   }, [searchQuery, activeTab, selectedCategory, minDiscount, activeSectionId, dealsSectionNavItems, scrollToSection]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       <DcListingHero
         titleBefore="Grab Today's Best"
         titleHighlight="Deals"
@@ -467,14 +467,14 @@ export function DealsPage() {
              {/* LEFT COLUMN SEARCH BAR */}
              <div className="relative mb-2">
                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                 <Search size={13} className="text-[#E8500A]" />
+                 <Search size={13} className="text-[#EB4501]" />
                </div>
                <input
                  type="text"
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
                  placeholder="Search brand deals..."
-                 className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors shadow-sm"
+                 className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors shadow-sm"
                />
              </div>
              
@@ -578,15 +578,15 @@ export function DealsPage() {
                className="bg-white rounded-2xl border border-[#eef2f6] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
                style={{ height: '410px' }}
              >
-               <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#E8500A]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
+               <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#EB4501]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
                
                <div className="flex flex-col items-center">
-                 <div className="w-10 h-10 rounded-full bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center mb-3 border border-[#E8500A]/5 shrink-0 shadow-sm">
+                 <div className="w-10 h-10 rounded-full bg-[#EB4501]/10 text-[#EB4501] flex items-center justify-center mb-3 border border-[#EB4501]/5 shrink-0 shadow-sm">
                    <Star className="w-4 h-4 fill-current" />
                  </div>
                  
                  <h3 className="font-sans text-sm font-semibold uppercase tracking-tight text-[#1A1D4E] leading-snug">
-                   For Business <span className="text-[#E8500A]">& Sellers</span>
+                   For Business <span className="text-[#EB4501]">& Sellers</span>
                  </h3>
                  
                  <p className="text-[11px] text-gray-400 font-semibold mt-2 px-1 leading-relaxed max-w-[220px]">
@@ -594,7 +594,7 @@ export function DealsPage() {
                  </p>
                </div>
 
-               <div className="border border-dashed border-[#E8500A]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-2xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+               <div className="border border-dashed border-[#EB4501]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-2xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
                  <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
                  <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                    Gain entry to featured deal slots, exposure metrics, and buyer engagement streams.
@@ -603,14 +603,14 @@ export function DealsPage() {
                  <button 
                    type="button"
                    onClick={() => navigate('/post-offer')}
-                   className="w-full py-2.5 bg-[#E8500A] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
+                   className="w-full py-2.5 bg-[#EB4501] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
                  >
                    POST OFFER <ArrowRight className="w-3.5 h-3.5" />
                  </button>
                </div>
 
                <div className="flex items-center justify-center gap-1.5 text-[8.5px] font-semibold text-[#8a9bb0] uppercase font-mono tracking-widest shrink-0">
-                 <Star className="w-3.5 h-3.5 text-[#E8500A] fill-current" /> 100k+ shopper log Daily
+                 <Star className="w-3.5 h-3.5 text-[#EB4501] fill-current" /> 100k+ shopper log Daily
                </div>
              </div>
           </aside>
@@ -668,7 +668,7 @@ export function DealsPage() {
                   <button
                     type="button"
                     onClick={() => handleTabChange('Flash Deals')}
-                    className="block w-full text-center text-[12px] font-bold text-[#1A1A2E] border-0 bg-transparent cursor-pointer hover:text-[#FF5B00]"
+                    className="block w-full text-center text-[12px] font-bold text-[#1A1A2E] border-0 bg-transparent cursor-pointer hover:text-[#CF4400]"
                   >
                     VIEW ALL FLASH DEALS ›
                   </button>
@@ -737,12 +737,12 @@ export function DealsPage() {
                       promoCodes.map((promo) => (
                         <div
                           key={promo.code}
-                          className="bg-white border border-gray-150 rounded-2xl p-5 flex flex-col justify-between min-h-[180px] relative overflow-hidden shadow-sm group hover:border-[#E8500A]/30 transition-all duration-300"
+                          className="bg-white border border-gray-150 rounded-2xl p-5 flex flex-col justify-between min-h-[180px] relative overflow-hidden shadow-sm group hover:border-[#EB4501]/30 transition-all duration-300"
                         >
-                          <div className="absolute top-0 right-0 w-20 h-20 bg-[#E8500A]/[0.04] rounded-full -translate-y-1/2 translate-x-1/2 blur-md" />
+                          <div className="absolute top-0 right-0 w-20 h-20 bg-[#EB4501]/[0.04] rounded-full -translate-y-1/2 translate-x-1/2 blur-md" />
                           <div>
                             <div className="flex items-center gap-1.5 mb-2">
-                              <Gift size={13} className="text-[#E8500A]" />
+                              <Gift size={13} className="text-[#EB4501]" />
                               <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
                                 {promo.brandName}
                               </span>
@@ -763,7 +763,7 @@ export function DealsPage() {
                                   setCopiedCode(promo.code);
                                   setTimeout(() => setCopiedCode(null), 2000);
                                 }}
-                                className="px-3 py-1.5 bg-[#FF5B00] hover:brightness-110 text-white text-[12px] font-bold tracking-tight rounded-md cursor-pointer transition-colors border-none font-sans"
+                                className="px-3 py-1.5 bg-[#EB4501] hover:brightness-110 text-white text-[12px] font-bold tracking-tight rounded-md cursor-pointer transition-colors border-none font-sans"
                               >
                                 {copiedCode === promo.code ? 'Copied' : 'Copy'}
                               </button>

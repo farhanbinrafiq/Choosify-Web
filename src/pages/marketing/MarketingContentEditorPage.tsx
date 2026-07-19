@@ -65,7 +65,7 @@ export function MarketingContentEditorPage() {
   if (isNew && !pickedType) {
     return (
       <div className="flex-grow p-6 max-w-4xl mx-auto">
-        <Link to="/marketing/content" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#E8500A] mb-6">
+        <Link to="/marketing/content" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#CF4400] mb-6">
           <ArrowLeft size={14} /> Back to Spotlight Content
         </Link>
         <h1 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">Create Spotlight Content</h1>
@@ -79,7 +79,7 @@ export function MarketingContentEditorPage() {
                 setPickedType(t.id);
                 setRecord(createEmptyContent(t.id, currentUser.id));
               }}
-              className="flex flex-col items-start gap-1 rounded-xl border border-[#e8edf2] bg-white p-4 text-left hover:border-[#E8500A]/40 hover:bg-[#E8500A]/5 transition-colors"
+              className="flex flex-col items-start gap-1 rounded-xl border border-[#e8edf2] bg-white p-4 text-left hover:border-[#EB4501]/40 hover:bg-[#CF4400]/5 transition-colors"
             >
               <span className="text-2xl" aria-hidden>{t.icon}</span>
               <span className="font-bold text-sm text-navy">{t.label}</span>
@@ -100,7 +100,7 @@ export function MarketingContentEditorPage() {
   return (
     <div className="flex-grow flex flex-col min-h-0">
       <div className="border-b border-[#e8edf2] bg-white px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-        <Link to="/marketing/content" className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#E8500A]">
+        <Link to="/marketing/content" className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#CF4400]">
           <ArrowLeft size={14} /> Spotlight Content
           {typeMeta && <span className="text-gray-300">·</span>}
           {typeMeta && <span className="font-bold text-navy">{typeMeta.icon} {typeMeta.label}</span>}
@@ -118,7 +118,7 @@ export function MarketingContentEditorPage() {
           <button
             type="button"
             onClick={handleSave}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#E8500A] text-white text-xs font-bold uppercase rounded"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#EB4501] text-white text-xs font-bold uppercase rounded"
           >
             <Save size={14} /> Save
           </button>
@@ -140,7 +140,7 @@ export function MarketingContentEditorPage() {
               onClick={() => setTab(key)}
               className={cn(
                 'w-full text-left px-3 py-2 rounded text-xs font-semibold',
-                tab === key ? 'bg-[#E8500A]/10 text-[#E8500A]' : 'text-gray-600 hover:bg-gray-50',
+                tab === key ? 'bg-[#EB4501]/10 text-[#EB4501]' : 'text-gray-600 hover:bg-gray-50',
               )}
             >
               {key === 'preview' && <Eye size={12} className="inline mr-1" />}

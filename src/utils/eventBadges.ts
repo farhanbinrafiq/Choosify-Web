@@ -3,14 +3,14 @@ import type { BrandPost, BrandPostKind } from '../types/brandPost';
 import { BRAND_POST_KIND_LABELS } from '../types/brandPost';
 
 const DEFAULT_EVENT_BADGES: SiteContentBadge[] = [
-  { id: 'event', label: 'Event', color: '#E8500A', entityType: 'event', mapsTo: 'event', priority: 1, isActive: true },
+  { id: 'event', label: 'Event', color: '#EB4501', entityType: 'event', mapsTo: 'event', priority: 1, isActive: true },
   { id: 'announcement', label: 'Announcement', color: '#1A1D4E', entityType: 'event', mapsTo: 'announcement', priority: 2, isActive: true },
   { id: 'festival', label: 'Festival', color: '#CF4400', entityType: 'event', mapsTo: 'festival', priority: 3, isActive: true },
-  { id: 'carnival', label: 'Carnival', color: '#FF5B00', entityType: 'event', mapsTo: 'carnival', priority: 4, isActive: true },
+  { id: 'carnival', label: 'Carnival', color: '#EB4501', entityType: 'event', mapsTo: 'carnival', priority: 4, isActive: true },
   { id: 'launch', label: 'Product Launch', color: '#1A1D4E', entityType: 'event', mapsTo: 'launch', priority: 5, isActive: true },
   { id: 'campaign', label: 'Brand Promotion', color: '#8a9bb0', entityType: 'event', mapsTo: 'campaign', priority: 6, isActive: true },
   { id: 'store_moment', label: 'Store Moment', color: '#1A1D4E', entityType: 'event', mapsTo: 'store_moment', priority: 7, isActive: true },
-  { id: 'sponsored', label: 'Sponsored', color: '#E8500A', entityType: 'event', mapsTo: 'sponsored', priority: 0, isActive: true },
+  { id: 'sponsored', label: 'Sponsored', color: '#EB4501', entityType: 'event', mapsTo: 'sponsored', priority: 0, isActive: true },
 ];
 
 function getConfiguredEventBadges(siteConfig: SiteConfig | null): SiteContentBadge[] {

@@ -522,7 +522,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
       <div className="max-w-[1440px] mx-auto px-6 w-full flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] whitespace-nowrap">{title}</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#E8500A]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]" />
         </div>
 
         <div className="flex-1 min-w-0 pr-2">
@@ -535,7 +535,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
                   className={cn(
                     "px-4 py-2 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 border shrink-0 hover:scale-[1.02] active:scale-[0.98]",
                     filter.active
-                      ? "bg-[#E8500A] text-white border-transparent shadow-xs font-black italic"
+                      ? "bg-[#EB4501] text-white border-transparent shadow-xs font-black italic"
                       : "bg-white border-[#e8edf2] text-gray-550 hover:border-[#1A1D4E]/25 hover:text-[#1A1D4E]"
                   )}
                 >
@@ -548,7 +548,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
             {onOpenFullFilters && (
               <button
                 onClick={onOpenFullFilters}
-                className="px-4 py-2 rounded-full text-[10.5px] font-black uppercase tracking-widest text-[#E8500A] bg-orange-primary/5 hover:bg-orange-primary/10 border border-dashed border-[#E8500A]/30 flex items-center gap-1 shrink-0 cursor-pointer"
+                className="px-4 py-2 rounded-full text-[10.5px] font-black uppercase tracking-widest text-[#EB4501] bg-orange-primary/5 hover:bg-orange-primary/10 border border-dashed border-[#EB4501]/30 flex items-center gap-1 shrink-0 cursor-pointer"
               >
                 <span>More Filters</span>
                 <span className="font-mono text-xs">▼</span>
@@ -587,12 +587,12 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
           {chips.map((chip, idx) => (
             <div
               key={`${chip.id}-${idx}`}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F4F8FA] border border-[#D9E6ED] rounded-[4px] text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider shadow-2xs hover:border-[#E8500A]/30 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F4F8FA] border border-[#D9E6ED] rounded-[4px] text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider shadow-2xs hover:border-[#EB4501]/30 transition-all"
             >
               <span>{chip.label}</span>
               <button
                 onClick={chip.onRemove}
-                className="text-[#E8500A] hover:text-[#CF4400] transition-colors p-[1.5px] rounded-full hover:bg-red-500/10 cursor-pointer border-none bg-none flex items-center justify-center"
+                className="text-[#EB4501] hover:text-[#CF4400] transition-colors p-[1.5px] rounded-full hover:bg-red-500/10 cursor-pointer border-none bg-none flex items-center justify-center"
                 aria-label={`Remove filter ${chip.label}`}
               >
                 <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -604,7 +604,7 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
 
           <button
             onClick={onClearAll}
-            className="text-[10px] font-extrabold text-[#E8500A] uppercase tracking-widest hover:text-[#CF4400] ml-3 transition-colors cursor-pointer border-none bg-transparent hover:underline"
+            className="text-[10px] font-extrabold text-[#EB4501] uppercase tracking-widest hover:text-[#CF4400] ml-3 transition-colors cursor-pointer border-none bg-transparent hover:underline"
           >
             Clear All
           </button>
@@ -677,7 +677,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
     return (
       <div className="flex flex-col gap-3 font-sans">
         <div className="py-2.5 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-          <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">Smartphone specs</span>
+          <span className="text-[12px] font-bold tracking-tight text-[#EB4501] block">Smartphone specs</span>
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Custom filters synced with Smartphone directory</span>
         </div>
         {specs.map((spec) => (
@@ -759,7 +759,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
     return (
       <div className="flex flex-col gap-3 font-sans">
         <div className="py-2.5 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-          <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">Fashion specs</span>
+          <span className="text-[12px] font-bold tracking-tight text-[#EB4501] block">Fashion specs</span>
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Custom apparel scopes</span>
         </div>
         {specs.map((spec) => (
@@ -831,7 +831,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
     return (
       <div className="flex flex-col gap-3 font-sans">
         <div className="py-2.5 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-          <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">Eyewear specs</span>
+          <span className="text-[12px] font-bold tracking-tight text-[#EB4501] block">Eyewear specs</span>
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Optimized dimensions for eyeglasses</span>
         </div>
         {specs.map((spec) => (
@@ -986,7 +986,7 @@ export function FullSidebarFilterPanel({
         {onReset && (
           <button
             onClick={onReset}
-            className="text-[9px] font-bold text-[#E8500A] hover:text-[#CF4400] uppercase tracking-wider transition-colors border-none bg-none cursor-pointer"
+            className="text-[9px] font-bold text-[#EB4501] hover:text-[#CF4400] uppercase tracking-wider transition-colors border-none bg-none cursor-pointer"
           >
             Reset All
           </button>
@@ -1286,8 +1286,8 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                             className={cn(
                               'shrink-0 px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
                               activeFiltersData.sectionNav.activeId === (activeFiltersData.sectionNav.allId || 'all')
-                                ? 'bg-[#E8500A] text-white border border-[#E8500A] shadow-md shadow-[#E8500A]/20'
-                                : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A]',
+                                ? 'bg-[#EB4501] text-white border border-[#EB4501] shadow-md shadow-[#EB4501]/20'
+                                : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#EB4501]/30 hover:text-[#CF4400]',
                             )}
                           >
                             {activeFiltersData.sectionNav.allLabel || 'Overview'}
@@ -1302,8 +1302,8 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                                 className={cn(
                                   'shrink-0 px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
                                   activeFiltersData.sectionNav?.activeId === item.id
-                                    ? 'bg-[#E8500A] text-white border border-[#E8500A] shadow-md shadow-[#E8500A]/20'
-                                    : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#E8500A]/30 hover:text-[#E8500A]',
+                                    ? 'bg-[#EB4501] text-white border border-[#EB4501] shadow-md shadow-[#EB4501]/20'
+                                    : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#EB4501]/30 hover:text-[#CF4400]',
                                 )}
                               >
                                 {item.icon}
@@ -1374,7 +1374,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={cn(
-              'w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(232,80,10,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto',
+              'w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(235, 69, 1,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto',
               isOpen
                 ? 'bg-surface-selected border-orange-primary text-orange-primary'
                 : 'bg-white border-[#e8edf2] text-heading hover:border-orange-primary/40',

@@ -37,7 +37,7 @@ export function ProductSpecsOverview({ specs, productTitle }: ProductSpecsOvervi
             )}
           >
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#E8500A]/10 text-[#E8500A] flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#EB4501]/10 text-[#EB4501] flex items-center justify-center shrink-0">
                 <CheckCircle2 size={14} />
               </div>
               <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">

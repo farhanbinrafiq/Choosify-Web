@@ -47,8 +47,8 @@ export function SpotlightDiscoverFiltersPanel({ filters, onChange }: SpotlightDi
             className={cn(
               'px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide border transition-colors',
               filters.contentTypes.includes(type)
-                ? 'bg-[#E8500A] text-white border-[#E8500A]'
-                : 'bg-white text-gray-500 border-[#e8edf2] hover:border-[#E8500A]/40',
+                ? 'bg-[#EB4501] text-white border-[#EB4501]'
+                : 'bg-white text-gray-500 border-[#e8edf2] hover:border-[#EB4501]/40',
             )}
           >
             {SPOTLIGHT_CONTENT_TYPE_META[type].label}
@@ -88,7 +88,7 @@ export function SpotlightDiscoverFiltersPanel({ filters, onChange }: SpotlightDi
           placeholder="Search experiences..."
           value={filters.query ?? ''}
           onChange={(e) => onChange({ ...filters, query: e.target.value })}
-          className="flex-1 min-w-[200px] px-3 py-2 text-sm border border-[#e8edf2] rounded-[5px] focus:outline-none focus:border-[#E8500A]/50"
+          className="flex-1 min-w-[200px] px-3 py-2 text-sm border border-[#e8edf2] rounded-[5px] focus:outline-none focus:border-[#EB4501]/50"
           aria-label="Search Spotlight"
         />
         <select
@@ -106,7 +106,7 @@ export function SpotlightDiscoverFiltersPanel({ filters, onChange }: SpotlightDi
         <button
           type="button"
           onClick={() => onChange({ ...filters, contentTypes: [], liveOnly: false, sponsoredOnly: false, verifiedOnly: false, trendingOnly: false, promotionsOnly: false, query: '' })}
-          className="text-[10px] font-bold uppercase text-gray-400 hover:text-[#E8500A]"
+          className="text-[10px] font-bold uppercase text-gray-400 hover:text-[#CF4400]"
         >
           Clear
         </button>

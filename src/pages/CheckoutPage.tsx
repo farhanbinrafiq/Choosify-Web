@@ -284,19 +284,19 @@ ORDER STATUS: PENDING_CONFIRMATION
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Checkout Header — constrained to feed silhouette */}
       <div className="w-full px-5 sm:px-10 pt-4">
         <header className="max-w-[1280px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 py-6 rounded-[14px] overflow-hidden">
           <nav className="text-xs text-white/45 mb-3" aria-label="Breadcrumb">
-            <Link to="/" className="hover:text-[#FF5B00] transition-colors">
+            <Link to="/" className="hover:text-[#CF4400] transition-colors">
               Home
             </Link>
             <span className="mx-1.5">›</span>
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="hover:text-[#FF5B00] transition-colors bg-transparent border-0 text-white/45 cursor-pointer p-0 text-xs"
+              className="hover:text-[#CF4400] transition-colors bg-transparent border-0 text-white/45 cursor-pointer p-0 text-xs"
             >
               Cart
             </button>
@@ -307,7 +307,7 @@ ORDER STATUS: PENDING_CONFIRMATION
           <div className="flex flex-wrap items-center justify-between gap-5">
             <div>
               <h1 className="text-2xl font-extrabold leading-tight">
-                SECURE <span className="text-[#FF5B00]">CHECKOUT</span>
+                SECURE <span className="text-[#EB4501]">CHECKOUT</span>
               </h1>
               <p className="text-[12.5px] text-white/50 mt-1">
                 Almost there! Review and place your order
@@ -327,7 +327,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                       className={cn(
                         'w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-extrabold',
                         step.done || step.num === 3
-                          ? 'bg-[#FF5B00] text-white'
+                          ? 'bg-[#EB4501] text-white'
                           : 'bg-white/10 text-white/50 border border-white/15',
                       )}
                     >
@@ -358,7 +358,7 @@ ORDER STATUS: PENDING_CONFIRMATION
           {/* Shipping Credentials */}
           <div className="bg-white border border-[#E8EDF2] rounded-xl p-5 sm:p-6 space-y-5">
             <h2 className="text-[12.5px] font-extrabold text-[#1A1A2E] flex items-center gap-1.5">
-              <MapPin size={16} className="text-[#FF5B00]" />
+              <MapPin size={16} className="text-[#EB4501]" />
               DELIVERY INFORMATION
             </h2>
 
@@ -371,7 +371,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                     type="text" 
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full h-11 bg-white border border-[#E5E7EB] rounded-lg pl-10 pr-4 text-[13px] font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]"
+                    className="w-full h-11 bg-white border border-[#E5E7EB] rounded-lg pl-10 pr-4 text-[13px] font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
                     placeholder="e.g. Kamal Hossain"
                   />
                 </div>
@@ -385,7 +385,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                     type="text" 
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full h-11 bg-white border border-[#E5E7EB] rounded-lg pl-10 pr-4 text-[13px] font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]"
+                    className="w-full h-11 bg-white border border-[#E5E7EB] rounded-lg pl-10 pr-4 text-[13px] font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
                     placeholder="e.g. +880 1712..."
                   />
                 </div>
@@ -397,7 +397,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                   type="text" 
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full h-11 bg-white border border-[#E5E7EB] rounded-lg px-4 text-[13px] font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]"
+                  className="w-full h-11 bg-white border border-[#E5E7EB] rounded-lg px-4 text-[13px] font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
                   placeholder="e.g. House No. 42, Road 11, Banani, Dhaka"
                 />
               </div>
@@ -407,7 +407,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                 <select 
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
-                  className="w-full h-11 bg-white border border-[#E5E7EB] rounded-lg px-4 text-[13px] font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00] cursor-pointer"
+                  className="w-full h-11 bg-white border border-[#E5E7EB] rounded-lg px-4 text-[13px] font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#EB4501] cursor-pointer"
                 >
                   <option value="Dhaka">Dhaka Metro Area</option>
                   <option value="Chittagong">Chittagong City</option>
@@ -423,7 +423,7 @@ ORDER STATUS: PENDING_CONFIRMATION
           <div className="bg-white border border-[#E8EDF2] rounded-xl p-5 sm:p-6 space-y-4">
             <h2 className="text-[12.5px] font-extrabold text-[#1A1A2E] flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5">
-                <Truck size={16} className="text-[#FF5B00]" />
+                <Truck size={16} className="text-[#EB4501]" />
                 SELLER-WISE DISPATCH SPLITS
               </span>
               <span className="text-[10.5px] text-[#9AA0AC] font-bold uppercase">
@@ -466,14 +466,14 @@ ORDER STATUS: PENDING_CONFIRMATION
           {/* Order notes — notes already wired to deliveryNotes above as landmark; keep optional notes section visual */}
           <div className="bg-white border border-[#E8EDF2] rounded-xl p-5 sm:p-6">
             <h2 className="text-[12.5px] font-extrabold text-[#1A1A2E] mb-3 flex items-center gap-1.5">
-              <MessageSquare size={14} className="text-[#FF5B00]" />
+              <MessageSquare size={14} className="text-[#EB4501]" />
               ORDER NOTES (OPTIONAL)
             </h2>
             <textarea
               value={deliveryNotes}
               onChange={(e) => setDeliveryNotes(e.target.value)}
               placeholder="e.g. Please call before delivery, leave at the gate, etc."
-              className="w-full h-[60px] rounded-lg border border-[#E5E7EB] p-2.5 text-xs text-[#1A1A2E] font-sans resize-none focus:outline-none focus:border-[#FF5B00] box-border"
+              className="w-full h-[60px] rounded-lg border border-[#E5E7EB] p-2.5 text-xs text-[#1A1A2E] font-sans resize-none focus:outline-none focus:border-[#EB4501] box-border"
             />
           </div>
         </div>
@@ -499,13 +499,13 @@ ORDER STATUS: PENDING_CONFIRMATION
                 className={cn(
                   "w-full p-4 rounded-lg border text-left flex gap-4 items-start transition-all",
                   paymentMethod === 'cod' 
-                    ? "border-[#FF5B00] bg-[#FF5B00]/5" 
+                    ? "border-[#EB4501] bg-[#EB4501]/5" 
                     : "border-[#E8EDF2] bg-white hover:bg-[#F4F7F9]",
                   !isCODEligible && "opacity-30 cursor-not-allowed"
                 )}
               >
                 <div className="w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 bg-white border-gray-300">
-                  {paymentMethod === 'cod' && <div className="w-2.5 h-2.5 bg-[#FF5B00] rounded-full" />}
+                  {paymentMethod === 'cod' && <div className="w-2.5 h-2.5 bg-[#EB4501] rounded-full" />}
                 </div>
                 <div>
                   <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wide leading-none mb-1">Cash On Delivery</h4>
@@ -518,12 +518,12 @@ ORDER STATUS: PENDING_CONFIRMATION
                 className={cn(
                   "w-full p-4 rounded-lg border text-left flex gap-4 items-start transition-all",
                   paymentMethod === 'credit' 
-                    ? "border-[#FF5B00] bg-[#FF5B00]/5" 
+                    ? "border-[#EB4501] bg-[#EB4501]/5" 
                     : "border-[#E8EDF2] bg-white hover:bg-[#F4F7F9]"
                 )}
               >
                 <div className="w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 bg-white border-gray-300">
-                  {paymentMethod === 'credit' && <div className="w-2.5 h-2.5 bg-[#FF5B00] rounded-full" />}
+                  {paymentMethod === 'credit' && <div className="w-2.5 h-2.5 bg-[#EB4501] rounded-full" />}
                 </div>
                 <div>
                   <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wide leading-none mb-1">Online / Prepayment</h4>
@@ -561,7 +561,7 @@ ORDER STATUS: PENDING_CONFIRMATION
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     placeholder="Enter promo code"
-                    className="flex-1 h-[38px] bg-white border border-[#E5E7EB] rounded-md px-3 text-xs font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]"
+                    className="flex-1 h-[38px] bg-white border border-[#E5E7EB] rounded-md px-3 text-xs font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
                   />
                   <button
                     type="button"
@@ -591,14 +591,14 @@ ORDER STATUS: PENDING_CONFIRMATION
 
               <div className="pt-3 flex justify-between items-baseline border-t border-[#F1F1F3]">
                 <span className="text-xs font-bold text-[#1A1A2E]">Total ({activeCart.length} Item{activeCart.length === 1 ? '' : 's'})</span>
-                <span className="text-lg font-extrabold text-[#FF5B00]">৳{finalTotal.toLocaleString()}</span>
+                <span className="text-lg font-extrabold text-[#EB4501]">৳{finalTotal.toLocaleString()}</span>
               </div>
             </div>
 
             {/* Action check button */}
             <button
               onClick={handlePlaceOrder}
-              className="w-full px-6 py-3.5 bg-[#FF5B00] hover:bg-[#E8500A] text-white text-[12.5px] font-extrabold rounded-lg transition-colors cursor-pointer border-0 flex items-center justify-center gap-1.5"
+              className="w-full px-6 py-3.5 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[12.5px] font-extrabold rounded-lg transition-colors cursor-pointer border-0 flex items-center justify-center gap-1.5"
             >
               <span>PROCEED TO PAYMENT</span>
               <ArrowRight size={16} />
@@ -608,7 +608,7 @@ ORDER STATUS: PENDING_CONFIRMATION
 
           {/* Guaranteed security escrow */}
           <div className="bg-[#14161f] p-[18px] rounded-xl text-white flex gap-4 items-center">
-            <ShieldCheck size={28} className="text-[#FF5B00] shrink-0" />
+            <ShieldCheck size={28} className="text-[#EB4501] shrink-0" />
             <div>
               <h4 className="text-[11.5px] font-extrabold leading-none mb-1">Buyer Protection</h4>
               <p className="text-[10px] text-white/50 font-medium leading-relaxed">Purchases are escrow-backed. Sellers receive instant routing with order verification.</p>

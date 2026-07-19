@@ -378,7 +378,7 @@ export function ClaimProfileModal({
                   ) : targetType === 'brand' && currentUser.role !== 'seller' ? (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <h4 className="text-[12px] font-bold text-[#FF5B00] tracking-tight block">Eligibility check</h4>
+                        <h4 className="text-[12px] font-bold text-[#EB4501] tracking-tight block">Eligibility check</h4>
                         <h3 className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">Seller profile required</h3>
                         <p className="text-xs text-[#1A1A2E] font-bold leading-relaxed bg-[#F97316]/5 border border-[#F97316]/20 p-3.5 rounded-xl">
                           "Create Seller Profile to continue claiming brands"
@@ -391,7 +391,7 @@ export function ClaimProfileModal({
                       <button
                         type="button"
                         onClick={handleCreateSellerProfile}
-                        className="w-full h-12 rounded-xl bg-[#FF5B00] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
+                        className="w-full h-12 rounded-xl bg-[#EB4501] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
                       >
                         Create Seller Profile <ArrowRight size={13} />
                       </button>
@@ -399,7 +399,7 @@ export function ClaimProfileModal({
                   ) : targetType === 'creator' && currentUser.role !== 'creator' ? (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <h4 className="text-[12px] font-bold text-[#FF5B00] tracking-tight block">Eligibility check</h4>
+                        <h4 className="text-[12px] font-bold text-[#EB4501] tracking-tight block">Eligibility check</h4>
                         <h3 className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">Creator profile required</h3>
                         <p className="text-xs text-[#1A1A2E] font-bold leading-relaxed bg-[#F97316]/5 border border-[#F97316]/20 p-3.5 rounded-xl">
                           "Create Creator Profile to continue claiming your creator page"
@@ -412,7 +412,7 @@ export function ClaimProfileModal({
                       <button
                         type="button"
                         onClick={handleCreateCreatorProfile}
-                        className="w-full h-12 rounded-xl bg-[#FF5B00] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
+                        className="w-full h-12 rounded-xl bg-[#EB4501] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
                       >
                         Create Creator Profile <ArrowRight size={13} />
                       </button>
@@ -605,7 +605,7 @@ export function ClaimProfileModal({
                                     placeholder="executive@branddomain.com"
                                     className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
                                   />
-                                  <span className="text-[12px] font-medium text-[#FF5B00] tracking-tight mt-1 block">
+                                  <span className="text-[12px] font-medium text-[#EB4501] tracking-tight mt-1 block">
                                     ⚠ Domain verification link will be cross-referenced with your website DNS configuration.
                                   </span>
                                 </div>
@@ -672,7 +672,7 @@ export function ClaimProfileModal({
 
                                 {/* Dynamic Webcam selfie placeholder UI */}
                                 <div className="bg-orange-50/20 border border-[#F97316]/10 p-4 rounded-xl space-y-2">
-                                  <span className="text-[12px] font-bold text-[#FF5B00] tracking-tight block">National Registry Face Matching API</span>
+                                  <span className="text-[12px] font-bold text-[#EB4501] tracking-tight block">National Registry Face Matching API</span>
                                   <div className="flex flex-col sm:flex-row items-center gap-4">
                                     <div className="w-20 h-20 rounded-full border border-gray-200 bg-white overflow-hidden shrink-0 flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: selfiePreview ? `url(${selfiePreview})` : 'none' }}>
                                       {!selfiePreview && <Camera className="w-6 h-6 text-gray-400" />}
@@ -1052,7 +1052,7 @@ export function ClaimProfileModal({
 
                                 {/* Dynamic Webcam selfie placeholder UI */}
                                 <div className="bg-orange-50/20 border border-[#F97316]/10 p-4 rounded-xl space-y-2">
-                                  <span className="text-[12px] font-bold text-[#FF5B00] tracking-tight block font-mono">Biometric Presence Matching</span>
+                                  <span className="text-[12px] font-bold text-[#EB4501] tracking-tight block font-mono">Biometric Presence Matching</span>
                                   <div className="flex flex-col sm:flex-row items-center gap-4">
                                     <div className="w-20 h-20 rounded-full border border-gray-200 bg-white overflow-hidden shrink-0 flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: selfiePreview ? `url(${selfiePreview})` : 'none' }}>
                                       {!selfiePreview && <Camera className="w-6 h-6 text-gray-400" />}

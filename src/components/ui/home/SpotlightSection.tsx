@@ -18,7 +18,7 @@ export const SpotlightSection: React.FC<SpotlightSectionProps> = ({ cards }) => 
         </div>
         <Link 
           to="/discover" 
-          className="text-xs font-bold text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 hover:text-[#EB4501]"
+          className="text-xs font-bold text-[#EB4501] uppercase tracking-wider flex items-center gap-1 hover:text-[#CF4400]"
         >
           VIEW ALL SPOTLIGHT <ChevronRight size={14} />
         </Link>

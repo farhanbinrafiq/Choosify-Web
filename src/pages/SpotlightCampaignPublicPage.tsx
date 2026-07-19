@@ -91,7 +91,7 @@ export function SpotlightCampaignPublicPage() {
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <h1 className="text-xl font-bold text-[#1a1a2e]">Experience unavailable</h1>
         <p className="text-sm text-gray-500 mt-2">This Spotlight experience may have ended or been removed.</p>
-        <Link to="/spotlight" className="inline-flex items-center gap-1 mt-6 text-[#E8500A] text-sm font-bold uppercase">
+        <Link to="/spotlight" className="inline-flex items-center gap-1 mt-6 text-[#EB4501] text-sm font-bold uppercase">
           Browse Spotlight <ChevronRight size={14} />
         </Link>
       </div>
@@ -114,13 +114,13 @@ export function SpotlightCampaignPublicPage() {
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
             to={`/spotlight/${content.slug}`}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] bg-[#E8500A] text-white text-xs font-black uppercase tracking-wider rounded hover:bg-[#CF4400]"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] bg-[#EB4501] text-white text-xs font-black uppercase tracking-wider rounded hover:bg-[#CF4400]"
           >
             {content.live?.status === 'replay' || content.live?.status === 'ended' ? 'Watch Replay' : content.live?.status === 'upcoming' ? 'Notify Me' : 'Watch Live'}
           </Link>
           <Link
             to={`/spotlight/${content.slug}`}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] border border-[#e8edf2] text-[#1a1a2e] text-xs font-bold uppercase tracking-wider rounded hover:border-[#E8500A]/40"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] border border-[#e8edf2] text-[#1a1a2e] text-xs font-bold uppercase tracking-wider rounded hover:border-[#EB4501]/40"
           >
             Campaign Overview
           </Link>

@@ -67,7 +67,7 @@ export const ContentHeroCard: React.FC<ContentHeroCardProps> = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-6 flex flex-col items-start space-y-6">
-            <span className={cn("text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-widest", categoryBadgeBg || "bg-[#FF5B00]")}>
+            <span className={cn("text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-widest", categoryBadgeBg || "bg-[#EB4501]")}>
               {categoryBadge}
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
@@ -102,7 +102,7 @@ export const ContentHeroCard: React.FC<ContentHeroCardProps> = ({
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Button onClick={onLike} variant={isLiked ? "primary" : "outline"} className={cn("gap-2 border-white/20", isLiked ? "bg-[#FF5B00] text-white border-transparent" : "text-white hover:bg-white/10")}>
+              <Button onClick={onLike} variant={isLiked ? "primary" : "outline"} className={cn("gap-2 border-white/20", isLiked ? "bg-[#EB4501] text-white border-transparent" : "text-white hover:bg-white/10")}>
                 <Heart size={16} className={cn(isLiked && "fill-current")} /> {isLiked ? 'Liked' : 'Like'}
               </Button>
               <Button onClick={onSave} variant={isSaved ? "primary" : "outline"} className={cn("gap-2 border-white/20", isSaved ? "bg-white text-[#000435] border-transparent" : "text-white hover:bg-white/10")}>
@@ -115,7 +115,7 @@ export const ContentHeroCard: React.FC<ContentHeroCardProps> = ({
           </div>
           
           <div className="lg:col-span-6 relative group">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#FF5B00]/20 to-purple-500/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-700 opacity-50" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#EB4501]/20 to-purple-500/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-700 opacity-50" />
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
               <img src={coverImage} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#000435] via-transparent to-transparent opacity-80" />

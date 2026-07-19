@@ -36,7 +36,7 @@ export function SpotlightPublisherRow({
       ) : (
         <span
           className={cn(
-            'rounded-full bg-[#E8500A]/10 text-[#E8500A] font-black flex items-center justify-center shrink-0',
+            'rounded-full bg-[#EB4501]/10 text-[#EB4501] font-black flex items-center justify-center shrink-0',
             secondary || compact ? 'w-5 h-5 text-[8px]' : 'w-7 h-7 text-[10px]',
           )}
         >
@@ -54,7 +54,7 @@ export function SpotlightPublisherRow({
             {publisher.name}
           </span>
           {publisher.isVerified && !secondary && (
-            <BadgeCheck size={compact ? 10 : 12} className="text-[#E8500A] shrink-0" aria-label="Verified" />
+            <BadgeCheck size={compact ? 10 : 12} className="text-[#EB4501] shrink-0" aria-label="Verified" />
           )}
         </div>
         {!compact && !secondary && (

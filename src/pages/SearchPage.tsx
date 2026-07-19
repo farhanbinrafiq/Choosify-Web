@@ -77,7 +77,7 @@ export function SearchPage() {
       renderSearch: () => (
         <div className="relative">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <Search size={13} className="text-[#FF5B00]" />
+            <Search size={13} className="text-[#EB4501]" />
           </div>
           <input
             type="text"
@@ -95,7 +95,7 @@ export function SearchPage() {
               }
             }}
             placeholder="Search products, brands, guides…"
-            className="w-full h-9 pl-8 pr-3 bg-white border border-[#E8EDF2] rounded-lg text-[11px] font-semibold text-[#1A1A2E] placeholder-[#9AA0AC] focus:outline-none focus:border-[#FF5B00]/50"
+            className="w-full h-9 pl-8 pr-3 bg-white border border-[#E8EDF2] rounded-lg text-[11px] font-semibold text-[#1A1A2E] placeholder-[#9AA0AC] focus:outline-none focus:border-[#EB4501]/50"
           />
         </div>
       ),
@@ -301,7 +301,7 @@ export function SearchPage() {
   const brandList = activeTab === 'all' ? results.brands.slice(0, 5) : results.brands;
 
   return (
-    <div className="min-h-screen bg-[#F4F7F9] text-[#1A1A2E] pb-16 font-sans antialiased">
+    <div className="min-h-screen bg-choosify-feed text-[#1A1A2E] pb-16 font-sans antialiased">
       {/* DC dark hero — constrained to feed silhouette */}
       <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <header
@@ -341,8 +341,8 @@ export function SearchPage() {
                 className={cn(
                   'px-4 py-2.5 rounded-[20px] text-xs font-bold cursor-pointer border transition-colors',
                   active
-                    ? 'bg-[#FF5B00] text-white border-[#FF5B00]'
-                    : 'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#FF5B00]/40',
+                    ? 'bg-[#EB4501] text-white border-[#EB4501]'
+                    : 'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#EB4501]/40',
                 )}
               >
                 {tab.label}{' '}
@@ -392,7 +392,7 @@ export function SearchPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('products')}
-                className="mt-4 text-[12px] font-bold text-[#FF5B00] bg-transparent border-0 cursor-pointer hover:underline"
+                className="mt-4 text-[12px] font-bold text-[#EB4501] bg-transparent border-0 cursor-pointer hover:underline"
               >
                 View all {results.products.length} products →
               </button>
@@ -409,7 +409,7 @@ export function SearchPage() {
                 <Link
                   key={brand.id || brand.name}
                   to={`/brands/${brand.id || brand.slug || encodeURIComponent(brand.name)}`}
-                  className="bg-white rounded-[10px] border border-[#E8EDF2] p-[18px] text-center no-underline hover:border-[#FF5B00]/35 transition-colors"
+                  className="bg-white rounded-[10px] border border-[#E8EDF2] p-[18px] text-center no-underline hover:border-[#EB4501]/35 transition-colors"
                 >
                   <div
                     className="text-[15px] font-extrabold"
@@ -427,7 +427,7 @@ export function SearchPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('brands')}
-                className="mt-4 text-[12px] font-bold text-[#FF5B00] bg-transparent border-0 cursor-pointer hover:underline"
+                className="mt-4 text-[12px] font-bold text-[#EB4501] bg-transparent border-0 cursor-pointer hover:underline"
               >
                 View all {results.brands.length} brands →
               </button>
@@ -444,7 +444,7 @@ export function SearchPage() {
                 <Link
                   key={guide.id || guide.slug}
                   to={catalogGuideHref(guide)}
-                  className="bg-white rounded-[10px] border border-[#E8EDF2] overflow-hidden no-underline hover:border-[#FF5B00]/35 transition-colors"
+                  className="bg-white rounded-[10px] border border-[#E8EDF2] overflow-hidden no-underline hover:border-[#EB4501]/35 transition-colors"
                 >
                   {guide.image || guide.coverImage || guide.thumbnail ? (
                     <div className="h-[120px] bg-[#F4F7F9] overflow-hidden">
@@ -470,7 +470,7 @@ export function SearchPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('guides')}
-                className="mt-4 text-[12px] font-bold text-[#FF5B00] bg-transparent border-0 cursor-pointer hover:underline"
+                className="mt-4 text-[12px] font-bold text-[#EB4501] bg-transparent border-0 cursor-pointer hover:underline"
               >
                 View all {results.guides.length} guides →
               </button>
@@ -487,7 +487,7 @@ export function SearchPage() {
                 <Link
                   key={c.id || c.name}
                   to={`/creators/${c.id}`}
-                  className="bg-white rounded-[10px] border border-[#E8EDF2] p-5 text-center no-underline hover:border-[#FF5B00]/35 transition-colors"
+                  className="bg-white rounded-[10px] border border-[#E8EDF2] p-5 text-center no-underline hover:border-[#EB4501]/35 transition-colors"
                 >
                   <div className="w-14 h-14 rounded-full overflow-hidden mx-auto mb-3 bg-[#F4F7F9]">
                     {c.avatar ? (
@@ -511,7 +511,7 @@ export function SearchPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('creators')}
-                className="mt-4 text-[12px] font-bold text-[#FF5B00] bg-transparent border-0 cursor-pointer hover:underline"
+                className="mt-4 text-[12px] font-bold text-[#EB4501] bg-transparent border-0 cursor-pointer hover:underline"
               >
                 View all {results.creators.length} creators →
               </button>

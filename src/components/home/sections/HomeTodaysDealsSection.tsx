@@ -19,7 +19,7 @@ const DEFAULT_DEALS = [
     title: 'Up to 60% Off Electronics',
     cta: 'Shop Now',
     href: '/deals',
-    bg: 'linear-gradient(135deg,#FF5B00,#EB4501)',
+    bg: 'linear-gradient(135deg,#EB4501,#CF4400)',
   },
   {
     kind: 'bank' as const,

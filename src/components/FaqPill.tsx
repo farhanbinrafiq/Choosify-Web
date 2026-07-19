@@ -17,11 +17,11 @@ export function FaqPill({ label, answer, icon }: FaqPillProps) {
         onClick={() => setIsOpen(!isOpen)}
         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 border border-slate-200 text-[#000435] text-xs font-bold hover:bg-slate-100 hover:border-slate-300 transition-all cursor-pointer shadow-sm active:scale-[0.98]"
       >
-        {icon || <HelpCircle size={14} className="text-[#FF5B00]" />}
+        {icon || <HelpCircle size={14} className="text-[#EB4501]" />}
         <span>{label}</span>
         <ChevronDown
           size={13}
-          className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#FF5B00]' : ''}`}
+          className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#EB4501]' : ''}`}
         />
       </button>
 

@@ -9,7 +9,7 @@ export interface PriorityDefinition {
 
 export const PRIORITY_REGISTRY: PriorityDefinition[] = [
   { id: 'critical', label: 'Critical', color: '#dc2626', sortOrder: 0 },
-  { id: 'high', label: 'High', color: '#E8500A', sortOrder: 1 },
+  { id: 'high', label: 'High', color: '#EB4501', sortOrder: 1 },
   { id: 'medium', label: 'Medium', color: '#f59e0b', sortOrder: 2 },
   { id: 'low', label: 'Low', color: '#94a3b8', sortOrder: 3 },
 ];

@@ -143,7 +143,7 @@ export function TrendingBrandsCarousel({
                   <div className="absolute top-4 left-4 z-10">
                     <span
                       className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-white"
-                      style={{ background: '#E8500A' }}
+                      style={{ background: '#EB4501' }}
                     >
                       {brand.category}
                     </span>
@@ -225,7 +225,7 @@ export function TrendingBrandsCarousel({
                   <div className="absolute top-4 left-4 z-10">
                     <span
                       className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full text-white"
-                      style={{ background: '#E8500A' }}
+                      style={{ background: '#EB4501' }}
                     >
                       {brand.category}
                     </span>
@@ -300,7 +300,7 @@ export function TrendingBrandsCarousel({
                 width: carouselIndex === i
                   ? (viewportSize === 'mobile' ? '28px' : '36px')
                   : (viewportSize === 'mobile' ? '10px' : '8px'),
-                background: carouselIndex === i ? '#E8500A' : 'rgba(255,255,255,0.22)',
+                background: carouselIndex === i ? '#EB4501' : 'rgba(255,255,255,0.22)',
               }}
               aria-label={`Go to brand ${i + 1}`}
             />

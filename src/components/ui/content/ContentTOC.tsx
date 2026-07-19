@@ -68,7 +68,7 @@ export const ContentTOC: React.FC<ContentTOCProps> = ({
   return (
     <div className={cn("bg-white rounded-3xl p-6 border border-slate-100 shadow-sm sticky top-24", className)}>
       <h3 className="text-xs font-black text-[#000435] uppercase tracking-widest flex items-center gap-2 mb-4">
-        <List className="w-4 h-4 text-[#FF5B00]" /> TABLE OF CONTENTS
+        <List className="w-4 h-4 text-[#EB4501]" /> TABLE OF CONTENTS
       </h3>
       <nav className="space-y-1">
         {headings.map((heading) => {
@@ -82,7 +82,7 @@ export const ContentTOC: React.FC<ContentTOCProps> = ({
                 "block py-2 text-sm font-semibold transition-all border-l-2",
                 heading.level === 2 ? "pl-4" : "pl-8 text-xs",
                 isActive 
-                  ? "border-[#FF5B00] text-[#FF5B00] bg-orange-50/50" 
+                  ? "border-[#EB4501] text-[#EB4501] bg-orange-50/50" 
                   : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 hover:bg-slate-50"
               )}
             >

@@ -6,13 +6,13 @@ import type { SiteProductBadge } from '../types/catalog';
 export type ProductBadgeTone = 'hot' | 'new' | 'featured' | 'sale' | 'event' | 'promo' | 'default';
 
 const TONE_STYLES: Record<ProductBadgeTone, string> = {
-  hot: 'bg-gradient-to-r from-[#E8500A] to-[#FF5B00] text-white border-[#FF8A4C]/40 shadow-[0_2px_8px_rgba(232,80,10,0.35)]',
+  hot: 'bg-gradient-to-r from-[#EB4501] to-[#CF4400] text-white border-[#FF8A4C]/40 shadow-[0_2px_8px_rgba(235, 69, 1,0.35)]',
   new: 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white border-emerald-300/40 shadow-[0_2px_8px_rgba(16,185,129,0.28)]',
   featured: 'bg-gradient-to-r from-[#1A1D4E] to-[#2d3278] text-white border-[#4b55c4]/35 shadow-[0_2px_8px_rgba(26,29,78,0.28)]',
   sale: 'bg-gradient-to-r from-rose-600 to-red-500 text-white border-rose-300/40 shadow-[0_2px_8px_rgba(225,29,72,0.28)]',
   event: 'bg-gradient-to-r from-violet-600 to-purple-500 text-white border-violet-300/40 shadow-[0_2px_8px_rgba(124,58,237,0.28)]',
   promo: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-200/50 shadow-[0_2px_8px_rgba(245,158,11,0.28)]',
-  default: 'bg-gradient-to-r from-[#E8500A] to-[#CF4400] text-white border-orange-200/40 shadow-[0_2px_8px_rgba(232,80,10,0.25)]',
+  default: 'bg-gradient-to-r from-[#EB4501] to-[#CF4400] text-white border-orange-200/40 shadow-[0_2px_8px_rgba(235, 69, 1,0.25)]',
 };
 
 function resolveTone(label: string): ProductBadgeTone {

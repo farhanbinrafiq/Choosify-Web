@@ -6,7 +6,7 @@ import { DealCard } from '../../../components/DealCard';
 export const DEALS_MOCK = [
   {
     type: 'flash',
-    bg: 'bg-gradient-to-br from-[#FF5B00] to-[#EB4501]',
+    bg: 'bg-gradient-to-br from-[#EB4501] to-[#CF4400]',
     label: 'FLASH SALE',
     title: 'Up to 60% Off',
     subtitle: 'On selected items',
@@ -52,7 +52,7 @@ export const DealsSection: React.FC = () => {
         </div>
         <Link 
           to="/deals" 
-          className="text-xs font-bold text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 hover:text-[#EB4501]"
+          className="text-xs font-bold text-[#EB4501] uppercase tracking-wider flex items-center gap-1 hover:text-[#CF4400]"
         >
           VIEW ALL DEALS <ChevronRight size={14} />
         </Link>

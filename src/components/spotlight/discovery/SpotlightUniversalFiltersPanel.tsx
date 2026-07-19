@@ -58,7 +58,7 @@ function FilterChip({ active, label, onClick }: { active?: boolean; label: strin
       type="button"
       onClick={onClick}
       className={cn(
-        'px-3 py-1.5 min-h-[44px] rounded-full text-[10px] font-bold uppercase border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E8500A]',
+        'px-3 py-1.5 min-h-[44px] rounded-full text-[10px] font-bold uppercase border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]',
         active ? 'bg-navy text-white border-navy' : 'bg-white text-gray-500 border-[#e8edf2]',
       )}
     >

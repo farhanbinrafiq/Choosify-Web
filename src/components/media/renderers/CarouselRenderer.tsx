@@ -70,7 +70,7 @@ export function CarouselRenderer({
               onClick={() => goTo(i)}
               className={cn(
                 'h-1.5 rounded-full transition-all',
-                i === index ? 'w-5 bg-[#E8500A]' : 'w-1.5 bg-white/70',
+                i === index ? 'w-5 bg-[#EB4501]' : 'w-1.5 bg-white/70',
               )}
               aria-label={`Go to slide ${i + 1}`}
             />

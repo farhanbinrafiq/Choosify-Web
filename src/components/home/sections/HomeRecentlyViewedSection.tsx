@@ -25,7 +25,7 @@ export function HomeRecentlyViewedSection({ products }: HomeRecentlyViewedSectio
           <Link
             key={product.id}
             to={`/products/${product.slug ?? product.id}`}
-            className="bg-white rounded-[10px] overflow-hidden border border-[#E8EDF2] hover:border-[#FF5B00]/35 transition-colors"
+            className="bg-white rounded-[10px] overflow-hidden border border-[#E8EDF2] hover:border-[#EB4501]/35 transition-colors"
           >
             <div className="relative h-[150px] bg-[#F4F7F9]">
               <img
@@ -34,7 +34,7 @@ export function HomeRecentlyViewedSection({ products }: HomeRecentlyViewedSectio
                 className="w-full h-full object-contain p-3"
                 loading="lazy"
               />
-              <span className="absolute top-2 right-2 w-[26px] h-[26px] rounded-full bg-white/92 flex items-center justify-center text-[#FF5B00]">
+              <span className="absolute top-2 right-2 w-[26px] h-[26px] rounded-full bg-white flex items-center justify-center text-[#CBD5E1] shadow-sm">
                 <Heart size={13} />
               </span>
             </div>

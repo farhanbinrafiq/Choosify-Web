@@ -29,7 +29,7 @@ export function SpotlightCampaignBadges({ badges, campaignType, className }: Spo
   return (
     <div className={cn('flex flex-wrap gap-1.5', className)}>
       {primary && (
-        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#E8500A] text-white">
+        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#EB4501] text-white">
           {BADGE_LABELS[primary]}
         </span>
       )}

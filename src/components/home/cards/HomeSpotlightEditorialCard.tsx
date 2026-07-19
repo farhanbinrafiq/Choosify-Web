@@ -27,7 +27,7 @@ function resolveEditorialBadge(card: HomepageSpotlightCardModel): EditorialBadge
     return { label: 'BRAND STORY', className: 'bg-violet-500 text-white' };
   }
   if (['promotion', 'discount', 'festival_campaign'].includes(type)) {
-    return { label: 'CAMPAIGN', className: 'bg-[#E8500A] text-white' };
+    return { label: 'CAMPAIGN', className: 'bg-[#EB4501] text-white' };
   }
   if (type === 'multi_product') {
     return { label: 'CAROUSEL', className: 'bg-blue-500 text-white' };

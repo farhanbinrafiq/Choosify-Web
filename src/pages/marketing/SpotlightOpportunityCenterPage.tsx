@@ -35,7 +35,7 @@ export default function SpotlightOpportunityCenterPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight flex items-center gap-2">
-            <Lightbulb size={24} className="text-[#E8500A]" aria-hidden />
+            <Lightbulb size={24} className="text-[#EB4501]" aria-hidden />
             Spotlight Opportunity Center
           </h1>
           <p className="text-xs text-gray-500 mt-1">
@@ -43,10 +43,10 @@ export default function SpotlightOpportunityCenterPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link to="/marketing/intelligence" className="inline-flex items-center gap-1 text-[10px] font-bold uppercase text-gray-400 hover:text-[#E8500A]">
+          <Link to="/marketing/intelligence" className="inline-flex items-center gap-1 text-[10px] font-bold uppercase text-gray-400 hover:text-[#CF4400]">
             <BarChart3 size={12} aria-hidden /> Intelligence
           </Link>
-          <Link to="/marketing/studio" className="inline-flex items-center gap-1 text-[10px] font-bold uppercase text-gray-400 hover:text-[#E8500A]">
+          <Link to="/marketing/studio" className="inline-flex items-center gap-1 text-[10px] font-bold uppercase text-gray-400 hover:text-[#CF4400]">
             <Megaphone size={12} aria-hidden /> Publisher Studio
           </Link>
         </div>
@@ -107,7 +107,7 @@ export default function SpotlightOpportunityCenterPage() {
           <option value="dismissed">Dismissed</option>
           <option value="all">All Status</option>
         </select>
-        <button type="button" onClick={center.resetFilters} className="text-[10px] font-bold uppercase text-gray-400 hover:text-[#E8500A] ml-auto">
+        <button type="button" onClick={center.resetFilters} className="text-[10px] font-bold uppercase text-gray-400 hover:text-[#CF4400] ml-auto">
           Reset
         </button>
       </div>

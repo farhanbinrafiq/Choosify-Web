@@ -25,7 +25,7 @@ export function SpotlightCollectionPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <h1 className="text-xl font-bold">Collection not found</h1>
-        <Link to="/spotlight/explore?tab=collections" className="mt-4 inline-block text-[#E8500A] text-sm font-bold uppercase">
+        <Link to="/spotlight/explore?tab=collections" className="mt-4 inline-block text-[#EB4501] text-sm font-bold uppercase">
           Browse collections
         </Link>
       </div>
@@ -44,7 +44,7 @@ export function SpotlightCollectionPage() {
         ]}
       />
       <header className="mb-8 text-left">
-        <span className="text-[10px] font-black uppercase text-[#E8500A]">{collection.kind}</span>
+        <span className="text-[10px] font-black uppercase text-[#EB4501]">{collection.kind}</span>
         <h1 className="text-2xl font-bold text-[#1a1a2e] mt-1">{collection.name}</h1>
         {collection.description && <p className="text-sm text-gray-500 mt-2">{collection.description}</p>}
       </header>

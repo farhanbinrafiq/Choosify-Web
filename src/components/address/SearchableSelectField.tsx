@@ -22,7 +22,7 @@ function FieldLabel({ children, required = false }: { children: React.ReactNode;
   return (
     <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-1">
       {children}
-      {required && <span className="text-[#E8500A] ml-1">*</span>}
+      {required && <span className="text-[#EB4501] ml-1">*</span>}
     </label>
   );
 }
@@ -68,7 +68,7 @@ export function SearchableSelectField({
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
         className={cn(
-          'w-full min-h-[48px] bg-slate-50 border border-slate-200/60 rounded-2xl px-4 text-left text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all flex items-center justify-between gap-2',
+          'w-full min-h-[48px] bg-slate-50 border border-slate-200/60 rounded-2xl px-4 text-left text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#EB4501]/10 focus:border-[#EB4501]/40 focus:bg-white transition-all flex items-center justify-between gap-2',
           disabled && 'bg-gray-50 text-gray-400 cursor-not-allowed',
         )}
         aria-haspopup="listbox"
@@ -115,7 +115,7 @@ export function SearchableSelectField({
                     }}
                     className={cn(
                       'w-full text-left px-4 py-2.5 text-[11px] font-bold hover:bg-[#FFF0E8] transition-colors',
-                      option.id === value ? 'text-[#E8500A] bg-[#FFF0E8]/60' : 'text-[#1a1a2e]',
+                      option.id === value ? 'text-[#EB4501] bg-[#FFF0E8]/60' : 'text-[#1a1a2e]',
                     )}
                   >
                     {option.postalCode ? `${option.name} (${option.postalCode})` : option.name}

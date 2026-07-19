@@ -54,7 +54,7 @@ export function CardEngagementStrip({
         onClick={onClickCapture}
       >
         <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
-          <span className="text-[#E8500A] text-lg font-space font-black">♥</span>
+          <span className="text-[#FF000D] text-lg font-space font-black">♥</span>
           <span>{loveCount.toLocaleString()} Love Reacts</span>
           <button
             type="button"
@@ -62,8 +62,8 @@ export function CardEngagementStrip({
             className={cn(
               'h-9 px-4 rounded-lg font-bold text-[12px] tracking-tight flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm whitespace-nowrap',
               hasLoved
-                ? 'bg-[#E8500A] text-white border border-[#E8500A]'
-                : 'bg-white text-[#E8500A] border border-white hover:bg-[#FFF0E8]',
+                ? 'bg-[#FF000D] text-white border border-[#FF000D]'
+                : 'bg-white text-[#1A1A2E] border border-white hover:bg-white/95',
             )}
           >
             <Heart size={13} className={cn(hasLoved && 'fill-current')} />
@@ -74,7 +74,7 @@ export function CardEngagementStrip({
         <div className="hidden sm:block h-4 w-px bg-white/20 shrink-0" aria-hidden="true" />
 
         <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
-          <Bookmark size={14} className="text-[#E8500A]" />
+          <Bookmark size={14} className="text-[#EB4501]" />
           <span>{saveCount.toLocaleString()} Saved</span>
           <button
             type="button"
@@ -82,7 +82,7 @@ export function CardEngagementStrip({
             className={cn(
               'h-9 px-4 rounded-lg font-bold text-[12px] tracking-tight flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm whitespace-nowrap border',
               isSaved
-                ? 'bg-white text-[#E8500A] border-white'
+                ? 'bg-white text-[#EB4501] border-white'
                 : 'bg-[#1A1D4E] text-white border-white/15 hover:bg-[#252a6e]',
             )}
           >
@@ -122,7 +122,7 @@ export function CardEngagementStrip({
           onClick={toggleLove}
           className={cn(
             'inline-flex items-center gap-1.5 min-h-8 px-1 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer border-0 bg-transparent',
-            hasLoved ? 'text-[#E8500A]' : 'text-[#8a9bb0] hover:text-[#E8500A]',
+            hasLoved ? 'text-[#FF000D]' : 'text-[#8a9bb0] hover:text-[#FF000D]',
           )}
         >
           <Heart size={14} className={cn(hasLoved && 'fill-current')} />
@@ -134,7 +134,7 @@ export function CardEngagementStrip({
           onClick={toggleSave}
           className={cn(
             'inline-flex items-center gap-1.5 min-h-8 px-1 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer border-0 bg-transparent',
-            isSaved ? 'text-[#E8500A]' : 'text-[#8a9bb0] hover:text-[#E8500A]',
+            isSaved ? 'text-[#FF000D]' : 'text-[#8a9bb0] hover:text-[#FF000D]',
           )}
         >
           <Bookmark size={14} className={cn(isSaved && 'fill-current')} />
@@ -145,7 +145,7 @@ export function CardEngagementStrip({
           <button
             type="button"
             onClick={(event) => share(event, shareUrl)}
-            className="inline-flex items-center gap-1.5 min-h-8 px-1 text-[11px] font-bold uppercase tracking-wider text-[#8a9bb0] hover:text-[#E8500A] transition-colors cursor-pointer border-0 bg-transparent"
+            className="inline-flex items-center gap-1.5 min-h-8 px-1 text-[11px] font-bold uppercase tracking-wider text-[#8a9bb0] hover:text-[#CF4400] transition-colors cursor-pointer border-0 bg-transparent"
           >
             <Share2 size={14} />
           </button>

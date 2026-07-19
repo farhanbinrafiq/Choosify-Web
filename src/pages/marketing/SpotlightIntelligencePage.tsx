@@ -146,7 +146,7 @@ function ContentSection({ intel }: { intel: IntelState }) {
           <div key={row.contentId} className="bg-white border border-[#e8edf2] rounded-xl p-4 space-y-3">
             <div className="flex flex-wrap justify-between gap-2">
               <div>
-                <button type="button" className="text-sm font-black text-navy hover:text-[#E8500A] text-left" onClick={() => row.href && navigate(row.href)}>
+                <button type="button" className="text-sm font-black text-navy hover:text-[#CF4400] text-left" onClick={() => row.href && navigate(row.href)}>
                   {row.title}
                 </button>
                 <p className="text-[10px] text-gray-400 uppercase">{row.contentType.replace(/_/g, ' ')}</p>
@@ -187,7 +187,7 @@ function CampaignsSection({ intel }: { intel: IntelState }) {
           <div key={row.campaignId} className="bg-white border border-[#e8edf2] rounded-xl p-4 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <button type="button" className="text-sm font-black text-navy uppercase hover:text-[#E8500A]" onClick={() => navigate(`/marketing/intelligence/campaigns/${row.campaignId}`)}>
+                <button type="button" className="text-sm font-black text-navy uppercase hover:text-[#CF4400]" onClick={() => navigate(`/marketing/intelligence/campaigns/${row.campaignId}`)}>
                   {row.name}
                 </button>
                 <p className="text-[10px] text-gray-400 uppercase">{row.status}</p>
@@ -451,14 +451,14 @@ export function SpotlightIntelligencePage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight flex items-center gap-2">
-            <BarChart3 size={24} className="text-[#E8500A]" />
+            <BarChart3 size={24} className="text-[#EB4501]" />
             Spotlight Intelligence
           </h1>
           <p className="text-xs text-gray-500 mt-1">
             The analytics brain of Choosify Spotlight — every experience measurable
           </p>
         </div>
-        <Link to="/marketing/studio" className="inline-flex items-center gap-1 text-[10px] font-bold uppercase text-gray-400 hover:text-[#E8500A]">
+        <Link to="/marketing/studio" className="inline-flex items-center gap-1 text-[10px] font-bold uppercase text-gray-400 hover:text-[#CF4400]">
           <Megaphone size={12} /> Publisher Studio
         </Link>
       </div>
@@ -478,7 +478,7 @@ export function SpotlightIntelligencePage() {
       {entityId && (
         <div className="bg-[#050514] text-white rounded-lg px-4 py-2 text-xs font-bold uppercase">
           Drill-down: {section} / {entityId}
-          <Link to={`/marketing/intelligence/${section === 'mission_control' ? '' : section}`} className="ml-3 text-[#E8500A] hover:underline">← Back</Link>
+          <Link to={`/marketing/intelligence/${section === 'mission_control' ? '' : section}`} className="ml-3 text-[#EB4501] hover:underline">← Back</Link>
         </div>
       )}
 

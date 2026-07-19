@@ -132,7 +132,7 @@ export function CreatorProfilePage() {
   const reviewDemo = getCreatorReviewDemo(creator);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       
       {/* 1. CREATOR HERO SECTION — Choosify.dc.html */}
       <div ref={creatorHeroRef}>
@@ -178,7 +178,7 @@ export function CreatorProfilePage() {
                 }}
                 className={
                   isLoved
-                    ? 'inline-flex items-center gap-1.5 bg-[#FFF3EA] text-[#FF5B00] border border-[#FFD8B8] px-[18px] py-2.5 rounded-lg text-xs font-bold'
+                    ? 'inline-flex items-center gap-1.5 bg-[#FF000D] text-white border border-[#FF000D] px-[18px] py-2.5 rounded-lg text-xs font-bold'
                     : 'inline-flex items-center gap-1.5 bg-white text-[#1A1A2E] border border-[#E5E7EB] px-[18px] py-2.5 rounded-lg text-xs font-semibold hover:bg-[#F4F7F9]'
                 }
               >
@@ -204,7 +204,7 @@ export function CreatorProfilePage() {
                 Ask For Branding
               </button>
               {localClaimStatus === 'pending' && (
-                <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-200 px-[18px] py-2.5 rounded-lg text-xs font-bold">
+                <div className="inline-flex items-center gap-1.5 bg-[#FF000D] text-white border border-[#FF000D] px-[18px] py-2.5 rounded-lg text-xs font-bold">
                   <Clock size={13} /> Verification Pending
                 </div>
               )}
@@ -214,7 +214,7 @@ export function CreatorProfilePage() {
       </div>
 
       {/* Profile tabs — Choosify.dc.html green underline */}
-      <div className="sticky z-40 w-full bg-[#F4F7F9] border-b border-[#E8EDF2] choosify-sticky-section-nav">
+      <div className="sticky z-40 w-full bg-choosify-feed border-b border-[#E8EDF2] choosify-sticky-section-nav">
         <div className="max-w-[1180px] mx-auto px-5 sm:px-8 lg:px-10 flex gap-7 overflow-x-auto">
           {(
             [
@@ -458,7 +458,7 @@ export function CreatorProfilePage() {
                        </button>
                        <button
                          type="submit"
-                         className="px-5 py-2.5 rounded-lg bg-[#FF5B00] hover:brightness-110 text-white text-[12px] font-bold tracking-tight flex items-center gap-1.5 shadow-sm cursor-pointer border-0"
+                         className="px-5 py-2.5 rounded-lg bg-[#EB4501] hover:brightness-110 text-white text-[12px] font-bold tracking-tight flex items-center gap-1.5 shadow-sm cursor-pointer border-0"
                        >
                          Submit Briefing <Send size={11} />
                        </button>

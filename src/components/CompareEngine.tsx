@@ -90,9 +90,9 @@ export function CompareEngine() {
   const STICKY_PILL_BASE =
     'shrink-0 px-4 py-2.5 sm:py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap touch-manipulation min-h-[40px] sm:min-h-0';
   const STICKY_PILL_ACTIVE =
-    'bg-[#FF5B00] text-white border border-[#FF5B00]';
+    'bg-[#EB4501] text-white border border-[#EB4501]';
   const STICKY_PILL_INACTIVE =
-    'bg-white text-[#1A1A2E] border border-[#E8EDF2] hover:border-[#FF5B00]/40 hover:text-[#FF5B00]';
+    'bg-white text-[#1A1A2E] border border-[#E8EDF2] hover:border-[#EB4501]/40 hover:text-[#CF4400]';
 
   const compareModeOptions = [
     { id: 'product' as const, label: 'Product Compare', icon: <ShoppingBag size={13} /> },
@@ -492,7 +492,7 @@ export function CompareEngine() {
   const toggleSwitch = (on: boolean) =>
     cn(
       'relative w-[34px] h-[19px] rounded-[10px] shrink-0 transition-colors cursor-pointer',
-      on ? 'bg-[#FF5B00]' : 'bg-[#D1D5DB]',
+      on ? 'bg-[#EB4501]' : 'bg-[#D1D5DB]',
     );
 
   useRegisterPageFilters(
@@ -530,7 +530,7 @@ export function CompareEngine() {
           <button
             type="button"
             onClick={() => setIsProductSearchOpen(true)}
-            className="px-8 py-3 bg-[#FF5B00] hover:brightness-110 text-white text-xs font-bold rounded-lg transition-all cursor-pointer border-none"
+            className="px-8 py-3 bg-[#EB4501] hover:brightness-110 text-white text-xs font-bold rounded-lg transition-all cursor-pointer border-none"
           >
             Add Products
           </button>
@@ -565,7 +565,7 @@ export function CompareEngine() {
                     'px-4 py-3 flex flex-col items-center justify-center text-center relative transition-all duration-300 min-h-[72px]',
                     p.matchesCriteria
                       ? productWinner?.id === p.id
-                        ? 'bg-[#FF5B00]/5'
+                        ? 'bg-[#EB4501]/5'
                         : 'bg-white'
                       : 'opacity-35 grayscale',
                   )}
@@ -598,7 +598,7 @@ export function CompareEngine() {
                   className="w-full px-[18px] py-3.5 flex items-center justify-between group hover:bg-[#FAFAFB] transition-colors border-b border-[#F1F1F3] bg-[#FAFAFB]"
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="text-[#FF5B00] shrink-0 text-[17px]">{section.icon}</span>
+                    <span className="text-[#EB4501] shrink-0 text-[17px]">{section.icon}</span>
                     <div className="text-left">
                       <h4 className="text-[12.5px] font-extrabold text-[#1A1A2E] tracking-tight leading-none">
                         {section.title}
@@ -668,7 +668,7 @@ export function CompareEngine() {
                                         <div className="text-[12.5px] font-bold text-[#1A1A2E]">{val}</div>
                                         <div className="w-full max-w-[100px] h-1 bg-[#F1F1F3] rounded-full overflow-hidden mt-1.5">
                                           <div
-                                            className="h-full bg-[#FF5B00]"
+                                            className="h-full bg-[#EB4501]"
                                             style={{ width: `${parseInt(val, 10) || 85}%` }}
                                           />
                                         </div>
@@ -692,7 +692,7 @@ export function CompareEngine() {
                                         {val}
                                       </span>
                                     ) : metric.type === 'tag' ? (
-                                      <span className="text-[12px] font-bold text-[#FF5B00] underline underline-offset-2">
+                                      <span className="text-[12px] font-bold text-[#EB4501] underline underline-offset-2">
                                         {val}
                                       </span>
                                     ) : (
@@ -722,7 +722,7 @@ export function CompareEngine() {
 
         {includeInlineVerdict && (
           <div className="bg-[#FAFAFB] p-6 md:p-8 text-center md:text-left flex flex-col md:flex-row items-center gap-6 md:gap-8 border-t border-[#E8EDF2]">
-            <div className="w-12 h-12 rounded-full bg-[#FFF3EA] flex items-center justify-center text-[#FF5B00] shrink-0 border border-[#FFD8B8]">
+            <div className="w-12 h-12 rounded-full bg-[#FFF3EA] flex items-center justify-center text-[#EB4501] shrink-0 border border-[#FFD8B8]">
               <Trophy size={20} />
             </div>
             <div className="flex-1">
@@ -748,7 +748,7 @@ export function CompareEngine() {
               <span className="text-[8px] font-extrabold text-[#9AA0AC] uppercase tracking-widest mb-1">
                 Recommended
               </span>
-              <span className="text-base font-extrabold text-[#FF5B00] leading-none uppercase">
+              <span className="text-base font-extrabold text-[#EB4501] leading-none uppercase">
                 {compareMode === 'product' && (productWinner?.name || '—')}
                 {compareMode === 'brand' && 'AARONG'}
                 {compareMode === 'creator' && 'NAFIS ANJUM'}
@@ -790,13 +790,13 @@ export function CompareEngine() {
                         'bg-white border rounded-xl p-5 text-left group transition-all duration-300 flex flex-col justify-between h-44 relative overflow-hidden',
                         p.matchesCriteria
                           ? p.isWinner
-                            ? 'border-[#FF5B00] shadow-sm'
-                            : 'border-[#E8EDF2] hover:border-[#FF5B00]/40'
+                            ? 'border-[#EB4501] shadow-sm'
+                            : 'border-[#E8EDF2] hover:border-[#EB4501]/40'
                           : 'border-[#E8EDF2] opacity-40 grayscale',
                       )}
                     >
                       {p.isWinner && (
-                        <div className="absolute -top-1.5 right-4 bg-[#FF5B00] text-white text-[8px] font-extrabold px-3 py-1 rounded-b-[4px] uppercase tracking-widest z-20">
+                        <div className="absolute -top-1.5 right-4 bg-[#EB4501] text-white text-[8px] font-extrabold px-3 py-1 rounded-b-[4px] uppercase tracking-widest z-20">
                           AI Winner
                         </div>
                       )}
@@ -810,7 +810,7 @@ export function CompareEngine() {
                           <img src={p.image} className="w-full h-full object-cover rounded-[3px]" alt={p.name} />
                         </div>
                         <div className="min-w-0">
-                          <span className="text-[#FF5B00] text-[8px] font-extrabold uppercase tracking-widest block leading-none mb-1">
+                          <span className="text-[#EB4501] text-[8px] font-extrabold uppercase tracking-widest block leading-none mb-1">
                             {p.brand}
                           </span>
                           <h4 className="text-[#1A1A2E] text-xs font-bold line-clamp-2 leading-snug">{p.name}</h4>
@@ -839,7 +839,7 @@ export function CompareEngine() {
                   <span className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#9AA0AC] whitespace-nowrap">
                     Decision profile
                   </span>
-                  <div className="w-2 h-2 rounded-full bg-[#FF5B00] animate-pulse shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-[#EB4501] animate-pulse shrink-0" />
                 </div>
 
                 <div className="relative min-w-0 w-full md:w-auto md:max-w-full">
@@ -990,7 +990,7 @@ export function CompareEngine() {
                     setSelectedBudget(Number(e.target.value));
                     triggerSoftLoading();
                   }}
-                  className="w-full accent-[#FF5B00] cursor-pointer mb-2"
+                  className="w-full accent-[#EB4501] cursor-pointer mb-2"
                 />
                 <div className="flex justify-between text-[10.5px] text-[#9AA0AC] mb-5">
                   <span>৳ 1,500</span>
@@ -1046,7 +1046,7 @@ export function CompareEngine() {
               {isLoading && (
                 <div className="absolute inset-0 bg-white/70 z-50 flex items-center justify-center rounded-xl min-h-[200px]">
                   <div className="flex flex-col items-center gap-2">
-                    <div className="w-8 h-8 rounded-full border-2 border-[#FF5B00] border-t-transparent animate-spin" />
+                    <div className="w-8 h-8 rounded-full border-2 border-[#EB4501] border-t-transparent animate-spin" />
                     <span className="text-[13px] font-semibold text-[#1A1A2E]">Recalculating…</span>
                   </div>
                 </div>
@@ -1072,7 +1072,7 @@ export function CompareEngine() {
                         className={cn(
                           'text-[10px] font-extrabold px-2.5 py-1 rounded-full',
                           productWinner?.id === p.id
-                            ? 'bg-[#FFF3EA] text-[#FF5B00]'
+                            ? 'bg-[#FFF3EA] text-[#EB4501]'
                             : 'bg-[#F4F7F9] text-[#4B5563]',
                         )}
                       >
@@ -1106,7 +1106,7 @@ export function CompareEngine() {
                     </div>
                     <Link
                       to={`/products/${p.id}`}
-                      className="block w-full text-center bg-[#FF5B00] hover:brightness-110 text-white py-2.5 rounded-lg text-xs font-bold no-underline transition-all"
+                      className="block w-full text-center bg-[#EB4501] hover:brightness-110 text-white py-2.5 rounded-lg text-xs font-bold no-underline transition-all"
                     >
                       View on Store
                     </Link>
@@ -1116,7 +1116,7 @@ export function CompareEngine() {
                   <button
                     type="button"
                     onClick={() => setIsProductSearchOpen(true)}
-                    className="border-[1.5px] border-dashed border-[#D1D5DB] rounded-xl flex flex-col items-center justify-center gap-3 p-4 min-h-[290px] cursor-pointer bg-transparent hover:border-[#FF5B00]/40 transition-colors"
+                    className="border-[1.5px] border-dashed border-[#D1D5DB] rounded-xl flex flex-col items-center justify-center gap-3 p-4 min-h-[290px] cursor-pointer bg-transparent hover:border-[#EB4501]/40 transition-colors"
                   >
                     <div className="w-[54px] h-[54px] rounded-full border-[1.5px] border-dashed border-[#D1D5DB] flex items-center justify-center text-[22px] text-[#9AA0AC]">
                       +
@@ -1151,7 +1151,7 @@ export function CompareEngine() {
                     </div>
                     <Link
                       to={`/products/${productWinner.id}`}
-                      className="block w-full text-center bg-[#FF5B00] hover:brightness-110 text-white py-2.5 rounded-lg text-xs font-bold no-underline transition-all"
+                      className="block w-full text-center bg-[#EB4501] hover:brightness-110 text-white py-2.5 rounded-lg text-xs font-bold no-underline transition-all"
                     >
                       View Full Review
                     </Link>
@@ -1272,7 +1272,7 @@ export function CompareEngine() {
                   <img src={productWinner.image} alt="" className="w-full h-full object-cover" />
                 </div>
                 <div>
-                  <div className="text-[9.5px] font-extrabold text-[#FF5B00] tracking-[0.05em] mb-0.5">
+                  <div className="text-[9.5px] font-extrabold text-[#EB4501] tracking-[0.05em] mb-0.5">
                     BEST OVERALL
                   </div>
                   <div className="text-[9.5px] font-bold text-white/60">{productWinner.brand}</div>
@@ -1552,13 +1552,13 @@ export function CompareEngine() {
             
             {/* 1. DECISION COGNITIVE ASSISTANT CARD */}
             <div className="bg-white rounded-xl border border-[#E8EDF2] p-5 text-left relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-3 text-[#FF5B00] opacity-25">
+              <div className="absolute top-0 right-0 p-3 text-[#EB4501] opacity-25">
                 <Sparkles size={18} />
               </div>
 
                <div className="flex items-center gap-2 mb-3">
-                  <Activity size={14} className="text-[#FF5B00]" />
-                  <span className="text-[9.5px] font-extrabold text-[#FF5B00] uppercase tracking-widest">AI Tradeoff Engine</span>
+                  <Activity size={14} className="text-[#EB4501]" />
+                  <span className="text-[9.5px] font-extrabold text-[#EB4501] uppercase tracking-widest">AI Tradeoff Engine</span>
                </div>
                
                <h4 className="text-xs font-extrabold text-[#1A1A2E] tracking-tight leading-snug mb-3">
@@ -1572,7 +1572,7 @@ export function CompareEngine() {
                   {compareMode === 'brand' && (
                     <>
                       <div className="p-3 bg-[#F4F7F9] rounded-lg border border-[#E8EDF2]">
-                        <span className="text-[#FF5B00] font-bold block mb-1">Trust index priority alignment:</span>
+                        <span className="text-[#EB4501] font-bold block mb-1">Trust index priority alignment:</span>
                         Aarong holds standard elite legacy prestige. Yellow covers rapid trend updates. Target Aarong for handloom authenticity, Yellow for formal contemporary models.
                       </div>
                     </>
@@ -1581,7 +1581,7 @@ export function CompareEngine() {
                   {compareMode === 'creator' && (
                     <>
                       <div className="p-3 bg-[#F4F7F9] rounded-lg border border-[#E8EDF2]">
-                        <span className="text-[#FF5B00] font-bold block mb-1">Engagement vs Reach Ledger:</span>
+                        <span className="text-[#EB4501] font-bold block mb-1">Engagement vs Reach Ledger:</span>
                         Nafis holds stronger conversion indices on hardware specs, while Tasnim provides premier aesthetic context-matching options.
                       </div>
                     </>
@@ -1590,7 +1590,7 @@ export function CompareEngine() {
                   {compareMode === 'guide' && (
                     <>
                       <div className="p-3 bg-[#F4F7F9] rounded-lg border border-[#E8EDF2]">
-                        <span className="text-[#FF5B00] font-bold block mb-1">Capsule Integration:</span>
+                        <span className="text-[#EB4501] font-bold block mb-1">Capsule Integration:</span>
                         Capsule guidelines save estimated ৳15k yearly on impulse buys by enforcing matching outfit formulas.
                       </div>
                     </>
@@ -1599,7 +1599,7 @@ export function CompareEngine() {
                   {compareMode === 'ai' && (
                     <>
                       <div className="p-3 bg-[#F4F7F9] rounded-lg border border-[#E8EDF2]">
-                        <span className="text-[#FF5B00] font-bold block mb-1">Risk Optimization Ledger:</span>
+                        <span className="text-[#EB4501] font-bold block mb-1">Risk Optimization Ledger:</span>
                         Optimal value package optimizes upfront cost amortized over 12 months. Excellent low risk rating.
                       </div>
                     </>
@@ -1622,7 +1622,7 @@ export function CompareEngine() {
                  ].map((comp, idx) => (
                     <div key={idx} className="flex justify-between items-center bg-gray-50/50 hover:bg-gray-50 p-2.5 rounded-[4px] border border-[#e8edf2]/60 cursor-pointer transition-colors group">
                        <div>
-                          <span className="text-[13px] font-bold text-[#1A1A2E] tracking-tight group-hover:text-[#FF5B00] transition-colors block leading-tight">{comp.label}</span>
+                          <span className="text-[13px] font-bold text-[#1A1A2E] tracking-tight group-hover:text-[#CF4400] transition-colors block leading-tight">{comp.label}</span>
                           <span className="text-[11px] font-medium text-[#9AA0AC] mt-0.5 block">{comp.date}</span>
                        </div>
                        <span className="px-2 py-0.5 bg-[#D6E1EC]/30 text-navy/70 text-[8.5px] font-black rounded-full leading-none">{comp.count}</span>
@@ -1637,7 +1637,7 @@ export function CompareEngine() {
                <p className="text-[10px] text-gray-400 font-medium leading-relaxed mb-3">
                  Export these active filters and parameters into a standalone share link.
                </p>
-               <button className="w-full py-2.5 bg-[#FF5B00]/8 hover:bg-[#FF5B00]/15 border border-[#FF5B00]/25 text-[#FF5B00] rounded-lg text-[13px] font-bold tracking-tight flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+               <button className="w-full py-2.5 bg-[#EB4501]/8 hover:bg-[#CF4400]/15 border border-[#EB4501]/25 text-[#EB4501] rounded-lg text-[13px] font-bold tracking-tight flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                   <Share2 size={13} /> Generate share link
                </button>
             </div>
@@ -1708,7 +1708,7 @@ export function CompareEngine() {
                   <button
                     type="button"
                     onClick={() => setIsProductSearchOpen(false)}
-                    className="w-9 h-9 rounded-full border border-[#e8edf2] text-[#8a9bb0] hover:text-[#E8500A] hover:border-[#E8500A]/30 flex items-center justify-center cursor-pointer"
+                    className="w-9 h-9 rounded-full border border-[#e8edf2] text-[#8a9bb0] hover:text-[#CF4400] hover:border-[#EB4501]/30 flex items-center justify-center cursor-pointer"
                   >
                     <X size={16} />
                   </button>
@@ -1721,7 +1721,7 @@ export function CompareEngine() {
                       value={productSearchQuery}
                       onChange={(e) => setProductSearchQuery(e.target.value)}
                       placeholder="Search products, brands, or categories..."
-                      className="w-full h-11 rounded-[5px] border border-[#e8edf2] bg-white px-4 pr-28 text-sm font-semibold text-[#1A1D4E] placeholder:text-gray-400 focus:outline-none focus:border-[#E8500A]/40"
+                      className="w-full h-11 rounded-[5px] border border-[#e8edf2] bg-white px-4 pr-28 text-sm font-semibold text-[#1A1D4E] placeholder:text-gray-400 focus:outline-none focus:border-[#EB4501]/40"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">
                       {comparedProducts.length}/4 selected
@@ -1748,7 +1748,7 @@ export function CompareEngine() {
                               className="w-16 h-16 rounded-[6px] object-cover border border-[#e8edf2] shrink-0"
                             />
                             <div className="min-w-0">
-                              <div className="text-[11px] font-bold tracking-tight text-[#FF5B00] mb-1">
+                              <div className="text-[11px] font-bold tracking-tight text-[#EB4501] mb-1">
                                 {product.brand || product.brandName || 'Brand'}
                               </div>
                               <h4 className="text-sm font-bold text-[#1A1A2E] line-clamp-2 leading-snug">
@@ -1768,14 +1768,14 @@ export function CompareEngine() {
                                   setIsProductSearchOpen(false);
                                 }
                               }}
-                              className="flex-1 py-2 rounded-[5px] bg-[#FF5B00] hover:brightness-110 text-white text-[10px] font-black uppercase tracking-widest cursor-pointer border-0 transition-all"
+                              className="flex-1 py-2 rounded-[5px] bg-[#EB4501] hover:brightness-110 text-white text-[10px] font-black uppercase tracking-widest cursor-pointer border-0 transition-all"
                             >
                               Add to compare
                             </button>
                             <button
                               type="button"
                               onClick={() => navigate(`/products/${product.id}`)}
-                              className="px-3 py-2 rounded-[5px] border border-[#e8edf2] text-[#1A1D4E] hover:border-[#E8500A]/30 hover:text-[#E8500A] text-[10px] font-black uppercase tracking-widest cursor-pointer"
+                              className="px-3 py-2 rounded-[5px] border border-[#e8edf2] text-[#1A1D4E] hover:border-[#EB4501]/30 hover:text-[#CF4400] text-[10px] font-black uppercase tracking-widest cursor-pointer"
                             >
                               View
                             </button>
@@ -1785,7 +1785,7 @@ export function CompareEngine() {
                     </div>
                   ) : (
                     <div className="min-h-[260px] flex flex-col items-center justify-center text-center gap-3">
-                      <div className="w-14 h-14 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center text-[#E8500A]">
+                      <div className="w-14 h-14 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center text-[#EB4501]">
                         <ShoppingBag size={22} />
                       </div>
                       <div>

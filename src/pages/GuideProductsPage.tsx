@@ -13,10 +13,10 @@ export function GuideProductsPage() {
 
   if (!guide) {
     return (
-      <div className="min-h-screen bg-[#F4F7F9] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-choosify-feed flex items-center justify-center px-4">
         <div className="text-center">
           <h2 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight">Guide not found</h2>
-          <Link to="/spotlight?tab=guides" className="text-[#FF5B00] font-bold mt-4 block text-[12.5px] hover:underline">
+          <Link to="/spotlight?tab=guides" className="text-[#EB4501] font-bold mt-4 block text-[12.5px] hover:underline">
             Back to guides
           </Link>
         </div>
@@ -28,7 +28,7 @@ export function GuideProductsPage() {
   const guideProducts = PRODUCTS.filter((p) => recommendedProductIds.includes(p.id));
 
   return (
-    <div className="bg-[#F4F7F9] min-h-screen pb-20">
+    <div className="bg-choosify-feed min-h-screen pb-20">
       <div className="w-full px-5 sm:px-10 pt-4">
         <header className="max-w-[1280px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 py-7 rounded-[14px] overflow-hidden">
           <Link
@@ -38,7 +38,7 @@ export function GuideProductsPage() {
             <ArrowLeft size={14} />
             Back to guide
           </Link>
-          <div className="text-[11px] font-bold text-[#FF5B00] tracking-wide mb-1.5">
+          <div className="text-[11px] font-bold text-[#EB4501] tracking-wide mb-1.5">
             RECOMMENDED PRODUCTS
           </div>
           <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight leading-tight max-w-3xl">

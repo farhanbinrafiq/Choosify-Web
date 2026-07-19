@@ -24,7 +24,7 @@ export function InteractiveCommercePage() {
         <p className="text-sm text-gray-500 mt-2">
           This live or replay event may not exist. Publish a livestream campaign in Spotlight CMS to preview.
         </p>
-        <Link to="/spotlight" className="inline-flex items-center gap-1 mt-6 text-[#E8500A] text-sm font-bold uppercase">
+        <Link to="/spotlight" className="inline-flex items-center gap-1 mt-6 text-[#EB4501] text-sm font-bold uppercase">
           Browse Spotlight <ChevronRight size={14} />
         </Link>
       </div>
@@ -36,7 +36,7 @@ export function InteractiveCommercePage() {
   return (
     <div className="px-4 py-8">
       <nav className="max-w-7xl mx-auto text-left mb-4">
-        <Link to={`/spotlight/${event.slug}`} className="text-xs font-bold uppercase text-gray-400 hover:text-[#E8500A]">
+        <Link to={`/spotlight/${event.slug}`} className="text-xs font-bold uppercase text-gray-400 hover:text-[#CF4400]">
           ← Campaign
         </Link>
       </nav>

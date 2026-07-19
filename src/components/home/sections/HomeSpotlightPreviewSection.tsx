@@ -10,7 +10,7 @@ interface HomeSpotlightPreviewSectionProps {
   items: ViralTodayItem[];
 }
 
-const AVATAR_COLORS = ['#FF5B00', '#2323FF', '#07A828', '#EB4501', '#000435', '#7C3AED'];
+const AVATAR_COLORS = ['#EB4501', '#2323FF', '#07A828', '#EB4501', '#000435', '#7C3AED'];
 
 /** Choosify.dc.html — "Viral Today" YouTube grid + Reels strip */
 export function HomeSpotlightPreviewSection({ items }: HomeSpotlightPreviewSectionProps) {

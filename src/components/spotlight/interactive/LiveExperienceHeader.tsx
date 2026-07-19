@@ -23,7 +23,7 @@ export function LiveExperienceHeader({ event }: LiveExperienceHeaderProps) {
     <header className="text-left mb-4">
       <div className="flex flex-wrap items-center gap-2 mb-2">
         <SpotlightLiveBadge status={statusBadge} />
-        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-[#E8500A]/10 text-[#E8500A] border border-[#E8500A]/20">
+        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-[#EB4501]/10 text-[#EB4501] border border-[#EB4501]/20">
           {LIVE_EXPERIENCE_LABELS[event.experienceKind]}
         </span>
         {event.officialKind && (
@@ -49,7 +49,7 @@ export function LiveExperienceHeader({ event }: LiveExperienceHeaderProps) {
           ))}
         </div>
       )}
-      <p className="text-[10px] font-bold uppercase text-[#E8500A] mt-3">{resolvePrimaryInteractiveCtaLabel(event)}</p>
+      <p className="text-[10px] font-bold uppercase text-[#EB4501] mt-3">{resolvePrimaryInteractiveCtaLabel(event)}</p>
     </header>
   );
 }

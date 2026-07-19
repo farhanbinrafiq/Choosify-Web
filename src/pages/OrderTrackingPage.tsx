@@ -166,7 +166,7 @@ export function OrderTrackingPage() {
     action: React.ReactNode,
   ) => (
     <div className="bg-white border border-[#E8EDF2] rounded-xl p-12 text-center shadow-sm max-w-xl mx-auto space-y-5">
-      <div className="w-14 h-14 bg-[#FFF3EC] rounded-full flex items-center justify-center text-[#FF5B00] mx-auto">
+      <div className="w-14 h-14 bg-[#FFF3EC] rounded-full flex items-center justify-center text-[#EB4501] mx-auto">
         <Package size={28} />
       </div>
       <div>
@@ -178,7 +178,7 @@ export function OrderTrackingPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Compact navy header — constrained to feed silhouette */}
       <div className="w-full px-5 sm:px-10 pt-4">
         <div className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 pt-6 pb-8 rounded-[14px] overflow-hidden">
@@ -193,7 +193,7 @@ export function OrderTrackingPage() {
             {order && (
               <>
                 <span className="mx-1.5">›</span>
-                <span className="text-[#FF5B00]">{order.orderId}</span>
+                <span className="text-[#EB4501]">{order.orderId}</span>
               </>
             )}
           </div>
@@ -201,7 +201,7 @@ export function OrderTrackingPage() {
           <div className="flex justify-between items-center flex-wrap gap-3.5">
             <div>
               <div className="text-[21px] font-extrabold leading-tight flex items-center gap-2">
-                <MapPin size={20} className="text-[#FF5B00] shrink-0" />
+                <MapPin size={20} className="text-[#EB4501] shrink-0" />
                 Track Your Order
               </div>
               {order ? (
@@ -223,7 +223,7 @@ export function OrderTrackingPage() {
               {orders.length > 0 && (
                 <div className="flex gap-2">
                   <input
-                    className="bg-white/5 border border-white/15 rounded-lg h-9 px-3 text-[12px] text-white placeholder:text-white/40 focus:outline-none focus:border-[#FF5B00] w-[160px] sm:w-[180px]"
+                    className="bg-white/5 border border-white/15 rounded-lg h-9 px-3 text-[12px] text-white placeholder:text-white/40 focus:outline-none focus:border-[#EB4501] w-[160px] sm:w-[180px]"
                     placeholder="ORD-XXXXX"
                     value={searchId}
                     onChange={(e) => setSearchId(e.target.value)}
@@ -232,7 +232,7 @@ export function OrderTrackingPage() {
                   <button
                     type="button"
                     onClick={handleSearchOrder}
-                    className="bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[11.5px] font-bold px-4 rounded-lg transition-colors h-9 cursor-pointer border-none"
+                    className="bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11.5px] font-bold px-4 rounded-lg transition-colors h-9 cursor-pointer border-none"
                   >
                     Search
                   </button>
@@ -258,7 +258,7 @@ export function OrderTrackingPage() {
             'Your placed orders will appear here for tracking.',
             <Link
               to="/products"
-              className="inline-block bg-[#FF5B00] hover:bg-[#EB4501] text-white text-[11.5px] font-bold px-6 py-2.5 rounded-lg transition-colors"
+              className="inline-block bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11.5px] font-bold px-6 py-2.5 rounded-lg transition-colors"
             >
               Start Shopping
             </Link>,
@@ -270,7 +270,7 @@ export function OrderTrackingPage() {
             <button
               type="button"
               onClick={() => setSelectedOrderId(null)}
-              className="text-[12px] font-bold text-[#FF5B00] hover:underline cursor-pointer bg-transparent border-none"
+              className="text-[12px] font-bold text-[#EB4501] hover:underline cursor-pointer bg-transparent border-none"
             >
               Clear Search
             </button>,
@@ -280,7 +280,7 @@ export function OrderTrackingPage() {
             {(import.meta as any).env?.DEV && (
               <div className="bg-[#1A1A2E] p-4 rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <Clock size={18} className="text-[#FF5B00] shrink-0" />
+                  <Clock size={18} className="text-[#EB4501] shrink-0" />
                   <div>
                     <h4 className="text-[12px] font-bold text-white/90">Delivery Simulator</h4>
                     <p className="text-[11px] text-white/50">Advance status to preview timeline states</p>
@@ -291,7 +291,7 @@ export function OrderTrackingPage() {
                   onClick={handleSimulateTransit}
                   className="bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[11.5px] font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 shrink-0 cursor-pointer"
                 >
-                  <Settings size={12} className="text-[#FF5B00]" />
+                  <Settings size={12} className="text-[#EB4501]" />
                   Advance Transit Step
                 </button>
               </div>
@@ -320,7 +320,7 @@ export function OrderTrackingPage() {
             )}
 
             {remoteShipment && (
-              <div className="rounded-xl border border-[#FF5B00]/30 bg-[#FFF6EF] px-4 py-3 text-[12px] text-[#4B5563]">
+              <div className="rounded-xl border border-[#EB4501]/30 bg-[#FFF6EF] px-4 py-3 text-[12px] text-[#4B5563]">
                 <div className="font-bold text-[#EB4501] text-[11px] mb-1">Live shipment status</div>
                 <div>
                   Courier: {remoteShipment.courier} · Tracking: {remoteShipment.trackingNumber}
@@ -365,8 +365,8 @@ export function OrderTrackingPage() {
                             className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[12px] ${
                               active
                                 ? current
-                                  ? 'bg-[#FF5B00] text-white shadow-[0_0_0_4px_#FFF3EC]'
-                                  : 'bg-[#FF5B00] text-white'
+                                  ? 'bg-[#EB4501] text-white shadow-[0_0_0_4px_#FFF3EC]'
+                                  : 'bg-[#EB4501] text-white'
                                 : 'bg-[#F4F7F9] text-[#9AA0AC] border border-[#E8EDF2]'
                             }`}
                           >
@@ -375,7 +375,7 @@ export function OrderTrackingPage() {
                           {!isLast && (
                             <div
                               className="w-0.5 flex-1 min-h-[34px]"
-                              style={{ background: lineDone || active ? '#FF5B00' : '#E8EDF2' }}
+                              style={{ background: lineDone || active ? '#EB4501' : '#E8EDF2' }}
                             />
                           )}
                         </div>
@@ -418,7 +418,7 @@ export function OrderTrackingPage() {
               <div className="flex flex-col gap-4">
                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-5">
                   <div className="text-[12px] font-extrabold text-[#1A1A2E] mb-3.5 flex items-center gap-1.5">
-                    <Package size={14} className="text-[#FF5B00]" />
+                    <Package size={14} className="text-[#EB4501]" />
                     ITEM IN THIS ORDER
                   </div>
                   <div className="space-y-3">
@@ -455,7 +455,7 @@ export function OrderTrackingPage() {
 
                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-5">
                   <div className="text-[12px] font-extrabold text-[#1A1A2E] mb-3 flex items-center gap-1.5">
-                    <Truck size={14} className="text-[#FF5B00]" />
+                    <Truck size={14} className="text-[#EB4501]" />
                     COURIER DETAILS
                   </div>
                   <div className="text-[12px] text-[#4B5563] leading-[1.8]">
@@ -506,11 +506,11 @@ export function OrderTrackingPage() {
             </div>
 
             {/* Optional sponsored banner — chrome only */}
-            <div className="bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#FF5B00] relative">
+            <div className="bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#EB4501] relative">
               <div className="absolute top-2.5 left-3.5 bg-[#1A1A2E] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-[3px] z-[1]">
                 SPONSORED
               </div>
-              <div className="h-[110px] bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center text-white text-[12px] font-extrabold text-center px-5">
+              <div className="h-[110px] bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center text-white text-[12px] font-extrabold text-center px-5">
                 While you wait — deals picked for you
               </div>
               <div className="px-5 py-3.5 flex justify-between items-center gap-3 flex-wrap">
@@ -524,7 +524,7 @@ export function OrderTrackingPage() {
                 </div>
                 <Link
                   to="/deals"
-                  className="bg-[#FF5B00] hover:bg-[#EB4501] text-white px-[18px] py-2 rounded-lg text-[11.5px] font-bold whitespace-nowrap transition-colors"
+                  className="bg-[#EB4501] hover:bg-[#CF4400] text-white px-[18px] py-2 rounded-lg text-[11.5px] font-bold whitespace-nowrap transition-colors"
                 >
                   Shop Now
                 </Link>
@@ -540,7 +540,7 @@ export function OrderTrackingPage() {
                   </div>
                   <Link
                     to="/products"
-                    className="text-[11.5px] font-bold text-[#FF5B00] hover:text-[#EB4501]"
+                    className="text-[11.5px] font-bold text-[#EB4501] hover:text-[#CF4400]"
                   >
                     View all recommendations →
                   </Link>

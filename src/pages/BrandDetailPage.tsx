@@ -251,7 +251,7 @@ export function BrandDetailPage() {
       renderSearch: () => (
         <div className="relative">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <Search size={13} className="text-[#E8500A]" />
+            <Search size={13} className="text-[#EB4501]" />
           </div>
           <input
             type="text"
@@ -261,7 +261,7 @@ export function BrandDetailPage() {
               if (e.key === "Enter") setSearchFilter(currentSearchInput);
             }}
             placeholder="Search products of this brand..."
-            className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#E8500A]/50 transition-colors"
+            className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
           />
         </div>
       ),
@@ -1261,7 +1261,7 @@ export function BrandDetailPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F7F9]">
+    <div className="flex flex-col min-h-screen bg-choosify-feed">
       <div ref={brandHeroRef}>
         <BrandDetailHero
           brand={brand}
@@ -1538,16 +1538,16 @@ export function BrandDetailPage() {
                           );
                         }, 1500);
                       }}
-                      className="w-full md:w-auto px-6 py-3 bg-[#FF5B00] hover:brightness-110 text-white font-bold text-[13px] tracking-tight rounded-lg shadow-sm active:scale-95 transition-all text-center cursor-pointer border-none"
+                      className="w-full md:w-auto px-6 py-3 bg-[#FF000D] hover:brightness-110 text-white font-bold text-[13px] tracking-tight rounded-lg shadow-sm active:scale-95 transition-all text-center cursor-pointer border-none"
                     >
                       Claim Ownership
                     </button>
                   ) : (
-                    <div className="px-5 py-3.5 bg-amber-500/10 border border-amber-500/30 rounded-[5px] flex flex-col items-center gap-1 text-center shrink-0">
-                      <span className="text-[8px] font-black text-amber-700 uppercase tracking-wider">
+                    <div className="px-5 py-3.5 bg-[#FF000D] border border-[#FF000D] rounded-[5px] flex flex-col items-center gap-1 text-center shrink-0">
+                      <span className="text-[8px] font-black text-white uppercase tracking-wider">
                         ● Verification Active
                       </span>
-                      <span className="text-[12px] font-bold text-[#1A1A2E] tracking-tight">
+                      <span className="text-[12px] font-bold text-white tracking-tight">
                         Under Review
                       </span>
                     </div>
@@ -1565,7 +1565,7 @@ export function BrandDetailPage() {
                   </h2>
                   <Link
                     to="/deals"
-                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#FF5B00] shrink-0"
+                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400] shrink-0"
                   >
                     VIEW ALL DEALS ›
                   </Link>
@@ -1576,7 +1576,7 @@ export function BrandDetailPage() {
 
                 {localClaimStatus !== "verified" ? (
                   <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-10">
-                    <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                    <div className="w-12 h-12 rounded-full bg-[#EB4501]/10 flex items-center justify-center text-[#EB4501]">
                       <Lock className="w-5 h-5" />
                     </div>
                     <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
@@ -1601,13 +1601,13 @@ export function BrandDetailPage() {
                             );
                           }, 1500);
                         }}
-                        className="bg-[#FF5B00] hover:brightness-110 text-white py-2 px-5 rounded-lg text-[12px] font-bold tracking-tight mt-2 cursor-pointer transition-all border-none"
+                        className="bg-[#FF000D] hover:brightness-110 text-white py-2 px-5 rounded-lg text-[12px] font-bold tracking-tight mt-2 cursor-pointer transition-all border-none"
                       >
                         Claim Brand Ownership
                       </button>
                     )}
                     {localClaimStatus === "pending" && (
-                      <div className="text-[12px] font-semibold text-amber-600 tracking-tight mt-2">
+                      <div className="inline-flex items-center bg-[#FF000D] text-white text-[12px] font-semibold tracking-tight mt-2 px-3 py-1.5 rounded-lg">
                         Ownership Verification Under Review
                       </div>
                     )}
@@ -1628,15 +1628,15 @@ export function BrandDetailPage() {
                     {brandPromos.map((promo, idx) => (
                       <div
                         key={`promo-${idx}`}
-                        className="w-[200px] sm:w-[220px] shrink-0 snap-start bg-white border border-[#E8EDF2] p-3.5 rounded-[10px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#FF5B00]/30 transition-all h-full min-h-[220px]"
+                        className="w-[200px] sm:w-[220px] shrink-0 snap-start bg-white border border-[#E8EDF2] p-3.5 rounded-[10px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#EB4501]/30 transition-all h-full min-h-[220px]"
                       >
-                        <div className="w-7 h-7 rounded-lg bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center mb-2 shadow-sm shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[#FFF3EA] text-[#EB4501] flex items-center justify-center mb-2 shadow-sm shrink-0">
                           <Gift size={14} />
                         </div>
                         <h4 className="text-xs font-semibold text-[#1A1A2E] mb-0.5">
                           {promo.title}
                         </h4>
-                        <div className="text-sm font-semibold text-[#FF5B00] mb-3 leading-none">
+                        <div className="text-sm font-semibold text-[#EB4501] mb-3 leading-none">
                           {promo.discount}
                         </div>
                         <button
@@ -1647,7 +1647,7 @@ export function BrandDetailPage() {
                               `Promo Code "${promo.code}" copied to clipboard!`,
                             );
                           }}
-                          className="w-full mt-auto py-2 bg-white rounded-lg border border-dashed border-[#E8EDF2] hover:border-[#FF5B00] font-mono text-xs font-semibold text-[#1A1A2E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer"
+                          className="w-full mt-auto py-2 bg-white rounded-lg border border-dashed border-[#E8EDF2] hover:border-[#EB4501] font-mono text-xs font-semibold text-[#1A1A2E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer"
                         >
                           <span className="text-[8px] text-gray-400 font-sans tracking-wide uppercase font-semibold">
                             PROMO CODE
@@ -1690,7 +1690,7 @@ export function BrandDetailPage() {
                   </h2>
                   <Link
                     to={`/brands/${brand.id}/products`}
-                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#FF5B00] shrink-0"
+                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400] shrink-0"
                   >
                     VIEW ALL PRODUCTS ›
                   </Link>
@@ -1701,7 +1701,7 @@ export function BrandDetailPage() {
 
                 {localClaimStatus !== "verified" ? (
                   <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-12">
-                    <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                    <div className="w-12 h-12 rounded-full bg-[#EB4501]/10 flex items-center justify-center text-[#EB4501]">
                       <Lock className="w-5 h-5" />
                     </div>
                     <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
@@ -1726,13 +1726,13 @@ export function BrandDetailPage() {
                             );
                           }, 1500);
                         }}
-                        className="bg-[#FF5B00] hover:brightness-110 text-white py-2 px-5 rounded-lg text-[12px] font-bold tracking-tight mt-2 cursor-pointer transition-all border-none"
+                        className="bg-[#FF000D] hover:brightness-110 text-white py-2 px-5 rounded-lg text-[12px] font-bold tracking-tight mt-2 cursor-pointer transition-all border-none"
                       >
                         Claim Brand Ownership
                       </button>
                     )}
                     {localClaimStatus === "pending" && (
-                      <div className="text-[12px] font-semibold text-amber-600 tracking-tight mt-2">
+                      <div className="inline-flex items-center bg-[#FF000D] text-white text-[12px] font-semibold tracking-tight mt-2 px-3 py-1.5 rounded-lg">
                         Verification Pending Review
                       </div>
                     )}
@@ -1752,7 +1752,7 @@ export function BrandDetailPage() {
                     <p>No products match chosen criteria.</p>
                     <button
                       onClick={clearAllFilters}
-                      className="text-[#E8500A] underline hover:text-[#ff5d14] text-[10px] cursor-pointer bg-transparent border-0"
+                      className="text-[#EB4501] underline hover:text-[#ff5d14] text-[10px] cursor-pointer bg-transparent border-0"
                     >
                       Clear Selections
                     </button>
@@ -1775,7 +1775,7 @@ export function BrandDetailPage() {
           <div id="creator-reviews-section" className="scroll-mt-36 w-full">
             {localClaimStatus !== "verified" ? (
               <div className="bg-white rounded-[10px] p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-sm border border-[#E8EDF2] py-12">
-                <div className="w-12 h-12 rounded-full bg-[#E8500A]/10 flex items-center justify-center text-[#E8500A]">
+                <div className="w-12 h-12 rounded-full bg-[#EB4501]/10 flex items-center justify-center text-[#EB4501]">
                   <Lock className="w-5 h-5" />
                 </div>
                 <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
@@ -1818,7 +1818,7 @@ export function BrandDetailPage() {
               <button
                 type="button"
                 onClick={() => toast.success("Loading all customer reviews...")}
-                className="text-[12px] font-bold text-[#1A1A2E] bg-transparent border-0 cursor-pointer hover:text-[#FF5B00] shrink-0 p-0"
+                className="text-[12px] font-bold text-[#1A1A2E] bg-transparent border-0 cursor-pointer hover:text-[#CF4400] shrink-0 p-0"
               >
                 VIEW ALL REVIEWS ›
               </button>
@@ -1971,7 +1971,7 @@ export function BrandDetailPage() {
           </div>
 
           {/* Trust strip — DC style */}
-          <div className="w-full bg-[#14161f] rounded-xl px-7 py-5 text-center text-white">
+          <div className="w-full choosify-dark-surface rounded-xl px-7 py-5 text-center text-white">
             <div className="text-[13px] font-extrabold mb-1">
               CHOSEN BY MILLIONS. TRUSTED WORLDWIDE.
             </div>
@@ -1987,7 +1987,7 @@ export function BrandDetailPage() {
                 { value: "4.3/5", label: "Brand Score" },
               ].map((ts) => (
                 <div key={ts.label}>
-                  <div className="text-[20px] font-extrabold text-[#FF5B00]">
+                  <div className="text-[20px] font-extrabold text-[#EB4501]">
                     {ts.value}
                   </div>
                   <div className="text-[10.5px] text-white/50">{ts.label}</div>

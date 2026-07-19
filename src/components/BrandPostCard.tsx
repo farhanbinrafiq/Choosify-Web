@@ -25,7 +25,7 @@ export function BrandPostCard({ post, variant = 'grid', compact = false, classNa
       to={spotlightContentHref(post.slug)}
       className={cn(
         'group flex flex-col bg-white rounded-[5px] border border-[#e8edf2] overflow-hidden shadow-sm',
-        'hover:border-[#E8500A]/35 hover:shadow-md transition-all duration-300 text-left h-full',
+        'hover:border-[#EB4501]/35 hover:shadow-md transition-all duration-300 text-left h-full',
         variant === 'carousel' && 'w-[280px] shrink-0',
         className,
       )}
@@ -69,7 +69,7 @@ export function BrandPostCard({ post, variant = 'grid', compact = false, classNa
         </div>
 
         <h3 className={cn(
-          'font-bold text-[#1A1D4E] leading-snug line-clamp-2 group-hover:text-[#E8500A] transition-colors',
+          'font-bold text-[#1A1D4E] leading-snug line-clamp-2 group-hover:text-[#CF4400] transition-colors',
           compact ? 'text-[11px]' : 'text-[13px]',
         )}>
           {post.title}
@@ -81,7 +81,7 @@ export function BrandPostCard({ post, variant = 'grid', compact = false, classNa
         <div className={cn('mt-auto border-t border-[#e8edf2]', compact ? 'pt-2 space-y-1' : 'pt-3 space-y-1.5')}>
           {dateLabel && (
             <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[#1A1D4E]/80">
-              <CalendarDays size={compact ? 11 : 12} className="text-[#E8500A] shrink-0" />
+              <CalendarDays size={compact ? 11 : 12} className="text-[#EB4501] shrink-0" />
               <span className="truncate">{dateLabel}</span>
             </div>
           )}
@@ -104,7 +104,7 @@ export function BrandPostCard({ post, variant = 'grid', compact = false, classNa
         />
 
         <div className={cn(
-          'flex items-center gap-1 font-black uppercase tracking-wider text-[#E8500A]',
+          'flex items-center gap-1 font-black uppercase tracking-wider text-[#EB4501]',
           compact ? 'text-[9px] pt-0.5' : 'text-[10px] pt-1',
         )}>
           <Sparkles size={compact ? 10 : 11} />
